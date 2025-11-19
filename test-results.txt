@@ -1,0 +1,725 @@
+
+> flexium@0.1.0 test
+> node --test test/*.test.mjs
+
+TAP version 13
+# All DOM tests passed!
+# Subtest: h() creates VNode with type and props
+ok 1 - h() creates VNode with type and props
+  ---
+  duration_ms: 1.024
+  ...
+# Subtest: h() creates VNode with children
+ok 2 - h() creates VNode with children
+  ---
+  duration_ms: 0.079292
+  ...
+# Subtest: h() handles nested children
+ok 3 - h() handles nested children
+  ---
+  duration_ms: 0.065209
+  ...
+# Subtest: h() flattens array children
+ok 4 - h() flattens array children
+  ---
+  duration_ms: 0.067417
+  ...
+# Subtest: h() filters out null and undefined children
+ok 5 - h() filters out null and undefined children
+  ---
+  duration_ms: 0.062625
+  ...
+# Subtest: h() handles boolean children
+ok 6 - h() handles boolean children
+  ---
+  duration_ms: 0.046959
+  ...
+# Subtest: h() handles key prop
+ok 7 - h() handles key prop
+  ---
+  duration_ms: 0.118792
+  ...
+# Subtest: h() creates VNode with component type
+ok 8 - h() creates VNode with component type
+  ---
+  duration_ms: 0.132083
+  ...
+# Subtest: Fragment returns children without wrapper
+not ok 9 - Fragment returns children without wrapper
+  ---
+  duration_ms: 0.717959
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:83:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'fragment'
+    - [Function: D]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:86:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: Fragment with no children
+not ok 10 - Fragment with no children
+  ---
+  duration_ms: 0.422125
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:90:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'fragment'
+    - [Function: D]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:93:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: DOMRenderer creates HTML element
+ok 11 - DOMRenderer creates HTML element
+  ---
+  duration_ms: 1.1255
+  ...
+# Subtest: DOMRenderer creates element with className
+not ok 12 - DOMRenderer creates element with className
+  ---
+  duration_ms: 0.363625
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:108:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '' !== 'test-class'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'test-class'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:112:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: DOMRenderer creates element with style
+not ok 13 - DOMRenderer creates element with style
+  ---
+  duration_ms: 0.800708
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:115:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '' !== 'red'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'red'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:119:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: DOMRenderer maps View to div
+ok 14 - DOMRenderer maps View to div
+  ---
+  duration_ms: 0.11475
+  ...
+# Subtest: DOMRenderer maps Text to span
+ok 15 - DOMRenderer maps Text to span
+  ---
+  duration_ms: 0.183375
+  ...
+# Subtest: DOMRenderer maps Button to button
+ok 16 - DOMRenderer maps Button to button
+  ---
+  duration_ms: 0.4605
+  ...
+# Subtest: DOMRenderer creates text node
+ok 17 - DOMRenderer creates text node
+  ---
+  duration_ms: 0.214583
+  ...
+# Subtest: DOMRenderer updates text node
+ok 18 - DOMRenderer updates text node
+  ---
+  duration_ms: 0.144709
+  ...
+# Subtest: DOMRenderer appends child
+ok 19 - DOMRenderer appends child
+  ---
+  duration_ms: 0.731583
+  ...
+# Subtest: DOMRenderer inserts before
+ok 20 - DOMRenderer inserts before
+  ---
+  duration_ms: 0.538334
+  ...
+# Subtest: DOMRenderer removes child
+ok 21 - DOMRenderer removes child
+  ---
+  duration_ms: 0.723792
+  ...
+# Subtest: DOMRenderer adds event listener
+ok 22 - DOMRenderer adds event listener
+  ---
+  duration_ms: 0.584042
+  ...
+# Subtest: DOMRenderer removes event listener
+ok 23 - DOMRenderer removes event listener
+  ---
+  duration_ms: 0.39375
+  ...
+# Subtest: DOMRenderer updates node props
+not ok 24 - DOMRenderer updates node props
+  ---
+  duration_ms: 0.166792
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:229:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '' !== 'old'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'old'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:233:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: DOMRenderer handles style updates
+not ok 25 - DOMRenderer handles style updates
+  ---
+  duration_ms: 0.216959
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:239:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '' !== 'red'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'red'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:243:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: render() mounts simple element
+ok 26 - render() mounts simple element
+  ---
+  duration_ms: 0.429625
+  ...
+# Subtest: render() mounts nested elements
+ok 27 - render() mounts nested elements
+  ---
+  duration_ms: 0.286667
+  ...
+# Subtest: render() handles text content
+ok 28 - render() handles text content
+  ---
+  duration_ms: 0.127875
+  ...
+# Subtest: render() handles number content
+ok 29 - render() handles number content
+  ---
+  duration_ms: 0.0675
+  ...
+# Subtest: render() handles null
+ok 30 - render() handles null
+  ---
+  duration_ms: 0.052917
+  ...
+# Subtest: render() handles undefined
+ok 31 - render() handles undefined
+  ---
+  duration_ms: 0.1095
+  ...
+# Subtest: render() mounts component function
+ok 32 - render() mounts component function
+  ---
+  duration_ms: 0.171542
+  ...
+# Subtest: render() applies className
+not ok 33 - render() applies className
+  ---
+  duration_ms: 0.138166
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:326:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + ''
+    - 'test-class another-class'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'test-class another-class'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:332:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: render() applies inline styles
+not ok 34 - render() applies inline styles
+  ---
+  duration_ms: 0.204208
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:335:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '' !== 'red'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'red'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:342:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: render() attaches event handlers
+ok 35 - render() attaches event handlers
+  ---
+  duration_ms: 0.192958
+  ...
+# Subtest: render() converts flexbox props to CSS
+not ok 36 - render() converts flexbox props to CSS
+  ---
+  duration_ms: 0.610292
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:364:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '' !== 'flex'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'flex'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:376:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: render() handles padding props
+not ok 37 - render() handles padding props
+  ---
+  duration_ms: 1.478875
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:383:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '20px' !== '10px'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '10px'
+  actual: '20px'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:394:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: render() handles margin props
+not ok 38 - render() handles margin props
+  ---
+  duration_ms: 0.319208
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:397:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '15px' !== '5px'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '5px'
+  actual: '15px'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/dom.test.mjs:408:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: render() handles bg prop as backgroundColor
+ok 39 - render() handles bg prop as backgroundColor
+  ---
+  duration_ms: 4.616167
+  ...
+# All integration tests passed!
+# Subtest: reactive text content updates
+not ok 40 - reactive text content updates
+  ---
+  duration_ms: 2.349334
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/integration.test.mjs:21:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/integration.test.mjs:33:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.start (node:internal/test_runner/test:877:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: signal in component props
+ok 41 - signal in component props
+  ---
+  duration_ms: 1.790333
+  ...
+# Subtest: computed values in DOM
+ok 42 - computed values in DOM
+  ---
+  duration_ms: 0.890583
+  ...
+# Subtest: effect updates DOM element
+ok 43 - effect updates DOM element
+  ---
+  duration_ms: 0.370875
+  ...
+# Subtest: effect updates multiple DOM properties
+ok 44 - effect updates multiple DOM properties
+  ---
+  duration_ms: 7.309833
+  ...
+# Subtest: batch updates prevent unnecessary DOM updates
+ok 45 - batch updates prevent unnecessary DOM updates
+  ---
+  duration_ms: 0.469583
+  ...
+# Subtest: conditional rendering with signals
+ok 46 - conditional rendering with signals
+  ---
+  duration_ms: 0.6175
+  ...
+# Subtest: list rendering with signals
+ok 47 - list rendering with signals
+  ---
+  duration_ms: 5.650666
+  ...
+# Subtest: form input with signal binding
+ok 48 - form input with signal binding
+  ---
+  duration_ms: 1.237042
+  ...
+# Subtest: style updates with signals
+ok 49 - style updates with signals
+  ---
+  duration_ms: 1.218625
+  ...
+# Subtest: nested computed values in DOM
+ok 50 - nested computed values in DOM
+  ---
+  duration_ms: 0.391292
+  ...
+# Subtest: complex interactive component
+ok 51 - complex interactive component
+  ---
+  duration_ms: 1.303792
+  ...
+# Subtest: effect cleanup with DOM
+ok 52 - effect cleanup with DOM
+  ---
+  duration_ms: 0.198958
+  ...
+# Subtest: mountReactive creates reactive node
+not ok 53 - mountReactive creates reactive node
+  ---
+  duration_ms: 0.415458
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/integration.test.mjs:334:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/integration.test.mjs:342:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: createReactiveRoot provides render and unmount
+ok 54 - createReactiveRoot provides render and unmount
+  ---
+  duration_ms: 0.464292
+  ...
+# Subtest: reactive root manages lifecycle
+ok 55 - reactive root manages lifecycle
+  ---
+  duration_ms: 0.681291
+  ...
+# Subtest: signals survive multiple renders
+ok 56 - signals survive multiple renders
+  ---
+  duration_ms: 0.249917
+  ...
+# All signal tests passed!
+# Subtest: signal creates reactive value
+ok 57 - signal creates reactive value
+  ---
+  duration_ms: 1.165334
+  ...
+# Subtest: signal can be called as a function to get value
+ok 58 - signal can be called as a function to get value
+  ---
+  duration_ms: 0.103334
+  ...
+# Subtest: signal.set() updates value
+ok 59 - signal.set() updates value
+  ---
+  duration_ms: 0.092667
+  ...
+# Subtest: signal.peek() reads value without tracking
+ok 60 - signal.peek() reads value without tracking
+  ---
+  duration_ms: 0.082459
+  ...
+# Subtest: signal handles different types
+ok 61 - signal handles different types
+  ---
+  duration_ms: 0.497
+  ...
+# Subtest: computed derives value from signal
+ok 62 - computed derives value from signal
+  ---
+  duration_ms: 0.206667
+  ...
+# Subtest: computed updates when dependency changes
+ok 63 - computed updates when dependency changes
+  ---
+  duration_ms: 0.101625
+  ...
+# Subtest: computed memoizes result
+ok 64 - computed memoizes result
+  ---
+  duration_ms: 0.108917
+  ...
+# Subtest: computed can be called as a function
+ok 65 - computed can be called as a function
+  ---
+  duration_ms: 0.366375
+  ...
+# Subtest: computed.peek() reads value without tracking
+ok 66 - computed.peek() reads value without tracking
+  ---
+  duration_ms: 0.422708
+  ...
+# Subtest: computed chains multiple dependencies
+ok 67 - computed chains multiple dependencies
+  ---
+  duration_ms: 0.153667
+  ...
+# Subtest: effect runs immediately
+ok 68 - effect runs immediately
+  ---
+  duration_ms: 0.350708
+  ...
+# Subtest: effect runs when signal changes
+ok 69 - effect runs when signal changes
+  ---
+  duration_ms: 0.076709
+  ...
+# Subtest: effect tracks multiple signals
+ok 70 - effect tracks multiple signals
+  ---
+  duration_ms: 0.108708
+  ...
+# Subtest: effect runs cleanup function
+ok 71 - effect runs cleanup function
+  ---
+  duration_ms: 0.073959
+  ...
+# Subtest: effect can be disposed
+ok 72 - effect can be disposed
+  ---
+  duration_ms: 0.0465
+  ...
+# Subtest: effect does not run infinitely
+ok 73 - effect does not run infinitely
+  ---
+  duration_ms: 1.657125
+  ...
+# Subtest: effect handles errors with onError handler
+ok 74 - effect handles errors with onError handler
+  ---
+  duration_ms: 0.149542
+  ...
+# Subtest: batch prevents multiple effect runs
+ok 75 - batch prevents multiple effect runs
+  ---
+  duration_ms: 0.094208
+  ...
+# Subtest: batch with nested signal updates
+ok 76 - batch with nested signal updates
+  ---
+  duration_ms: 0.075875
+  ...
+# Subtest: untrack reads signal without creating dependency
+ok 77 - untrack reads signal without creating dependency
+  ---
+  duration_ms: 0.066917
+  ...
+# Subtest: untrack returns function result
+ok 78 - untrack returns function result
+  ---
+  duration_ms: 0.041083
+  ...
+# Subtest: root creates disposable scope
+not ok 79 - root creates disposable scope
+  ---
+  duration_ms: 1.94625
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/signal.test.mjs:314:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    10 !== 5
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 5
+  actual: 10
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/signal.test.mjs:333:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: root disposes multiple effects
+not ok 80 - root disposes multiple effects
+  ---
+  duration_ms: 0.59325
+  location: '/Users/wick/Documents/workspaces/flexium.js/test/signal.test.mjs:336:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    15 !== 7
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 7
+  actual: 15
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/wick/Documents/workspaces/flexium.js/test/signal.test.mjs:362:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: complex reactive graph
+ok 81 - complex reactive graph
+  ---
+  duration_ms: 0.236125
+  ...
+# Subtest: conditional dependencies
+ok 82 - conditional dependencies
+  ---
+  duration_ms: 0.079209
+  ...
+1..82
+# tests 82
+# suites 0
+# pass 67
+# fail 15
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 492.787083
