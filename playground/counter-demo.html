@@ -115,7 +115,7 @@
     <script type="module">
         // Import Flexium reactive system and DOM renderer
         import { signal, effect } from '../dist/index.mjs'
-        import { h, createReactiveRoot } from '../dist/dom.mjs'
+        import { h, render } from '../dist/dom.mjs'
 
         // Create a reactive signal for the counter
         const count = signal(0)
@@ -123,24 +123,23 @@
         // Get the app container
         const appContainer = document.getElementById('app')
 
-        // Create a reactive root for automatic updates
-        const reactiveRoot = createReactiveRoot(appContainer)
-
         // Render function that creates the UI
         function CounterApp() {
             return h('div', { class: 'counter-container' }, [
                 h('h1', {}, ['Flexium Counter']),
 
-                // Display current count - this will auto-update!
-                h('div', { class: 'count-display' }, [
-                    () => String(count.value)
-                ]),
+                // Display current count - we'll update this with effect
+                h('div', {
+                    class: 'count-display',
+                    id: 'count-display'
+                }, [String(count.value)]),
 
                 // Button group
                 h('div', { class: 'button-group' }, [
                     h('button', {
                         onclick: () => {
                             count.value--
+                            console.log('Decremented to:', count.value)
                         },
                         title: 'Decrement'
                     }, ['-']),
@@ -148,6 +147,7 @@
                     h('button', {
                         onclick: () => {
                             count.value++
+                            console.log('Incremented to:', count.value)
                         },
                         title: 'Increment'
                     }, ['+'])
@@ -158,6 +158,7 @@
                     class: 'reset-btn',
                     onclick: () => {
                         count.value = 0
+                        console.log('Reset to:', count.value)
                     }
                 }, ['Reset']),
 
@@ -169,17 +170,23 @@
             ])
         }
 
-        // Render the app with reactive updates
-        reactiveRoot.render(CounterApp())
+        // Render the app using render() function
+        render(CounterApp(), appContainer)
 
-        // Log to console for debugging
-        console.log('Flexium Counter Demo loaded!')
-        console.log('Counter signal:', count)
+        // Get the count display element
+        const countDisplay = document.getElementById('count-display')
 
-        // Track updates in console
+        // Setup reactive updates with effect
         effect(() => {
             console.log('Count changed to:', count.value)
+            if (countDisplay) {
+                countDisplay.textContent = String(count.value)
+            }
         })
+
+        // Log to console for debugging
+        console.log('✅ Flexium Counter Demo loaded!')
+        console.log('Initial count:', count.value)
     </script>
 </body>
 </html>

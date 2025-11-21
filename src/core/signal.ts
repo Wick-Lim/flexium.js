@@ -257,6 +257,9 @@ export function signal<T>(initialValue: T): Signal<T> {
   sig.set = (newValue: T) => node.set(newValue);
   sig.peek = () => node.peek();
 
+  // Mark as signal for detection
+  (sig as any)[SIGNAL_MARKER] = true;
+
   return sig;
 }
 
@@ -287,6 +290,9 @@ export function computed<T>(fn: () => T): Computed<T> {
   });
 
   comp.peek = () => node.peek();
+
+  // Mark as signal for detection
+  (comp as any)[SIGNAL_MARKER] = true;
 
   return comp;
 }
@@ -375,4 +381,29 @@ export function root<T>(fn: (dispose: () => void) => T): T {
   };
 
   return fn(dispose);
+}
+
+/**
+ * Symbol to mark signals for detection
+ * @internal
+ */
+const SIGNAL_MARKER = Symbol('flexium.signal');
+
+/**
+ * Check if a value is a signal
+ *
+ * @param value - Value to check
+ * @returns True if value is a signal or computed
+ *
+ * @example
+ * const count = signal(0);
+ * isSignal(count); // true
+ * isSignal(5); // false
+ */
+export function isSignal(value: any): value is Signal<any> | Computed<any> {
+  return (
+    value !== null &&
+    typeof value === 'function' &&
+    SIGNAL_MARKER in value
+  );
 }

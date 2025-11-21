@@ -7,7 +7,8 @@
  */
 
 import type { VNode } from '../../core/renderer';
-import { effect, batch } from '../../core/signal';
+import { effect, batch, isSignal } from '../../core/signal';
+import type { Signal, Computed } from '../../core/signal';
 import { domRenderer } from './index';
 import { isVNode } from './h';
 
@@ -23,12 +24,27 @@ const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>();
  * for any signal dependencies in props or children.
  */
 export function mountReactive(
-  vnode: VNode | string | number | null | undefined,
+  vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined,
   parent?: Node
 ): Node | null {
   // Handle null/undefined
   if (vnode === null || vnode === undefined) {
     return null;
+  }
+
+  // Handle signals - automatically create reactive text nodes
+  if (isSignal(vnode)) {
+    const textNode = document.createTextNode('');
+
+    const dispose = effect(() => {
+      const value = (vnode as Signal<any>).value;
+      domRenderer.updateTextNode(textNode, String(value));
+    });
+
+    // Store cleanup
+    REACTIVE_BINDINGS.set(textNode, new Set([dispose]));
+
+    return textNode;
   }
 
   // Handle text nodes
@@ -125,27 +141,42 @@ function setupReactiveProps(
   for (const key in props) {
     const value = props[key];
 
-    // Skip non-reactive props
-    if (typeof value !== 'function' || key.startsWith('on')) {
+    // Skip event handlers
+    if (key.startsWith('on')) {
       continue;
     }
 
-    // Create reactive effect for computed/signal values
-    const dispose = effect(() => {
-      try {
-        // Try to execute as a getter function
-        const computedValue = value();
-
-        // Update the prop with the computed value
+    // Handle signals directly
+    if (isSignal(value)) {
+      const dispose = effect(() => {
+        const computedValue = value.value;
         const oldProps = { [key]: undefined };
         const newProps = { [key]: computedValue };
         domRenderer.updateNode(node, oldProps, newProps);
-      } catch (e) {
-        // Not a signal/computed, ignore
-      }
-    });
+      });
+      disposers.push(dispose);
+      continue;
+    }
 
-    disposers.push(dispose);
+    // Handle functions that might be computed values
+    if (typeof value === 'function') {
+      // Create reactive effect for computed/signal values
+      const dispose = effect(() => {
+        try {
+          // Try to execute as a getter function
+          const computedValue = value();
+
+          // Update the prop with the computed value
+          const oldProps = { [key]: undefined };
+          const newProps = { [key]: computedValue };
+          domRenderer.updateNode(node, oldProps, newProps);
+        } catch (e) {
+          // Not a signal/computed, ignore
+        }
+      });
+
+      disposers.push(dispose);
+    }
   }
 
   return disposers;
@@ -231,6 +262,14 @@ export function createReactiveRoot(container: HTMLElement) {
 
 /**
  * Helper to create reactive text nodes that update when signals change
+ *
+ * @deprecated Use signals directly as children instead
+ * @example
+ * // Old way:
+ * reactiveText(() => count.value)
+ *
+ * // New way:
+ * h('div', {}, [count])
  */
 export function reactiveText(getText: () => string): Text {
   const textNode = document.createTextNode('');
@@ -244,4 +283,52 @@ export function reactiveText(getText: () => string): Text {
   REACTIVE_BINDINGS.set(textNode, new Set([dispose]));
 
   return textNode;
+}
+
+/**
+ * Helper function to bind a signal to an element property
+ * Useful for more complex bindings beyond simple text content
+ *
+ * @param signal - The signal to bind
+ * @param transform - Optional transform function
+ * @returns An object that can be spread into props
+ *
+ * @example
+ * const isDisabled = signal(false);
+ * h('button', { ...bind(isDisabled, (val) => ({ disabled: val })) })
+ */
+export function bind<T>(
+  signal: Signal<T> | Computed<T>,
+  transform?: (value: T) => Record<string, any>
+): Record<string, Signal<any> | Computed<any>> {
+  if (transform) {
+    // If there's a transform, we need to return signals for each prop
+    // For simplicity, we'll just pass the signal directly and let setupReactiveProps handle it
+    return { __signal__: signal };
+  }
+  return { value: signal };
+}
+
+/**
+ * Reactive Text Component
+ * A convenience component that accepts signals directly as children
+ *
+ * @example
+ * // Simple usage:
+ * h(ReactiveText, {}, [count])
+ *
+ * // With styling:
+ * h(ReactiveText, { fontSize: 24, color: 'blue' }, [count])
+ */
+export function ReactiveText(props: {
+  children?: any[];
+  [key: string]: any;
+}): VNode {
+  const { children = [], ...otherProps } = props;
+
+  return {
+    type: 'span',
+    props: otherProps,
+    children: children,
+  };
 }

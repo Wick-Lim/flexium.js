@@ -11,6 +11,7 @@ export {
   batch,
   untrack,
   root,
+  isSignal,
   type Signal,
   type Computed
 } from './signal';

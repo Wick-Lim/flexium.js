@@ -3,11 +3,15 @@
  *
  * This module provides the main render function for mounting components to the DOM.
  * It includes simple reconciliation logic for mounting and unmounting components.
+ *
+ * Note: For reactive rendering with automatic signal tracking, use renderReactive
+ * or createReactiveRoot from './reactive'.
  */
 
 import type { VNode } from '../../core/renderer';
 import { domRenderer } from './index';
 import { isVNode } from './h';
+import { renderReactive, createReactiveRoot } from './reactive';
 
 /**
  * Internal node data stored on DOM nodes
@@ -20,28 +24,28 @@ interface NodeData {
 const NODE_DATA = new WeakMap<Node, NodeData>();
 
 /**
- * Render a component to a DOM container
+ * Render a component to a DOM container with automatic reactivity
+ *
+ * This function uses reactive rendering by default, which means:
+ * - Signals passed as children automatically update the DOM
+ * - Signals in props automatically update element properties
+ * - Component functions automatically re-render when signals change
  *
  * @param vnode - Virtual node to render
  * @param container - DOM element to render into
  * @returns The rendered DOM node
+ *
+ * @example
+ * const count = signal(0);
+ * render(h('div', {}, [count]), document.body);
+ * // The div will automatically update when count changes
  */
 export function render(
   vnode: VNode | string | number | null | undefined,
   container: HTMLElement
 ): Node | null {
-  // Clear container if it has existing content
-  if (container.firstChild) {
-    unmount(container);
-  }
-
-  // Mount new content
-  const node = mount(vnode);
-  if (node) {
-    container.appendChild(node);
-  }
-
-  return node;
+  // Use reactive rendering for automatic signal tracking
+  return renderReactive(vnode, container);
 }
 
 /**
@@ -205,32 +209,21 @@ export function update(
 }
 
 /**
- * Create a root for rendering with reactivity support
+ * Create a root for rendering with automatic reactivity
+ *
+ * This creates a root that supports fine-grained reactive updates.
+ * Signals are automatically tracked and only the affected DOM nodes are updated.
+ *
+ * @param container - DOM element to render into
+ * @returns Root object with render and unmount methods
+ *
+ * @example
+ * const root = createRoot(document.body);
+ * const count = signal(0);
+ * root.render(h('div', {}, [count]));
+ * // Later: count.value++ will automatically update the DOM
  */
 export function createRoot(container: HTMLElement) {
-  let currentVNode: VNode | null = null;
-  let currentNode: Node | null = null;
-
-  return {
-    render(vnode: VNode) {
-      if (!currentVNode) {
-        // Initial render
-        currentNode = render(vnode, container);
-        currentVNode = vnode;
-      } else {
-        // Update render
-        if (currentNode instanceof HTMLElement) {
-          update(currentNode, currentVNode, vnode);
-          currentVNode = vnode;
-        }
-      }
-    },
-    unmount() {
-      if (currentNode) {
-        unmount(currentNode);
-        currentVNode = null;
-        currentNode = null;
-      }
-    },
-  };
+  // Use reactive root for automatic signal tracking
+  return createReactiveRoot(container);
 }

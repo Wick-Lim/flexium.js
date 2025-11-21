@@ -1,4 +1,4 @@
-import { signal, computed, effect, batch } from './dist/core/signal.js';
+import { signal, computed, effect, batch } from './dist/index.mjs';
 
 console.log('Testing signal system...\n');
 

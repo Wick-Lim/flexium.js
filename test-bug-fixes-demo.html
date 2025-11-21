@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM Renderer Bug Fixes - Live Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #555;
+      margin-top: 30px;
+    }
+    .demo-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .demo-title {
+      font-weight: bold;
+      color: #2196F3;
+      margin-bottom: 10px;
+    }
+    .demo-description {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+      font-style: italic;
+    }
+    .demo-container {
+      border: 2px dashed #ccc;
+      padding: 10px;
+      margin: 10px 0;
+      min-height: 50px;
+      border-radius: 4px;
+    }
+    .code-block {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      margin: 10px 0;
+      border-left: 3px solid #4CAF50;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status.fixed {
+      background: #d4edda;
+      color: #155724;
+    }
+    button {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #1976D2;
+    }
+  </style>
+</head>
+<body>
+  <h1>DOM Renderer Bug Fixes - Live Demo</h1>
+  <p>This demo shows all 4 critical bugs that were fixed in the DOMRenderer implementation.</p>
+
+  <h2>Bug #1: className Prop <span class="status fixed">FIXED</span></h2>
+  <div class="demo-section">
+    <div class="demo-title">className prop is now applied and can be updated</div>
+    <div class="demo-description">Before: className prop was ignored. After: className is properly set and updated.</div>
+    <div class="code-block">renderer.createNode('Row', { className: 'my-class' })</div>
+    <div id="demo1-container" class="demo-container"></div>
+    <button onclick="demo1Update()">Update className</button>
+  </div>
+
+  <h2>Bug #2: style Object Prop <span class="status fixed">FIXED</span></h2>
+  <div class="demo-section">
+    <div class="demo-title">style object prop is now applied</div>
+    <div class="demo-description">Before: style={{ ... }} was ignored. After: style objects are properly applied.</div>
+    <div class="code-block">renderer.createNode('Row', { style: { fontSize: '20px', fontWeight: 'bold' } })</div>
+    <div id="demo2-container" class="demo-container"></div>
+    <button onclick="demo2Update()">Update style</button>
+  </div>
+
+  <h2>Bug #3: Flexbox Shorthand Props <span class="status fixed">FIXED</span></h2>
+  <div class="demo-section">
+    <div class="demo-title">align and justify shorthand props now work</div>
+    <div class="demo-description">Before: align and justify were ignored. After: They map to alignItems and justifyContent.</div>
+    <div class="code-block">renderer.createNode('Row', { gap: 10, align: 'center', justify: 'space-around' })</div>
+    <div id="demo3-container" class="demo-container"></div>
+    <button onclick="demo3Update()">Change alignment</button>
+  </div>
+
+  <h2>Bug #4: updateNode Actually Updates <span class="status fixed">FIXED</span></h2>
+  <div class="demo-section">
+    <div class="demo-title">updateNode now actually updates DOM properties</div>
+    <div class="demo-description">Before: updateNode didn't update styles. After: All props are properly updated.</div>
+    <div class="code-block">renderer.updateNode(node, oldProps, newProps)</div>
+    <div id="demo4-container" class="demo-container"></div>
+    <button onclick="demo4Update()">Update all props</button>
+  </div>
+
+  <h2>Combined Demo: All Fixes Together <span class="status fixed">WORKING</span></h2>
+  <div class="demo-section">
+    <div class="demo-title">All critical props working together</div>
+    <div class="demo-description">className, style object, flexbox shorthand, gap, padding, margin - all working!</div>
+    <div id="demo5-container" class="demo-container"></div>
+    <button onclick="demo5Animate()">Animate changes</button>
+  </div>
+
+  <script type="module">
+    import { DOMRenderer } from './dist/dom.mjs';
+
+    const renderer = new DOMRenderer();
+    window.renderer = renderer;
+
+    // Demo 1: className
+    const demo1 = renderer.createNode('Row', {
+      className: 'demo-box',
+      style: { padding: '20px', background: '#e3f2fd', borderRadius: '4px' }
+    });
+    const demo1Text = renderer.createTextNode('Element with className="demo-box"');
+    renderer.appendChild(demo1, demo1Text);
+    document.getElementById('demo1-container').appendChild(demo1);
+
+    window.demo1Update = () => {
+      const newClass = demo1.className === 'demo-box' ? 'updated-class' : 'demo-box';
+      renderer.updateNode(demo1, { className: demo1.className }, { className: newClass });
+      demo1Text.textContent = `Element with className="${demo1.className}"`;
+    };
+
+    // Demo 2: style object
+    const demo2 = renderer.createNode('Row', {
+      style: { fontSize: '16px', color: '#333', padding: '15px', background: '#f3e5f5', borderRadius: '4px' }
+    });
+    const demo2Text = renderer.createTextNode('Text with style object applied');
+    renderer.appendChild(demo2, demo2Text);
+    document.getElementById('demo2-container').appendChild(demo2);
+
+    window.demo2Update = () => {
+      const newStyle = demo2.style.fontSize === '16px'
+        ? { fontSize: '24px', color: '#9c27b0', fontWeight: 'bold', padding: '20px', background: '#f3e5f5', borderRadius: '4px' }
+        : { fontSize: '16px', color: '#333', padding: '15px', background: '#f3e5f5', borderRadius: '4px' };
+      renderer.updateNode(demo2, { style: demo2.style }, { style: newStyle });
+    };
+
+    // Demo 3: Flexbox shorthand
+    const demo3 = renderer.createNode('Row', {
+      gap: 10,
+      align: 'center',
+      justify: 'space-around',
+      padding: 20,
+      bg: '#fff3e0',
+      style: { borderRadius: '4px', minHeight: '60px' }
+    });
+
+    for (let i = 1; i <= 3; i++) {
+      const box = renderer.createNode('View', {
+        style: {
+          width: '40px',
+          height: '40px',
+          backgroundColor: '#ff9800',
+          borderRadius: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      const text = renderer.createTextNode(String(i));
+      renderer.appendChild(box, text);
+      renderer.appendChild(demo3, box);
+    }
+    document.getElementById('demo3-container').appendChild(demo3);
+
+    window.demo3Update = () => {
+      const newAlign = demo3.style.alignItems === 'center' ? 'flex-start' : 'center';
+      const newJustify = demo3.style.justifyContent === 'space-around' ? 'flex-end' : 'space-around';
+      renderer.updateNode(
+        demo3,
+        { gap: 10, align: demo3.style.alignItems, justify: demo3.style.justifyContent },
+        { gap: 20, align: newAlign, justify: newJustify, padding: 20, bg: '#fff3e0' }
+      );
+    };
+
+    // Demo 4: updateNode
+    const demo4 = renderer.createNode('Row', {
+      className: 'initial',
+      padding: 10,
+      gap: 5,
+      bg: '#ffebee',
+      style: { borderRadius: '4px', minHeight: '50px' }
+    });
+    const demo4Text = renderer.createTextNode('Click update to change all props');
+    renderer.appendChild(demo4, demo4Text);
+    document.getElementById('demo4-container').appendChild(demo4);
+
+    window.demo4Update = () => {
+      const isInitial = demo4.className === 'initial';
+      renderer.updateNode(
+        demo4,
+        { className: 'initial', padding: 10, gap: 5, bg: '#ffebee' },
+        {
+          className: isInitial ? 'updated' : 'initial',
+          padding: isInitial ? 25 : 10,
+          gap: isInitial ? 15 : 5,
+          bg: isInitial ? '#c8e6c9' : '#ffebee',
+          style: { borderRadius: '4px', minHeight: '50px' }
+        }
+      );
+      demo4Text.textContent = `Props ${isInitial ? 'UPDATED' : 'RESET'} - className: ${demo4.className}, padding: ${demo4.style.padding}, gap: ${demo4.style.gap}`;
+    };
+
+    // Demo 5: Combined
+    const demo5 = renderer.createNode('Column', {
+      className: 'combined-demo',
+      gap: 15,
+      padding: 20,
+      align: 'stretch',
+      bg: '#e8f5e9',
+      style: { borderRadius: '8px' }
+    });
+
+    const row1 = renderer.createNode('Row', {
+      gap: 10,
+      padding: 15,
+      align: 'center',
+      justify: 'space-between',
+      bg: '#4CAF50',
+      style: { borderRadius: '4px', color: 'white' }
+    });
+    const row1Text = renderer.createTextNode('Row with gap, align, justify');
+    renderer.appendChild(row1, row1Text);
+    renderer.appendChild(demo5, row1);
+
+    const row2 = renderer.createNode('Row', {
+      className: 'custom-row',
+      gap: 8,
+      padding: 12,
+      align: 'center',
+      bg: '#2196F3',
+      style: { borderRadius: '4px', color: 'white', fontSize: '14px' }
+    });
+    const row2Text = renderer.createTextNode('Row with className and style object');
+    renderer.appendChild(row2, row2Text);
+    renderer.appendChild(demo5, row2);
+
+    document.getElementById('demo5-container').appendChild(demo5);
+
+    let animationState = 0;
+    window.demo5Animate = () => {
+      animationState = (animationState + 1) % 3;
+
+      const configs = [
+        { gap: 15, padding: 20, align: 'stretch', bg: '#e8f5e9' },
+        { gap: 25, padding: 30, align: 'center', bg: '#fff3e0' },
+        { gap: 10, padding: 15, align: 'flex-start', bg: '#f3e5f5' }
+      ];
+
+      const config = configs[animationState];
+      renderer.updateNode(
+        demo5,
+        { className: 'combined-demo' },
+        {
+          className: 'combined-demo',
+          ...config,
+          style: { borderRadius: '8px' }
+        }
+      );
+    };
+
+    console.log('All demos loaded successfully!');
+    console.log('Try clicking the buttons to see the bug fixes in action.');
+  </script>
+</body>
+</html>

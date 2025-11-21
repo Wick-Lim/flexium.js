@@ -17,6 +17,8 @@ export {
   createReactiveRoot,
   mountReactive,
   reactiveText,
+  bind,
+  ReactiveText,
 } from './reactive';
 
 // JSX factory

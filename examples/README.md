@@ -16,7 +16,143 @@ npx http-server
 # Then open http://localhost:8000/examples/ in your browser
 ```
 
-## h() Function Examples (NEW!)
+## 🌟 FEATURED EXAMPLES
+
+### 1. Todo App (`/todo-app`) ⭐ PRODUCTION DEMO
+
+**A comprehensive, production-ready Todo application showcasing ALL Flexium features**
+
+This is the most complete real-world example, built specifically to prove Flexium can handle production use cases.
+
+**Features**:
+- ✅ **10 signals** - Complete state management (todos, form, filters, validation)
+- ✅ **5 computed values** - Statistics, filtered todos, completion percentage
+- ✅ **4 effects** - localStorage, validation, rendering, logging
+- ✅ **CRUD operations** - Create, read, update, delete with proper patterns
+- ✅ **Form validation** - Real-time reactive error handling
+- ✅ **Multiple filters** - Status (all/active/completed), category, search
+- ✅ **Data persistence** - Auto-save to localStorage with error handling
+- ✅ **Mobile responsive** - Professional UI that works on all devices
+- ✅ **Accessibility** - Proper labels, ARIA, keyboard navigation
+
+**Quick Start**: `open todo-app/index.html` (no build required!)
+
+**Documentation**:
+- `README.md` - Complete feature documentation
+- `FEATURES_DEMONSTRATED.md` - 17KB technical deep-dive
+- `ISSUES_AND_LIMITATIONS.md` - Honest assessment and recommendations
+- `QUICKSTART.md` - Get running in 30 seconds
+
+**Best For**: Understanding production patterns, real-world state management, evaluating Flexium
+
+---
+
+### 2. Complete Showcase (`/showcase`)
+
+**THE ULTIMATE FLEXIUM DEMO - Multiple components in one app**
+
+🎯 **Perfect for:**
+- First-time users wanting to see what Flexium can do
+- Developers evaluating Flexium for projects
+- Learning reactive patterns and best practices
+- README/documentation main demo
+- Copy-paste component examples
+
+✨ **9 Interactive Components:**
+1. **Counter** - Signals and computed values with stats
+2. **Todo List** - Array manipulation, CRUD operations
+3. **Form Validation** - Real-time validation with effects
+4. **Tabs** - Conditional rendering and state management
+5. **Modal Dialog** - Portal-like rendering with animations
+6. **Progress Bar** - Dynamic styling and smooth transitions
+7. **Timer** - Effect cleanup, interval management
+8. **Color Picker** - Random colors, dynamic backgrounds
+9. **Global Stats** - Cross-component reactivity
+
+🎨 **Beautiful Design:**
+- Animated gradient background
+- Glass-morphism cards with backdrop blur
+- Smooth hover effects and transitions
+- Professional color palette
+- Responsive grid layout
+- Modern UI/UX patterns
+
+📊 **Technical Features:**
+- 15+ reactive signals
+- 8 computed values
+- 4 side effects with cleanup
+- Batch updates
+- Fine-grained rendering
+- WCAG accessibility compliant
+
+📦 **One File, Zero Build:**
+- 38KB single HTML file
+- Works offline
+- No build step needed
+- Just open in browser!
+
+**Quick Start:**
+```bash
+open examples/showcase/index.html
+```
+
+**Documentation:**
+- `README.md` - Developer guide
+- `VISUAL_DESCRIPTION.md` - UI/UX details
+- `FEATURES_SUMMARY.md` - Complete feature list
+
+---
+
+## 🆕 Automatic Reactivity Examples
+
+### auto-reactive-demo.ts
+**NEW FEATURE: Automatic Reactive Bindings**
+
+Comprehensive demonstration showing how signals automatically update the DOM without manual `effect()` calls:
+- Signals as children (automatically reactive text)
+- Computed values as children
+- Signals in props (automatic property updates)
+- Multiple signals in one element
+- ReactiveText component for explicit reactive text
+- Complex reactive UIs with zero boilerplate
+
+**Quick Start:**
+```bash
+# Build and run
+npm run dev
+# Navigate to auto-reactive-demo
+```
+
+### before-after-comparison.ts
+**NEW FEATURE: Migration Guide**
+
+Side-by-side comparison demonstrating:
+- **OLD WAY**: Manual `effect()` calls (tedious and error-prone)
+- **NEW WAY**: Automatic reactive bindings (clean and simple)
+
+Shows three scenarios:
+1. Simple counter with reactive text
+2. Multiple computed values
+3. Dynamic props with reactive updates
+
+This is the perfect example for understanding the improvement automatic reactivity brings!
+
+**Key Takeaway:**
+```typescript
+// BEFORE (manual effects)
+effect(() => {
+  element.textContent = count.value;
+});
+
+// AFTER (automatic)
+h('div', {}, [count]) // Just works!
+```
+
+**See also:** `/docs/AUTOMATIC_REACTIVITY.md` for complete documentation.
+
+---
+
+## h() Function Examples
 
 ### simple-h-test.html
 **Minimal working example** - Exactly as requested:

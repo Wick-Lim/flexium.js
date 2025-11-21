@@ -40,6 +40,8 @@ const SKIP_PROPS = new Set([
   'children',
   'key',
   'ref',
+  'className',
+  'style',
   // Layout props (handled via style)
   'width',
   'height',
@@ -60,6 +62,9 @@ const SKIP_PROPS = new Set([
   'justifyContent',
   'alignItems',
   'alignSelf',
+  // Shorthand flexbox props
+  'align',
+  'justify',
   // Visual props (handled via style)
   'bg',
   'color',
@@ -88,32 +93,37 @@ function px(value: number | string): string {
 function applyStyles(element: HTMLElement, props: Record<string, any>): void {
   const style = element.style;
 
+  // Apply style object prop first (if provided)
+  if (props.style && typeof props.style === 'object') {
+    Object.assign(style, props.style);
+  }
+
   // Layout
   if (props.width !== undefined) style.width = px(props.width);
   if (props.height !== undefined) style.height = px(props.height);
 
-  // Padding
+  // Padding - apply general padding first, then individual ones can override
   if (props.padding !== undefined) {
     style.padding = px(props.padding);
-  } else {
-    if (props.paddingTop !== undefined) style.paddingTop = px(props.paddingTop);
-    if (props.paddingRight !== undefined)
-      style.paddingRight = px(props.paddingRight);
-    if (props.paddingBottom !== undefined)
-      style.paddingBottom = px(props.paddingBottom);
-    if (props.paddingLeft !== undefined) style.paddingLeft = px(props.paddingLeft);
   }
+  // Individual padding props can override the general padding
+  if (props.paddingTop !== undefined) style.paddingTop = px(props.paddingTop);
+  if (props.paddingRight !== undefined)
+    style.paddingRight = px(props.paddingRight);
+  if (props.paddingBottom !== undefined)
+    style.paddingBottom = px(props.paddingBottom);
+  if (props.paddingLeft !== undefined) style.paddingLeft = px(props.paddingLeft);
 
-  // Margin
+  // Margin - apply general margin first, then individual ones can override
   if (props.margin !== undefined) {
     style.margin = px(props.margin);
-  } else {
-    if (props.marginTop !== undefined) style.marginTop = px(props.marginTop);
-    if (props.marginRight !== undefined) style.marginRight = px(props.marginRight);
-    if (props.marginBottom !== undefined)
-      style.marginBottom = px(props.marginBottom);
-    if (props.marginLeft !== undefined) style.marginLeft = px(props.marginLeft);
   }
+  // Individual margin props can override the general margin
+  if (props.marginTop !== undefined) style.marginTop = px(props.marginTop);
+  if (props.marginRight !== undefined) style.marginRight = px(props.marginRight);
+  if (props.marginBottom !== undefined)
+    style.marginBottom = px(props.marginBottom);
+  if (props.marginLeft !== undefined) style.marginLeft = px(props.marginLeft);
 
   // Flexbox - Row/Column get display:flex by default
   const type = element.getAttribute('data-flexium-type');
@@ -127,6 +137,7 @@ function applyStyles(element: HTMLElement, props: Record<string, any>): void {
     }
   }
 
+  // Apply flexbox properties
   if (props.flexDirection) style.flexDirection = props.flexDirection;
   if (props.justifyContent) style.justifyContent = props.justifyContent;
   if (props.alignItems) style.alignItems = props.alignItems;
@@ -134,6 +145,24 @@ function applyStyles(element: HTMLElement, props: Record<string, any>): void {
   if (props.flexWrap) style.flexWrap = props.flexWrap;
   if (props.flex !== undefined) style.flex = String(props.flex);
   if (props.gap !== undefined) style.gap = px(props.gap);
+
+  // Shorthand flexbox props
+  if (props.justify) style.justifyContent = props.justify;
+  if (props.align) style.alignItems = props.align;
+
+  // If any flexbox layout props are present, set display:flex (unless it's already set)
+  if (
+    (props.flexDirection ||
+      props.justifyContent ||
+      props.alignItems ||
+      props.flexWrap ||
+      props.gap !== undefined ||
+      props.justify ||
+      props.align) &&
+    !style.display
+  ) {
+    style.display = 'flex';
+  }
 
   // Visual
   if (props.bg) style.backgroundColor = props.bg;
@@ -160,6 +189,13 @@ function applyStyles(element: HTMLElement, props: Record<string, any>): void {
  */
 function removeStyles(element: HTMLElement, props: Record<string, any>): void {
   const style = element.style;
+
+  // Remove style object prop
+  if (props.style && typeof props.style === 'object') {
+    for (const key in props.style) {
+      (style as any)[key] = '';
+    }
+  }
 
   // Layout
   if (props.width !== undefined) style.width = '';
@@ -193,6 +229,10 @@ function removeStyles(element: HTMLElement, props: Record<string, any>): void {
   if (props.flexWrap) style.flexWrap = '';
   if (props.flex !== undefined) style.flex = '';
   if (props.gap !== undefined) style.gap = '';
+
+  // Shorthand flexbox props
+  if (props.justify) style.justifyContent = '';
+  if (props.align) style.alignItems = '';
 
   // Visual
   if (props.bg) style.backgroundColor = '';
@@ -241,6 +281,15 @@ export class DOMRenderer implements Renderer {
     oldProps: Record<string, any>,
     newProps: Record<string, any>
   ): void {
+    // Handle className
+    if (newProps.className !== oldProps.className) {
+      if (newProps.className) {
+        node.className = newProps.className;
+      } else {
+        node.className = '';
+      }
+    }
+
     // Remove old event listeners
     for (const key in oldProps) {
       if (key.startsWith('on') && !(key in newProps)) {
@@ -252,13 +301,15 @@ export class DOMRenderer implements Renderer {
       }
     }
 
-    // Remove old styles
-    const oldStyleProps = Object.keys(oldProps).filter((k) => SKIP_PROPS.has(k));
-    if (oldStyleProps.length > 0) {
-      const oldStyles = Object.fromEntries(
-        oldStyleProps.map((k) => [k, oldProps[k]])
-      );
-      removeStyles(node, oldStyles);
+    // Remove old styles that are no longer present in newProps
+    const removedStyleProps: Record<string, any> = {};
+    for (const key in oldProps) {
+      if (SKIP_PROPS.has(key) && !(key in newProps)) {
+        removedStyleProps[key] = oldProps[key];
+      }
+    }
+    if (Object.keys(removedStyleProps).length > 0) {
+      removeStyles(node, removedStyleProps);
     }
 
     // Apply new styles

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM Renderer Bug Fix Tests</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .test-result {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .pass {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .fail {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .test-container {
+      border: 2px dashed #ccc;
+      padding: 10px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>DOM Renderer Bug Fix Tests</h1>
+  <div id="test-results"></div>
+
+  <script type="module">
+    import { DOMRenderer } from './src/renderers/dom/index.ts';
+
+    const results = [];
+    const renderer = new DOMRenderer();
+    const testContainer = document.createElement('div');
+    testContainer.id = 'test-container';
+    document.body.appendChild(testContainer);
+
+    function test(name, fn) {
+      try {
+        fn();
+        results.push({ name, passed: true });
+        console.log(`✓ ${name}`);
+      } catch (error) {
+        results.push({ name, passed: false, error: error.message });
+        console.error(`✗ ${name}:`, error.message);
+      }
+    }
+
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message || 'Assertion failed');
+      }
+    }
+
+    function assertEquals(actual, expected, message) {
+      if (actual !== expected) {
+        throw new Error(`${message || 'Values not equal'}: expected "${expected}", got "${actual}"`);
+      }
+    }
+
+    // Clear test container
+    function clearTests() {
+      testContainer.innerHTML = '';
+    }
+
+    // Test 1: className prop is applied on creation
+    test('className prop is applied on creation', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { className: 'test-class' });
+      testContainer.appendChild(element);
+      assertEquals(element.className, 'test-class', 'className should be set');
+    });
+
+    // Test 2: className prop is updated
+    test('className prop is updated', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { className: 'initial-class' });
+      testContainer.appendChild(element);
+      renderer.updateNode(element, { className: 'initial-class' }, { className: 'updated-class' });
+      assertEquals(element.className, 'updated-class', 'className should be updated');
+    });
+
+    // Test 3: style object prop is applied on creation
+    test('style object prop is applied on creation', () => {
+      clearTests();
+      const element = renderer.createNode('Row', {
+        style: { fontSize: '20px', color: 'red' }
+      });
+      testContainer.appendChild(element);
+      assertEquals(element.style.fontSize, '20px', 'fontSize from style object should be set');
+      assertEquals(element.style.color, 'red', 'color from style object should be set');
+    });
+
+    // Test 4: style object prop is updated
+    test('style object prop is updated', () => {
+      clearTests();
+      const element = renderer.createNode('Row', {
+        style: { fontSize: '16px' }
+      });
+      testContainer.appendChild(element);
+      renderer.updateNode(
+        element,
+        { style: { fontSize: '16px' } },
+        { style: { fontSize: '24px', fontWeight: 'bold' } }
+      );
+      assertEquals(element.style.fontSize, '24px', 'fontSize should be updated');
+      assertEquals(element.style.fontWeight, 'bold', 'fontWeight should be added');
+    });
+
+    // Test 5: gap prop is converted to CSS
+    test('gap prop is converted to CSS', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { gap: 16 });
+      testContainer.appendChild(element);
+      assertEquals(element.style.gap, '16px', 'gap should be converted to CSS');
+    });
+
+    // Test 6: gap prop is updated
+    test('gap prop is updated', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { gap: 8 });
+      testContainer.appendChild(element);
+      renderer.updateNode(element, { gap: 8 }, { gap: 24 });
+      assertEquals(element.style.gap, '24px', 'gap should be updated');
+    });
+
+    // Test 7: align shorthand prop is converted to alignItems
+    test('align shorthand prop is converted to alignItems', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { align: 'center' });
+      testContainer.appendChild(element);
+      assertEquals(element.style.alignItems, 'center', 'align should be converted to alignItems');
+    });
+
+    // Test 8: justify shorthand prop is converted to justifyContent
+    test('justify shorthand prop is converted to justifyContent', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { justify: 'space-between' });
+      testContainer.appendChild(element);
+      assertEquals(element.style.justifyContent, 'space-between', 'justify should be converted to justifyContent');
+    });
+
+    // Test 9: padding prop is converted to CSS
+    test('padding prop is converted to CSS', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { padding: 20 });
+      testContainer.appendChild(element);
+      assertEquals(element.style.padding, '20px', 'padding should be converted to CSS');
+    });
+
+    // Test 10: padding prop is updated
+    test('padding prop is updated', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { padding: 10 });
+      testContainer.appendChild(element);
+      renderer.updateNode(element, { padding: 10 }, { padding: 30 });
+      assertEquals(element.style.padding, '30px', 'padding should be updated');
+    });
+
+    // Test 11: margin prop is converted to CSS
+    test('margin prop is converted to CSS', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { margin: 15 });
+      testContainer.appendChild(element);
+      assertEquals(element.style.margin, '15px', 'margin should be converted to CSS');
+    });
+
+    // Test 12: margin prop is updated
+    test('margin prop is updated', () => {
+      clearTests();
+      const element = renderer.createNode('Row', { margin: 10 });
+      testContainer.appendChild(element);
+      renderer.updateNode(element, { margin: 10 }, { margin: 20 });
+      assertEquals(element.style.margin, '20px', 'margin should be updated');
+    });
+
+    // Test 13: Multiple style props work together
+    test('Multiple style props work together', () => {
+      clearTests();
+      const element = renderer.createNode('Row', {
+        className: 'multi-test',
+        gap: 12,
+        padding: 16,
+        margin: 8,
+        bg: 'blue',
+        align: 'center',
+        justify: 'space-around'
+      });
+      testContainer.appendChild(element);
+      assertEquals(element.className, 'multi-test', 'className should be set');
+      assertEquals(element.style.gap, '12px', 'gap should be set');
+      assertEquals(element.style.padding, '16px', 'padding should be set');
+      assertEquals(element.style.margin, '8px', 'margin should be set');
+      assertEquals(element.style.backgroundColor, 'blue', 'backgroundColor should be set');
+      assertEquals(element.style.alignItems, 'center', 'alignItems should be set');
+      assertEquals(element.style.justifyContent, 'space-around', 'justifyContent should be set');
+    });
+
+    // Test 14: updateNode actually updates when props change
+    test('updateNode actually updates when props change', () => {
+      clearTests();
+      const element = renderer.createNode('Row', {
+        className: 'before',
+        gap: 8,
+        padding: 10,
+        bg: 'red'
+      });
+      testContainer.appendChild(element);
+
+      renderer.updateNode(
+        element,
+        { className: 'before', gap: 8, padding: 10, bg: 'red' },
+        { className: 'after', gap: 16, padding: 20, bg: 'green' }
+      );
+
+      assertEquals(element.className, 'after', 'className should be updated');
+      assertEquals(element.style.gap, '16px', 'gap should be updated');
+      assertEquals(element.style.padding, '20px', 'padding should be updated');
+      assertEquals(element.style.backgroundColor, 'green', 'backgroundColor should be updated');
+    });
+
+    // Test 15: Removing props clears styles
+    test('Removing props clears styles', () => {
+      clearTests();
+      const element = renderer.createNode('Row', {
+        className: 'test',
+        gap: 10,
+        padding: 15
+      });
+      testContainer.appendChild(element);
+
+      renderer.updateNode(
+        element,
+        { className: 'test', gap: 10, padding: 15 },
+        { }
+      );
+
+      assertEquals(element.className, '', 'className should be cleared');
+      assertEquals(element.style.gap, '', 'gap should be cleared');
+      assertEquals(element.style.padding, '', 'padding should be cleared');
+    });
+
+    // Test 16: Row has display:flex by default
+    test('Row has display:flex by default', () => {
+      clearTests();
+      const element = renderer.createNode('Row', {});
+      testContainer.appendChild(element);
+      assertEquals(element.style.display, 'flex', 'Row should have display:flex');
+      assertEquals(element.style.flexDirection, 'row', 'Row should have flexDirection:row');
+    });
+
+    // Test 17: Column has display:flex and flexDirection:column
+    test('Column has display:flex and flexDirection:column', () => {
+      clearTests();
+      const element = renderer.createNode('Column', {});
+      testContainer.appendChild(element);
+      assertEquals(element.style.display, 'flex', 'Column should have display:flex');
+      assertEquals(element.style.flexDirection, 'column', 'Column should have flexDirection:column');
+    });
+
+    // Display results
+    function displayResults() {
+      const resultsDiv = document.getElementById('test-results');
+      const passed = results.filter(r => r.passed).length;
+      const total = results.length;
+
+      let html = `
+        <div class="test-section">
+          <div class="test-title">Test Summary: ${passed}/${total} passed</div>
+      `;
+
+      results.forEach(result => {
+        const className = result.passed ? 'pass' : 'fail';
+        const status = result.passed ? '✓ PASS' : '✗ FAIL';
+        const error = result.error ? `<br>Error: ${result.error}` : '';
+        html += `<div class="test-result ${className}">${status}: ${result.name}${error}</div>`;
+      });
+
+      html += '</div>';
+
+      // Visual test examples
+      html += `
+        <div class="test-section">
+          <div class="test-title">Visual Examples</div>
+          <div id="visual-examples"></div>
+        </div>
+      `;
+
+      resultsDiv.innerHTML = html;
+
+      // Add visual examples
+      const visualContainer = document.getElementById('visual-examples');
+
+      // Example 1: Row with gap, padding, and alignment
+      const row1 = renderer.createNode('Row', {
+        className: 'test-container',
+        gap: 10,
+        padding: 20,
+        align: 'center',
+        justify: 'space-around',
+        bg: '#e3f2fd'
+      });
+
+      for (let i = 1; i <= 3; i++) {
+        const box = renderer.createNode('View', {
+          style: { width: '50px', height: '50px', backgroundColor: '#2196f3', borderRadius: '4px' }
+        });
+        renderer.appendChild(row1, box);
+      }
+
+      const example1 = document.createElement('div');
+      example1.innerHTML = '<p><strong>Example 1:</strong> Row with gap:10, padding:20, align:center, justify:space-around</p>';
+      example1.appendChild(row1);
+      visualContainer.appendChild(example1);
+
+      // Example 2: Column with gap and className
+      const col1 = renderer.createNode('Column', {
+        className: 'test-container',
+        gap: 15,
+        padding: 20,
+        bg: '#f3e5f5'
+      });
+
+      for (let i = 1; i <= 3; i++) {
+        const box = renderer.createNode('View', {
+          style: { width: '100px', height: '40px', backgroundColor: '#9c27b0', borderRadius: '4px' }
+        });
+        renderer.appendChild(col1, box);
+      }
+
+      const example2 = document.createElement('div');
+      example2.innerHTML = '<p><strong>Example 2:</strong> Column with gap:15, padding:20, className applied</p>';
+      example2.appendChild(col1);
+      visualContainer.appendChild(example2);
+    }
+
+    displayResults();
+  </script>
+</body>
+</html>
