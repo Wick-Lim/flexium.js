@@ -1,0 +1,44 @@
+{
+  "name": "create-flexium",
+  "version": "0.1.0",
+  "description": "Scaffold a Flexium project with one command",
+  "type": "module",
+  "bin": {
+    "create-flexium": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "../../templates"
+  ],
+  "scripts": {
+    "test": "node index.js test-project"
+  },
+  "keywords": [
+    "flexium",
+    "create",
+    "scaffold",
+    "cli",
+    "starter",
+    "template",
+    "signals",
+    "reactive",
+    "jsx",
+    "vite",
+    "typescript"
+  ],
+  "author": "Flexium Contributors",
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/flexium.js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/flexium.js.git",
+    "directory": "packages/create-flexium"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/flexium.js/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

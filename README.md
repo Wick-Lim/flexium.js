@@ -51,7 +51,28 @@ Modern web development shouldn't be complicated. Flexium brings together the bes
 
 ## Quick Start in 60 Seconds
 
-### Installation
+### Scaffold a New Project (Recommended)
+
+The fastest way to get started is with our project scaffolding tool:
+
+```bash
+npm create flexium@latest my-app
+```
+
+This gives you:
+- ⚡ Vite + TypeScript setup
+- 📦 Automatic JSX runtime configured
+- 🎨 Example components
+- 🚀 Hot module replacement
+
+Then:
+```bash
+cd my-app
+npm install
+npm run dev
+```
+
+### Add to Existing Project
 
 ```bash
 # npm

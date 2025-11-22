@@ -16,6 +16,33 @@ A simple interactive counter application that demonstrates:
 
 ## Step 1: Create a New Project
 
+### Option A: Use Scaffolding Tool (Recommended)
+
+The fastest way to get started:
+
+```bash
+npm create flexium@latest my-flexium-app
+cd my-flexium-app
+npm install
+npm run dev
+```
+
+**That's it!** Open your browser to the URL shown (usually `http://localhost:5173`).
+
+**What you get:**
+- ⚡ Vite dev server with hot reload
+- 📦 TypeScript configured
+- 🎨 Example components
+- 🚀 Ready to customize
+
+**Skip to [Step 5](#step-5-run-the-development-server)** if you used this option.
+
+---
+
+### Option B: Manual Setup
+
+If you prefer manual setup or want to add Flexium to an existing project:
+
 ```bash
 # Create a new directory
 mkdir my-flexium-app
@@ -29,7 +56,7 @@ npm init -y
 
 ---
 
-## Step 2: Install Flexium
+## Step 2: Install Flexium (Manual Setup)
 
 ```bash
 # Install Flexium
