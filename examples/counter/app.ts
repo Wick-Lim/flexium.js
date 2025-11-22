@@ -16,7 +16,7 @@
  * This is fine-grained reactivity in action!
  */
 
-import { signal } from 'flexium'
+import { signal } from '../../packages/flexium/dist/index.mjs'
 import { render, Column, Row, Button, Text } from 'flexium/dom'
 
 function Counter() {

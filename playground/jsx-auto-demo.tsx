@@ -5,8 +5,8 @@
  * Notice: NO h import needed!
  */
 
-import { signal, effect } from '../dist/index.mjs'
-import { render } from '../dist/dom.mjs'
+import { signal, effect } from '../packages/flexium/dist/index.mjs'
+import { render } from '../packages/flexium/dist/dom.mjs'
 // NOTE: No h import! TypeScript will automatically use jsx-runtime
 
 // Create reactive signals

@@ -10,7 +10,7 @@
  * - Conditional rendering
  */
 
-import { signal, computed } from 'flexium'
+import { signal, computed } from '../../packages/flexium/dist/index.mjs'
 import { render, Column, Row, Input, Button, Text, Motion } from 'flexium/dom'
 
 interface Todo {

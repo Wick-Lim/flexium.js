@@ -9,7 +9,7 @@
  * - Complex layouts with nested components
  */
 
-import { signal, computed, effect } from 'flexium'
+import { signal, computed, effect } from '../../packages/flexium/dist/index.mjs'
 import { render, Column, Row, Grid, Text, Button, Motion } from 'flexium/dom'
 
 interface Stat {

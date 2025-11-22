@@ -26,17 +26,17 @@ const TEMPLATES = {
   'vite-starter': {
     name: 'Vite + TypeScript (Recommended)',
     description: 'Production-ready setup with Vite, TypeScript, and hot reload',
-    path: '../../templates/vite-starter',
+    path: './templates/vite-starter',
   },
   'vanilla-starter': {
     name: 'Vanilla (No Build)',
     description: 'Simple starter with no build tools - just open in browser',
-    path: '../../templates/vanilla-starter',
+    path: './templates/vanilla-starter',
   },
   'todo-app': {
     name: 'Todo App (Reference)',
     description: 'Complete todo application showing best practices',
-    path: '../../templates/todo-app-template',
+    path: './templates/todo-app-template',
   },
 }
 
@@ -83,7 +83,7 @@ async function getProjectName(rl, args) {
   if (args[0]) {
     return args[0]
   }
-  const name = await question(rl, `${cyan}📝 Project name:${reset} `)
+  const name = await question(rl, `${cyan}📝 Project name [default: my-flexium-app]:${reset} `)
   return name.trim() || 'my-flexium-app'
 }
 
@@ -91,16 +91,23 @@ async function getProjectName(rl, args) {
 async function getTemplateChoice(rl) {
   const answer = await question(
     rl,
-    `${cyan}🎨 Choose template (1-${Object.keys(TEMPLATES).length}):${reset} `
+    `${cyan}🎨 Choose template (1-${Object.keys(TEMPLATES).length}) [default: 1]:${reset} `
   )
-  const choice = parseInt(answer.trim())
+  const trimmed = answer.trim()
+
+  // If empty, use default
+  if (!trimmed) {
+    return 'vite-starter'
+  }
+
+  const choice = parseInt(trimmed)
   const templateKeys = Object.keys(TEMPLATES)
 
   if (choice >= 1 && choice <= templateKeys.length) {
     return templateKeys[choice - 1]
   }
 
-  return 'vite-starter' // Default
+  return 'vite-starter' // Default for invalid input
 }
 
 // Copy template
@@ -116,8 +123,8 @@ function copyTemplate(templatePath, targetPath, projectName) {
   // Create directory
   mkdirSync(targetPath, { recursive: true })
 
-  // Copy template files
-  const fullTemplatePath = resolve(__dirname, templatePath)
+  // Copy template files - use absolute path from __dirname
+  const fullTemplatePath = join(__dirname, templatePath)
   if (!existsSync(fullTemplatePath)) {
     console.log(`${red}❌ Error: Template not found at ${fullTemplatePath}${reset}`)
     process.exit(1)

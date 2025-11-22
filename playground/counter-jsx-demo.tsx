@@ -1,5 +1,5 @@
-import { signal, effect } from '../dist/index.mjs'
-import { render } from '../dist/dom.mjs'
+import { signal, effect } from '../packages/flexium/dist/index.mjs'
+import { render } from '../packages/flexium/dist/dom.mjs'
 
 // JSX is automatically handled by the new JSX transform - no h import needed!
 // Create reactive signals

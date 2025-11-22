@@ -61,3 +61,6 @@ test-*.html
 test-*.tsx
 verify-*.mjs
 test-*.txt
+
+# Claude AI
+.claude/

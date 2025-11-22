@@ -1,6 +1,6 @@
 // Import from the built library
-import { signal, computed, effect } from '../dist/index.mjs'
-import { h, render } from '../dist/dom.mjs'
+import { signal, computed, effect } from '../packages/flexium/dist/index.mjs'
+import { h, render } from '../packages/flexium/dist/dom.mjs'
 
 console.log('✅ Flexium loaded successfully!')
 

@@ -1,5 +1,5 @@
-import { signal } from '../dist/index.mjs'
-import { render } from '../dist/dom.mjs'
+import { signal } from '../packages/flexium/dist/index.mjs'
+import { render } from '../packages/flexium/dist/dom.mjs'
 
 // JSX is automatically handled - no h import needed!
 // Create a reactive counter signal
