@@ -148,7 +148,7 @@ function Counter() {
 // Render to DOM
 const app = document.getElementById('app')
 const counterElement = Counter()
-app.appendChild(counterElement)
+render(counterElement, app)
 
 // Setup reactive updates
 const countDisplay = document.getElementById('count-display')

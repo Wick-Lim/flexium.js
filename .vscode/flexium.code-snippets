@@ -1,0 +1,389 @@
+{
+  "Flexium Signal": {
+    "prefix": "fsig",
+    "body": [
+      "const ${1:name} = signal(${2:initialValue})"
+    ],
+    "description": "Create a reactive signal"
+  },
+
+  "Flexium Signal with Type": {
+    "prefix": "fsigt",
+    "body": [
+      "const ${1:name} = signal<${2:string}>(${3:'initialValue'})"
+    ],
+    "description": "Create a typed reactive signal"
+  },
+
+  "Flexium Computed": {
+    "prefix": "fcomp",
+    "body": [
+      "const ${1:name} = computed(() => ${2:expression})"
+    ],
+    "description": "Create a computed signal"
+  },
+
+  "Flexium Computed Multi-line": {
+    "prefix": "fcompm",
+    "body": [
+      "const ${1:name} = computed(() => {",
+      "  ${2:// computation logic}",
+      "  return ${3:result}",
+      "})"
+    ],
+    "description": "Create a multi-line computed signal"
+  },
+
+  "Flexium Effect": {
+    "prefix": "feff",
+    "body": [
+      "effect(() => {",
+      "  ${1:// side effect}",
+      "})"
+    ],
+    "description": "Create an effect"
+  },
+
+  "Flexium Effect with Cleanup": {
+    "prefix": "feffc",
+    "body": [
+      "effect(() => {",
+      "  ${1:// setup}",
+      "  ",
+      "  return () => {",
+      "    ${2:// cleanup}",
+      "  }",
+      "})"
+    ],
+    "description": "Create an effect with cleanup function"
+  },
+
+  "Flexium Batch": {
+    "prefix": "fbatch",
+    "body": [
+      "batch(() => {",
+      "  ${1:// multiple signal updates}",
+      "})"
+    ],
+    "description": "Batch multiple signal updates"
+  },
+
+  "Flexium Untrack": {
+    "prefix": "funtrack",
+    "body": [
+      "untrack(() => ${1:expression})"
+    ],
+    "description": "Read signals without tracking"
+  },
+
+  "Flexium Component": {
+    "prefix": "fcomponent",
+    "body": [
+      "import { signal, computed, effect } from 'flexium'",
+      "import { h } from 'flexium/dom'",
+      "",
+      "interface ${1:ComponentName}Props {",
+      "  ${2:// props}",
+      "}",
+      "",
+      "export function ${1:ComponentName}(props: ${1:ComponentName}Props) {",
+      "  ${3:// component logic}",
+      "  ",
+      "  return (",
+      "    <div>",
+      "      ${4:// JSX content}",
+      "    </div>",
+      "  )",
+      "}"
+    ],
+    "description": "Create a Flexium component with TypeScript"
+  },
+
+  "Flexium Component (Functional)": {
+    "prefix": "fcomp-fn",
+    "body": [
+      "export const ${1:ComponentName} = (props: { ${2:prop}: ${3:string} }) => {",
+      "  const ${4:state} = signal(${5:initialValue})",
+      "  ",
+      "  return (",
+      "    <div>",
+      "      ${6:// JSX content}",
+      "    </div>",
+      "  )",
+      "}"
+    ],
+    "description": "Create a functional Flexium component"
+  },
+
+  "Flexium Row": {
+    "prefix": "frow",
+    "body": [
+      "<Row",
+      "  gap={${1:16}}",
+      "  align=\"${2|start,center,end,stretch|}\"",
+      "  justify=\"${3|start,center,end,space-between,space-around,space-evenly|}\"",
+      ">",
+      "  ${4:// children}",
+      "</Row>"
+    ],
+    "description": "Create a Row layout component"
+  },
+
+  "Flexium Column": {
+    "prefix": "fcol",
+    "body": [
+      "<Column",
+      "  gap={${1:16}}",
+      "  align=\"${2|start,center,end,stretch|}\"",
+      "  justify=\"${3|start,center,end,space-between,space-around,space-evenly|}\"",
+      ">",
+      "  ${4:// children}",
+      "</Column>"
+    ],
+    "description": "Create a Column layout component"
+  },
+
+  "Flexium Stack": {
+    "prefix": "fstack",
+    "body": [
+      "<Stack>",
+      "  ${1:// overlapping children}",
+      "</Stack>"
+    ],
+    "description": "Create a Stack layout component"
+  },
+
+  "Flexium Grid": {
+    "prefix": "fgrid",
+    "body": [
+      "<Grid",
+      "  cols={{ base: ${1:1}, md: ${2:2}, lg: ${3:3} }}",
+      "  gap={${4:16}}",
+      ">",
+      "  ${5:// grid items}",
+      "</Grid>"
+    ],
+    "description": "Create a responsive Grid layout"
+  },
+
+  "Flexium Motion": {
+    "prefix": "fmotion",
+    "body": [
+      "<Motion",
+      "  initial={{ opacity: 0, y: ${1:20} }}",
+      "  animate={{ opacity: 1, y: 0 }}",
+      "  exit={{ opacity: 0, y: ${2:-20} }}",
+      "  duration={${3:300}}",
+      ">",
+      "  ${4:// animated content}",
+      "</Motion>"
+    ],
+    "description": "Create a Motion animation component"
+  },
+
+  "Flexium Motion Spring": {
+    "prefix": "fmotion-spring",
+    "body": [
+      "<Motion",
+      "  initial={{ scale: 0 }}",
+      "  animate={{ scale: 1 }}",
+      "  spring={{",
+      "    tension: ${1:170},",
+      "    friction: ${2:26},",
+      "    mass: ${3:1}",
+      "  }}",
+      ">",
+      "  ${4:// animated content}",
+      "</Motion>"
+    ],
+    "description": "Create a Motion component with spring physics"
+  },
+
+  "Flexium Form": {
+    "prefix": "fform",
+    "body": [
+      "<Form",
+      "  onSubmit={(data) => {",
+      "    ${1:// handle submit}",
+      "  }}",
+      "  validation={{",
+      "    ${2:fieldName}: (value) => ${3:validation logic} || 'Error message'",
+      "  }}",
+      ">",
+      "  ${4:// form fields}",
+      "</Form>"
+    ],
+    "description": "Create a Form component with validation"
+  },
+
+  "Flexium Input": {
+    "prefix": "finput",
+    "body": [
+      "<Input",
+      "  name=\"${1:fieldName}\"",
+      "  type=\"${2|text,email,password,number,tel,url|}\"",
+      "  placeholder=\"${3:Enter value...}\"",
+      "  required={${4:false}}",
+      "/>"
+    ],
+    "description": "Create an Input component"
+  },
+
+  "Flexium Button": {
+    "prefix": "fbutton",
+    "body": [
+      "<Button",
+      "  onClick={() => ${1:handleClick()}}",
+      "  variant=\"${2|primary,secondary,outline,ghost|}\"",
+      "  disabled={${3:false}}",
+      ">",
+      "  ${4:Button Text}",
+      "</Button>"
+    ],
+    "description": "Create a Button component"
+  },
+
+  "Flexium Text": {
+    "prefix": "ftext",
+    "body": [
+      "<Text",
+      "  as=\"${1|p,span,h1,h2,h3,h4,h5,h6|}\"",
+      "  size=\"${2|xs,sm,base,lg,xl,2xl|}\"",
+      "  weight=\"${3|normal,medium,semibold,bold|}\"",
+      ">",
+      "  ${4:Text content}",
+      "</Text>"
+    ],
+    "description": "Create a Text component"
+  },
+
+  "Flexium Counter Example": {
+    "prefix": "fcounter",
+    "body": [
+      "import { signal } from 'flexium'",
+      "import { render } from 'flexium/dom'",
+      "",
+      "const count = signal(0)",
+      "",
+      "const App = () => (",
+      "  <div>",
+      "    <h1>Count: {count.value}</h1>",
+      "    <button onclick={() => count.value++}>Increment</button>",
+      "    <button onclick={() => count.value--}>Decrement</button>",
+      "  </div>",
+      ")",
+      "",
+      "render(<App />, document.getElementById('root')!)"
+    ],
+    "description": "Full counter example"
+  },
+
+  "Flexium Todo Item": {
+    "prefix": "ftodo",
+    "body": [
+      "interface Todo {",
+      "  id: number",
+      "  text: string",
+      "  completed: boolean",
+      "}",
+      "",
+      "const todos = signal<Todo[]>([])",
+      "",
+      "const addTodo = (text: string) => {",
+      "  todos.value = [",
+      "    ...todos.value,",
+      "    { id: Date.now(), text, completed: false }",
+      "  ]",
+      "}",
+      "",
+      "const toggleTodo = (id: number) => {",
+      "  todos.value = todos.value.map(todo =>",
+      "    todo.id === id ? { ...todo, completed: !todo.completed } : todo",
+      "  )",
+      "}"
+    ],
+    "description": "Todo list state management pattern"
+  },
+
+  "Flexium Async Effect": {
+    "prefix": "feff-async",
+    "body": [
+      "effect(() => {",
+      "  const controller = new AbortController()",
+      "  ",
+      "  ;(async () => {",
+      "    try {",
+      "      const response = await fetch(${1:url}, { signal: controller.signal })",
+      "      const data = await response.json()",
+      "      ${2:// handle data}",
+      "    } catch (error) {",
+      "      if (error.name !== 'AbortError') {",
+      "        console.error('Fetch error:', error)",
+      "      }",
+      "    }",
+      "  })()",
+      "  ",
+      "  return () => controller.abort()",
+      "})"
+    ],
+    "description": "Effect with async fetch and cleanup"
+  },
+
+  "Flexium Derived State Pattern": {
+    "prefix": "fderived",
+    "body": [
+      "// Base signals",
+      "const ${1:firstName} = signal('${2:John}')",
+      "const ${3:lastName} = signal('${4:Doe}')",
+      "",
+      "// Derived computed",
+      "const ${5:fullName} = computed(() => `\\${${1:firstName}.value} \\${${3:lastName}.value}`)"
+    ],
+    "description": "Pattern for derived state with computed"
+  },
+
+  "Flexium Event Handler": {
+    "prefix": "fhandler",
+    "body": [
+      "const handle${1:Event} = (${2:event}: ${3:MouseEvent}) => {",
+      "  ${4:// event handling logic}",
+      "}"
+    ],
+    "description": "Create a typed event handler"
+  },
+
+  "Flexium Custom Hook Pattern": {
+    "prefix": "fhook",
+    "body": [
+      "export function use${1:CustomHook}(${2:params}) {",
+      "  const ${3:state} = signal(${4:initialValue})",
+      "  ",
+      "  effect(() => {",
+      "    ${5:// effect logic}",
+      "  })",
+      "  ",
+      "  return {",
+      "    ${3:state},",
+      "    ${6:// return values}",
+      "  }",
+      "}"
+    ],
+    "description": "Custom hook pattern for reusable logic"
+  },
+
+  "Flexium Test Template": {
+    "prefix": "ftest",
+    "body": [
+      "import { describe, it, expect } from 'vitest'",
+      "import { signal, computed, effect } from 'flexium'",
+      "",
+      "describe('${1:ComponentName}', () => {",
+      "  it('${2:should do something}', () => {",
+      "    ${3:// test logic}",
+      "    expect(${4:actual}).toBe(${5:expected})",
+      "  })",
+      "})"
+    ],
+    "description": "Test template for Flexium components"
+  }
+}

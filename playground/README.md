@@ -12,13 +12,20 @@ cd /path/to/flexium.js
 npm install
 npm run build
 
-# Then start the playground
+# Then open the counter demo with an HTTP server
 cd playground
-npm install
-npm run dev
+
+# Method 1: Python HTTP server (recommended - usually pre-installed)
+python3 -m http.server 8000
+# Open http://localhost:8000/counter-demo.html
+
+# Method 2: Node http-server
+npm install -g http-server
+http-server -p 8000
+# Open http://localhost:8000/counter-demo.html
 ```
 
-The playground will open at `http://localhost:3000`
+**Critical**: Never open HTML files directly with `file://` - this causes CORS errors with ES6 modules!
 
 ## What's Included
 
@@ -74,19 +81,40 @@ count.value++
 
 ## Troubleshooting
 
-### "Cannot find module 'flexium'"
-Build the library first: `cd .. && npm run build`
+### CORS Policy Errors (Most Common)
+```
+Access to script at 'file:///.../dist/index.mjs' from origin 'null' has been blocked by CORS policy
+```
+**Solution**: Use an HTTP server! Never use `file://` protocol with ES6 modules.
+```bash
+python3 -m http.server 8000
+# Then open http://localhost:8000/counter-demo.html
+```
 
-### Port 3000 already in use
-Change port in `vite.config.js` or kill the process using port 3000
+### "Cannot find module 'flexium'" or 404 on .mjs files
+**Problem**: Library not built yet
+**Solution**: Build the library first: `cd .. && npm run build`
+**Verify**: Check that `../dist/` folder exists with `.mjs` files
+
+### Counter Not Updating
+**Check**:
+1. Open browser DevTools console (F12)
+2. Look for any error messages
+3. Verify you see "✅ Flexium Counter Demo loaded!"
+4. Click buttons and check for console logs
 
 ### Changes to library not reflected
-Rebuild: `cd .. && npm run build`, then restart dev server
+**Solution**: Rebuild the library after source changes
+```bash
+cd ..
+npm run build
+# Refresh browser (hard refresh: Cmd+Shift+R or Ctrl+Shift+F5)
+```
 
-### Console errors
-1. Check that `dist/` folder exists in project root
-2. Verify imports in `main.js` point to correct paths
-3. Check browser console for specific errors
+### Port Already in Use
+**Solution**:
+- Use a different port: `python3 -m http.server 8001`
+- Or kill the process: `lsof -ti:8000 | xargs kill`
 
 ## Tips
 

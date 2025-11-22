@@ -4,8 +4,8 @@
     "module": "ESNext",
     "lib": ["ES2020", "DOM"],
     "moduleResolution": "bundler",
-    "jsx": "react",
-    "jsxFactory": "h",
+    "jsx": "react-jsx",
+    "jsxImportSource": "flexium",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -22,9 +22,11 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@flexium/core": ["./src/core"],
-      "@flexium/primitives": ["./src/primitives"]
+      "@flexium/primitives": ["./src/primitives"],
+      "flexium/jsx-runtime": ["./src/jsx-runtime.ts"],
+      "flexium/jsx-dev-runtime": ["./src/jsx-runtime.ts"]
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.bench.ts", "**/*.tsx", "examples/**/*"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.bench.ts"]
 }

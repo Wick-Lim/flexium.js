@@ -27,7 +27,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Editor
-.vscode/
+# .vscode/ - kept in repo for shared settings
+.vscode/settings.local.json
 .idea/
 *.swp
 *.swo
@@ -48,3 +49,15 @@ temp/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Development artifacts (agent reports, test files)
+*_SUMMARY.md
+*_REPORT.md
+*SUMMARY*.md
+*REPORT*.md
+test-*.mjs
+test-*.js
+test-*.html
+test-*.tsx
+verify-*.mjs
+test-*.txt

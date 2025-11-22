@@ -6,11 +6,15 @@
  * - DOM rendering
  * - Platform-agnostic components
  * - Reactive updates
+ * - Manual h() function usage (not using automatic JSX transform)
  */
 
 import { signal, computed, effect } from '../src/core/signal';
 import { h } from '../src/renderers/dom/h';
 import { createReactiveRoot } from '../src/renderers/dom/reactive';
+
+// Note: This example uses the h() function directly for educational purposes.
+// For JSX usage with automatic transform, see playground/counter-jsx-demo.tsx
 
 // ============================================================================
 // Platform-Agnostic Components

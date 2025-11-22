@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexium Demos - Interactive Showcase</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: white;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      opacity: 0.95;
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      font-size: 1rem;
+      opacity: 0.85;
+      font-weight: 400;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .demo-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .demo-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    .demo-preview {
+      height: 200px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .demo-preview::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .demo-preview.counter { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .demo-preview.todo { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .demo-preview.dashboard { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .demo-preview.animations { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+    .demo-icon {
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    }
+
+    .demo-content {
+      padding: 1.5rem;
+    }
+
+    .demo-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #1a202c;
+    }
+
+    .demo-description {
+      color: #718096;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .demo-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .tag {
+      background: #edf2f7;
+      color: #4a5568;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .demo-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    footer {
+      text-align: center;
+      color: white;
+      padding: 2rem 0;
+      opacity: 0.9;
+    }
+
+    footer a {
+      color: white;
+      text-decoration: underline;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+      color: white;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      opacity: 0.85;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.5rem; }
+      .subtitle { font-size: 1.1rem; }
+      .demo-grid { grid-template-columns: 1fr; }
+      .stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Flexium Demos</h1>
+      <p class="subtitle">Interactive Showcase of Signal-Based Reactivity</p>
+      <p class="tagline">Fine-grained reactivity, zero VDOM, built-in UX</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-value">4</span>
+        <span class="stat-label">Interactive Demos</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">&lt; 25KB</span>
+        <span class="stat-label">Total Bundle Size</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">0</span>
+        <span class="stat-label">Dependencies</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">60fps</span>
+        <span class="stat-label">Smooth Animations</span>
+      </div>
+    </div>
+
+    <div class="demo-grid">
+      <!-- Counter Demo -->
+      <div class="demo-card" onclick="window.location.href='counter/index.html'">
+        <div class="demo-preview counter">
+          <div class="demo-icon">🔢</div>
+        </div>
+        <div class="demo-content">
+          <h2 class="demo-title">Counter Variations</h2>
+          <p class="demo-description">
+            Explore different counter patterns: basic, multi-counter, async operations, and animated transitions.
+            Perfect introduction to Flexium's reactive signals.
+          </p>
+          <div class="demo-tags">
+            <span class="tag">Signals</span>
+            <span class="tag">Effects</span>
+            <span class="tag">Computed</span>
+            <span class="tag">Batch</span>
+          </div>
+          <div class="demo-actions">
+            <a href="counter/index.html" class="btn btn-primary">View Demo</a>
+            <a href="counter/README.md" class="btn btn-secondary">View Code</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- TodoMVC Demo -->
+      <div class="demo-card" onclick="window.location.href='todo-mvc/index.html'">
+        <div class="demo-preview todo">
+          <div class="demo-icon">✓</div>
+        </div>
+        <div class="demo-content">
+          <h2 class="demo-title">TodoMVC</h2>
+          <p class="demo-description">
+            Full-featured TodoMVC implementation with add, edit, delete, and filter capabilities.
+            Includes localStorage persistence and beautiful animations.
+          </p>
+          <div class="demo-tags">
+            <span class="tag">CRUD</span>
+            <span class="tag">Storage</span>
+            <span class="tag">Filters</span>
+            <span class="tag">Animations</span>
+          </div>
+          <div class="demo-actions">
+            <a href="todo-mvc/index.html" class="btn btn-primary">View Demo</a>
+            <a href="todo-mvc/README.md" class="btn btn-secondary">View Code</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard Demo -->
+      <div class="demo-card" onclick="window.location.href='dashboard/index.html'">
+        <div class="demo-preview dashboard">
+          <div class="demo-icon">📊</div>
+        </div>
+        <div class="demo-content">
+          <h2 class="demo-title">Interactive Dashboard</h2>
+          <p class="demo-description">
+            Professional dashboard with real-time charts, metrics, and widgets. Demonstrates computed values
+            and reactive data visualization.
+          </p>
+          <div class="demo-tags">
+            <span class="tag">Charts</span>
+            <span class="tag">Real-time</span>
+            <span class="tag">Computed</span>
+            <span class="tag">Responsive</span>
+          </div>
+          <div class="demo-actions">
+            <a href="dashboard/index.html" class="btn btn-primary">View Demo</a>
+            <a href="dashboard/README.md" class="btn btn-secondary">View Code</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animations Demo -->
+      <div class="demo-card" onclick="window.location.href='animations/index.html'">
+        <div class="demo-preview animations">
+          <div class="demo-icon">✨</div>
+        </div>
+        <div class="demo-content">
+          <h2 class="demo-title">Motion & Animations</h2>
+          <p class="demo-description">
+            Showcase of the Motion component with spring physics, gestures, and smooth transitions.
+            Interactive playground for Web Animations API.
+          </p>
+          <div class="demo-tags">
+            <span class="tag">Motion</span>
+            <span class="tag">Springs</span>
+            <span class="tag">Gestures</span>
+            <span class="tag">WAAPI</span>
+          </div>
+          <div class="demo-actions">
+            <a href="animations/index.html" class="btn btn-primary">View Demo</a>
+            <a href="animations/README.md" class="btn btn-secondary">View Code</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        Built with Flexium - Next-generation UI/UX library<br>
+        <a href="https://github.com/yourusername/flexium.js" target="_blank">View on GitHub</a> |
+        <a href="../README.md">Documentation</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

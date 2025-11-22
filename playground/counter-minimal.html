@@ -42,13 +42,13 @@
         // Create reactive root for automatic DOM updates
         const root = createReactiveRoot(app)
 
-        // Create UI - the count display uses a function to make it reactive
+        // Create UI - signals are automatically reactive when passed as children
         const Counter = h('div', {}, [
             h('h1', {}, ['Counter Demo']),
 
-            // Reactive count display - function will be re-executed on changes
+            // Reactive count display - signal is automatically tracked
             h('div', { class: 'count' }, [
-                () => String(count.value)
+                count
             ]),
 
             h('div', {}, [

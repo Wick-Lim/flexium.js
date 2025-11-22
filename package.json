@@ -8,24 +8,34 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./dom": {
+      "types": "./dist/dom.d.ts",
       "import": "./dist/dom.mjs",
-      "require": "./dist/dom.js",
-      "types": "./dist/dom.d.ts"
+      "require": "./dist/dom.js"
     },
     "./canvas": {
+      "types": "./dist/canvas.d.ts",
       "import": "./dist/canvas.mjs",
-      "require": "./dist/canvas.js",
-      "types": "./dist/canvas.d.ts"
+      "require": "./dist/canvas.js"
     },
     "./primitives": {
+      "types": "./dist/primitives.d.ts",
       "import": "./dist/primitives.mjs",
-      "require": "./dist/primitives.js",
-      "types": "./dist/primitives.d.ts"
+      "require": "./dist/primitives.js"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/jsx-runtime.d.ts",
+      "import": "./dist/jsx-runtime.mjs",
+      "require": "./dist/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/jsx-dev-runtime.d.ts",
+      "import": "./dist/jsx-dev-runtime.mjs",
+      "require": "./dist/jsx-dev-runtime.js"
     }
   },
   "files": [
@@ -57,16 +67,36 @@
   "keywords": [
     "signals",
     "reactive",
+    "jsx",
     "ui",
     "framework",
     "dom",
     "canvas",
     "renderer",
     "flexbox",
-    "lightweight"
+    "lightweight",
+    "fine-grained",
+    "typescript",
+    "vite",
+    "react-alternative",
+    "preact-alternative",
+    "solid-alternative",
+    "no-virtual-dom",
+    "signal-based",
+    "computed",
+    "effect",
+    "cross-platform"
   ],
-  "author": "",
+  "author": "Flexium Contributors",
   "license": "MIT",
+  "homepage": "https://github.com/yourusername/flexium.js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/flexium.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/flexium.js/issues"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",

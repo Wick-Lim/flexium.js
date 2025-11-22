@@ -6,6 +6,8 @@ export default defineConfig({
     dom: 'src/dom.ts',
     canvas: 'src/canvas.ts',
     primitives: 'src/primitives.ts',
+    'jsx-runtime': 'src/jsx-runtime.ts',
+    'jsx-dev-runtime': 'src/jsx-dev-runtime.ts',
   },
   format: ['esm', 'cjs'],
   dts: true,

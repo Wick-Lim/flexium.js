@@ -128,18 +128,18 @@
             return h('div', { class: 'counter-container' }, [
                 h('h1', {}, ['Flexium Counter']),
 
-                // Display current count - we'll update this with effect
+                // Display current count - reactive signal binding
                 h('div', {
                     class: 'count-display',
                     id: 'count-display'
-                }, [String(count.value)]),
+                }, [count]),
 
                 // Button group
                 h('div', { class: 'button-group' }, [
                     h('button', {
                         onclick: () => {
                             count.value--
-                            console.log('Decremented to:', count.value)
+                            console.log('[-] Decremented to:', count.value)
                         },
                         title: 'Decrement'
                     }, ['-']),
@@ -147,7 +147,7 @@
                     h('button', {
                         onclick: () => {
                             count.value++
-                            console.log('Incremented to:', count.value)
+                            console.log('[+] Incremented to:', count.value)
                         },
                         title: 'Increment'
                     }, ['+'])
@@ -158,7 +158,7 @@
                     class: 'reset-btn',
                     onclick: () => {
                         count.value = 0
-                        console.log('Reset to:', count.value)
+                        console.log('[Reset] Count reset to:', count.value)
                     }
                 }, ['Reset']),
 
@@ -170,23 +170,13 @@
             ])
         }
 
-        // Render the app using render() function
+        // Render the app using render() function with automatic reactivity
         render(CounterApp(), appContainer)
-
-        // Get the count display element
-        const countDisplay = document.getElementById('count-display')
-
-        // Setup reactive updates with effect
-        effect(() => {
-            console.log('Count changed to:', count.value)
-            if (countDisplay) {
-                countDisplay.textContent = String(count.value)
-            }
-        })
 
         // Log to console for debugging
         console.log('✅ Flexium Counter Demo loaded!')
         console.log('Initial count:', count.value)
+        console.log('The counter will automatically update when you click +/- buttons!')
     </script>
 </body>
 </html>

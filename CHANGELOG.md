@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### JSX Runtime & Metadata Updates - 2025-11-22
+
+#### Added
+- **Automatic JSX Runtime** - React 17+ style JSX transformation
+  - `/jsx-runtime` export for automatic JSX (no h import needed)
+  - `/jsx-dev-runtime` export for development mode
+  - Full TypeScript support with proper JSX types
+  - Comprehensive JSX Guide documentation
+- **Enhanced package.json metadata**
+  - Extended keywords for better npm discoverability
+  - Repository, homepage, and bugs URLs
+  - Author information
+- **CHANGELOG.md** - Following Keep a Changelog format
+- **Example READMEs** - Individual README files for each example with:
+  - How to run instructions
+  - What the example demonstrates
+  - Detailed feature breakdowns
+  - Beginner-friendly explanations
+
+### Documentation Improvements - 2025-11-21
+
+#### Added
+- **NEW_USER_GUIDE.md** - Comprehensive step-by-step guide for new users
+  - Complete installation walkthrough
+  - Common issues and solutions section
+  - FAQ covering frequent questions
+  - Next steps and learning resources
+  - Performance tips and debugging guide
+
+#### Fixed
+- **README.md** - Added CORS troubleshooting and HTTP server instructions
+  - Documented the need for HTTP server instead of file:// protocol
+  - Added Python and Node.js HTTP server setup instructions
+  - Expanded "Known Issues & Troubleshooting" section
+
+- **playground/README.md** - Enhanced with detailed troubleshooting
+  - CORS policy error solutions (most common issue)
+  - Module not found error fixes
+  - Counter not updating checklist
+  - Port conflicts resolution
+
+#### Verified
+- Counter demo (`playground/counter-demo.html`) confirmed working
+- All reactive features functioning correctly:
+  - Signal creation and updates
+  - Effect tracking and execution
+  - DOM rendering with h() and render()
+  - Event handlers responding properly
+  - Console logging for debugging
+
+#### Lessons Learned
+- ES6 modules require HTTP server (CORS policy)
+- file:// protocol causes security errors with module imports
+- Clear documentation is as important as working code
+- New users need explicit setup instructions with troubleshooting
+
+---
+
 ## [0.1.0] - 2025-11-19
 
 ### Added - Initial Release

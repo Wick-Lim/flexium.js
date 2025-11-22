@@ -1,25 +1,49 @@
 /**
- * Flexium Counter Example
+ * Flexium Counter Example - Beginner Level
  *
- * This example demonstrates:
+ * A simple counter app demonstrating Flexium's core reactivity features.
+ * Perfect for learning the basics of signal-based state management.
+ *
+ * What you'll learn:
  * - signal() for reactive state
  * - Layout primitives (Column, Row)
  * - UI components (Text, Button)
  * - Event handling
  * - Fine-grained reactivity (only count updates, not full re-render)
+ *
+ * Key Concept: When count.value changes, ONLY the Text element displaying
+ * the count updates. The entire component doesn't re-render like in React.
+ * This is fine-grained reactivity in action!
  */
 
 import { signal } from 'flexium'
 import { render, Column, Row, Button, Text } from 'flexium/dom'
 
 function Counter() {
-  // Create a reactive signal
+  // ========================================
+  // STATE: Create a reactive signal
+  // ========================================
+
+  /**
+   * signal() creates a reactive primitive value.
+   * - Reading count.value will automatically track dependencies
+   * - Writing count.value will trigger updates in the UI
+   * - No setState() or complex update logic needed!
+   */
   const count = signal(0)
 
-  // Handlers
-  const increment = () => count.value++
-  const decrement = () => count.value--
-  const reset = () => count.value = 0
+  // ========================================
+  // EVENT HANDLERS: Define actions
+  // ========================================
+
+  /**
+   * Event handlers are just regular functions that modify signals.
+   * When they update count.value, Flexium automatically updates
+   * only the parts of the UI that depend on count.
+   */
+  const increment = () => count.value++   // Direct mutation - simple and clear
+  const decrement = () => count.value--   // No setState(), no dispatch()
+  const reset = () => count.value = 0     // Just assign the new value
 
   return (
     <Column

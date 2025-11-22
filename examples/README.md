@@ -2,6 +2,8 @@
 
 Complete, runnable examples demonstrating Flexium's features and best practices.
 
+> **NEW:** Flexium now supports automatic JSX runtime (React 17+ style)! No need to import `h` anymore. See the [JSX Guide](/docs/JSX_GUIDE.md) for details.
+
 ## Running Examples
 
 Each example is self-contained and can be run independently:
@@ -390,41 +392,67 @@ Want to build your own example? Here's the basic structure:
 </html>
 ```
 
-### 2. Create TypeScript file
+### 2. Create TypeScript file with JSX
 
-```typescript
+```tsx
+// NEW: No h import needed with automatic JSX runtime!
 import { signal } from 'flexium'
-import { render, Column, Text, Button } from 'flexium/dom'
+import { render } from 'flexium/dom'
 
 function App() {
   const message = signal('Hello Flexium!')
 
   return (
-    <Column gap={16} padding={24}>
-      <Text fontSize={24}>{message.value}</Text>
-      <Button onPress={() => message.value = 'Clicked!'}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px' }}>
+      <div style={{ fontSize: '24px' }}>{message.value}</div>
+      <button onclick={() => message.value = 'Clicked!'}>
         Click Me
-      </Button>
-    </Column>
+      </button>
+    </div>
   )
 }
 
 render(<App />, document.getElementById('app')!)
 ```
 
-### 3. Build and run
+### 3. Configure TypeScript for automatic JSX
+
+Create `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "jsxImportSource": "flexium",
+    "moduleResolution": "bundler",
+    "strict": true
+  }
+}
+```
+
+### 4. Build and run
 
 ```bash
 # Install dependencies
 npm install flexium
 
-# Build (if using TypeScript)
+# Using Vite (recommended)
+npm create vite@latest my-app -- --template vanilla-ts
+cd my-app
+npm install flexium
+npm run dev
+
+# Or build manually with TypeScript
 npm install -D typescript
-npx tsc app.ts
+npx tsc app.tsx
 
 # Serve
 npx serve .
 ```
+
+**Note:** With automatic JSX runtime, you no longer need to import `h`! Just configure `tsconfig.json` and start writing JSX. See the [JSX Guide](/docs/JSX_GUIDE.md) for more details.
 
 ## Tips & Best Practices
 
