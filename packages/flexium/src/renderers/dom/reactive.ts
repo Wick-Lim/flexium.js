@@ -12,6 +12,7 @@ import type { Signal, Computed } from '../../core/signal';
 import { domRenderer } from './index';
 import { isVNode } from './h';
 import { pushProvider, popProvider } from '../../core/context';
+import { reconcileArrays } from './reconcile';
 
 /**
  * Track reactive bindings for cleanup
@@ -37,28 +38,104 @@ export function mountReactive(
   if (isSignal(vnode) || typeof vnode === 'function') {
     // Placeholder node to mark position
     const startNode = document.createTextNode('');
+    // Wrapper fragment to hold startNode and initial content
+    // This is crucial because startNode isn't attached to the real parent yet during initial render
+    const wrapperFragment = document.createDocumentFragment();
+    wrapperFragment.appendChild(startNode);
+
     let currentNode: Node | null = startNode;
     let currentVNode: any = null;
+    let currentVNodeList: VNode[] = []; // Track array children for reconciliation
 
     const dispose = effect(() => {
       const value = isSignal(vnode) ? (vnode as Signal<any>).value : (vnode as Function)();
 
+      // Handle Array (List Rendering) with Reconciliation
+      if (Array.isArray(value)) {
+        // Normalize children (filter nulls, etc.)
+        const newVNodes = value.filter(c => c != null);
+        
+        // Determine container: 
+        // 1. If startNode is in DOM, use its parent (Update phase)
+        // 2. If startNode is in wrapperFragment, use wrapperFragment (Initial phase)
+        // 3. Fallback to parent (Should rarely happen if logic is correct)
+        const container = currentNode && currentNode.parentNode ? currentNode.parentNode : parent;
+        
+        if (container) {
+          if (currentVNodeList.length > 0 && container !== wrapperFragment) {
+            // Update: Reconcile (Only if we are mounted in real DOM)
+            const nextSibling = currentNode!.nextSibling; 
+            reconcileArrays(container, currentVNodeList, newVNodes, nextSibling);
+          } else {
+            // Initial Render OR First render in real DOM OR Switched from single
+            
+            // If previously single node, remove it
+            if (currentNode && currentNode !== startNode && !currentVNodeList.length) {
+               if (currentNode.parentNode) {
+                 domRenderer.removeChild(currentNode.parentNode, currentNode);
+               }
+            }
+
+            const fragment = document.createDocumentFragment();
+            for (const child of newVNodes) {
+              const childNode = mountReactive(child, fragment);
+              if (childNode && typeof child === 'object') {
+                (child as any)._node = childNode;
+              }
+            }
+            
+            // Insert after startNode
+            if (startNode.parentNode) {
+                // This works for both wrapperFragment and real DOM
+                startNode.parentNode.insertBefore(fragment, startNode.nextSibling);
+            }
+          }
+          
+          // Update references
+          currentVNodeList = newVNodes;
+          currentVNode = value;
+          currentNode = startNode; // Keep anchor
+        }
+        return;
+      }
+
+      // Handle Single Value (Text/Element) ... (rest is same, simplified logic needed)
+      // If previously was array, clear it
+      if (currentVNodeList.length > 0) {
+         const container = startNode.parentNode;
+         if (container) {
+             for (const vnode of currentVNodeList) {
+                 if (vnode._node) {
+                     domRenderer.removeChild(container, vnode._node);
+                 }
+             }
+         }
+         currentVNodeList = [];
+      }
+
       // If value is different from current
       if (value !== currentVNode) {
-        // If it's a primitive, we can just update the text node if we have one
         if ((typeof value === 'string' || typeof value === 'number') &&
-          currentNode && currentNode.nodeType === Node.TEXT_NODE) {
+          currentNode && currentNode.nodeType === Node.TEXT_NODE && currentNode !== startNode) {
           domRenderer.updateTextNode(currentNode as Text, String(value));
         } else {
-          // Full replace
           const newNode = mountReactive(value);
-
-          if (newNode && currentNode && currentNode.parentNode) {
-            currentNode.parentNode.replaceChild(newNode, currentNode);
-            cleanupReactive(currentNode);
-            currentNode = newNode;
-          } else if (newNode && !currentNode && parent) {
-            // Should not happen if we start with placeholder
+          
+          // If we have a newNode, replace the old one (or insert if first time)
+          if (newNode) {
+              if (currentNode && currentNode !== startNode && currentNode.parentNode) {
+                  currentNode.parentNode.replaceChild(newNode, currentNode);
+              } else if (startNode.parentNode) {
+                  // Initial render or switching from array/placeholder
+                  startNode.parentNode.insertBefore(newNode, startNode.nextSibling);
+              }
+              currentNode = newNode;
+          } else {
+              // If newNode is null (e.g. null/false return), we should just have the startNode
+              if (currentNode && currentNode !== startNode && currentNode.parentNode) {
+                  domRenderer.removeChild(currentNode.parentNode, currentNode);
+              }
+              currentNode = startNode;
           }
         }
         currentVNode = value;
@@ -66,14 +143,31 @@ export function mountReactive(
     });
 
     // Store cleanup
-    if (currentNode) {
-      if (!REACTIVE_BINDINGS.has(currentNode)) {
-        REACTIVE_BINDINGS.set(currentNode, new Set());
+    // We attach to startNode because it's the stable anchor
+    // If startNode was replaced, attach to the new node (currentNode)
+    const targetNode = currentNode || startNode;
+    if (targetNode) {
+      if (!REACTIVE_BINDINGS.has(targetNode)) {
+        REACTIVE_BINDINGS.set(targetNode, new Set());
       }
-      REACTIVE_BINDINGS.get(currentNode)!.add(dispose);
+      REACTIVE_BINDINGS.get(targetNode)!.add(dispose);
     }
 
-    return currentNode;
+    // Determine the result node to append/return
+    const resultNode = (currentNode !== startNode && currentNode) ? currentNode : wrapperFragment;
+
+    // If parent is provided, append the result
+    if (parent) {
+        domRenderer.appendChild(parent, resultNode);
+    }
+
+    // If we appended wrapperFragment, it's now empty.
+    // We should return the anchor (startNode) so the caller can track/remove it.
+    if (resultNode === wrapperFragment) {
+        return startNode;
+    }
+
+    return resultNode;
   }
 
   // Handle arrays (fragments)
@@ -171,6 +265,10 @@ export function mountReactive(
       }
     }
 
+    if (parent) {
+      domRenderer.appendChild(parent, node);
+    }
+
     return node;
   }
 
@@ -234,7 +332,7 @@ function setupReactiveProps(
 /**
  * Clean up reactive bindings when a node is removed
  */
-function cleanupReactive(node: Node): void {
+export function cleanupReactive(node: Node): void {
   const bindings = REACTIVE_BINDINGS.get(node);
   if (bindings) {
     bindings.forEach((dispose) => dispose());

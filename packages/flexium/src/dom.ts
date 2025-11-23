@@ -9,7 +9,7 @@ export { signal, computed, effect, batch, untrack, root } from './core/signal'
 export type { Signal, Computed } from './core/signal'
 
 // DOM renderer
-export { DOMRenderer } from './renderers/dom'
+export { DOMRenderer, domRenderer } from './renderers/dom'
 export { h, Fragment, isVNode, createTextVNode } from './renderers/dom/h'
 export { render, createRoot } from './renderers/dom/render'
 export { mountReactive, createReactiveRoot } from './renderers/dom/reactive'

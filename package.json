@@ -5,6 +5,7 @@
   "description": "Flexium - Fine-grained reactive UI framework (monorepo)",
   "type": "module",
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
@@ -16,13 +17,9 @@
     "dev:flexium": "turbo run dev --filter=flexium",
     "dev:docs": "turbo run dev --filter=@flexium/docs",
     "test": "turbo run test",
-    "test:unit": "node --test tests/*.test.mjs",
-    "test:signal": "node --test tests/signal.test.mjs",
-    "test:dom": "node --test tests/dom.test.mjs",
-    "test:jsx": "node --test tests/jsx-runtime.test.mjs",
-    "test:integration": "node --test tests/integration.test.mjs",
-    "test:cli": "./tests/test-simple.sh",
-    "test:e2e": "node tests/test-e2e.mjs",
+    "test:unit": "turbo run test --filter=flexium",
+    "test:e2e": "npx playwright test -c tests/playwright.config.ts",
+    "test:cli": "./tests/unit/test-simple.sh",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "format": "npm run format --workspaces --if-present",
@@ -51,6 +48,7 @@
     "npm": ">=9.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "turbo": "^2.6.1"
   }
 }

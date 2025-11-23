@@ -41,19 +41,19 @@
       "require": "./dist/jsx-dev-runtime.js"
     },
     "./server": {
+      "types": "./dist/server.d.ts",
       "import": "./dist/server.mjs",
-      "require": "./dist/server.js",
-      "types": "./dist/server.d.ts"
+      "require": "./dist/server.js"
     },
     "./router": {
+      "types": "./dist/router.d.ts",
       "import": "./dist/router.mjs",
-      "require": "./dist/router.js",
-      "types": "./dist/router.d.ts"
+      "require": "./dist/router.js"
     },
     "./store": {
+      "types": "./dist/store.d.ts",
       "import": "./dist/store.mjs",
-      "require": "./dist/store.js",
-      "types": "./dist/store.d.ts"
+      "require": "./dist/store.js"
     }
   },
   "files": [
@@ -67,10 +67,12 @@
     "dev:web": "cd examples/web-demo && npm run dev",
     "build": "tsup",
     "build:types": "tsc --emitDeclarationOnly",
-    "test": "node --test test/*.test.mjs",
-    "test:signal": "node --test test/signal.test.mjs",
-    "test:dom": "node --test test/dom.test.mjs",
-    "test:integration": "node --test test/integration.test.mjs",
+    "test": "node --test ../../tests/unit/*.test.mjs",
+    "test:signal": "node --test ../../tests/unit/signal.test.mjs",
+    "test:dom": "node --test ../../tests/unit/dom.test.mjs",
+    "test:events": "node --test ../../tests/unit/events.test.mjs",
+    "test:reconcile": "node --test ../../tests/unit/reconciliation.test.mjs",
+    "test:integration": "node --test ../../tests/unit/integration.test.mjs",
     "test:vitest": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",

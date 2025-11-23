@@ -19,7 +19,7 @@ function StoryItem(props: { id: number; index: number }) {
                 <br />
                 <span class="meta">
                     <span class="by">
-                        by <Link to={`/user/${s.user}`}>{s.user}</Link>
+                        by <Link to={`/user/${s.by}`}>{s.by}</Link>
                     </span>
                     <span class="time"> {new Date(s.time * 1000).toLocaleString()}</span>
                     <span class="comments-link">

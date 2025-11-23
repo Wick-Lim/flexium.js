@@ -15,6 +15,7 @@
  */
 
 import type { VNode } from '../../core/renderer';
+import { createVNode } from '../../core/vnode';
 
 /**
  * JSX factory function
@@ -44,12 +45,7 @@ export function h(
     (child) => child !== null && child !== undefined && child !== false
   );
 
-  return {
-    type,
-    props: normalizedProps,
-    children: normalizedChildren,
-    key,
-  };
+  return createVNode(type, normalizedProps, normalizedChildren, key);
 }
 
 /**
@@ -57,11 +53,7 @@ export function h(
  * Renders children without a wrapper element
  */
 export function Fragment(props: { children?: any[] }): VNode {
-  return {
-    type: 'fragment',
-    props: {},
-    children: props.children || [],
-  };
+  return createVNode('fragment', {}, props.children || []);
 }
 
 /**

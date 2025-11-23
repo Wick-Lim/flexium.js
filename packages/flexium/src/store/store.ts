@@ -63,11 +63,16 @@ export function createStore<T extends object>(initialState: T): [T, SetStoreFunc
         batch(() => {
             let current = state;
             for (let i = 0; i < args.length - 1; i++) {
-                const key = args[i];
+                const rawKey = args[i];
+                // Proxy traps receive string keys, so we must convert numbers to strings
+                // to ensure we access the same Signal in the Map.
+                // Symbols should be kept as is.
+                const key = typeof rawKey === 'symbol' ? rawKey : String(rawKey);
+                
                 if (i === args.length - 2) {
                     // Last key, update value
                     const newVal = args[i + 1];
-                    updateValue(current, key, newVal);
+                    updateValue(current, key as string, newVal);
                 } else {
                     // Navigate down
                     current = current[key];
@@ -79,11 +84,11 @@ export function createStore<T extends object>(initialState: T): [T, SetStoreFunc
     return [store, setStore];
 }
 
-function updateValue(target: StoreNode, prop: string, newValue: any) {
-    const oldValue = target[prop];
+function updateValue(target: StoreNode, prop: string | symbol, newValue: any) {
+    const oldValue = target[prop as any];
 
     if (oldValue !== newValue) {
-        target[prop] = newValue;
+        target[prop as any] = newValue;
 
         // Trigger signal update
         const signals = target[SIGNALS];

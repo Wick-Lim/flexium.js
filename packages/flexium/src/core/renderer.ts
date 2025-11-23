@@ -56,7 +56,7 @@ export interface Renderer {
   insertBefore(
     parent: RenderNode,
     child: RenderNode,
-    beforeChild: RenderNode
+    beforeChild: RenderNode | null
   ): void;
 
   /**
@@ -164,4 +164,5 @@ export interface VNode {
   props: Record<string, any>;
   children: (VNode | string | number | null | undefined | Function)[];
   key?: string | number;
+  _node?: RenderNode; // Internal reference to the rendered node
 }

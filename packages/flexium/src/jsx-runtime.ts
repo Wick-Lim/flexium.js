@@ -33,6 +33,7 @@
  */
 
 import type { VNode } from './core/renderer';
+import { createVNode } from './core/vnode';
 
 /**
  * Flatten nested children arrays
@@ -40,14 +41,33 @@ import type { VNode } from './core/renderer';
 function flattenChildren(children: any[]): any[] {
   const result: any[] = [];
 
-  for (const child of children) {
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i];
     if (Array.isArray(child)) {
-      result.push(...flattenChildren(child));
+      const flattened = flattenChildren(child);
+      for (let j = 0; j < flattened.length; j++) {
+        result.push(flattened[j]);
+      }
     } else {
       result.push(child);
     }
   }
 
+  return result;
+}
+
+/**
+ * Filter out null, undefined, and false children
+ * Optimized for performance using a simple loop
+ */
+function filterChildren(children: any[]): any[] {
+  const result: any[] = [];
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i];
+    if (child !== null && child !== undefined && child !== false) {
+      result.push(child);
+    }
+  }
   return result;
 }
 
@@ -63,29 +83,30 @@ export function jsx(
   props: Record<string, any>
 ): VNode {
   // Extract children from props
-  const { children, key, ...restProps } = props || {};
+  // Manual extraction is faster than destructuring
+  const key = props.key;
+  const restProps: Record<string, any> = {};
+  
+  for (const k in props) {
+    if (k !== 'key' && k !== 'children') {
+      restProps[k] = props[k];
+    }
+  }
 
-  // Normalize children
+  let children = props.children;
   let normalizedChildren: any[] = [];
+
   if (children !== undefined) {
     if (Array.isArray(children)) {
-      normalizedChildren = flattenChildren(children);
-    } else {
+      // Recursively flatten and then filter
+      normalizedChildren = filterChildren(flattenChildren(children));
+    } else if (children !== null && children !== false) {
+      // Single child optimization
       normalizedChildren = [children];
     }
   }
 
-  // Filter out null, undefined, and false
-  normalizedChildren = normalizedChildren.filter(
-    (child) => child !== null && child !== undefined && child !== false
-  );
-
-  return {
-    type,
-    props: restProps,
-    children: normalizedChildren,
-    key,
-  };
+  return createVNode(type, restProps, normalizedChildren, key);
 }
 
 /**
@@ -100,9 +121,29 @@ export function jsxs(
   type: string | Function,
   props: Record<string, any>
 ): VNode {
-  // For Flexium, we treat jsxs the same as jsx
-  // (could add optimizations later)
-  return jsx(type, props);
+  // For jsxs, we know children is an array passed as a prop
+  // We can skip flattening, but we still need to filter
+  
+  const key = props.key;
+  const restProps: Record<string, any> = {};
+  
+  for (const k in props) {
+    if (k !== 'key' && k !== 'children') {
+      restProps[k] = props[k];
+    }
+  }
+
+  let normalizedChildren: any[] = [];
+  const children = props.children;
+
+  if (Array.isArray(children)) {
+    // Skip recursive flattening for jsxs, just filter
+    normalizedChildren = filterChildren(children);
+  } else if (children !== undefined && children !== null && children !== false) {
+    normalizedChildren = [children];
+  }
+
+  return createVNode(type, restProps, normalizedChildren, key);
 }
 
 /**
@@ -110,11 +151,7 @@ export function jsxs(
  * Renders children without a wrapper element
  */
 export function Fragment(props: { children?: any[] }): VNode {
-  return {
-    type: 'fragment',
-    props: {},
-    children: props.children || [],
-  };
+  return createVNode('fragment', {}, props.children || []);
 }
 
 /**

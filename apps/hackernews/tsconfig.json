@@ -22,10 +22,10 @@
         "noFallthroughCasesInSwitch": true,
         "paths": {
             "flexium": [
-                "../flexium/src/index.ts"
+                "../../packages/flexium/src/index.ts"
             ],
             "flexium/*": [
-                "../flexium/src/*"
+                "../../packages/flexium/src/*"
             ]
         }
     },

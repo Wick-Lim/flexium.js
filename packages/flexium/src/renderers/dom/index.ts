@@ -1,12 +1,5 @@
-/**
- * DOM Renderer Implementation
- *
- * This renderer implements the Renderer interface for the browser DOM.
- * It maps platform-agnostic component types to HTML elements and handles
- * conversion of props to DOM attributes and CSS styles.
- */
-
 import type { Renderer, EventHandler } from '../../core/renderer';
+import { eventDelegator } from './events';
 
 /**
  * Component type to HTML element mapping
@@ -254,14 +247,6 @@ function removeStyles(element: HTMLElement, props: Record<string, any>): void {
  * DOM Renderer implementation
  */
 export class DOMRenderer implements Renderer {
-  /**
-   * Store event listeners on nodes for cleanup
-   */
-  private eventListeners = new WeakMap<
-    Node,
-    Map<string, Set<EventHandler>>
-  >();
-
   createNode(type: string, props: Record<string, any>): HTMLElement {
     // Map component type to HTML element
     const tagName = ELEMENT_MAPPING[type] || type;
@@ -294,10 +279,8 @@ export class DOMRenderer implements Renderer {
     for (const key in oldProps) {
       if (key.startsWith('on') && !(key in newProps)) {
         const eventName = EVENT_MAPPING[key] || key.slice(2).toLowerCase();
-        const handler = oldProps[key];
-        if (typeof handler === 'function') {
-          this.removeEventListener(node, eventName, handler);
-        }
+        // Use delegator to unregister
+        this.removeEventListener(node, eventName, oldProps[key]);
       }
     }
 
@@ -328,7 +311,7 @@ export class DOMRenderer implements Renderer {
             this.removeEventListener(node, eventName, oldHandler);
           }
 
-          // Add new listener
+          // Add new listener using delegator
           this.addEventListener(node, eventName, handler);
         }
       }
@@ -368,13 +351,17 @@ export class DOMRenderer implements Renderer {
     parent.appendChild(child);
   }
 
-  insertBefore(parent: Node, child: Node, beforeChild: Node): void {
+  insertBefore(parent: Node, child: Node, beforeChild: Node | null): void {
     parent.insertBefore(child, beforeChild);
   }
 
+  nextSibling(node: Node): Node | null {
+    return node.nextSibling;
+  }
+
   removeChild(parent: Node, child: Node): void {
-    // Clean up event listeners
-    this.cleanupEventListeners(child);
+    // No need to manually cleanup listeners if using WeakMap in delegator
+    // The nodeHandlers WeakMap will automatically release entries when node is garbage collected
     parent.removeChild(child);
   }
 
@@ -387,64 +374,17 @@ export class DOMRenderer implements Renderer {
   }
 
   addEventListener(node: Node, event: string, handler: EventHandler): void {
+    // Use Event Delegation
     // Map to DOM event name
     const domEvent = EVENT_MAPPING[event] || event;
-
-    // Store listener for cleanup
-    if (!this.eventListeners.has(node)) {
-      this.eventListeners.set(node, new Map());
-    }
-    const listeners = this.eventListeners.get(node)!;
-    if (!listeners.has(domEvent)) {
-      listeners.set(domEvent, new Set());
-    }
-    listeners.get(domEvent)!.add(handler);
-
-    // Add DOM event listener
-    (node as any).addEventListener(domEvent, handler);
+    eventDelegator.on(node, domEvent, handler);
   }
 
-  removeEventListener(node: Node, event: string, handler: EventHandler): void {
+  removeEventListener(node: Node, event: string, _handler: EventHandler): void {
+    // Use Event Delegation
     // Map to DOM event name
     const domEvent = EVENT_MAPPING[event] || event;
-
-    // Remove from stored listeners
-    const listeners = this.eventListeners.get(node);
-    if (listeners) {
-      const eventListeners = listeners.get(domEvent);
-      if (eventListeners) {
-        eventListeners.delete(handler);
-        if (eventListeners.size === 0) {
-          listeners.delete(domEvent);
-        }
-      }
-      if (listeners.size === 0) {
-        this.eventListeners.delete(node);
-      }
-    }
-
-    // Remove DOM event listener
-    (node as any).removeEventListener(domEvent, handler);
-  }
-
-  /**
-   * Clean up all event listeners on a node and its children
-   */
-  private cleanupEventListeners(node: Node): void {
-    const listeners = this.eventListeners.get(node);
-    if (listeners) {
-      for (const [event, handlers] of listeners) {
-        for (const handler of handlers) {
-          (node as any).removeEventListener(event, handler);
-        }
-      }
-      this.eventListeners.delete(node);
-    }
-
-    // Clean up children
-    if (node.childNodes) {
-      node.childNodes.forEach((child) => this.cleanupEventListeners(child));
-    }
+    eventDelegator.off(node, domEvent);
   }
 }
 
