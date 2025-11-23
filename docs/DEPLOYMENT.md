@@ -781,6 +781,38 @@ npm install flexium --force
 
 ### Deployment Errors
 
+#### "Module.require" or "Cannot find module @rollup/rollup-linux-x64-gnu" (Vercel)
+
+**Problem**: Build fails on Vercel (Linux) because `tsup` or `esbuild` cannot find platform-specific binaries, often due to `package-lock.json` being generated on macOS/Windows.
+
+**Solution**: Force installation of Linux binaries before build.
+
+1. Add a `prebuild` script to your package's `package.json`:
+```json
+"scripts": {
+  "prebuild": "npm install --no-save @rollup/rollup-linux-x64-gnu",
+  "build": "tsup"
+}
+```
+2. Or configure Vercel **Install Command**: `npm install && npm install --no-save @rollup/rollup-linux-x64-gnu`
+3. **Redeploy with Cleared Cache** in Vercel dashboard.
+
+#### "No Output Directory named 'dist' found" (Vercel + VitePress)
+
+**Problem**: Vercel expects the build output in `dist` by default, but VitePress outputs to `.vitepress/dist`.
+
+**Solution**: Configure Output Directory.
+
+1. Go to Vercel Project Settings > **Build & Development Settings**.
+2. Change **Output Directory** to: `.vitepress/dist` (or `apps/docs/.vitepress/dist` if root directory is not changed).
+3. Alternatively, add `vercel.json`:
+```json
+{
+  "framework": "vitepress",
+  "outputDirectory": ".vitepress/dist"
+}
+```
+
 #### "404 on refresh (SPA routing)"
 
 **Solution**: Configure server to serve `index.html` for all routes

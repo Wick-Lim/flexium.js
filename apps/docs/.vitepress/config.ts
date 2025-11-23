@@ -40,7 +40,8 @@ export default defineConfig({
             { text: 'Effects', link: '/guide/effects' },
             { text: 'Router', link: '/guide/router' },
             { text: 'Store', link: '/guide/store' },
-            { text: 'JSX & Rendering', link: '/guide/jsx' }
+            { text: 'JSX & Rendering', link: '/guide/jsx' },
+            { text: 'Error Handling', link: '/guide/error-handling' }
           ]
         },
         {
