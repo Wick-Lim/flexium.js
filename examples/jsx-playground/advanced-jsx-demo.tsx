@@ -1,4 +1,4 @@
-import { signal, computed, effect, batch } from '../../packages/flexium/dist/index.mjs'
+import { signal, computed, effect } from '../../packages/flexium/dist/index.mjs'
 import { render } from '../../packages/flexium/dist/dom.mjs'
 
 // JSX is automatically handled by the new JSX transform - no h import needed!

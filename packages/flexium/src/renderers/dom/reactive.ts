@@ -7,7 +7,7 @@
  */
 
 import type { VNode } from '../../core/renderer';
-import { effect, batch, isSignal, onCleanup } from '../../core/signal';
+import { effect, isSignal, onCleanup } from '../../core/signal';
 import type { Signal, Computed } from '../../core/signal';
 import { domRenderer } from './index';
 import { isVNode } from './h';
@@ -307,21 +307,19 @@ export function createReactiveRoot(container: HTMLElement) {
 
   return {
     render(vnode: VNode) {
-      batch(() => {
-        if (currentRootNode) {
-          cleanupReactive(currentRootNode);
-          container.innerHTML = ''; 
-          currentRootNode = null;
-        }
-        if (rootDispose) {
-          rootDispose();
-          rootDispose = null;
-        }
+      if (currentRootNode) {
+        cleanupReactive(currentRootNode);
+        container.innerHTML = ''; 
+        currentRootNode = null;
+      }
+      if (rootDispose) {
+        rootDispose();
+        rootDispose = null;
+      }
 
-        rootDispose = effect(() => {
-          container.innerHTML = '';
-          currentRootNode = mountReactive(vnode, container);
-        });
+      rootDispose = effect(() => {
+        container.innerHTML = '';
+        currentRootNode = mountReactive(vnode, container);
       });
     },
     unmount() {

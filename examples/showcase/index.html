@@ -567,8 +567,7 @@
             signal,
             computed,
             effect,
-            createReactiveRoot,
-            batch
+            createReactiveRoot
         } from '../../packages/flexium/dist/dom.mjs';
 
         // =====================================================
@@ -778,24 +777,21 @@
                         h('div', { className: 'error-message' }, [messageError.value]) :
                         null
                 ]),
-                h('button', {
-                    className: 'btn btn-success',
-                    style: 'width: 100%;',
-                    onclick: () => {
-                        if (!emailError.value && !messageError.value &&
-                            formData.email.value && formData.message.value) {
-                            formSubmitted.value = true;
-                            setTimeout(() => {
-                                batch(() => {
-                                    formData.email.value = '';
-                                    formData.message.value = '';
-                                    formSubmitted.value = false;
-                                });
-                            }, 2000);
-                        }
-                    }
-                }, ['Submit Form'])
-            ]);
+                                    h('button', {
+                                        className: 'btn btn-success',
+                                        style: 'width: 100%;',
+                                        onclick: () => {
+                                            if (!emailError.value && !messageError.value &&
+                                                formData.email.value && formData.message.value) {
+                                                formSubmitted.value = true;
+                                                setTimeout(() => {
+                                                    formData.email.value = '';
+                                                    formData.message.value = '';
+                                                    formSubmitted.value = false;
+                                                }, 2000);
+                                            }
+                                        }
+                                    }, ['Submit Form'])            ]);
         }
 
         const formRoot = createReactiveRoot(document.getElementById('form'));
@@ -992,10 +988,8 @@
                     h('button', {
                         className: 'btn btn-danger',
                         onclick: () => {
-                            batch(() => {
-                                isRunning.value = false;
-                                seconds.value = 0;
-                            });
+                            isRunning.value = false;
+                            seconds.value = 0;
                         }
                     }, ['↺ Reset'])
                 ])

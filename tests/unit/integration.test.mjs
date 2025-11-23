@@ -11,7 +11,7 @@ global.Node = dom.window.Node;
 global.Text = dom.window.Text;
 global.HTMLElement = dom.window.HTMLElement;
 
-import { signal, computed, effect, batch } from '../../packages/flexium/dist/test-exports.mjs';
+import { signal, computed, effect } from '../../packages/flexium/dist/test-exports.mjs';
 import { h, render, createReactiveRoot, mountReactive } from '../../packages/flexium/dist/dom.mjs';
 
 // ==========================================

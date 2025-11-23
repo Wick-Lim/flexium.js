@@ -1,4 +1,4 @@
-import { state, effect, batch } from '../../packages/flexium/dist/index.mjs';
+import { state, effect } from '../../packages/flexium/dist/index.mjs';
 import { performance } from 'perf_hooks';
 
 console.log('=== Flexium Reactivity Benchmark ===\n');

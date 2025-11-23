@@ -594,11 +594,9 @@
     // ========================================
     // FLEXIUM SIGNAL IMPLEMENTATION
     // ========================================
-    // In production: import { signal, computed, effect, batch } from 'flexium'
+    // In production: import { signal, computed, effect } from 'flexium'
 
     let activeEffect = null;
-    let batchDepth = 0;
-    let batchedEffects = new Set();
 
     function signal(initialValue) {
       let value = initialValue;
@@ -614,11 +612,7 @@
         set value(newValue) {
           if (value !== newValue) {
             value = newValue;
-            if (batchDepth > 0) {
-              subscribers.forEach(sub => batchedEffects.add(sub));
-            } else {
-              subscribers.forEach(sub => sub());
-            }
+            subscribers.forEach(sub => sub());
           }
         },
         peek: () => value,
@@ -646,20 +640,6 @@
       };
       execute();
       return () => {};
-    }
-
-    function batch(fn) {
-      batchDepth++;
-      try {
-        fn();
-      } finally {
-        batchDepth--;
-        if (batchDepth === 0) {
-          const effects = new Set(batchedEffects);
-          batchedEffects.clear();
-          effects.forEach(eff => eff());
-        }
-      }
     }
 
     // ========================================
@@ -784,14 +764,12 @@
       todos.value = [...todos.value, newTodo];
 
       // Reset form
-      batch(() => {
-        newTodoTitle.value = '';
-        newTodoDescription.value = '';
-        newTodoCategory.value = 'personal';
-        newTodoPriority.value = 'medium';
-        titleTouched.value = false;
-        titleError.value = null;
-      });
+      newTodoTitle.value = '';
+      newTodoDescription.value = '';
+      newTodoCategory.value = 'personal';
+      newTodoPriority.value = 'medium';
+      titleTouched.value = false;
+      titleError.value = null;
     }
 
     function toggleTodo(id) {
@@ -1161,7 +1139,6 @@
     console.log('  ✓ Effects for side effects (localStorage, validation)');
     console.log('  ✓ Form validation with reactive errors');
     console.log('  ✓ Multiple filters and search');
-    console.log('  ✓ Batch updates for performance');
     console.log('  ✓ Fine-grained reactivity');
     console.log('  ✓ Mobile-responsive design');
     console.log('  ✓ Production-ready patterns');

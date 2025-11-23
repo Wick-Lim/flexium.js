@@ -5,7 +5,7 @@
  * Supports nested fields, async validation, and automatic error tracking
  */
 
-import { signal, computed, batch, type Signal, type Computed } from '../../core/signal';
+import { signal, computed, type Signal, type Computed } from '../../core/signal';
 
 /**
  * Field value types
@@ -276,27 +276,25 @@ export function createForm(config: FormConfig = {}): {
 
   // Set field value
   function setFieldValue(name: string, value: FieldValue): void {
-    batch(() => {
-      // Update form data
-      formData.set({ ...formData.value, [name]: value });
+    // Update form data
+    formData.set({ ...formData.value, [name]: value });
 
-      // Update field state
-      const field = getField(name);
-      field.value.set(value as any);
-      field.dirty.set(true);
+    // Update field state
+    const field = getField(name);
+    field.value.set(value as any);
+    field.dirty.set(true);
 
-      // Mark as dirty
-      const newDirtyFields = new Set(dirtyFields.value);
-      newDirtyFields.add(name);
-      dirtyFields.set(newDirtyFields);
+    // Mark as dirty
+    const newDirtyFields = new Set(dirtyFields.value);
+    newDirtyFields.add(name);
+    dirtyFields.set(newDirtyFields);
 
-      // Validate on change if enabled
-      if (validateOnChange && field.touched.value) {
-        validateField(name).then(error => {
-          setFieldError(name, error);
-        });
-      }
-    });
+    // Validate on change if enabled
+    if (validateOnChange && field.touched.value) {
+      validateField(name).then(error => {
+        setFieldError(name, error);
+      });
+    }
   }
 
   // Set field error
@@ -338,12 +336,10 @@ export function createForm(config: FormConfig = {}): {
     }
 
     // Mark all fields as touched
-    batch(() => {
-      const allFields = new Set(Object.keys(validation));
-      for (const name of allFields) {
-        setFieldTouched(name, true);
-      }
-    });
+    const allFields = new Set(Object.keys(validation));
+    for (const name of allFields) {
+      setFieldTouched(name, true);
+    }
 
     // Validate form
     const valid = await validateForm();
@@ -367,20 +363,18 @@ export function createForm(config: FormConfig = {}): {
 
   // Reset form
   function reset(values?: FormData): void {
-    batch(() => {
-      formData.set(values || initialValues);
-      touchedFields.set(new Set());
-      dirtyFields.set(new Set());
-      isSubmitting.set(false);
+    formData.set(values || initialValues);
+    touchedFields.set(new Set());
+    dirtyFields.set(new Set());
+    isSubmitting.set(false);
 
-      // Reset all field states
-      for (const [name, field] of fields) {
-        field.value.set(formData.value[name] as any);
-        field.touched.set(false);
-        field.dirty.set(false);
-        field.validating.set(false);
-      }
-    });
+    // Reset all field states
+    for (const [name, field] of fields) {
+      field.value.set(formData.value[name] as any);
+      field.touched.set(false);
+      field.dirty.set(false);
+      field.validating.set(false);
+    }
   }
 
   // Cleanup
