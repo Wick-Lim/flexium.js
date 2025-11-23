@@ -1,9 +1,10 @@
-import { createResource } from 'flexium'
+import { state, effect } from 'flexium'
 import { Link } from 'flexium/router'
-import { loadStories, state } from '../store'
+import { loadStories, useList, useItem } from '../store'
 
 function StoryItem(props: { id: number; index: number }) {
-    const story = () => state.items[props.id]
+    // Subscribe to item state
+    const [story] = useItem(props.id);
 
     return () => {
         const s = story()
@@ -33,28 +34,46 @@ function StoryItem(props: { id: number; index: number }) {
 }
 
 export default function Stories(props: { type: string }) {
-    // Use createResource to trigger data loading
-    const [data] = createResource(
-        () => props.type,
-        async (type) => {
-            await loadStories(type as any)
-            return state.lists[type as keyof typeof state.lists]
-        }
-    )
+    // Local state for loading status
+    const [loading, setLoading] = state(true);
+    
+    // We need to react to prop changes (type change)
+    effect(() => {
+        setLoading(true);
+        loadStories(props.type).then(() => setLoading(false));
+    });
+
+    // Subscribe to the list corresponding to the current type
+    // Note: We can't use dynamic hook in conditional/loop, but here type is prop
+    // However, we need a way to get the list reactively based on prop.
+    // Ideally: const list = computed(() => useList(props.type)[0]())
+    // But useList creates signals.
+    
+    // Let's use a local signal that updates when type changes
+    const [ids, setIds] = state<number[]>([]);
+
+    effect(() => {
+        const [list] = useList(props.type);
+        // We need to track the list value.
+        // If useList returns a stable signal for a key, we can read it.
+        // But here we want to bind local ids to the global list.
+        
+        // Simple polling/subscription pattern inside effect:
+        setIds(list());
+    });
 
     return (
         <div class="view">
             <div class="news-list-nav">
                 {() => {
-                    if (data.loading) return <span>Loading...</span>
+                    if (loading()) return <span>Loading...</span>
                     return null
                 }}
             </div>
 
             <ul class="news-list">
                 {() => {
-                    const ids = data() || []
-                    return ids.map((id: number, i: number) => <StoryItem id={id} index={i + 1} />)
+                    return ids().map((id: number, i: number) => <StoryItem id={id} index={i + 1} />)
                 }}
             </ul>
         </div>

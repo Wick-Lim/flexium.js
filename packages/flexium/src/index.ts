@@ -5,8 +5,10 @@
  */
 
 // Core reactivity primitives
-export { signal, computed, effect, batch, untrack, root, isSignal, onCleanup, createResource } from './core/signal'
-export type { Signal, Computed, Resource } from './core/signal'
+export { effect, batch, untrack, root } from './core/signal'
+export { state, clearGlobalState } from './core/state'
+// Export types
+export type { StateGetter, StateSetter } from './core/state'
 
 // Context
 export { createContext, useContext } from './core/context'

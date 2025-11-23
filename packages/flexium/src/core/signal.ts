@@ -124,6 +124,7 @@ class SignalNode<T> implements IObservable {
   set(newValue: T): void {
     if (this._value !== newValue) {
       this._value = newValue;
+      console.log('Signal changed:', newValue, 'subscribers:', this.subscribers.size);
       this.notify();
     }
   }

@@ -5,8 +5,8 @@
  */
 
 // Re-export core reactivity
-export { signal, computed, effect, batch, untrack, root } from './core/signal'
-export type { Signal, Computed } from './core/signal'
+export { effect, batch, untrack, root } from './core/signal'
+export { state } from './core/state'
 
 // DOM renderer
 export { DOMRenderer, domRenderer } from './renderers/dom'

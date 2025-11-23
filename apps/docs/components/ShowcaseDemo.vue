@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { signal, computed, effect } from 'flexium'
+import { state, effect } from 'flexium'
 import { h, render } from 'flexium/dom'
 
 const container = ref(null)
@@ -8,8 +8,9 @@ let cleanup = null
 
 // Flexium Counter Component Logic
 function Counter() {
-  const count = signal(0)
-  const doubled = computed(() => count.value * 2)
+  const [count, setCount] = state(0)
+  // Use state with function for derived value (acts as resource/computed)
+  const [doubled] = state(() => count() * 2)
 
   const containerNode = h('div', {
     style: {
@@ -64,7 +65,7 @@ function Counter() {
           fontVariantNumeric: 'tabular-nums',
           lineHeight: '1'
         }
-      }, [count]) // Direct signal binding
+      }, [count]) // Direct signal binding (getter function is reactive)
     ]),
 
     // Doubled display
@@ -93,7 +94,7 @@ function Counter() {
       }
     }, [
       h('button', {
-        onclick: () => { count.value-- },
+        onclick: () => { setCount(c => c - 1) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',
@@ -109,7 +110,7 @@ function Counter() {
       }, ['- Decrement']),
 
       h('button', {
-        onclick: () => { count.value = 0 },
+        onclick: () => { setCount(0) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',
@@ -124,7 +125,7 @@ function Counter() {
       }, ['Reset']),
 
       h('button', {
-        onclick: () => { count.value++ },
+        onclick: () => { setCount(c => c + 1) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',
