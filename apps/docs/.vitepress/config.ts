@@ -64,8 +64,7 @@ export default defineConfig({
         {
           text: 'Core API',
           items: [
-            { text: 'State', link: '/api/state' },
-            { text: 'Batch & Untrack', link: '/api/state#batch-fn' } // Anchor link to batch
+            { text: 'State', link: '/api/state' }
           ]
         },
         {
