@@ -43,28 +43,6 @@ effect(() => {
 });
 ```
 
----
+## Utilities
 
-### `batch(fn)`
-
-Batches multiple state updates into a single render cycle.
-
-```javascript
-batch(() => {
-  setCount(c => c + 1);
-  setName('Flexium');
-});
-```
-
----
-
-### `untrack(fn)`
-
-Runs a function without tracking dependencies.
-
-```javascript
-effect(() => {
-  // Updates only when A changes, ignores B
-  console.log(a(), untrack(() => b())); 
-});
-```
+- **`clearGlobalState()`**: Clears all global states from the registry. Useful for testing.

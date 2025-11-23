@@ -5,7 +5,7 @@
  */
 
 // Re-export core reactivity
-export { signal, computed, effect, batch, untrack, root } from './core/signal'
+export { signal, computed, effect, root } from './core/signal'
 export type { Signal, Computed } from './core/signal'
 
 // TODO: Implement Canvas renderer

@@ -5,7 +5,7 @@
  */
 
 // Re-export core reactivity
-export { effect, batch, untrack, root } from './core/signal'
+export { effect, root } from './core/signal'
 export { state } from './core/state'
 
 // Motion primitives

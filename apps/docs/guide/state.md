@@ -144,41 +144,6 @@ effect(() => {
 
 Effects run immediately once, and then re-run whenever any tracked dependency changes.
 
-### `batch(fn)`
-
-Combine multiple updates into a single render cycle.
-
-```tsx
-import { state, batch } from 'flexium';
-
-const [first, setFirst] = state('John');
-const [last, setLast] = state('Doe');
-
-function updateName() {
-  batch(() => {
-    setFirst('Jane');
-    setLast('Smith');
-  });
-  // DOM updates once here
-}
-```
-
-### `untrack(fn)`
-
-Read a signal without subscribing to it.
-
-```tsx
-import { state, effect, untrack } from 'flexium';
-
-const [a, setA] = state(1);
-const [b, setB] = state(2);
-
-effect(() => {
-  console.log(a()); // Track A
-  console.log(untrack(() => b())); // Read B, but don't track
-});
-```
-
 ## List Rendering
 
 For rendering lists efficiently, use the `<For>` component or the `.map()` helper on array states.
