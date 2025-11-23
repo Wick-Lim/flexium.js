@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { createStore, effect } from '../../packages/flexium/dist/index.mjs';
+import { createStore, effect } from '../../packages/flexium/dist/test-exports.mjs';
 
 test('createStore initializes with state', () => {
     const [state] = createStore({ count: 0 });

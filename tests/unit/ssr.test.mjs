@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { renderToString } from '../../packages/flexium/dist/server.mjs';
-import { signal } from '../../packages/flexium/dist/index.mjs';
+import { signal } from '../../packages/flexium/dist/test-exports.mjs';
 
 test('renderToString renders text', () => {
     const html = renderToString('Hello');

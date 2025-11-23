@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { signal, effect, onCleanup, root } from '../../packages/flexium/dist/index.mjs';
+import { signal, effect, onCleanup, root } from '../../packages/flexium/dist/test-exports.mjs';
 
 test('onCleanup runs when effect re-runs', () => {
     const count = signal(0);

@@ -15,7 +15,7 @@ global.HTMLElement = dom.window.HTMLElement;
 // Import jsx-runtime and DOM renderer
 import { jsx, jsxs, Fragment } from '../../packages/flexium/dist/jsx-runtime.mjs';
 import { render } from '../../packages/flexium/dist/dom.mjs';
-import { signal, computed } from '../../packages/flexium/dist/index.mjs';
+import { signal, computed } from '../../packages/flexium/dist/test-exports.mjs';
 
 // ==========================================
 // Automatic JSX Transform Integration Tests

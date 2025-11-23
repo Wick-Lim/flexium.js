@@ -28,9 +28,10 @@ export type StateSetter<T> = {
  * 2. Local Resource: const [data, actions] = state(async () => fetch('/api').then(r => r.json()));
  * 3. Global Value: const [theme, setTheme] = state('light', { key: 'theme' });
  * 4. Global Resource: const [user, actions] = state(fetchUser, { key: 'user' });
+ * 5. Computed (Derived): const [double] = state(() => count() * 2);
  * 
- * Note: Functions passed as the first argument are treated as Resource Fetchers.
- * To create a synchronous computed value (derived state), use `computed()` (exported separately) or wrap in a fetcher.
+ * @param initialValueOrFetcher - Initial value, or a function to derive/fetch state.
+ * @param options - Optional settings (e.g., global key).
  */
 export function state<T>(
   initialValueOrFetcher: T | ((...args: any[]) => T | Promise<T>), 
@@ -130,7 +131,6 @@ export function state<T>(
             const fn = newValue as (prev: T) => T;
             s.value = fn(s.peek());
         } else {
-            console.log('Setting signal value via state:', newValue);
             s.value = newValue;
         }
     }

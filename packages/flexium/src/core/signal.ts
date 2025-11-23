@@ -32,6 +32,7 @@ let batchedEffects = new Set<ISubscriber>();
 
 /**
  * Base interface for reactive signals
+ * @internal
  */
 export interface Signal<T> {
   value: T;
@@ -42,6 +43,7 @@ export interface Signal<T> {
 
 /**
  * Computed signal interface (read-only)
+ * @internal
  */
 export interface Computed<T> {
   readonly value: T;
@@ -124,7 +126,6 @@ class SignalNode<T> implements IObservable {
   set(newValue: T): void {
     if (this._value !== newValue) {
       this._value = newValue;
-      console.log('Signal changed:', newValue, 'subscribers:', this.subscribers.size);
       this.notify();
     }
   }

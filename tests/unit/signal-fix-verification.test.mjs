@@ -7,7 +7,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { signal, computed, effect, batch, untrack } from '../../packages/flexium/dist/index.mjs';
+import { signal, computed, effect, batch, untrack } from '../../packages/flexium/dist/test-exports.mjs';
 
 console.log('\n=== SIGNAL FIX VERIFICATION TESTS ===\n');
 

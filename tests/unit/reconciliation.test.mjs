@@ -11,7 +11,7 @@ global.Node = dom.window.Node;
 global.Text = dom.window.Text;
 global.HTMLElement = dom.window.HTMLElement;
 
-import { signal } from '../../packages/flexium/dist/index.mjs'; 
+import { signal } from '../../packages/flexium/dist/test-exports.mjs'; 
 import { h, render } from '../../packages/flexium/dist/dom.mjs';
 
 // Since reconcileArrays is internal and not exported in the main bundle,

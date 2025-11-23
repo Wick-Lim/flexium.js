@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { createLocation, matchPath } from '../../packages/flexium/dist/index.mjs';
+import { createLocation, matchPath } from '../../packages/flexium/dist/test-exports.mjs';
 
 // Mock window location and history
 global.window = {

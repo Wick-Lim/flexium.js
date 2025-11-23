@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { signal, createResource, effect } from '../../packages/flexium/dist/index.mjs';
+import { signal, createResource, effect } from '../../packages/flexium/dist/test-exports.mjs';
 
 test('createResource fetches data', async () => {
     const fetcher = async () => {

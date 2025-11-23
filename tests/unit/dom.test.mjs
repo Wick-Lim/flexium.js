@@ -202,10 +202,17 @@ test('DOMRenderer adds event listener', () => {
     clicked = true;
   };
 
+  // Must attach to body for delegation to work
+  document.body.appendChild(node);
+  
   renderer.addEventListener(node, 'click', handler);
-  node.click();
+  
+  // Dispatch event that bubbles
+  node.dispatchEvent(new window.Event('click', { bubbles: true }));
 
   assert.strictEqual(clicked, true);
+  
+  document.body.removeChild(node);
 });
 
 test('DOMRenderer removes event listener', () => {
@@ -217,13 +224,17 @@ test('DOMRenderer removes event listener', () => {
     clickCount++;
   };
 
+  document.body.appendChild(node);
+
   renderer.addEventListener(node, 'click', handler);
-  node.click();
+  node.dispatchEvent(new window.Event('click', { bubbles: true }));
   assert.strictEqual(clickCount, 1);
 
   renderer.removeEventListener(node, 'click', handler);
-  node.click();
+  node.dispatchEvent(new window.Event('click', { bubbles: true }));
   assert.strictEqual(clickCount, 1); // Should not increment
+  
+  document.body.removeChild(node);
 });
 
 test('DOMRenderer updates node props', () => {
@@ -345,6 +356,8 @@ test('render() applies inline styles', () => {
 
 test('render() attaches event handlers', () => {
   const container = document.createElement('div');
+  document.body.appendChild(container); // Attach container
+  
   let clicked = false;
 
   const vnode = h('button', {
@@ -356,9 +369,11 @@ test('render() attaches event handlers', () => {
   render(vnode, container);
 
   const button = container.children[0];
-  button.click();
+  button.dispatchEvent(new window.Event('click', { bubbles: true }));
 
   assert.strictEqual(clicked, true);
+  
+  document.body.removeChild(container);
 });
 
 test('render() converts flexbox props to CSS', () => {

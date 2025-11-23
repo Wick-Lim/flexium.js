@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { createContext, useContext, signal, effect, root } from '../../packages/flexium/dist/index.mjs';
+import { createContext, useContext, signal, effect, root } from '../../packages/flexium/dist/test-exports.mjs';
 import { mountReactive } from '../../packages/flexium/dist/dom.mjs';
 import { JSDOM } from 'jsdom';
 
