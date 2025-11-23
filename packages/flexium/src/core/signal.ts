@@ -27,8 +27,6 @@ interface IObservable {
 // Global context for dependency tracking
 let activeEffect: ISubscriber | null = null;
 let owner: { cleanups: (() => void)[] } | null = null;
-let batchDepth = 0;
-let batchedEffects = new Set<ISubscriber>();
 
 /**
  * Runs a function once when the component mounts.
@@ -165,18 +163,8 @@ class SignalNode<T> implements IObservable {
   }
 
   notify(): void {
-    if (batchDepth > 0) {
-      // Collect effects to run after batch completes
-      for (const subscriber of this.subscribers) {
-        batchedEffects.add(subscriber);
-      }
-    } else {
-      // Run effects immediately - copy subscribers to avoid modification during iteration
-      const subscribersToNotify = new Set(this.subscribers);
-      for (const subscriber of subscribersToNotify) {
-        subscriber.execute();
-      }
-    }
+    // console.log('NOTIFY', this.constructor.name, activeEffect?.constructor.name);
+    this.subscribers.forEach((sub) => sub.execute());
   }
 }
 
@@ -364,47 +352,20 @@ export function effect(
   return dispose;
 }
 
-/**
- * Batches multiple signal updates to prevent cascading updates
- *
- * @param fn - Function containing signal updates
- *
- * @example
- * batch(() => {
- *   count.value++;
- *   name.value = "new";
- * }); // effects only run once at the end
- */
-export function batch(fn: () => void): void {
-  batchDepth++;
-  try {
-    fn();
-  } finally {
-    batchDepth--;
-    if (batchDepth === 0) {
-      const effects = new Set(batchedEffects);
-      batchedEffects.clear();
-      for (const effect of effects) {
-        effect.execute();
-      }
-    }
-  }
+export function effect(fn: () => void | (() => void), onError?: (error: Error) => void): () => void {
+  const node = new EffectNode(fn, onError);
+  node.execute();
+  return () => node.dispose();
 }
 
-/**
- * Runs a function without tracking dependencies
- * Useful for reading signals inside effects without creating dependencies
- *
- * @param fn - Function to run without tracking
- * @returns The return value of fn
- */
+// TODO: Remove this internal use of untrack when `onMount` can be refactored
 export function untrack<T>(fn: () => T): T {
-  const prevEffect = activeEffect;
+  const prev = activeEffect;
   activeEffect = null;
   try {
     return fn();
   } finally {
-    activeEffect = prevEffect;
+    activeEffect = prev;
   }
 }
 

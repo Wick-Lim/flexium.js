@@ -10,7 +10,7 @@ export default defineConfig({
 
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
-      { text: 'API', link: '/api/state' },
+      { text: 'Reference', link: '/reference/primitives/view' },
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
@@ -44,32 +44,10 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Primitives',
+          text: 'Cross-Platform Guides',
           items: [
-            { text: 'View', link: '/api/primitives/view' },
-            { text: 'Text', link: '/api/primitives/text' },
-            { text: 'Image', link: '/api/primitives/image' },
-            { text: 'Pressable', link: '/api/primitives/pressable' },
-            { text: 'ScrollView', link: '/api/primitives/scrollview' }
-          ]
-        },
-        {
-          text: 'Canvas',
-          items: [
-            { text: 'Canvas', link: '/api/canvas/canvas' },
-            { text: 'Rect', link: '/api/canvas/rect' },
-            { text: 'Circle', link: '/api/canvas/circle' },
-            { text: 'Path', link: '/api/canvas/path' },
-            { text: 'Text', link: '/api/canvas/text' },
-            { text: 'Line', link: '/api/canvas/line' },
-            { text: 'Arc', link: '/api/canvas/arc' }
-          ]
-        },
-        {
-          text: 'Cross-Platform',
-          items: [
-            { text: 'Primitives', link: '/guide/primitives' },
-            { text: 'Canvas Rendering', link: '/guide/canvas' },
+            { text: 'Primitives Overview', link: '/guide/primitives' },
+            { text: 'Canvas Rendering Guide', link: '/guide/canvas' },
             { text: 'Styling', link: '/guide/styling' }
           ]
         },
@@ -80,6 +58,30 @@ export default defineConfig({
             { text: 'Server-Side Rendering', link: '/guide/ssr' },
             { text: 'TypeScript', link: '/guide/typescript' },
             { text: 'Testing', link: '/guide/testing' }
+          ]
+        }
+      ],
+      '/reference/': [ // New reference sidebar
+        {
+          text: 'Primitives API',
+          items: [
+            { text: 'View', link: '/reference/primitives/view' },
+            { text: 'Text', link: '/reference/primitives/text' },
+            { text: 'Image', link: '/reference/primitives/image' },
+            { text: 'Pressable', link: '/reference/primitives/pressable' },
+            { text: 'ScrollView', link: '/reference/primitives/scrollview' }
+          ]
+        },
+        {
+          text: 'Canvas API',
+          items: [
+            { text: 'Canvas', link: '/reference/canvas/canvas' },
+            { text: 'Rect', link: '/reference/canvas/rect' },
+            { text: 'Circle', link: '/reference/canvas/circle' },
+            { text: 'Path', link: '/reference/canvas/path' },
+            { text: 'Text', link: '/reference/canvas/text' },
+            { text: 'Line', link: '/reference/canvas/line' },
+            { text: 'Arc', link: '/reference/canvas/arc' }
           ]
         }
       ],

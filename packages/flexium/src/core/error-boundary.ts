@@ -1,5 +1,5 @@
 import { createContext } from './context';
-import { signal, untrack } from './signal';
+import { signal } from './signal';
 import { h } from '../renderers/dom/h';
 
 export interface ErrorBoundaryContextValue {
@@ -12,9 +12,7 @@ export function ErrorBoundary(props: { fallback: any, children: any }) {
     const error = signal<any>(null);
 
     const setError = (err: any) => {
-        untrack(() => {
             error.value = err;
-        });
     };
     
     const contextValue: ErrorBoundaryContextValue = { setError };

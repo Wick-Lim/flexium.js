@@ -10,8 +10,6 @@ export {
   signal, 
   computed, 
   effect, 
-  batch, 
-  untrack, 
   root, 
   isSignal, 
   onCleanup, 

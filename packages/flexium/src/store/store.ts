@@ -1,4 +1,4 @@
-import { signal, batch, Signal } from '../core/signal';
+import { signal, Signal } from '../core/signal';
 
 // Internal symbol to store signals on objects
 const SIGNALS = Symbol('store-signals');

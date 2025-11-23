@@ -1,5 +1,5 @@
 import { createContext } from './context';
-import { signal, untrack } from './signal';
+import { signal } from './signal';
 import { h } from '../renderers/dom/h';
 
 export interface SuspenseContextValue {
@@ -12,14 +12,12 @@ export function Suspense(props: { fallback: any, children: any }) {
     const pendingCount = signal(0);
     
     const registerPromise = (promise: Promise<any>) => {
-        untrack(() => {
             pendingCount.value++;
             promise.then(() => {
                 pendingCount.value--;
             }, () => {
                 pendingCount.value--;
             });
-        });
     };
     
     const contextValue: SuspenseContextValue = { registerPromise };
