@@ -237,16 +237,10 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   }
 
   notify(): void {
-    if (batchDepth > 0) {
-      for (const subscriber of this.subscribers) {
-        batchedEffects.add(subscriber);
-      }
-    } else {
-      // Run effects immediately - copy subscribers to avoid modification during iteration
-      const subscribersToNotify = new Set(this.subscribers);
-      for (const subscriber of subscribersToNotify) {
-        subscriber.execute();
-      }
+    // Run effects immediately - copy subscribers to avoid modification during iteration
+    const subscribersToNotify = new Set(this.subscribers);
+    for (const subscriber of subscribersToNotify) {
+      subscriber.execute();
     }
   }
 }
@@ -350,12 +344,6 @@ export function effect(
   }
 
   return dispose;
-}
-
-export function effect(fn: () => void | (() => void), onError?: (error: Error) => void): () => void {
-  const node = new EffectNode(fn, onError);
-  node.execute();
-  return () => node.dispose();
 }
 
 // TODO: Remove this internal use of untrack when `onMount` can be refactored

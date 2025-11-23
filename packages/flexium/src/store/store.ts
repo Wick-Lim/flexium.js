@@ -60,25 +60,23 @@ export function createStore<T extends object>(initialState: T): [T, SetStoreFunc
     const store = new Proxy(state, proxyTraps);
 
     const setStore = (...args: any[]) => {
-        batch(() => {
-            let current = state;
-            for (let i = 0; i < args.length - 1; i++) {
-                const rawKey = args[i];
-                // Proxy traps receive string keys, so we must convert numbers to strings
-                // to ensure we access the same Signal in the Map.
-                // Symbols should be kept as is.
-                const key = typeof rawKey === 'symbol' ? rawKey : String(rawKey);
-                
-                if (i === args.length - 2) {
-                    // Last key, update value
-                    const newVal = args[i + 1];
-                    updateValue(current, key as string, newVal);
-                } else {
-                    // Navigate down
-                    current = current[key];
-                }
+        let current = state;
+        for (let i = 0; i < args.length - 1; i++) {
+            const rawKey = args[i];
+            // Proxy traps receive string keys, so we must convert numbers to strings
+            // to ensure we access the same Signal in the Map.
+            // Symbols should be kept as is.
+            const key = typeof rawKey === 'symbol' ? rawKey : String(rawKey);
+            
+            if (i === args.length - 2) {
+                // Last key, update value
+                const newVal = args[i + 1];
+                updateValue(current, key as string, newVal);
+            } else {
+                // Navigate down
+                current = current[key];
             }
-        });
+        }
     };
 
     return [store, setStore];
