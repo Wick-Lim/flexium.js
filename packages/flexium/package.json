@@ -68,7 +68,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "prebuild": "npm rebuild esbuild",
+    "prebuild": "npm install --no-save @rollup/rollup-linux-x64-gnu",
     "dev": "tsup --watch",
     "dev:web": "cd examples/web-demo && npm run dev",
     "build": "tsup",
