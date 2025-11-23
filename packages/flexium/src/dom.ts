@@ -13,6 +13,7 @@ export { DOMRenderer, domRenderer } from './renderers/dom'
 export { h, Fragment, isVNode, createTextVNode } from './renderers/dom/h'
 export { render, createRoot } from './renderers/dom/render'
 export { mountReactive, createReactiveRoot } from './renderers/dom/reactive'
+export { Portal } from './renderers/dom/portal'
 export { hydrate } from './renderers/dom/hydrate'
 
 // Types

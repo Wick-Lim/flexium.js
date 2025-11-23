@@ -3,6 +3,17 @@ import type { EventHandler } from '../../core/renderer';
 // Map of event names to global listener status
 const globalListeners = new Set<string>();
 
+// Events that do not bubble and must be captured
+const NON_BUBBLING_EVENTS = new Set([
+  'focus',
+  'blur',
+  'mouseenter',
+  'mouseleave',
+  'load',
+  'unload',
+  'scroll'
+]);
+
 // WeakMap to store event handlers for each node
 // Key: DOM Node, Value: Map<EventName, Handler>
 const nodeHandlers = new WeakMap<Node, Map<string, EventHandler>>();
@@ -13,21 +24,23 @@ const nodeHandlers = new WeakMap<Node, Map<string, EventHandler>>();
 function dispatchEvent(event: Event) {
   let target = event.target as Node | null;
   const eventType = event.type.toLowerCase();
+  const bubbles = !NON_BUBBLING_EVENTS.has(eventType);
 
-  // Bubble up from target to document
+  // Bubble up from target to document (or just target if non-bubbling)
   while (target && target !== document) {
     const handlers = nodeHandlers.get(target);
     if (handlers && handlers.has(eventType)) {
       const handler = handlers.get(eventType);
       if (handler) {
         handler(event);
-        // Stop propagation if needed? 
-        // For now, we mimic native bubbling, so we let it continue unless handler stops it.
         if (event.cancelBubble) {
           break;
         }
       }
     }
+    
+    if (!bubbles) break; // Stop if event doesn't bubble
+    
     target = target.parentNode;
   }
 }
@@ -37,7 +50,8 @@ function dispatchEvent(event: Event) {
  */
 function ensureGlobalListener(eventName: string) {
   if (!globalListeners.has(eventName)) {
-    document.addEventListener(eventName, dispatchEvent, { capture: false });
+    const capture = NON_BUBBLING_EVENTS.has(eventName);
+    document.addEventListener(eventName, dispatchEvent, { capture });
     globalListeners.add(eventName);
   }
 }

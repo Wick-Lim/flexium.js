@@ -53,7 +53,8 @@ test('reconciliation: handles list reordering', () => {
   };
 
   render(h(ListComponent, {}), container);
-  const ul = container.firstChild;
+  // mountReactive inserts a text node anchor for components, so firstChild might be a text node
+  const ul = container.querySelector('ul');
   
   // Initial state
   assert.strictEqual(ul.children.length, 3);
@@ -84,7 +85,7 @@ test('reconciliation: handles insertion and deletion', () => {
   const items = signal([1, 2]);
 
   render(h('ul', {}, () => items.value.map(id => h('li', { key: id, id: `item-${id}` }, id))), container);
-  const ul = container.firstChild;
+  const ul = container.querySelector('ul');
   
   const node1 = ul.children[0];
   const node2 = ul.children[1];

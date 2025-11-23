@@ -1,77 +1,76 @@
-/**
- * Context API for dependency injection
- */
+const contextStack = new Map<symbol, any[]>();
 
-/**
- * Context interface
- */
 export interface Context<T> {
     id: symbol;
-    defaultValue: T;
     Provider: (props: { value: T; children: any }) => any;
+    defaultValue: T;
 }
 
-/**
- * Internal map to track current context values
- * Key is the context symbol, value is the stack of values
- */
-const contextStacks = new Map<symbol, any[]>();
-
-/**
- * Creates a Context object
- *
- * @param defaultValue - The default value if no provider is found
- * @returns Context object with Provider component
- */
 export function createContext<T>(defaultValue: T): Context<T> {
     const id = Symbol('context');
-
-    const Provider = (props: { value: T; children: any }) => {
+    
+    const Provider = (props: { value: T, children: any }) => {
         return props.children;
     };
-
-    // Mark as a context provider for the renderer
     (Provider as any)._contextId = id;
-
+    
     return {
         id,
-        defaultValue,
-        Provider
+        Provider,
+        defaultValue
     };
 }
 
-/**
- * Retrieves the current value of a Context
- *
- * @param context - The context object
- * @returns The current value
- */
 export function useContext<T>(context: Context<T>): T {
-    const stack = contextStacks.get(context.id);
+    const stack = contextStack.get(context.id);
     if (stack && stack.length > 0) {
         return stack[stack.length - 1];
     }
     return context.defaultValue;
 }
 
-/**
- * Internal: Push a provider value onto the stack
- * @internal
- */
 export function pushProvider(id: symbol, value: any) {
-    if (!contextStacks.has(id)) {
-        contextStacks.set(id, []);
+    if (!contextStack.has(id)) {
+        contextStack.set(id, []);
     }
-    contextStacks.get(id)!.push(value);
+    contextStack.get(id)!.push(value);
+}
+
+export function popProvider(id: symbol) {
+    const stack = contextStack.get(id);
+    if (stack) {
+        stack.pop();
+    }
 }
 
 /**
- * Internal: Pop a provider value from the stack
- * @internal
+ * Capture the current context state
  */
-export function popProvider(id: symbol) {
-    const stack = contextStacks.get(id);
-    if (stack) {
-        stack.pop();
+export function captureContext(): Map<symbol, any> {
+    const snapshot = new Map<symbol, any>();
+    for (const [id, stack] of contextStack) {
+        if (stack.length > 0) {
+            snapshot.set(id, stack[stack.length - 1]);
+        }
+    }
+    return snapshot;
+}
+
+/**
+ * Run a function with the captured context restored
+ */
+export function runWithContext<T>(snapshot: Map<symbol, any>, fn: () => T): T {
+    const pushedIds: symbol[] = [];
+    for (const [id, value] of snapshot) {
+        pushProvider(id, value);
+        pushedIds.push(id);
+    }
+    
+    try {
+        return fn();
+    } finally {
+        for (const id of pushedIds) {
+            popProvider(id);
+        }
     }
 }

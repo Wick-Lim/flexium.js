@@ -11,6 +11,10 @@ export type StateGetter<T> = {
   error: any;
   state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored';
   latest: T | undefined;
+  read: () => T | undefined;
+  map: T extends (infer U)[] 
+    ? (fn: (item: U, index: () => number) => any) => any 
+    : never;
 };
 
 // Enhanced Setter Type: acts as setter but carries Resource actions
@@ -110,7 +114,8 @@ export function state<T>(
     loading: { get: () => (s as any).loading || false },
     error: { get: () => (s as any).error },
     state: { get: () => (s as any).state || 'ready' },
-    latest: { get: () => (s as any).latest ?? s.peek() }
+    latest: { get: () => (s as any).latest ?? s.peek() },
+    read: { value: (s as any).read || (() => s.value) }
   });
 
   // Setter Wrapper

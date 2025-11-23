@@ -1,6 +1,6 @@
 {
   "name": "flexium",
-  "version": "0.2.0",
+  "version": "0.2.4",
   "description": "A lightweight, signals-based UI framework with cross-platform renderers",
   "publishConfig": {
     "access": "public"
@@ -54,6 +54,11 @@
       "types": "./dist/store.d.ts",
       "import": "./dist/store.mjs",
       "require": "./dist/store.js"
+    },
+    "./test-exports": {
+      "types": "./dist/test-exports.d.ts",
+      "import": "./dist/test-exports.mjs",
+      "require": "./dist/test-exports.js"
     }
   },
   "files": [

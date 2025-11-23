@@ -31,6 +31,14 @@ let batchDepth = 0;
 let batchedEffects = new Set<ISubscriber>();
 
 /**
+ * Runs a function once when the component mounts.
+ * Equivalent to `effect(() => untrack(fn))` but clearer intent.
+ */
+export function onMount(fn: () => void | (() => void)): void {
+  effect(() => untrack(fn));
+}
+
+/**
  * Base interface for reactive signals
  * @internal
  */
@@ -57,6 +65,8 @@ export interface Computed<T> {
 class EffectNode implements ISubscriber {
   dependencies = new Set<IObservable>();
   cleanups: (() => void)[] = [];
+  private isExecuting = false;
+  private isQueued = false;
 
   constructor(
     public fn: () => void | (() => void),
@@ -64,6 +74,26 @@ class EffectNode implements ISubscriber {
   ) { }
 
   execute(): void {
+    if (this.isExecuting) {
+        this.isQueued = true;
+        return;
+    }
+
+    this.isExecuting = true;
+    
+    try {
+        this.run();
+    } finally {
+        this.isExecuting = false;
+        if (this.isQueued) {
+            this.isQueued = false;
+            // Schedule microtask to avoid stack overflow and infinite sync loops
+            queueMicrotask(() => this.execute());
+        }
+    }
+  }
+
+  private run(): void {
     for (const cleanup of this.cleanups) {
       cleanup();
     }
@@ -450,6 +480,11 @@ export interface Resource<T> extends Signal<T | undefined> {
   error: any;
   state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored';
   latest: T | undefined;
+  /**
+   * Read value, throwing Promise if pending or Error if failed.
+   * Used by Suspense.
+   */
+  read: () => T | undefined;
 }
 
 /**
@@ -526,7 +561,18 @@ export function createResource<T, S = any>(
     state: { get: () => state.value },
     latest: { get: () => value.peek() },
     peek: { value: () => value.peek() },
-    set: { value: (v: T) => value.set(v) }
+    set: { value: (v: T) => value.set(v) },
+    read: {
+        value: () => {
+            if (state.value === 'pending' || state.value === 'refreshing') {
+                throw lastPromise;
+            }
+            if (state.value === 'errored') {
+                throw error.value;
+            }
+            return value.value;
+        }
+    }
   });
 
   (resource as any)[SIGNAL_MARKER] = true;

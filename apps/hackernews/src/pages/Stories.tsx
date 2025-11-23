@@ -72,9 +72,7 @@ export default function Stories(props: { type: string }) {
             </div>
 
             <ul class="news-list">
-                {() => {
-                    return ids().map((id: number, i: number) => <StoryItem id={id} index={i + 1} />)
-                }}
+                {ids.map((id: number, i: () => number) => <StoryItem id={id} index={i() + 1} />)}
             </ul>
         </div>
     )

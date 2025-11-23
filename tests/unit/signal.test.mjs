@@ -196,7 +196,7 @@ test('effect can be disposed', () => {
   assert.strictEqual(effectValue, 5); // Should not update after dispose
 });
 
-test('effect does not run infinitely', () => {
+test('effect does not run infinitely', async () => {
   const count = signal(0);
   let runCount = 0;
 
@@ -206,6 +206,7 @@ test('effect does not run infinitely', () => {
       count.value = count.value + 1; // Write to signal in effect
     }
   });
+  await new Promise(r => setTimeout(r, 0)); // Wait for microtasks
 
   // Should stabilize and not run forever
   assert.strictEqual(count.value, 3);
@@ -425,5 +426,4 @@ test('conditional dependencies', () => {
   age.value = 40;
   assert.strictEqual(result, 'Jane is 40');
 });
-
 console.log('\nAll signal tests passed!');

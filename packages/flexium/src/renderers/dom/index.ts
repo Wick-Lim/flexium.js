@@ -81,166 +81,123 @@ function px(value: number | string): string {
 }
 
 /**
- * Apply style props to DOM element
+ * Apply style props to DOM element efficiently
  */
-function applyStyles(element: HTMLElement, props: Record<string, any>): void {
+function updateStyles(element: HTMLElement, oldProps: Record<string, any>, newProps: Record<string, any>): void {
   const style = element.style;
 
-  // Apply style object prop first (if provided)
-  if (props.style && typeof props.style === 'object') {
-    Object.assign(style, props.style);
-  }
-
-  // Layout
-  if (props.width !== undefined) style.width = px(props.width);
-  if (props.height !== undefined) style.height = px(props.height);
-
-  // Padding - apply general padding first, then individual ones can override
-  if (props.padding !== undefined) {
-    style.padding = px(props.padding);
-  }
-  // Individual padding props can override the general padding
-  if (props.paddingTop !== undefined) style.paddingTop = px(props.paddingTop);
-  if (props.paddingRight !== undefined)
-    style.paddingRight = px(props.paddingRight);
-  if (props.paddingBottom !== undefined)
-    style.paddingBottom = px(props.paddingBottom);
-  if (props.paddingLeft !== undefined) style.paddingLeft = px(props.paddingLeft);
-
-  // Margin - apply general margin first, then individual ones can override
-  if (props.margin !== undefined) {
-    style.margin = px(props.margin);
-  }
-  // Individual margin props can override the general margin
-  if (props.marginTop !== undefined) style.marginTop = px(props.marginTop);
-  if (props.marginRight !== undefined) style.marginRight = px(props.marginRight);
-  if (props.marginBottom !== undefined)
-    style.marginBottom = px(props.marginBottom);
-  if (props.marginLeft !== undefined) style.marginLeft = px(props.marginLeft);
-
-  // Flexbox - Row/Column get display:flex by default
-  const type = element.getAttribute('data-flexium-type');
-  if (type === 'Row' || type === 'Column' || type === 'Stack') {
-    style.display = 'flex';
-
-    if (type === 'Row') {
-      style.flexDirection = 'row';
-    } else if (type === 'Column') {
-      style.flexDirection = 'column';
+  // 1. Handle 'style' object prop
+  const oldStyle = oldProps.style;
+  const newStyle = newProps.style;
+  
+  if (oldStyle !== newStyle) {
+    if (oldStyle && typeof oldStyle === 'object') {
+      for (const key in oldStyle) {
+        if (!newStyle || !(key in newStyle)) {
+          if ((style as any)[key] !== '') (style as any)[key] = '';
+        }
+      }
+    }
+    if (newStyle && typeof newStyle === 'object') {
+      for (const key in newStyle) {
+        const val = newStyle[key];
+        if (!oldStyle || oldStyle[key] !== val) {
+           (style as any)[key] = val;
+        }
+      }
     }
   }
 
-  // Apply flexbox properties
-  if (props.flexDirection) style.flexDirection = props.flexDirection;
-  if (props.justifyContent) style.justifyContent = props.justifyContent;
-  if (props.alignItems) style.alignItems = props.alignItems;
-  if (props.alignSelf) style.alignSelf = props.alignSelf;
-  if (props.flexWrap) style.flexWrap = props.flexWrap;
-  if (props.flex !== undefined) style.flex = String(props.flex);
-  if (props.gap !== undefined) style.gap = px(props.gap);
+  // 2. Handle Flexium specific style props
+  // Helper to update individual style property if changed
+  const update = (prop: string, value: string | undefined) => {
+      // Note: accessing style[prop] is slow, maybe better to just assign?
+      // Browsers optimize redundant assignment, but string conversion has cost.
+      // Let's trust browser for simple properties, but we handle logic.
+      if (value === undefined) {
+          if ((style as any)[prop] !== '') (style as any)[prop] = '';
+      } else {
+          if ((style as any)[prop] !== value) (style as any)[prop] = value;
+      }
+  };
 
-  // Shorthand flexbox props
-  if (props.justify) style.justifyContent = props.justify;
-  if (props.align) style.alignItems = props.align;
+  // Layout
+  if (oldProps.width !== newProps.width) update('width', newProps.width !== undefined ? px(newProps.width) : undefined);
+  if (oldProps.height !== newProps.height) update('height', newProps.height !== undefined ? px(newProps.height) : undefined);
 
-  // If any flexbox layout props are present, set display:flex (unless it's already set)
-  if (
-    (props.flexDirection ||
-      props.justifyContent ||
-      props.alignItems ||
-      props.flexWrap ||
-      props.gap !== undefined ||
-      props.justify ||
-      props.align) &&
-    !style.display
-  ) {
-    style.display = 'flex';
+  // Flexbox setup (display: flex)
+  const type = element.getAttribute('data-flexium-type');
+  const needsFlex = (
+      newProps.flexDirection || newProps.justifyContent || newProps.alignItems || 
+      newProps.flexWrap || newProps.gap !== undefined || newProps.justify || newProps.align ||
+      type === 'Row' || type === 'Column' || type === 'Stack'
+  );
+
+  if (needsFlex) {
+      if (style.display !== 'flex') style.display = 'flex';
+      
+      if (type === 'Row' && style.flexDirection !== 'row') style.flexDirection = 'row';
+      if (type === 'Column' && style.flexDirection !== 'column') style.flexDirection = 'column';
   }
+
+  // Flex properties
+  if (oldProps.flexDirection !== newProps.flexDirection) update('flexDirection', newProps.flexDirection);
+  if (oldProps.justifyContent !== newProps.justifyContent) update('justifyContent', newProps.justifyContent);
+  if (oldProps.alignItems !== newProps.alignItems) update('alignItems', newProps.alignItems);
+  if (oldProps.alignSelf !== newProps.alignSelf) update('alignSelf', newProps.alignSelf);
+  if (oldProps.flexWrap !== newProps.flexWrap) update('flexWrap', newProps.flexWrap);
+  if (oldProps.flex !== newProps.flex) update('flex', newProps.flex !== undefined ? String(newProps.flex) : undefined);
+  if (oldProps.gap !== newProps.gap) update('gap', newProps.gap !== undefined ? px(newProps.gap) : undefined);
+
+  // Shorthands
+  if (oldProps.justify !== newProps.justify) update('justifyContent', newProps.justify);
+  if (oldProps.align !== newProps.align) update('alignItems', newProps.align);
 
   // Visual
-  if (props.bg) style.backgroundColor = props.bg;
-  if (props.color) style.color = props.color;
-  if (props.borderRadius !== undefined)
-    style.borderRadius = px(props.borderRadius);
-  if (props.borderWidth !== undefined) {
-    style.borderWidth = px(props.borderWidth);
-    style.borderStyle = style.borderStyle || 'solid';
+  if (oldProps.bg !== newProps.bg) update('backgroundColor', newProps.bg);
+  if (oldProps.color !== newProps.color) update('color', newProps.color);
+  if (oldProps.borderRadius !== newProps.borderRadius) update('borderRadius', newProps.borderRadius !== undefined ? px(newProps.borderRadius) : undefined);
+  if (oldProps.borderWidth !== newProps.borderWidth) {
+      update('borderWidth', newProps.borderWidth !== undefined ? px(newProps.borderWidth) : undefined);
+      if (newProps.borderWidth !== undefined && style.borderStyle !== 'solid') style.borderStyle = 'solid';
   }
-  if (props.borderColor) style.borderColor = props.borderColor;
-  if (props.opacity !== undefined) style.opacity = String(props.opacity);
+  if (oldProps.borderColor !== newProps.borderColor) update('borderColor', newProps.borderColor);
+  if (oldProps.opacity !== newProps.opacity) update('opacity', newProps.opacity !== undefined ? String(newProps.opacity) : undefined);
 
   // Typography
-  if (props.fontSize !== undefined) style.fontSize = px(props.fontSize);
-  if (props.fontWeight !== undefined) style.fontWeight = String(props.fontWeight);
-  if (props.fontFamily) style.fontFamily = props.fontFamily;
-  if (props.lineHeight !== undefined) style.lineHeight = String(props.lineHeight);
-  if (props.textAlign) style.textAlign = props.textAlign;
+  if (oldProps.fontSize !== newProps.fontSize) update('fontSize', newProps.fontSize !== undefined ? px(newProps.fontSize) : undefined);
+  if (oldProps.fontWeight !== newProps.fontWeight) update('fontWeight', newProps.fontWeight !== undefined ? String(newProps.fontWeight) : undefined);
+  if (oldProps.fontFamily !== newProps.fontFamily) update('fontFamily', newProps.fontFamily);
+  if (oldProps.lineHeight !== newProps.lineHeight) update('lineHeight', newProps.lineHeight !== undefined ? String(newProps.lineHeight) : undefined);
+  if (oldProps.textAlign !== newProps.textAlign) update('textAlign', newProps.textAlign);
+  
+  // Padding/Margin
+  // Optimization: Check general first
+  if (oldProps.padding !== newProps.padding) update('padding', newProps.padding !== undefined ? px(newProps.padding) : undefined);
+  if (oldProps.paddingTop !== newProps.paddingTop) update('paddingTop', newProps.paddingTop !== undefined ? px(newProps.paddingTop) : undefined);
+  if (oldProps.paddingRight !== newProps.paddingRight) update('paddingRight', newProps.paddingRight !== undefined ? px(newProps.paddingRight) : undefined);
+  if (oldProps.paddingBottom !== newProps.paddingBottom) update('paddingBottom', newProps.paddingBottom !== undefined ? px(newProps.paddingBottom) : undefined);
+  if (oldProps.paddingLeft !== newProps.paddingLeft) update('paddingLeft', newProps.paddingLeft !== undefined ? px(newProps.paddingLeft) : undefined);
+
+  if (oldProps.margin !== newProps.margin) update('margin', newProps.margin !== undefined ? px(newProps.margin) : undefined);
+  if (oldProps.marginTop !== newProps.marginTop) update('marginTop', newProps.marginTop !== undefined ? px(newProps.marginTop) : undefined);
+  if (oldProps.marginRight !== newProps.marginRight) update('marginRight', newProps.marginRight !== undefined ? px(newProps.marginRight) : undefined);
+  if (oldProps.marginBottom !== newProps.marginBottom) update('marginBottom', newProps.marginBottom !== undefined ? px(newProps.marginBottom) : undefined);
+  if (oldProps.marginLeft !== newProps.marginLeft) update('marginLeft', newProps.marginLeft !== undefined ? px(newProps.marginLeft) : undefined);
 }
 
 /**
- * Remove style props from DOM element
+ * Normalize className prop (supports string, array, object)
  */
-function removeStyles(element: HTMLElement, props: Record<string, any>): void {
-  const style = element.style;
-
-  // Remove style object prop
-  if (props.style && typeof props.style === 'object') {
-    for (const key in props.style) {
-      (style as any)[key] = '';
-    }
+function normalizeClass(value: any): string {
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) {
+    return value.map(normalizeClass).filter(Boolean).join(' ');
   }
-
-  // Layout
-  if (props.width !== undefined) style.width = '';
-  if (props.height !== undefined) style.height = '';
-
-  // Padding
-  if (props.padding !== undefined) {
-    style.padding = '';
-  } else {
-    if (props.paddingTop !== undefined) style.paddingTop = '';
-    if (props.paddingRight !== undefined) style.paddingRight = '';
-    if (props.paddingBottom !== undefined) style.paddingBottom = '';
-    if (props.paddingLeft !== undefined) style.paddingLeft = '';
+  if (typeof value === 'object' && value !== null) {
+    return Object.keys(value).filter(k => value[k]).join(' ');
   }
-
-  // Margin
-  if (props.margin !== undefined) {
-    style.margin = '';
-  } else {
-    if (props.marginTop !== undefined) style.marginTop = '';
-    if (props.marginRight !== undefined) style.marginRight = '';
-    if (props.marginBottom !== undefined) style.marginBottom = '';
-    if (props.marginLeft !== undefined) style.marginLeft = '';
-  }
-
-  // Flexbox
-  if (props.flexDirection) style.flexDirection = '';
-  if (props.justifyContent) style.justifyContent = '';
-  if (props.alignItems) style.alignItems = '';
-  if (props.alignSelf) style.alignSelf = '';
-  if (props.flexWrap) style.flexWrap = '';
-  if (props.flex !== undefined) style.flex = '';
-  if (props.gap !== undefined) style.gap = '';
-
-  // Shorthand flexbox props
-  if (props.justify) style.justifyContent = '';
-  if (props.align) style.alignItems = '';
-
-  // Visual
-  if (props.bg) style.backgroundColor = '';
-  if (props.color) style.color = '';
-  if (props.borderRadius !== undefined) style.borderRadius = '';
-  if (props.borderWidth !== undefined) style.borderWidth = '';
-  if (props.borderColor) style.borderColor = '';
-  if (props.opacity !== undefined) style.opacity = '';
-
-  // Typography
-  if (props.fontSize !== undefined) style.fontSize = '';
-  if (props.fontWeight !== undefined) style.fontWeight = '';
-  if (props.fontFamily) style.fontFamily = '';
-  if (props.lineHeight !== undefined) style.lineHeight = '';
-  if (props.textAlign) style.textAlign = '';
+  return '';
 }
 
 /**
@@ -253,9 +210,11 @@ export class DOMRenderer implements Renderer {
     const element = document.createElement(tagName);
 
     // Store original type for reference
-    element.setAttribute('data-flexium-type', type);
+    if (ELEMENT_MAPPING[type]) {
+        element.setAttribute('data-flexium-type', type);
+    }
 
-    // Apply all props
+    // Apply all props (treat oldProps as empty)
     this.updateNode(element, {}, props);
 
     return element;
@@ -266,84 +225,59 @@ export class DOMRenderer implements Renderer {
     oldProps: Record<string, any>,
     newProps: Record<string, any>
   ): void {
-    // Handle className
+    // 1. Handle className
     if (newProps.className !== oldProps.className) {
-      if (newProps.className) {
-        node.className = newProps.className;
-      } else {
-        node.className = '';
-      }
+      node.className = normalizeClass(newProps.className);
     }
 
-    // Remove old event listeners
+    // 2. Update Styles (Efficiently)
+    updateStyles(node, oldProps, newProps);
+
+    // 3. Handle Events & Attributes
+    // We iterate over merged keys to handle additions, updates, and removals in one pass if possible
+    // But separating old and new is easier for now.
+    
+    // Remove deleted props
     for (const key in oldProps) {
-      if (key.startsWith('on') && !(key in newProps)) {
-        const eventName = EVENT_MAPPING[key] || key.slice(2).toLowerCase();
-        // Use delegator to unregister
-        this.removeEventListener(node, eventName, oldProps[key]);
-      }
-    }
+        if (!(key in newProps)) {
+            // Ignore Symbols
+            if (typeof key === 'symbol') continue;
 
-    // Remove old styles that are no longer present in newProps
-    const removedStyleProps: Record<string, any> = {};
-    for (const key in oldProps) {
-      if (SKIP_PROPS.has(key) && !(key in newProps)) {
-        removedStyleProps[key] = oldProps[key];
-      }
-    }
-    if (Object.keys(removedStyleProps).length > 0) {
-      removeStyles(node, removedStyleProps);
-    }
-
-    // Apply new styles
-    applyStyles(node, newProps);
-
-    // Add new event listeners
-    for (const key in newProps) {
-      if (key.startsWith('on')) {
-        const handler = newProps[key];
-        if (typeof handler === 'function') {
-          const eventName = EVENT_MAPPING[key] || key.slice(2).toLowerCase();
-
-          // Remove old listener if it exists
-          const oldHandler = oldProps[key];
-          if (oldHandler && oldHandler !== handler) {
-            this.removeEventListener(node, eventName, oldHandler);
-          }
-
-          // Add new listener using delegator
-          this.addEventListener(node, eventName, handler);
+            if (key.startsWith('on')) {
+                const eventName = EVENT_MAPPING[key] || key.slice(2).toLowerCase();
+                this.removeEventListener(node, eventName, oldProps[key]);
+            } else if (!SKIP_PROPS.has(key)) {
+                node.removeAttribute(key);
+            }
         }
-      }
     }
 
-    // Apply other props as attributes
-    for (const key in newProps) {
-      if (
-        !key.startsWith('on') &&
-        !SKIP_PROPS.has(key) &&
-        newProps[key] !== oldProps[key]
-      ) {
-        const value = newProps[key];
-        if (value === null || value === undefined || value === false) {
-          node.removeAttribute(key);
-        } else if (value === true) {
-          node.setAttribute(key, '');
-        } else {
-          node.setAttribute(key, String(value));
+    // Add/Update new props
+    const keys = Reflect.ownKeys(newProps); // Get string and symbol keys
+    for (const key of keys) {
+        // Ignore Symbols (Synapse keys)
+        if (typeof key === 'symbol') continue;
+        
+        // Cast key to string for accessing record
+        const strKey = key as string;
+        const newVal = newProps[strKey];
+        const oldVal = oldProps[strKey];
+
+        if (newVal === oldVal) continue;
+
+        if (strKey.startsWith('on')) {
+            const eventName = EVENT_MAPPING[strKey] || strKey.slice(2).toLowerCase();
+            if (oldVal) this.removeEventListener(node, eventName, oldVal);
+            if (newVal) this.addEventListener(node, eventName, newVal);
+        } else if (!SKIP_PROPS.has(strKey)) {
+            if (newVal === null || newVal === undefined || newVal === false) {
+                node.removeAttribute(strKey);
+            } else if (newVal === true) {
+                node.setAttribute(strKey, '');
+            } else {
+                node.setAttribute(strKey, String(newVal));
+            }
         }
-      }
-    }
-
-    // Remove old attributes
-    for (const key in oldProps) {
-      if (
-        !key.startsWith('on') &&
-        !SKIP_PROPS.has(key) &&
-        !(key in newProps)
-      ) {
-        node.removeAttribute(key);
-      }
     }
   }
 

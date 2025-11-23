@@ -165,7 +165,7 @@ test('conditional rendering with signals', () => {
   assert.strictEqual(container.textContent.includes('Content visible'), true);
 });
 
-test('list rendering with signals', () => {
+test('list rendering with signals', async () => {
   const container = document.createElement('div');
   const items = signal(['Apple', 'Banana', 'Orange']);
 
@@ -178,8 +178,9 @@ test('list rendering with signals', () => {
   };
 
   render(h(List, null), container);
+  await new Promise(r => setTimeout(r, 0)); // Wait for initial render
 
-  const listItems = container.querySelectorAll('li');
+  let listItems = container.querySelectorAll('li');
   assert.strictEqual(listItems.length, 3);
   assert.strictEqual(listItems[0].textContent, 'Apple');
   assert.strictEqual(listItems[1].textContent, 'Banana');
@@ -187,12 +188,12 @@ test('list rendering with signals', () => {
 
   // Update list
   items.value = ['Mango', 'Grape'];
-  render(h(List, null), container);
+  await new Promise(r => setTimeout(r, 0)); // Wait for reactivity
 
-  const updatedItems = container.querySelectorAll('li');
-  assert.strictEqual(updatedItems.length, 2);
-  assert.strictEqual(updatedItems[0].textContent, 'Mango');
-  assert.strictEqual(updatedItems[1].textContent, 'Grape');
+  listItems = container.querySelectorAll('li'); // Re-query after update
+  assert.strictEqual(listItems.length, 2);
+  assert.strictEqual(listItems[0].textContent, 'Mango');
+  assert.strictEqual(listItems[1].textContent, 'Grape');
 });
 
 test('form input with signal binding', () => {

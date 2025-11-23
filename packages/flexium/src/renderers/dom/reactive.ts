@@ -7,27 +7,20 @@
  */
 
 import type { VNode } from '../../core/renderer';
-import { effect, batch, isSignal } from '../../core/signal';
+import { effect, batch, isSignal, onCleanup } from '../../core/signal';
 import type { Signal, Computed } from '../../core/signal';
 import { domRenderer } from './index';
 import { isVNode } from './h';
-import { pushProvider, popProvider } from '../../core/context';
+import { pushProvider, popProvider, useContext, captureContext, runWithContext } from '../../core/context';
 import { reconcileArrays } from './reconcile';
+import { SuspenseCtx } from '../../core/suspense';
+import { ErrorBoundaryCtx } from '../../core/error-boundary';
 
-/**
- * Track reactive bindings for cleanup
- */
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>();
 
-/**
- * Mount a virtual node with reactive tracking
- *
- * This function creates DOM nodes and automatically sets up reactive effects
- * for any signal dependencies in props or children.
- */
 export function mountReactive(
   vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined | Function | any[],
-  parent?: Node
+  container?: Node
 ): Node | null {
   // Handle null/undefined
   if (vnode === null || vnode === undefined) {
@@ -36,46 +29,31 @@ export function mountReactive(
 
   // Handle signals and functions (reactive children)
   if (isSignal(vnode) || typeof vnode === 'function') {
-    // Placeholder node to mark position
     const startNode = document.createTextNode('');
-    // Wrapper fragment to hold startNode and initial content
-    // This is crucial because startNode isn't attached to the real parent yet during initial render
-    const wrapperFragment = document.createDocumentFragment();
-    wrapperFragment.appendChild(startNode);
+    const parent = container || document.createDocumentFragment();
+    domRenderer.appendChild(parent, startNode);
 
     let currentNode: Node | null = startNode;
     let currentVNode: any = null;
-    let currentVNodeList: VNode[] = []; // Track array children for reconciliation
+    let currentVNodeList: VNode[] = []; 
 
     const dispose = effect(() => {
       const value = isSignal(vnode) ? (vnode as Signal<any>).value : (vnode as Function)();
+      const currentContainer = startNode.parentNode; 
+      
+      // Safety check: if node is detached, we can't update siblings
+      if (!currentContainer) return;
 
-      // Handle Array (List Rendering) with Reconciliation
       if (Array.isArray(value)) {
-        // Normalize children (filter nulls, etc.)
         const newVNodes = value.filter(c => c != null);
-        
-        // Determine container: 
-        // 1. If startNode is in DOM, use its parent (Update phase)
-        // 2. If startNode is in wrapperFragment, use wrapperFragment (Initial phase)
-        // 3. Fallback to parent (Should rarely happen if logic is correct)
-        const container = currentNode && currentNode.parentNode ? currentNode.parentNode : parent;
-        
-        if (container) {
-          if (currentVNodeList.length > 0 && container !== wrapperFragment) {
-            // Update: Reconcile (Only if we are mounted in real DOM)
-            const nextSibling = currentNode!.nextSibling; 
-            reconcileArrays(container, currentVNodeList, newVNodes, nextSibling);
-          } else {
-            // Initial Render OR First render in real DOM OR Switched from single
-            
-            // If previously single node, remove it
-            if (currentNode && currentNode !== startNode && !currentVNodeList.length) {
-               if (currentNode.parentNode) {
-                 domRenderer.removeChild(currentNode.parentNode, currentNode);
-               }
+        if (currentVNodeList.length > 0) {
+            const nextSibling = startNode.nextSibling; 
+            // Note: reconcileArrays expects parent, oldVNodes, newVNodes, nextSibling
+            reconcileArrays(currentContainer, currentVNodeList, newVNodes, nextSibling);
+        } else {
+            if (currentNode && currentNode !== startNode) {
+                 try { currentContainer.removeChild(currentNode); } catch(e) {}
             }
-
             const fragment = document.createDocumentFragment();
             for (const child of newVNodes) {
               const childNode = mountReactive(child, fragment);
@@ -83,57 +61,43 @@ export function mountReactive(
                 (child as any)._node = childNode;
               }
             }
-            
-            // Insert after startNode
-            if (startNode.parentNode) {
-                // This works for both wrapperFragment and real DOM
-                startNode.parentNode.insertBefore(fragment, startNode.nextSibling);
-            }
-          }
-          
-          // Update references
-          currentVNodeList = newVNodes;
-          currentVNode = value;
-          currentNode = startNode; // Keep anchor
+            currentContainer.insertBefore(fragment, startNode.nextSibling);
         }
+        currentVNodeList = newVNodes;
+        currentVNode = value;
+        currentNode = startNode; 
         return;
       }
 
-      // Handle Single Value (Text/Element) ... (rest is same, simplified logic needed)
-      // If previously was array, clear it
       if (currentVNodeList.length > 0) {
-         const container = startNode.parentNode;
-         if (container) {
-             for (const vnode of currentVNodeList) {
-                 if (vnode._node) {
-                     domRenderer.removeChild(container, vnode._node);
-                 }
+         for (const childVNode of currentVNodeList) {
+             if (childVNode._node && childVNode._node.parentNode === currentContainer) {
+                 try { currentContainer.removeChild(childVNode._node); } catch(e) {}
              }
          }
          currentVNodeList = [];
       }
 
-      // If value is different from current
       if (value !== currentVNode) {
         if ((typeof value === 'string' || typeof value === 'number') &&
           currentNode && currentNode.nodeType === Node.TEXT_NODE && currentNode !== startNode) {
           domRenderer.updateTextNode(currentNode as Text, String(value));
         } else {
           const newNode = mountReactive(value);
-          
-          // If we have a newNode, replace the old one (or insert if first time)
           if (newNode) {
-              if (currentNode && currentNode !== startNode && currentNode.parentNode) {
-                  currentNode.parentNode.replaceChild(newNode, currentNode);
-              } else if (startNode.parentNode) {
-                  // Initial render or switching from array/placeholder
-                  startNode.parentNode.insertBefore(newNode, startNode.nextSibling);
+              if (currentNode && currentNode !== startNode) {
+                  if (currentNode.parentNode === currentContainer) {
+                      currentContainer.replaceChild(newNode, currentNode);
+                  } else {
+                      currentContainer.insertBefore(newNode, startNode.nextSibling);
+                  }
+              } else {
+                  currentContainer.insertBefore(newNode, startNode.nextSibling);
               }
               currentNode = newNode;
           } else {
-              // If newNode is null (e.g. null/false return), we should just have the startNode
-              if (currentNode && currentNode !== startNode && currentNode.parentNode) {
-                  domRenderer.removeChild(currentNode.parentNode, currentNode);
+              if (currentNode && currentNode !== startNode && currentNode.parentNode === currentContainer) {
+                  try { currentContainer.removeChild(currentNode); } catch(e) {}
               }
               currentNode = startNode;
           }
@@ -142,49 +106,30 @@ export function mountReactive(
       }
     });
 
-    // Store cleanup
-    // We attach to startNode because it's the stable anchor
-    // If startNode was replaced, attach to the new node (currentNode)
-    const targetNode = currentNode || startNode;
-    if (targetNode) {
-      if (!REACTIVE_BINDINGS.has(targetNode)) {
-        REACTIVE_BINDINGS.set(targetNode, new Set());
-      }
-      REACTIVE_BINDINGS.get(targetNode)!.add(dispose);
+    if (!REACTIVE_BINDINGS.has(startNode)) {
+      REACTIVE_BINDINGS.set(startNode, new Set());
     }
+    REACTIVE_BINDINGS.get(startNode)!.add(dispose);
 
-    // Determine the result node to append/return
-    const resultNode = (currentNode !== startNode && currentNode) ? currentNode : wrapperFragment;
-
-    // If parent is provided, append the result
-    if (parent) {
-        domRenderer.appendChild(parent, resultNode);
-    }
-
-    // If we appended wrapperFragment, it's now empty.
-    // We should return the anchor (startNode) so the caller can track/remove it.
-    if (resultNode === wrapperFragment) {
-        return startNode;
-    }
-
-    return resultNode;
+    return container ? startNode : parent;
   }
 
-  // Handle arrays (fragments)
   if (Array.isArray(vnode)) {
     const fragment = document.createDocumentFragment();
     for (const child of vnode) {
-      const childNode = mountReactive(child, fragment);
-      if (childNode) {
-        fragment.appendChild(childNode);
-      }
+      mountReactive(child, fragment);
+    }
+    if (container) {
+        domRenderer.appendChild(container, fragment);
     }
     return fragment;
   }
 
   // Handle text nodes
   if (typeof vnode === 'string' || typeof vnode === 'number') {
-    return domRenderer.createTextNode(String(vnode));
+    const textNode = domRenderer.createTextNode(String(vnode));
+    if (container) domRenderer.appendChild(container, textNode);
+    return textNode;
   }
 
   // Handle VNodes
@@ -192,81 +137,115 @@ export function mountReactive(
     // Handle function components
     if (typeof vnode.type === 'function') {
       const component = vnode.type as Function;
+      const startNode = document.createTextNode('');
+      const parent = container || document.createDocumentFragment();
+      domRenderer.appendChild(parent, startNode);
+      
+      let currentNodes: Node[] = [];
+      const contextSnapshot = captureContext();
 
-      // Create a container for the component's output
-      let currentNode: Node | null = null;
-
-      // Create reactive effect for component re-rendering
       const dispose = effect(() => {
-        const contextId = (component as any)._contextId;
-        if (contextId) {
-          pushProvider(contextId, vnode.props.value);
-        }
-
-        try {
-          const result = component({ ...vnode.props, children: vnode.children });
-
-          if (currentNode) {
-            // Update existing node
-            const newNode = mountReactive(result);
-            if (newNode && parent) {
-              parent.replaceChild(newNode, currentNode);
-              cleanupReactive(currentNode);
-              currentNode = newNode;
-            }
-          } else {
-            // Initial render
-            currentNode = mountReactive(result, parent);
-          }
-        } finally {
+        runWithContext(contextSnapshot, () => {
+          const contextId = (component as any)._contextId;
           if (contextId) {
-            popProvider(contextId);
+            pushProvider(contextId, vnode.props.value);
           }
-        }
+          
+          onCleanup(() => {
+              const currentParent = startNode.parentNode;
+              if (currentParent) {
+                  let nodeToRemove = startNode.nextSibling;
+                  for (let i = 0; i < currentNodes.length; i++) {
+                      if (nodeToRemove) {
+                          const next = nodeToRemove.nextSibling;
+                          cleanupReactive(nodeToRemove);
+                          try {
+                              currentParent.removeChild(nodeToRemove);
+                          } catch (e) {}
+                          nodeToRemove = next;
+                      }
+                  }
+              } else {
+                  // If startNode is detached, just cleanup reactions
+                  currentNodes.forEach(cleanupReactive);
+              }
+              currentNodes = [];
+          });
+
+          try {
+            let result;
+            try {
+              result = component({ ...vnode.props, children: vnode.children });
+            } catch (err) {
+              if (err instanceof Promise) {
+                  const suspense = useContext(SuspenseCtx);
+                  if (suspense) {
+                      suspense.registerPromise(err);
+                      result = null;
+                  } else {
+                      throw err; 
+                  }
+              } else {
+                  const errorBoundary = useContext(ErrorBoundaryCtx);
+                  if (errorBoundary) {
+                      errorBoundary.setError(err);
+                      result = null; 
+                  } else {
+                      throw err;
+                  }
+              }
+            }
+
+            const fragment = document.createDocumentFragment();
+            mountReactive(result, fragment);
+            
+            const currentParent = startNode.parentNode;
+            if (currentParent) {
+                currentNodes = Array.from(fragment.childNodes);
+                currentParent.insertBefore(fragment, startNode.nextSibling);
+            }
+            
+          } finally {
+            if (contextId) {
+              popProvider(contextId);
+            }
+          }
+        });
       });
 
-      // Store cleanup function
-      if (currentNode) {
-        if (!REACTIVE_BINDINGS.has(currentNode)) {
-          REACTIVE_BINDINGS.set(currentNode, new Set());
-        }
-        REACTIVE_BINDINGS.get(currentNode)!.add(dispose);
+      if (!REACTIVE_BINDINGS.has(startNode)) {
+        REACTIVE_BINDINGS.set(startNode, new Set());
       }
+      REACTIVE_BINDINGS.get(startNode)!.add(dispose);
 
-      return currentNode;
+      return container ? startNode : parent;
     }
 
     // Handle fragments
     if (vnode.type === 'fragment') {
       const fragment = document.createDocumentFragment();
       for (const child of vnode.children) {
-        const childNode = mountReactive(child, fragment);
-        if (childNode) {
-          fragment.appendChild(childNode);
-        }
+        mountReactive(child, fragment);
+      }
+      if (container) {
+        domRenderer.appendChild(container, fragment);
       }
       return fragment;
     }
 
     // Handle built-in elements
     const node = domRenderer.createNode(vnode.type as string, vnode.props);
-
-    // Set up reactive bindings for props
     const disposeProps = setupReactiveProps(node, vnode.props);
     if (disposeProps.length > 0) {
       REACTIVE_BINDINGS.set(node, new Set(disposeProps));
     }
 
-    // Mount children with reactive tracking
     for (const child of vnode.children) {
-      const childNode = mountReactive(child, node);
-      if (childNode) {
-        domRenderer.appendChild(node, childNode);
-      }
+      mountReactive(child, node);
     }
 
-    if (parent) {
-      domRenderer.appendChild(parent, node);
+    if (container) {
+      domRenderer.appendChild(container, node);
     }
 
     return node;
@@ -275,118 +254,74 @@ export function mountReactive(
   return null;
 }
 
-/**
- * Set up reactive effects for props that might contain signals
- */
 function setupReactiveProps(
   node: HTMLElement,
   props: Record<string, any>
 ): (() => void)[] {
   const disposers: (() => void)[] = [];
-
-  // Check each prop for potential reactivity
   for (const key in props) {
     const value = props[key];
+    if (key.startsWith('on')) continue;
 
-    // Skip event handlers
-    if (key.startsWith('on')) {
-      continue;
-    }
-
-    // Handle signals directly
     if (isSignal(value)) {
       const dispose = effect(() => {
-        const computedValue = value.value;
-        const oldProps = { [key]: undefined };
-        const newProps = { [key]: computedValue };
-        domRenderer.updateNode(node, oldProps, newProps);
+        domRenderer.updateNode(node, { [key]: undefined }, { [key]: value.value });
       });
       disposers.push(dispose);
       continue;
     }
 
-    // Handle functions that might be computed values
     if (typeof value === 'function') {
-      // Create reactive effect for computed/signal values
       const dispose = effect(() => {
         try {
-          // Try to execute as a getter function
-          const computedValue = value();
-
-          // Update the prop with the computed value
-          const oldProps = { [key]: undefined };
-          const newProps = { [key]: computedValue };
-          domRenderer.updateNode(node, oldProps, newProps);
-        } catch (e) {
-          // Not a signal/computed, ignore
-        }
+          domRenderer.updateNode(node, { [key]: undefined }, { [key]: value() });
+        } catch (e) {}
       });
-
       disposers.push(dispose);
     }
   }
-
   return disposers;
 }
 
-/**
- * Clean up reactive bindings when a node is removed
- */
 export function cleanupReactive(node: Node): void {
   const bindings = REACTIVE_BINDINGS.get(node);
   if (bindings) {
     bindings.forEach((dispose) => dispose());
     REACTIVE_BINDINGS.delete(node);
   }
-
-  // Clean up children
   if (node.childNodes) {
     node.childNodes.forEach((child) => cleanupReactive(child));
   }
 }
 
-/**
- * Render a component with reactive tracking
- */
 export function renderReactive(
-  vnode: VNode | string | number | null | undefined | Function,
+  vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined | Function | any[],
   container: HTMLElement
 ): Node | null {
-  // Clear container
-  while (container.firstChild) {
-    cleanupReactive(container.firstChild);
-    container.removeChild(container.firstChild);
-  }
-
-  // Mount with reactive tracking
-  const node = mountReactive(vnode, container);
-  if (node) {
-    container.appendChild(node);
-  }
-
-  return node;
+  return mountReactive(vnode, container);
 }
 
-/**
- * Create a reactive root for rendering
- */
 export function createReactiveRoot(container: HTMLElement) {
   let rootDispose: (() => void) | null = null;
+  let currentRootNode: Node | null = null; 
 
   return {
     render(vnode: VNode) {
-      // Batch all updates together
       batch(() => {
-        // Clean up previous render
+        if (currentRootNode) {
+          cleanupReactive(currentRootNode);
+          container.innerHTML = ''; 
+          currentRootNode = null;
+        }
         if (rootDispose) {
           rootDispose();
+          rootDispose = null;
         }
 
-        // Create new render effect
         rootDispose = effect(() => {
-          renderReactive(vnode, container);
+          container.innerHTML = '';
+          currentRootNode = mountReactive(vnode, container);
         });
-
       });
     },
     unmount() {
@@ -394,82 +329,37 @@ export function createReactiveRoot(container: HTMLElement) {
         rootDispose();
         rootDispose = null;
       }
-
-      while (container.firstChild) {
-        cleanupReactive(container.firstChild);
-        container.removeChild(container.firstChild);
-      }
-
+      cleanupReactive(container); 
+      container.innerHTML = '';
     },
   };
 }
 
-/**
- * Helper to create reactive text nodes that update when signals change
- *
- * @deprecated Use signals directly as children instead
- * @example
- * // Old way:
- * reactiveText(() => count.value)
- *
- * // New way:
- * h('div', {}, [count])
- */
 export function reactiveText(getText: () => string): Text {
   const textNode = document.createTextNode('');
-
   const dispose = effect(() => {
     const text = getText();
     domRenderer.updateTextNode(textNode, text);
   });
-
-  // Store cleanup
   REACTIVE_BINDINGS.set(textNode, new Set([dispose]));
-
   return textNode;
 }
 
-/**
- * Helper function to bind a signal to an element property
- * Useful for more complex bindings beyond simple text content
- *
- * @param signal - The signal to bind
- * @param transform - Optional transform function
- * @returns An object that can be spread into props
- *
- * @example
- * const isDisabled = signal(false);
- * h('button', { ...bind(isDisabled, (val) => ({ disabled: val })) })
- */
 export function bind<T>(
   signal: Signal<T> | Computed<T>,
   transform?: (value: T) => Record<string, any>
 ): Record<string, Signal<any> | Computed<any>> {
   if (transform) {
-    // If there's a transform, we need to return signals for each prop
-    // For simplicity, we'll just pass the signal directly and let setupReactiveProps handle it
     return { __signal__: signal };
   }
   return { value: signal };
 }
 
-/**
- * Reactive Text Component
- * A convenience component that accepts signals directly as children
- *
- * @example
- * // Simple usage:
- * h(ReactiveText, {}, [count])
- *
- * // With styling:
- * h(ReactiveText, { fontSize: 24, color: 'blue' }, [count])
- */
 export function ReactiveText(props: {
   children?: any[];
   [key: string]: any;
 }): VNode {
   const { children = [], ...otherProps } = props;
-
   return {
     type: 'span',
     props: otherProps,

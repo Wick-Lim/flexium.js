@@ -19,6 +19,10 @@ The unified API for all state management needs.
   - `.loading`: (boolean) True if an async fetcher is pending.
   - `.error`: (any) Error object if fetcher failed.
   - `.state`: ('ready' | 'pending' | ...) Current status.
+  - **`.map(callback)`**: (Array only) Optimizes list rendering using `<For>`.
+    ```js
+    { list.map((item, i) => <Item index={i()} />) }
+    ```
 - **`setter(newValue)`**: Updates the value.
   - Accepts a new value or an updater function `prev => newValue`.
   - `.refetch()`: Re-runs the fetcher function (if applicable).

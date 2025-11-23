@@ -1,4 +1,4 @@
-import { Signal } from '../core/signal';
+import { Signal, Computed } from '../core/signal';
 
 export interface Location {
     pathname: string;
@@ -7,15 +7,33 @@ export interface Location {
     query: Record<string, string>;
 }
 
+export interface RouterContext {
+    location: Signal<Location> | Computed<Location>;
+    params: Signal<Record<string, string>> | Computed<Record<string, string>>;
+    navigate: (path: string) => void;
+    // Matches for the current URL (ordered by depth)
+    matches: Signal<RouteMatch[]> | Computed<RouteMatch[]>;
+}
 export interface RouteProps {
-    path: string;
-    component: () => any; // Component function
+    path?: string; // path can be optional for layout routes or index
+    index?: boolean;
+    component: Function;
+    children?: any; // Nested routes
 }
 
-export interface RouterContext {
-    location: Signal<Location>;
-    params: Signal<Record<string, string>>;
-    navigate: (path: string) => void;
+export interface RouteMatch {
+    route: RouteDef;
+    params: Record<string, string>;
+    pathname: string; // Matched portion of the URL
+}
+
+// Internal definition of a route
+export interface RouteDef {
+    path: string;
+    index: boolean;
+    component: Function;
+    children: RouteDef[];
+    // We might need the original VNode props if we want to support other props
 }
 
 export interface LinkProps {
@@ -23,3 +41,4 @@ export interface LinkProps {
     class?: string;
     children?: any;
 }
+
