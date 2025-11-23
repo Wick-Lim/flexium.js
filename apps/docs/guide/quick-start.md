@@ -13,8 +13,6 @@ npm install
 npm run dev
 ```
 
-This scaffolds a new Flexium project with Vite, TypeScript, and a sample app.
-
 ## Manual Installation
 
 Add Flexium to an existing Vite project:
@@ -36,46 +34,26 @@ Update your `tsconfig.json`:
 }
 ```
 
-Or use the automatic runtime in your `vite.config.ts`:
-
-```ts
-import { defineConfig } from 'vite'
-
-export default defineConfig({
-  esbuild: {
-    jsxImportSource: 'flexium'
-  }
-})
-```
-
 ## Your First Component
 
 Create `src/App.tsx`:
 
 ```tsx
-import { signal } from 'flexium'
-import { View, Text, Pressable } from 'flexium'
+import { state } from 'flexium'
 
 export function App() {
-  const count = signal(0)
+  const [count, setCount] = state(0)
 
   return (
-    <View style={{ padding: 20, gap: 10 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
-        Counter: {count}
-      </Text>
-
-      <Pressable
-        onPress={() => count.value++}
-        style={{
-          padding: 10,
-          backgroundColor: '#007bff',
-          borderRadius: 5
-        }}
+    <div style={{ padding: '20px' }}>
+      <h1>Counter: {count}</h1>
+      <button 
+        onclick={() => setCount(c => c + 1)}
+        style={{ padding: '10px 20px', fontSize: '16px' }}
       >
-        <Text style={{ color: 'white' }}>Increment</Text>
-      </Pressable>
-    </View>
+        Increment
+      </button>
+    </div>
   )
 }
 ```
@@ -91,90 +69,57 @@ import { App } from './App'
 mount(document.getElementById('app')!, <App />)
 ```
 
-## Understanding the Basics
+## Understanding the API
 
-### Signals
-
-Signals are the core reactive primitive:
+### 1. Local State
 
 ```tsx
-import { signal } from 'flexium'
-
-const count = signal(0)
-
-// Read value
-console.log(count.value) // 0
-
-// Update value
-count.value++
-console.log(count.value) // 1
+const [count, setCount] = state(0);
+// count() -> get value
+// setCount(1) or setCount(c => c + 1) -> set value
 ```
 
-### Computed Values
+### 2. Global State
 
-Derived state that auto-updates:
+Share state between components easily using a unique `key`.
 
 ```tsx
-import { signal, computed } from 'flexium'
+// In Header.tsx
+const [theme, setTheme] = state('light', { key: 'theme' });
 
-const count = signal(0)
-const doubled = computed(() => count.value * 2)
-
-console.log(doubled.value) // 0
-count.value = 5
-console.log(doubled.value) // 10 (auto-updated!)
+// In Footer.tsx - Initial value is optional if already initialized
+const [theme, setTheme] = state(undefined, { key: 'theme' });
 ```
 
-### Effects
+### 3. Async State (Resources)
 
-Run side effects when signals change:
+Flexium handles loading and error states for you.
 
 ```tsx
-import { signal, effect } from 'flexium'
+const [user, actions] = state(async () => {
+  const res = await fetch('/api/user');
+  return res.json();
+});
 
-const count = signal(0)
-
-effect(() => {
-  console.log(`Count is now: ${count.value}`)
-})
-// Logs: "Count is now: 0"
-
-count.value = 5
-// Logs: "Count is now: 5"
+return (
+  <div>
+    {user.loading && <p>Loading...</p>}
+    {user.error && <p>Error: {user.error.message}</p>}
+    {user() && <p>Welcome, {user().name}</p>}
+  </div>
+);
 ```
 
-## Canvas Example
+### 4. Computed State
 
-Flexium makes canvas rendering reactive:
+Pass a function to `state()` to create a value that updates automatically when dependencies change.
 
 ```tsx
-import { signal } from 'flexium'
-import { Canvas, Circle } from 'flexium'
-
-export function AnimatedCircle() {
-  const x = signal(50)
-
-  // Animate
-  setInterval(() => {
-    x.value = (x.value + 1) % 400
-  }, 16)
-
-  return (
-    <Canvas width={400} height={400}>
-      <Circle x={x} y={200} radius={30} fill="blue" />
-    </Canvas>
-  )
-}
+const [count] = state(0);
+const [double] = state(() => count() * 2);
 ```
 
 ## Next Steps
 
-- Learn about [Signals](/guide/signals) in depth
-- Explore [Cross-Platform Primitives](/guide/primitives)
-- Check out [Canvas Rendering](/guide/canvas)
-- Browse [Examples](/examples/counter)
-
-<div class="tip custom-block">
-  <p class="custom-block-title">Need Help?</p>
-  <p>Join our <a href="https://discord.gg/flexium">Discord</a> or check the <a href="https://github.com/yourusername/flexium.js/discussions">GitHub Discussions</a>.</p>
-</div>
+- Learn about [State Management](/guide/state) in depth.
+- Explore [Cross-Platform Primitives](/guide/primitives).

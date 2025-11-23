@@ -10,11 +10,11 @@ export default defineConfig({
 
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
-      { text: 'API', link: '/api/signals' },
+      { text: 'API', link: '/api/state' },
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.1.5',
+        text: 'v0.2.4',
         items: [
           { text: 'Changelog', link: 'https://github.com/yourusername/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -35,9 +35,7 @@ export default defineConfig({
         {
           text: 'Core Concepts',
           items: [
-            { text: 'Signals', link: '/guide/signals' },
-            { text: 'Computed Values', link: '/guide/computed' },
-            { text: 'Effects', link: '/guide/effects' },
+            { text: 'State Management', link: '/guide/state' },
             { text: 'Router', link: '/guide/router' },
             { text: 'Store', link: '/guide/store' },
             { text: 'JSX & Rendering', link: '/guide/jsx' },
@@ -66,10 +64,8 @@ export default defineConfig({
         {
           text: 'Core API',
           items: [
-            { text: 'Signals', link: '/api/signals' },
-            { text: 'Computed', link: '/api/computed' },
-            { text: 'Effects', link: '/api/effects' },
-            { text: 'Batch & Untrack', link: '/api/batch-untrack' }
+            { text: 'State', link: '/api/state' },
+            { text: 'Batch & Untrack', link: '/api/state#batch-fn' } // Anchor link to batch
           ]
         },
         {

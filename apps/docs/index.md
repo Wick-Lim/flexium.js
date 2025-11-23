@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Flexium
-  text: Signal-Based Reactive UI
-  tagline: A lightweight framework for building cross-platform UIs with fine-grained reactivity
+  text: Unified State & Reactivity
+  tagline: Simpler, Faster, Unified. The next-generation UI framework.
   actions:
     - theme: brand
       text: Get Started
@@ -18,41 +18,38 @@ hero:
 
 features:
   - icon: ⚡
+    title: Unified State API
+    details: One function for everything. state() handles local, global, and async state effortlessly.
+  - icon: 🎯
     title: Fine-Grained Reactivity
-    details: Signal-based reactivity system for precise, efficient updates without virtual DOM overhead
+    details: Updates only what changed without Virtual DOM overhead. Optimized for performance.
   - icon: 🎨
     title: Cross-Platform
-    details: Write once, run everywhere. Universal primitives work on web and React Native
-  - icon: 🎯
-    title: TypeScript First
-    details: Built with TypeScript for superior type safety and developer experience
+    details: Write once, run everywhere. Universal primitives for Web and Canvas.
   - icon: 📦
     title: Lightweight
-    details: Minimal bundle size with tree-shakeable exports. Only ship what you use
-  - icon: 🎪
-    title: Canvas Support
-    details: Declarative JSX-based canvas rendering with reactive signal integration
+    details: Minimal bundle size (~3KB) with tree-shakeable exports.
+  - icon: 🛠
+    title: TypeScript First
+    details: Built with TypeScript for superior type safety and developer experience.
   - icon: 🚀
-    title: Fast Development
-    details: Automatic JSX runtime, Vite integration, and instant HMR
+    title: Zero-Config JSX
+    details: Works out of the box with standard tooling like Vite.
 ---
 
 ## Quick Example
 
 ```tsx
-import { signal, effect } from 'flexium'
-import { View, Text, Pressable } from 'flexium'
+import { state } from 'flexium'
 
 function Counter() {
-  const count = signal(0)
+  // Local state with unified API
+  const [count, setCount] = state(0)
 
   return (
-    <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 24 }}>Count: {count}</Text>
-      <Pressable onPress={() => count.value++}>
-        <Text>Increment</Text>
-      </Pressable>
-    </View>
+    <button onclick={() => setCount(c => c + 1)}>
+      Count: {count}
+    </button>
   )
 }
 ```
