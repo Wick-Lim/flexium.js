@@ -1,12 +1,55 @@
-import { ResponsiveValue, FlexDirection, JustifyContent, AlignItems, Overflow, WhiteSpace, TextOverflow, WordBreak, TextAlign, VerticalAlign, TextTransform, TextDecoration, FontStyle, FontWeight, FontSize, LineHeight, LetterSpacing, ZIndex, Position, Top, Right, Bottom, Left, Cursor, Visibility, BoxSizing, PointerEvents } from '../../types/styles';
-import { CSSProperties } from '../../renderers/dom/types';
+/**
+ * Layout Primitives Types
+ */
 
-export type { ResponsiveValue };
+/**
+ * Responsive value type supporting base and breakpoint-specific values
+ */
+export type ResponsiveValue<T> = T | {
+  base?: T;
+  sm?: T;
+  md?: T;
+  lg?: T;
+  xl?: T;
+};
+
+/**
+ * CSS Properties type
+ */
+export interface CSSProperties {
+  [key: string]: string | number | undefined;
+}
+
+// Layout Types
+export type FlexDirection = 'row' | 'column' | 'row-reverse' | 'column-reverse';
+export type JustifyContent = 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly' | 'flex-start' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly';
+export type AlignItems = 'start' | 'center' | 'end' | 'stretch' | 'baseline' | 'flex-start' | 'flex-end';
+export type Overflow = 'visible' | 'hidden' | 'scroll' | 'auto';
+export type Position = 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
+export type Display = 'flex' | 'none' | 'block' | 'inline-block' | 'inline' | 'grid' | 'initial';
+export type FlexWrap = 'wrap' | 'nowrap' | 'wrap-reverse';
+
+// Text Types
+export type TextAlign = 'left' | 'center' | 'right' | 'justify';
+export type FontStyle = 'normal' | 'italic' | 'oblique';
+export type FontWeight = 'normal' | 'bold' | 'bolder' | 'lighter' | number | string;
+export type TextTransform = 'none' | 'capitalize' | 'uppercase' | 'lowercase';
+export type TextDecoration = 'none' | 'underline' | 'overline' | 'line-through' | 'blink';
+export type WhiteSpace = 'normal' | 'nowrap' | 'pre' | 'pre-line' | 'pre-wrap';
+export type TextOverflow = 'clip' | 'ellipsis';
+export type WordBreak = 'normal' | 'break-all' | 'keep-all' | 'break-word';
+export type VerticalAlign = 'baseline' | 'sub' | 'super' | 'top' | 'text-top' | 'middle' | 'bottom' | 'text-bottom' | string | number;
+
+// Other Types
+export type Cursor = 'auto' | 'default' | 'none' | 'context-menu' | 'help' | 'pointer' | 'progress' | 'wait' | 'cell' | 'crosshair' | 'text' | 'vertical-text' | 'alias' | 'copy' | 'move' | 'no-drop' | 'not-allowed' | 'grab' | 'grabbing' | string;
+export type Visibility = 'visible' | 'hidden' | 'collapse';
+export type BoxSizing = 'content-box' | 'border-box';
+export type PointerEvents = 'auto' | 'none' | 'visiblePainted' | 'visibleFill' | 'visibleStroke' | 'visible' | 'painted' | 'fill' | 'stroke' | 'all' | 'inherit';
 
 // Base style props that can be applied to any component
 export interface BaseStyleProps {
   // Layout
-  display?: ResponsiveValue<'flex' | 'none' | 'block' | 'inline-block' | 'inline' | 'grid' | 'initial'>;
+  display?: ResponsiveValue<Display>;
   flex?: ResponsiveValue<number | string>;
   flexGrow?: ResponsiveValue<number>;
   flexShrink?: ResponsiveValue<number>;
@@ -16,7 +59,7 @@ export interface BaseStyleProps {
   alignItems?: ResponsiveValue<AlignItems>;
   alignSelf?: ResponsiveValue<AlignItems>;
   gap?: ResponsiveValue<number | string>;
-  flexWrap?: ResponsiveValue<'wrap' | 'nowrap' | 'wrap-reverse'>;
+  flexWrap?: ResponsiveValue<FlexWrap>;
 
   // Spacing
   padding?: ResponsiveValue<number | string>;
@@ -52,21 +95,21 @@ export interface BaseStyleProps {
 
   // Positioning
   position?: ResponsiveValue<Position>;
-  top?: ResponsiveValue<Top>;
-  right?: ResponsiveValue<Right>;
-  bottom?: ResponsiveValue<Bottom>;
-  left?: ResponsiveValue<Left>;
-  zIndex?: ResponsiveValue<ZIndex>;
+  top?: ResponsiveValue<number | string>;
+  right?: ResponsiveValue<number | string>;
+  bottom?: ResponsiveValue<number | string>;
+  left?: ResponsiveValue<number | string>;
+  zIndex?: ResponsiveValue<number>;
 
   // Text
   color?: ResponsiveValue<string>;
-  fontSize?: ResponsiveValue<FontSize>;
+  fontSize?: ResponsiveValue<number | string>;
   fontWeight?: ResponsiveValue<FontWeight>;
   fontFamily?: ResponsiveValue<string>;
   fontStyle?: ResponsiveValue<FontStyle>;
   textAlign?: ResponsiveValue<TextAlign>;
-  lineHeight?: ResponsiveValue<LineHeight>;
-  letterSpacing?: ResponsiveValue<LetterSpacing>;
+  lineHeight?: ResponsiveValue<number | string>;
+  letterSpacing?: ResponsiveValue<number | string>;
   textTransform?: ResponsiveValue<TextTransform>;
   textDecoration?: ResponsiveValue<TextDecoration>;
   whiteSpace?: ResponsiveValue<WhiteSpace>;
@@ -96,9 +139,6 @@ export interface BaseComponentProps extends BaseStyleProps {
   onMouseLeave?: (event: MouseEvent) => void;
   children?: any;
 }
-
-export type AlignItems = 'start' | 'center' | 'end' | 'stretch' | 'baseline';
-export type JustifyContent = 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
 
 // Helper to convert style props to CSSProperties
 export function stylePropsToCSS(props: BaseStyleProps): CSSProperties {
@@ -190,25 +230,28 @@ export function mergeStyles(baseStyles: CSSProperties, userStyles?: CSSPropertie
   return { ...baseStyles, ...userStyles };
 }
 
-// Helper to get the base value from a responsive prop (e.g., { base: 10, md: 20 } -> 10)
-export function getBaseValue<T>(responsiveValue: ResponsiveValue<T>): T {
+// Helper to get the base value from a responsive prop
+export function getBaseValue<T>(responsiveValue: ResponsiveValue<T> | undefined): T | undefined {
+    if (responsiveValue === undefined) return undefined;
     if (typeof responsiveValue === 'object' && responsiveValue !== null && 'base' in responsiveValue) {
+        // @ts-ignore - we know base exists because of the check
         return responsiveValue.base;
     }
     return responsiveValue as T;
 }
 
 // Helper to convert number to px string if needed
-export function toCSSValue(value: number | string): string | number {
+export function toCSSValue(value: number | string | undefined): string | number | undefined {
+    if (value === undefined) return undefined;
     if (typeof value === 'number') {
         return `${value}px`;
     }
     return value;
 }
 
-// Map justify shorthand to CSS value (duplicate, should be in actual Row/Column components)
+// Map justify shorthand to CSS value
 function mapJustifyContent(value: JustifyContent): string {
-    const map: Record<JustifyContent, string> = {
+    const map: Record<string, string> = {
         start: 'flex-start',
         center: 'center',
         end: 'flex-end',
@@ -216,12 +259,13 @@ function mapJustifyContent(value: JustifyContent): string {
         around: 'space-around',
         evenly: 'space-evenly',
     };
+    // If it's a known shorthand, map it. Otherwise return as is (e.g. 'flex-start')
     return map[value] || value;
 }
 
-// Map align shorthand to CSS value (duplicate, should be in actual Row/Column components)
+// Map align shorthand to CSS value
 function mapAlignItems(value: AlignItems): string {
-    const map: Record<AlignItems, string> = {
+    const map: Record<string, string> = {
         start: 'flex-start',
         center: 'center',
         end: 'flex-end',

@@ -22,7 +22,7 @@ export interface RowProps extends BaseComponentProps {
  * Map justify shorthand to CSS value
  */
 function mapJustifyContent(value: JustifyContent): string {
-  const map: Record<JustifyContent, string> = {
+  const map: Record<string, string> = {
     start: 'flex-start',
     center: 'center',
     end: 'flex-end',
@@ -37,7 +37,7 @@ function mapJustifyContent(value: JustifyContent): string {
  * Map align shorthand to CSS value
  */
 function mapAlignItems(value: AlignItems): string {
-  const map: Record<AlignItems, string> = {
+  const map: Record<string, string> = {
     start: 'flex-start',
     center: 'center',
     end: 'flex-end',
@@ -105,13 +105,13 @@ export function Row(props: RowProps): VNode {
   // Handle alignment
   const alignValue = getBaseValue(align);
   if (alignValue) {
-    flexStyles.alignItems = mapAlignItems(alignValue);
+    flexStyles.alignItems = mapAlignItems(alignValue as AlignItems);
   }
 
   // Handle justification
   const justifyValue = getBaseValue(justify);
   if (justifyValue) {
-    flexStyles.justifyContent = mapJustifyContent(justifyValue);
+    flexStyles.justifyContent = mapJustifyContent(justifyValue as JustifyContent);
   }
 
   // Handle wrap
