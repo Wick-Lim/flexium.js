@@ -1,6 +1,6 @@
-# Effects
+# effect()
 
-Effects are functions that run automatically whenever their reactive dependencies change. They are the bridge between the reactive state and the outside world (DOM updates, API calls, subscriptions, etc.).
+`effect()` runs a function automatically whenever its reactive dependencies change. It is the bridge between the reactive state and the outside world (DOM updates, API calls, subscriptions, etc.).
 
 ## Usage
 

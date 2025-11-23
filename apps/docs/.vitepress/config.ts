@@ -33,40 +33,14 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Core Concepts',
+          text: 'Core API',
           items: [
-            { text: 'State Management', link: '/guide/state' },
-            { text: 'Effects', link: '/guide/effects' },
-            { text: 'Derived State (Computed)', link: '/guide/state#computed-state-derived' },
+            { text: 'state()', link: '/guide/state' },
+            { text: 'effect()', link: '/guide/effects' },
             { text: 'Router', link: '/guide/router' },
             { text: 'Store', link: '/guide/store' },
             { text: 'JSX & Rendering', link: '/guide/jsx' },
             { text: 'Error Handling', link: '/guide/error-handling' }
-          ]
-        },
-        {
-          text: 'Cross-Platform',
-          items: [
-            { text: 'Primitives', link: '/guide/primitives' },
-            { text: 'Canvas Rendering', link: '/guide/canvas' },
-            { text: 'Styling', link: '/guide/styling' }
-          ]
-        },
-        {
-          text: 'Advanced',
-          items: [
-            { text: 'Performance', link: '/guide/performance' },
-            { text: 'Server-Side Rendering', link: '/guide/ssr' },
-            { text: 'TypeScript', link: '/guide/typescript' },
-            { text: 'Testing', link: '/guide/testing' }
-          ]
-        }
-      ],
-      '/api/': [
-        {
-          text: 'Core API',
-          items: [
-            { text: 'State', link: '/api/state' }
           ]
         },
         {
@@ -89,6 +63,23 @@ export default defineConfig({
             { text: 'Text', link: '/api/canvas/text' },
             { text: 'Line', link: '/api/canvas/line' },
             { text: 'Arc', link: '/api/canvas/arc' }
+          ]
+        },
+        {
+          text: 'Cross-Platform',
+          items: [
+            { text: 'Primitives', link: '/guide/primitives' },
+            { text: 'Canvas Rendering', link: '/guide/canvas' },
+            { text: 'Styling', link: '/guide/styling' }
+          ]
+        },
+        {
+          text: 'Advanced',
+          items: [
+            { text: 'Performance', link: '/guide/performance' },
+            { text: 'Server-Side Rendering', link: '/guide/ssr' },
+            { text: 'TypeScript', link: '/guide/typescript' },
+            { text: 'Testing', link: '/guide/testing' }
           ]
         }
       ],

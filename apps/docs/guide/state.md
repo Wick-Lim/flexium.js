@@ -1,7 +1,7 @@
-# State Management
+# state()
 
-Flexium provides a single, unified API for all your state management needs: `state()`. 
-Whether it's local component state, shared global state, async data fetching, or derived values, `state()` handles it all.
+`state()` is the single, unified API for all state management in Flexium.
+It handles local state, shared global state, async data fetching, and derived values.
 
 ## The `state()` API
 
