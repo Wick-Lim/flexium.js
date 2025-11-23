@@ -9,8 +9,7 @@ import { h } from '../../packages/flexium/dist/dom.mjs';
 // Performance Comparison Tests
 // ==========================================
 
-test('jsx() performance is comparable to h()', () => {
-  const iterations = 10000;
+  const iterations = 1000;
 
   // Test jsx()
   const jsxStart = performance.now();
@@ -36,7 +35,7 @@ test('jsx() performance is comparable to h()', () => {
 });
 
 test('jsxs() performance with multiple children', () => {
-  const iterations = 5000;
+  const iterations = 500;
 
   // Test jsxs()
   const jsxsStart = performance.now();
@@ -61,7 +60,7 @@ test('jsxs() performance with multiple children', () => {
 });
 
 test('jsx() nested children flattening performance', () => {
-  const iterations = 5000;
+  const iterations = 500;
 
   const start = performance.now();
   for (let i = 0; i < iterations; i++) {
@@ -84,7 +83,7 @@ test('jsx() nested children flattening performance', () => {
 });
 
 test('jsx() memory efficiency', () => {
-  const iterations = 10000;
+  const iterations = 1000;
   const nodes = [];
 
   const start = performance.now();

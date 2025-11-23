@@ -67,7 +67,7 @@
     "dev:web": "cd examples/web-demo && npm run dev",
     "build": "tsup",
     "build:types": "tsc --emitDeclarationOnly",
-    "test": "node --test ../../tests/unit/*.test.mjs",
+    "test": "vitest run",
     "test:signal": "node --test ../../tests/unit/signal.test.mjs",
     "test:dom": "node --test ../../tests/unit/dom.test.mjs",
     "test:events": "node --test ../../tests/unit/events.test.mjs",

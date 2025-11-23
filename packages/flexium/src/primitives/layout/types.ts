@@ -1,51 +1,34 @@
-/**
- * Responsive value type supporting base and breakpoint-specific values
- */
-export type ResponsiveValue<T> = T | {
-  base?: T;
-  sm?: T;
-  md?: T;
-  lg?: T;
-  xl?: T;
-};
+import { ResponsiveValue, FlexDirection, JustifyContent, AlignItems, Overflow, WhiteSpace, TextOverflow, WordBreak, TextAlign, VerticalAlign, TextTransform, TextDecoration, FontStyle, FontWeight, FontSize, LineHeight, LetterSpacing, ZIndex, Position, Top, Right, Bottom, Left, Cursor, Visibility, BoxSizing, PointerEvents } from '../../types/styles';
+import { CSSProperties } from '../../renderers/dom/types';
 
-/**
- * Alignment values for flex containers
- */
-export type AlignItems = 'start' | 'center' | 'end' | 'stretch' | 'baseline';
+export type { ResponsiveValue };
 
-/**
- * Justify content values for flex containers
- */
-export type JustifyContent = 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
+// Base style props that can be applied to any component
+export interface BaseStyleProps {
+  // Layout
+  display?: ResponsiveValue<'flex' | 'none' | 'block' | 'inline-block' | 'inline' | 'grid' | 'initial'>;
+  flex?: ResponsiveValue<number | string>;
+  flexGrow?: ResponsiveValue<number>;
+  flexShrink?: ResponsiveValue<number>;
+  flexBasis?: ResponsiveValue<string>;
+  flexDirection?: ResponsiveValue<FlexDirection>;
+  justifyContent?: ResponsiveValue<JustifyContent>;
+  alignItems?: ResponsiveValue<AlignItems>;
+  alignSelf?: ResponsiveValue<AlignItems>;
+  gap?: ResponsiveValue<number | string>;
+  flexWrap?: ResponsiveValue<'wrap' | 'nowrap' | 'wrap-reverse'>;
 
-/**
- * Flex direction values
- */
-export type FlexDirection = 'row' | 'column' | 'row-reverse' | 'column-reverse';
-
-/**
- * Common style props for all layout primitives
- */
-export interface StyleProps {
   // Spacing
   padding?: ResponsiveValue<number | string>;
-  paddingX?: ResponsiveValue<number | string>;
-  paddingY?: ResponsiveValue<number | string>;
   paddingTop?: ResponsiveValue<number | string>;
   paddingRight?: ResponsiveValue<number | string>;
   paddingBottom?: ResponsiveValue<number | string>;
   paddingLeft?: ResponsiveValue<number | string>;
-
   margin?: ResponsiveValue<number | string>;
-  marginX?: ResponsiveValue<number | string>;
-  marginY?: ResponsiveValue<number | string>;
   marginTop?: ResponsiveValue<number | string>;
   marginRight?: ResponsiveValue<number | string>;
   marginBottom?: ResponsiveValue<number | string>;
   marginLeft?: ResponsiveValue<number | string>;
-
-  gap?: ResponsiveValue<number | string>;
 
   // Sizing
   width?: ResponsiveValue<number | string>;
@@ -55,180 +38,96 @@ export interface StyleProps {
   minHeight?: ResponsiveValue<number | string>;
   maxHeight?: ResponsiveValue<number | string>;
 
-  // Flex
-  flex?: ResponsiveValue<number | string>;
-  flexGrow?: ResponsiveValue<number>;
-  flexShrink?: ResponsiveValue<number>;
-  flexBasis?: ResponsiveValue<number | string>;
-
-  // Colors
-  bg?: string;
-  backgroundColor?: string;
-  color?: string;
-
-  // Border
-  border?: string;
-  borderTop?: string;
-  borderRight?: string;
-  borderBottom?: string;
-  borderLeft?: string;
+  // Visual
+  backgroundColor?: ResponsiveValue<string>;
+  background?: ResponsiveValue<string>;
   borderRadius?: ResponsiveValue<number | string>;
   borderWidth?: ResponsiveValue<number | string>;
-  borderColor?: string;
-  borderStyle?: string;
+  borderColor?: ResponsiveValue<string>;
+  borderStyle?: ResponsiveValue<string>;
+  border?: ResponsiveValue<string>;
+  opacity?: ResponsiveValue<number>;
+  overflow?: ResponsiveValue<Overflow>;
+  boxShadow?: ResponsiveValue<string>;
 
-  // Typography
-  fontSize?: ResponsiveValue<number | string>;
-  fontWeight?: ResponsiveValue<number | string>;
-  fontFamily?: string;
-  lineHeight?: ResponsiveValue<number | string>;
-  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  // Positioning
+  position?: ResponsiveValue<Position>;
+  top?: ResponsiveValue<Top>;
+  right?: ResponsiveValue<Right>;
+  bottom?: ResponsiveValue<Bottom>;
+  left?: ResponsiveValue<Left>;
+  zIndex?: ResponsiveValue<ZIndex>;
 
-  // Position
-  position?: 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
-  top?: ResponsiveValue<number | string>;
-  right?: ResponsiveValue<number | string>;
-  bottom?: ResponsiveValue<number | string>;
-  left?: ResponsiveValue<number | string>;
-  zIndex?: number;
-
-  // Display
-  display?: string;
-  overflow?: 'visible' | 'hidden' | 'scroll' | 'auto';
-  overflowX?: 'visible' | 'hidden' | 'scroll' | 'auto';
-  overflowY?: 'visible' | 'hidden' | 'scroll' | 'auto';
-
-  // Opacity & Visibility
-  opacity?: number;
-  visibility?: 'visible' | 'hidden' | 'collapse';
-
-  // Cursor
-  cursor?: string;
+  // Text
+  color?: ResponsiveValue<string>;
+  fontSize?: ResponsiveValue<FontSize>;
+  fontWeight?: ResponsiveValue<FontWeight>;
+  fontFamily?: ResponsiveValue<string>;
+  fontStyle?: ResponsiveValue<FontStyle>;
+  textAlign?: ResponsiveValue<TextAlign>;
+  lineHeight?: ResponsiveValue<LineHeight>;
+  letterSpacing?: ResponsiveValue<LetterSpacing>;
+  textTransform?: ResponsiveValue<TextTransform>;
+  textDecoration?: ResponsiveValue<TextDecoration>;
+  whiteSpace?: ResponsiveValue<WhiteSpace>;
+  textOverflow?: ResponsiveValue<TextOverflow>;
+  wordBreak?: ResponsiveValue<WordBreak>;
+  verticalAlign?: ResponsiveValue<VerticalAlign>;
 
   // Other
-  boxShadow?: string;
-  transition?: string;
-  transform?: string;
+  cursor?: ResponsiveValue<Cursor>;
+  visibility?: ResponsiveValue<Visibility>;
+  boxSizing?: ResponsiveValue<BoxSizing>;
+  pointerEvents?: ResponsiveValue<PointerEvents>;
 }
 
-/**
- * Base component props
- */
-export interface BaseComponentProps extends StyleProps {
-  children?: any;
+// Base props for all components
+export interface BaseComponentProps extends BaseStyleProps {
+  id?: string;
   className?: string;
   style?: CSSProperties;
-  id?: string;
-  role?: string;
   'aria-label'?: string;
   'aria-labelledby'?: string;
   'aria-describedby'?: string;
+  role?: string;
+  tabIndex?: number;
   onClick?: (event: MouseEvent) => void;
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
+  children?: any;
 }
 
-/**
- * Breakpoint configuration
- */
-export interface BreakpointConfig {
-  sm: string;
-  md: string;
-  lg: string;
-  xl: string;
-}
+export type AlignItems = 'start' | 'center' | 'end' | 'stretch' | 'baseline';
+export type JustifyContent = 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
 
-/**
- * Default breakpoint values (in pixels)
- */
-export const defaultBreakpoints: BreakpointConfig = {
-  sm: '640px',
-  md: '768px',
-  lg: '1024px',
-  xl: '1280px',
-};
-
-/**
- * Convert a value to CSS string (add 'px' if it's a number)
- */
-export function toCSSValue(value: number | string | undefined): string | undefined {
-  if (value === undefined) return undefined;
-  if (typeof value === 'number') return `${value}px`;
-  return value;
-}
-
-/**
- * Check if a value is a responsive object
- */
-export function isResponsiveValue<T>(value: any): value is { base?: T; sm?: T; md?: T; lg?: T; xl?: T } {
-  return typeof value === 'object' && value !== null && !Array.isArray(value) && ('base' in value || 'sm' in value || 'md' in value || 'lg' in value || 'xl' in value);
-}
-
-/**
- * Get base value from responsive value or return value as-is
- */
-export function getBaseValue<T>(value: ResponsiveValue<T> | undefined): T | undefined {
-  if (value === undefined) return undefined;
-  if (isResponsiveValue(value)) {
-    return value.base ?? value.sm ?? value.md ?? value.lg ?? value.xl;
-  }
-  return value;
-}
-
-/**
- * CSS Properties type
- */
-export interface CSSProperties {
-  [key: string]: string | number | undefined;
-}
-
-/**
- * Convert style props to inline CSS styles
- * Only handles base (non-responsive) values for inline styles
- */
-export function stylePropsToCSS(props: StyleProps): CSSProperties {
+// Helper to convert style props to CSSProperties
+export function stylePropsToCSS(props: BaseStyleProps): CSSProperties {
   const styles: CSSProperties = {};
 
-  // Spacing - padding
-  const padding = getBaseValue(props.padding);
-  const paddingX = getBaseValue(props.paddingX);
-  const paddingY = getBaseValue(props.paddingY);
+  // Layout
+  if (props.display !== undefined) styles.display = getBaseValue(props.display);
+  if (props.flex !== undefined) styles.flex = getBaseValue(props.flex);
+  if (props.flexGrow !== undefined) styles.flexGrow = getBaseValue(props.flexGrow);
+  if (props.flexShrink !== undefined) styles.flexShrink = getBaseValue(props.flexShrink);
+  if (props.flexBasis !== undefined) styles.flexBasis = getBaseValue(props.flexBasis);
+  if (props.flexDirection !== undefined) styles.flexDirection = getBaseValue(props.flexDirection);
+  if (props.justifyContent !== undefined) styles.justifyContent = mapJustifyContent(getBaseValue(props.justifyContent) as JustifyContent);
+  if (props.alignItems !== undefined) styles.alignItems = mapAlignItems(getBaseValue(props.alignItems) as AlignItems);
+  if (props.alignSelf !== undefined) styles.alignSelf = mapAlignItems(getBaseValue(props.alignSelf) as AlignItems);
+  if (props.gap !== undefined) styles.gap = toCSSValue(getBaseValue(props.gap));
+  if (props.flexWrap !== undefined) styles.flexWrap = getBaseValue(props.flexWrap);
 
-  if (padding !== undefined) styles.padding = toCSSValue(padding);
-  if (paddingX !== undefined) {
-    styles.paddingLeft = toCSSValue(paddingX);
-    styles.paddingRight = toCSSValue(paddingX);
-  }
-  if (paddingY !== undefined) {
-    styles.paddingTop = toCSSValue(paddingY);
-    styles.paddingBottom = toCSSValue(paddingY);
-  }
+  // Spacing
+  if (props.padding !== undefined) styles.padding = toCSSValue(getBaseValue(props.padding));
   if (props.paddingTop !== undefined) styles.paddingTop = toCSSValue(getBaseValue(props.paddingTop));
   if (props.paddingRight !== undefined) styles.paddingRight = toCSSValue(getBaseValue(props.paddingRight));
   if (props.paddingBottom !== undefined) styles.paddingBottom = toCSSValue(getBaseValue(props.paddingBottom));
   if (props.paddingLeft !== undefined) styles.paddingLeft = toCSSValue(getBaseValue(props.paddingLeft));
-
-  // Spacing - margin
-  const margin = getBaseValue(props.margin);
-  const marginX = getBaseValue(props.marginX);
-  const marginY = getBaseValue(props.marginY);
-
-  if (margin !== undefined) styles.margin = toCSSValue(margin);
-  if (marginX !== undefined) {
-    styles.marginLeft = toCSSValue(marginX);
-    styles.marginRight = toCSSValue(marginX);
-  }
-  if (marginY !== undefined) {
-    styles.marginTop = toCSSValue(marginY);
-    styles.marginBottom = toCSSValue(marginY);
-  }
+  if (props.margin !== undefined) styles.margin = toCSSValue(getBaseValue(props.margin));
   if (props.marginTop !== undefined) styles.marginTop = toCSSValue(getBaseValue(props.marginTop));
   if (props.marginRight !== undefined) styles.marginRight = toCSSValue(getBaseValue(props.marginRight));
   if (props.marginBottom !== undefined) styles.marginBottom = toCSSValue(getBaseValue(props.marginBottom));
   if (props.marginLeft !== undefined) styles.marginLeft = toCSSValue(getBaseValue(props.marginLeft));
-
-  // Gap
-  if (props.gap !== undefined) styles.gap = toCSSValue(getBaseValue(props.gap));
 
   // Sizing
   if (props.width !== undefined) styles.width = toCSSValue(getBaseValue(props.width));
@@ -238,68 +137,96 @@ export function stylePropsToCSS(props: StyleProps): CSSProperties {
   if (props.minHeight !== undefined) styles.minHeight = toCSSValue(getBaseValue(props.minHeight));
   if (props.maxHeight !== undefined) styles.maxHeight = toCSSValue(getBaseValue(props.maxHeight));
 
-  // Flex
-  if (props.flex !== undefined) styles.flex = getBaseValue(props.flex);
-  if (props.flexGrow !== undefined) styles.flexGrow = getBaseValue(props.flexGrow);
-  if (props.flexShrink !== undefined) styles.flexShrink = getBaseValue(props.flexShrink);
-  if (props.flexBasis !== undefined) styles.flexBasis = toCSSValue(getBaseValue(props.flexBasis));
-
-  // Colors
-  if (props.bg) styles.backgroundColor = props.bg;
-  if (props.backgroundColor) styles.backgroundColor = props.backgroundColor;
-  if (props.color) styles.color = props.color;
-
-  // Border
-  if (props.border) styles.border = props.border;
-  if (props.borderTop) styles.borderTop = props.borderTop;
-  if (props.borderRight) styles.borderRight = props.borderRight;
-  if (props.borderBottom) styles.borderBottom = props.borderBottom;
-  if (props.borderLeft) styles.borderLeft = props.borderLeft;
+  // Visual
+  if (props.backgroundColor !== undefined) styles.backgroundColor = getBaseValue(props.backgroundColor);
+  if (props.background !== undefined) styles.background = getBaseValue(props.background);
   if (props.borderRadius !== undefined) styles.borderRadius = toCSSValue(getBaseValue(props.borderRadius));
   if (props.borderWidth !== undefined) styles.borderWidth = toCSSValue(getBaseValue(props.borderWidth));
-  if (props.borderColor) styles.borderColor = props.borderColor;
-  if (props.borderStyle) styles.borderStyle = props.borderStyle;
+  if (props.borderColor !== undefined) styles.borderColor = getBaseValue(props.borderColor);
+  if (props.borderStyle !== undefined) styles.borderStyle = getBaseValue(props.borderStyle);
+  if (props.border !== undefined) styles.border = getBaseValue(props.border);
+  if (props.opacity !== undefined) styles.opacity = getBaseValue(props.opacity);
+  if (props.overflow !== undefined) styles.overflow = getBaseValue(props.overflow);
+  if (props.boxShadow !== undefined) styles.boxShadow = getBaseValue(props.boxShadow);
 
-  // Typography
-  if (props.fontSize !== undefined) styles.fontSize = toCSSValue(getBaseValue(props.fontSize));
-  if (props.fontWeight !== undefined) styles.fontWeight = getBaseValue(props.fontWeight);
-  if (props.fontFamily) styles.fontFamily = props.fontFamily;
-  if (props.lineHeight !== undefined) styles.lineHeight = toCSSValue(getBaseValue(props.lineHeight));
-  if (props.textAlign) styles.textAlign = props.textAlign;
-
-  // Position
-  if (props.position) styles.position = props.position;
+  // Positioning
+  if (props.position !== undefined) styles.position = getBaseValue(props.position);
   if (props.top !== undefined) styles.top = toCSSValue(getBaseValue(props.top));
   if (props.right !== undefined) styles.right = toCSSValue(getBaseValue(props.right));
   if (props.bottom !== undefined) styles.bottom = toCSSValue(getBaseValue(props.bottom));
   if (props.left !== undefined) styles.left = toCSSValue(getBaseValue(props.left));
-  if (props.zIndex !== undefined) styles.zIndex = props.zIndex;
+  if (props.zIndex !== undefined) styles.zIndex = getBaseValue(props.zIndex);
 
-  // Display
-  if (props.display) styles.display = props.display;
-  if (props.overflow) styles.overflow = props.overflow;
-  if (props.overflowX) styles.overflowX = props.overflowX;
-  if (props.overflowY) styles.overflowY = props.overflowY;
-
-  // Opacity & Visibility
-  if (props.opacity !== undefined) styles.opacity = props.opacity;
-  if (props.visibility) styles.visibility = props.visibility;
-
-  // Cursor
-  if (props.cursor) styles.cursor = props.cursor;
+  // Text
+  if (props.color !== undefined) styles.color = getBaseValue(props.color);
+  if (props.fontSize !== undefined) styles.fontSize = toCSSValue(getBaseValue(props.fontSize));
+  if (props.fontWeight !== undefined) styles.fontWeight = getBaseValue(props.fontWeight);
+  if (props.fontFamily !== undefined) styles.fontFamily = getBaseValue(props.fontFamily);
+  if (props.fontStyle !== undefined) styles.fontStyle = getBaseValue(props.fontStyle);
+  if (props.textAlign !== undefined) styles.textAlign = getBaseValue(props.textAlign);
+  if (props.lineHeight !== undefined) styles.lineHeight = toCSSValue(getBaseValue(props.lineHeight));
+  if (props.letterSpacing !== undefined) styles.letterSpacing = toCSSValue(getBaseValue(props.letterSpacing));
+  if (props.textTransform !== undefined) styles.textTransform = getBaseValue(props.textTransform);
+  if (props.textDecoration !== undefined) styles.textDecoration = getBaseValue(props.textDecoration);
+  if (props.whiteSpace !== undefined) styles.whiteSpace = getBaseValue(props.whiteSpace);
+  if (props.textOverflow !== undefined) styles.textOverflow = getBaseValue(props.textOverflow);
+  if (props.wordBreak !== undefined) styles.wordBreak = getBaseValue(props.wordBreak);
+  if (props.verticalAlign !== undefined) styles.verticalAlign = getBaseValue(props.verticalAlign);
 
   // Other
-  if (props.boxShadow) styles.boxShadow = props.boxShadow;
-  if (props.transition) styles.transition = props.transition;
-  if (props.transform) styles.transform = props.transform;
+  if (props.cursor !== undefined) styles.cursor = getBaseValue(props.cursor);
+  if (props.visibility !== undefined) styles.visibility = getBaseValue(props.visibility);
+  if (props.boxSizing !== undefined) styles.boxSizing = getBaseValue(props.boxSizing);
+  if (props.pointerEvents !== undefined) styles.pointerEvents = getBaseValue(props.pointerEvents);
 
   return styles;
 }
 
-/**
- * Merge user styles with generated styles
- */
-export function mergeStyles(generatedStyles: CSSProperties, userStyle?: CSSProperties): CSSProperties {
-  if (!userStyle) return generatedStyles;
-  return { ...generatedStyles, ...userStyle };
+// Helper to merge styles (user-provided style takes precedence)
+export function mergeStyles(baseStyles: CSSProperties, userStyles?: CSSProperties): CSSProperties {
+  if (!userStyles) {
+    return baseStyles;
+  }
+  return { ...baseStyles, ...userStyles };
+}
+
+// Helper to get the base value from a responsive prop (e.g., { base: 10, md: 20 } -> 10)
+export function getBaseValue<T>(responsiveValue: ResponsiveValue<T>): T {
+    if (typeof responsiveValue === 'object' && responsiveValue !== null && 'base' in responsiveValue) {
+        return responsiveValue.base;
+    }
+    return responsiveValue as T;
+}
+
+// Helper to convert number to px string if needed
+export function toCSSValue(value: number | string): string | number {
+    if (typeof value === 'number') {
+        return `${value}px`;
+    }
+    return value;
+}
+
+// Map justify shorthand to CSS value (duplicate, should be in actual Row/Column components)
+function mapJustifyContent(value: JustifyContent): string {
+    const map: Record<JustifyContent, string> = {
+        start: 'flex-start',
+        center: 'center',
+        end: 'flex-end',
+        between: 'space-between',
+        around: 'space-around',
+        evenly: 'space-evenly',
+    };
+    return map[value] || value;
+}
+
+// Map align shorthand to CSS value (duplicate, should be in actual Row/Column components)
+function mapAlignItems(value: AlignItems): string {
+    const map: Record<AlignItems, string> = {
+        start: 'flex-start',
+        center: 'center',
+        end: 'flex-end',
+        stretch: 'stretch',
+        baseline: 'baseline',
+    };
+    return map[value] || value;
 }

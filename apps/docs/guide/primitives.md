@@ -1,4 +1,4 @@
-# Cross-Platform Primitives
+# Primitives Overview
 
 Flexium provides universal primitives that work seamlessly across web and React Native.
 
@@ -9,11 +9,11 @@ Write once, run everywhere. The same code works on:
 - **Web**: Compiles to standard HTML elements
 - **React Native**: Compiles to React Native components (coming soon)
 
-## Available Primitives
+## Core Primitives
 
 ### View
 
-Universal container component.
+Universal container component. It's the most basic building block for layout.
 
 ```tsx
 import { View } from 'flexium'
@@ -26,6 +26,50 @@ import { View } from 'flexium'
 **Compiles to:**
 - Web: `<div>`
 - React Native: `<View>`
+
+### Row
+
+Horizontal flex container for arranging children in a row. Supports alignment, justification, and responsive props.
+
+```tsx
+import { Row } from 'flexium'
+
+<Row gap={16} align="center" justify="between">
+  <Text>Left</Text>
+  <Text>Right</Text>
+</Row>
+```
+
+**Props:**
+- `align`: Aligns items on the cross axis (vertical). Accepts `'start' | 'center' | 'end' | 'stretch' | 'baseline'`. Supports responsive values.
+- `justify`: Justifies items on the main axis (horizontal). Accepts `'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'`. Supports responsive values.
+- `gap`: Spacing between children. Accepts a number (in px) or responsive values.
+- `wrap`: Enables wrapping of items. Accepts `boolean` or responsive values.
+- `reverse`: Reverses the direction of items. Accepts `boolean`.
+- `as`: (Web only) HTML element to render (e.g., `'div'`, `'span'`). Defaults to `'div'`.
+- All [CommonStyle](#commonstyle) props.
+
+### Column
+
+Vertical flex container for arranging children in a column. Supports alignment, justification, and responsive props.
+
+```tsx
+import { Column } from 'flexium'
+
+<Column gap={8} padding={16}>
+  <Text>Top</Text>
+  <Text>Bottom</Text>
+</Column>
+```
+
+**Props:**
+- `align`: Aligns items on the cross axis (horizontal). Accepts `'start' | 'center' | 'end' | 'stretch' | 'baseline'`. Supports responsive values.
+- `justify`: Justifies items on the main axis (vertical). Accepts `'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'`. Supports responsive values.
+- `gap`: Spacing between children. Accepts a number (in px) or responsive values.
+- `wrap`: Enables wrapping of items. Accepts `boolean` or responsive values.
+- `reverse`: Reverses the direction of items. Accepts `boolean`.
+- `as`: (Web only) HTML element to render (e.g., `'div'`, `'span'`). Defaults to `'div'`.
+- All [CommonStyle](#commonstyle) props.
 
 ### Text
 
@@ -142,14 +186,14 @@ interface CommonStyle {
 
 ```tsx
 import { signal } from 'flexium'
-import { View, Text, Image, Pressable, ScrollView } from 'flexium'
+import { View, Text, Image, Pressable, ScrollView, Row, Column } from 'flexium'
 
 function UserProfile() {
   const likes = signal(42)
 
   return (
     <ScrollView>
-      <View style={{ padding: 20, gap: 15 }}>
+      <Column style={{ padding: 20, gap: 15 }}>
         {/* Avatar */}
         <Image
           src="/avatar.jpg"
@@ -161,17 +205,17 @@ function UserProfile() {
         />
 
         {/* Info */}
-        <View style={{ gap: 5 }}>
+        <Column style={{ gap: 5 }}>
           <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
             Alice Smith
           </Text>
           <Text style={{ color: '#666' }}>
             Product Designer
           </Text>
-        </View>
+        </Column>
 
         {/* Actions */}
-        <View style={{ flexDirection: 'row', gap: 10 }}>
+        <Row style={{ gap: 10 }}>
           <Pressable
             onPress={() => likes.value++}
             style={{
@@ -199,8 +243,8 @@ function UserProfile() {
               Follow
             </Text>
           </Pressable>
-        </View>
-      </View>
+        </Row>
+      </Column>
     </ScrollView>
   )
 }
@@ -240,6 +284,6 @@ module.exports = {
 
 ## Next Steps
 
-- Learn about [Canvas Rendering](/guide/canvas)
+- Learn about [Canvas Rendering Guide](/guide/canvas)
 - Explore [Styling](/guide/styling)
-- Check [API Reference](/api/primitives/view)
+- Check [View API Reference](/reference/primitives/view)

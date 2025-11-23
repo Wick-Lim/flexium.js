@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### API Simplification & Doc Overhaul - 2025-11-23
+
+#### Changed
+- **Simplified Reactivity API**: Unified state management under `state()`.
+  - `state()` now handles local, global, async, and derived state.
+  - `createStore` has been removed and consolidated into `state()`.
+  - `batch` and `untrack` removed from public API (handled automatically internally).
+- **Documentation Structure**: Major overhaul of `apps/docs`.
+  - Restructured sidebar into `Core API`, `Cross-Platform Guides`, and `Advanced`.
+  - Added dedicated guides for `Row`, `Column` (Layout Primitives) and `Control Flow` (`For`, `Show`).
+  - Removed deprecated documentation (`store.md`, etc.).
+
+#### Removed
+- `createStore` API (use `state()` instead).
+- `batch` and `untrack` form public exports.
+
 ### JSX Runtime & Metadata Updates - 2025-11-22
 
 #### Added

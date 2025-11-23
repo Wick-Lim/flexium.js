@@ -37,6 +37,9 @@ export default defineConfig({
           items: [
             { text: 'state()', link: '/guide/state' },
             { text: 'effect()', link: '/guide/effects' },
+            { text: 'Control Flow', link: '/guide/flow' },
+            { text: 'Row', link: '/guide/primitives' },
+            { text: 'Column', link: '/guide/primitives' },
             { text: 'Router', link: '/guide/router' },
             { text: 'JSX & Rendering', link: '/guide/jsx' },
             { text: 'Error Handling', link: '/guide/error-handling' }

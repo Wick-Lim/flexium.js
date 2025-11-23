@@ -32,6 +32,7 @@ export type {
 
 // Cross-platform primitives (web/mobile)
 export { View } from './primitives/View'
+export { Row, Column } from './primitives/layout'
 export { Text } from './primitives/Text'
 export { Image } from './primitives/Image'
 export { Pressable } from './primitives/Pressable'
@@ -45,13 +46,17 @@ export type {
   ImageProps,
   PressableProps,
   ScrollViewProps,
-  CommonStyle,
-  TextStyle,
+  CanvasProps,
   RectProps,
   CircleProps,
   PathProps,
   CanvasTextProps,
   LineProps,
   ArcProps,
-  CanvasProps,
 } from './primitives/types'
+
+export type {
+  RowProps,
+  ColumnProps,
+  CommonStyle,
+} from './primitives/layout'
