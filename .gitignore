@@ -3,6 +3,9 @@ node_modules/
 .pnp
 .pnp.js
 
+# turborepo
+.turbo/
+
 # Build output
 dist/
 build/
@@ -46,7 +49,7 @@ temp/
 *.temp
 
 # Package manager
-package-lock.json
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
 

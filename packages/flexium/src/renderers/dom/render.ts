@@ -41,7 +41,7 @@ const NODE_DATA = new WeakMap<Node, NodeData>();
  * // The div will automatically update when count changes
  */
 export function render(
-  vnode: VNode | string | number | null | undefined,
+  vnode: VNode | string | number | null | undefined | Function,
   container: HTMLElement
 ): Node | null {
   // Use reactive rendering for automatic signal tracking
@@ -51,10 +51,15 @@ export function render(
 /**
  * Mount a virtual node to create a DOM node
  */
-function mount(vnode: VNode | string | number | null | undefined): Node | null {
+function mount(vnode: VNode | string | number | null | undefined | Function): Node | null {
   // Handle null/undefined
   if (vnode === null || vnode === undefined) {
     return null;
+  }
+
+  // Handle functions (lazy components)
+  if (typeof vnode === 'function') {
+    return mount(vnode());
   }
 
   // Handle text nodes

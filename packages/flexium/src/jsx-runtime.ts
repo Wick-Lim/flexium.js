@@ -121,3 +121,19 @@ export function Fragment(props: { children?: any[] }): VNode {
  * JSX runtime for development (same as production for now)
  */
 export { jsx as jsxDEV };
+
+export namespace JSX {
+  export interface IntrinsicElements {
+    [elemName: string]: any;
+  }
+  export type Element = any;
+  export interface ElementClass {
+    render: any;
+  }
+  export interface ElementAttributesProperty {
+    props: any;
+  }
+  export interface ElementChildrenAttribute {
+    children: {};
+  }
+}

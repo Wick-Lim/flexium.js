@@ -6,7 +6,7 @@
  * conversion of props to DOM attributes and CSS styles.
  */
 
-import type { Renderer, RenderNode, EventHandler, CommonProps } from '../../core/renderer';
+import type { Renderer, EventHandler } from '../../core/renderer';
 
 /**
  * Component type to HTML element mapping

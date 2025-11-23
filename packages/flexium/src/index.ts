@@ -5,8 +5,18 @@
  */
 
 // Core reactivity primitives
-export { signal, computed, effect, batch, untrack, root, isSignal } from './core/signal'
-export type { Signal, Computed } from './core/signal'
+export { signal, computed, effect, batch, untrack, root, isSignal, onCleanup, createResource } from './core/signal'
+export type { Signal, Computed, Resource } from './core/signal'
+
+// Context
+export { createContext, useContext } from './core/context'
+export type { Context } from './core/context'
+
+// Router
+export * from './router'
+
+// Store
+export * from './store'
 
 // Cross-platform primitives
 export {

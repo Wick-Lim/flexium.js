@@ -26,6 +26,7 @@ interface IObservable {
 
 // Global context for dependency tracking
 let activeEffect: ISubscriber | null = null;
+let owner: { cleanups: (() => void)[] } | null = null;
 let batchDepth = 0;
 let batchedEffects = new Set<ISubscriber>();
 
@@ -53,16 +54,18 @@ export interface Computed<T> {
  */
 class EffectNode implements ISubscriber {
   dependencies = new Set<IObservable>();
-  cleanup?: () => void;
+  cleanups: (() => void)[] = [];
 
   constructor(
     public fn: () => void | (() => void),
     public onError?: (error: Error) => void
-  ) {}
+  ) { }
 
   execute(): void {
-    this.cleanup?.();
-    this.cleanup = undefined;
+    for (const cleanup of this.cleanups) {
+      cleanup();
+    }
+    this.cleanups = [];
 
     // Clear previous dependencies
     for (const dep of this.dependencies) {
@@ -76,7 +79,7 @@ class EffectNode implements ISubscriber {
     try {
       const result = this.fn();
       if (typeof result === 'function') {
-        this.cleanup = result;
+        this.cleanups.push(result);
       }
     } catch (error) {
       if (this.onError) {
@@ -90,7 +93,10 @@ class EffectNode implements ISubscriber {
   }
 
   dispose(): void {
-    this.cleanup?.();
+    for (const cleanup of this.cleanups) {
+      cleanup();
+    }
+    this.cleanups = [];
     for (const dep of this.dependencies) {
       dep.subscribers.delete(this);
     }
@@ -104,7 +110,7 @@ class EffectNode implements ISubscriber {
 class SignalNode<T> implements IObservable {
   subscribers = new Set<ISubscriber>();
 
-  constructor(private _value: T) {}
+  constructor(private _value: T) { }
 
   get(): T {
     // Track dependency if inside an effect or computed
@@ -151,7 +157,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   private _value!: T;
   private _dirty = true;
 
-  constructor(private computeFn: () => T) {}
+  constructor(private computeFn: () => T) { }
 
   execute(): void {
     // When a dependency changes, mark as dirty and notify subscribers
@@ -317,7 +323,13 @@ export function effect(
 ): () => void {
   const node = new EffectNode(fn, options?.onError);
   node.execute();
-  return () => node.dispose();
+  const dispose = () => node.dispose();
+
+  if (owner) {
+    owner.cleanups.push(dispose);
+  }
+
+  return dispose;
 }
 
 /**
@@ -372,15 +384,22 @@ export function untrack<T>(fn: () => T): T {
  * @returns Dispose function for all effects in the scope
  */
 export function root<T>(fn: (dispose: () => void) => T): T {
-  const effects: (() => void)[] = [];
+  const prevOwner = owner;
+  const newOwner = { cleanups: [] as (() => void)[] };
+  owner = newOwner;
+
   const dispose = () => {
-    for (const effect of effects) {
-      effect();
+    for (const cleanup of newOwner.cleanups) {
+      cleanup();
     }
-    effects.length = 0;
+    newOwner.cleanups = [];
   };
 
-  return fn(dispose);
+  try {
+    return fn(dispose);
+  } finally {
+    owner = prevOwner;
+  }
 }
 
 /**
@@ -406,4 +425,114 @@ export function isSignal(value: any): value is Signal<any> | Computed<any> {
     typeof value === 'function' &&
     SIGNAL_MARKER in value
   );
+}
+
+/**
+ * Registers a cleanup function that runs before the current effect re-runs or is disposed
+ *
+ * @param fn - Cleanup function
+ */
+export function onCleanup(fn: () => void): void {
+  if (activeEffect instanceof EffectNode) {
+    activeEffect.cleanups.push(fn);
+  } else {
+    console.warn('onCleanup must be called from within an effect');
+  }
+}
+
+/**
+ * Resource interface for async data
+ */
+export interface Resource<T> extends Signal<T | undefined> {
+  loading: boolean;
+  error: any;
+  state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored';
+  latest: T | undefined;
+}
+
+/**
+ * Creates a resource for handling async data
+ *
+ * @param source - Reactive source (signal or function) that triggers the fetcher
+ * @param fetcher - Async function that fetches data based on source
+ * @returns [Resource, Actions] tuple
+ */
+export function createResource<T, S = any>(
+  source: S | Signal<S> | (() => S),
+  fetcher: (source: S, { value, refetching }: { value: T | undefined; refetching: any }) => Promise<T>
+): [Resource<T>, { mutate: (v: T | undefined) => void; refetch: () => void }] {
+  const value = signal<T | undefined>(undefined);
+  const error = signal<any>(undefined);
+  const loading = signal<boolean>(false);
+  const state = signal<'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'>('unresolved');
+
+  let lastPromise: Promise<T> | null = null;
+
+  const load = async (currentSource: S, refetching = false) => {
+    if (refetching) {
+      state.value = 'refreshing';
+      loading.value = true;
+    } else {
+      state.value = 'pending';
+      loading.value = true;
+    }
+    error.value = undefined;
+
+    const promise = fetcher(currentSource, { value: value.peek(), refetching });
+    lastPromise = promise;
+
+    try {
+      const result = await promise;
+      if (lastPromise === promise) {
+        value.value = result;
+        state.value = 'ready';
+        loading.value = false;
+      }
+    } catch (err) {
+      if (lastPromise === promise) {
+        error.value = err;
+        state.value = 'errored';
+        loading.value = false;
+      }
+    }
+  };
+
+  const getSource = () => {
+    if (typeof source === 'function') {
+      if (isSignal(source)) {
+        return (source as Signal<S>).value;
+      }
+      return (source as () => S)();
+    }
+    return source;
+  };
+
+  // Track source changes
+  effect(() => {
+    const currentSource = getSource();
+    load(currentSource, false);
+  });
+
+  const resource = function () {
+    return value();
+  } as Resource<T>;
+
+  Object.defineProperties(resource, {
+    value: { get: () => value.value },
+    loading: { get: () => loading.value },
+    error: { get: () => error.value },
+    state: { get: () => state.value },
+    latest: { get: () => value.peek() },
+    peek: { value: () => value.peek() },
+    set: { value: (v: T) => value.set(v) }
+  });
+
+  (resource as any)[SIGNAL_MARKER] = true;
+
+  const actions = {
+    mutate: (v: T | undefined) => value.set(v),
+    refetch: () => load(getSource(), true)
+  };
+
+  return [resource, actions];
 }

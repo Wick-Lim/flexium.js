@@ -151,6 +151,48 @@ a.value = 5 // Effect runs
 b.value = 10 // Effect doesn't run
 ```
 
+### Async Data with `createResource`
+
+Handle async data fetching with automatic state management:
+
+```tsx
+import { createResource } from 'flexium'
+
+const fetchUser = async (id) => {
+  const response = await fetch(\`/api/users/\${id}\`)
+  return response.json()
+}
+
+const [user, { mutate, refetch }] = createResource(userId, fetchUser)
+
+effect(() => {
+  if (user.loading) {
+    console.log('Loading...')
+  } else if (user.error) {
+    console.error('Error:', user.error)
+  } else {
+    console.log('User:', user())
+  }
+})
+```
+
+### Cleanup with `onCleanup`
+
+Register cleanup callbacks within effects:
+
+```tsx
+import { effect, onCleanup } from 'flexium'
+
+effect(() => {
+  const handler = () => console.log('Window resized')
+  window.addEventListener('resize', handler)
+
+  onCleanup(() => {
+    window.removeEventListener('resize', handler)
+  })
+})
+```
+
 ## Comparison with Other Frameworks
 
 ### vs React useState

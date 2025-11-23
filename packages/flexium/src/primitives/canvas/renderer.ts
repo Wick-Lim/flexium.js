@@ -18,8 +18,8 @@ import { unwrapSignal } from './utils'
 export function renderCanvasChildren(
   ctx: CanvasRenderingContext2D,
   children: any,
-  width: number,
-  height: number
+  _width: number,
+  _height: number
 ): void {
   if (!children) return
 

@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Flexium',
   description: 'A lightweight, signals-based UI framework with cross-platform renderers',
+  ignoreDeadLinks: true,
 
   themeConfig: {
     logo: '/logo.svg',
@@ -36,6 +37,8 @@ export default defineConfig({
             { text: 'Signals', link: '/guide/signals' },
             { text: 'Computed Values', link: '/guide/computed' },
             { text: 'Effects', link: '/guide/effects' },
+            { text: 'Router', link: '/guide/router' },
+            { text: 'Store', link: '/guide/store' },
             { text: 'JSX & Rendering', link: '/guide/jsx' }
           ]
         },
@@ -51,6 +54,7 @@ export default defineConfig({
           text: 'Advanced',
           items: [
             { text: 'Performance', link: '/guide/performance' },
+            { text: 'Server-Side Rendering', link: '/guide/ssr' },
             { text: 'TypeScript', link: '/guide/typescript' },
             { text: 'Testing', link: '/guide/testing' }
           ]

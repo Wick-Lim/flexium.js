@@ -11,6 +11,7 @@ import { effect, batch, isSignal } from '../../core/signal';
 import type { Signal, Computed } from '../../core/signal';
 import { domRenderer } from './index';
 import { isVNode } from './h';
+import { pushProvider, popProvider } from '../../core/context';
 
 /**
  * Track reactive bindings for cleanup
@@ -24,7 +25,7 @@ const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>();
  * for any signal dependencies in props or children.
  */
 export function mountReactive(
-  vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined,
+  vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined | Function | any[],
   parent?: Node
 ): Node | null {
   // Handle null/undefined
@@ -32,19 +33,59 @@ export function mountReactive(
     return null;
   }
 
-  // Handle signals - automatically create reactive text nodes
-  if (isSignal(vnode)) {
-    const textNode = document.createTextNode('');
+  // Handle signals and functions (reactive children)
+  if (isSignal(vnode) || typeof vnode === 'function') {
+    // Placeholder node to mark position
+    const startNode = document.createTextNode('');
+    let currentNode: Node | null = startNode;
+    let currentVNode: any = null;
 
     const dispose = effect(() => {
-      const value = (vnode as Signal<any>).value;
-      domRenderer.updateTextNode(textNode, String(value));
+      const value = isSignal(vnode) ? (vnode as Signal<any>).value : (vnode as Function)();
+
+      // If value is different from current
+      if (value !== currentVNode) {
+        // If it's a primitive, we can just update the text node if we have one
+        if ((typeof value === 'string' || typeof value === 'number') &&
+          currentNode && currentNode.nodeType === Node.TEXT_NODE) {
+          domRenderer.updateTextNode(currentNode as Text, String(value));
+        } else {
+          // Full replace
+          const newNode = mountReactive(value);
+
+          if (newNode && currentNode && currentNode.parentNode) {
+            currentNode.parentNode.replaceChild(newNode, currentNode);
+            cleanupReactive(currentNode);
+            currentNode = newNode;
+          } else if (newNode && !currentNode && parent) {
+            // Should not happen if we start with placeholder
+          }
+        }
+        currentVNode = value;
+      }
     });
 
     // Store cleanup
-    REACTIVE_BINDINGS.set(textNode, new Set([dispose]));
+    if (currentNode) {
+      if (!REACTIVE_BINDINGS.has(currentNode)) {
+        REACTIVE_BINDINGS.set(currentNode, new Set());
+      }
+      REACTIVE_BINDINGS.get(currentNode)!.add(dispose);
+    }
 
-    return textNode;
+    return currentNode;
+  }
+
+  // Handle arrays (fragments)
+  if (Array.isArray(vnode)) {
+    const fragment = document.createDocumentFragment();
+    for (const child of vnode) {
+      const childNode = mountReactive(child, fragment);
+      if (childNode) {
+        fragment.appendChild(childNode);
+      }
+    }
+    return fragment;
   }
 
   // Handle text nodes
@@ -60,26 +101,34 @@ export function mountReactive(
 
       // Create a container for the component's output
       let currentNode: Node | null = null;
-      let currentVNode: VNode | string | number | null | undefined = null;
 
       // Create reactive effect for component re-rendering
       const dispose = effect(() => {
-        const result = component({ ...vnode.props, children: vnode.children });
-
-        if (currentNode) {
-          // Update existing node
-          const newNode = mountReactive(result);
-          if (newNode && parent) {
-            parent.replaceChild(newNode, currentNode);
-            cleanupReactive(currentNode);
-            currentNode = newNode;
-          }
-        } else {
-          // Initial render
-          currentNode = mountReactive(result, parent);
+        const contextId = (component as any)._contextId;
+        if (contextId) {
+          pushProvider(contextId, vnode.props.value);
         }
 
-        currentVNode = result;
+        try {
+          const result = component({ ...vnode.props, children: vnode.children });
+
+          if (currentNode) {
+            // Update existing node
+            const newNode = mountReactive(result);
+            if (newNode && parent) {
+              parent.replaceChild(newNode, currentNode);
+              cleanupReactive(currentNode);
+              currentNode = newNode;
+            }
+          } else {
+            // Initial render
+            currentNode = mountReactive(result, parent);
+          }
+        } finally {
+          if (contextId) {
+            popProvider(contextId);
+          }
+        }
       });
 
       // Store cleanup function
@@ -202,7 +251,7 @@ function cleanupReactive(node: Node): void {
  * Render a component with reactive tracking
  */
 export function renderReactive(
-  vnode: VNode | string | number | null | undefined,
+  vnode: VNode | string | number | null | undefined | Function,
   container: HTMLElement
 ): Node | null {
   // Clear container
@@ -224,7 +273,6 @@ export function renderReactive(
  * Create a reactive root for rendering
  */
 export function createReactiveRoot(container: HTMLElement) {
-  let currentVNode: VNode | null = null;
   let rootDispose: (() => void) | null = null;
 
   return {
@@ -241,7 +289,6 @@ export function createReactiveRoot(container: HTMLElement) {
           renderReactive(vnode, container);
         });
 
-        currentVNode = vnode;
       });
     },
     unmount() {
@@ -255,7 +302,6 @@ export function createReactiveRoot(container: HTMLElement) {
         container.removeChild(container.firstChild);
       }
 
-      currentVNode = null;
     },
   };
 }

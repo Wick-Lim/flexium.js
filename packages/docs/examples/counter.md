@@ -86,7 +86,8 @@ mount(document.getElementById('app')!, <Counter />)
 
 <div id="counter-demo"></div>
 
-<script setup>
+<!--
+<script setup lang="tsx">
 import { signal, computed } from 'flexium'
 import { View, Text, Pressable } from 'flexium'
 import { mount } from 'flexium/dom'
@@ -119,6 +120,7 @@ onMounted(() => {
   mount(document.getElementById('counter-demo'), <Counter />)
 })
 </script>
+-->
 
 ## Key Concepts
 

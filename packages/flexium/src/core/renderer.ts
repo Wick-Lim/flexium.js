@@ -122,12 +122,12 @@ export interface CommonProps {
   // Flexbox
   flexDirection?: 'row' | 'column';
   justifyContent?:
-    | 'flex-start'
-    | 'flex-end'
-    | 'center'
-    | 'space-between'
-    | 'space-around'
-    | 'space-evenly';
+  | 'flex-start'
+  | 'flex-end'
+  | 'center'
+  | 'space-between'
+  | 'space-around'
+  | 'space-evenly';
   alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
   gap?: number;
   flex?: number;
@@ -162,6 +162,6 @@ export interface CommonProps {
 export interface VNode {
   type: string | Function;
   props: Record<string, any>;
-  children: (VNode | string | number | null | undefined)[];
+  children: (VNode | string | number | null | undefined | Function)[];
   key?: string | number;
 }
