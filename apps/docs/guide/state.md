@@ -124,13 +124,9 @@ console.log(double()); // 10
 
 Computed state is read-only by default (the setter is no-op or throws, depending on config).
 
-## Reactivity Primitives
+## Effects & Side Effects
 
-While `state()` is the main entry point, Flexium exposes core primitives for advanced use cases.
-
-### `effect(fn)`
-
-Run side effects when state changes.
+While `state()` manages data, `effect()` handles side effects like DOM manipulation, logging, or subscriptions.
 
 ```tsx
 import { state, effect } from 'flexium';
@@ -138,11 +134,12 @@ import { state, effect } from 'flexium';
 const [count, setCount] = state(0);
 
 effect(() => {
+  // Automatically runs when 'count' changes
   console.log('Count is:', count());
 });
 ```
 
-Effects run immediately once, and then re-run whenever any tracked dependency changes.
+For detailed usage, automatic tracking, and cleanup, see the **[Effects](/guide/effects)** guide.
 
 ## List Rendering
 

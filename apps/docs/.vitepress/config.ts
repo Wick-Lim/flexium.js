@@ -36,6 +36,8 @@ export default defineConfig({
           text: 'Core Concepts',
           items: [
             { text: 'State Management', link: '/guide/state' },
+            { text: 'Effects', link: '/guide/effects' },
+            { text: 'Derived State (Computed)', link: '/guide/state#computed-state-derived' },
             { text: 'Router', link: '/guide/router' },
             { text: 'Store', link: '/guide/store' },
             { text: 'JSX & Rendering', link: '/guide/jsx' },
