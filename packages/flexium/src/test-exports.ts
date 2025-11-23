@@ -23,7 +23,7 @@ export { state } from './core/state';
 export { createContext, useContext } from './core/context';
 
 // Store
-export { createStore } from './store/store';
+
 
 // Router
 export { createLocation, matchPath } from './router/core';

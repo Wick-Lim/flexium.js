@@ -38,7 +38,6 @@ export default defineConfig({
             { text: 'state()', link: '/guide/state' },
             { text: 'effect()', link: '/guide/effects' },
             { text: 'Router', link: '/guide/router' },
-            { text: 'Store', link: '/guide/store' },
             { text: 'JSX & Rendering', link: '/guide/jsx' },
             { text: 'Error Handling', link: '/guide/error-handling' }
           ]

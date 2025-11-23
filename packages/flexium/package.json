@@ -50,11 +50,6 @@
       "import": "./dist/router.mjs",
       "require": "./dist/router.js"
     },
-    "./store": {
-      "types": "./dist/store.d.ts",
-      "import": "./dist/store.mjs",
-      "require": "./dist/store.js"
-    },
     "./test-exports": {
       "types": "./dist/test-exports.d.ts",
       "import": "./dist/test-exports.mjs",
