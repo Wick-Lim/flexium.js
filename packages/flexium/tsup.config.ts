@@ -10,7 +10,6 @@ export default defineConfig({
     'jsx-dev-runtime': 'src/jsx-dev-runtime.ts',
     server: 'src/server/index.ts',
     router: 'src/router/index.ts',
-    store: 'src/store/index.ts',
     'test-exports': 'src/test-exports.ts',
   },
   format: ['esm', 'cjs'],
