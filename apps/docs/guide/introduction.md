@@ -1,73 +1,24 @@
 # Introduction
 
-Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `state()`.
-
-## What is Flexium?
-
-Flexium simplifies modern UI development by combining the best ideas from Solid.js (Signals), React (Hooks), and Recoil (Atoms) into a cohesive experience.
-
-### 1. Unified State API
-
-No more `useState`, `useRecoil`, `useQuery` separation. Just `state()`.
-
-```tsx
-// Local state
-const [count, setCount] = state(0);
-
-// Global state (shared by key)
-const [theme, setTheme] = state('light', { key: 'theme' });
-
-// Async Resource (fetching)
-const [user] = state(async () => {
-  const res = await fetch('/api/user');
-  return res.json();
-});
-```
-
-### 2. Fine-Grained Reactivity
-
-Unlike React's virtual DOM diffing, Flexium uses a signal-based system. Components run once, and only the DOM nodes that depend on changed state are updated.
-
-```tsx
-const [count, setCount] = state(0);
-
-// Only this specific text node updates when count changes
-<span>{count}</span>
-```
-
-### 3. Cross-Platform by Design
-
-Flexium supports multiple renderers, including DOM and Canvas.
-
-```tsx
-// Works on Canvas!
-<Canvas width={400} height={400}>
-  <Circle x={100} y={100} radius={30} fill="blue" />
-</Canvas>
-```
+Flexium is a next-generation UI framework built for performance, simplicity, and cross-platform compatibility. It combines fine-grained reactivity (signals) with a unified state API and universal primitives.
 
 ## Why Flexium?
 
-### Simpler Mental Model
+- **Unified State**: One function (`state()`) handles local, global, and async state.
+- **Fine-Grained Reactivity**: No Virtual DOM overhead. Updates are surgical and precise.
+- **Cross-Platform (Flexium Native)**: Write once using universal primitives (`Row`, `Column`, `Text`) and run on Web, Native (future), and Canvas.
+- **Type Safety**: Built with TypeScript for a superior developer experience.
 
-Instead of learning different APIs for different types of state, you learn one: `state()`.
+## Flexium Native Philosophy
 
-- **Local?** `state(value)`
-- **Global?** `state(value, { key })`
-- **Computed?** `state(() => value * 2)`
-- **Async?** `state(async () => fetch())`
+Flexium adopts a "Flexium Native" approach, similar to React Native but simpler. We avoid HTML-specific tags like `div`, `span`, or `h1` in favor of universal components:
 
-### Performance
+- **Layout**: Use `Row` and `Column` for 99% of your layout needs. They map to Flexbox containers.
+- **Text**: Use `Text` for all text rendering.
+- **Interaction**: Use `Pressable` for touch and click handling.
 
-| Feature | React | Flexium |
-|---------|-------|---------|
-| Reactivity | Virtual DOM | Signals |
-| Re-renders | Component trees | Individual bindings |
-| API Surface | Huge (Hooks, Context, etc.) | Tiny (`state`, `effect`) |
+This abstraction allows your Flexium code to run on the Web (rendering to DOM) today, and on Native platforms (iOS, Android) in the future without changing your component code.
 
-## Next Steps
+## Getting Started
 
-<div class="tip custom-block">
-  <p class="custom-block-title">Ready to start?</p>
-  <p>Follow the <a href="/guide/quick-start">Quick Start</a> guide to build your first Flexium app.</p>
-</div>
+Check out the [Quick Start](/guide/quick-start) guide to create your first Flexium app.

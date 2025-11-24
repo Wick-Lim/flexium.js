@@ -10,7 +10,7 @@ export default defineConfig({
 
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
-      { text: 'Reference', link: '/reference/primitives/view' },
+      { text: 'Reference', link: '/reference/primitives/column' },
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
@@ -38,8 +38,6 @@ export default defineConfig({
             { text: 'state()', link: '/guide/state' },
             { text: 'effect()', link: '/guide/effects' },
             { text: 'Control Flow', link: '/guide/flow' },
-            { text: 'Row', link: '/guide/primitives' },
-            { text: 'Column', link: '/guide/primitives' },
             { text: 'Router', link: '/guide/router' },
             { text: 'JSX & Rendering', link: '/guide/jsx' },
             { text: 'Error Handling', link: '/guide/error-handling' }
@@ -65,13 +63,19 @@ export default defineConfig({
       ],
       '/reference/': [ // New reference sidebar
         {
-          text: 'Primitives API',
+          text: 'Layout Primitives',
           items: [
-            { text: 'View', link: '/reference/primitives/view' },
-            { text: 'Text', link: '/reference/primitives/text' },
-            { text: 'Image', link: '/reference/primitives/image' },
-            { text: 'Pressable', link: '/reference/primitives/pressable' },
+            { text: 'Column', link: '/reference/primitives/column' },
+            { text: 'Row', link: '/reference/primitives/row' },
             { text: 'ScrollView', link: '/reference/primitives/scrollview' }
+          ]
+        },
+        {
+          text: 'Content Primitives',
+          items: [
+             { text: 'Text', link: '/reference/primitives/text' },
+             { text: 'Image', link: '/reference/primitives/image' },
+             { text: 'Pressable', link: '/reference/primitives/pressable' },
           ]
         },
         {

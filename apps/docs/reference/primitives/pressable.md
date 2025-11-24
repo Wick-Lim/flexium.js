@@ -1,1 +1,31 @@
-# Pressable\n\nA clickable container component that handles interactions.
+# Pressable
+
+A wrapper for making views respond to touches or clicks.
+
+## Usage
+
+```tsx
+import { Pressable, Text } from 'flexium';
+
+function Button() {
+  return (
+    <Pressable
+      onPress={() => console.log('Pressed')}
+      style={{ padding: 10, backgroundColor: 'blue' }}
+    >
+      <Text style={{ color: 'white' }}>Click Me</Text>
+    </Pressable>
+  );
+}
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `any` | Content to be made pressable. |
+| `onPress` | `() => void` | Called when a single tap/click is detected. |
+| `onPressIn` | `() => void` | Called when a touch is activated. |
+| `onPressOut` | `() => void` | Called when a touch is deactivated. |
+| `disabled` | `boolean` | Whether the press interaction is disabled. |
+| `style` | `object` | Container styles. |
