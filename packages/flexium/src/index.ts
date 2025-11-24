@@ -52,7 +52,11 @@ export { Outlet } from './router/components' // Explicitly export Outlet if not 
 
 // Cross-platform primitives
 export {
-  View,
+  Row,
+  Column,
+  Spacer,
+  Grid,
+  Stack,
   Text,
   Image,
   Pressable,
@@ -68,7 +72,12 @@ export {
 } from './primitives'
 
 export type {
-  ViewProps,
+  RowProps,
+  ColumnProps,
+  SpacerProps,
+  GridProps,
+  StackProps,
+  BaseStyleProps,
   TextProps,
   ImageProps,
   PressableProps,

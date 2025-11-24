@@ -1,289 +1,148 @@
-# Primitives Overview
+# Core Primitives
 
-Flexium provides universal primitives that work seamlessly across web and React Native.
+Flexium provides a set of universal primitives that work across Web and Native platforms (Flexium Native). Instead of using platform-specific tags like `div` or `span`, use these components to build your UI.
 
-## Philosophy
+## Layout
 
-Write once, run everywhere. The same code works on:
-
-- **Web**: Compiles to standard HTML elements
-- **React Native**: Compiles to React Native components (coming soon)
-
-## Core Primitives
-
-### View
-
-Universal container component. It's the most basic building block for layout.
-
-```tsx
-import { View } from 'flexium'
-
-<View style={{ flex: 1, padding: 20, backgroundColor: '#f0f0f0' }}>
-  <Text>Content here</Text>
-</View>
-```
-
-**Compiles to:**
-- Web: `<div>`
-- React Native: `<View>`
-
-### Row
-
-Horizontal flex container for arranging children in a row. Supports alignment, justification, and responsive props.
-
-```tsx
-import { Row } from 'flexium'
-
-<Row gap={16} align="center" justify="between">
-  <Text>Left</Text>
-  <Text>Right</Text>
-</Row>
-```
-
-**Props:**
-- `align`: Aligns items on the cross axis (vertical). Accepts `'start' | 'center' | 'end' | 'stretch' | 'baseline'`. Supports responsive values.
-- `justify`: Justifies items on the main axis (horizontal). Accepts `'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'`. Supports responsive values.
-- `gap`: Spacing between children. Accepts a number (in px) or responsive values.
-- `wrap`: Enables wrapping of items. Accepts `boolean` or responsive values.
-- `reverse`: Reverses the direction of items. Accepts `boolean`.
-- `as`: (Web only) HTML element to render (e.g., `'div'`, `'span'`). Defaults to `'div'`.
-- All [CommonStyle](#commonstyle) props.
+Flexium uses `Row` and `Column` for all layout needs. This aligns with the Flexbox model and simplifies cross-platform development.
 
 ### Column
 
-Vertical flex container for arranging children in a column. Supports alignment, justification, and responsive props.
+Vertical layout container.
 
 ```tsx
 import { Column } from 'flexium'
 
-<Column gap={8} padding={16}>
+<Column gap={10} padding={20}>
   <Text>Top</Text>
   <Text>Bottom</Text>
 </Column>
 ```
 
-**Props:**
-- `align`: Aligns items on the cross axis (horizontal). Accepts `'start' | 'center' | 'end' | 'stretch' | 'baseline'`. Supports responsive values.
-- `justify`: Justifies items on the main axis (vertical). Accepts `'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'`. Supports responsive values.
-- `gap`: Spacing between children. Accepts a number (in px) or responsive values.
-- `wrap`: Enables wrapping of items. Accepts `boolean` or responsive values.
-- `reverse`: Reverses the direction of items. Accepts `boolean`.
-- `as`: (Web only) HTML element to render (e.g., `'div'`, `'span'`). Defaults to `'div'`.
-- All [CommonStyle](#commonstyle) props.
+- Web: `<div style="display: flex; flex-direction: column">`
+- React Native: `<View style={{flexDirection: 'column'}}>`
+
+### Row
+
+Horizontal layout container.
+
+```tsx
+import { Row } from 'flexium'
+
+<Row justify="between" align="center">
+  <Text>Left</Text>
+  <Text>Right</Text>
+</Row>
+```
+
+- Web: `<div style="display: flex; flex-direction: row">`
+- React Native: `<View style={{flexDirection: 'row'}}>`
+
+## Content
 
 ### Text
 
-Universal text component.
+Renders text content.
 
 ```tsx
 import { Text } from 'flexium'
 
-<Text style={{ fontSize: 16, color: '#333' }}>
+<Text style={{ fontSize: 20, color: 'blue' }}>
   Hello World
 </Text>
 ```
 
-**Compiles to:**
-- Web: `<span>`
+- Web: `<span>` or `<p>`
 - React Native: `<Text>`
 
 ### Image
 
-Universal image component.
+Renders images.
 
 ```tsx
 import { Image } from 'flexium'
 
 <Image
   src="/logo.png"
-  style={{ width: 100, height: 100 }}
+  width={100}
+  height={100}
   alt="Logo"
 />
 ```
 
-**Compiles to:**
 - Web: `<img>`
 - React Native: `<Image>`
 
+## Interaction
+
 ### Pressable
 
-Universal touchable/button component.
+A wrapper for making views respond to touches or clicks.
 
 ```tsx
-import { Pressable } from 'flexium'
+import { Pressable, Text } from 'flexium'
 
-<Pressable
-  onPress={() => console.log('Pressed!')}
-  style={{ padding: 10, backgroundColor: 'blue' }}
->
-  <Text>Click Me</Text>
+<Pressable onPress={() => console.log('Pressed')}>
+  <Text>Button</Text>
 </Pressable>
 ```
 
-**Compiles to:**
-- Web: `<button>`
-- React Native: `<Pressable>`
+- Web: `<div role="button">` or `<button>`
+- React Native: `<Pressable>` or `<TouchableOpacity>`
+
+## Scrolling
 
 ### ScrollView
 
-Universal scrollable container.
+A scrolling container.
 
 ```tsx
-import { ScrollView } from 'flexium'
+import { ScrollView, Column } from 'flexium'
 
 <ScrollView style={{ height: 400 }}>
-  <View>
-    {/* Long content */}
-  </View>
+  <Column>
+    {/* Content */}
+  </Column>
 </ScrollView>
 ```
 
-**Compiles to:**
-- Web: `<div style="overflow: auto">`
+- Web: `<div style="overflow: scroll">`
 - React Native: `<ScrollView>`
 
-## CommonStyle
-
-All primitives support a universal style object based on Flexbox:
+## Full Example
 
 ```tsx
-interface CommonStyle {
-  // Layout
-  display?: 'flex' | 'none'
-  flex?: number
-  flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse'
-  justifyContent?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around'
-  alignItems?: 'flex-start' | 'center' | 'flex-end' | 'stretch' | 'baseline'
-  gap?: number
+import { Column, Row, Text, Image, Pressable, ScrollView } from 'flexium'
 
-  // Spacing
-  padding?: number
-  paddingTop?: number
-  paddingRight?: number
-  paddingBottom?: number
-  paddingLeft?: number
-  margin?: number
-  marginTop?: number
-  // ... etc
-
-  // Sizing
-  width?: number | string
-  height?: number | string
-  minWidth?: number
-  maxWidth?: number
-
-  // Visual
-  backgroundColor?: string
-  borderRadius?: number
-  borderWidth?: number
-  borderColor?: string
-  opacity?: number
-  // ... etc
-}
-```
-
-## Example: Complete UI
-
-```tsx
-import { signal } from 'flexium'
-import { View, Text, Image, Pressable, ScrollView, Row, Column } from 'flexium'
-
-function UserProfile() {
-  const likes = signal(42)
-
+function App() {
   return (
     <ScrollView>
-      <Column style={{ padding: 20, gap: 15 }}>
-        {/* Avatar */}
-        <Image
-          src="/avatar.jpg"
-          style={{
-            width: 100,
-            height: 100,
-            borderRadius: 50
-          }}
-        />
-
-        {/* Info */}
-        <Column style={{ gap: 5 }}>
-          <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
-            Alice Smith
-          </Text>
-          <Text style={{ color: '#666' }}>
-            Product Designer
-          </Text>
-        </Column>
-
-        {/* Actions */}
-        <Row style={{ gap: 10 }}>
-          <Pressable
-            onPress={() => likes.value++}
-            style={{
-              flex: 1,
-              padding: 12,
-              backgroundColor: '#007bff',
-              borderRadius: 8
-            }}
-          >
-            <Text style={{ color: 'white', textAlign: 'center' }}>
-              Like ({likes})
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => console.log('Follow')}
-            style={{
-              flex: 1,
-              padding: 12,
-              backgroundColor: '#28a745',
-              borderRadius: 8
-            }}
-          >
-            <Text style={{ color: 'white', textAlign: 'center' }}>
-              Follow
-            </Text>
-          </Pressable>
+      <Column padding={20} gap={16}>
+        <Row align="center" gap={12}>
+          <Image src="avatar.png" width={50} height={50} />
+          <Column>
+             <Text style={{ fontWeight: 'bold' }}>John Doe</Text>
+             <Text style={{ color: 'gray' }}>Software Engineer</Text>
+          </Column>
         </Row>
+
+        <Text>
+          Welcome to Flexium! This UI works on Web and Native.
+        </Text>
+
+        <Pressable
+          onPress={() => alert('Clicked!')}
+          style={{ backgroundColor: 'blue', padding: 12, borderRadius: 8 }}
+        >
+          <Text style={{ color: 'white', textAlign: 'center' }}>
+            Get Started
+          </Text>
+        </Pressable>
       </Column>
     </ScrollView>
   )
 }
 ```
 
-This exact code runs on both web and React Native with zero changes!
-
-## Platform-Specific Code
-
-If you need platform-specific behavior:
-
-```tsx
-// vite.config.ts (Web)
-export default defineConfig({
-  resolve: {
-    alias: {
-      'flexium/primitives': 'flexium/primitives/web'
-    }
-  }
-})
-
-// metro.config.js (React Native)
-module.exports = {
-  resolver: {
-    resolveRequest: (context, moduleName) => {
-      if (moduleName === 'flexium/primitives') {
-        return context.resolveRequest(
-          context,
-          'flexium/primitives/native'
-        )
-      }
-      return context.resolveRequest(context, moduleName)
-    }
-  }
-}
-```
-
-## Next Steps
-
-- Learn about [Canvas Rendering Guide](/guide/canvas)
-- Explore [Styling](/guide/styling)
-- Check [View API Reference](/reference/primitives/view)
+- Check [Column API Reference](/reference/primitives/column)
+- Check [Row API Reference](/reference/primitives/row)

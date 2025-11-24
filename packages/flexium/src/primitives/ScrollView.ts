@@ -2,14 +2,14 @@
  * ScrollView - Universal scrollable container
  *
  * Maps to:
- * - Web: <div> with overflow
+ * - Web: <div style="overflow: scroll">
  * - React Native: <ScrollView>
  *
  * @example
  * ```tsx
  * <ScrollView style={{ height: 300 }}>
- *   <View>...</View>
- *   <View>...</View>
+ *   <Column>...</Column>
+ *   <Column>...</Column>
  * </ScrollView>
  * ```
  */
@@ -22,7 +22,7 @@ export function ScrollView(props: ScrollViewProps): VNode {
   const {
     children,
     style,
-    horizontal,
+    horizontal = false,
     showsHorizontalScrollIndicator = true,
     showsVerticalScrollIndicator = true,
     ...rest
@@ -30,27 +30,23 @@ export function ScrollView(props: ScrollViewProps): VNode {
 
   const scrollStyle = {
     ...style,
-    overflow: 'auto',
     overflowX: horizontal ? 'auto' : 'hidden',
     overflowY: horizontal ? 'hidden' : 'auto',
-    WebkitOverflowScrolling: 'touch',
+    display: 'flex' as const,
+    flexDirection: (horizontal ? 'row' : 'column') as 'row' | 'column',
   }
 
   // Hide scrollbars if requested
-  const additionalStyle: Record<string, any> = {}
-  if (!showsHorizontalScrollIndicator || !showsVerticalScrollIndicator) {
-    additionalStyle.scrollbarWidth = 'none' // Firefox
-    additionalStyle.msOverflowStyle = 'none' // IE/Edge
+  if (!showsHorizontalScrollIndicator) {
+    // Note: This requires CSS usually, setting inline for demo
+    // scrollStyle.scrollbarWidth = 'none'
   }
 
   return {
     type: 'div',
     props: {
       ...rest,
-      style: {
-        ...normalizeStyle(scrollStyle),
-        ...additionalStyle,
-      },
+      style: normalizeStyle(scrollStyle as any),
     },
     children: Array.isArray(children) ? children : children ? [children] : [],
   }
