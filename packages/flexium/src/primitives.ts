@@ -31,7 +31,6 @@ export type {
 } from './primitives/ui/Button'
 
 // Cross-platform primitives (web/mobile)
-export { View } from './primitives/View'
 export { Row, Column, Stack, Grid, Spacer } from './primitives/layout'
 export { Text } from './primitives/Text'
 export { Image } from './primitives/Image'
@@ -41,7 +40,6 @@ export { Canvas, Rect, Circle, Path, CanvasText, Line, Arc } from './primitives/
 export { normalizeStyle } from './primitives/utils'
 
 export type {
-  ViewProps,
   TextProps,
   ImageProps,
   PressableProps,
@@ -62,5 +60,6 @@ export type {
   StackProps,
   GridProps,
   SpacerProps,
+  BaseStyleProps,
   CommonStyle,
 } from './primitives/layout'

@@ -1,1 +1,32 @@
-# Line\n\nDraws a straight line on the canvas.
+# Line
+
+Draws a straight line on the canvas.
+
+## Usage
+
+```tsx
+import { Canvas, Line } from 'flexium';
+
+<Canvas width={200} height={200}>
+  <Line
+    x1={10}
+    y1={10}
+    x2={100}
+    y2={100}
+    stroke="red"
+    strokeWidth={5}
+  />
+</Canvas>
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `x1` | `number \| Signal<number>` | Start x-coordinate. |
+| `y1` | `number \| Signal<number>` | Start y-coordinate. |
+| `x2` | `number \| Signal<number>` | End x-coordinate. |
+| `y2` | `number \| Signal<number>` | End y-coordinate. |
+| `stroke` | `string \| Signal<string>` | The line color. |
+| `strokeWidth` | `number \| Signal<number>` | The width of the line. |
+| `opacity` | `number \| Signal<number>` | Opacity (0 to 1). |
