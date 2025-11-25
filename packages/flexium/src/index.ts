@@ -5,7 +5,7 @@
  */
 
 // Core reactivity primitives
-export { effect, root, onMount } from './core/signal'
+export { effect, root, onMount, signal, computed } from './core/signal'
 import { state as coreState, clearGlobalState } from './core/state'
 import { StateGetter, StateSetter } from './core/state'
 import { For } from './core/flow'
