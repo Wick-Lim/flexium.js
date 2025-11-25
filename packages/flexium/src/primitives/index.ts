@@ -13,11 +13,26 @@ export * from './form';
 // UI components
 export * from './ui';
 
-// Layout components (will be added by layout system)
-export * from './layout/types';
+// Layout components
+export {
+  Row,
+  Column,
+  Spacer,
+  Grid,
+  Stack,
+} from './layout';
+
+export type {
+  RowProps,
+  ColumnProps,
+  SpacerProps,
+  GridProps,
+  StackProps,
+  CommonStyle as BaseStyleProps,
+} from './layout';
+
 
 // Cross-platform primitives
-export { View } from './View';
 export { Text } from './Text';
 export { Image } from './Image';
 export { Pressable } from './Pressable';
@@ -36,7 +51,6 @@ export {
 
 // Cross-platform types
 export type {
-  ViewProps,
   TextProps,
   ImageProps,
   PressableProps,

@@ -88,41 +88,8 @@ async function getProjectName(rl, args) {
 }
 
 // Get template choice
-async function getTemplateChoice(rl, args) {
-  // Check if template choice provided in args
-  if (args[1]) {
-    const trimmed = args[1].toString()
-    const choice = parseInt(trimmed)
-    const templateKeys = Object.keys(TEMPLATES)
-
-    if (choice >= 1 && choice <= templateKeys.length) {
-      return templateKeys[choice - 1]
-    }
-    // If arg provided but invalid/not a number, check if it matches a key directly (optional, but good)
-    if (Object.keys(TEMPLATES).includes(trimmed)) {
-        return trimmed;
-    }
-  }
-
-  const answer = await question(
-    rl,
-    `${cyan}🎨 Choose template (1-${Object.keys(TEMPLATES).length}) [default: 1]:${reset} `
-  )
-  const trimmed = answer.trim()
-
-  // If empty, use default
-  if (!trimmed) {
-    return 'vite-starter'
-  }
-
-  const choice = parseInt(trimmed)
-  const templateKeys = Object.keys(TEMPLATES)
-
-  if (choice >= 1 && choice <= templateKeys.length) {
-    return templateKeys[choice - 1]
-  }
-
-  return 'vite-starter' // Default for invalid input
+async function getTemplateChoice() {
+  return 'vite-starter'
 }
 
 // Copy template
@@ -189,8 +156,8 @@ async function main() {
     const projectName = await getProjectName(rl, args)
 
     // Show templates and get choice
-    showTemplates()
-    const templateKey = await getTemplateChoice(rl, args)
+    // showTemplates()
+    const templateKey = await getTemplateChoice()
     const template = TEMPLATES[templateKey]
 
     console.log(`\n${green}✨ Selected:${reset} ${bright}${template.name}${reset}`)
