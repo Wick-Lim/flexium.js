@@ -96,20 +96,6 @@ export interface TextStyle extends CommonStyle {
 }
 
 /**
- * View component props
- * Universal container component
- */
-export interface ViewProps {
-  children?: any
-  style?: CommonStyle
-  onClick?: () => void
-  onPress?: () => void // Mobile compatibility
-  class?: string // Web only
-  className?: string // Web only (alias)
-  id?: string
-}
-
-/**
  * Text component props
  * Universal text display
  */

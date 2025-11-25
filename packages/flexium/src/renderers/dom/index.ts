@@ -11,7 +11,6 @@ const ELEMENT_MAPPING: Record<string, string> = {
   Text: 'span',
   Button: 'button',
   Input: 'input',
-  View: 'div',
   Container: 'div',
 };
 
