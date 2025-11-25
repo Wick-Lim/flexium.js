@@ -163,8 +163,9 @@ class SignalNode<T> implements IObservable {
   }
 
   notify(): void {
-    // console.log('NOTIFY', this.constructor.name, activeEffect?.constructor.name);
-    this.subscribers.forEach((sub) => sub.execute());
+    // Copy subscribers to avoid infinite loops when effects unsubscribe/resubscribe during execution
+    const subscribersToNotify = new Set(this.subscribers);
+    subscribersToNotify.forEach((sub) => sub.execute());
   }
 }
 
