@@ -20,7 +20,7 @@ import { Column } from 'flexium'
 ```
 
 - Web: `<div style="display: flex; flex-direction: column">`
-- React Native: `<View style={{flexDirection: 'column'}}>`
+- React Native: <code>&lt;View style=&#123;&#123;flexDirection: 'column'&#125;&#125;&gt;</code>
 
 ### Row
 
@@ -36,7 +36,7 @@ import { Row } from 'flexium'
 ```
 
 - Web: `<div style="display: flex; flex-direction: row">`
-- React Native: `<View style={{flexDirection: 'row'}}>`
+- React Native: <code>&lt;View style=&#123;&#123;flexDirection: 'row'&#125;&#125;&gt;</code>
 
 ## Content
 
