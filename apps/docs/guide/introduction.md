@@ -1,3 +1,15 @@
+---
+title: Introduction - What is Flexium?
+description: Learn about Flexium, a next-generation UI framework with fine-grained reactivity, unified state API, and cross-platform support.
+head:
+  - - meta
+    - property: og:title
+      content: Introduction to Flexium
+  - - meta
+    - property: og:description
+      content: Flexium is a next-generation UI framework built for performance, simplicity, and cross-platform compatibility.
+---
+
 # Introduction
 
 Flexium is a next-generation UI framework built for performance, simplicity, and cross-platform compatibility. It combines fine-grained reactivity (signals) with a unified state API and universal primitives.

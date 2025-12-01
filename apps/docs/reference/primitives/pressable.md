@@ -1,3 +1,15 @@
+---
+title: Pressable - Touch & Click Handler Component
+description: API reference for Flexium's Pressable component. Handle touch and click interactions with cross-platform support.
+head:
+  - - meta
+    - property: og:title
+      content: Pressable Component - Flexium API Reference
+  - - meta
+    - property: og:description
+      content: Pressable component for handling touch and click events. Universal interaction primitive for Flexium.
+---
+
 # Pressable
 
 A wrapper for making views respond to touches or clicks.

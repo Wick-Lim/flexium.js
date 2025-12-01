@@ -1,3 +1,15 @@
+---
+title: TypeScript Support - Type-Safe Development
+description: Flexium's first-class TypeScript support with complete type definitions for components, state, and props.
+head:
+  - - meta
+    - property: og:title
+      content: TypeScript Support - Flexium
+  - - meta
+    - property: og:description
+      content: First-class TypeScript support with complete type definitions. Build type-safe reactive applications.
+---
+
 # TypeScript Support
 
 Flexium is written in TypeScript and provides first-class type definitions.

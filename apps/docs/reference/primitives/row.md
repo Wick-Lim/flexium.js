@@ -1,3 +1,15 @@
+---
+title: Row - Horizontal Layout Component
+description: API reference for Flexium's Row component. Create horizontal layouts with flexbox-based row direction.
+head:
+  - - meta
+    - property: og:title
+      content: Row Component - Flexium API Reference
+  - - meta
+    - property: og:description
+      content: Row is the primary primitive for horizontal layouts in Flexium. Flexbox-based with cross-platform support.
+---
+
 # Row
 
 A horizontal layout component.

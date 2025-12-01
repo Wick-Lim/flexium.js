@@ -1,5 +1,19 @@
 ---
 layout: home
+title: Flexium - Unified State & Reactivity UI Framework
+titleTemplate: false
+description: A lightweight, signals-based UI framework with fine-grained reactivity. Unified state API, universal primitives for Web and Canvas.
+
+head:
+  - - meta
+    - property: og:title
+      content: Flexium - Unified State & Reactivity UI Framework
+  - - meta
+    - property: og:description
+      content: A lightweight, signals-based UI framework with fine-grained reactivity. Build cross-platform apps with unified state API.
+  - - meta
+    - name: twitter:title
+      content: Flexium - Unified State & Reactivity UI Framework
 
 hero:
   name: Flexium

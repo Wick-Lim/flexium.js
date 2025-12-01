@@ -1,3 +1,15 @@
+---
+title: Installation - Setting Up Flexium
+description: Learn how to install Flexium in your project. Prerequisites, package installation, and configuration guide.
+head:
+  - - meta
+    - property: og:title
+      content: Installation - Flexium
+  - - meta
+    - property: og:description
+      content: Complete installation guide for Flexium. Set up your development environment and configure your project.
+---
+
 # Installation
 
 ## Prerequisites

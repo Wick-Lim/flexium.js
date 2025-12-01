@@ -1,3 +1,15 @@
+---
+title: Counter Example - Basic State Management
+description: Learn Flexium's state management with a simple counter example. Demonstrates reactive state updates and event handling.
+head:
+  - - meta
+    - property: og:title
+      content: Counter Example - Flexium
+  - - meta
+    - property: og:description
+      content: Simple counter example demonstrating Flexium's state management and reactive updates.
+---
+
 # Counter Example
 
 This example demonstrates state management and interaction.

@@ -1,3 +1,15 @@
+---
+title: Arc - Canvas Arc Component
+description: API reference for Flexium's Arc component. Draw arcs and partial circles on canvas with reactive properties.
+head:
+  - - meta
+    - property: og:title
+      content: Arc Component - Flexium Canvas API
+  - - meta
+    - property: og:description
+      content: Arc component for drawing arcs and partial circles on canvas. Great for charts and gauges.
+---
+
 # Arc
 
 Draws an arc on the canvas.

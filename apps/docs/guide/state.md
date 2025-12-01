@@ -1,3 +1,15 @@
+---
+title: state() - Unified State Management API
+description: Learn how to use Flexium's unified state() API for local state, global state, async data fetching, and computed values.
+head:
+  - - meta
+    - property: og:title
+      content: state() API - Flexium State Management
+  - - meta
+    - property: og:description
+      content: Master Flexium's unified state() API - one function for local, global, async, and computed state management.
+---
+
 # state()
 
 `state()` is the single, unified API for all state management in Flexium.
