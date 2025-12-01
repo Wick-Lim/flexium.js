@@ -1,10 +1,10 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state, effect } from 'flexium'
+import { state } from 'flexium'
 import { h, render } from 'flexium/dom'
 
 const container = ref(null)
-let intervalId = null
+let timerInterval = null
 
 function TimerDemo() {
   const [seconds, setSeconds] = state(0)
@@ -21,19 +21,26 @@ function TimerDemo() {
 
   const startStop = () => {
     if (isRunning()) {
-      clearInterval(intervalId)
-      intervalId = null
+      // Stop
+      if (timerInterval) {
+        clearInterval(timerInterval)
+        timerInterval = null
+      }
+      setIsRunning(false)
     } else {
-      intervalId = setInterval(() => {
+      // Start
+      setIsRunning(true)
+      timerInterval = setInterval(() => {
         setSeconds(s => s + 0.01)
       }, 10)
     }
-    setIsRunning(r => !r)
   }
 
   const reset = () => {
-    clearInterval(intervalId)
-    intervalId = null
+    if (timerInterval) {
+      clearInterval(timerInterval)
+      timerInterval = null
+    }
     setIsRunning(false)
     setSeconds(0)
     setLaps([])
@@ -74,20 +81,23 @@ function TimerDemo() {
 
     // Buttons
     h('div', { style: { display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' } }, [
-      h('button', {
+      // Start/Stop button - use a function to render reactively
+      () => h('button', {
         onclick: startStop,
         style: {
           padding: '12px 24px',
-          background: () => isRunning() ? '#ef4444' : '#10b981',
+          background: isRunning() ? '#ef4444' : '#10b981',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
           cursor: 'pointer',
           fontWeight: '600',
           fontSize: '14px',
-          minWidth: '100px'
+          minWidth: '100px',
+          transition: 'background 0.2s'
         }
-      }, [() => isRunning() ? 'Stop' : 'Start']),
+      }, [isRunning() ? 'Stop' : 'Start']),
+
       h('button', {
         onclick: addLap,
         style: {
@@ -101,6 +111,7 @@ function TimerDemo() {
           fontSize: '14px'
         }
       }, ['Lap']),
+
       h('button', {
         onclick: reset,
         style: {
@@ -124,9 +135,11 @@ function TimerDemo() {
         textAlign: 'left'
       }
     }, [
-      () => laps().length > 0 ?
-        h('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
-          laps().map((lap, i) =>
+      () => {
+        const lapList = laps()
+        if (lapList.length === 0) return null
+        return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
+          lapList.map((lap, i) =>
             h('div', {
               style: {
                 display: 'flex',
@@ -138,11 +151,12 @@ function TimerDemo() {
                 fontFamily: 'monospace'
               }
             }, [
-              h('span', { style: { color: '#6b7280' } }, [`Lap ${laps().length - i}`]),
+              h('span', { style: { color: '#6b7280' } }, [`Lap ${lapList.length - i}`]),
               h('span', { style: { fontWeight: '600' } }, [formatTime(lap)])
             ])
           )
-        ) : null
+        )
+      }
     ])
   ])
 }
@@ -154,7 +168,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (intervalId) clearInterval(intervalId)
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
   if (container.value) {
     container.value.innerHTML = ''
   }
@@ -170,5 +187,13 @@ onUnmounted(() => {
 <style scoped>
 .demo-wrapper {
   margin: 20px 0;
+}
+
+.demo-wrapper :deep(button:hover) {
+  filter: brightness(110%);
+}
+
+.demo-wrapper :deep(button:active) {
+  filter: brightness(90%);
 }
 </style>
