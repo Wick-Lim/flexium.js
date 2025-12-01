@@ -1,3 +1,15 @@
+---
+title: Error Handling - ErrorBoundary Component
+description: Handle runtime errors gracefully with Flexium's ErrorBoundary component. Display fallback UIs and prevent app crashes.
+head:
+  - - meta
+    - property: og:title
+      content: Error Handling - Flexium
+  - - meta
+    - property: og:description
+      content: Catch and handle errors in component trees with ErrorBoundary. Display fallback UIs instead of crashing.
+---
+
 # Error Handling
 
 Flexium provides a robust way to handle runtime errors in your component tree using the `ErrorBoundary` component. This allows you to catch errors in child components and display a fallback UI instead of crashing the entire application.

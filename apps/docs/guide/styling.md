@@ -1,3 +1,15 @@
+---
+title: Styling - CSS, Modules & Inline Styles
+description: Style Flexium components with CSS, CSS Modules, and inline styles. Learn best practices for reactive UI styling.
+head:
+  - - meta
+    - property: og:title
+      content: Styling Guide - Flexium
+  - - meta
+    - property: og:description
+      content: Multiple styling options for Flexium - standard CSS, CSS Modules, and inline styles. Flexible and performant.
+---
+
 # Styling
 
 Flexium supports standard CSS, CSS Modules, and inline styles.

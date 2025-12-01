@@ -1,3 +1,15 @@
+---
+title: Router - Client-Side Navigation
+description: Build Single Page Applications with Flexium's built-in router. Learn about routes, navigation, and dynamic parameters.
+head:
+  - - meta
+    - property: og:title
+      content: Router - Flexium SPA Routing
+  - - meta
+    - property: og:description
+      content: Built-in router for Flexium Single Page Applications. Client-side navigation, dynamic routes, and more.
+---
+
 # Router
 
 Flexium includes a built-in router for building Single Page Applications (SPA).

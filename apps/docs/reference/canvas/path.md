@@ -1,3 +1,15 @@
+---
+title: Path - Canvas Path Component
+description: API reference for Flexium's Path component. Draw custom SVG-like paths on canvas with reactive properties.
+head:
+  - - meta
+    - property: og:title
+      content: Path Component - Flexium Canvas API
+  - - meta
+    - property: og:description
+      content: Path component for drawing custom SVG-like paths on canvas. Supports complex shapes and curves.
+---
+
 # Path
 
 Draws a custom SVG-like path on the canvas.

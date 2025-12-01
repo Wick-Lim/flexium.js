@@ -1,9 +1,116 @@
 import { defineConfig } from 'vitepress'
 
+const siteUrl = 'https://flexium.dev'
+const siteName = 'Flexium'
+const siteDescription = 'A lightweight, signals-based UI framework with cross-platform renderers. Fine-grained reactivity, unified state API, and universal primitives for Web and Canvas.'
+
 export default defineConfig({
-  title: 'Flexium',
-  description: 'A lightweight, signals-based UI framework with cross-platform renderers',
+  title: siteName,
+  description: siteDescription,
   ignoreDeadLinks: true,
+  lang: 'en-US',
+  cleanUrls: true,
+  lastUpdated: true,
+
+  // Sitemap configuration
+  sitemap: {
+    hostname: siteUrl,
+    transformItems: (items) => {
+      // Add priority based on page depth
+      return items.map(item => ({
+        ...item,
+        changefreq: 'weekly',
+        priority: item.url === '' ? 1.0 :
+                  item.url.includes('guide/') ? 0.8 :
+                  item.url.includes('reference/') ? 0.7 : 0.6
+      }))
+    }
+  },
+
+  // Head meta tags for SEO
+  head: [
+    // Basic meta tags
+    ['meta', { name: 'author', content: 'Flexium Contributors' }],
+    ['meta', { name: 'keywords', content: 'flexium, javascript, typescript, ui framework, reactive, signals, fine-grained reactivity, canvas, web components, jsx' }],
+    ['meta', { name: 'robots', content: 'index, follow' }],
+    ['meta', { name: 'googlebot', content: 'index, follow' }],
+
+    // Favicon and icons
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }],
+    ['link', { rel: 'manifest', href: '/site.webmanifest' }],
+    ['meta', { name: 'theme-color', content: '#646cff' }],
+
+    // Open Graph / Facebook
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: siteName }],
+    ['meta', { property: 'og:title', content: siteName }],
+    ['meta', { property: 'og:description', content: siteDescription }],
+    ['meta', { property: 'og:image', content: `${siteUrl}/og-image.png` }],
+    ['meta', { property: 'og:url', content: siteUrl }],
+    ['meta', { property: 'og:locale', content: 'en_US' }],
+
+    // Twitter Card
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:title', content: siteName }],
+    ['meta', { name: 'twitter:description', content: siteDescription }],
+    ['meta', { name: 'twitter:image', content: `${siteUrl}/og-image.png` }],
+
+    // Canonical URL
+    ['link', { rel: 'canonical', href: siteUrl }],
+
+    // JSON-LD structured data
+    ['script', { type: 'application/ld+json' }, JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: siteName,
+      description: siteDescription,
+      url: siteUrl,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Cross-platform',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD'
+      },
+      author: {
+        '@type': 'Organization',
+        name: 'Flexium Contributors'
+      },
+      license: 'https://opensource.org/licenses/MIT'
+    })],
+
+    // Additional JSON-LD for documentation
+    ['script', { type: 'application/ld+json' }, JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: `${siteName} Documentation`,
+      url: siteUrl,
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${siteUrl}/?search={search_term_string}`
+        },
+        'query-input': 'required name=search_term_string'
+      }
+    })]
+  ],
+
+  // Transform page meta for better SEO
+  transformPageData(pageData) {
+    const canonicalUrl = `${siteUrl}/${pageData.relativePath}`
+      .replace(/index\.md$/, '')
+      .replace(/\.md$/, '')
+
+    pageData.frontmatter.head ??= []
+    pageData.frontmatter.head.push(
+      ['link', { rel: 'canonical', href: canonicalUrl }],
+      ['meta', { property: 'og:url', content: canonicalUrl }]
+    )
+  },
 
   themeConfig: {
     logo: '/logo.svg',

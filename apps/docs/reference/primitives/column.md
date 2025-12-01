@@ -1,3 +1,15 @@
+---
+title: Column - Vertical Layout Component
+description: API reference for Flexium's Column component. Create vertical layouts with flexbox-based column direction.
+head:
+  - - meta
+    - property: og:title
+      content: Column Component - Flexium API Reference
+  - - meta
+    - property: og:description
+      content: Column is the primary primitive for vertical layouts in Flexium. Flexbox-based with cross-platform support.
+---
+
 # Column
 
 A vertical layout component.

@@ -1,3 +1,15 @@
+---
+title: Core Primitives - Universal UI Components
+description: Learn about Flexium's universal primitives like Row, Column, Text, Image, and Pressable for cross-platform UI development.
+head:
+  - - meta
+    - property: og:title
+      content: Core Primitives - Flexium
+  - - meta
+    - property: og:description
+      content: Universal UI components that work across Web and Native platforms. Build with Row, Column, Text, Image, and Pressable.
+---
+
 # Core Primitives
 
 Flexium provides a set of universal primitives that work across Web and Native platforms (Flexium Native). Instead of using platform-specific tags like `div` or `span`, use these components to build your UI.

@@ -1,3 +1,15 @@
+---
+title: Showcase - Live Flexium Demo
+description: Experience Flexium's fine-grained reactivity in action. Interactive live demo running directly in your browser.
+head:
+  - - meta
+    - property: og:title
+      content: Flexium Showcase - Live Demo
+  - - meta
+    - property: og:description
+      content: See Flexium in action with an interactive live demo. Experience fine-grained reactivity directly in your browser.
+---
+
 # Flexium Showcase
 
 Experience the power of Flexium's fine-grained reactivity directly in your browser. This demo is running live, powered by the core `flexium` library.

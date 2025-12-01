@@ -1,3 +1,15 @@
+---
+title: Canvas - Canvas Container Component
+description: API reference for Flexium's Canvas component. Container for declarative canvas-based drawings with JSX.
+head:
+  - - meta
+    - property: og:title
+      content: Canvas Component - Flexium API Reference
+  - - meta
+    - property: og:description
+      content: Canvas component is the container for all canvas-based drawings in Flexium. Declarative and reactive.
+---
+
 # Canvas
 
 The `Canvas` component acts as a container for all canvas-based drawings. It creates a `<canvas>` element on the web.

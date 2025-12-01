@@ -1,3 +1,15 @@
+---
+title: Rect - Canvas Rectangle Component
+description: API reference for Flexium's Rect component. Draw rectangles on canvas with reactive properties.
+head:
+  - - meta
+    - property: og:title
+      content: Rect Component - Flexium Canvas API
+  - - meta
+    - property: og:description
+      content: Rect component for drawing rectangles on canvas. Declarative JSX syntax with reactive properties.
+---
+
 # Rect
 
 Draws a rectangle on the canvas.

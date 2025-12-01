@@ -1,0 +1,15 @@
+# Flexium Documentation - robots.txt
+# https://flexium.dev
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://flexium.dev/sitemap.xml
+
+# Crawl-delay for polite crawling (optional)
+Crawl-delay: 1
+
+# Disallow admin or private paths (if any)
+Disallow: /api/
+Disallow: /_*

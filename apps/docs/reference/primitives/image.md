@@ -1,3 +1,15 @@
+---
+title: Image - Image Rendering Component
+description: API reference for Flexium's Image component. Display images with cross-platform support and reactive properties.
+head:
+  - - meta
+    - property: og:title
+      content: Image Component - Flexium API Reference
+  - - meta
+    - property: og:description
+      content: Image component for rendering images in Flexium. Universal primitive with cross-platform support.
+---
+
 # Image
 
 Renders an image.

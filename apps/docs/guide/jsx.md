@@ -1,3 +1,15 @@
+---
+title: JSX & Rendering - Building UI with JSX
+description: Learn how Flexium uses JSX for declarative UI. No Virtual DOM, just optimized direct DOM manipulation with fine-grained reactivity.
+head:
+  - - meta
+    - property: og:title
+      content: JSX & Rendering - Flexium
+  - - meta
+    - property: og:description
+      content: Build UIs with JSX in Flexium. Optimized function calls, no Virtual DOM diffing, and built-in control flow components.
+---
+
 # JSX & Rendering
 
 Flexium uses JSX to describe the UI. It looks like HTML but works with JavaScript logic.

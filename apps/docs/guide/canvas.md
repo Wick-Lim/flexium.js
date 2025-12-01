@@ -1,3 +1,15 @@
+---
+title: Canvas Rendering - Declarative Canvas with JSX
+description: Build reactive canvas applications with Flexium's declarative JSX-based API. Perfect for games, data visualization, and custom graphics.
+head:
+  - - meta
+    - property: og:title
+      content: Canvas Rendering - Flexium
+  - - meta
+    - property: og:description
+      content: Declarative JSX-based canvas rendering with built-in Signal reactivity for games, charts, and custom graphics.
+---
+
 # Canvas Rendering
 
 Flexium provides declarative JSX-based canvas rendering with built-in Signal reactivity.

@@ -1,3 +1,15 @@
+---
+title: Text - Text Rendering Component
+description: API reference for Flexium's Text component. Render and style text content with cross-platform support.
+head:
+  - - meta
+    - property: og:title
+      content: Text Component - Flexium API Reference
+  - - meta
+    - property: og:description
+      content: Text component for rendering text content in Flexium. Universal primitive with styling options.
+---
+
 # Text
 
 Renders text content.

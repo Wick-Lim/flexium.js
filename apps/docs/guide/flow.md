@@ -1,3 +1,15 @@
+---
+title: Control Flow - For, Show, Switch Components
+description: Learn Flexium's control flow components for efficient conditional rendering and list handling with fine-grained reactivity.
+head:
+  - - meta
+    - property: og:title
+      content: Control Flow Components - Flexium
+  - - meta
+    - property: og:description
+      content: Master For, Show, Switch, and Match components for optimized conditional rendering and list iteration.
+---
+
 # Control Flow
 
 Flexium provides a set of dedicated control flow components (`<For>`, `<Show>`, `<Switch>`, `<Match>`) designed to handle conditional rendering and lists efficiently. Unlike JavaScript's native `.map()` or ternary operators, these components are optimized for fine-grained reactivity, ensuring that only the necessary parts of the DOM are updated when state changes.

@@ -1,3 +1,15 @@
+---
+title: effect() - Reactive Side Effects
+description: Learn how to use Flexium's effect() API to run side effects automatically when reactive dependencies change.
+head:
+  - - meta
+    - property: og:title
+      content: effect() API - Flexium Reactive Effects
+  - - meta
+    - property: og:description
+      content: Run side effects automatically when reactive state changes. Handle DOM updates, API calls, and subscriptions with effect().
+---
+
 # effect()
 
 `effect()` runs a function automatically whenever its reactive dependencies change. It is the bridge between the reactive state and the outside world (DOM updates, API calls, subscriptions, etc.).

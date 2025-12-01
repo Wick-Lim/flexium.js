@@ -1,3 +1,15 @@
+---
+title: Performance - Optimization Guide
+description: Learn how Flexium achieves high performance with fine-grained updates, no Virtual DOM, and automatic optimizations.
+head:
+  - - meta
+    - property: og:title
+      content: Performance Optimization - Flexium
+  - - meta
+    - property: og:description
+      content: High performance by default with fine-grained reactivity. No Virtual DOM overhead, surgical DOM updates.
+---
+
 # Performance
 
 Flexium is designed for high performance by default.

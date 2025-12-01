@@ -1,3 +1,15 @@
+---
+title: Quick Start - Get Started with Flexium
+description: Get up and running with Flexium in under 5 minutes. Learn how to create your first project, configure JSX, and build components.
+head:
+  - - meta
+    - property: og:title
+      content: Quick Start - Flexium
+  - - meta
+    - property: og:description
+      content: Get up and running with Flexium in under 5 minutes. Create your first reactive UI application.
+---
+
 # Quick Start
 
 Get up and running with Flexium in under 5 minutes.

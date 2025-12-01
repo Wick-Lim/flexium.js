@@ -1,3 +1,15 @@
+---
+title: Server-Side Rendering (SSR) - SEO & Performance
+description: Implement SSR with Flexium for improved SEO and faster initial page loads. Server entry, hydration, and best practices.
+head:
+  - - meta
+    - property: og:title
+      content: Server-Side Rendering - Flexium SSR
+  - - meta
+    - property: og:description
+      content: Generate HTML on the server for better SEO and initial load performance. Complete SSR guide for Flexium.
+---
+
 # Server-Side Rendering (SSR)
 
 Flexium supports Server-Side Rendering to generate HTML on the server, improving SEO and initial load performance.
