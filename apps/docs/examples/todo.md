@@ -114,9 +114,17 @@ function TodoApp() {
 ## With Filtering
 
 ```tsx
+import { state, For } from 'flexium'
+import { Column, Row, Text, Pressable } from 'flexium'
+
 function TodoAppWithFilter() {
-  const [todos, setTodos] = state<Todo[]>([])
+  const [todos, setTodos] = state<Todo[]>([
+    { id: 1, text: 'Learn Flexium', completed: true },
+    { id: 2, text: 'Build an app', completed: false },
+    { id: 3, text: 'Deploy to production', completed: false }
+  ])
   const [filter, setFilter] = state<'all' | 'active' | 'completed'>('all')
+  const [inputText, setInputText] = state('')
 
   // Computed filtered list
   const [filteredTodos] = state(() => {
@@ -129,39 +137,101 @@ function TodoAppWithFilter() {
   })
 
   // Stats
-  const [remaining] = state(() =>
-    todos().filter(t => !t.completed).length
-  )
+  const [remaining] = state(() => todos().filter(t => !t.completed).length)
+
+  const addTodo = () => {
+    const text = inputText().trim()
+    if (!text) return
+    setTodos(prev => [...prev, { id: Date.now(), text, completed: false }])
+    setInputText('')
+  }
+
+  const toggleTodo = (id: number) => {
+    setTodos(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
+  }
+
+  const deleteTodo = (id: number) => {
+    setTodos(prev => prev.filter(t => t.id !== id))
+  }
 
   return (
-    <Column gap={16}>
-      {/* ... input section ... */}
+    <Column gap={16} padding={20}>
+      <Text style={{ fontSize: '24px', fontWeight: 'bold' }}>Todo List</Text>
+
+      <Row gap={8}>
+        <input
+          type="text"
+          value={inputText()}
+          oninput={(e) => setInputText(e.target.value)}
+          onkeydown={(e) => e.key === 'Enter' && addTodo()}
+          placeholder="Add a new todo..."
+          style={{ flex: 1, padding: '8px' }}
+        />
+        <Pressable onPress={addTodo}>
+          <Text style={{ padding: '8px 16px', background: '#646cff', color: 'white' }}>
+            Add
+          </Text>
+        </Pressable>
+      </Row>
 
       <Row gap={8}>
         <Pressable onPress={() => setFilter('all')}>
-          <Text style={{ fontWeight: filter() === 'all' ? 'bold' : 'normal' }}>
+          <Text style={{
+            padding: '6px 12px',
+            background: filter() === 'all' ? '#646cff' : '#e5e7eb',
+            color: filter() === 'all' ? 'white' : '#333',
+            borderRadius: '4px'
+          }}>
             All
           </Text>
         </Pressable>
         <Pressable onPress={() => setFilter('active')}>
-          <Text style={{ fontWeight: filter() === 'active' ? 'bold' : 'normal' }}>
+          <Text style={{
+            padding: '6px 12px',
+            background: filter() === 'active' ? '#646cff' : '#e5e7eb',
+            color: filter() === 'active' ? 'white' : '#333',
+            borderRadius: '4px'
+          }}>
             Active
           </Text>
         </Pressable>
         <Pressable onPress={() => setFilter('completed')}>
-          <Text style={{ fontWeight: filter() === 'completed' ? 'bold' : 'normal' }}>
+          <Text style={{
+            padding: '6px 12px',
+            background: filter() === 'completed' ? '#646cff' : '#e5e7eb',
+            color: filter() === 'completed' ? 'white' : '#333',
+            borderRadius: '4px'
+          }}>
             Completed
           </Text>
         </Pressable>
       </Row>
 
-      <Text>{remaining} items remaining</Text>
+      <Text style={{ color: '#666' }}>{remaining} items remaining</Text>
 
-      <For each={filteredTodos}>
-        {(todo) => (
-          /* ... todo item ... */
-        )}
-      </For>
+      <Column gap={8}>
+        <For each={filteredTodos}>
+          {(todo) => (
+            <Row gap={8} style={{ padding: '8px', background: '#f5f5f5', alignItems: 'center' }}>
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onchange={() => toggleTodo(todo.id)}
+              />
+              <Text style={{
+                flex: 1,
+                textDecoration: todo.completed ? 'line-through' : 'none',
+                color: todo.completed ? '#999' : '#333'
+              }}>
+                {todo.text}
+              </Text>
+              <Pressable onPress={() => deleteTodo(todo.id)}>
+                <Text style={{ color: 'red', padding: '4px 8px' }}>Delete</Text>
+              </Pressable>
+            </Row>
+          )}
+        </For>
+      </Column>
     </Column>
   )
 }

@@ -126,6 +126,9 @@ function BarChart() {
 ## Line Chart
 
 ```tsx
+import { state } from 'flexium'
+import { Canvas, Path, Circle, Line } from 'flexium'
+
 function LineChart() {
   const [data] = state([
     { x: 0, y: 30 },
@@ -194,6 +197,10 @@ function LineChart() {
 ## Pie Chart
 
 ```tsx
+import { state } from 'flexium'
+import { Canvas, Path } from 'flexium'
+import { Column, Row, Text } from 'flexium'
+
 function PieChart() {
   const [data] = state([
     { label: 'Product A', value: 35, color: '#646cff' },
