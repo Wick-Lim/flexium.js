@@ -31,9 +31,11 @@ export default defineConfig({
   head: [
     // Basic meta tags
     ['meta', { name: 'author', content: 'Flexium Contributors' }],
-    ['meta', { name: 'keywords', content: 'flexium, javascript, typescript, ui framework, reactive, signals, fine-grained reactivity, canvas, web components, jsx' }],
-    ['meta', { name: 'robots', content: 'index, follow' }],
+    ['meta', { name: 'keywords', content: 'flexium, javascript, typescript, ui framework, reactive, signals, fine-grained reactivity, canvas, web components, jsx, frontend, state management' }],
+    ['meta', { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }],
     ['meta', { name: 'googlebot', content: 'index, follow' }],
+    ['meta', { name: 'bingbot', content: 'index, follow' }],
+    ['meta', { name: 'generator', content: 'VitePress' }],
 
     // Favicon and icons
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
@@ -42,13 +44,21 @@ export default defineConfig({
     ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }],
     ['link', { rel: 'manifest', href: '/site.webmanifest' }],
     ['meta', { name: 'theme-color', content: '#646cff' }],
+    ['meta', { name: 'msapplication-TileColor', content: '#646cff' }],
+    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
+    ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }],
+    ['meta', { name: 'apple-mobile-web-app-title', content: siteName }],
 
     // Open Graph / Facebook
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:site_name', content: siteName }],
     ['meta', { property: 'og:title', content: siteName }],
     ['meta', { property: 'og:description', content: siteDescription }],
-    ['meta', { property: 'og:image', content: `${siteUrl}/og-image.png` }],
+    ['meta', { property: 'og:image', content: `${siteUrl}/og-image.svg` }],
+    ['meta', { property: 'og:image:type', content: 'image/svg+xml' }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { property: 'og:image:alt', content: 'Flexium - Fine-grained Reactive UI Framework' }],
     ['meta', { property: 'og:url', content: siteUrl }],
     ['meta', { property: 'og:locale', content: 'en_US' }],
 
@@ -56,10 +66,15 @@ export default defineConfig({
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:title', content: siteName }],
     ['meta', { name: 'twitter:description', content: siteDescription }],
-    ['meta', { name: 'twitter:image', content: `${siteUrl}/og-image.png` }],
+    ['meta', { name: 'twitter:image', content: `${siteUrl}/og-image.svg` }],
+    ['meta', { name: 'twitter:image:alt', content: 'Flexium - Fine-grained Reactive UI Framework' }],
 
     // Canonical URL
     ['link', { rel: 'canonical', href: siteUrl }],
+
+    // Alternate language (for future i18n)
+    ['link', { rel: 'alternate', hreflang: 'en', href: siteUrl }],
+    ['link', { rel: 'alternate', hreflang: 'x-default', href: siteUrl }],
 
     // JSON-LD structured data
     ['script', { type: 'application/ld+json' }, JSON.stringify({
