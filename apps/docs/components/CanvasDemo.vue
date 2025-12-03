@@ -1,125 +1,144 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state, effect } from 'flexium'
-import { h, render } from 'flexium/dom'
 
-const container = ref(null)
-let animationCleanup = null
+const canvasRef = ref(null)
+let frameId = null
+let hue = 0
+let mouseX = 150
+let mouseY = 150
+let particles = []
 
-function CanvasDemo() {
-  const [mouseX, setMouseX] = state(150)
-  const [mouseY, setMouseY] = state(150)
-  const [hue, setHue] = state(0)
-  const [particles, setParticles] = state([])
+const handleMouseMove = (e) => {
+  const rect = e.target.getBoundingClientRect()
+  mouseX = e.clientX - rect.left
+  mouseY = e.clientY - rect.top
 
-  const canvas = h('canvas', {
-    width: 300,
-    height: 300,
-    onmousemove: (e) => {
-      const rect = e.target.getBoundingClientRect()
-      setMouseX(e.clientX - rect.left)
-      setMouseY(e.clientY - rect.top)
-
-      // Add particle
-      setParticles(prev => [...prev.slice(-20), {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        size: Math.random() * 10 + 5,
-        hue: hue()
-      }])
-    },
-    style: {
-      background: '#1a1a2e',
-      borderRadius: '12px',
-      cursor: 'crosshair',
-      display: 'block',
-      margin: '0 auto'
-    }
+  // Add particle
+  particles.push({
+    x: mouseX,
+    y: mouseY,
+    size: Math.random() * 10 + 5,
+    hue: hue
   })
 
-  // Animation loop
-  let frameId
-  const animate = () => {
-    setHue(h => (h + 1) % 360)
+  // Keep only last 20 particles
+  if (particles.length > 20) {
+    particles = particles.slice(-20)
+  }
+}
 
-    const ctx = canvas.getContext('2d')
-    if (ctx) {
-      ctx.fillStyle = 'rgba(26, 26, 46, 0.1)'
-      ctx.fillRect(0, 0, 300, 300)
-
-      // Draw particles
-      particles().forEach((p, i) => {
-        const alpha = (i + 1) / particles().length
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2)
-        ctx.fillStyle = `hsla(${p.hue}, 70%, 60%, ${alpha})`
-        ctx.fill()
-      })
-
-      // Draw main circle
-      ctx.beginPath()
-      ctx.arc(mouseX(), mouseY(), 20, 0, Math.PI * 2)
-      ctx.fillStyle = `hsl(${hue()}, 70%, 60%)`
-      ctx.fill()
-
-      ctx.beginPath()
-      ctx.arc(mouseX(), mouseY(), 30, 0, Math.PI * 2)
-      ctx.strokeStyle = `hsla(${hue()}, 70%, 60%, 0.5)`
-      ctx.lineWidth = 3
-      ctx.stroke()
-    }
-
+const animate = () => {
+  const canvas = canvasRef.value
+  if (!canvas) {
     frameId = requestAnimationFrame(animate)
+    return
   }
 
-  // Start animation after a small delay to ensure canvas is mounted
-  setTimeout(() => {
-    animate()
-  }, 100)
-
-  animationCleanup = () => {
-    if (frameId) cancelAnimationFrame(frameId)
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    frameId = requestAnimationFrame(animate)
+    return
   }
 
-  return h('div', {
-    style: {
-      padding: '24px',
-      background: '#f9fafb',
-      borderRadius: '12px',
-      maxWidth: '400px',
-      margin: '0 auto',
-      textAlign: 'center'
-    }
-  }, [
-    h('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Canvas Animation']),
-    h('p', { style: { margin: '0 0 16px', color: '#6b7280', fontSize: '14px' } },
-      ['Move your mouse over the canvas']),
-    canvas
-  ])
+  // Update hue
+  hue = (hue + 1) % 360
+
+  // Clear with fade effect
+  ctx.fillStyle = 'rgba(26, 26, 46, 0.15)'
+  ctx.fillRect(0, 0, 300, 300)
+
+  // Draw particles
+  const len = particles.length
+  particles.forEach((p, i) => {
+    const alpha = (i + 1) / len
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2)
+    ctx.fillStyle = `hsla(${p.hue}, 70%, 60%, ${alpha})`
+    ctx.fill()
+  })
+
+  // Draw outer ring
+  ctx.beginPath()
+  ctx.arc(mouseX, mouseY, 30, 0, Math.PI * 2)
+  ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.5)`
+  ctx.lineWidth = 3
+  ctx.stroke()
+
+  // Draw main cursor circle
+  ctx.beginPath()
+  ctx.arc(mouseX, mouseY, 20, 0, Math.PI * 2)
+  ctx.fillStyle = `hsl(${hue}, 70%, 60%)`
+  ctx.fill()
+
+  frameId = requestAnimationFrame(animate)
 }
 
 onMounted(() => {
-  if (container.value) {
-    render(CanvasDemo(), container.value)
+  if (canvasRef.value) {
+    // Initialize canvas with dark background
+    const ctx = canvasRef.value.getContext('2d')
+    if (ctx) {
+      ctx.fillStyle = '#1a1a2e'
+      ctx.fillRect(0, 0, 300, 300)
+    }
+    // Start animation
+    frameId = requestAnimationFrame(animate)
   }
 })
 
 onUnmounted(() => {
-  if (animationCleanup) animationCleanup()
-  if (container.value) {
-    container.value.innerHTML = ''
+  if (frameId) {
+    cancelAnimationFrame(frameId)
+    frameId = null
   }
 })
 </script>
 
 <template>
   <div class="demo-wrapper">
-    <div ref="container"></div>
+    <div class="canvas-container">
+      <h3>Canvas Animation</h3>
+      <p>Move your mouse over the canvas</p>
+      <canvas
+        ref="canvasRef"
+        width="300"
+        height="300"
+        @mousemove="handleMouseMove"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped>
 .demo-wrapper {
   margin: 20px 0;
+}
+
+.canvas-container {
+  padding: 24px;
+  background: #f9fafb;
+  border-radius: 12px;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.canvas-container h3 {
+  margin: 0 0 16px;
+  color: #374151;
+}
+
+.canvas-container p {
+  margin: 0 0 16px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.canvas-container canvas {
+  background: #1a1a2e;
+  border-radius: 12px;
+  cursor: crosshair;
+  display: block;
+  margin: 0 auto;
 }
 </style>
