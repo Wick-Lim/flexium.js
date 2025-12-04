@@ -1,41 +1,58 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
 import { state } from 'flexium'
-import { h, render } from 'flexium/dom'
 
 const container = ref(null)
-let animationCleanup = null
+let frameId = null
 
-function CanvasDemo() {
+onMounted(() => {
+  if (!container.value) return
+
+  // State
   const [mouseX, setMouseX] = state(150)
   const [mouseY, setMouseY] = state(150)
   const [hue, setHue] = state(0)
   const [particles, setParticles] = state([])
 
-  // Create actual canvas DOM element (not VNode)
+  // Build DOM directly (Vue handles the wrapper)
+  const wrapper = document.createElement('div')
+  wrapper.style.cssText = 'padding: 24px; background: #f9fafb; border-radius: 12px; max-width: 400px; margin: 0 auto; text-align: center;'
+
+  const title = document.createElement('h3')
+  title.textContent = 'Canvas Animation'
+  title.style.cssText = 'margin: 0 0 16px; color: #374151;'
+
+  const desc = document.createElement('p')
+  desc.textContent = 'Move your mouse over the canvas'
+  desc.style.cssText = 'margin: 0 0 16px; color: #6b7280; font-size: 14px;'
+
   const canvas = document.createElement('canvas')
   canvas.width = 300
   canvas.height = 300
   canvas.style.cssText = 'background: #1a1a2e; border-radius: 12px; cursor: crosshair; display: block; margin: 0 auto;'
 
+  wrapper.appendChild(title)
+  wrapper.appendChild(desc)
+  wrapper.appendChild(canvas)
+  container.value.appendChild(wrapper)
+
+  const ctx = canvas.getContext('2d')
+
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect()
-    setMouseX(e.clientX - rect.left)
-    setMouseY(e.clientY - rect.top)
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    setMouseX(x)
+    setMouseY(y)
 
-    // Add particle
     setParticles(prev => [...prev.slice(-20), {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x, y,
       size: Math.random() * 10 + 5,
       hue: hue()
     }])
   })
 
-  const ctx = canvas.getContext('2d')
-
   // Animation loop
-  let frameId
   const animate = () => {
     setHue(h => (h + 1) % 360)
 
@@ -44,8 +61,9 @@ function CanvasDemo() {
       ctx.fillRect(0, 0, 300, 300)
 
       // Draw particles
-      particles().forEach((p, i) => {
-        const alpha = (i + 1) / particles().length
+      const pts = particles()
+      pts.forEach((p, i) => {
+        const alpha = (i + 1) / pts.length
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2)
         ctx.fillStyle = `hsla(${p.hue}, 70%, 60%, ${alpha})`
@@ -68,38 +86,11 @@ function CanvasDemo() {
     frameId = requestAnimationFrame(animate)
   }
 
-  // Start animation
   animate()
-
-  animationCleanup = () => {
-    if (frameId) cancelAnimationFrame(frameId)
-  }
-
-  return h('div', {
-    style: {
-      padding: '24px',
-      background: '#f9fafb',
-      borderRadius: '12px',
-      maxWidth: '400px',
-      margin: '0 auto',
-      textAlign: 'center'
-    }
-  }, [
-    h('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Canvas Animation']),
-    h('p', { style: { margin: '0 0 16px', color: '#6b7280', fontSize: '14px' } },
-      ['Move your mouse over the canvas']),
-    canvas  // Real DOM element, not VNode
-  ])
-}
-
-onMounted(() => {
-  if (container.value) {
-    render(CanvasDemo(), container.value)
-  }
 })
 
 onUnmounted(() => {
-  if (animationCleanup) animationCleanup()
+  if (frameId) cancelAnimationFrame(frameId)
   if (container.value) {
     container.value.innerHTML = ''
   }
