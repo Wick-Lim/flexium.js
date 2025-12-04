@@ -136,7 +136,7 @@ export default defineConfig({
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.2.4',
+        text: 'v0.3.0',
         items: [
           { text: 'Changelog', link: 'https://github.com/yourusername/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -176,6 +176,7 @@ export default defineConfig({
         {
           text: 'Advanced',
           items: [
+            { text: 'Advanced API', link: '/guide/advanced-api' },
             { text: 'Performance', link: '/guide/performance' },
             { text: 'Server-Side Rendering', link: '/guide/ssr' },
             { text: 'TypeScript', link: '/guide/typescript' },
