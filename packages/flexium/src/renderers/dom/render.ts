@@ -49,9 +49,9 @@ export function render(
 }
 
 /**
- * Mount a virtual node to create a DOM node
+ * Mount a virtual node to create a DOM node (internal)
  */
-function mount(vnode: VNodeChild | Function): Node | null {
+function mountVNode(vnode: VNodeChild | Function): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
   if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
     return null;
@@ -61,7 +61,7 @@ function mount(vnode: VNodeChild | Function): Node | null {
   if (Array.isArray(vnode)) {
     const fragment = document.createDocumentFragment();
     for (const child of vnode) {
-      const childNode = mount(child);
+      const childNode = mountVNode(child);
       if (childNode) {
         fragment.appendChild(childNode);
       }
@@ -71,7 +71,7 @@ function mount(vnode: VNodeChild | Function): Node | null {
 
   // Handle functions (lazy components)
   if (typeof vnode === 'function') {
-    return mount(vnode());
+    return mountVNode(vnode());
   }
 
   // Handle text nodes
@@ -85,14 +85,14 @@ function mount(vnode: VNodeChild | Function): Node | null {
     if (typeof vnode.type === 'function') {
       const component = vnode.type as Function;
       const result = component({ ...vnode.props, children: vnode.children });
-      return mount(result);
+      return mountVNode(result);
     }
 
     // Handle fragments
     if (vnode.type === 'fragment') {
       const fragment = document.createDocumentFragment();
       for (const child of vnode.children) {
-        const childNode = mount(child);
+        const childNode = mountVNode(child);
         if (childNode) {
           fragment.appendChild(childNode);
         }
@@ -111,7 +111,7 @@ function mount(vnode: VNodeChild | Function): Node | null {
 
     // Mount children
     for (const child of vnode.children) {
-      const childNode = mount(child);
+      const childNode = mountVNode(child);
       if (childNode) {
         domRenderer.appendChild(node, childNode);
       }
@@ -153,7 +153,7 @@ export function update(
 ): void {
   // If types don't match, replace the node
   if (oldVNode.type !== newVNode.type) {
-    const newNode = mount(newVNode);
+    const newNode = mountVNode(newVNode);
     if (newNode && node.parentNode) {
       node.parentNode.replaceChild(newNode, node);
     }
@@ -189,7 +189,7 @@ export function update(
       }
     } else if (!oldChild) {
       // Add new child
-      const newChildNode = mount(newChild);
+      const newChildNode = mountVNode(newChild);
       if (newChildNode) {
         domRenderer.appendChild(node, newChildNode);
       }
@@ -201,7 +201,7 @@ export function update(
         }
       } else {
         // Replace text with element
-        const newChildNode = mount(newChild);
+        const newChildNode = mountVNode(newChild);
         if (newChildNode && childNode) {
           node.replaceChild(newChildNode, childNode);
           unmount(childNode);
@@ -210,7 +210,7 @@ export function update(
     } else if (isVNode(oldChild)) {
       if (typeof newChild === 'string' || typeof newChild === 'number') {
         // Replace element with text
-        const newChildNode = mount(newChild);
+        const newChildNode = mountVNode(newChild);
         if (newChildNode && childNode) {
           node.replaceChild(newChildNode, childNode);
           unmount(childNode);
@@ -243,4 +243,24 @@ export function update(
 export function createRoot(container: HTMLElement) {
   // Use reactive root for automatic signal tracking
   return createReactiveRoot(container);
+}
+
+/**
+ * Mount a component to a DOM container
+ *
+ * Convenience function with container-first argument order.
+ * Equivalent to render(vnode, container).
+ *
+ * @param container - DOM element to render into
+ * @param vnode - Virtual node to render
+ * @returns The rendered DOM node
+ *
+ * @example
+ * mount(document.getElementById('app')!, <App />)
+ */
+export function mount(
+  container: HTMLElement,
+  vnode: VNode | string | number | null | undefined | Function
+): Node | null {
+  return render(vnode, container);
 }

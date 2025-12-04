@@ -35,7 +35,7 @@ function state<T>(
 export { state, clearGlobalState }
 export { For, Show, Switch, Match } from './core/flow'
 export { Suspense } from './core/suspense'
-export { ErrorBoundary } from './core/error-boundary' // New export
+export { ErrorBoundary, useErrorBoundary } from './core/error-boundary'
 export { Portal } from './renderers/dom/portal'
 // Export types
 export type { StateGetter, StateSetter } from './core/state'

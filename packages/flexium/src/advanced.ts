@@ -19,3 +19,6 @@ export {
 } from './core/signal'
 
 export type { Signal, Computed, Resource } from './core/signal'
+
+// DevTools
+export { enableDevTools, disableDevTools } from './devtools'
