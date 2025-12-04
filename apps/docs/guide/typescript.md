@@ -37,3 +37,27 @@ function User(props: Props) {
 const [count, setCount] = state<number>(0);
 const [user, setUser] = state<User | null>(null);
 ```
+
+## VNode Children Types
+
+As of v0.3.1, Flexium provides improved type definitions for virtual node children:
+
+```tsx
+import type { VNodeChild, VNode } from 'flexium';
+
+// VNodeChild supports: VNode, string, number, boolean, null, undefined, and arrays
+type VNodeChild = VNode | string | number | boolean | null | undefined | VNodeChild[];
+```
+
+This allows for more flexible JSX expressions:
+
+```tsx
+function ConditionalRender({ show }: { show: boolean }) {
+  return (
+    <div>
+      {show && <span>Visible</span>}  {/* boolean short-circuit */}
+      {null}  {/* safely ignored */}
+    </div>
+  );
+}
+```
