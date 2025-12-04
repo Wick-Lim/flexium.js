@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state, effect } from 'flexium'
+import { state } from 'flexium'
 import { h, render } from 'flexium/dom'
 
 const container = ref(null)
@@ -12,37 +12,33 @@ function CanvasDemo() {
   const [hue, setHue] = state(0)
   const [particles, setParticles] = state([])
 
-  const canvas = h('canvas', {
-    width: 300,
-    height: 300,
-    onmousemove: (e) => {
-      const rect = e.target.getBoundingClientRect()
-      setMouseX(e.clientX - rect.left)
-      setMouseY(e.clientY - rect.top)
+  // Create actual canvas DOM element (not VNode)
+  const canvas = document.createElement('canvas')
+  canvas.width = 300
+  canvas.height = 300
+  canvas.style.cssText = 'background: #1a1a2e; border-radius: 12px; cursor: crosshair; display: block; margin: 0 auto;'
 
-      // Add particle
-      setParticles(prev => [...prev.slice(-20), {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        size: Math.random() * 10 + 5,
-        hue: hue()
-      }])
-    },
-    style: {
-      background: '#1a1a2e',
-      borderRadius: '12px',
-      cursor: 'crosshair',
-      display: 'block',
-      margin: '0 auto'
-    }
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect()
+    setMouseX(e.clientX - rect.left)
+    setMouseY(e.clientY - rect.top)
+
+    // Add particle
+    setParticles(prev => [...prev.slice(-20), {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      size: Math.random() * 10 + 5,
+      hue: hue()
+    }])
   })
+
+  const ctx = canvas.getContext('2d')
 
   // Animation loop
   let frameId
   const animate = () => {
     setHue(h => (h + 1) % 360)
 
-    const ctx = canvas.getContext('2d')
     if (ctx) {
       ctx.fillStyle = 'rgba(26, 26, 46, 0.1)'
       ctx.fillRect(0, 0, 300, 300)
@@ -72,10 +68,8 @@ function CanvasDemo() {
     frameId = requestAnimationFrame(animate)
   }
 
-  // Start animation after a small delay to ensure canvas is mounted
-  setTimeout(() => {
-    animate()
-  }, 100)
+  // Start animation
+  animate()
 
   animationCleanup = () => {
     if (frameId) cancelAnimationFrame(frameId)
@@ -94,7 +88,7 @@ function CanvasDemo() {
     h('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Canvas Animation']),
     h('p', { style: { margin: '0 0 16px', color: '#6b7280', fontSize: '14px' } },
       ['Move your mouse over the canvas']),
-    canvas
+    canvas  // Real DOM element, not VNode
   ])
 }
 
