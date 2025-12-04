@@ -226,4 +226,4 @@ For more information, see `.claude/agents/README.md`.
 
 ---
 
-[0.1.0]: https://github.com/yourusername/flexium.js/releases/tag/v0.1.0
+[0.1.0]: https://github.com/Wick-Lim/flexium.js/releases/tag/v0.1.0

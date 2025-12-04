@@ -196,15 +196,15 @@ Want to contribute? Start here:
 1. [CONTRIBUTING_QUICK_START.md](../.github/CONTRIBUTING_QUICK_START.md) - 5-minute setup
 2. [CONTRIBUTING.md](../CONTRIBUTING.md) - Full guidelines
 3. [PROJECT_SUMMARY.md](../PROJECT_SUMMARY.md) - Current status
-4. [GitHub Issues](https://github.com/yourusername/flexium.js/issues) - What to work on
+4. [GitHub Issues](https://github.com/Wick-Lim/flexium.js/issues) - What to work on
 
 ## Support
 
 ### Getting Help
 
 1. **Check documentation** - Start with [FAQ.md](./FAQ.md)
-2. **Search issues** - [GitHub Issues](https://github.com/yourusername/flexium.js/issues)
-3. **Ask questions** - [GitHub Discussions](https://github.com/yourusername/flexium.js/discussions)
+2. **Search issues** - [GitHub Issues](https://github.com/Wick-Lim/flexium.js/issues)
+3. **Ask questions** - [GitHub Discussions](https://github.com/Wick-Lim/flexium.js/discussions)
 4. **Report bugs** - Use [issue template](../.github/ISSUE_TEMPLATE.md)
 
 ### Community
@@ -224,7 +224,7 @@ For deep dives into the architecture:
 
 ## Project Status
 
-**Current Version:** 0.1.0-alpha
+**Current Version:** 0.3.0
 
 **Status:** Early development
 

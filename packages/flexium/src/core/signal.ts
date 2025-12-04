@@ -30,10 +30,32 @@ let owner: { cleanups: (() => void)[] } | null = null;
 
 /**
  * Runs a function once when the component mounts.
- * Equivalent to `effect(() => untrack(fn))` but clearer intent.
+ * Unlike effect(), onMount does not track dependencies - it runs exactly once.
+ *
+ * @param fn - Function to run on mount. Can return a cleanup function.
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   onMount(() => {
+ *     console.log('Mounted!');
+ *     return () => console.log('Unmounted!');
+ *   });
+ *   return <div>Hello</div>;
+ * }
+ * ```
  */
 export function onMount(fn: () => void | (() => void)): void {
-  effect(() => untrack(fn));
+  // Schedule the mount callback to run after the current execution
+  // This ensures the component is fully rendered before mount runs
+  queueMicrotask(() => {
+    const cleanup = fn();
+
+    // Register cleanup with owner if available
+    if (cleanup && typeof cleanup === 'function' && owner) {
+      owner.cleanups.push(cleanup);
+    }
+  });
 }
 
 /**
@@ -347,7 +369,24 @@ export function effect(
   return dispose;
 }
 
-// TODO: Remove this internal use of untrack when `onMount` can be refactored
+/**
+ * Execute a function without tracking signal dependencies.
+ * Useful when you need to read signals inside an effect without creating dependencies.
+ *
+ * @param fn - Function to execute without tracking
+ * @returns The return value of fn
+ *
+ * @example
+ * ```tsx
+ * const count = signal(0);
+ * const name = signal('Alice');
+ *
+ * effect(() => {
+ *   // Only re-runs when count changes, not name
+ *   console.log(count(), untrack(() => name()));
+ * });
+ * ```
+ */
 export function untrack<T>(fn: () => T): T {
   const prev = activeEffect;
   activeEffect = null;

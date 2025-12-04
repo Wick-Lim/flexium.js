@@ -16,19 +16,19 @@
 ### ⚠️ 배포 전 필수 작업
 
 - [ ] npm 계정 로그인
-- [ ] GitHub 저장소 URL 업데이트 (yourusername 변경)
+- [ ] GitHub 저장소 URL 업데이트 (Wick-Lim 변경)
 - [ ] 패키지 이름 확인 (npm에서 사용 가능한지)
 
 ---
 
 ## 1단계: GitHub URL 업데이트
 
-`package.json`과 `packages/create-flexium/package.json`에서 `yourusername`을 실제 GitHub username으로 변경하세요.
+`package.json`과 `packages/create-flexium/package.json`에서 `Wick-Lim`을 실제 GitHub username으로 변경하세요.
 
 ```bash
-# 모든 yourusername을 한번에 변경
+# 모든 Wick-Lim을 한번에 변경
 # macOS/Linux
-find . -name "package.json" -not -path "./node_modules/*" -exec sed -i '' 's/yourusername/YOUR_GITHUB_USERNAME/g' {} +
+find . -name "package.json" -not -path "./node_modules/*" -exec sed -i '' 's/Wick-Lim/YOUR_GITHUB_USERNAME/g' {} +
 
 # 또는 수동으로 변경:
 # 1. package.json
@@ -95,7 +95,7 @@ npm publish --dry-run
 npm publish --access public
 
 # 성공 메시지 확인:
-# + flexium@0.1.0
+# + flexium@0.3.0
 ```
 
 배포가 성공하면:
@@ -117,7 +117,7 @@ npm publish --dry-run
 npm publish --access public
 
 # 성공 메시지 확인:
-# + create-flexium@0.1.0
+# + create-flexium@0.3.0
 ```
 
 배포가 성공하면:
@@ -203,7 +203,7 @@ npm publish --otp=123456
 
 ```bash
 # 특정 버전 삭제
-npm unpublish flexium@0.1.0
+npm unpublish flexium@0.3.0
 
 # ⚠️ 경고: 72시간 동안 같은 버전 재배포 불가
 ```

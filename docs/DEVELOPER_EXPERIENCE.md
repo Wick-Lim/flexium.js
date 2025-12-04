@@ -19,7 +19,7 @@ Welcome to Flexium! This guide will help you get the best possible development e
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/flexium.js.git
+git clone https://github.com/Wick-Lim/flexium.js.git
 cd flexium.js
 
 # Install dependencies
@@ -375,8 +375,8 @@ Use browser DevTools:
 
 ### Community
 
-- [GitHub Discussions](https://github.com/yourusername/flexium.js/discussions)
-- [Issue Tracker](https://github.com/yourusername/flexium.js/issues)
+- [GitHub Discussions](https://github.com/Wick-Lim/flexium.js/discussions)
+- [Issue Tracker](https://github.com/Wick-Lim/flexium.js/issues)
 - [Contributing Guide](../CONTRIBUTING.md)
 
 ## Troubleshooting

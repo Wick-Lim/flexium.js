@@ -88,8 +88,18 @@ async function getProjectName(rl, args) {
 }
 
 // Get template choice
-async function getTemplateChoice() {
-  return 'vite-starter'
+async function getTemplateChoice(rl) {
+  showTemplates()
+
+  const templateKeys = Object.keys(TEMPLATES)
+  const choice = await question(rl, `${cyan}📦 Select template [1-${templateKeys.length}] (default: 1):${reset} `)
+  const index = parseInt(choice.trim()) - 1
+
+  if (isNaN(index) || index < 0 || index >= templateKeys.length) {
+    return templateKeys[0] // Default to first template
+  }
+
+  return templateKeys[index]
 }
 
 // Copy template
@@ -140,7 +150,7 @@ function showNextSteps(projectName, templateKey) {
   }
 
   console.log(`\n${bright}📚 Learn more:${reset}`)
-  console.log(`  ${blue}https://github.com/yourusername/flexium.js${reset}`)
+  console.log(`  ${blue}https://github.com/Wick-Lim/flexium.js${reset}`)
   console.log()
 }
 
@@ -156,8 +166,7 @@ async function main() {
     const projectName = await getProjectName(rl, args)
 
     // Show templates and get choice
-    // showTemplates()
-    const templateKey = await getTemplateChoice()
+    const templateKey = await getTemplateChoice(rl)
     const template = TEMPLATES[templateKey]
 
     console.log(`\n${green}✨ Selected:${reset} ${bright}${template.name}${reset}`)

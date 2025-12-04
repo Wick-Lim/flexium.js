@@ -27,7 +27,7 @@ Thank you for your interest in contributing to Flexium! This document provides g
 
 1. **Fork and clone the repository**:
 ```bash
-git clone https://github.com/yourusername/flexium.js.git
+git clone https://github.com/Wick-Lim/flexium.js.git
 cd flexium.js
 ```
 
@@ -455,7 +455,7 @@ For questions:
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/yourusername/flexium.js.git
+git clone https://github.com/Wick-Lim/flexium.js.git
 cd flexium.js
 npm install
 
@@ -499,8 +499,8 @@ npm run dev
 ## Getting Help
 
 - Read the [documentation](/docs)
-- Check [existing issues](https://github.com/yourusername/flexium.js/issues)
-- Ask in [GitHub Discussions](https://github.com/yourusername/flexium.js/discussions)
+- Check [existing issues](https://github.com/Wick-Lim/flexium.js/issues)
+- Ask in [GitHub Discussions](https://github.com/Wick-Lim/flexium.js/discussions)
 - Review [example code](/examples)
 
 ## License

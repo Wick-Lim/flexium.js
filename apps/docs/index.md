@@ -25,7 +25,7 @@ hero:
       link: /guide/quick-start
     - theme: alt
       text: View on GitHub
-      link: https://github.com/yourusername/flexium.js
+      link: https://github.com/Wick-Lim/flexium.js
   image:
     src: /logo.svg
     alt: Flexium

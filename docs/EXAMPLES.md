@@ -8,7 +8,7 @@ All examples are self-contained and can be run without a build step:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/flexium.js.git
+git clone https://github.com/Wick-Lim/flexium.js.git
 cd flexium.js
 
 # Start an HTTP server
@@ -659,8 +659,8 @@ const items = signal(['a', 'b', 'c'])
 - **Getting Started**: [QUICK_START.md](./QUICK_START.md)
 - **API Reference**: [docs/API.md](./docs/API.md)
 - **Guides**: [docs/GETTING_STARTED.md](./docs/GETTING_STARTED.md)
-- **GitHub Issues**: [Report problems](https://github.com/yourusername/flexium.js/issues)
-- **Discussions**: [Ask questions](https://github.com/yourusername/flexium.js/discussions)
+- **GitHub Issues**: [Report problems](https://github.com/Wick-Lim/flexium.js/issues)
+- **Discussions**: [Ask questions](https://github.com/Wick-Lim/flexium.js/discussions)
 
 ---
 

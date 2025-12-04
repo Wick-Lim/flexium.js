@@ -672,7 +672,7 @@ Current options:
 3. Follow the relevant agent guidelines in `.claude/agents/`
 4. Submit a PR
 
-See [GitHub Issues](https://github.com/yourusername/flexium.js/issues) for open tasks.
+See [GitHub Issues](https://github.com/Wick-Lim/flexium.js/issues) for open tasks.
 
 ---
 
@@ -680,7 +680,7 @@ See [GitHub Issues](https://github.com/yourusername/flexium.js/issues) for open 
 
 - Check the [API Documentation](./API.md)
 - Read [Best Practices](./BEST_PRACTICES.md)
-- Search [GitHub Issues](https://github.com/yourusername/flexium.js/issues)
+- Search [GitHub Issues](https://github.com/Wick-Lim/flexium.js/issues)
 - Open a new issue with the question label
 
 **Happy coding with Flexium!**

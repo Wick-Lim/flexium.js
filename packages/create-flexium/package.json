@@ -34,14 +34,14 @@
   ],
   "author": "Flexium Contributors",
   "license": "MIT",
-  "homepage": "https://github.com/yourusername/flexium.js#readme",
+  "homepage": "https://github.com/Wick-Lim/flexium.js#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/flexium.js.git",
+    "url": "git+https://github.com/Wick-Lim/flexium.js.git",
     "directory": "packages/create-flexium"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/flexium.js/issues"
+    "url": "https://github.com/Wick-Lim/flexium.js/issues"
   },
   "engines": {
     "node": ">=18.0.0"

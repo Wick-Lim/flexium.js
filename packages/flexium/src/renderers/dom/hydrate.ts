@@ -1,33 +1,77 @@
 import { effect, isSignal } from '../../core/signal';
 
-export function hydrate(vnode: any, container: Element) {
-    // Simple hydration strategy: 
-    // For this MVP, we will clear the container and re-render.
-    // True hydration requires matching VDOM to existing DOM nodes, which is complex.
-    // Re-rendering is a valid "hydration" strategy for simple frameworks to ensure interactivity,
-    // although less performant than true hydration.
-
-    // TODO: Implement true hydration that walks the DOM tree.
-    // For now, we reuse the existing render logic but we need to be careful not to double-mount.
-
-    // Actually, let's try a basic true hydration approach.
-    hydrateNode(vnode, container.firstChild as Node);
+/**
+ * Hydration options
+ */
+export interface HydrateOptions {
+    /** Called when hydration encounters a mismatch */
+    onMismatch?: (message: string, domNode: Node | null, vnode: any) => void;
+    /** Whether to recover from mismatches by re-rendering */
+    recoverMismatch?: boolean;
 }
 
-function hydrateNode(vnode: any, domNode: Node | null): Node | null {
-    if (!domNode || !vnode) return null;
+/**
+ * Hydrate server-rendered HTML with client-side interactivity
+ *
+ * This function walks the existing DOM tree and attaches event handlers,
+ * sets up signal bindings, and validates that the DOM matches the expected vnode structure.
+ *
+ * @param vnode - Virtual node to hydrate against
+ * @param container - Container element with server-rendered HTML
+ * @param options - Hydration options
+ *
+ * @example
+ * ```tsx
+ * // Server rendered HTML in #app
+ * hydrate(<App />, document.getElementById('app'));
+ * ```
+ */
+export function hydrate(vnode: any, container: Element, options: HydrateOptions = {}) {
+    const { onMismatch, recoverMismatch = false } = options;
 
+    const handleMismatch = (message: string, domNode: Node | null, vn: any) => {
+        if (onMismatch) {
+            onMismatch(message, domNode, vn);
+        } else if (typeof __DEV__ !== 'undefined' ? __DEV__ : true) {
+            console.warn(`[Flexium Hydration] ${message}`);
+        }
+    };
+
+    hydrateNode(vnode, container.firstChild as Node, { handleMismatch, recoverMismatch });
+}
+
+interface HydrateContext {
+    handleMismatch: (message: string, domNode: Node | null, vnode: any) => void;
+    recoverMismatch: boolean;
+}
+
+function hydrateNode(vnode: any, domNode: Node | null, ctx: HydrateContext): Node | null {
+    if (vnode === null || vnode === undefined || vnode === false) {
+        return domNode;
+    }
+
+    if (!domNode) {
+        ctx.handleMismatch('No DOM node found for vnode', domNode, vnode);
+        return null;
+    }
+
+    // Handle text/number primitives
     if (typeof vnode === 'string' || typeof vnode === 'number') {
         if (domNode.nodeType === Node.TEXT_NODE) {
-            if (domNode.textContent !== String(vnode)) {
-                domNode.textContent = String(vnode);
+            const text = String(vnode);
+            if (domNode.textContent !== text) {
+                ctx.handleMismatch(`Text mismatch: "${domNode.textContent}" vs "${text}"`, domNode, vnode);
+                domNode.textContent = text;
             }
+            return domNode.nextSibling;
+        } else {
+            ctx.handleMismatch(`Expected text node, got ${domNode.nodeType}`, domNode, vnode);
             return domNode.nextSibling;
         }
     }
 
+    // Handle signals - create reactive binding
     if (isSignal(vnode)) {
-        // For signals, we create an effect to update the text node
         if (domNode.nodeType === Node.TEXT_NODE) {
             effect(() => {
                 domNode.textContent = String(vnode.value);
@@ -36,37 +80,122 @@ function hydrateNode(vnode: any, domNode: Node | null): Node | null {
         }
     }
 
-    if (typeof vnode.type === 'function') {
-        const result = vnode.type(vnode.props || {});
-        return hydrateNode(result, domNode);
+    // Handle computed values
+    if (typeof vnode === 'function') {
+        // Create reactive binding for computed/derived values
+        effect(() => {
+            const value = vnode();
+            if (domNode.nodeType === Node.TEXT_NODE) {
+                domNode.textContent = String(value);
+            }
+        });
+        return domNode.nextSibling;
     }
 
+    // Handle function components
+    if (typeof vnode.type === 'function') {
+        const result = vnode.type({ ...vnode.props, children: vnode.children });
+        return hydrateNode(result, domNode, ctx);
+    }
+
+    // Handle fragments
+    if (vnode.type === 'fragment' || vnode.type === null) {
+        let currentNode: Node | null = domNode;
+        const children = vnode.children || [];
+        for (const child of children) {
+            currentNode = hydrateNode(child, currentNode, ctx);
+        }
+        return currentNode;
+    }
+
+    // Handle element vnodes
     if (typeof vnode.type === 'string') {
-        if (domNode.nodeType === Node.ELEMENT_NODE && (domNode as Element).tagName.toLowerCase() === vnode.type.toLowerCase()) {
-            const el = domNode as Element;
+        if (domNode.nodeType !== Node.ELEMENT_NODE) {
+            ctx.handleMismatch(`Expected element node, got ${domNode.nodeType}`, domNode, vnode);
+            return domNode.nextSibling;
+        }
 
-            // Attach events
-            if (vnode.props) {
-                for (const key in vnode.props) {
-                    if (key.startsWith('on')) {
-                        const eventName = key.slice(2).toLowerCase();
-                        el.addEventListener(eventName, vnode.props[key]);
-                    }
+        const el = domNode as Element;
+        const tagName = el.tagName.toLowerCase();
+
+        if (tagName !== vnode.type.toLowerCase()) {
+            ctx.handleMismatch(`Tag mismatch: "${tagName}" vs "${vnode.type}"`, domNode, vnode);
+            return domNode.nextSibling;
+        }
+
+        // Hydrate props
+        if (vnode.props) {
+            hydrateProps(el, vnode.props, ctx);
+        }
+
+        // Hydrate children
+        let childDom = el.firstChild;
+        if (vnode.children) {
+            const children = Array.isArray(vnode.children) ? vnode.children.flat() : [vnode.children];
+            for (const child of children) {
+                if (child === null || child === undefined || child === false) continue;
+                childDom = hydrateNode(child, childDom, ctx) as ChildNode | null;
+            }
+        }
+
+        return el.nextSibling;
+    }
+
+    return domNode?.nextSibling || null;
+}
+
+/**
+ * Hydrate element props - attach events, set up reactive bindings
+ */
+function hydrateProps(el: Element, props: Record<string, any>, ctx: HydrateContext): void {
+    for (const key in props) {
+        const value = props[key];
+
+        if (key === 'children' || key === 'key' || key === 'ref') {
+            // Handle ref callback
+            if (key === 'ref' && typeof value === 'function') {
+                value(el);
+            }
+            continue;
+        }
+
+        // Event handlers
+        if (key.startsWith('on')) {
+            const eventName = key.slice(2).toLowerCase();
+            el.addEventListener(eventName, value);
+            continue;
+        }
+
+        // Reactive props (signals)
+        if (isSignal(value)) {
+            const propName = key === 'className' ? 'class' : key;
+            effect(() => {
+                if (propName === 'class') {
+                    el.setAttribute('class', String(value.value));
+                } else if (propName === 'style' && typeof value.value === 'object') {
+                    Object.assign((el as HTMLElement).style, value.value);
+                } else if (propName in el) {
+                    (el as any)[propName] = value.value;
+                } else {
+                    el.setAttribute(propName, String(value.value));
+                }
+            });
+            continue;
+        }
+
+        // Validate static props match (in development)
+        if (typeof __DEV__ !== 'undefined' ? __DEV__ : true) {
+            if (key === 'className' || key === 'class') {
+                const domClass = el.getAttribute('class') || '';
+                if (domClass !== value) {
+                    ctx.handleMismatch(`Class mismatch on <${el.tagName.toLowerCase()}>: "${domClass}" vs "${value}"`, el, props);
                 }
             }
-
-            // Hydrate children
-            let childDom = el.firstChild;
-            if (vnode.children) {
-                const children = Array.isArray(vnode.children) ? vnode.children : [vnode.children];
-                for (const child of children) {
-                    childDom = hydrateNode(child, childDom) as ChildNode | null;
-                }
-            }
-
-            return el.nextSibling;
         }
     }
+}
 
-    return domNode.nextSibling;
+// Declare global __DEV__ for development mode detection
+declare global {
+    const __DEV__: boolean | undefined;
 }

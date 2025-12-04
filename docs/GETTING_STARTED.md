@@ -100,7 +100,7 @@ npm install -D typescript
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "flexium": "^0.1.0"
+    "flexium": "^0.3.0"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
@@ -922,7 +922,7 @@ python3 -m http.server 8000
 - [Examples](../EXAMPLES.md) - All working examples
 - [API Reference](./API.md) - Complete API docs
 - [Migration Guide](./MIGRATION.md) - From other frameworks
-- [GitHub](https://github.com/yourusername/flexium.js) - Source code
+- [GitHub](https://github.com/Wick-Lim/flexium.js) - Source code
 
 ---
 

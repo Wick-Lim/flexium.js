@@ -234,7 +234,7 @@ Update `package.json` to include a build script:
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "flexium": "^0.1.0"
+    "flexium": "^0.3.0"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
@@ -492,8 +492,8 @@ effect(() => {
 - Check the [FAQ](./docs/FAQ.md)
 - Browse [examples](./examples/)
 - Read the [API docs](./docs/API.md)
-- Ask in [GitHub Discussions](https://github.com/yourusername/flexium.js/discussions)
-- Report bugs in [Issues](https://github.com/yourusername/flexium.js/issues)
+- Ask in [GitHub Discussions](https://github.com/Wick-Lim/flexium.js/discussions)
+- Report bugs in [Issues](https://github.com/Wick-Lim/flexium.js/issues)
 
 ---
 
