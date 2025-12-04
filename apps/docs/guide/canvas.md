@@ -306,6 +306,6 @@ function RealtimeChart() {
 
 ## Next Steps
 
-- Explore [Canvas API Reference](/api/canvas/canvas)
+- Explore [Canvas API Reference](/reference/canvas/canvas)
 - Check out [Canvas Examples](/examples/animated-circle)
 - Learn about [Performance](/guide/performance)
