@@ -2,6 +2,78 @@ import type { Renderer, EventHandler } from '../../core/renderer';
 import { eventDelegator } from './events';
 
 /**
+ * Style property configuration for data-driven updates
+ */
+interface StylePropConfig {
+  /** CSS property name to set */
+  cssProp: string;
+  /** Transform function (e.g., px for pixel values) */
+  transform?: 'px' | 'string' | 'none';
+  /** Additional side effect when setting this property */
+  sideEffect?: (style: CSSStyleDeclaration, value: string | undefined) => void;
+}
+
+/**
+ * Data-driven style property mappings
+ * Maps Flexium props to CSS properties with optional transformations
+ */
+const STYLE_PROPS_CONFIG: Record<string, StylePropConfig> = {
+  // Layout
+  width: { cssProp: 'width', transform: 'px' },
+  height: { cssProp: 'height', transform: 'px' },
+
+  // Flex properties
+  flexDirection: { cssProp: 'flexDirection', transform: 'none' },
+  justifyContent: { cssProp: 'justifyContent', transform: 'none' },
+  alignItems: { cssProp: 'alignItems', transform: 'none' },
+  alignSelf: { cssProp: 'alignSelf', transform: 'none' },
+  flexWrap: { cssProp: 'flexWrap', transform: 'none' },
+  flex: { cssProp: 'flex', transform: 'string' },
+  gap: { cssProp: 'gap', transform: 'px' },
+
+  // Shorthands
+  justify: { cssProp: 'justifyContent', transform: 'none' },
+  align: { cssProp: 'alignItems', transform: 'none' },
+
+  // Visual
+  bg: { cssProp: 'backgroundColor', transform: 'none' },
+  color: { cssProp: 'color', transform: 'none' },
+  borderRadius: { cssProp: 'borderRadius', transform: 'px' },
+  borderWidth: {
+    cssProp: 'borderWidth',
+    transform: 'px',
+    sideEffect: (style, value) => {
+      if (value !== undefined && style.borderStyle !== 'solid') {
+        style.borderStyle = 'solid';
+      }
+    }
+  },
+  borderColor: { cssProp: 'borderColor', transform: 'none' },
+  opacity: { cssProp: 'opacity', transform: 'string' },
+
+  // Typography
+  fontSize: { cssProp: 'fontSize', transform: 'px' },
+  fontWeight: { cssProp: 'fontWeight', transform: 'string' },
+  fontFamily: { cssProp: 'fontFamily', transform: 'none' },
+  lineHeight: { cssProp: 'lineHeight', transform: 'string' },
+  textAlign: { cssProp: 'textAlign', transform: 'none' },
+
+  // Padding
+  padding: { cssProp: 'padding', transform: 'px' },
+  paddingTop: { cssProp: 'paddingTop', transform: 'px' },
+  paddingRight: { cssProp: 'paddingRight', transform: 'px' },
+  paddingBottom: { cssProp: 'paddingBottom', transform: 'px' },
+  paddingLeft: { cssProp: 'paddingLeft', transform: 'px' },
+
+  // Margin
+  margin: { cssProp: 'margin', transform: 'px' },
+  marginTop: { cssProp: 'marginTop', transform: 'px' },
+  marginRight: { cssProp: 'marginRight', transform: 'px' },
+  marginBottom: { cssProp: 'marginBottom', transform: 'px' },
+  marginLeft: { cssProp: 'marginLeft', transform: 'px' },
+};
+
+/**
  * Component type to HTML element mapping
  */
 const ELEMENT_MAPPING: Record<string, string> = {
@@ -80,20 +152,36 @@ function px(value: number | string): string {
 }
 
 /**
+ * Transform a value based on the config type
+ */
+function transformValue(value: unknown, transform: StylePropConfig['transform']): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  switch (transform) {
+    case 'px':
+      return px(value as number | string);
+    case 'string':
+      return String(value);
+    case 'none':
+    default:
+      return value as string;
+  }
+}
+
+/**
  * Apply style props to DOM element efficiently
  */
-function updateStyles(element: HTMLElement, oldProps: Record<string, any>, newProps: Record<string, any>): void {
+function updateStyles(element: HTMLElement, oldProps: Record<string, unknown>, newProps: Record<string, unknown>): void {
   const style = element.style;
 
   // 1. Handle 'style' object prop
-  const oldStyle = oldProps.style;
-  const newStyle = newProps.style;
-  
+  const oldStyle = oldProps.style as Record<string, string> | undefined;
+  const newStyle = newProps.style as Record<string, string> | undefined;
+
   if (oldStyle !== newStyle) {
     if (oldStyle && typeof oldStyle === 'object') {
       for (const key in oldStyle) {
         if (!newStyle || !(key in newStyle)) {
-          if ((style as any)[key] !== '') (style as any)[key] = '';
+          style.setProperty(key, '');
         }
       }
     }
@@ -101,88 +189,53 @@ function updateStyles(element: HTMLElement, oldProps: Record<string, any>, newPr
       for (const key in newStyle) {
         const val = newStyle[key];
         if (!oldStyle || oldStyle[key] !== val) {
-           (style as any)[key] = val;
+          style.setProperty(key, val);
         }
       }
     }
   }
 
-  // 2. Handle Flexium specific style props
-  // Helper to update individual style property if changed
-  const update = (prop: string, value: string | undefined) => {
-      // Note: accessing style[prop] is slow, maybe better to just assign?
-      // Browsers optimize redundant assignment, but string conversion has cost.
-      // Let's trust browser for simple properties, but we handle logic.
-      if (value === undefined) {
-          if ((style as any)[prop] !== '') (style as any)[prop] = '';
-      } else {
-          if ((style as any)[prop] !== value) (style as any)[prop] = value;
-      }
-  };
-
-  // Layout
-  if (oldProps.width !== newProps.width) update('width', newProps.width !== undefined ? px(newProps.width) : undefined);
-  if (oldProps.height !== newProps.height) update('height', newProps.height !== undefined ? px(newProps.height) : undefined);
-
-  // Flexbox setup (display: flex)
+  // 2. Flexbox setup (display: flex)
   const type = element.getAttribute('data-flexium-type');
   const needsFlex = (
-      newProps.flexDirection || newProps.justifyContent || newProps.alignItems || 
-      newProps.flexWrap || newProps.gap !== undefined || newProps.justify || newProps.align ||
-      type === 'Row' || type === 'Column' || type === 'Stack'
+    newProps.flexDirection || newProps.justifyContent || newProps.alignItems ||
+    newProps.flexWrap || newProps.gap !== undefined || newProps.justify || newProps.align ||
+    type === 'Row' || type === 'Column' || type === 'Stack'
   );
 
   if (needsFlex) {
-      if (style.display !== 'flex') style.display = 'flex';
-      
-      if (type === 'Row' && style.flexDirection !== 'row') style.flexDirection = 'row';
-      if (type === 'Column' && style.flexDirection !== 'column') style.flexDirection = 'column';
+    if (style.display !== 'flex') style.display = 'flex';
+    if (type === 'Row' && style.flexDirection !== 'row') style.flexDirection = 'row';
+    if (type === 'Column' && style.flexDirection !== 'column') style.flexDirection = 'column';
   }
 
-  // Flex properties
-  if (oldProps.flexDirection !== newProps.flexDirection) update('flexDirection', newProps.flexDirection);
-  if (oldProps.justifyContent !== newProps.justifyContent) update('justifyContent', newProps.justifyContent);
-  if (oldProps.alignItems !== newProps.alignItems) update('alignItems', newProps.alignItems);
-  if (oldProps.alignSelf !== newProps.alignSelf) update('alignSelf', newProps.alignSelf);
-  if (oldProps.flexWrap !== newProps.flexWrap) update('flexWrap', newProps.flexWrap);
-  if (oldProps.flex !== newProps.flex) update('flex', newProps.flex !== undefined ? String(newProps.flex) : undefined);
-  if (oldProps.gap !== newProps.gap) update('gap', newProps.gap !== undefined ? px(newProps.gap) : undefined);
+  // 3. Handle Flexium specific style props using data-driven config
+  for (const propName in STYLE_PROPS_CONFIG) {
+    const oldValue = oldProps[propName];
+    const newValue = newProps[propName];
 
-  // Shorthands
-  if (oldProps.justify !== newProps.justify) update('justifyContent', newProps.justify);
-  if (oldProps.align !== newProps.align) update('alignItems', newProps.align);
+    if (oldValue === newValue) continue;
 
-  // Visual
-  if (oldProps.bg !== newProps.bg) update('backgroundColor', newProps.bg);
-  if (oldProps.color !== newProps.color) update('color', newProps.color);
-  if (oldProps.borderRadius !== newProps.borderRadius) update('borderRadius', newProps.borderRadius !== undefined ? px(newProps.borderRadius) : undefined);
-  if (oldProps.borderWidth !== newProps.borderWidth) {
-      update('borderWidth', newProps.borderWidth !== undefined ? px(newProps.borderWidth) : undefined);
-      if (newProps.borderWidth !== undefined && style.borderStyle !== 'solid') style.borderStyle = 'solid';
+    const config = STYLE_PROPS_CONFIG[propName];
+    const transformedValue = transformValue(newValue, config.transform);
+    const cssProp = config.cssProp as keyof CSSStyleDeclaration;
+
+    // Update the style property
+    if (transformedValue === undefined) {
+      if (style[cssProp] !== '') {
+        (style as unknown as Record<string, string>)[cssProp as string] = '';
+      }
+    } else {
+      if (style[cssProp] !== transformedValue) {
+        (style as unknown as Record<string, string>)[cssProp as string] = transformedValue;
+      }
+    }
+
+    // Apply any side effects
+    if (config.sideEffect) {
+      config.sideEffect(style, transformedValue);
+    }
   }
-  if (oldProps.borderColor !== newProps.borderColor) update('borderColor', newProps.borderColor);
-  if (oldProps.opacity !== newProps.opacity) update('opacity', newProps.opacity !== undefined ? String(newProps.opacity) : undefined);
-
-  // Typography
-  if (oldProps.fontSize !== newProps.fontSize) update('fontSize', newProps.fontSize !== undefined ? px(newProps.fontSize) : undefined);
-  if (oldProps.fontWeight !== newProps.fontWeight) update('fontWeight', newProps.fontWeight !== undefined ? String(newProps.fontWeight) : undefined);
-  if (oldProps.fontFamily !== newProps.fontFamily) update('fontFamily', newProps.fontFamily);
-  if (oldProps.lineHeight !== newProps.lineHeight) update('lineHeight', newProps.lineHeight !== undefined ? String(newProps.lineHeight) : undefined);
-  if (oldProps.textAlign !== newProps.textAlign) update('textAlign', newProps.textAlign);
-  
-  // Padding/Margin
-  // Optimization: Check general first
-  if (oldProps.padding !== newProps.padding) update('padding', newProps.padding !== undefined ? px(newProps.padding) : undefined);
-  if (oldProps.paddingTop !== newProps.paddingTop) update('paddingTop', newProps.paddingTop !== undefined ? px(newProps.paddingTop) : undefined);
-  if (oldProps.paddingRight !== newProps.paddingRight) update('paddingRight', newProps.paddingRight !== undefined ? px(newProps.paddingRight) : undefined);
-  if (oldProps.paddingBottom !== newProps.paddingBottom) update('paddingBottom', newProps.paddingBottom !== undefined ? px(newProps.paddingBottom) : undefined);
-  if (oldProps.paddingLeft !== newProps.paddingLeft) update('paddingLeft', newProps.paddingLeft !== undefined ? px(newProps.paddingLeft) : undefined);
-
-  if (oldProps.margin !== newProps.margin) update('margin', newProps.margin !== undefined ? px(newProps.margin) : undefined);
-  if (oldProps.marginTop !== newProps.marginTop) update('marginTop', newProps.marginTop !== undefined ? px(newProps.marginTop) : undefined);
-  if (oldProps.marginRight !== newProps.marginRight) update('marginRight', newProps.marginRight !== undefined ? px(newProps.marginRight) : undefined);
-  if (oldProps.marginBottom !== newProps.marginBottom) update('marginBottom', newProps.marginBottom !== undefined ? px(newProps.marginBottom) : undefined);
-  if (oldProps.marginLeft !== newProps.marginLeft) update('marginLeft', newProps.marginLeft !== undefined ? px(newProps.marginLeft) : undefined);
 }
 
 /**

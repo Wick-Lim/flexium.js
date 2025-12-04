@@ -8,13 +8,15 @@
 
 /**
  * Base node type - platform-specific implementations will extend this
+ * Using any intentionally for cross-platform flexibility (DOM Node, Canvas, etc.)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RenderNode = any;
 
 /**
  * Event handler function type
  */
-export type EventHandler = (event: any) => void;
+export type EventHandler = (event: Event) => void;
 
 /**
  * Core renderer interface that all platform renderers must implement
@@ -26,7 +28,7 @@ export interface Renderer {
    * @param props - Properties to apply to the node
    * @returns The created node
    */
-  createNode(type: string, props: Record<string, any>): RenderNode;
+  createNode(type: string, props: Record<string, unknown>): RenderNode;
 
   /**
    * Update the properties of an existing node
@@ -36,8 +38,8 @@ export interface Renderer {
    */
   updateNode(
     node: RenderNode,
-    oldProps: Record<string, any>,
-    newProps: Record<string, any>
+    oldProps: Record<string, unknown>,
+    newProps: Record<string, unknown>
   ): void;
 
   /**
@@ -157,12 +159,17 @@ export interface CommonProps {
 }
 
 /**
+ * Child types that can be rendered
+ */
+export type VNodeChild = VNode | string | number | boolean | null | undefined | VNodeChild[];
+
+/**
  * Virtual node structure used for JSX/h function
  */
 export interface VNode {
   type: string | Function;
-  props: Record<string, any>;
-  children: (VNode | string | number | null | undefined | Function)[];
+  props: Record<string, unknown>;
+  children: VNodeChild[];
   key?: string | number;
   _node?: RenderNode; // Internal reference to the rendered node
 }

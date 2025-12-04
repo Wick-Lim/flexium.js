@@ -5,6 +5,7 @@ import { LinkProps, RouteProps, RouterContext } from './types';
 import { h } from '../renderers/dom/h';
 import { RouterCtx, RouteDepthCtx } from './context';
 import { useContext } from '../core/context';
+import type { VNodeChild } from '../core/renderer';
 
 // Helper to use Router Context
 export function useRouter(): RouterContext {
@@ -15,7 +16,7 @@ export function useRouter(): RouterContext {
     return ctx;
 }
 
-export function Router(props: { children: any }) {
+export function Router(props: { children: VNodeChild }) {
     const [location, navigate] = createLocation();
     
     // Parse route configuration from children

@@ -16,15 +16,16 @@ import { reconcileArrays } from './reconcile';
 import { SuspenseCtx } from '../../core/suspense';
 import { ErrorBoundaryCtx } from '../../core/error-boundary';
 import { isForComponent, mountForComponent, For, ForComponent } from '../../core/flow';
+import type { StateGetter } from '../../core/state';
 
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>();
 
 export function mountReactive(
-  vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined | Function | any[] | ForComponent<any>,
+  vnode: VNode | string | number | boolean | Signal<any> | Computed<any> | null | undefined | Function | any[] | ForComponent<any>,
   container?: Node
 ): Node | null {
-  // Handle null/undefined
-  if (vnode === null || vnode === undefined) {
+  // Handle null/undefined/boolean (falsy JSX values)
+  if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
     return null;
   }
 
@@ -160,8 +161,8 @@ export function mountReactive(
     // Handle For component specially (direct DOM caching)
     if (vnode.type === For) {
       const forComp = For({
-        each: vnode.props.each,
-        children: vnode.children as any
+        each: vnode.props.each as unknown as StateGetter<unknown[]>,
+        children: vnode.children as unknown as ((item: unknown, index: () => number) => VNode)[]
       });
       return mountReactive(forComp, container);
     }

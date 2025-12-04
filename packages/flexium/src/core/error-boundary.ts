@@ -1,6 +1,7 @@
 import { createContext, useContext } from './context';
 import { signal } from './signal';
 import { h } from '../renderers/dom/h';
+import type { VNodeChild, VNode } from './renderer';
 
 export interface ErrorBoundaryContextValue {
     setError: (error: Error | unknown) => void;
@@ -8,11 +9,19 @@ export interface ErrorBoundaryContextValue {
     retry: () => void;
 }
 
+/** Props for the fallback component */
+export interface ErrorFallbackProps {
+    error: Error;
+    errorInfo: ErrorInfo | null;
+    reset: () => void;
+    retryCount: number;
+}
+
 export interface ErrorBoundaryProps {
     /** Fallback UI to render when an error occurs. Can be a VNode or a function that receives error info */
-    fallback: any | ((props: { error: Error; reset: () => void }) => any);
+    fallback: VNodeChild | ((props: ErrorFallbackProps) => VNode | null);
     /** Children to render */
-    children: any;
+    children: VNodeChild;
     /** Callback when an error is caught */
     onError?: (error: Error, errorInfo: ErrorInfo) => void;
     /** Callback when error is reset */
@@ -55,7 +64,7 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
         const errorObj = err instanceof Error ? err : new Error(String(err));
         const info: ErrorInfo = {
             timestamp: Date.now(),
-            componentStack: (err as any)?.componentStack
+            componentStack: (err as Error & { componentStack?: string })?.componentStack
         };
 
         error.value = errorObj;
@@ -95,9 +104,9 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
     };
 
     // Create a wrapper that catches render errors
-    const safeRender = (content: any) => {
+    const safeRender = (content: VNodeChild): VNodeChild => {
         try {
-            return typeof content === 'function' ? content() : content;
+            return typeof content === 'function' ? (content as () => VNodeChild)() : content;
         } catch (renderError) {
             setError(renderError);
             return null;

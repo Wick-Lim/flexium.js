@@ -1,19 +1,37 @@
 import { signal, createResource } from './signal';
 
+/** Internal state object that may be a Signal or Resource */
+interface StateObject {
+  value: unknown;
+  peek: () => unknown;
+  loading?: boolean;
+  error?: unknown;
+  state?: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored';
+  latest?: unknown;
+  read?: () => unknown;
+  _stateActions?: StateActions;
+}
+
+/** Actions available for state mutation */
+interface StateActions {
+  mutate?: (value: unknown) => void;
+  refetch?: () => void;
+}
+
 // Global registry for keyed states
 // We store either a Signal, Resource, or Computed
-const globalStateRegistry = new Map<string, any>();
+const globalStateRegistry = new Map<string, StateObject>();
 
 // Enhanced Getter Type: acts as accessor but carries Resource properties if applicable
 export type StateGetter<T> = {
   (): T;
   loading: boolean;
-  error: any;
+  error: unknown;
   state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored';
   latest: T | undefined;
   read: () => T | undefined;
-  map: T extends (infer U)[] 
-    ? (fn: (item: U, index: () => number) => any) => any 
+  map: T extends (infer U)[]
+    ? <R>(fn: (item: U, index: () => number) => R) => R[]
     : never;
 };
 
@@ -38,11 +56,11 @@ export type StateSetter<T> = {
  * @param options - Optional settings (e.g., global key).
  */
 export function state<T>(
-  initialValueOrFetcher: T | ((...args: any[]) => T | Promise<T>), 
+  initialValueOrFetcher: T | (() => T | Promise<T>),
   options?: { key?: string }
 ): [StateGetter<T>, StateSetter<T>] {
-  let s: any;
-  let actions: any = {};
+  let s: StateObject;
+  let actions: StateActions = {};
 
   const key = options?.key;
   
@@ -55,7 +73,7 @@ export function state<T>(
     // Actually, we can store the *result tuple* or the *base signal object* and re-wrap.
     // Storing the base object (Signal or Resource) is better.
     s = cached;
-    
+
     // Re-derive actions based on whether it's a resource or signal
     // Ideally, we should store the *actions* too if it's a resource.
     // Let's simplify: Signal/Resource objects already contain necessary methods.
@@ -71,19 +89,19 @@ export function state<T>(
       // createResource tracks dependencies in 'source' execution.
       // The fetcher simply receives the result of source() and returns it.
       // This supports both sync computed values (fn returns value) and async resources (fn returns Promise).
-      
-      const fn = initialValueOrFetcher as () => any;
-      
+
+      const fn = initialValueOrFetcher as () => T | Promise<T>;
+
       const [res, resActions] = createResource(
-        fn, 
+        fn,
         async (val) => val // The value computed by fn is passed here
       );
-      
-      s = res;
-      actions = resActions;
+
+      s = res as unknown as StateObject;
+      actions = resActions as StateActions;
     } else {
       // It's a value -> Create Signal
-      s = signal<T>(initialValueOrFetcher);
+      s = signal<T>(initialValueOrFetcher) as unknown as StateObject;
     }
 
     // Save to registry if key provided
@@ -93,40 +111,40 @@ export function state<T>(
       // For Resource, actions has refetch.
       // Let's store the object `s` and attach `actions` to it or store a wrapper?
       // Let's store the object `s` and attach `_actions` property to it for retrieval.
-      (s as any)._stateActions = actions;
+      s._stateActions = actions;
       globalStateRegistry.set(key, s);
     }
   }
 
   // If we retrieved from cache, retrieve actions
-  if (!actions.refetch && (s as any)._stateActions) {
-    actions = (s as any)._stateActions;
+  if (!actions.refetch && s._stateActions) {
+    actions = s._stateActions;
   }
 
   // 3. Construct Return Tuple
   
   // Getter Wrapper
-  const getter = (() => s.value) as StateGetter<T>;
-  
+  const getter = (() => s.value as T) as StateGetter<T>;
+
   // Attach Resource properties to getter (if available)
   // This allows access like: data.loading, data.error
   Object.defineProperties(getter, {
-    loading: { get: () => (s as any).loading || false },
-    error: { get: () => (s as any).error },
-    state: { get: () => (s as any).state || 'ready' },
-    latest: { get: () => (s as any).latest ?? s.peek() },
-    read: { value: (s as any).read || (() => s.value) }
+    loading: { get: () => s.loading || false },
+    error: { get: () => s.error },
+    state: { get: () => s.state || 'ready' },
+    latest: { get: () => (s.latest ?? s.peek()) as T | undefined },
+    read: { value: s.read || (() => s.value as T) }
   });
 
   // Setter Wrapper
   const setter = ((newValue: T | ((prev: T) => T)) => {
     // Use mutate if available (Resource), otherwise set (Signal)
     if (actions.mutate) {
-        // Resource mutate usually takes value directly. 
+        // Resource mutate usually takes value directly.
         // If function, we need to handle it manually.
         if (typeof newValue === 'function') {
             const fn = newValue as (prev: T) => T;
-            actions.mutate(fn(s.peek()));
+            actions.mutate(fn(s.peek() as T));
         } else {
             actions.mutate(newValue);
         }
@@ -134,7 +152,7 @@ export function state<T>(
         // Signal set
         if (typeof newValue === 'function') {
             const fn = newValue as (prev: T) => T;
-            s.value = fn(s.peek());
+            s.value = fn(s.peek() as T);
         } else {
             s.value = newValue;
         }
@@ -142,9 +160,8 @@ export function state<T>(
   }) as StateSetter<T>;
 
   // Attach Actions to setter
-  setter.mutate = actions.mutate || ((v: T) => { 
-      if (typeof v === 'function') s.value = (v as any)(s.peek());
-      else s.value = v; 
+  setter.mutate = (actions.mutate as StateSetter<T>['mutate']) || ((v: T | undefined) => {
+      if (v !== undefined) s.value = v;
   });
   setter.refetch = actions.refetch || (() => { /* no-op for simple state */ });
 

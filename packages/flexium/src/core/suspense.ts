@@ -1,17 +1,18 @@
 import { createContext } from './context';
 import { signal } from './signal';
 import { h } from '../renderers/dom/h';
+import type { VNodeChild } from './renderer';
 
 export interface SuspenseContextValue {
-    registerPromise: (promise: Promise<any>) => void;
+    registerPromise: (promise: Promise<unknown>) => void;
 }
 
 export const SuspenseCtx = createContext<SuspenseContextValue | null>(null);
 
-export function Suspense(props: { fallback: any, children: any }) {
+export function Suspense(props: { fallback: VNodeChild, children: VNodeChild }) {
     const pendingCount = signal(0);
-    
-    const registerPromise = (promise: Promise<any>) => {
+
+    const registerPromise = (promise: Promise<unknown>) => {
             pendingCount.value++;
             promise.then(() => {
                 pendingCount.value--;

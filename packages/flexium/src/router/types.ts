@@ -1,4 +1,5 @@
 import { Signal, Computed } from '../core/signal';
+import type { VNodeChild } from '../core/renderer';
 
 export interface Location {
     pathname: string;
@@ -18,7 +19,7 @@ export interface RouteProps {
     path?: string; // path can be optional for layout routes or index
     index?: boolean;
     component: Function;
-    children?: any; // Nested routes
+    children?: VNodeChild; // Nested routes
 }
 
 export interface RouteMatch {
@@ -39,6 +40,6 @@ export interface RouteDef {
 export interface LinkProps {
     to: string;
     class?: string;
-    children?: any;
+    children?: VNodeChild;
 }
 

@@ -8,7 +8,7 @@
  * or createReactiveRoot from './reactive'.
  */
 
-import type { VNode } from '../../core/renderer';
+import type { VNode, VNodeChild } from '../../core/renderer';
 import { domRenderer } from './index';
 import { isVNode } from './h';
 import { renderReactive, createReactiveRoot } from './reactive';
@@ -18,7 +18,7 @@ import { renderReactive, createReactiveRoot } from './reactive';
  */
 interface NodeData {
   vnode: VNode | null;
-  props: Record<string, any>;
+  props: Record<string, unknown>;
 }
 
 const NODE_DATA = new WeakMap<Node, NodeData>();
@@ -51,10 +51,22 @@ export function render(
 /**
  * Mount a virtual node to create a DOM node
  */
-function mount(vnode: VNode | string | number | null | undefined | Function): Node | null {
-  // Handle null/undefined
-  if (vnode === null || vnode === undefined) {
+function mount(vnode: VNodeChild | Function): Node | null {
+  // Handle null/undefined/boolean (falsy JSX values)
+  if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
     return null;
+  }
+
+  // Handle arrays of children
+  if (Array.isArray(vnode)) {
+    const fragment = document.createDocumentFragment();
+    for (const child of vnode) {
+      const childNode = mount(child);
+      if (childNode) {
+        fragment.appendChild(childNode);
+      }
+    }
+    return fragment;
   }
 
   // Handle functions (lazy components)
