@@ -1,4 +1,4 @@
-import { state, effect } from 'flexium'
+import { state, effect, For } from 'flexium'
 import { Link } from 'flexium/router'
 import { loadStories, useList, useItem } from '../store'
 
@@ -72,7 +72,9 @@ export default function Stories(props: { type: string }) {
             </div>
 
             <ul class="news-list">
-                {ids.map((id: number, i: () => number) => <StoryItem id={id} index={i() + 1} />)}
+                <For each={ids}>
+                    {(id: number, index: () => number) => <StoryItem id={id} index={index() + 1} />}
+                </For>
             </ul>
         </div>
     )

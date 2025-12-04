@@ -1,10 +1,10 @@
 import { VNode } from '../core/renderer';
 import { StateGetter } from '../core/state';
-import { signal, effect, Signal, onCleanup } from './signal';
+import { signal, effect, Signal } from './signal';
 
 interface ForProps<T> {
   each: StateGetter<T[]>;
-  children: ((item: T, index: () => number) => VNode)[];
+  children: ((item: T, index: () => number) => VNode) | ((item: T, index: () => number) => VNode)[];
 }
 
 /**
@@ -40,7 +40,7 @@ export function For<T>(props: ForProps<T>): ForComponent<T> {
   const component = {
     [FOR_MARKER]: true,
     each: props.each,
-    renderItem: props.children[0],
+    renderItem: Array.isArray(props.children) ? props.children[0] : props.children,
   } as ForComponent<T>;
 
   return component;
@@ -80,8 +80,6 @@ export function mountForComponent<T>(
 
   // Direct DOM cache: item reference -> { node, indexSig, dispose }
   let cache = new Map<T, ForCacheEntry<T>>();
-  // Track order of items for efficient reordering
-  let currentOrder: T[] = [];
 
   const dispose = effect(() => {
     const list = each() || [];
@@ -132,11 +130,6 @@ export function mountForComponent<T>(
 
     // Phase 3: Reorder nodes efficiently
     // Use insertBefore to move nodes into correct position
-    let nextSibling: Node | null = startMarker.nextSibling;
-
-    // Skip nodes that belong to us until we hit the end marker or non-our-nodes
-    const ourNodes = new Set(newNodes);
-
     for (let i = 0; i < newNodes.length; i++) {
       const node = newNodes[i];
 
@@ -158,9 +151,8 @@ export function mountForComponent<T>(
       }
     }
 
-    // Update cache and order
+    // Update cache
     cache = newCache;
-    currentOrder = list.slice();
   });
 
   // Cleanup function

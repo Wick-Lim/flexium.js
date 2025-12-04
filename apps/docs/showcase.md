@@ -32,7 +32,8 @@ A simple counter demonstrating `state()` and `computed()` - the building blocks 
 
 ::: details View Source Code
 ```tsx
-import { state, computed } from 'flexium'
+import { state } from 'flexium'
+import { computed } from 'flexium/advanced'
 
 function Counter() {
   const [count, setCount] = state(0)
