@@ -4,8 +4,8 @@
  * Core exports for signal-based reactivity system
  */
 
-// Core reactivity primitives
-export { effect, root, onMount, signal, computed } from './core/signal'
+// Core reactivity primitives (public API - minimal surface)
+export { effect, onMount } from './core/signal'
 import { state as coreState, clearGlobalState } from './core/state'
 import { StateGetter, StateSetter } from './core/state'
 import { For } from './core/flow'

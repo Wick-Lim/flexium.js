@@ -6,15 +6,16 @@
  */
 
 // Core Signal System
-export { 
-  signal, 
-  computed, 
-  effect, 
-  root, 
-  isSignal, 
-  onCleanup, 
+export {
+  signal,
+  computed,
+  effect,
+  root,
+  isSignal,
+  onCleanup,
   createResource,
-  onMount
+  onMount,
+  untrack
 } from './core/signal';
 
 export { state } from './core/state';

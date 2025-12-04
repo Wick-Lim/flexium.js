@@ -1,6 +1,6 @@
 import { VNode } from '../core/renderer';
 import { StateGetter } from '../core/state';
-import { signal, Signal } from './signal';
+import { signal, effect, Signal, onCleanup } from './signal';
 
 interface ForProps<T> {
   each: StateGetter<T[]>;
@@ -8,58 +8,171 @@ interface ForProps<T> {
 }
 
 /**
+ * Item cache entry for DOM-direct rendering
+ */
+interface ForCacheEntry<T> {
+  item: T;
+  node: Node;
+  indexSig: Signal<number>;
+  dispose: () => void;
+}
+
+/**
+ * Marker symbol to identify For components
+ */
+export const FOR_MARKER = Symbol('flexium.for');
+
+/**
  * <For> component for efficient list rendering.
- * Reuses DOM nodes for items that haven't changed, avoiding full VDOM diffing.
- * 
+ * Uses direct DOM caching - no VNode intermediate layer.
+ *
+ * Performance characteristics:
+ * - O(1) for append/prepend
+ * - O(1) for item reuse (by reference)
+ * - O(n) for reorder with minimal DOM moves
+ *
  * @example
  * <For each={items}>
  *   {(item, index) => <div>{item.name}</div>}
  * </For>
  */
-export function For<T>(props: ForProps<T>) {
-  const { each, children } = props;
-  const renderItem = children[0];
-  
-  // Cache VNodes and Index Signals by Item reference
-  let cache = new Map<T, { vnode: VNode, indexSig: Signal<number> }>();
+export function For<T>(props: ForProps<T>): ForComponent<T> {
+  const component = {
+    [FOR_MARKER]: true,
+    each: props.each,
+    renderItem: props.children[0],
+  } as ForComponent<T>;
 
-  return () => {
+  return component;
+}
+
+export interface ForComponent<T> {
+  [FOR_MARKER]: true;
+  each: StateGetter<T[]>;
+  renderItem: (item: T, index: () => number) => VNode;
+}
+
+/**
+ * Check if value is a For component
+ */
+export function isForComponent(value: any): value is ForComponent<any> {
+  return value && value[FOR_MARKER] === true;
+}
+
+/**
+ * Mount a For component with direct DOM caching.
+ * Called from reactive.ts when For marker is detected.
+ *
+ * @param forComp - The For component descriptor
+ * @param parent - Parent DOM node
+ * @param mountFn - Function to mount a VNode to DOM (from reactive.ts)
+ * @param cleanupFn - Function to cleanup a DOM node (from reactive.ts)
+ * @returns Dispose function
+ */
+export function mountForComponent<T>(
+  forComp: ForComponent<T>,
+  parent: Node,
+  startMarker: Node,
+  mountFn: (vnode: VNode) => Node | null,
+  cleanupFn: (node: Node) => void
+): () => void {
+  const { each, renderItem } = forComp;
+
+  // Direct DOM cache: item reference -> { node, indexSig, dispose }
+  let cache = new Map<T, ForCacheEntry<T>>();
+  // Track order of items for efficient reordering
+  let currentOrder: T[] = [];
+
+  const dispose = effect(() => {
     const list = each() || [];
-    const newCache = new Map<T, { vnode: VNode, indexSig: Signal<number> }>();
-    
-    const vnodes = list.map((item, i) => {
-      let cached = cache.get(item);
-      
-      if (!cached) {
-        // Create new index signal
+    const newCache = new Map<T, ForCacheEntry<T>>();
+    const newNodes: Node[] = [];
+
+    // Phase 1: Create/reuse nodes
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      let entry = cache.get(item);
+
+      if (!entry) {
+        // New item: create index signal, render, mount
         const indexSig = signal(i);
-        
-        // Create new VNode, passing index getter
         const vnode = renderItem(item, indexSig);
-        
-        // Ensure key is set
-        if (vnode.key == null) {
-            if (item != null && (item as any).id != null) {
-                vnode.key = (item as any).id;
-            } else if (typeof item === 'string' || typeof item === 'number') {
-                vnode.key = item;
-            }
+        const node = mountFn(vnode);
+
+        if (node) {
+          entry = {
+            item,
+            node,
+            indexSig,
+            dispose: () => cleanupFn(node)
+          };
         }
-        
-        cached = { vnode, indexSig };
       } else {
-        // Update index if changed
-        if (cached.indexSig.peek() !== i) {
-            cached.indexSig.set(i);
+        // Existing item: update index if changed
+        if (entry.indexSig.peek() !== i) {
+          entry.indexSig.set(i);
         }
       }
-      
-      newCache.set(item, cached);
-      return cached.vnode;
-    });
-    
+
+      if (entry) {
+        newCache.set(item, entry);
+        newNodes.push(entry.node);
+      }
+    }
+
+    // Phase 2: Remove nodes no longer in list
+    for (const [item, entry] of cache) {
+      if (!newCache.has(item)) {
+        entry.dispose();
+        if (entry.node.parentNode === parent) {
+          parent.removeChild(entry.node);
+        }
+      }
+    }
+
+    // Phase 3: Reorder nodes efficiently
+    // Use insertBefore to move nodes into correct position
+    let nextSibling: Node | null = startMarker.nextSibling;
+
+    // Skip nodes that belong to us until we hit the end marker or non-our-nodes
+    const ourNodes = new Set(newNodes);
+
+    for (let i = 0; i < newNodes.length; i++) {
+      const node = newNodes[i];
+
+      // Find where this node should be inserted (before which sibling)
+      // We need to find the correct position after the previous node in newNodes
+      const expectedPosition = i === 0
+        ? startMarker.nextSibling
+        : newNodes[i - 1].nextSibling;
+
+      if (node !== expectedPosition) {
+        // Node is not in correct position, move it
+        if (node.parentNode === parent) {
+          // Already in parent, just move
+          parent.insertBefore(node, expectedPosition);
+        } else {
+          // Not yet in parent, insert
+          parent.insertBefore(node, expectedPosition);
+        }
+      }
+    }
+
+    // Update cache and order
     cache = newCache;
-    return vnodes;
+    currentOrder = list.slice();
+  });
+
+  // Cleanup function
+  return () => {
+    dispose();
+    for (const entry of cache.values()) {
+      entry.dispose();
+      if (entry.node.parentNode === parent) {
+        parent.removeChild(entry.node);
+      }
+    }
+    cache.clear();
   };
 }
 

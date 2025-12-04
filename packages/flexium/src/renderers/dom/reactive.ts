@@ -15,16 +15,39 @@ import { pushProvider, popProvider, useContext, captureContext, runWithContext }
 import { reconcileArrays } from './reconcile';
 import { SuspenseCtx } from '../../core/suspense';
 import { ErrorBoundaryCtx } from '../../core/error-boundary';
+import { isForComponent, mountForComponent, For, ForComponent } from '../../core/flow';
 
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>();
 
 export function mountReactive(
-  vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined | Function | any[],
+  vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined | Function | any[] | ForComponent<any>,
   container?: Node
 ): Node | null {
   // Handle null/undefined
   if (vnode === null || vnode === undefined) {
     return null;
+  }
+
+  // Handle For component with direct DOM caching (no VNode intermediate)
+  if (isForComponent(vnode)) {
+    const startMarker = document.createTextNode('');
+    const parent = container || document.createDocumentFragment();
+    domRenderer.appendChild(parent, startMarker);
+
+    const forDispose = mountForComponent(
+      vnode,
+      parent,
+      startMarker,
+      (childVnode) => mountReactive(childVnode),
+      cleanupReactive
+    );
+
+    if (!REACTIVE_BINDINGS.has(startMarker)) {
+      REACTIVE_BINDINGS.set(startMarker, new Set());
+    }
+    REACTIVE_BINDINGS.get(startMarker)!.add(forDispose);
+
+    return container ? startMarker : parent;
   }
 
   // Handle signals and functions (reactive children)
@@ -134,13 +157,22 @@ export function mountReactive(
 
   // Handle VNodes
   if (isVNode(vnode)) {
+    // Handle For component specially (direct DOM caching)
+    if (vnode.type === For) {
+      const forComp = For({
+        each: vnode.props.each,
+        children: vnode.children as any
+      });
+      return mountReactive(forComp, container);
+    }
+
     // Handle function components
     if (typeof vnode.type === 'function') {
       const component = vnode.type as Function;
       const startNode = document.createTextNode('');
       const parent = container || document.createDocumentFragment();
       domRenderer.appendChild(parent, startNode);
-      
+
       let currentNodes: Node[] = [];
       const contextSnapshot = captureContext();
 
