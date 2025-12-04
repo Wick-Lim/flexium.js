@@ -1,6 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install",
-  "buildCommand": "npx turbo run build --filter=@flexium/docs",
-  "outputDirectory": "apps/docs/.vitepress/dist"
-}
