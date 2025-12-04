@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2025-12-05
+
+### DX Improvements & DevTools Enhancement
+
+#### Added
+- **Standardized Error Code System** - All Flexium errors now follow FLXxxx format
+  - Error codes from FLX101 to FLX702 covering all error categories
+  - Contextual information in error messages
+  - Actionable suggestions for fixing issues
+  - New `errors.ts` module with `logError()`, `logWarning()`, and `FlexiumError` class
+- **DevTools Auto-Registration** - Signals and effects are now automatically tracked
+  - No manual registration required after `enableDevTools()`
+  - Hook-based system avoids circular dependencies
+  - Effect name support via `options.name` parameter
+- **DevTools Documentation** - New `/guide/devtools` page with:
+  - Browser console API reference
+  - Event subscription guide
+  - Custom tool building examples
+
+#### Changed
+- **`__DEV__` default value** - Changed from `true` to `false`
+  - Production builds no longer emit hydration warnings by default
+  - Set `__DEV__` explicitly in vite.config.ts for development warnings
+- **Error messages updated** across all modules:
+  - `signal.ts` - Effect and cleanup errors
+  - `Form.ts` - Validation and submission errors
+  - `Button.ts` - Handler and accessibility warnings
+  - `error-boundary.ts` - Callback and render errors
+  - `devtools/index.ts` - Listener errors
+
+#### Fixed
+- **`advanced.mjs` build output** - Entry point now correctly generates in dist/
+
 ### API Simplification & Doc Overhaul - 2025-11-23
 
 #### Changed

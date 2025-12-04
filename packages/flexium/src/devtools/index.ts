@@ -15,7 +15,8 @@
  * ```
  */
 
-import { Signal, Computed } from '../core/signal';
+import { Signal, Computed, setDevToolsHooks } from '../core/signal';
+import { ErrorCodes, logError } from '../core/errors';
 
 export interface DevToolsState {
     enabled: boolean;
@@ -79,6 +80,14 @@ const listeners: DevToolsListener[] = [];
 export function enableDevTools(): void {
     devToolsState.enabled = true;
 
+    // Register hooks with signal system for automatic tracking
+    setDevToolsHooks({
+        onSignalCreate: (signal, name) => registerSignal(signal, name),
+        onSignalUpdate: (id, value) => updateSignalInfo(id, value),
+        onEffectCreate: (name) => registerEffect(name),
+        onEffectRun: (id, status, error) => updateEffectInfo(id, status, error),
+    });
+
     // Expose to window for browser extension
     if (typeof window !== 'undefined') {
         (window as any).__FLEXIUM_DEVTOOLS__ = {
@@ -108,6 +117,9 @@ export function disableDevTools(): void {
     devToolsState.effects.clear();
     devToolsState.components.clear();
 
+    // Unregister hooks
+    setDevToolsHooks(null);
+
     if (typeof window !== 'undefined') {
         delete (window as any).__FLEXIUM_DEVTOOLS__;
     }
@@ -133,7 +145,7 @@ function emit(event: DevToolsEventType, data: unknown): void {
         try {
             listener(event, data);
         } catch (e) {
-            console.error('[Flexium DevTools] Listener error:', e);
+            logError(ErrorCodes.DEVTOOLS_LISTENER_ERROR, { event }, e);
         }
     }
 }

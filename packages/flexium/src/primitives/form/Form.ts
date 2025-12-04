@@ -6,6 +6,7 @@
  */
 
 import { signal, computed, type Signal, type Computed } from '../../core/signal';
+import { ErrorCodes, logError } from '../../core/errors';
 
 /**
  * Field value types
@@ -196,7 +197,7 @@ export function createForm(config: FormConfig = {}): {
           return typeof result === 'string' ? result : 'Invalid value';
         }
       } catch (error) {
-        console.error(`Validation error for field ${name}:`, error);
+        logError(ErrorCodes.FORM_VALIDATION_FAILED, { field: name }, error);
         return 'Validation error';
       }
     }
@@ -254,7 +255,7 @@ export function createForm(config: FormConfig = {}): {
             return typeof result === 'string' ? result : 'Invalid value';
           }
         } catch (error) {
-          console.error(`Validation error for field ${name}:`, error);
+          logError(ErrorCodes.FORM_VALIDATION_FAILED, { field: name }, error);
           return 'Validation error';
         }
       }
@@ -354,7 +355,7 @@ export function createForm(config: FormConfig = {}): {
       try {
         await onSubmit(formData.value);
       } catch (error) {
-        console.error('Form submission error:', error);
+        logError(ErrorCodes.FORM_SUBMISSION_FAILED, undefined, error);
       } finally {
         isSubmitting.set(false);
       }

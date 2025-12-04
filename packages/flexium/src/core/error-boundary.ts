@@ -2,6 +2,7 @@ import { createContext, useContext } from './context';
 import { signal } from './signal';
 import { h } from '../renderers/dom/h';
 import type { VNodeChild, VNode } from './renderer';
+import { ErrorCodes, logError } from './errors';
 
 export interface ErrorBoundaryContextValue {
     setError: (error: Error | unknown) => void;
@@ -75,7 +76,7 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
             try {
                 onError(errorObj, info);
             } catch (callbackError) {
-                console.error('Error in onError callback:', callbackError);
+                logError(ErrorCodes.ERROR_BOUNDARY_CALLBACK_FAILED, { callback: 'onError' }, callbackError);
             }
         }
     };
@@ -92,7 +93,7 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
             try {
                 onReset();
             } catch (callbackError) {
-                console.error('Error in onReset callback:', callbackError);
+                logError(ErrorCodes.ERROR_BOUNDARY_CALLBACK_FAILED, { callback: 'onReset' }, callbackError);
             }
         }
     };
@@ -160,7 +161,7 @@ export function useErrorBoundary(): ErrorBoundaryContextValue {
         // Return a no-op implementation if not within an ErrorBoundary
         return {
             setError: (err) => {
-                console.error('Uncaught error (no ErrorBoundary):', err);
+                logError(ErrorCodes.UNCAUGHT_RENDER_ERROR, undefined, err);
                 throw err;
             },
             clearError: () => {},

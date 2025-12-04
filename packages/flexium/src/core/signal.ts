@@ -8,6 +8,30 @@
  * - Batching prevents cascading updates for performance
  */
 
+import { ErrorCodes, logError, logWarning } from './errors';
+
+/**
+ * DevTools hooks interface - set by devtools module to avoid circular imports
+ * @internal
+ */
+export interface DevToolsHooks {
+  onSignalCreate?: (signal: Signal<unknown>, name?: string) => number;
+  onSignalUpdate?: (id: number, value: unknown) => void;
+  onEffectCreate?: (name?: string) => number;
+  onEffectRun?: (id: number, status: 'idle' | 'running' | 'error', error?: Error) => void;
+}
+
+// Global hooks registry - set by devtools when enabled
+let devToolsHooks: DevToolsHooks | null = null;
+
+/**
+ * Register devtools hooks (called by devtools module)
+ * @internal
+ */
+export function setDevToolsHooks(hooks: DevToolsHooks | null): void {
+  devToolsHooks = hooks;
+}
+
 /**
  * Base interface for subscriber nodes
  */
@@ -137,7 +161,7 @@ class EffectNode implements ISubscriber {
       if (this.onError) {
         this.onError(error as Error);
       } else {
-        console.error('Error in effect:', error);
+        logError(ErrorCodes.EFFECT_EXECUTION_FAILED, undefined, error);
       }
     } finally {
       activeEffect = prevEffect;
@@ -281,6 +305,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
  */
 export function signal<T>(initialValue: T): Signal<T> {
   const node = new SignalNode(initialValue);
+  let devToolsId = -1;
 
   const sig = function (this: any) {
     return node.get();
@@ -292,16 +317,31 @@ export function signal<T>(initialValue: T): Signal<T> {
     },
     set(newValue: T) {
       node.set(newValue);
+      // Notify devtools of update
+      if (devToolsId >= 0 && devToolsHooks?.onSignalUpdate) {
+        devToolsHooks.onSignalUpdate(devToolsId, newValue);
+      }
     },
     enumerable: true,
     configurable: true
   });
 
-  sig.set = (newValue: T) => node.set(newValue);
+  sig.set = (newValue: T) => {
+    node.set(newValue);
+    // Notify devtools of update
+    if (devToolsId >= 0 && devToolsHooks?.onSignalUpdate) {
+      devToolsHooks.onSignalUpdate(devToolsId, newValue);
+    }
+  };
   sig.peek = () => node.peek();
 
   // Mark as signal for detection
   (sig as any)[SIGNAL_MARKER] = true;
+
+  // Register with devtools if enabled
+  if (devToolsHooks?.onSignalCreate) {
+    devToolsId = devToolsHooks.onSignalCreate(sig as Signal<unknown>);
+  }
 
   return sig;
 }
@@ -356,9 +396,34 @@ export function computed<T>(fn: () => T): Computed<T> {
  */
 export function effect(
   fn: () => void | (() => void),
-  options?: { onError?: (error: Error) => void }
+  options?: { onError?: (error: Error) => void; name?: string }
 ): () => void {
-  const node = new EffectNode(fn, options?.onError);
+  // Register with devtools before execution
+  let devToolsId = -1;
+  if (devToolsHooks?.onEffectCreate) {
+    devToolsId = devToolsHooks.onEffectCreate(options?.name);
+  }
+
+  // Wrap fn to track execution in devtools
+  const wrappedFn = devToolsId >= 0 ? () => {
+    if (devToolsHooks?.onEffectRun) {
+      devToolsHooks.onEffectRun(devToolsId, 'running');
+    }
+    try {
+      const result = fn();
+      if (devToolsHooks?.onEffectRun) {
+        devToolsHooks.onEffectRun(devToolsId, 'idle');
+      }
+      return result;
+    } catch (error) {
+      if (devToolsHooks?.onEffectRun) {
+        devToolsHooks.onEffectRun(devToolsId, 'error', error as Error);
+      }
+      throw error;
+    }
+  } : fn;
+
+  const node = new EffectNode(wrappedFn, options?.onError);
   node.execute();
   const dispose = () => node.dispose();
 
@@ -457,7 +522,7 @@ export function onCleanup(fn: () => void): void {
   if (activeEffect instanceof EffectNode) {
     activeEffect.cleanups.push(fn);
   } else {
-    console.warn('onCleanup must be called from within an effect');
+    logWarning(ErrorCodes.CLEANUP_OUTSIDE_EFFECT);
   }
 }
 

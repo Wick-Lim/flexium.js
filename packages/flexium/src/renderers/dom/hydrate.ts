@@ -32,7 +32,7 @@ export function hydrate(vnode: any, container: Element, options: HydrateOptions 
     const handleMismatch = (message: string, domNode: Node | null, vn: any) => {
         if (onMismatch) {
             onMismatch(message, domNode, vn);
-        } else if (typeof __DEV__ !== 'undefined' ? __DEV__ : true) {
+        } else if (typeof __DEV__ !== 'undefined' ? __DEV__ : false) {
             console.warn(`[Flexium Hydration] ${message}`);
         }
     };
@@ -184,7 +184,7 @@ function hydrateProps(el: Element, props: Record<string, any>, ctx: HydrateConte
         }
 
         // Validate static props match (in development)
-        if (typeof __DEV__ !== 'undefined' ? __DEV__ : true) {
+        if (typeof __DEV__ !== 'undefined' ? __DEV__ : false) {
             if (key === 'className' || key === 'class') {
                 const domClass = el.getAttribute('class') || '';
                 if (domClass !== value) {

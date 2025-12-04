@@ -6,6 +6,7 @@
  */
 
 import { signal, effect, type Signal } from '../../core/signal';
+import { ErrorCodes, logError, logWarning } from '../../core/errors';
 
 /**
  * Button variants
@@ -247,7 +248,7 @@ export function createButton(props: ButtonProps): {
       try {
         await onPress(e);
       } catch (error) {
-        console.error('Button press handler error:', error);
+        logError(ErrorCodes.BUTTON_HANDLER_FAILED, undefined, error);
       }
     };
 
@@ -378,7 +379,7 @@ export function createIconButton(props: ButtonProps & { icon: HTMLElement }): {
   const { icon, ariaLabel, ...buttonProps } = props;
 
   if (!ariaLabel) {
-    console.warn('IconButton should have an aria-label for accessibility');
+    logWarning(ErrorCodes.BUTTON_MISSING_ARIA_LABEL);
   }
 
   const { element, dispose } = createButton({
