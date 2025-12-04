@@ -18,9 +18,13 @@
     "test:cli": "./tests/unit/test-simple.sh",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "format": "pnpm -r run format",
+    "format": "turbo run format",
     "clean": "turbo run clean && rm -rf node_modules"
   },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "keywords": [
     "flexium",
     "signals",
@@ -38,10 +42,9 @@
   "bugs": {
     "url": "https://github.com/yourusername/flexium.js/issues"
   },
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "npm@10.8.2",
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=9.0.0"
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
