@@ -159,10 +159,10 @@ export default defineConfig({
           items: [
             { text: 'state()', link: '/guide/state' },
             { text: 'effect()', link: '/guide/effects' },
-            { text: 'For / Show / Switch / Match', link: '/guide/flow' },
+            { text: '<For /> / <Show /> / <Switch /> / <Match />', link: '/guide/flow' },
             { text: 'createContext() / useContext()', link: '/guide/context' },
-            { text: 'Suspense', link: '/guide/suspense' },
-            { text: 'ErrorBoundary', link: '/guide/error-handling' }
+            { text: '<Suspense />', link: '/guide/suspense' },
+            { text: '<ErrorBoundary />', link: '/guide/error-handling' }
           ]
         },
         {
@@ -170,36 +170,36 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'render()', link: '/guide/jsx' },
-            { text: 'Portal', link: '/guide/portal' },
-            { text: 'Row', link: '/reference/primitives/row' },
-            { text: 'Column', link: '/reference/primitives/column' },
-            { text: 'Stack', link: '/reference/primitives/stack' },
-            { text: 'Grid', link: '/reference/primitives/grid' },
-            { text: 'Spacer', link: '/reference/primitives/spacer' },
-            { text: 'ScrollView', link: '/reference/primitives/scrollview' },
-            { text: 'Text', link: '/reference/primitives/text' },
-            { text: 'Image', link: '/reference/primitives/image' },
-            { text: 'Pressable', link: '/reference/primitives/pressable' }
+            { text: '<Portal />', link: '/guide/portal' },
+            { text: '<Row />', link: '/reference/primitives/row' },
+            { text: '<Column />', link: '/reference/primitives/column' },
+            { text: '<Stack />', link: '/reference/primitives/stack' },
+            { text: '<Grid />', link: '/reference/primitives/grid' },
+            { text: '<Spacer />', link: '/reference/primitives/spacer' },
+            { text: '<ScrollView />', link: '/reference/primitives/scrollview' },
+            { text: '<Text />', link: '/reference/primitives/text' },
+            { text: '<Image />', link: '/reference/primitives/image' },
+            { text: '<Pressable />', link: '/reference/primitives/pressable' }
           ]
         },
         {
           text: 'flexium/canvas',
           collapsed: false,
           items: [
-            { text: 'Canvas', link: '/guide/canvas' },
-            { text: 'Rect', link: '/reference/canvas/rect' },
-            { text: 'Circle', link: '/reference/canvas/circle' },
-            { text: 'Line', link: '/reference/canvas/line' },
-            { text: 'Arc', link: '/reference/canvas/arc' },
-            { text: 'Path', link: '/reference/canvas/path' },
-            { text: 'Text (Canvas)', link: '/reference/canvas/text' }
+            { text: '<Canvas />', link: '/guide/canvas' },
+            { text: '<Rect />', link: '/reference/canvas/rect' },
+            { text: '<Circle />', link: '/reference/canvas/circle' },
+            { text: '<Line />', link: '/reference/canvas/line' },
+            { text: '<Arc />', link: '/reference/canvas/arc' },
+            { text: '<Path />', link: '/reference/canvas/path' },
+            { text: '<Text /> (Canvas)', link: '/reference/canvas/text' }
           ]
         },
         {
           text: 'flexium/router',
           collapsed: false,
           items: [
-            { text: 'Router / Route', link: '/guide/router' }
+            { text: '<Router /> / <Route />', link: '/guide/router' }
           ]
         },
         {
@@ -222,28 +222,28 @@ export default defineConfig({
           text: 'flexium/dom',
           collapsed: false,
           items: [
-            { text: 'Row', link: '/reference/primitives/row' },
-            { text: 'Column', link: '/reference/primitives/column' },
-            { text: 'Stack', link: '/reference/primitives/stack' },
-            { text: 'Grid', link: '/reference/primitives/grid' },
-            { text: 'Spacer', link: '/reference/primitives/spacer' },
-            { text: 'ScrollView', link: '/reference/primitives/scrollview' },
-            { text: 'Text', link: '/reference/primitives/text' },
-            { text: 'Image', link: '/reference/primitives/image' },
-            { text: 'Pressable', link: '/reference/primitives/pressable' }
+            { text: '<Row />', link: '/reference/primitives/row' },
+            { text: '<Column />', link: '/reference/primitives/column' },
+            { text: '<Stack />', link: '/reference/primitives/stack' },
+            { text: '<Grid />', link: '/reference/primitives/grid' },
+            { text: '<Spacer />', link: '/reference/primitives/spacer' },
+            { text: '<ScrollView />', link: '/reference/primitives/scrollview' },
+            { text: '<Text />', link: '/reference/primitives/text' },
+            { text: '<Image />', link: '/reference/primitives/image' },
+            { text: '<Pressable />', link: '/reference/primitives/pressable' }
           ]
         },
         {
           text: 'flexium/canvas',
           collapsed: false,
           items: [
-            { text: 'Canvas', link: '/reference/canvas/canvas' },
-            { text: 'Rect', link: '/reference/canvas/rect' },
-            { text: 'Circle', link: '/reference/canvas/circle' },
-            { text: 'Path', link: '/reference/canvas/path' },
-            { text: 'Text', link: '/reference/canvas/text' },
-            { text: 'Line', link: '/reference/canvas/line' },
-            { text: 'Arc', link: '/reference/canvas/arc' }
+            { text: '<Canvas />', link: '/reference/canvas/canvas' },
+            { text: '<Rect />', link: '/reference/canvas/rect' },
+            { text: '<Circle />', link: '/reference/canvas/circle' },
+            { text: '<Path />', link: '/reference/canvas/path' },
+            { text: '<Text />', link: '/reference/canvas/text' },
+            { text: '<Line />', link: '/reference/canvas/line' },
+            { text: '<Arc />', link: '/reference/canvas/arc' }
           ]
         }
       ],
