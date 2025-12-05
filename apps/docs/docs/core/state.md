@@ -2,6 +2,16 @@
 
 Create reactive state with fine-grained updates.
 
+<script setup>
+import ShowcaseDemo from '../../components/ShowcaseDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <ShowcaseDemo />
+</ClientOnly>
+
 ## Import
 
 ```ts

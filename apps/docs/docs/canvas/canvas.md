@@ -10,9 +10,21 @@ head:
       content: Canvas component is the container for all canvas-based drawings in Flexium. Declarative and reactive.
 ---
 
+<script setup>
+import CanvasDemo from '../../components/CanvasDemo.vue'
+</script>
+
 # Canvas
 
 The `Canvas` component acts as a container for all canvas-based drawings. It creates a `<canvas>` element on the web.
+
+## Live Demo
+
+Move your mouse over the canvas to see particle effects:
+
+<ClientOnly>
+  <CanvasDemo />
+</ClientOnly>
 
 ## Usage
 

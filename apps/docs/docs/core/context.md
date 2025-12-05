@@ -2,6 +2,16 @@
 
 Share state across the component tree without prop drilling.
 
+<script setup>
+import ContextDemo from '../../components/ContextDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <ContextDemo />
+</ClientOnly>
+
 ## Import
 
 ```tsx

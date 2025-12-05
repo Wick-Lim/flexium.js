@@ -2,6 +2,18 @@
 
 Create a consistent animation/game loop with delta time.
 
+<script setup>
+import SnakeGameDemo from '../../components/SnakeGameDemo.vue'
+</script>
+
+## Live Demo
+
+Use arrow keys or WASD to control the snake:
+
+<ClientOnly>
+  <SnakeGameDemo />
+</ClientOnly>
+
 ## Import
 
 ```tsx

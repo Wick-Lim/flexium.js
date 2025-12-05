@@ -2,6 +2,16 @@
 
 Efficiently render lists with automatic keying and updates.
 
+<script setup>
+import TodoDemo from '../../components/TodoDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <TodoDemo />
+</ClientOnly>
+
 ## Import
 
 ```tsx

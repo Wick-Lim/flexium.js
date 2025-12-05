@@ -10,9 +10,21 @@ head:
       content: List is a flexible primitive component for rendering lists in Flexium. Supports optional virtualization for large datasets.
 ---
 
+<script setup>
+import VirtualListDemo from '../../components/VirtualListDemo.vue'
+</script>
+
 # List
 
 A flexible component for rendering lists with optional virtualization support.
+
+## Live Demo
+
+Scroll through 10,000 items with smooth virtualization:
+
+<ClientOnly>
+  <VirtualListDemo />
+</ClientOnly>
 
 The `List` component renders lists efficiently. By default, it renders all items. For large datasets, enable the `virtual` option to render only visible items using virtualization.
 

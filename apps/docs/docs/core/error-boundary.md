@@ -2,6 +2,16 @@
 
 Catch and handle errors gracefully in your component tree.
 
+<script setup>
+import ErrorBoundaryDemo from '../../components/ErrorBoundaryDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <ErrorBoundaryDemo />
+</ClientOnly>
+
 ## Import
 
 ```tsx

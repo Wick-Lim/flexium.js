@@ -2,6 +2,18 @@
 
 Run side effects when reactive dependencies change.
 
+<script setup>
+import TimerDemo from '../../components/TimerDemo.vue'
+</script>
+
+## Live Demo
+
+A stopwatch demonstrating `effect()` for timer-based updates:
+
+<ClientOnly>
+  <TimerDemo />
+</ClientOnly>
+
 ## Import
 
 ```ts

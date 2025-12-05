@@ -486,13 +486,13 @@ All these Flexium demos are actually running inside Vue components (VitePress)! 
 
 ---
 
-## More Examples
+## Explore the Docs
 
-Explore our collection of complete, runnable examples showcasing Flexium's full capabilities.
+Each documentation page now includes live demos. Here are some highlights:
 
 <div class="example-grid">
 
-<a href="/examples/router" class="example-card">
+<a href="/docs/router/router" class="example-card">
   <div class="example-icon">🧭</div>
   <div class="example-content">
     <h3>Router</h3>
@@ -500,7 +500,7 @@ Explore our collection of complete, runnable examples showcasing Flexium's full 
   </div>
 </a>
 
-<a href="/examples/suspense" class="example-card">
+<a href="/docs/core/suspense" class="example-card">
   <div class="example-icon">⏳</div>
   <div class="example-content">
     <h3>Suspense</h3>
@@ -508,11 +508,19 @@ Explore our collection of complete, runnable examples showcasing Flexium's full 
   </div>
 </a>
 
-<a href="/examples/virtual-list" class="example-card">
+<a href="/docs/primitives/list" class="example-card">
   <div class="example-icon">📜</div>
   <div class="example-content">
-    <h3>Virtual List</h3>
-    <p>Efficiently render 100,000+ items with smooth scrolling</p>
+    <h3>List</h3>
+    <p>Efficiently render 100,000+ items with smooth virtualization</p>
+  </div>
+</a>
+
+<a href="/docs/interactive/loop" class="example-card">
+  <div class="example-icon">🎮</div>
+  <div class="example-content">
+    <h3>Interactive Apps</h3>
+    <p>Build games with animation loops, keyboard, and mouse input</p>
   </div>
 </a>
 
@@ -568,4 +576,4 @@ Explore our collection of complete, runnable examples showcasing Flexium's full 
 
 ## Build Your Own
 
-Ready to create something? Check out the [examples](/examples/counter) for more code samples, or dive into the [Quick Start](/guide/quick-start) guide to begin building.
+Ready to create something? Browse the [API Docs](/docs/core/state) with live demos on every page, or dive into the [Quick Start](/guide/quick-start) guide to begin building.
