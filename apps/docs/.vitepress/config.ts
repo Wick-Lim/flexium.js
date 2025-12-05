@@ -177,6 +177,8 @@ export default defineConfig({
         {
           text: 'Advanced',
           items: [
+            { text: 'Suspense', link: '/guide/suspense' },
+            { text: 'Portal', link: '/guide/portal' },
             { text: 'Advanced API', link: '/guide/advanced-api' },
             { text: 'DevTools', link: '/guide/devtools' },
             { text: 'Performance', link: '/guide/performance' },
