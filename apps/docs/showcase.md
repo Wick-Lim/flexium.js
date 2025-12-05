@@ -19,7 +19,9 @@ import ShowcaseDemo from './components/ShowcaseDemo.vue'
 import TodoDemo from './components/TodoDemo.vue'
 import CanvasDemo from './components/CanvasDemo.vue'
 import TimerDemo from './components/TimerDemo.vue'
-import ThemeDemo from './components/ThemeDemo.vue'
+import SnakeGameDemo from './components/SnakeGameDemo.vue'
+import ContextDemo from './components/ContextDemo.vue'
+import ErrorBoundaryDemo from './components/ErrorBoundaryDemo.vue'
 </script>
 
 ---
@@ -209,82 +211,6 @@ function Stopwatch() {
 
 ---
 
-## Theme Switcher Demo
-
-Interactive theme customization with dark mode toggle and color picker. Shows reactive style bindings.
-
-<ClientOnly>
-  <ThemeDemo />
-</ClientOnly>
-
-::: details View Source Code
-```tsx
-import { state } from 'flexium/core'
-import { Column, Row, Text, Pressable } from 'flexium/primitives'
-
-function ThemeSwitcher() {
-  const [isDark, setIsDark] = state(false)
-  const [primaryColor, setPrimaryColor] = state('#4f46e5')
-
-  const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
-
-  return (
-    <Column
-      gap={20}
-      style={() => ({
-        background: isDark() ? '#1f2937' : '#f9fafb',
-        padding: '24px',
-        transition: 'all 0.3s ease'
-      })}
-    >
-      {/* Dark mode toggle */}
-      <Row gap={12} style={{ alignItems: 'center' }}>
-        <Text style={() => ({ color: isDark() ? '#fff' : '#333' })}>
-          Dark Mode
-        </Text>
-        <Pressable onPress={() => setIsDark(d => !d)}>
-          <div style={() => ({
-            width: '56px',
-            height: '28px',
-            borderRadius: '14px',
-            background: isDark() ? primaryColor() : '#d1d5db'
-          })} />
-        </Pressable>
-      </Row>
-
-      {/* Color picker */}
-      <Row gap={8}>
-        {colors.map(color => (
-          <Pressable onPress={() => setPrimaryColor(color)}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              background: color,
-              borderRadius: '8px',
-              border: primaryColor() === color ? '3px solid white' : 'none'
-            }} />
-          </Pressable>
-        ))}
-      </Row>
-
-      {/* Preview */}
-      <Pressable>
-        <Text style={() => ({
-          background: primaryColor(),
-          color: 'white',
-          padding: '12px 24px'
-        })}>
-          Preview Button
-        </Text>
-      </Pressable>
-    </Column>
-  )
-}
-```
-:::
-
----
-
 ## Canvas Animation Demo
 
 Interactive canvas with particle trail effects. Move your mouse to see smooth, reactive canvas rendering.
@@ -354,6 +280,188 @@ function ParticleCanvas() {
 
 ---
 
+## Snake Game Demo
+
+A complete game built with Flexium's game module. Use arrow keys or WASD to control the snake!
+
+<ClientOnly>
+  <SnakeGameDemo />
+</ClientOnly>
+
+::: details View Source Code
+```tsx
+import { signal, effect } from 'flexium/core'
+import { mount } from 'flexium/dom'
+import { Canvas, DrawRect } from 'flexium/canvas'
+import { useKeyboard, createGameLoop, Keys } from 'flexium/game'
+
+const snake = signal([{ x: 7, y: 7 }])
+const direction = signal('RIGHT')
+const food = signal({ x: 12, y: 7 })
+const score = signal(0)
+
+function SnakeGame() {
+  const keyboard = useKeyboard()
+
+  const gameLoop = createGameLoop({
+    onUpdate: (delta) => {
+      // Handle input and move snake
+      moveSnake()
+    }
+  })
+
+  effect(() => {
+    gameLoop.start()
+    return () => gameLoop.stop()
+  })
+
+  return (
+    <Canvas width={300} height={300}>
+      {/* Render food */}
+      <DrawRect x={food.value.x * 20} y={food.value.y * 20}
+                width={20} height={20} fill="#e74c3c" />
+
+      {/* Render snake */}
+      {snake.value.map((segment, i) => (
+        <DrawRect x={segment.x * 20} y={segment.y * 20}
+                  width={20} height={20} fill={i === 0 ? '#27ae60' : '#2ecc71'} />
+      ))}
+    </Canvas>
+  )
+}
+```
+:::
+
+---
+
+## Context API Demo
+
+Authentication, shopping cart, and notifications with multiple providers working together.
+
+<ClientOnly>
+  <ContextDemo />
+</ClientOnly>
+
+::: details View Source Code
+```tsx
+import { createContext, useContext, signal, For } from 'flexium/core'
+
+const AuthContext = createContext({
+  user: signal(null),
+  login: (name) => {},
+  logout: () => {}
+})
+
+const CartContext = createContext({
+  items: signal([]),
+  addItem: (product) => {},
+  removeItem: (id) => {},
+  updateQty: (id, delta) => {},
+  total: signal(0)
+})
+
+const NotificationContext = createContext({
+  notifications: signal([]),
+  notify: (msg, type) => {}
+})
+
+function App() {
+  return (
+    <AuthProvider>
+      <CartProvider>
+        <NotificationProvider>
+          <Shop />
+        </NotificationProvider>
+      </CartProvider>
+    </AuthProvider>
+  )
+}
+
+function Shop() {
+  const { user, login, logout } = useContext(AuthContext)
+  const { items, addItem, total } = useContext(CartContext)
+  const { notify } = useContext(NotificationContext)
+
+  const products = [
+    { id: 1, name: 'Flexium Pro', price: 99 },
+    { id: 2, name: 'Signal Pack', price: 49 }
+  ]
+
+  return (
+    <div>
+      {user.value ? (
+        <button onclick={logout}>Logout</button>
+      ) : (
+        <button onclick={() => login('Alice')}>Login</button>
+      )}
+
+      <For each={products}>
+        {(product) => (
+          <button
+            onclick={() => {
+              addItem(product)
+              notify(`Added ${product.name}`, 'success')
+            }}
+            disabled={!user.value}
+          >
+            Add {product.name} - ${product.price}
+          </button>
+        )}
+      </For>
+
+      <div>Cart Total: ${total.value}</div>
+    </div>
+  )
+}
+```
+:::
+
+---
+
+## Error Boundary Demo
+
+Graceful error handling with recovery mechanisms.
+
+<ClientOnly>
+  <ErrorBoundaryDemo />
+</ClientOnly>
+
+::: details View Source Code
+```tsx
+import { ErrorBoundary, useErrorBoundary } from 'flexium'
+
+function BuggyComponent() {
+  const { setError } = useErrorBoundary()
+
+  const riskyAction = () => {
+    if (Math.random() < 0.5) {
+      setError(new Error('Random error occurred!'))
+    }
+  }
+
+  return <button onclick={riskyAction}>Risky Click</button>
+}
+
+function App() {
+  return (
+    <ErrorBoundary
+      fallback={({ error, reset, retryCount }) => (
+        <div>
+          <h3>Error: {error.message}</h3>
+          <p>Retry attempts: {retryCount}</p>
+          <button onclick={reset}>Try Again</button>
+        </div>
+      )}
+    >
+      <BuggyComponent />
+    </ErrorBoundary>
+  )
+}
+```
+:::
+
+---
+
 ## Why These Demos Matter
 
 Unlike React or Vue, Flexium **does not use a Virtual DOM** for updates. When you interact with these demos:
@@ -375,6 +483,86 @@ Unlike React or Vue, Flexium **does not use a Virtual DOM** for updates. When yo
 ### Framework Interop
 
 All these Flexium demos are actually running inside Vue components (VitePress)! Flexium's minimal footprint and DOM-based approach makes it easy to embed in any environment.
+
+---
+
+## More Examples
+
+Explore our collection of complete, runnable examples showcasing Flexium's full capabilities.
+
+<div class="example-grid">
+
+<a href="/examples/router" class="example-card">
+  <div class="example-icon">🧭</div>
+  <div class="example-content">
+    <h3>Router</h3>
+    <p>Full SPA with nested routes, dynamic params, and programmatic navigation</p>
+  </div>
+</a>
+
+<a href="/examples/suspense" class="example-card">
+  <div class="example-icon">⏳</div>
+  <div class="example-content">
+    <h3>Suspense</h3>
+    <p>Async data loading with loading states and error boundaries</p>
+  </div>
+</a>
+
+<a href="/examples/virtual-list" class="example-card">
+  <div class="example-icon">📜</div>
+  <div class="example-content">
+    <h3>Virtual List</h3>
+    <p>Efficiently render 100,000+ items with smooth scrolling</p>
+  </div>
+</a>
+
+</div>
+
+<style>
+.example-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.example-card {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.example-card:hover {
+  border-color: var(--vp-c-brand);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.example-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.example-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.example-content p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+  line-height: 1.5;
+}
+</style>
 
 ---
 

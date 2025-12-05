@@ -319,11 +319,32 @@ export default defineConfig({
           ]
         },
         {
+          text: 'Advanced Examples',
+          items: [
+            { text: 'Router', link: '/examples/router' },
+            { text: 'Suspense', link: '/examples/suspense' },
+            { text: 'Context API', link: '/examples/context' },
+            { text: 'Error Boundary', link: '/examples/error-boundary' }
+          ]
+        },
+        {
           text: 'Canvas Examples',
           items: [
             { text: 'Animated Circle', link: '/examples/animated-circle' },
             { text: 'Drawing App', link: '/examples/drawing-app' },
             { text: 'Charts', link: '/examples/charts' }
+          ]
+        },
+        {
+          text: 'Game Development',
+          items: [
+            { text: 'Snake Game', link: '/examples/snake-game' }
+          ]
+        },
+        {
+          text: 'Performance',
+          items: [
+            { text: 'Virtual List', link: '/examples/virtual-list' }
           ]
         }
       ]
