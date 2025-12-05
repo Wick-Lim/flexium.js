@@ -159,8 +159,11 @@ export default defineConfig({
           items: [
             { text: 'state()', link: '/guide/state' },
             { text: 'effect()', link: '/guide/effects' },
-            { text: '&lt;For /&gt; / &lt;Show /&gt; / &lt;Switch /&gt; / &lt;Match /&gt;', link: '/guide/flow' },
-            { text: 'createContext() / useContext()', link: '/guide/context' },
+            { text: '&lt;For /&gt;', link: '/guide/flow#for' },
+            { text: '&lt;Show /&gt;', link: '/guide/flow#show' },
+            { text: '&lt;Switch /&gt; / &lt;Match /&gt;', link: '/guide/flow#switch-match' },
+            { text: 'createContext()', link: '/guide/context#createcontext' },
+            { text: 'useContext()', link: '/guide/context#usecontext' },
             { text: '&lt;Suspense /&gt;', link: '/guide/suspense' },
             { text: '&lt;ErrorBoundary /&gt;', link: '/guide/error-handling' }
           ]
@@ -199,7 +202,9 @@ export default defineConfig({
           text: 'flexium/router',
           collapsed: false,
           items: [
-            { text: '&lt;Router /&gt; / &lt;Route /&gt;', link: '/guide/router' }
+            { text: '&lt;Router /&gt;', link: '/guide/router#router' },
+            { text: '&lt;Route /&gt;', link: '/guide/router#route' },
+            { text: '&lt;Link /&gt;', link: '/guide/router#link' }
           ]
         },
         {
