@@ -3,8 +3,11 @@ import path from 'path'
 
 export default defineConfig({
   test: {
-    // 루트 디렉토리의 테스트 파일들을 포함
-    include: ['../../tests/unit/**/*.test.mjs'],
+    // 테스트 파일들 포함 (src 내부 + 루트 테스트)
+    include: [
+      'src/**/__tests__/*.test.ts',
+      '../../tests/unit/**/*.test.mjs'
+    ],
     
     // DOM 테스트를 위한 환경 설정
     environment: 'jsdom',
