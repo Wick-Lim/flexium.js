@@ -132,7 +132,6 @@ export default defineConfig({
 
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
-      { text: 'Reference', link: '/reference/core/state' },
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
@@ -155,66 +154,77 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Core API',
-          items: [
-            { text: 'state()', link: '/guide/state' },
-            { text: 'effect()', link: '/guide/effects' },
-            { text: 'Control Flow', link: '/guide/flow' },
-            { text: 'Context', link: '/guide/context' },
-            { text: 'Router', link: '/guide/router' },
-            { text: 'JSX & Rendering', link: '/guide/jsx' },
-            { text: 'Error Handling', link: '/guide/error-handling' }
-          ]
-        },
-        {
-          text: 'Cross-Platform Guides',
-          items: [
-            { text: 'Primitives Overview', link: '/guide/primitives' },
-            { text: 'Animation', link: '/guide/animation' },
-            { text: 'Canvas Rendering Guide', link: '/guide/canvas' },
-            { text: 'Styling', link: '/guide/styling' }
-          ]
-        },
-        {
-          text: 'Advanced',
-          items: [
-            { text: 'Suspense', link: '/guide/suspense' },
-            { text: 'Portal', link: '/guide/portal' },
-            { text: 'Advanced API', link: '/guide/advanced-api' },
-            { text: 'DevTools', link: '/guide/devtools' },
-            { text: 'Performance', link: '/guide/performance' },
-            { text: 'Server-Side Rendering', link: '/guide/ssr' },
-            { text: 'TypeScript', link: '/guide/typescript' },
-            { text: 'Testing', link: '/guide/testing' }
-          ]
-        }
-      ],
-      '/reference/': [
-        {
           text: 'flexium/core',
           collapsed: false,
           items: [
-            { text: 'state()', link: '/reference/core/state' },
-            { text: 'effect()', link: '/reference/core/effect' },
-            { text: 'signal() / computed()', link: '/reference/core/signal' },
-            { text: 'batch() / untrack()', link: '/reference/core/batch' },
-            { text: 'onMount() / onCleanup()', link: '/reference/core/lifecycle' },
-            { text: 'For / Show / Switch / Match', link: '/reference/core/flow' },
-            { text: 'createContext() / useContext()', link: '/reference/core/context' },
-            { text: 'Suspense', link: '/reference/core/suspense' },
-            { text: 'ErrorBoundary', link: '/reference/core/error-boundary' }
+            { text: 'state()', link: '/guide/state' },
+            { text: 'effect()', link: '/guide/effects' },
+            { text: 'For / Show / Switch / Match', link: '/guide/flow' },
+            { text: 'createContext() / useContext()', link: '/guide/context' },
+            { text: 'Suspense', link: '/guide/suspense' },
+            { text: 'ErrorBoundary', link: '/guide/error-handling' }
           ]
         },
         {
           text: 'flexium/dom',
           collapsed: false,
           items: [
-            { text: 'render() / createRoot()', link: '/reference/dom/render' },
-            { text: 'mount() / hydrate()', link: '/reference/dom/mount' },
-            { text: 'Portal', link: '/reference/dom/portal' },
-            { text: 'h() / f() / Fragment', link: '/reference/dom/h' }
+            { text: 'render()', link: '/guide/jsx' },
+            { text: 'Portal', link: '/guide/portal' }
           ]
         },
+        {
+          text: 'flexium/canvas',
+          collapsed: false,
+          items: [
+            { text: 'Canvas', link: '/guide/canvas' },
+            { text: 'Rect', link: '/reference/canvas/rect' },
+            { text: 'Circle', link: '/reference/canvas/circle' },
+            { text: 'Line', link: '/reference/canvas/line' },
+            { text: 'Arc', link: '/reference/canvas/arc' },
+            { text: 'Path', link: '/reference/canvas/path' },
+            { text: 'Text', link: '/reference/canvas/text' }
+          ]
+        },
+        {
+          text: 'flexium/primitives',
+          collapsed: false,
+          items: [
+            { text: 'Overview', link: '/guide/primitives' },
+            { text: 'Row', link: '/reference/primitives/row' },
+            { text: 'Column', link: '/reference/primitives/column' },
+            { text: 'Stack', link: '/reference/primitives/stack' },
+            { text: 'Grid', link: '/reference/primitives/grid' },
+            { text: 'Spacer', link: '/reference/primitives/spacer' },
+            { text: 'ScrollView', link: '/reference/primitives/scrollview' },
+            { text: 'Text', link: '/reference/primitives/text' },
+            { text: 'Image', link: '/reference/primitives/image' },
+            { text: 'Pressable', link: '/reference/primitives/pressable' }
+          ]
+        },
+        {
+          text: 'flexium/router',
+          collapsed: false,
+          items: [
+            { text: 'Router / Route', link: '/guide/router' }
+          ]
+        },
+        {
+          text: 'Advanced',
+          collapsed: true,
+          items: [
+            { text: 'Animation', link: '/guide/animation' },
+            { text: 'Styling', link: '/guide/styling' },
+            { text: 'Advanced API', link: '/guide/advanced-api' },
+            { text: 'Performance', link: '/guide/performance' },
+            { text: 'Server-Side Rendering', link: '/guide/ssr' },
+            { text: 'TypeScript', link: '/guide/typescript' },
+            { text: 'Testing', link: '/guide/testing' },
+            { text: 'DevTools', link: '/guide/devtools' }
+          ]
+        }
+      ],
+      '/reference/': [
         {
           text: 'flexium/canvas',
           collapsed: false,
@@ -242,17 +252,6 @@ export default defineConfig({
             { text: 'Image', link: '/reference/primitives/image' },
             { text: 'Pressable', link: '/reference/primitives/pressable' }
           ]
-        },
-        {
-          text: 'flexium/router',
-          collapsed: false,
-          items: [
-            { text: 'Router / Route', link: '/reference/router/router' },
-            { text: 'Link', link: '/reference/router/link' },
-            { text: 'Outlet', link: '/reference/router/outlet' },
-            { text: 'useParams() / useLocation()', link: '/reference/router/hooks' },
-            { text: 'Route Guards', link: '/reference/router/guards' }
-          ]
         }
       ],
       '/examples/': [
@@ -276,7 +275,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/yourusername/flexium.js' }
+      { icon: 'github', link: 'https://github.com/Wick-Lim/flexium.js' }
     ],
 
     footer: {
