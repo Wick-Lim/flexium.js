@@ -1,18 +1,18 @@
 ---
-title: Virtual List - Performance
-description: Efficiently render large lists with VirtualList for optimal performance.
+title: List - Performance
+description: Efficiently render large lists with List for optimal performance.
 head:
   - - meta
     - property: og:title
-      content: Virtual List Example - Flexium
+      content: List Example - Flexium
   - - meta
     - property: og:description
       content: High-performance list rendering with virtualization in Flexium.
 ---
 
-# Virtual List Example
+# List Example
 
-This example demonstrates efficiently rendering large lists using VirtualList.
+This example demonstrates efficiently rendering large lists using List with virtual mode.
 
 ## Features Demonstrated
 
@@ -28,7 +28,7 @@ This example demonstrates efficiently rendering large lists using VirtualList.
 ```tsx
 import { signal, computed } from 'flexium/core'
 import { render } from 'flexium/dom'
-import { VirtualList } from 'flexium'
+import { List } from 'flexium'
 
 interface User {
   id: number
@@ -50,11 +50,12 @@ const users = signal(generateUsers(10000))
 function App() {
   return (
     <div>
-      <h1>VirtualList Example</h1>
+      <h1>List Example</h1>
       <p>Rendering {users.value.length.toLocaleString()} items</p>
 
-      <VirtualList
+      <List
         items={users}
+        virtual
         height={600}
         itemSize={80}
         overscan={5}
@@ -69,7 +70,7 @@ function App() {
             </div>
           </div>
         )}
-      </VirtualList>
+      </List>
     </div>
   )
 }
@@ -89,8 +90,9 @@ function App() {
         <div>Visible: {visibleRange.value.start} - {visibleRange.value.end}</div>
       </div>
 
-      <VirtualList
+      <List
         items={users}
+        virtual
         height={600}
         itemSize={80}
         onScroll={(scrollTop) => {
@@ -101,7 +103,7 @@ function App() {
         }}
       >
         {(user) => <UserItem user={user} />}
-      </VirtualList>
+      </List>
     </div>
   )
 }
@@ -138,13 +140,14 @@ const itemHeight = signal(80)
   />
 </div>
 
-<VirtualList
+<List
   items={users}
+  virtual
   height={600}
   itemSize={itemHeight.value}
 >
   {(user) => <UserItem user={user} />}
-</VirtualList>
+</List>
 ```
 
 ## Loading Different Dataset Sizes
@@ -170,19 +173,20 @@ const itemHeight = signal(80)
 - Significant lag during scrolling
 - Slow initial render
 
-### With VirtualList
+### With List (virtual mode)
 - Only ~20-30 DOM nodes rendered (visible + overscan)
 - Less than 1MB memory regardless of total items
 - Smooth scrolling with any dataset size
 - Fast initial render
 
-## VirtualList Props
+## List Props
 
 | Prop | Type | Description |
 |------|------|-------------|
 | `items` | `Signal<T[]>` | Array of items to render |
-| `height` | `number` | Container height in pixels |
-| `itemSize` | `number` | Height of each item |
+| `virtual` | `boolean` | Enable virtualization (default: false) |
+| `height` | `number` | Container height in pixels (required when virtual) |
+| `itemSize` | `number` | Height of each item (required when virtual) |
 | `overscan` | `number` | Extra items to render above/below |
 | `getKey` | `(item: T) => Key` | Function to get unique key |
 | `onScroll` | `(scrollTop: number) => void` | Scroll position callback |

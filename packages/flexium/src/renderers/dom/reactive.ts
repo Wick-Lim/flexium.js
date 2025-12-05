@@ -29,10 +29,10 @@ import {
 } from '../../core/flow'
 import type { StateGetter } from '../../core/state'
 import {
-  isVirtualListComponent,
-  mountVirtualListComponent,
-  VirtualListComponent,
-} from '../../primitives/VirtualList'
+  isListComponent,
+  mountListComponent,
+  ListComponent,
+} from '../../primitives/List'
 
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>()
 
@@ -54,7 +54,7 @@ export function mountReactive(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | ForComponent<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | VirtualListComponent<any>,
+    | ListComponent<any>,
   container?: Node
 ): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
@@ -62,11 +62,11 @@ export function mountReactive(
     return null
   }
 
-  // Handle VirtualList component
-  if (isVirtualListComponent(vnode)) {
+  // Handle List component
+  if (isListComponent(vnode)) {
     const parent = container || document.createDocumentFragment()
 
-    const virtualListDispose = mountVirtualListComponent(
+    const listDispose = mountListComponent(
       vnode,
       parent,
       (childVnode) => mountReactive(childVnode),
@@ -78,7 +78,7 @@ export function mountReactive(
     if (!REACTIVE_BINDINGS.has(marker)) {
       REACTIVE_BINDINGS.set(marker, new Set())
     }
-    REACTIVE_BINDINGS.get(marker)!.add(virtualListDispose)
+    REACTIVE_BINDINGS.get(marker)!.add(listDispose)
 
     return container ? parent.firstChild : parent
   }

@@ -1,6 +1,6 @@
 import { signal, computed, effect } from '../../../packages/flexium/dist/index.mjs'
 import { render } from '../../../packages/flexium/dist/dom.mjs'
-import { VirtualList } from '../../../packages/flexium/dist/index.mjs'
+import { List } from '../../../packages/flexium/dist/index.mjs'
 
 // Types for our data
 interface User {
@@ -51,7 +51,7 @@ function App() {
   return (
     <div class="container">
       <div class="header">
-        <h1>VirtualList Example</h1>
+        <h1>List Example</h1>
         <p>Efficiently rendering {totalItems.value.toLocaleString()} items with virtualization</p>
       </div>
 
@@ -205,12 +205,13 @@ function App() {
           </div>
         </div>
 
-        {/* VirtualList Section */}
+        {/* List Section */}
         <div class="section">
           <h2>User List</h2>
           <div class="list-container">
-            <VirtualList
+            <List
               items={users}
+              virtual
               height={600}
               itemSize={itemHeight.value}
               overscan={5}
@@ -237,7 +238,7 @@ function App() {
                   </div>
                 </div>
               )}
-            </VirtualList>
+            </List>
           </div>
         </div>
 
@@ -251,7 +252,7 @@ function App() {
               and cause significant lag during scrolling and interactions.
             </p>
             <strong style="color: #1e40af; display: block; margin-top: 12px;">
-              With VirtualList:
+              With List (virtual mode):
             </strong>
             <p style="color: #1e3a8a; margin-top: 8px;">
               Only ~20-30 DOM nodes are rendered at any time (visible items + overscan),
@@ -288,7 +289,7 @@ if (app) {
   render(rootElement, app)
 
   const endTime = performance.now()
-  console.log(`✅ VirtualList demo rendered in ${(endTime - startTime).toFixed(2)}ms`)
+  console.log(`✅ List demo rendered in ${(endTime - startTime).toFixed(2)}ms`)
   console.log(`📊 Initial render: ${visibleCount.value} items visible out of ${totalItems.value}`)
   console.log('🎯 Try scrolling, changing item heights, or loading different dataset sizes!')
 }

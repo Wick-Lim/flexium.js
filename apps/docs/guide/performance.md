@@ -429,12 +429,12 @@ effect(() => {
 });
 ```
 
-## VirtualList for Large Lists
+## List for Large Lists
 
-When rendering thousands of items, use `VirtualList` to only render visible items:
+When rendering thousands of items, use `List` with `virtual` mode to only render visible items:
 
 ```tsx
-import { VirtualList } from 'flexium/primitives';
+import { List } from 'flexium/primitives';
 import { state } from 'flexium/core';
 
 function BigList() {
@@ -447,8 +447,9 @@ function BigList() {
   );
 
   return (
-    <VirtualList
+    <List
       items={items}
+      virtual
       height={600}
       itemSize={50}
       overscan={5}
@@ -459,7 +460,7 @@ function BigList() {
           {index()}: {item.name}
         </div>
       )}
-    </VirtualList>
+    </List>
   );
 }
 ```
@@ -470,7 +471,7 @@ function BigList() {
 - **Fast initial render** - only visible items rendered
 - **Efficient updates** - only visible items re-render
 
-### VirtualList Best Practices
+### List Best Practices
 
 1. **Use stable keys** - Provide `getKey` for efficient reconciliation
 2. **Fixed item heights** - Best performance with consistent heights
@@ -478,7 +479,7 @@ function BigList() {
 4. **Memoize renderers** - Avoid recreating render functions
 
 ```tsx
-import { VirtualList } from 'flexium/primitives';
+import { List } from 'flexium/primitives';
 import { state, memo } from 'flexium/core';
 
 function OptimizedList() {
@@ -493,15 +494,16 @@ function OptimizedList() {
   ));
 
   return (
-    <VirtualList
+    <List
       items={items}
+      virtual
       height={600}
       itemSize={40}
       overscan={3}
       getKey={item => item.id}
     >
       {renderItem}
-    </VirtualList>
+    </List>
   );
 }
 ```
@@ -867,7 +869,7 @@ Flexium works with React DevTools for component profiling:
 
 1. **Use computed for derived values** - Lazy, memoized, efficient
 2. **Batch multiple updates** - Reduce intermediate renders
-3. **Leverage VirtualList for long lists** - Constant memory, smooth scrolling
+3. **Leverage List with virtual mode for long lists** - Constant memory, smooth scrolling
 4. **Code split with lazy()** - Smaller initial bundles
 5. **Import only what you need** - Better tree shaking
 6. **Use untrack() judiciously** - Prevent unnecessary dependencies

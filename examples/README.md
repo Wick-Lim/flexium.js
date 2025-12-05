@@ -330,12 +330,12 @@ effect(() => {
 
 ---
 
-#### 7. Virtual List (`/virtual-list`)
+#### 7. List (`/virtual-list`)
 
 **Efficiently render massive datasets**
 
 **Demonstrates:**
-- VirtualList component for performance
+- List component with virtual mode for performance
 - Windowing/virtualization techniques
 - Fixed item heights
 - Programmatic scrolling
@@ -344,7 +344,7 @@ effect(() => {
 
 **Features:**
 - Handle 10,000+ items effortlessly
-- Only render visible items
+- Only render visible items (when virtual mode enabled)
 - Smooth 60fps scrolling
 - Custom item rendering
 - Scroll to any position
@@ -471,10 +471,10 @@ Elegant async data loading with suspense boundaries, loading states, error handl
 
 ### Performance
 
-#### Virtual List (`/virtual-list`)
+#### List (`/virtual-list`)
 High-performance list rendering for thousands of items using virtualization/windowing techniques.
 
-**APIs:** VirtualList, itemSize, overscan, programmatic scrolling, getKey
+**APIs:** List, virtual, itemSize, overscan, programmatic scrolling, getKey
 
 **Difficulty:** Advanced
 

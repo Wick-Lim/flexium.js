@@ -59,20 +59,25 @@ export type {
   CanvasProps,
 } from './types'
 
-// VirtualList for efficient large list rendering
+// List component with optional virtualization
 export {
+  List,
   VirtualList,
+  isListComponent,
   isVirtualListComponent,
+  LIST_MARKER,
   VIRTUALLIST_MARKER,
-} from './VirtualList'
+} from './List'
 
 export type {
+  ListProps,
+  ListComponent,
   VirtualListProps,
   VirtualListComponent,
   FixedSizeConfig,
   VariableSizeConfig,
   SizeConfig,
-} from './VirtualList'
+} from './List'
 
 // Utils
 export { normalizeStyle } from './utils'

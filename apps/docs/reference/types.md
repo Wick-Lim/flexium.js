@@ -855,19 +855,20 @@ const motionProps: MotionProps = {
 }
 ```
 
-## VirtualList Types
+## List Types
 
-### VirtualListProps
+### ListProps
 
-Props for the VirtualList component (efficient rendering of large lists).
+Props for the List component (efficient rendering of lists with optional virtualization).
 
 ```typescript
-interface VirtualListProps<T> {
+interface ListProps<T> {
   items: ItemsGetter<T>
   children: (item: T, index: () => number) => FNode
-  height: number | string
+  virtual?: boolean
+  height?: number | string
   width?: number | string
-  itemSize: number | SizeConfig
+  itemSize?: number | SizeConfig
   overscan?: number
   getKey?: (item: T, index: number) => string | number
   onScroll?: (scrollTop: number) => void
@@ -878,20 +879,22 @@ interface VirtualListProps<T> {
 **Properties:**
 - `items` - Data source (reactive array or getter function)
 - `children` - Render function for each item
-- `height` - Container height (required)
+- `virtual` - Enable virtualization (default: false)
+- `height` - Container height (required when virtual is true)
 - `width` - Container width (optional, defaults to 100%)
-- `itemSize` - Item height (number for fixed, config for variable)
-- `overscan` - Extra items to render above/below viewport (default: 3)
+- `itemSize` - Item height (required when virtual is true)
+- `overscan` - Extra items to render above/below viewport (default: 3, virtual only)
 - `getKey` - Key extractor for stable identity
-- `onScroll` - Scroll event callback
-- `onVisibleRangeChange` - Callback when visible range changes
+- `onScroll` - Scroll event callback (virtual only)
+- `onVisibleRangeChange` - Callback when visible range changes (virtual only)
 
 **Usage:**
 ```tsx
 const items = signal([...Array(10000)].map((_, i) => ({ id: i, name: `Item ${i}` })))
 
-<VirtualList
+<List
   items={items}
+  virtual
   height={400}
   itemSize={50}
   getKey={(item) => item.id}
@@ -901,12 +904,12 @@ const items = signal([...Array(10000)].map((_, i) => ({ id: i, name: `Item ${i}`
       {index()}: {item.name}
     </div>
   )}
-</VirtualList>
+</List>
 ```
 
 ### SizeConfig
 
-Configuration for variable-height items in VirtualList.
+Configuration for variable-height items in List (when virtual mode enabled).
 
 ```typescript
 type SizeConfig = FixedSizeConfig | VariableSizeConfig

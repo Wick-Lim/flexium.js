@@ -681,15 +681,17 @@ Note: `showsHorizontalScrollIndicator` and `showsVerticalScrollIndicator` may ha
 For very long lists, consider virtualization:
 
 ```tsx
-import { VirtualList } from 'flexium';
+import { List } from 'flexium';
 
 // Instead of ScrollView with many items
-<VirtualList
+<List
   items={thousands}
-  itemHeight={60}
-  containerHeight={600}
-  renderItem={item => <Card {...item} />}
-/>
+  virtual
+  itemSize={60}
+  height={600}
+>
+  {(item) => <Card {...item} />}
+</List>
 ```
 
 ### Lazy Loading Images
@@ -869,4 +871,4 @@ function ScrollSpyDoc() {
 - [Column](/reference/primitives/column) - Vertical layout container (use inside ScrollView)
 - [Row](/reference/primitives/row) - Horizontal layout container (use inside ScrollView)
 - [Image](/reference/primitives/image) - Images with lazy loading support
-- [VirtualList](/reference/components/virtual-list) - Optimized for very long lists
+- [List](/reference/primitives/list) - Optimized for very long lists (with virtual mode)

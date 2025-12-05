@@ -638,14 +638,17 @@ Flatten your layout structure when possible:
 For long scrolling lists, use virtualization:
 
 ```tsx
-import { VirtualList } from 'flexium';
+import { List } from 'flexium';
 
 <Column style={{ height: 600 }}>
-  <VirtualList
+  <List
     items={manyItems}
-    itemHeight={60}
-    renderItem={item => <ItemCard item={item} />}
-  />
+    virtual
+    itemSize={60}
+    height={600}
+  >
+    {(item) => <ItemCard item={item} />}
+  </List>
 </Column>
 ```
 

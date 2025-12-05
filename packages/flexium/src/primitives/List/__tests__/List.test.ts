@@ -1,22 +1,22 @@
 /**
- * VirtualList Component Tests
+ * List Component Tests
  *
- * Comprehensive tests for VirtualList virtualization system
+ * Comprehensive tests for List virtualization system
  * @vitest-environment jsdom
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
-  VirtualList,
-  isVirtualListComponent,
-  mountVirtualListComponent,
-  VIRTUALLIST_MARKER,
-} from '../VirtualList'
+  List,
+  isListComponent,
+  mountListComponent,
+  LIST_MARKER,
+} from '../List'
 import { signal } from '../../../core/signal'
 import { f } from '../../../renderers/dom/h'
 import type { FNode } from '../../../core/renderer'
 
-describe('VirtualList Component', () => {
+describe('List Component', () => {
   let container: HTMLElement
   let disposeCallbacks: Array<() => void>
 
@@ -33,32 +33,34 @@ describe('VirtualList Component', () => {
     container.remove()
   })
 
-  describe('VirtualList() - Component Creation', () => {
-    it('should create VirtualList component with required props', () => {
+  describe('List() - Component Creation', () => {
+    it('should create List component with required props', () => {
       const items = signal([1, 2, 3])
       const renderItem = (item: number) => f('div', {}, String(item))
 
-      const component = VirtualList({
+      const component = List({
         items,
         children: renderItem,
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
       expect(component).toBeDefined()
-      expect(isVirtualListComponent(component)).toBe(true)
+      expect(isListComponent(component)).toBe(true)
     })
 
-    it('should include VIRTUALLIST_MARKER', () => {
+    it('should include LIST_MARKER', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      expect(component[VIRTUALLIST_MARKER]).toBe(true)
+      expect(component[LIST_MARKER]).toBe(true)
     })
 
     it('should store all provided props', () => {
@@ -68,9 +70,10 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange = vi.fn()
       const getKey = (item: number, index: number) => `item-${index}`
 
-      const component = VirtualList({
+      const component = List({
         items,
         children: renderItem,
+        virtual: true,
         height: 400,
         width: 600,
         itemSize: 50,
@@ -93,9 +96,10 @@ describe('VirtualList Component', () => {
 
     it('should use default overscan of 3', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
@@ -105,9 +109,10 @@ describe('VirtualList Component', () => {
 
     it('should handle string height and width', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: '100vh',
         width: '100%',
         itemSize: 50,
@@ -119,9 +124,10 @@ describe('VirtualList Component', () => {
 
     it('should handle fixed size config', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: { mode: 'fixed', itemHeight: 75 },
       })
@@ -131,9 +137,10 @@ describe('VirtualList Component', () => {
 
     it('should handle variable size config', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: { mode: 'variable', estimatedItemHeight: 60 },
       })
@@ -145,47 +152,49 @@ describe('VirtualList Component', () => {
     })
   })
 
-  describe('isVirtualListComponent()', () => {
-    it('should identify VirtualList components', () => {
+  describe('isListComponent()', () => {
+    it('should identify List components', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      expect(isVirtualListComponent(component)).toBe(true)
+      expect(isListComponent(component)).toBe(true)
     })
 
-    it('should return false for non-VirtualList objects', () => {
-      expect(isVirtualListComponent({})).toBe(false)
-      expect(isVirtualListComponent({ [VIRTUALLIST_MARKER]: false })).toBe(
+    it('should return false for non-List objects', () => {
+      expect(isListComponent({})).toBe(false)
+      expect(isListComponent({ [LIST_MARKER]: false })).toBe(
         false
       )
-      expect(isVirtualListComponent(null)).toBe(false)
-      expect(isVirtualListComponent(undefined)).toBe(false)
-      expect(isVirtualListComponent(123)).toBe(false)
-      expect(isVirtualListComponent('string')).toBe(false)
+      expect(isListComponent(null)).toBe(false)
+      expect(isListComponent(undefined)).toBe(false)
+      expect(isListComponent(123)).toBe(false)
+      expect(isListComponent('string')).toBe(false)
     })
 
     it('should return false for plain objects with marker but wrong value', () => {
-      const obj = { [VIRTUALLIST_MARKER]: 'wrong' }
-      expect(isVirtualListComponent(obj)).toBe(false)
+      const obj = { [LIST_MARKER]: 'wrong' }
+      expect(isListComponent(obj)).toBe(false)
     })
   })
 
-  describe('mountVirtualListComponent() - Basic Rendering', () => {
+  describe('mountListComponent() - Basic Rendering', () => {
     it('should create container with correct styles', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => {
@@ -208,15 +217,16 @@ describe('VirtualList Component', () => {
 
     it('should create container with string dimensions', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: '100vh',
         width: '50%',
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -231,14 +241,15 @@ describe('VirtualList Component', () => {
 
     it('should set accessibility attributes on container', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -254,14 +265,15 @@ describe('VirtualList Component', () => {
 
     it('should create inner container with correct styles', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -279,15 +291,16 @@ describe('VirtualList Component', () => {
 
     it('should render visible items on initial mount', () => {
       const items = signal([1, 2, 3, 4, 5])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, `Item ${item}`),
+        virtual: true,
         height: 200,
         itemSize: 50,
       })
 
       const mountedNodes: Node[] = []
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => {
@@ -309,7 +322,7 @@ describe('VirtualList Component', () => {
 
     it('should position items absolutely with translateY', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number, index: () => number) =>
           f('div', {}, `Item ${index()}`),
@@ -317,7 +330,7 @@ describe('VirtualList Component', () => {
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => {
@@ -349,14 +362,15 @@ describe('VirtualList Component', () => {
   describe('Fixed Item Heights', () => {
     it('should calculate correct total height for fixed items', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -373,16 +387,17 @@ describe('VirtualList Component', () => {
 
     it('should render only visible items with fixed height', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 2,
       })
 
       const mountedElements: HTMLElement[] = []
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => {
@@ -402,14 +417,15 @@ describe('VirtualList Component', () => {
 
     it('should use fixed size config', () => {
       const items = signal(Array.from({ length: 50 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: { mode: 'fixed', itemHeight: 75 },
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -428,14 +444,15 @@ describe('VirtualList Component', () => {
   describe('Dynamic Item Heights', () => {
     it('should use estimated height for variable mode', () => {
       const items = signal(Array.from({ length: 50 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: { mode: 'variable', estimatedItemHeight: 60 },
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -456,16 +473,17 @@ describe('VirtualList Component', () => {
     it('should call onVisibleRangeChange on mount', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onVisibleRangeChange = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 2,
         onVisibleRangeChange,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -482,15 +500,16 @@ describe('VirtualList Component', () => {
     it('should not call onVisibleRangeChange if range unchanged', () => {
       const items = signal([1, 2, 3])
       const onVisibleRangeChange = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         onVisibleRangeChange,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -512,15 +531,16 @@ describe('VirtualList Component', () => {
     it('should attach scroll event listener', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onScroll = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         onScroll,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -540,16 +560,17 @@ describe('VirtualList Component', () => {
     it('should update visible items on scroll', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onVisibleRangeChange = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 1,
         onVisibleRangeChange,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -572,9 +593,10 @@ describe('VirtualList Component', () => {
 
     it('should use passive scroll listener', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
@@ -584,7 +606,7 @@ describe('VirtualList Component', () => {
         'addEventListener'
       )
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -607,16 +629,17 @@ describe('VirtualList Component', () => {
     it('should render overscan items above viewport', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onVisibleRangeChange = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 3,
         onVisibleRangeChange,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -632,16 +655,17 @@ describe('VirtualList Component', () => {
     it('should render overscan items below viewport', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onVisibleRangeChange = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 3,
         onVisibleRangeChange,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -660,18 +684,20 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange1 = vi.fn()
       const onVisibleRangeChange2 = vi.fn()
 
-      const component1 = VirtualList({
+      const component1 = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 1,
         onVisibleRangeChange: onVisibleRangeChange1,
       })
 
-      const component2 = VirtualList({
+      const component2 = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 5,
@@ -681,13 +707,13 @@ describe('VirtualList Component', () => {
       const container1 = document.createElement('div')
       const container2 = document.createElement('div')
 
-      const dispose1 = mountVirtualListComponent(
+      const dispose1 = mountListComponent(
         component1,
         container1,
         (fnode: FNode) => document.createElement('div'),
         () => {}
       )
-      const dispose2 = mountVirtualListComponent(
+      const dispose2 = mountListComponent(
         component2,
         container2,
         (fnode: FNode) => document.createElement('div'),
@@ -706,15 +732,16 @@ describe('VirtualList Component', () => {
   describe('Large List Performance (1000+ items)', () => {
     it('should handle 1000 items efficiently', () => {
       const items = signal(Array.from({ length: 1000 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
       const mountedElements: HTMLElement[] = []
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => {
@@ -732,15 +759,16 @@ describe('VirtualList Component', () => {
 
     it('should handle 10000 items efficiently', () => {
       const items = signal(Array.from({ length: 10000 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
       const mountedElements: HTMLElement[] = []
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => {
@@ -757,14 +785,15 @@ describe('VirtualList Component', () => {
 
     it('should set correct total height for large lists', () => {
       const items = signal(Array.from({ length: 5000 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -784,15 +813,16 @@ describe('VirtualList Component', () => {
     it('should reuse DOM nodes when scrolling', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const cleanupFn = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 1,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -812,7 +842,7 @@ describe('VirtualList Component', () => {
 
     it('should update existing item positions when scrolling', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number, index: () => number) =>
           f('div', {}, `Item ${index()}`),
@@ -821,7 +851,7 @@ describe('VirtualList Component', () => {
         overscan: 0,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => {
@@ -866,15 +896,16 @@ describe('VirtualList Component', () => {
 
       const getKey = vi.fn((item: Item) => item.id)
 
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: Item) => f('div', {}, item.name),
+        virtual: true,
         height: 400,
         itemSize: 50,
         getKey,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -889,14 +920,15 @@ describe('VirtualList Component', () => {
 
     it('should use index as key when getKey not provided', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -920,15 +952,16 @@ describe('VirtualList Component', () => {
         { id: 'c', value: 3 },
       ])
 
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: Item) => f('div', {}, String(item.value)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         getKey: (item: Item) => item.id,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -952,15 +985,16 @@ describe('VirtualList Component', () => {
     it('should recalculate on items change', () => {
       const items = signal([1, 2, 3])
       const onVisibleRangeChange = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         onVisibleRangeChange,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -981,14 +1015,15 @@ describe('VirtualList Component', () => {
 
     it('should update total height when items change', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1009,14 +1044,15 @@ describe('VirtualList Component', () => {
 
     it('should update aria-rowcount when items change', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1036,15 +1072,16 @@ describe('VirtualList Component', () => {
     it('should handle empty list', () => {
       const items = signal<number[]>([])
       const onVisibleRangeChange = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         onVisibleRangeChange,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1062,14 +1099,15 @@ describe('VirtualList Component', () => {
 
     it('should handle single item list', () => {
       const items = signal([1])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1086,14 +1124,15 @@ describe('VirtualList Component', () => {
 
     it('should handle null items getter returning empty', () => {
       const items = signal<number[] | null>(null)
-      const component = VirtualList({
+      const component = List({
         items: () => items() || [],
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1106,14 +1145,15 @@ describe('VirtualList Component', () => {
 
     it('should handle transition from empty to filled', () => {
       const items = signal<number[]>([])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1135,14 +1175,15 @@ describe('VirtualList Component', () => {
     it('should handle transition from filled to empty', () => {
       const items = signal([1, 2, 3, 4, 5])
       const cleanupFn = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1167,14 +1208,15 @@ describe('VirtualList Component', () => {
 
     it('should handle very small heights', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 10,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1188,14 +1230,15 @@ describe('VirtualList Component', () => {
 
     it('should handle very small item sizes', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 1,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1211,14 +1254,15 @@ describe('VirtualList Component', () => {
 
     it('should handle very large item sizes', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 1000,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1234,15 +1278,16 @@ describe('VirtualList Component', () => {
 
     it('should handle zero overscan', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
         overscan: 0,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1258,9 +1303,10 @@ describe('VirtualList Component', () => {
   describe('Cleanup and Disposal', () => {
     it('should remove event listener on dispose', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
@@ -1270,7 +1316,7 @@ describe('VirtualList Component', () => {
         'removeEventListener'
       )
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1291,14 +1337,15 @@ describe('VirtualList Component', () => {
     it('should call cleanup for all cached items on dispose', () => {
       const items = signal([1, 2, 3, 4, 5])
       const cleanupFn = vi.fn()
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1316,14 +1363,15 @@ describe('VirtualList Component', () => {
 
     it('should remove container from parent on dispose', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1339,14 +1387,15 @@ describe('VirtualList Component', () => {
 
     it('should dispose effect on cleanup', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1371,14 +1420,15 @@ describe('VirtualList Component', () => {
       const cleanupFn = vi.fn(() => {
         throw new Error('Cleanup error')
       })
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1397,14 +1447,15 @@ describe('VirtualList Component', () => {
   describe('Accessibility Attributes', () => {
     it('should set role="list" on container', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1418,14 +1469,15 @@ describe('VirtualList Component', () => {
 
     it('should set role="listitem" on items', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1442,14 +1494,15 @@ describe('VirtualList Component', () => {
 
     it('should set aria-rowindex on items', () => {
       const items = signal([1, 2, 3])
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 400,
         itemSize: 50,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),
@@ -1469,15 +1522,16 @@ describe('VirtualList Component', () => {
 
     it('should update aria-rowindex when items are repositioned', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
-      const component = VirtualList({
+      const component = List({
         items,
         children: (item: number) => f('div', {}, String(item)),
+        virtual: true,
         height: 200,
         itemSize: 50,
         overscan: 0,
       })
 
-      const dispose = mountVirtualListComponent(
+      const dispose = mountListComponent(
         component,
         container,
         (fnode: FNode) => document.createElement('div'),

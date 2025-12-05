@@ -420,35 +420,29 @@ effect(() => {
 
 ### 5. Virtualize Long Lists
 
-For lists with 100+ items, use virtualization:
+For lists with 100+ items, use the List component with virtual mode:
 
 ```typescript
-import { signal, computed } from 'flexium/core'
+import { List } from 'flexium/primitives'
+import { signal } from 'flexium/core'
 
-function VirtualList({ items, itemHeight = 50, visibleCount = 20 }) {
-  const scrollTop = signal(0)
+const items = signal(Array.from({ length: 10000 }, (_, i) => ({ id: i, text: `Item ${i}` })))
 
-  const visibleItems = computed(() => {
-    const start = Math.floor(scrollTop.value / itemHeight)
-    const end = start + visibleCount
-    return items.slice(start, end)
-  })
-
+function MyList() {
   return (
-    <div
-      style={{ height: `${visibleCount * itemHeight}px`, overflow: 'auto' }}
-      onscroll={(e) => scrollTop.value = e.target.scrollTop}
+    <List
+      items={items}
+      virtual
+      height={400}
+      itemSize={50}
+      getKey={(item) => item.id}
     >
-      <div style={{ height: `${items.length * itemHeight}px` }}>
-        <div style={{ transform: `translateY(${Math.floor(scrollTop.value / itemHeight) * itemHeight}px)` }}>
-          {visibleItems.value.map(item => (
-            <div style={{ height: `${itemHeight}px` }}>
-              {item.text}
-            </div>
-          ))}
+      {(item) => (
+        <div style={{ height: '50px', padding: '10px' }}>
+          {item.text}
         </div>
-      </div>
-    </div>
+      )}
+    </List>
   )
 }
 ```

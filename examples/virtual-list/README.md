@@ -1,10 +1,10 @@
-# VirtualList Example
+# List Example
 
-A comprehensive demonstration of Flexium's VirtualList component for efficiently rendering large lists with thousands of items.
+A comprehensive demonstration of Flexium's List component for efficiently rendering large lists with thousands of items.
 
 ## Overview
 
-This example showcases the VirtualList component's ability to handle large datasets efficiently by only rendering items that are visible in the viewport. This technique, known as "windowing" or "virtualization", provides excellent performance even with hundreds of thousands of items.
+This example showcases the List component's ability to handle large datasets efficiently by only rendering items that are visible in the viewport when `virtual` mode is enabled. This technique, known as "windowing" or "virtualization", provides excellent performance even with hundreds of thousands of items.
 
 ## Features Demonstrated
 
@@ -22,7 +22,7 @@ This example showcases the VirtualList component's ability to handle large datas
 - **Accessibility** - Proper ARIA attributes and keyboard navigation
 - **Performance metrics** - Console logging and visual indicators
 
-## How VirtualList Works
+## How List Works
 
 ### Traditional Rendering Problem
 
@@ -33,9 +33,9 @@ Without virtualization, rendering 100,000 list items would:
 - Make initial render very slow
 - Impact overall application performance
 
-### VirtualList Solution
+### List with Virtual Mode
 
-With VirtualList, you get:
+With List (virtual mode enabled), you get:
 - Only ~20-30 DOM nodes rendered at any time (visible + overscan)
 - Less than 1MB of memory usage regardless of total count
 - Smooth 60fps scrolling even with millions of items
@@ -79,35 +79,38 @@ npm run preview
 
 ## API Reference
 
-### VirtualList Props
+### List Props
 
 ```typescript
-interface VirtualListProps<T> {
+interface ListProps<T> {
   // Data source - reactive getter function
   items: () => T[]
 
   // Render function for each item
   children: (item: T, index: () => number) => VNode
 
-  // Container height (required for viewport calculation)
-  height: number | string
+  // Enable virtualization (default: false)
+  virtual?: boolean
+
+  // Container height (required when virtual is true)
+  height?: number | string
 
   // Width (optional, defaults to 100%)
   width?: number | string
 
-  // Item height - number for fixed, config object for variable
-  itemSize: number | SizeConfig
+  // Item height - number for fixed, config object for variable (required when virtual)
+  itemSize?: number | SizeConfig
 
-  // Number of extra items to render above/below viewport (default: 3)
+  // Number of extra items to render above/below viewport (default: 3, virtual only)
   overscan?: number
 
   // Key extractor for stable item identity
   getKey?: (item: T, index: number) => string | number
 
-  // Scroll event callback
+  // Scroll event callback (virtual only)
   onScroll?: (scrollTop: number) => void
 
-  // Visible range change callback
+  // Visible range change callback (virtual only)
   onVisibleRangeChange?: (startIndex: number, endIndex: number) => void
 }
 ```
@@ -116,7 +119,7 @@ interface VirtualListProps<T> {
 
 ```tsx
 import { signal } from 'flexium'
-import { VirtualList } from 'flexium/primitives'
+import { List } from 'flexium/primitives'
 
 const items = signal(
   Array.from({ length: 10000 }, (_, i) => ({ id: i, name: `Item ${i}` }))
@@ -124,8 +127,9 @@ const items = signal(
 
 function MyList() {
   return (
-    <VirtualList
+    <List
       items={items}
+      virtual
       height={400}
       itemSize={50}
       overscan={3}
@@ -136,7 +140,7 @@ function MyList() {
           {index()}: {item.name}
         </div>
       )}
-    </VirtualList>
+    </List>
   )
 }
 ```
@@ -144,10 +148,11 @@ function MyList() {
 ### Advanced Example with Variable Heights
 
 ```tsx
-import { VirtualList } from 'flexium/primitives'
+import { List } from 'flexium/primitives'
 
-<VirtualList
+<List
   items={items}
+  virtual
   height={600}
   itemSize={{
     mode: 'variable',
@@ -160,7 +165,7 @@ import { VirtualList } from 'flexium/primitives'
       {/* Variable height content */}
     </div>
   )}
-</VirtualList>
+</List>
 ```
 
 ## Configuration
@@ -196,7 +201,7 @@ The `overscan` prop (set to 5 in this example) determines how many extra items a
 
 ## Accessibility
 
-VirtualList includes proper accessibility support:
+List includes proper accessibility support:
 - `role="list"` on container
 - `role="listitem"` on each item
 - `aria-rowcount` showing total items
@@ -205,7 +210,7 @@ VirtualList includes proper accessibility support:
 
 ## Browser Support
 
-VirtualList uses modern web APIs:
+List uses modern web APIs:
 - CSS transforms for positioning
 - Passive scroll listeners for performance
 - IntersectionObserver for visibility (future enhancement)
@@ -218,7 +223,7 @@ Supported browsers:
 ## Further Reading
 
 - [Flexium Documentation](../../README.md)
-- [VirtualList API Reference](../../packages/flexium/src/primitives/VirtualList/README.md)
+- [List API Reference](../../packages/flexium/src/primitives/List/README.md)
 - [Performance Best Practices](../../docs/performance.md)
 
 ## License

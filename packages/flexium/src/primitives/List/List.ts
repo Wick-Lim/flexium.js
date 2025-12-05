@@ -1,54 +1,64 @@
 import { signal, effect } from '../../core/signal'
 import type { FNode } from '../../core/renderer'
 import type {
-  VirtualListProps,
-  VirtualListComponent,
-  VirtualListCacheEntry,
+  ListProps,
+  ListComponent,
+  ListCacheEntry,
   SizeConfig,
 } from './types'
 
-/** Marker symbol for VirtualList components */
-export const VIRTUALLIST_MARKER = Symbol('flexium.virtuallist')
+/** Marker symbol for List components */
+export const LIST_MARKER = Symbol('flexium.list')
+
+/** @deprecated Use LIST_MARKER instead */
+export const VIRTUALLIST_MARKER = LIST_MARKER
 
 /**
- * Check if a value is a VirtualListComponent
+ * Check if a value is a ListComponent
  */
-export function isVirtualListComponent<T>(
+export function isListComponent<T>(
   value: unknown
-): value is VirtualListComponent<T> {
+): value is ListComponent<T> {
   return (
     value !== null &&
     typeof value === 'object' &&
-    VIRTUALLIST_MARKER in value &&
-    (value as Record<symbol, unknown>)[VIRTUALLIST_MARKER] === true
+    LIST_MARKER in value &&
+    (value as Record<symbol, unknown>)[LIST_MARKER] === true
   )
 }
 
+/** @deprecated Use isListComponent instead */
+export const isVirtualListComponent = isListComponent
+
 /**
- * VirtualList - Efficiently render large lists
+ * List - Render lists with optional virtualization
  *
- * Only renders items visible in the viewport, plus overscan items
- * for smooth scrolling.
+ * By default, renders all items. Set `virtual` to true for large lists
+ * to only render visible items.
  *
  * @example
  * ```tsx
- * const items = signal(Array.from({ length: 10000 }, (_, i) => ({ id: i, name: `Item ${i}` })));
+ * // Simple list (renders all items)
+ * <List items={items}>
+ *   {(item, index) => <div>{item.name}</div>}
+ * </List>
  *
- * <VirtualList
+ * // Virtual list (for large datasets)
+ * <List
  *   items={items}
+ *   virtual
  *   height={400}
  *   itemSize={50}
  * >
  *   {(item, index) => <div>{index()}: {item.name}</div>}
- * </VirtualList>
+ * </List>
  * ```
  */
-export function VirtualList<T>(
-  props: VirtualListProps<T>
-): VirtualListComponent<T> {
+export function List<T>(props: ListProps<T>): ListComponent<T> {
   const {
     items,
     children,
+    virtual = false,
     height,
     width,
     itemSize,
@@ -56,12 +66,15 @@ export function VirtualList<T>(
     getKey,
     onScroll,
     onVisibleRangeChange,
+    class: className,
+    style,
   } = props
 
-  const component: VirtualListComponent<T> = {
-    [VIRTUALLIST_MARKER]: true,
+  const component: ListComponent<T> = {
+    [LIST_MARKER]: true,
     items,
     renderItem: children,
+    virtual,
     height,
     width,
     itemSize,
@@ -69,10 +82,15 @@ export function VirtualList<T>(
     getKey,
     onScroll,
     onVisibleRangeChange,
+    class: className,
+    style,
   }
 
   return component
 }
+
+/** @deprecated Use List instead */
+export const VirtualList = List
 
 /**
  * Get item height based on configuration
@@ -116,10 +134,122 @@ function calculateVisibleRangeFixed(
 }
 
 /**
- * Mount a VirtualList component to the DOM
+ * Mount a List component to the DOM
  */
-export function mountVirtualListComponent<T>(
-  comp: VirtualListComponent<T>,
+export function mountListComponent<T>(
+  comp: ListComponent<T>,
+  parent: Node,
+  mountFn: (vnode: FNode) => Node | null,
+  cleanupFn: (node: Node) => void
+): () => void {
+  if (comp.virtual) {
+    return mountVirtualList(comp, parent, mountFn, cleanupFn)
+  } else {
+    return mountSimpleList(comp, parent, mountFn, cleanupFn)
+  }
+}
+
+/** @deprecated Use mountListComponent instead */
+export const mountVirtualListComponent = mountListComponent
+
+/**
+ * Mount a simple (non-virtual) list
+ */
+function mountSimpleList<T>(
+  comp: ListComponent<T>,
+  parent: Node,
+  mountFn: (vnode: FNode) => Node | null,
+  cleanupFn: (node: Node) => void
+): () => void {
+  const { items, renderItem, getKey, class: className, style } = comp
+
+  // Create container
+  const container = document.createElement('div')
+  container.setAttribute('role', 'list')
+  if (className) container.className = className
+  if (style) {
+    Object.entries(style).forEach(([key, value]) => {
+      ;(container.style as unknown as Record<string, string>)[key] =
+        typeof value === 'number' ? `${value}px` : value
+    })
+  }
+
+  parent.appendChild(container)
+
+  // Cache for rendered items
+  const cache = new Map<string | number, { node: Node; dispose: () => void }>()
+
+  // Get key for item
+  const getItemKey = (item: T, index: number): string | number => {
+    if (getKey) {
+      return getKey(item, index)
+    }
+    return index
+  }
+
+  // Render effect
+  const disposeEffect = effect(() => {
+    const list = items() || []
+    const currentKeys = new Set<string | number>()
+
+    // Render items
+    list.forEach((item, index) => {
+      const key = getItemKey(item, index)
+      currentKeys.add(key)
+
+      if (!cache.has(key)) {
+        const indexSig = signal(index)
+        const vnode = renderItem(item, () => indexSig())
+        const node = mountFn(vnode)
+
+        if (node && node instanceof HTMLElement) {
+          node.setAttribute('role', 'listitem')
+          container.appendChild(node)
+
+          cache.set(key, {
+            node,
+            dispose: () => {
+              try {
+                cleanupFn(node)
+              } catch {
+                // Ignore cleanup errors
+              }
+            },
+          })
+        }
+      }
+    })
+
+    // Remove items no longer in list
+    for (const [key, entry] of cache) {
+      if (!currentKeys.has(key)) {
+        entry.dispose()
+        if (entry.node.parentNode === container) {
+          container.removeChild(entry.node)
+        }
+        cache.delete(key)
+      }
+    }
+  })
+
+  // Cleanup
+  return () => {
+    disposeEffect()
+    for (const entry of cache.values()) {
+      entry.dispose()
+    }
+    cache.clear()
+    if (container.parentNode === parent) {
+      parent.removeChild(container)
+    }
+  }
+}
+
+/**
+ * Mount a virtual (windowed) list
+ */
+function mountVirtualList<T>(
+  comp: ListComponent<T>,
   parent: Node,
   mountFn: (vnode: FNode) => Node | null,
   cleanupFn: (node: Node) => void
@@ -135,6 +265,11 @@ export function mountVirtualListComponent<T>(
     onScroll,
     onVisibleRangeChange,
   } = comp
+
+  if (!height || !itemSize) {
+    console.warn('List: height and itemSize are required when virtual is true')
+    return () => {}
+  }
 
   // Create container structure
   const container = document.createElement('div')
@@ -161,7 +296,7 @@ export function mountVirtualListComponent<T>(
 
   // Reactive state
   const scrollTopSig = signal(0)
-  const cache = new Map<string | number, VirtualListCacheEntry<T>>()
+  const cache = new Map<string | number, ListCacheEntry<T>>()
 
   // Track previous visible range
   let prevStartIndex = -1
@@ -297,4 +432,4 @@ export function mountVirtualListComponent<T>(
   }
 }
 
-export default VirtualList
+export default List
