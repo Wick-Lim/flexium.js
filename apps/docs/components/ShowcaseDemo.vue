@@ -22,8 +22,9 @@ function Counter() {
       background: '#f9fafb',
       borderRadius: '16px',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-      maxWidth: '500px',
-      margin: '0 auto',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
       border: '1px solid #e5e7eb'
     }
   }, [

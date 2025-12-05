@@ -162,7 +162,7 @@ export interface CanvasProps {
 /**
  * Rectangle drawing props
  */
-export interface RectProps {
+export interface DrawRectProps {
   x: number | Signal<number>
   y: number | Signal<number>
   width: number | Signal<number>
@@ -176,7 +176,7 @@ export interface RectProps {
 /**
  * Circle drawing props
  */
-export interface CircleProps {
+export interface DrawCircleProps {
   x: number | Signal<number>
   y: number | Signal<number>
   radius: number | Signal<number>
@@ -189,7 +189,7 @@ export interface CircleProps {
 /**
  * Path drawing props
  */
-export interface PathProps {
+export interface DrawPathProps {
   d: string | Signal<string>
   fill?: string | Signal<string>
   stroke?: string | Signal<string>
@@ -200,7 +200,7 @@ export interface PathProps {
 /**
  * Canvas text drawing props
  */
-export interface CanvasTextProps {
+export interface DrawTextProps {
   x: number | Signal<number>
   y: number | Signal<number>
   text: string | Signal<string>
@@ -215,7 +215,7 @@ export interface CanvasTextProps {
 /**
  * Line drawing props
  */
-export interface LineProps {
+export interface DrawLineProps {
   x1: number | Signal<number>
   y1: number | Signal<number>
   x2: number | Signal<number>
@@ -228,7 +228,7 @@ export interface LineProps {
 /**
  * Arc drawing props
  */
-export interface ArcProps {
+export interface DrawArcProps {
   x: number | Signal<number>
   y: number | Signal<number>
   radius: number | Signal<number>

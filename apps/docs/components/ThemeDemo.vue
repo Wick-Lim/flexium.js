@@ -16,8 +16,9 @@ function ThemeDemo() {
       padding: '24px',
       background: isDark() ? '#1f2937' : '#f9fafb',
       borderRadius: '12px',
-      maxWidth: '400px',
-      margin: '0 auto',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
       transition: 'all 0.3s ease'
     })
   }, [

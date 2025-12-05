@@ -57,8 +57,9 @@ function TimerDemo() {
       padding: '24px',
       background: '#f9fafb',
       borderRadius: '12px',
-      maxWidth: '350px',
-      margin: '0 auto',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
       textAlign: 'center'
     }
   }, [

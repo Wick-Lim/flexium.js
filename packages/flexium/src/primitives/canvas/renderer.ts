@@ -3,12 +3,12 @@
  */
 
 import type {
-  RectProps,
-  CircleProps,
-  PathProps,
-  CanvasTextProps,
-  LineProps,
-  ArcProps,
+  DrawRectProps,
+  DrawCircleProps,
+  DrawPathProps,
+  DrawTextProps,
+  DrawLineProps,
+  DrawArcProps,
 } from '../types'
 import { unwrapSignal } from './utils'
 
@@ -54,7 +54,7 @@ export function renderCanvasChildren(
 /**
  * Render rectangle
  */
-function renderRect(ctx: CanvasRenderingContext2D, props: RectProps): void {
+function renderRect(ctx: CanvasRenderingContext2D, props: DrawRectProps): void {
   const x = unwrapSignal(props.x)
   const y = unwrapSignal(props.y)
   const width = unwrapSignal(props.width)
@@ -87,7 +87,7 @@ function renderRect(ctx: CanvasRenderingContext2D, props: RectProps): void {
 /**
  * Render circle
  */
-function renderCircle(ctx: CanvasRenderingContext2D, props: CircleProps): void {
+function renderCircle(ctx: CanvasRenderingContext2D, props: DrawCircleProps): void {
   const x = unwrapSignal(props.x)
   const y = unwrapSignal(props.y)
   const radius = unwrapSignal(props.radius)
@@ -122,7 +122,7 @@ function renderCircle(ctx: CanvasRenderingContext2D, props: CircleProps): void {
 /**
  * Render path
  */
-function renderPath(ctx: CanvasRenderingContext2D, props: PathProps): void {
+function renderPath(ctx: CanvasRenderingContext2D, props: DrawPathProps): void {
   const d = unwrapSignal(props.d)
   const fill = unwrapSignal(props.fill)
   const stroke = unwrapSignal(props.stroke)
@@ -155,7 +155,7 @@ function renderPath(ctx: CanvasRenderingContext2D, props: PathProps): void {
 /**
  * Render text
  */
-function renderText(ctx: CanvasRenderingContext2D, props: CanvasTextProps): void {
+function renderText(ctx: CanvasRenderingContext2D, props: DrawTextProps): void {
   const x = unwrapSignal(props.x)
   const y = unwrapSignal(props.y)
   const text = unwrapSignal(props.text)
@@ -183,7 +183,7 @@ function renderText(ctx: CanvasRenderingContext2D, props: CanvasTextProps): void
 /**
  * Render line
  */
-function renderLine(ctx: CanvasRenderingContext2D, props: LineProps): void {
+function renderLine(ctx: CanvasRenderingContext2D, props: DrawLineProps): void {
   const x1 = unwrapSignal(props.x1)
   const y1 = unwrapSignal(props.y1)
   const x2 = unwrapSignal(props.x2)
@@ -212,7 +212,7 @@ function renderLine(ctx: CanvasRenderingContext2D, props: LineProps): void {
 /**
  * Render arc
  */
-function renderArc(ctx: CanvasRenderingContext2D, props: ArcProps): void {
+function renderArc(ctx: CanvasRenderingContext2D, props: DrawArcProps): void {
   const x = unwrapSignal(props.x)
   const y = unwrapSignal(props.y)
   const radius = unwrapSignal(props.radius)

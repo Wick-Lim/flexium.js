@@ -35,8 +35,9 @@ function TodoDemo() {
       padding: '24px',
       background: '#f9fafb',
       borderRadius: '12px',
-      maxWidth: '400px',
-      margin: '0 auto'
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box'
     }
   }, [
     h('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Todo List']),

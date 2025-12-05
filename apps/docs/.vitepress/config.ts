@@ -188,12 +188,12 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/guide/canvas' },
-            { text: '&lt;Rect /&gt;', link: '/reference/canvas/rect' },
-            { text: '&lt;Circle /&gt;', link: '/reference/canvas/circle' },
-            { text: '&lt;Arc /&gt;', link: '/reference/canvas/arc' },
-            { text: '&lt;Line /&gt;', link: '/reference/canvas/line' },
-            { text: '&lt;Path /&gt;', link: '/reference/canvas/path' },
-            { text: '&lt;CanvasText /&gt;', link: '/reference/canvas/text' }
+            { text: '&lt;DrawRect /&gt;', link: '/reference/canvas/rect' },
+            { text: '&lt;DrawCircle /&gt;', link: '/reference/canvas/circle' },
+            { text: '&lt;DrawArc /&gt;', link: '/reference/canvas/arc' },
+            { text: '&lt;DrawLine /&gt;', link: '/reference/canvas/line' },
+            { text: '&lt;DrawPath /&gt;', link: '/reference/canvas/path' },
+            { text: '&lt;DrawText /&gt;', link: '/reference/canvas/text' }
           ]
         },
         {
@@ -241,12 +241,12 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/reference/canvas/canvas' },
-            { text: '&lt;Rect /&gt;', link: '/reference/canvas/rect' },
-            { text: '&lt;Circle /&gt;', link: '/reference/canvas/circle' },
-            { text: '&lt;Arc /&gt;', link: '/reference/canvas/arc' },
-            { text: '&lt;Line /&gt;', link: '/reference/canvas/line' },
-            { text: '&lt;Path /&gt;', link: '/reference/canvas/path' },
-            { text: '&lt;CanvasText /&gt;', link: '/reference/canvas/text' }
+            { text: '&lt;DrawRect /&gt;', link: '/reference/canvas/rect' },
+            { text: '&lt;DrawCircle /&gt;', link: '/reference/canvas/circle' },
+            { text: '&lt;DrawArc /&gt;', link: '/reference/canvas/arc' },
+            { text: '&lt;DrawLine /&gt;', link: '/reference/canvas/line' },
+            { text: '&lt;DrawPath /&gt;', link: '/reference/canvas/path' },
+            { text: '&lt;DrawText /&gt;', link: '/reference/canvas/text' }
           ]
         }
       ],

@@ -16,7 +16,7 @@ onMounted(() => {
 
   // Build DOM directly (Vue handles the wrapper)
   const wrapper = document.createElement('div')
-  wrapper.style.cssText = 'padding: 24px; background: #f9fafb; border-radius: 12px; max-width: 400px; margin: 0 auto; text-align: center;'
+  wrapper.style.cssText = 'padding: 24px; background: #f9fafb; border-radius: 12px; width: 100%; max-width: 100%; box-sizing: border-box; text-align: center;'
 
   const title = document.createElement('h3')
   title.textContent = 'Canvas Animation'

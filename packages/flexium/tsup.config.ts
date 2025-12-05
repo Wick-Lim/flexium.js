@@ -7,6 +7,7 @@ export default defineConfig({
     advanced: 'src/advanced.ts',
     dom: 'src/dom.ts',
     canvas: 'src/canvas.ts',
+    game: 'src/game.ts',
     primitives: 'src/primitives.ts',
     'jsx-runtime': 'src/jsx-runtime.ts',
     'jsx-dev-runtime': 'src/jsx-dev-runtime.ts',

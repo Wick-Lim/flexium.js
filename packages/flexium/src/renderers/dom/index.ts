@@ -152,6 +152,13 @@ function px(value: number | string): string {
 }
 
 /**
+ * Convert camelCase to kebab-case for CSS property names
+ */
+function toKebabCase(str: string): string {
+  return str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+}
+
+/**
  * Transform a value based on the config type
  */
 function transformValue(value: unknown, transform: StylePropConfig['transform']): string | undefined {
@@ -181,7 +188,8 @@ function updateStyles(element: HTMLElement, oldProps: Record<string, unknown>, n
     if (oldStyle && typeof oldStyle === 'object') {
       for (const key in oldStyle) {
         if (!newStyle || !(key in newStyle)) {
-          style.setProperty(key, '');
+          // Convert camelCase to kebab-case for CSS property names
+          style.setProperty(toKebabCase(key), '');
         }
       }
     }
@@ -189,7 +197,8 @@ function updateStyles(element: HTMLElement, oldProps: Record<string, unknown>, n
       for (const key in newStyle) {
         const val = newStyle[key];
         if (!oldStyle || oldStyle[key] !== val) {
-          style.setProperty(key, val);
+          // Convert camelCase to kebab-case for CSS property names
+          style.setProperty(toKebabCase(key), val);
         }
       }
     }

@@ -41,12 +41,12 @@ export { ScrollView } from './ScrollView';
 // Canvas primitives
 export {
   Canvas,
-  Rect,
-  Circle,
-  Path,
-  CanvasText,
-  Line,
-  Arc,
+  DrawRect,
+  DrawCircle,
+  DrawPath,
+  DrawText,
+  DrawLine,
+  DrawArc,
 } from './canvas';
 
 // Cross-platform types
@@ -57,12 +57,12 @@ export type {
   ScrollViewProps,
   CommonStyle,
   TextStyle,
-  RectProps,
-  CircleProps,
-  PathProps,
-  CanvasTextProps,
-  LineProps,
-  ArcProps,
+  DrawRectProps,
+  DrawCircleProps,
+  DrawPathProps,
+  DrawTextProps,
+  DrawLineProps,
+  DrawArcProps,
   CanvasProps,
 } from './types';
 

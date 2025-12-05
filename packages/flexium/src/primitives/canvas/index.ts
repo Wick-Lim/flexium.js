@@ -3,11 +3,11 @@
  */
 
 export { Canvas } from './Canvas'
-export { Rect } from './Rect'
-export { Circle } from './Circle'
-export { Path } from './Path'
-export { CanvasText } from './CanvasText'
-export { Line } from './Line'
-export { Arc } from './Arc'
+export { DrawRect } from './DrawRect'
+export { DrawCircle } from './DrawCircle'
+export { DrawPath } from './DrawPath'
+export { DrawText } from './DrawText'
+export { DrawLine } from './DrawLine'
+export { DrawArc } from './DrawArc'
 export { renderCanvasChildren } from './renderer'
 export { unwrapSignal } from './utils'

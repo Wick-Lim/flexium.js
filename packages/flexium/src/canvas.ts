@@ -7,14 +7,14 @@
  *
  * @example
  * ```tsx
- * import { Canvas, Rect, Circle } from 'flexium/canvas'
+ * import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
  * import { signal } from 'flexium/core'
  *
  * const x = signal(50)
  *
  * <Canvas width={300} height={200}>
- *   <Rect x={x} y={50} width={100} height={50} fill="blue" />
- *   <Circle x={150} y={100} radius={30} fill="red" />
+ *   <DrawRect x={x} y={50} width={100} height={50} fill="blue" />
+ *   <DrawCircle x={150} y={100} radius={30} fill="red" />
  * </Canvas>
  * ```
  */
@@ -25,12 +25,12 @@ export type { Signal, Computed } from './core/signal'
 
 // Canvas primitives
 export { Canvas } from './primitives/canvas/Canvas'
-export { Rect } from './primitives/canvas/Rect'
-export { Circle } from './primitives/canvas/Circle'
-export { Arc } from './primitives/canvas/Arc'
-export { Line } from './primitives/canvas/Line'
-export { Path } from './primitives/canvas/Path'
-export { CanvasText } from './primitives/canvas/CanvasText'
+export { DrawRect } from './primitives/canvas/DrawRect'
+export { DrawCircle } from './primitives/canvas/DrawCircle'
+export { DrawArc } from './primitives/canvas/DrawArc'
+export { DrawLine } from './primitives/canvas/DrawLine'
+export { DrawPath } from './primitives/canvas/DrawPath'
+export { DrawText } from './primitives/canvas/DrawText'
 
 // Canvas renderer utilities
 export { renderCanvasChildren } from './primitives/canvas/renderer'
@@ -39,10 +39,10 @@ export { unwrapSignal } from './primitives/canvas/utils'
 // Canvas types
 export type {
     CanvasProps,
-    RectProps,
-    CircleProps,
-    ArcProps,
-    LineProps,
-    PathProps,
-    CanvasTextProps
+    DrawRectProps,
+    DrawCircleProps,
+    DrawArcProps,
+    DrawLineProps,
+    DrawPathProps,
+    DrawTextProps
 } from './primitives/types'
