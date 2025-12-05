@@ -1,6 +1,6 @@
 {
   "name": "flexium",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "A lightweight, signals-based UI framework with cross-platform renderers",
   "publishConfig": {
     "access": "public"
@@ -44,6 +44,26 @@
       "types": "./dist/primitives.d.ts",
       "import": "./dist/primitives.mjs",
       "require": "./dist/primitives.js"
+    },
+    "./primitives/motion": {
+      "types": "./dist/primitives/motion.d.ts",
+      "import": "./dist/primitives/motion.mjs",
+      "require": "./dist/primitives/motion.js"
+    },
+    "./primitives/form": {
+      "types": "./dist/primitives/form.d.ts",
+      "import": "./dist/primitives/form.mjs",
+      "require": "./dist/primitives/form.js"
+    },
+    "./primitives/ui": {
+      "types": "./dist/primitives/ui.d.ts",
+      "import": "./dist/primitives/ui.mjs",
+      "require": "./dist/primitives/ui.js"
+    },
+    "./primitives/layout": {
+      "types": "./dist/primitives/layout.d.ts",
+      "import": "./dist/primitives/layout.mjs",
+      "require": "./dist/primitives/layout.js"
     },
     "./jsx-runtime": {
       "types": "./dist/jsx-runtime.d.ts",

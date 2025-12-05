@@ -1,0 +1,434 @@
+---
+title: ESLint Plugin - Code Quality & Best Practices
+description: Learn how to use eslint-plugin-flexium to enforce best practices and catch common mistakes in Flexium applications.
+head:
+  - - meta
+    - property: og:title
+      content: ESLint Plugin - Flexium
+  - - meta
+    - property: og:description
+      content: ESLint plugin for Flexium with rules for reactivity best practices, effect cleanup, and performance optimization.
+---
+
+# ESLint Plugin
+
+The official ESLint plugin for Flexium helps you write better code by enforcing best practices and catching common mistakes.
+
+## Installation
+
+```bash
+npm install eslint-plugin-flexium --save-dev
+```
+
+## Basic Usage
+
+Add `flexium` to the plugins section of your `.eslintrc` configuration file and extend the recommended config:
+
+```json
+{
+  "plugins": ["flexium"],
+  "extends": ["plugin:flexium/recommended"]
+}
+```
+
+## Configurations
+
+The plugin provides three preset configurations:
+
+| Configuration | Description | Use Case |
+|--------------|-------------|----------|
+| `recommended` | Balanced rules for most projects | General development |
+| `strict` | Stricter rules for production code | Production applications |
+| `all` | Enable all rules as errors | Maximum code quality enforcement |
+
+### Using Configurations
+
+```json
+{
+  "extends": ["plugin:flexium/recommended"]
+}
+```
+
+```json
+{
+  "extends": ["plugin:flexium/strict"]
+}
+```
+
+```json
+{
+  "extends": ["plugin:flexium/all"]
+}
+```
+
+## Custom Configuration
+
+Configure rules individually to match your project's needs:
+
+```json
+{
+  "plugins": ["flexium"],
+  "rules": {
+    "flexium/no-signal-outside-reactive": "warn",
+    "flexium/effect-cleanup": "warn",
+    "flexium/no-side-effect-in-computed": "error",
+    "flexium/prefer-batch": "off"
+  }
+}
+```
+
+## Rules
+
+### `flexium/no-signal-outside-reactive`
+
+Disallow reading signal values outside of reactive contexts.
+
+**Why?** Signal reads outside of `effect()`, `computed()`, or JSX will not be tracked and won't trigger re-renders.
+
+#### Bad
+
+```javascript
+const count = signal(0);
+
+// ❌ Signal read outside reactive context - won't trigger updates
+if (count.value > 5) {
+  doSomething();
+}
+
+// ❌ Signal call outside reactive context
+if (count() > 5) {
+  doSomething();
+}
+```
+
+#### Good
+
+```javascript
+const count = signal(0);
+
+// ✅ Signal read inside effect
+effect(() => {
+  if (count() > 5) {
+    doSomething();
+  }
+});
+
+// ✅ Signal read inside computed
+const shouldDoSomething = computed(() => count() > 5);
+
+// ✅ Signal read inside JSX
+const App = () => (
+  <div>
+    {count() > 5 && <div>Count is greater than 5</div>}
+  </div>
+);
+```
+
+### `flexium/effect-cleanup`
+
+Enforce cleanup functions in effects that add event listeners or timers.
+
+**Why?** Effects that add event listeners or timers without cleanup can cause memory leaks.
+
+#### Bad
+
+```javascript
+// ❌ No cleanup for event listener
+effect(() => {
+  window.addEventListener('resize', handleResize);
+});
+
+// ❌ No cleanup for timer
+effect(() => {
+  const interval = setInterval(() => {
+    console.log('Tick');
+  }, 1000);
+});
+```
+
+#### Good
+
+```javascript
+// ✅ Returns cleanup function for event listener
+effect(() => {
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+});
+
+// ✅ Returns cleanup function for timer
+effect(() => {
+  const interval = setInterval(() => {
+    console.log('Tick');
+  }, 1000);
+  return () => clearInterval(interval);
+});
+
+// ✅ Effect without listeners/timers doesn't need cleanup
+effect(() => {
+  console.log('Count changed:', count());
+});
+```
+
+### `flexium/no-side-effect-in-computed`
+
+Disallow side effects in computed functions.
+
+**Why?** Computed values should be pure functions. Side effects belong in `effect()`.
+
+#### Bad
+
+```javascript
+// ❌ Side effect in computed (console.log)
+const doubled = computed(() => {
+  console.log('Computing...');
+  return count.value * 2;
+});
+
+// ❌ Mutation in computed
+const users = signal([]);
+const sortedUsers = computed(() => {
+  return users().sort(); // Mutates original array!
+});
+
+// ❌ DOM manipulation in computed
+const displayText = computed(() => {
+  document.title = count().toString(); // DOM side effect!
+  return `Count: ${count()}`;
+});
+```
+
+#### Good
+
+```javascript
+// ✅ Pure computed
+const doubled = computed(() => count.value * 2);
+
+// ✅ Side effect in effect
+effect(() => {
+  console.log('Count changed:', count());
+});
+
+// ✅ Non-mutating computed
+const sortedUsers = computed(() => {
+  return [...users()].sort(); // Creates new array
+});
+
+// ✅ DOM manipulation in effect
+effect(() => {
+  document.title = count().toString();
+});
+```
+
+### `flexium/prefer-batch`
+
+Suggest using `batch()` when multiple signals are updated consecutively.
+
+**Why?** Multiple signal updates without batching can cause unnecessary re-renders.
+
+#### Bad
+
+```javascript
+// ⚠️ Warning - multiple updates without batch (3 separate re-renders)
+count.value = 1;
+name.value = 'test';
+active.value = true;
+
+// ⚠️ Multiple signal updates in a function
+function updateUser(id: number, data: UserData) {
+  userId.value = id;
+  userName.value = data.name;
+  userEmail.value = data.email;
+  userActive.value = data.active;
+}
+```
+
+#### Good
+
+```javascript
+import { batch } from 'flexium';
+
+// ✅ Batched updates (single re-render)
+batch(() => {
+  count.value = 1;
+  name.value = 'test';
+  active.value = true;
+});
+
+// ✅ Batched function
+function updateUser(id: number, data: UserData) {
+  batch(() => {
+    userId.value = id;
+    userName.value = data.name;
+    userEmail.value = data.email;
+    userActive.value = data.active;
+  });
+}
+
+// ✅ Single signal update doesn't need batching
+count.value = 1;
+```
+
+#### Configuration
+
+Configure the threshold for when to warn about consecutive updates:
+
+```json
+{
+  "flexium/prefer-batch": ["warn", { "threshold": 2 }]
+}
+```
+
+Options:
+- `threshold` (default: `2`): Number of consecutive signal updates before warning.
+
+## Integration with Other Configs
+
+The Flexium ESLint plugin works alongside other ESLint configurations:
+
+```json
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:flexium/recommended"
+  ],
+  "plugins": ["@typescript-eslint", "flexium"],
+  "rules": {
+    // Override specific rules if needed
+    "flexium/prefer-batch": "off"
+  }
+}
+```
+
+## TypeScript Support
+
+The plugin fully supports TypeScript projects. Make sure to install the TypeScript ESLint parser:
+
+```bash
+npm install @typescript-eslint/parser --save-dev
+```
+
+```json
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["flexium"],
+  "extends": ["plugin:flexium/recommended"]
+}
+```
+
+## Common Issues
+
+### Rule Not Working
+
+If a rule isn't being enforced:
+
+1. Verify the plugin is listed in `plugins` array
+2. Check that the rule is enabled in your config
+3. Ensure your file extensions are included in ESLint's `--ext` option
+4. Restart your editor/IDE
+
+### Too Many Warnings
+
+If you're getting too many warnings during migration:
+
+1. Start with `recommended` config instead of `strict` or `all`
+2. Disable specific rules temporarily:
+   ```json
+   {
+     "extends": ["plugin:flexium/recommended"],
+     "rules": {
+       "flexium/prefer-batch": "off"
+     }
+   }
+   ```
+3. Fix violations incrementally
+4. Gradually enable stricter rules
+
+### False Positives
+
+If you encounter false positives:
+
+1. Use ESLint disable comments for specific cases:
+   ```javascript
+   // eslint-disable-next-line flexium/no-signal-outside-reactive
+   const initialValue = count();
+   ```
+
+2. Report the issue on [GitHub](https://github.com/Wick-Lim/flexium.js/issues)
+
+## Best Practices
+
+### Use the Recommended Config
+
+Start with the `recommended` config and customize from there:
+
+```json
+{
+  "extends": ["plugin:flexium/recommended"],
+  "rules": {
+    // Add project-specific overrides here
+  }
+}
+```
+
+### Enable Auto-Fix
+
+Many rules support auto-fix. Run ESLint with the `--fix` flag:
+
+```bash
+npx eslint . --fix
+```
+
+### Integrate with Your Editor
+
+Install ESLint extensions for your editor:
+- **VS Code**: [ESLint Extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+- **WebStorm**: Built-in ESLint support
+- **Vim**: [ALE](https://github.com/dense-analysis/ale) or [coc-eslint](https://github.com/neoclide/coc-eslint)
+
+### Use Pre-Commit Hooks
+
+Enforce ESLint checks before commits using [husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/okonet/lint-staged):
+
+```json
+// package.json
+{
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": ["eslint --fix"]
+  }
+}
+```
+
+## Migrating Existing Projects
+
+When adding ESLint to an existing Flexium project:
+
+1. **Install dependencies**:
+   ```bash
+   npm install eslint eslint-plugin-flexium --save-dev
+   ```
+
+2. **Create configuration**:
+   ```json
+   {
+     "extends": ["plugin:flexium/recommended"]
+   }
+   ```
+
+3. **Run ESLint**:
+   ```bash
+   npx eslint .
+   ```
+
+4. **Fix automatically fixable issues**:
+   ```bash
+   npx eslint . --fix
+   ```
+
+5. **Fix remaining issues manually**, using the rule documentation as a guide
+
+6. **Enable stricter rules gradually** as your codebase improves
