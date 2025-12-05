@@ -1,4 +1,4 @@
-import { signal, effect, onCleanup } from '../../core/signal';
+import { signal, effect } from '../../core/signal';
 import type { VNode } from '../../core/renderer';
 import type {
   VirtualListProps,
@@ -77,7 +77,7 @@ export function VirtualList<T>(
 /**
  * Get item height based on configuration
  */
-function getItemHeight(config: number | SizeConfig, index: number): number {
+function getItemHeight(config: number | SizeConfig, _index: number): number {
   if (typeof config === 'number') {
     return config;
   }
