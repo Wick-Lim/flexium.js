@@ -11,7 +11,6 @@ export default defineConfig({
             'flexium/jsx-runtime': path.resolve(__dirname, '../../packages/flexium/src/jsx-runtime.ts'),
             'flexium/dom': path.resolve(__dirname, '../../packages/flexium/src/dom.ts'),
             'flexium/router': path.resolve(__dirname, '../../packages/flexium/src/router/index.ts'),
-            'flexium/store': path.resolve(__dirname, '../../packages/flexium/src/store/index.ts'),
             'flexium': path.resolve(__dirname, '../../packages/flexium/src/index.ts')
         }
     }
