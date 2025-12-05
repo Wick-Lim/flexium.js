@@ -3,7 +3,7 @@
  * Version Sync Script
  *
  * Syncs version numbers across all package files and documentation.
- * Source of truth: packages/flexium/package.json
+ * Source of truth: root package.json
  *
  * Usage:
  *   node scripts/sync-versions.mjs           # Sync to current version
@@ -17,13 +17,13 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
-// Source of truth
-const MAIN_PKG = join(ROOT, 'packages/flexium/package.json');
+// Source of truth: root package.json
+const MAIN_PKG = join(ROOT, 'package.json');
 
 // Files to sync (relative to ROOT)
 const FILES_TO_SYNC = [
   // Package files
-  { path: 'package.json', type: 'json', field: 'version' },
+  { path: 'packages/flexium/package.json', type: 'json', field: 'version' },
   { path: 'packages/create-flexium/package.json', type: 'json', field: 'version' },
   { path: 'apps/docs/package.json', type: 'json', field: 'version' },
 
@@ -68,11 +68,11 @@ function syncVersion(targetVersion) {
 
   console.log(`\n📦 Syncing version: ${version}\n`);
 
-  // Update main package if version specified
+  // Update root package if version specified
   if (targetVersion && mainPkg.version !== targetVersion) {
     mainPkg.version = targetVersion;
     writeJSON(MAIN_PKG, mainPkg);
-    console.log(`✅ packages/flexium/package.json -> ${version}`);
+    console.log(`✅ package.json (root) -> ${version}`);
   }
 
   // Sync other files
