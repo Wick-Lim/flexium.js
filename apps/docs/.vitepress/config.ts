@@ -132,6 +132,7 @@ export default defineConfig({
 
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
+      { text: 'Docs', link: '/docs/core/state' },
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
@@ -154,71 +155,38 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/core',
-          collapsed: false,
+          text: 'Essentials',
           items: [
-            { text: 'state()', link: '/guide/state' },
-            { text: 'effect()', link: '/guide/effects' },
-            { text: '&lt;For /&gt;', link: '/guide/flow#for' },
-            { text: '&lt;Show /&gt;', link: '/guide/flow#show' },
-            { text: '&lt;Switch /&gt;', link: '/guide/flow#switch' },
-            { text: '&lt;Suspense /&gt;', link: '/guide/suspense' },
-            { text: '&lt;ErrorBoundary /&gt;', link: '/guide/error-handling' }
-          ]
-        },
-        {
-          text: 'flexium/dom',
-          collapsed: false,
-          items: [
-            { text: 'render()', link: '/guide/jsx' },
-            { text: '&lt;Portal /&gt;', link: '/guide/portal' },
-            { text: 'Primitives', link: '/guide/primitives' },
-            { text: '&lt;Row /&gt;', link: '/reference/primitives/row' },
-            { text: '&lt;Column /&gt;', link: '/reference/primitives/column' },
-            { text: '&lt;Grid /&gt;', link: '/reference/primitives/grid' },
-            { text: '&lt;Stack /&gt;', link: '/reference/primitives/stack' },
-            { text: '&lt;Spacer /&gt;', link: '/reference/primitives/spacer' },
-            { text: '&lt;ScrollView /&gt;', link: '/reference/primitives/scrollview' },
-            { text: '&lt;Text /&gt;', link: '/reference/primitives/text' },
-            { text: '&lt;Image /&gt;', link: '/reference/primitives/image' },
-            { text: '&lt;Pressable /&gt;', link: '/reference/primitives/pressable' }
-          ]
-        },
-        {
-          text: 'flexium/canvas',
-          collapsed: false,
-          items: [
-            { text: '&lt;Canvas /&gt;', link: '/guide/canvas' },
-            { text: '&lt;DrawRect /&gt;', link: '/reference/canvas/rect' },
-            { text: '&lt;DrawCircle /&gt;', link: '/reference/canvas/circle' },
-            { text: '&lt;DrawArc /&gt;', link: '/reference/canvas/arc' },
-            { text: '&lt;DrawLine /&gt;', link: '/reference/canvas/line' },
-            { text: '&lt;DrawPath /&gt;', link: '/reference/canvas/path' },
-            { text: '&lt;DrawText /&gt;', link: '/reference/canvas/text' }
-          ]
-        },
-        {
-          text: 'flexium/router',
-          collapsed: false,
-          items: [
-            { text: '&lt;Router /&gt;', link: '/guide/router#router' },
-            { text: '&lt;Route /&gt;', link: '/guide/router#route' },
-            { text: '&lt;Link /&gt;', link: '/guide/router#link' }
+            { text: 'Reactivity', link: '/guide/state' },
+            { text: 'JSX & Rendering', link: '/guide/jsx' },
+            { text: 'Control Flow', link: '/guide/flow' },
+            { text: 'Primitives', link: '/guide/primitives' }
           ]
         },
         {
           text: 'Advanced',
-          collapsed: true,
+          collapsed: false,
           items: [
             { text: 'Context API', link: '/guide/context' },
+            { text: 'Error Handling', link: '/guide/error-handling' },
+            { text: 'Suspense', link: '/guide/suspense' },
+            { text: 'Routing', link: '/guide/router' },
             { text: 'Styling', link: '/guide/styling' },
             { text: 'Animation', link: '/guide/animation' },
+            { text: 'Forms', link: '/guide/forms' },
+            { text: 'Canvas', link: '/guide/canvas' },
+            { text: 'Game Development', link: '/guide/game' }
+          ]
+        },
+        {
+          text: 'In Depth',
+          collapsed: true,
+          items: [
+            { text: 'Effects', link: '/guide/effects' },
+            { text: 'Batch API', link: '/guide/batch' },
+            { text: 'Portal', link: '/guide/portal' },
             { text: 'Motion', link: '/guide/motion' },
             { text: 'Transitions', link: '/guide/transitions' },
-            { text: 'Forms', link: '/guide/forms' },
-            { text: 'Game Development', link: '/guide/game' },
-            { text: 'Batch API', link: '/guide/batch' },
-            { text: 'Advanced API', link: '/guide/advanced-api' },
             { text: 'Performance', link: '/guide/performance' },
             { text: 'TypeScript', link: '/guide/typescript' },
             { text: 'Testing', link: '/guide/testing' },
@@ -233,7 +201,96 @@ export default defineConfig({
             { text: 'ESLint Plugin', link: '/guide/eslint-plugin' },
             { text: 'Vite Plugin', link: '/guide/vite-plugin' }
           ]
+        }
+      ],
+      '/docs/': [
+        {
+          text: 'flexium/core',
+          collapsed: false,
+          items: [
+            { text: 'state()', link: '/docs/core/state' },
+            { text: 'computed()', link: '/docs/core/computed' },
+            { text: 'effect()', link: '/docs/core/effect' },
+            { text: 'batch()', link: '/docs/core/batch' },
+            { text: '&lt;For /&gt;', link: '/docs/core/for' },
+            { text: '&lt;Show /&gt;', link: '/docs/core/show' },
+            { text: '&lt;Switch /&gt;', link: '/docs/core/switch' },
+            { text: '&lt;Suspense /&gt;', link: '/docs/core/suspense' },
+            { text: '&lt;ErrorBoundary /&gt;', link: '/docs/core/error-boundary' },
+            { text: 'Context API', link: '/docs/core/context' }
+          ]
         },
+        {
+          text: 'flexium/dom',
+          collapsed: false,
+          items: [
+            { text: 'render()', link: '/docs/dom/render' },
+            { text: 'h()', link: '/docs/dom/h' },
+            { text: '&lt;Portal /&gt;', link: '/docs/dom/portal' }
+          ]
+        },
+        {
+          text: 'Layout Primitives',
+          collapsed: false,
+          items: [
+            { text: '&lt;Row /&gt;', link: '/docs/primitives/row' },
+            { text: '&lt;Column /&gt;', link: '/docs/primitives/column' },
+            { text: '&lt;Grid /&gt;', link: '/docs/primitives/grid' },
+            { text: '&lt;Stack /&gt;', link: '/docs/primitives/stack' },
+            { text: '&lt;Spacer /&gt;', link: '/docs/primitives/spacer' },
+            { text: '&lt;ScrollView /&gt;', link: '/docs/primitives/scrollview' }
+          ]
+        },
+        {
+          text: 'UI Primitives',
+          collapsed: false,
+          items: [
+            { text: '&lt;Text /&gt;', link: '/docs/primitives/text' },
+            { text: '&lt;Image /&gt;', link: '/docs/primitives/image' },
+            { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
+            { text: '&lt;Button /&gt;', link: '/docs/primitives/button' },
+            { text: '&lt;VirtualList /&gt;', link: '/docs/primitives/virtuallist' }
+          ]
+        },
+        {
+          text: 'flexium/canvas',
+          collapsed: false,
+          items: [
+            { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
+            { text: '&lt;DrawRect /&gt;', link: '/docs/canvas/rect' },
+            { text: '&lt;DrawCircle /&gt;', link: '/docs/canvas/circle' },
+            { text: '&lt;DrawArc /&gt;', link: '/docs/canvas/arc' },
+            { text: '&lt;DrawLine /&gt;', link: '/docs/canvas/line' },
+            { text: '&lt;DrawPath /&gt;', link: '/docs/canvas/path' },
+            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' }
+          ]
+        },
+        {
+          text: 'flexium/router',
+          collapsed: false,
+          items: [
+            { text: '&lt;Router /&gt;', link: '/docs/router/router' },
+            { text: '&lt;Route /&gt;', link: '/docs/router/route' },
+            { text: '&lt;Link /&gt;', link: '/docs/router/link' },
+            { text: 'useRouter()', link: '/docs/router/use-router' }
+          ]
+        },
+        {
+          text: 'flexium/game',
+          collapsed: false,
+          items: [
+            { text: 'useKeyboard()', link: '/docs/game/use-keyboard' },
+            { text: 'useMouse()', link: '/docs/game/use-mouse' },
+            { text: 'createGameLoop()', link: '/docs/game/game-loop' }
+          ]
+        },
+        {
+          text: 'Type Reference',
+          collapsed: true,
+          items: [
+            { text: 'Types', link: '/docs/types' }
+          ]
+        }
       ],
       '/reference/': [
         {
