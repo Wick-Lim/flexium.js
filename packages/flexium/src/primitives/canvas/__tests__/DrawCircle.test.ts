@@ -35,8 +35,8 @@ describe('DrawCircle', () => {
     } as unknown as CanvasRenderingContext2D
   })
 
-  describe('VNode Creation', () => {
-    it('should create a circle VNode with correct type', () => {
+  describe('FNode Creation', () => {
+    it('should create a circle FNode with correct type', () => {
       const circle = DrawCircle({ x: 50, y: 50, radius: 25 })
 
       expect(circle.type).toBe('canvas-circle')

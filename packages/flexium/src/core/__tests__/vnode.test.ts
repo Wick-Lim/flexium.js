@@ -1,12 +1,12 @@
 /**
- * VNode Tests
+ * FNode Tests
  *
- * Tests for the createFNode function and VNode structure
+ * Tests for the createFNode function and FNode structure
  * @vitest-environment jsdom
  */
 
 import { describe, it, expect } from 'vitest'
-import { createFNode, createVNode } from '../vnode'
+import { createFNode } from '../vnode'
 import type { FNode } from '../renderer'
 
 describe('createFNode', () => {
@@ -288,9 +288,9 @@ describe('createFNode', () => {
   })
 })
 
-describe('createVNode (deprecated)', () => {
+describe('createFNode (deprecated)', () => {
   it('should be an alias for createFNode', () => {
-    expect(createVNode).toBe(createFNode)
+    expect(createFNode).toBe(createFNode)
   })
 
   it('should work exactly like createFNode', () => {
@@ -299,7 +299,7 @@ describe('createVNode (deprecated)', () => {
     const key = 'my-key'
 
     const fnodeResult = createFNode('div', props, children, key)
-    const vnodeResult = createVNode('div', props, children, key)
+    const vnodeResult = createFNode('div', props, children, key)
 
     expect(vnodeResult).toEqual(fnodeResult)
   })

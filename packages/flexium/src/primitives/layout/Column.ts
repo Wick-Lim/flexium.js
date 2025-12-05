@@ -1,5 +1,5 @@
-import { h } from '../../renderers/dom/h'
-import { VNode } from '../../core/renderer'
+import { f } from '../../renderers/dom/h'
+import { FNode } from '../../core/renderer'
 import {
   BaseComponentProps,
   AlignItems,
@@ -77,7 +77,7 @@ function mapAlignItems(value: AlignItems): string {
  * </Column>
  * ```
  */
-export function Column(props: ColumnProps): VNode {
+export function Column(props: ColumnProps): FNode {
   const {
     children,
     align,
@@ -137,7 +137,7 @@ export function Column(props: ColumnProps): VNode {
   )
 
   // Create element
-  return h(
+  return f(
     as,
     {
       style: finalStyles,

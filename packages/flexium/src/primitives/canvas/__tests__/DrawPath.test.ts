@@ -43,8 +43,8 @@ describe('DrawPath', () => {
     } as unknown as CanvasRenderingContext2D
   })
 
-  describe('VNode Creation', () => {
-    it('should create a path VNode with correct type', () => {
+  describe('FNode Creation', () => {
+    it('should create a path FNode with correct type', () => {
       const path = DrawPath({ d: 'M 10 10 L 100 100' })
 
       expect(path.type).toBe('canvas-path')

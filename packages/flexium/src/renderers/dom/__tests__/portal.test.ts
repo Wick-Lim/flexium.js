@@ -8,7 +8,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Portal } from '../portal'
 import { mountReactive, cleanupReactive } from '../reactive'
-import { h } from '../h'
+import { f } from '../h'
 import { signal } from '../../../core/signal'
 
 describe('Portal Component', () => {
@@ -38,10 +38,10 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h('div', { class: 'portal-content' }, 'Portal Content'),
+          children: f('div', { class: 'portal-content' }, 'Portal Content'),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       // Portal content should be in target, not in container
       expect(portalTarget.querySelector('.portal-content')).not.toBeNull()
@@ -52,10 +52,10 @@ describe('Portal Component', () => {
     it('should render to document.body by default', () => {
       const App = () =>
         Portal({
-          children: h('div', { class: 'portal-default' }, 'Default Target'),
+          children: f('div', { class: 'portal-default' }, 'Default Target'),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       // Should render to body
       expect(document.body.querySelector('.portal-default')).not.toBeNull()
@@ -72,10 +72,10 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h('div', {}, 'Content'),
+          children: f('div', {}, 'Content'),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       // Portal content should be in target
       expect(portalTarget.querySelector('div')).not.toBeNull()
@@ -93,13 +93,13 @@ describe('Portal Component', () => {
         Portal({
           mount: portalTarget,
           children: [
-            h('div', { class: 'child-1' }, 'Child 1'),
-            h('div', { class: 'child-2' }, 'Child 2'),
-            h('div', { class: 'child-3' }, 'Child 3'),
+            f('div', { class: 'child-1' }, 'Child 1'),
+            f('div', { class: 'child-2' }, 'Child 2'),
+            f('div', { class: 'child-3' }, 'Child 3'),
           ],
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(
         portalTarget.querySelectorAll('div').length
@@ -116,22 +116,22 @@ describe('Portal Component', () => {
           children: 'Simple text content',
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(portalTarget.textContent).toContain('Simple text content')
     })
 
     it('should render component children to portal target', () => {
       const PortalChild = () =>
-        h('div', { class: 'component-child' }, 'Component')
+        f('div', { class: 'component-child' }, 'Component')
 
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h(PortalChild, {}),
+          children: f(PortalChild, {}),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(portalTarget.querySelector('.component-child')).not.toBeNull()
       expect(portalTarget.textContent).toContain('Component')
@@ -143,10 +143,10 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h('div', { class: 'cleanup-test' }, 'Test'),
+          children: f('div', { class: 'cleanup-test' }, 'Test'),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(portalTarget.querySelector('.cleanup-test')).not.toBeNull()
 
@@ -164,10 +164,10 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h('div', { class: 'reactive-content' }, count),
+          children: f('div', { class: 'reactive-content' }, count),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(portalTarget.textContent).toContain('0')
 
@@ -188,18 +188,18 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h(
+          children: f(
             'div',
             { class: 'outer' },
-            h(
+            f(
               'div',
               { class: 'middle' },
-              h('div', { class: 'inner' }, 'Nested')
+              f('div', { class: 'inner' }, 'Nested')
             )
           ),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(portalTarget.querySelector('.inner')).not.toBeNull()
 
@@ -222,14 +222,14 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h(
+          children: f(
             'div',
             { class: 'outer-content' },
-            h(
+            f(
               () =>
                 Portal({
                   mount: innerTarget,
-                  children: h(
+                  children: f(
                     'div',
                     { class: 'inner-content' },
                     'Nested Portal'
@@ -240,7 +240,7 @@ describe('Portal Component', () => {
           ),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       // Outer portal should be in portalTarget
       expect(portalTarget.querySelector('.outer-content')).not.toBeNull()
@@ -264,17 +264,17 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h(
+          children: f(
             () =>
               Portal({
                 mount: innerTarget,
-                children: h('div', { class: 'nested' }, 'Content'),
+                children: f('div', { class: 'nested' }, 'Content'),
               }),
             {}
           ),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(innerTarget.querySelector('.nested')).not.toBeNull()
 
@@ -294,28 +294,28 @@ describe('Portal Component', () => {
       document.body.appendChild(target2)
 
       const App = () =>
-        h(
+        f(
           'div',
           {},
-          h(
+          f(
             () =>
               Portal({
                 mount: target1,
-                children: h('div', { class: 'portal-1' }, 'Portal 1'),
+                children: f('div', { class: 'portal-1' }, 'Portal 1'),
               }),
             {}
           ),
-          h(
+          f(
             () =>
               Portal({
                 mount: target2,
-                children: h('div', { class: 'portal-2' }, 'Portal 2'),
+                children: f('div', { class: 'portal-2' }, 'Portal 2'),
               }),
             {}
           )
         )
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(target1.querySelector('.portal-1')).not.toBeNull()
       expect(target2.querySelector('.portal-2')).not.toBeNull()
@@ -343,10 +343,10 @@ describe('Portal Component', () => {
       const DynamicPortal = () =>
         Portal({
           mount: currentTarget.value,
-          children: h('div', { class: 'dynamic' }, 'Dynamic Content'),
+          children: f('div', { class: 'dynamic' }, 'Dynamic Content'),
         })
 
-      mountReactive(h(DynamicPortal, {}), container)
+      mountReactive(f(DynamicPortal, {}), container)
 
       // Should render to target1 initially
       expect(target1.querySelector('.dynamic')).not.toBeNull()
@@ -367,10 +367,10 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h('div', { class: 'same-doc' }, 'Same Document'),
+          children: f('div', { class: 'same-doc' }, 'Same Document'),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(portalTarget.querySelector('.same-doc')).not.toBeNull()
       expect(portalTarget.ownerDocument).toBe(document)
@@ -382,14 +382,14 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h(
+          children: f(
             'button',
             { onclick: clickHandler, class: 'portal-button' },
             'Click Me'
           ),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       const button = portalTarget.querySelector(
         '.portal-button'
@@ -406,10 +406,10 @@ describe('Portal Component', () => {
       const App = () =>
         Portal({
           mount: portalTarget,
-          children: h('div', { class: 'reactive' }, text),
+          children: f('div', { class: 'reactive' }, text),
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(portalTarget.textContent).toContain('Initial')
 
@@ -426,10 +426,10 @@ describe('Portal Component', () => {
         Portal({
           mount: portalTarget,
           children: () =>
-            show.value ? h('div', { class: 'conditional' }, 'Visible') : null,
+            show.value ? f('div', { class: 'conditional' }, 'Visible') : null,
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(portalTarget.querySelector('.conditional')).not.toBeNull()
 
@@ -448,7 +448,7 @@ describe('Portal Component', () => {
           children: null,
         })
 
-      expect(() => mountReactive(h(App, {}), container)).not.toThrow()
+      expect(() => mountReactive(f(App, {}), container)).not.toThrow()
     })
 
     it('should handle undefined children', () => {
@@ -458,7 +458,7 @@ describe('Portal Component', () => {
           children: undefined as any,
         })
 
-      expect(() => mountReactive(h(App, {}), container)).not.toThrow()
+      expect(() => mountReactive(f(App, {}), container)).not.toThrow()
     })
 
     it('should handle empty array children', () => {
@@ -468,7 +468,7 @@ describe('Portal Component', () => {
           children: [],
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       // Portal target may have the content, but it should be empty
       expect(portalTarget.children.length).toBe(0)
@@ -480,16 +480,16 @@ describe('Portal Component', () => {
           mount: portalTarget,
           children: [
             'Text',
-            h('span', {}, 'Element'),
+            f('span', {}, 'Element'),
             42,
             null,
             undefined,
             false,
-            h('div', {}, 'Another element'),
+            f('div', {}, 'Another element'),
           ],
         })
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       // Should render truthy values
       expect(portalTarget.textContent).toContain('Text')
@@ -500,17 +500,17 @@ describe('Portal Component', () => {
 
     it('should handle portal as child of component', () => {
       const Wrapper = (props: { children: any }) =>
-        h('div', { class: 'wrapper' }, props.children)
+        f('div', { class: 'wrapper' }, props.children)
 
       const App = () =>
-        h(
+        f(
           Wrapper,
           {},
-          h(
+          f(
             () =>
               Portal({
                 mount: portalTarget,
-                children: h(
+                children: f(
                   'div',
                   { class: 'in-portal' },
                   'Portal in Component'
@@ -520,7 +520,7 @@ describe('Portal Component', () => {
           )
         )
 
-      mountReactive(h(App, {}), container)
+      mountReactive(f(App, {}), container)
 
       expect(container.querySelector('.wrapper')).not.toBeNull()
       expect(portalTarget.querySelector('.in-portal')).not.toBeNull()

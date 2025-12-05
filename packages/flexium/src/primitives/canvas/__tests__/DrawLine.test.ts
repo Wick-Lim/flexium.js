@@ -28,15 +28,15 @@ describe('DrawLine', () => {
     } as unknown as CanvasRenderingContext2D
   })
 
-  describe('VNode Creation', () => {
-    it('should create a line VNode with correct type', () => {
+  describe('FNode Creation', () => {
+    it('should create a line FNode with correct type', () => {
       const line = DrawLine({ x1: 0, y1: 0, x2: 100, y2: 100 })
 
       expect(line.type).toBe('canvas-line')
       expect(line.children).toEqual([])
     })
 
-    it('should create VNode with all props', () => {
+    it('should create FNode with all props', () => {
       const line = DrawLine({
         x1: 10,
         y1: 20,
@@ -57,7 +57,7 @@ describe('DrawLine', () => {
       expect(line.props.opacity).toBe(0.7)
     })
 
-    it('should create VNode with minimal props', () => {
+    it('should create FNode with minimal props', () => {
       const line = DrawLine({ x1: 50, y1: 50, x2: 150, y2: 150 })
 
       expect(line.type).toBe('canvas-line')

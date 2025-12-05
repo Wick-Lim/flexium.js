@@ -3,11 +3,14 @@
  */
 
 /**
- * Virtual Node - internal representation of UI elements
+ * Flexium Node - internal representation of UI elements
  */
-export interface VNode {
+export interface FNode {
   type: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   props: Record<string, any>
-  children: VNode[]
+  children: FNode[]
 }
+
+/** @deprecated Use FNode instead */
+export type VNode = FNode

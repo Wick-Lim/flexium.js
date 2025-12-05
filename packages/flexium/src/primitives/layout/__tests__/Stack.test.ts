@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { Stack } from '../Stack'
 
 describe('Stack', () => {
-  it('should create a VNode with display grid for stacking', () => {
+  it('should create a FNode with display grid for stacking', () => {
     const result = Stack({ children: [] }) as any
     expect(result).toBeDefined()
     expect(result.type).toBe('div')

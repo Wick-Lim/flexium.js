@@ -13,11 +13,11 @@
  * ```
  */
 
-import type { VNode } from '../types'
+import type { FNode } from '../types'
 import type { TextProps } from './types'
 import { normalizeStyle } from './utils'
 
-export function Text(props: TextProps): VNode {
+export function Text(props: TextProps): FNode {
   const {
     children,
     style,

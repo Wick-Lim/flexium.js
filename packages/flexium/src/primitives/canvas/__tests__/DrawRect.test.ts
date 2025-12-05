@@ -1,7 +1,7 @@
 /**
  * DrawRect Component Tests
  *
- * Comprehensive tests for DrawRect canvas primitive including VNode creation,
+ * Comprehensive tests for DrawRect canvas primitive including FNode creation,
  * rendering, signal reactivity, and edge cases.
  */
 
@@ -26,22 +26,22 @@ describe('DrawRect', () => {
     } as unknown as CanvasRenderingContext2D
   })
 
-  describe('VNode Creation', () => {
-    it('should create a VNode with correct type', () => {
-      const vnode = DrawRect({ x: 10, y: 20, width: 100, height: 50 })
+  describe('FNode Creation', () => {
+    it('should create a FNode with correct type', () => {
+      const fnode = DrawRect({ x: 10, y: 20, width: 100, height: 50 })
 
-      expect(vnode.type).toBe('canvas-rect')
+      expect(fnode.type).toBe('canvas-rect')
     })
 
-    it('should create a VNode with empty children array', () => {
-      const vnode = DrawRect({ x: 10, y: 20, width: 100, height: 50 })
+    it('should create a FNode with empty children array', () => {
+      const fnode = DrawRect({ x: 10, y: 20, width: 100, height: 50 })
 
-      expect(vnode.children).toEqual([])
-      expect(Array.isArray(vnode.children)).toBe(true)
+      expect(fnode.children).toEqual([])
+      expect(Array.isArray(fnode.children)).toBe(true)
     })
 
     it('should pass all props correctly', () => {
-      const vnode = DrawRect({
+      const fnode = DrawRect({
         x: 15,
         y: 25,
         width: 120,
@@ -52,30 +52,30 @@ describe('DrawRect', () => {
         opacity: 0.7,
       })
 
-      expect(vnode.props.x).toBe(15)
-      expect(vnode.props.y).toBe(25)
-      expect(vnode.props.width).toBe(120)
-      expect(vnode.props.height).toBe(60)
-      expect(vnode.props.fill).toBe('blue')
-      expect(vnode.props.stroke).toBe('red')
-      expect(vnode.props.strokeWidth).toBe(3)
-      expect(vnode.props.opacity).toBe(0.7)
+      expect(fnode.props.x).toBe(15)
+      expect(fnode.props.y).toBe(25)
+      expect(fnode.props.width).toBe(120)
+      expect(fnode.props.height).toBe(60)
+      expect(fnode.props.fill).toBe('blue')
+      expect(fnode.props.stroke).toBe('red')
+      expect(fnode.props.strokeWidth).toBe(3)
+      expect(fnode.props.opacity).toBe(0.7)
     })
 
     it('should handle minimal props', () => {
-      const vnode = DrawRect({
+      const fnode = DrawRect({
         x: 0,
         y: 0,
         width: 50,
         height: 50,
       })
 
-      expect(vnode.props.x).toBe(0)
-      expect(vnode.props.y).toBe(0)
-      expect(vnode.props.width).toBe(50)
-      expect(vnode.props.height).toBe(50)
-      expect(vnode.props.fill).toBeUndefined()
-      expect(vnode.props.stroke).toBeUndefined()
+      expect(fnode.props.x).toBe(0)
+      expect(fnode.props.y).toBe(0)
+      expect(fnode.props.width).toBe(50)
+      expect(fnode.props.height).toBe(50)
+      expect(fnode.props.fill).toBeUndefined()
+      expect(fnode.props.stroke).toBeUndefined()
     })
   })
 

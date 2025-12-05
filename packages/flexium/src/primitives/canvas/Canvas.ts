@@ -14,12 +14,12 @@
  * ```
  */
 
-import type { VNode } from '../../types'
+import type { FNode } from '../../types'
 import type { CanvasProps } from '../types'
 import { normalizeStyle } from '../utils'
 import { renderCanvasChildren } from './renderer'
 
-export function Canvas(props: CanvasProps): VNode {
+export function Canvas(props: CanvasProps): FNode {
   const { width, height, children, style, id, ...rest } = props
 
   return {

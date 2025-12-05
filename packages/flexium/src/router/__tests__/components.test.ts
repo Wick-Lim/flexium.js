@@ -8,7 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Router, Route, Link, Outlet, useRouter } from '../components'
-import { h } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/h'
 import { mountReactive } from '../../renderers/dom/reactive'
 
 describe('Router Components', () => {
@@ -34,10 +34,10 @@ describe('Router Components', () => {
   describe('Router Component', () => {
     describe('Initialization', () => {
       it('should render Router component successfully', () => {
-        const HomeComponent = () => h('div', { id: 'home' }, 'Home')
+        const HomeComponent = () => f('div', { id: 'home' }, 'Home')
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: HomeComponent })],
+          children: [f(Route, { path: '/', component: HomeComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -48,12 +48,12 @@ describe('Router Components', () => {
       })
 
       it('should render nothing when no routes match', () => {
-        const HomeComponent = () => h('div', { id: 'home' }, 'Home')
+        const HomeComponent = () => f('div', { id: 'home' }, 'Home')
 
         window.history.pushState({}, '', '/nonexistent')
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: HomeComponent })],
+          children: [f(Route, { path: '/', component: HomeComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -64,12 +64,12 @@ describe('Router Components', () => {
       it('should initialize with current browser location', () => {
         window.history.pushState({}, '', '/about')
 
-        const AboutComponent = () => h('div', { id: 'about' }, 'About')
+        const AboutComponent = () => f('div', { id: 'about' }, 'About')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, { path: 'about', component: AboutComponent }),
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, { path: 'about', component: AboutComponent }),
             ]),
           ],
         })
@@ -84,11 +84,11 @@ describe('Router Components', () => {
 
         const TestComponent = () => {
           routerContext = useRouter()
-          return h('div', {}, 'Test')
+          return f('div', {}, 'Test')
         }
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: TestComponent })],
+          children: [f(Route, { path: '/', component: TestComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -101,15 +101,15 @@ describe('Router Components', () => {
       })
 
       it('should parse multiple root routes', () => {
-        const HomeComponent = () => h('div', { id: 'home' }, 'Home')
-        const AboutComponent = () => h('div', { id: 'about' }, 'About')
+        const HomeComponent = () => f('div', { id: 'home' }, 'Home')
+        const AboutComponent = () => f('div', { id: 'about' }, 'About')
 
         window.history.pushState({}, '', '/about')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: HomeComponent }),
-            h(Route, { path: '/about', component: AboutComponent }),
+            f(Route, { path: '/', component: HomeComponent }),
+            f(Route, { path: '/about', component: AboutComponent }),
           ],
         })
 
@@ -122,14 +122,14 @@ describe('Router Components', () => {
 
     describe('Route Matching', () => {
       it('should match exact paths', () => {
-        const UsersComponent = () => h('div', { id: 'users' }, 'Users List')
+        const UsersComponent = () => f('div', { id: 'users' }, 'Users List')
 
         window.history.pushState({}, '', '/users')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, { path: 'users', component: UsersComponent }),
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, { path: 'users', component: UsersComponent }),
             ]),
           ],
         })
@@ -140,17 +140,17 @@ describe('Router Components', () => {
       })
 
       it('should match nested routes', () => {
-        const Layout = () => h('div', { id: 'layout' }, [h(Outlet, {})])
-        const Users = () => h('div', { id: 'users' }, [h(Outlet, {})])
-        const UserDetail = () => h('div', { id: 'detail' }, 'User Detail')
+        const Layout = () => f('div', { id: 'layout' }, [f(Outlet, {})])
+        const Users = () => f('div', { id: 'users' }, [f(Outlet, {})])
+        const UserDetail = () => f('div', { id: 'detail' }, 'User Detail')
 
         window.history.pushState({}, '', '/users/123')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: Layout }, [
-              h(Route, { path: 'users', component: Users }, [
-                h(Route, { path: ':id', component: UserDetail }),
+            f(Route, { path: '/', component: Layout }, [
+              f(Route, { path: 'users', component: Users }, [
+                f(Route, { path: ':id', component: UserDetail }),
               ]),
             ]),
           ],
@@ -164,12 +164,12 @@ describe('Router Components', () => {
       })
 
       it('should match root path correctly', () => {
-        const HomeComponent = () => h('div', { id: 'home' }, 'Home')
+        const HomeComponent = () => f('div', { id: 'home' }, 'Home')
 
         window.history.pushState({}, '', '/')
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: HomeComponent })],
+          children: [f(Route, { path: '/', component: HomeComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -178,15 +178,15 @@ describe('Router Components', () => {
       })
 
       it('should prioritize first matching route', () => {
-        const Route1 = () => h('div', { id: 'route1' }, 'Route 1')
-        const Route2 = () => h('div', { id: 'route2' }, 'Route 2')
+        const Route1 = () => f('div', { id: 'route1' }, 'Route 1')
+        const Route2 = () => f('div', { id: 'route2' }, 'Route 2')
 
         window.history.pushState({}, '', '/test')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/test', component: Route1 }),
-            h(Route, { path: '/test', component: Route2 }),
+            f(Route, { path: '/test', component: Route1 }),
+            f(Route, { path: '/test', component: Route2 }),
           ],
         })
 
@@ -197,15 +197,15 @@ describe('Router Components', () => {
       })
 
       it('should handle index routes', () => {
-        const Layout = () => h('div', { id: 'layout' }, [h(Outlet, {})])
-        const IndexComponent = () => h('div', { id: 'index' }, 'Index')
+        const Layout = () => f('div', { id: 'layout' }, [f(Outlet, {})])
+        const IndexComponent = () => f('div', { id: 'index' }, 'Index')
 
         window.history.pushState({}, '', '/')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: Layout }, [
-              h(Route, { index: true, component: IndexComponent }),
+            f(Route, { path: '/', component: Layout }, [
+              f(Route, { index: true, component: IndexComponent }),
             ]),
           ],
         })
@@ -223,15 +223,15 @@ describe('Router Components', () => {
 
         const UserComponent = (props: any) => {
           receivedParams = props.params
-          return h('div', { id: 'user' }, `User ${props.params.id}`)
+          return f('div', { id: 'user' }, `User ${props.params.id}`)
         }
 
         window.history.pushState({}, '', '/users/123')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, { path: 'users/:id', component: UserComponent }),
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, { path: 'users/:id', component: UserComponent }),
             ]),
           ],
         })
@@ -247,7 +247,7 @@ describe('Router Components', () => {
 
         const PostComponent = (props: any) => {
           receivedParams = props.params
-          return h(
+          return f(
             'div',
             { id: 'post' },
             `User ${props.params.userId} Post ${props.params.postId}`
@@ -258,11 +258,11 @@ describe('Router Components', () => {
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(
                 Route,
-                { path: 'users/:userId', component: () => h(Outlet, {}) },
-                [h(Route, { path: 'posts/:postId', component: PostComponent })]
+                { path: 'users/:userId', component: () => f(Outlet, {}) },
+                [f(Route, { path: 'posts/:postId', component: PostComponent })]
               ),
             ]),
           ],
@@ -278,15 +278,15 @@ describe('Router Components', () => {
 
         const ItemComponent = (props: any) => {
           receivedParams = props.params
-          return h('div', { id: 'item' }, props.params.slug)
+          return f('div', { id: 'item' }, props.params.slug)
         }
 
         window.history.pushState({}, '', '/items/my-awesome-item-123')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, { path: 'items/:slug', component: ItemComponent }),
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, { path: 'items/:slug', component: ItemComponent }),
             ]),
           ],
         })
@@ -302,15 +302,15 @@ describe('Router Components', () => {
         const TestComponent = () => {
           const router = useRouter()
           contextParams = router.params()
-          return h('div', {}, 'Test')
+          return f('div', {}, 'Test')
         }
 
         window.history.pushState({}, '', '/products/abc123')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, {
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, {
                 path: 'products/:productId',
                 component: TestComponent,
               }),
@@ -327,14 +327,14 @@ describe('Router Components', () => {
     describe('Route Guards', () => {
       it('should call beforeEnter guard', () => {
         const guardSpy = vi.fn(() => true)
-        const Component = () => h('div', { id: 'protected' }, 'Protected')
+        const Component = () => f('div', { id: 'protected' }, 'Protected')
 
         window.history.pushState({}, '', '/protected')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, {
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, {
                 path: 'protected',
                 component: Component,
                 beforeEnter: guardSpy,
@@ -351,14 +351,14 @@ describe('Router Components', () => {
 
       it('should block rendering when guard returns false', () => {
         const guardSpy = vi.fn(() => false)
-        const Component = () => h('div', { id: 'protected' }, 'Protected')
+        const Component = () => f('div', { id: 'protected' }, 'Protected')
 
         window.history.pushState({}, '', '/protected')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, {
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, {
                 path: 'protected',
                 component: Component,
                 beforeEnter: guardSpy,
@@ -379,14 +379,14 @@ describe('Router Components', () => {
           receivedParams = params
           return true
         })
-        const Component = () => h('div', { id: 'user' }, 'User')
+        const Component = () => f('div', { id: 'user' }, 'User')
 
         window.history.pushState({}, '', '/users/456')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, {
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, {
                 path: 'users/:id',
                 component: Component,
                 beforeEnter: guardSpy,
@@ -403,11 +403,11 @@ describe('Router Components', () => {
 
       it('should apply guard at root route level', () => {
         const guardSpy = vi.fn(() => false)
-        const Component = () => h('div', { id: 'root' }, 'Root')
+        const Component = () => f('div', { id: 'root' }, 'Root')
 
         const RouterApp = Router({
           children: [
-            h(Route, {
+            f(Route, {
               path: '/',
               component: Component,
               beforeEnter: guardSpy,
@@ -425,10 +425,10 @@ describe('Router Components', () => {
 
   describe('Route Component', () => {
     it('should be used as configuration component', () => {
-      const TestComponent = () => h('div', { id: 'test' }, 'Test')
+      const TestComponent = () => f('div', { id: 'test' }, 'Test')
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })],
+        children: [f(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -437,16 +437,16 @@ describe('Router Components', () => {
     })
 
     it('should support nested Route components', () => {
-      const Parent = () => h('div', { id: 'parent' }, [h(Outlet, {})])
-      const Child = () => h('div', { id: 'child' }, 'Child')
+      const Parent = () => f('div', { id: 'parent' }, [f(Outlet, {})])
+      const Child = () => f('div', { id: 'child' }, 'Child')
 
       window.history.pushState({}, '', '/parent/child')
 
       const RouterApp = Router({
         children: [
-          h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-            h(Route, { path: 'parent', component: Parent }, [
-              h(Route, { path: 'child', component: Child }),
+          f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+            f(Route, { path: 'parent', component: Parent }, [
+              f(Route, { path: 'child', component: Child }),
             ]),
           ]),
         ],
@@ -459,13 +459,13 @@ describe('Router Components', () => {
     })
 
     it('should accept optional path prop', () => {
-      const Layout = () => h('div', { id: 'layout' }, [h(Outlet, {})])
-      const Home = () => h('div', { id: 'home' }, 'Home')
+      const Layout = () => f('div', { id: 'layout' }, [f(Outlet, {})])
+      const Home = () => f('div', { id: 'home' }, 'Home')
 
       const RouterApp = Router({
         children: [
-          h(Route, { component: Layout }, [
-            h(Route, { path: '/', component: Home }),
+          f(Route, { component: Layout }, [
+            f(Route, { path: '/', component: Home }),
           ]),
         ],
       })
@@ -481,10 +481,10 @@ describe('Router Components', () => {
     describe('Rendering', () => {
       it('should render anchor tag with href', () => {
         const TestComponent = () =>
-          h('div', {}, [h(Link, { to: '/about' }, 'About')])
+          f('div', {}, [f(Link, { to: '/about' }, 'About')])
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: TestComponent })],
+          children: [f(Route, { path: '/', component: TestComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -497,12 +497,12 @@ describe('Router Components', () => {
 
       it('should apply class attribute', () => {
         const TestComponent = () =>
-          h('div', {}, [
-            h(Link, { to: '/profile', class: 'nav-link active' }, 'Profile'),
+          f('div', {}, [
+            f(Link, { to: '/profile', class: 'nav-link active' }, 'Profile'),
           ])
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: TestComponent })],
+          children: [f(Route, { path: '/', component: TestComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -513,15 +513,15 @@ describe('Router Components', () => {
 
       it('should render children elements', () => {
         const TestComponent = () =>
-          h('div', {}, [
-            h(Link, { to: '/home' }, [
-              h('span', { class: 'icon' }, 'H'),
-              h('span', {}, 'Home'),
+          f('div', {}, [
+            f(Link, { to: '/home' }, [
+              f('span', { class: 'icon' }, 'H'),
+              f('span', {}, 'Home'),
             ]),
           ])
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: TestComponent })],
+          children: [f(Route, { path: '/', component: TestComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -535,14 +535,14 @@ describe('Router Components', () => {
 
       it('should render multiple links', () => {
         const NavComponent = () =>
-          h('nav', {}, [
-            h(Link, { to: '/home' }, 'Home'),
-            h(Link, { to: '/about' }, 'About'),
-            h(Link, { to: '/contact' }, 'Contact'),
+          f('nav', {}, [
+            f(Link, { to: '/home' }, 'Home'),
+            f(Link, { to: '/about' }, 'About'),
+            f(Link, { to: '/contact' }, 'Contact'),
           ])
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: NavComponent })],
+          children: [f(Route, { path: '/', component: NavComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -558,10 +558,10 @@ describe('Router Components', () => {
     describe('Navigation', () => {
       it('should prevent default click behavior', () => {
         const TestComponent = () =>
-          h('div', {}, [h(Link, { to: '/users' }, 'Users')])
+          f('div', {}, [f(Link, { to: '/users' }, 'Users')])
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: TestComponent })],
+          children: [f(Route, { path: '/', component: TestComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -580,10 +580,10 @@ describe('Router Components', () => {
 
       it('should call navigate on click', () => {
         const TestComponent = () =>
-          h('div', {}, [h(Link, { to: '/products' }, 'Products')])
+          f('div', {}, [f(Link, { to: '/products' }, 'Products')])
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: TestComponent })],
+          children: [f(Route, { path: '/', component: TestComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -602,10 +602,10 @@ describe('Router Components', () => {
 
       it('should navigate to path with parameters', () => {
         const TestComponent = () =>
-          h('div', {}, [h(Link, { to: '/users/123' }, 'User 123')])
+          f('div', {}, [f(Link, { to: '/users/123' }, 'User 123')])
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: TestComponent })],
+          children: [f(Route, { path: '/', component: TestComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -624,14 +624,14 @@ describe('Router Components', () => {
 
       it('should work with nested routes', () => {
         const NavComponent = () =>
-          h('div', {}, [h(Link, { to: '/dashboard/settings' }, 'Settings')])
+          f('div', {}, [f(Link, { to: '/dashboard/settings' }, 'Settings')])
 
         window.history.pushState({}, '', '/dashboard')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, { path: 'dashboard', component: NavComponent }),
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, { path: 'dashboard', component: NavComponent }),
             ]),
           ],
         })
@@ -658,16 +658,16 @@ describe('Router Components', () => {
     describe('Integration', () => {
       it('should work with complex children structure', () => {
         const TestComponent = () =>
-          h('nav', { class: 'navbar' }, [
-            h('div', { class: 'brand' }, 'Logo'),
-            h('ul', {}, [
-              h('li', {}, [h(Link, { to: '/home', class: 'link' }, 'Home')]),
-              h('li', {}, [h(Link, { to: '/about', class: 'link' }, 'About')]),
+          f('nav', { class: 'navbar' }, [
+            f('div', { class: 'brand' }, 'Logo'),
+            f('ul', {}, [
+              f('li', {}, [f(Link, { to: '/home', class: 'link' }, 'Home')]),
+              f('li', {}, [f(Link, { to: '/about', class: 'link' }, 'About')]),
             ]),
           ])
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: TestComponent })],
+          children: [f(Route, { path: '/', component: TestComponent })],
         })
 
         mountReactive(RouterApp, container)
@@ -684,15 +684,15 @@ describe('Router Components', () => {
     describe('Basic Rendering', () => {
       it('should render nested route component', () => {
         const Layout = () =>
-          h('div', { id: 'layout' }, [h('header', {}, 'Header'), h(Outlet, {})])
-        const Content = () => h('div', { id: 'content' }, 'Content')
+          f('div', { id: 'layout' }, [f('header', {}, 'Header'), f(Outlet, {})])
+        const Content = () => f('div', { id: 'content' }, 'Content')
 
         window.history.pushState({}, '', '/content')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: Layout }, [
-              h(Route, { path: 'content', component: Content }),
+            f(Route, { path: '/', component: Layout }, [
+              f(Route, { path: 'content', component: Content }),
             ]),
           ],
         })
@@ -706,12 +706,12 @@ describe('Router Components', () => {
 
       it('should render null when no child route matches', () => {
         const Layout = () =>
-          h('div', { id: 'layout' }, [h('h1', {}, 'Layout'), h(Outlet, {})])
+          f('div', { id: 'layout' }, [f('h1', {}, 'Layout'), f(Outlet, {})])
 
         window.history.pushState({}, '', '/')
 
         const RouterApp = Router({
-          children: [h(Route, { path: '/', component: Layout })],
+          children: [f(Route, { path: '/', component: Layout })],
         })
 
         mountReactive(RouterApp, container)
@@ -723,7 +723,7 @@ describe('Router Components', () => {
       })
 
       it('should return null when used outside Router context', () => {
-        const app = h(Outlet, {})
+        const app = f(Outlet, {})
         mountReactive(app, container)
 
         expect(container.innerHTML).toBe('')
@@ -733,19 +733,19 @@ describe('Router Components', () => {
     describe('Nested Outlets', () => {
       it('should handle multiple levels of nesting', () => {
         const Level1 = () =>
-          h('div', { id: 'level1' }, [h('span', {}, 'Level 1'), h(Outlet, {})])
+          f('div', { id: 'level1' }, [f('span', {}, 'Level 1'), f(Outlet, {})])
         const Level2 = () =>
-          h('div', { id: 'level2' }, [h('span', {}, 'Level 2'), h(Outlet, {})])
-        const Level3 = () => h('div', { id: 'level3' }, 'Level 3')
+          f('div', { id: 'level2' }, [f('span', {}, 'Level 2'), f(Outlet, {})])
+        const Level3 = () => f('div', { id: 'level3' }, 'Level 3')
 
         window.history.pushState({}, '', '/a/b/c')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-              h(Route, { path: 'a', component: Level1 }, [
-                h(Route, { path: 'b', component: Level2 }, [
-                  h(Route, { path: 'c', component: Level3 }),
+            f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+              f(Route, { path: 'a', component: Level1 }, [
+                f(Route, { path: 'b', component: Level2 }, [
+                  f(Route, { path: 'c', component: Level3 }),
                 ]),
               ]),
             ]),
@@ -760,17 +760,17 @@ describe('Router Components', () => {
       })
 
       it('should render deeply nested components in correct order', () => {
-        const Root = () => h('div', { class: 'root' }, [h(Outlet, {})])
-        const Parent = () => h('div', { class: 'parent' }, [h(Outlet, {})])
-        const Child = () => h('div', { class: 'child' }, 'Leaf')
+        const Root = () => f('div', { class: 'root' }, [f(Outlet, {})])
+        const Parent = () => f('div', { class: 'parent' }, [f(Outlet, {})])
+        const Child = () => f('div', { class: 'child' }, 'Leaf')
 
         window.history.pushState({}, '', '/parent/child')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: Root }, [
-              h(Route, { path: 'parent', component: Parent }, [
-                h(Route, { path: 'child', component: Child }),
+            f(Route, { path: '/', component: Root }, [
+              f(Route, { path: 'parent', component: Parent }, [
+                f(Route, { path: 'child', component: Child }),
               ]),
             ]),
           ],
@@ -793,18 +793,18 @@ describe('Router Components', () => {
       it('should pass params to nested components', () => {
         let receivedParams: any = null
 
-        const Layout = () => h('div', { id: 'layout' }, [h(Outlet, {})])
+        const Layout = () => f('div', { id: 'layout' }, [f(Outlet, {})])
         const UserDetail = (props: any) => {
           receivedParams = props.params
-          return h('div', { id: 'user' }, `User ${props.params.id}`)
+          return f('div', { id: 'user' }, `User ${props.params.id}`)
         }
 
         window.history.pushState({}, '', '/users/789')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: Layout }, [
-              h(Route, { path: 'users/:id', component: UserDetail }),
+            f(Route, { path: '/', component: Layout }, [
+              f(Route, { path: 'users/:id', component: UserDetail }),
             ]),
           ],
         })
@@ -818,20 +818,20 @@ describe('Router Components', () => {
       it('should pass accumulated params through multiple outlets', () => {
         let receivedParams: any = null
 
-        const Layout = () => h('div', {}, [h(Outlet, {})])
-        const UsersLayout = () => h('div', {}, [h(Outlet, {})])
+        const Layout = () => f('div', {}, [f(Outlet, {})])
+        const UsersLayout = () => f('div', {}, [f(Outlet, {})])
         const PostDetail = (props: any) => {
           receivedParams = props.params
-          return h('div', { id: 'post' }, 'Post')
+          return f('div', { id: 'post' }, 'Post')
         }
 
         window.history.pushState({}, '', '/users/10/posts/20')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: Layout }, [
-              h(Route, { path: 'users/:userId', component: UsersLayout }, [
-                h(Route, { path: 'posts/:postId', component: PostDetail }),
+            f(Route, { path: '/', component: Layout }, [
+              f(Route, { path: 'users/:userId', component: UsersLayout }, [
+                f(Route, { path: 'posts/:postId', component: PostDetail }),
               ]),
             ]),
           ],
@@ -846,15 +846,15 @@ describe('Router Components', () => {
     describe('Route Guards with Outlet', () => {
       it('should respect beforeEnter guard in nested routes', () => {
         const guardSpy = vi.fn(() => false)
-        const Layout = () => h('div', { id: 'layout' }, [h(Outlet, {})])
-        const Protected = () => h('div', { id: 'protected' }, 'Protected')
+        const Layout = () => f('div', { id: 'layout' }, [f(Outlet, {})])
+        const Protected = () => f('div', { id: 'protected' }, 'Protected')
 
         window.history.pushState({}, '', '/protected')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: Layout }, [
-              h(Route, {
+            f(Route, { path: '/', component: Layout }, [
+              f(Route, {
                 path: 'protected',
                 component: Protected,
                 beforeEnter: guardSpy,
@@ -872,15 +872,15 @@ describe('Router Components', () => {
 
       it('should allow rendering when guard returns true', () => {
         const guardSpy = vi.fn(() => true)
-        const Layout = () => h('div', { id: 'layout' }, [h(Outlet, {})])
-        const Allowed = () => h('div', { id: 'allowed' }, 'Allowed')
+        const Layout = () => f('div', { id: 'layout' }, [f(Outlet, {})])
+        const Allowed = () => f('div', { id: 'allowed' }, 'Allowed')
 
         window.history.pushState({}, '', '/allowed')
 
         const RouterApp = Router({
           children: [
-            h(Route, { path: '/', component: Layout }, [
-              h(Route, {
+            f(Route, { path: '/', component: Layout }, [
+              f(Route, {
                 path: 'allowed',
                 component: Allowed,
                 beforeEnter: guardSpy,
@@ -904,11 +904,11 @@ describe('Router Components', () => {
       const TestComponent = () => {
         const router = useRouter()
         navigateFn = router.navigate
-        return h('div', { id: 'test' }, 'Test')
+        return f('div', { id: 'test' }, 'Test')
       }
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })],
+        children: [f(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -928,11 +928,11 @@ describe('Router Components', () => {
 
       const TestComponent = () => {
         router = useRouter()
-        return h('div', {}, 'Test')
+        return f('div', {}, 'Test')
       }
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })],
+        children: [f(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -947,19 +947,19 @@ describe('Router Components', () => {
 
     it('should trigger route re-matching on navigate', () => {
       let router: any = null
-      const Home = () => h('div', { id: 'home' }, 'Home')
-      const About = () => h('div', { id: 'about' }, 'About')
+      const Home = () => f('div', { id: 'home' }, 'Home')
+      const About = () => f('div', { id: 'about' }, 'About')
 
       const TestComponent = () => {
         router = useRouter()
-        return h('div', {}, [h(Outlet, {})])
+        return f('div', {}, [f(Outlet, {})])
       }
 
       const RouterApp = Router({
         children: [
-          h(Route, { path: '/', component: TestComponent }, [
-            h(Route, { path: '/', component: Home }),
-            h(Route, { path: 'about', component: About }),
+          f(Route, { path: '/', component: TestComponent }, [
+            f(Route, { path: '/', component: Home }),
+            f(Route, { path: 'about', component: About }),
           ]),
         ],
       })
@@ -979,22 +979,22 @@ describe('Router Components', () => {
   describe('Complex Integration Scenarios', () => {
     it('should handle complete app with navigation and nested routes', () => {
       const Layout = () =>
-        h('div', { id: 'layout' }, [
-          h('nav', {}, [
-            h(Link, { to: '/' }, 'Home'),
-            h(Link, { to: '/about' }, 'About'),
+        f('div', { id: 'layout' }, [
+          f('nav', {}, [
+            f(Link, { to: '/' }, 'Home'),
+            f(Link, { to: '/about' }, 'About'),
           ]),
-          h(Outlet, {}),
+          f(Outlet, {}),
         ])
 
-      const Home = () => h('div', { id: 'home' }, 'Home Page')
-      const About = () => h('div', { id: 'about' }, 'About Page')
+      const Home = () => f('div', { id: 'home' }, 'Home Page')
+      const About = () => f('div', { id: 'about' }, 'About Page')
 
       const RouterApp = Router({
         children: [
-          h(Route, { path: '/', component: Layout }, [
-            h(Route, { index: true, component: Home }),
-            h(Route, { path: 'about', component: About }),
+          f(Route, { path: '/', component: Layout }, [
+            f(Route, { index: true, component: Home }),
+            f(Route, { path: 'about', component: About }),
           ]),
         ],
       })
@@ -1012,19 +1012,19 @@ describe('Router Components', () => {
       const guardSpy = vi.fn(() => true)
       let receivedParams: any = null
 
-      const Dashboard = () => h('div', { id: 'dashboard' }, [h(Outlet, {})])
+      const Dashboard = () => f('div', { id: 'dashboard' }, [f(Outlet, {})])
       const UserProfile = (props: any) => {
         receivedParams = props.params
-        return h('div', { id: 'profile' }, `User ${props.params.id}`)
+        return f('div', { id: 'profile' }, `User ${props.params.id}`)
       }
 
       window.history.pushState({}, '', '/dashboard/user/555')
 
       const RouterApp = Router({
         children: [
-          h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-            h(Route, { path: 'dashboard', component: Dashboard }, [
-              h(Route, {
+          f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+            f(Route, { path: 'dashboard', component: Dashboard }, [
+              f(Route, {
                 path: 'user/:id',
                 component: UserProfile,
                 beforeEnter: guardSpy,
@@ -1043,16 +1043,16 @@ describe('Router Components', () => {
     })
 
     it('should handle route changes through browser history', () => {
-      const Page1 = () => h('div', { id: 'page1' }, 'Page 1')
-      const Page2 = () => h('div', { id: 'page2' }, 'Page 2')
+      const Page1 = () => f('div', { id: 'page1' }, 'Page 1')
+      const Page2 = () => f('div', { id: 'page2' }, 'Page 2')
 
       window.history.pushState({}, '', '/page1')
 
       const RouterApp = Router({
         children: [
-          h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-            h(Route, { path: 'page1', component: Page1 }),
-            h(Route, { path: 'page2', component: Page2 }),
+          f(Route, { path: '/', component: () => f(Outlet, {}) }, [
+            f(Route, { path: 'page1', component: Page1 }),
+            f(Route, { path: 'page2', component: Page2 }),
           ]),
         ],
       })

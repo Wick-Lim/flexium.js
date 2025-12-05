@@ -8,7 +8,7 @@
 import { onCleanup } from '../../core/signal'
 import type { AnimatableProps, MotionController } from './Motion'
 import { MotionController as MC } from './Motion'
-import { h } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/h'
 
 /**
  * Preset animation types
@@ -193,7 +193,7 @@ export function Transition(props: TransitionProps) {
   })
 
   // Return wrapper div with ref to capture element
-  return h(
+  return f(
     'div',
     {
       style: { display: 'contents' },

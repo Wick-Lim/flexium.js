@@ -13,8 +13,8 @@ import {
   VIRTUALLIST_MARKER,
 } from '../VirtualList'
 import { signal } from '../../../core/signal'
-import { h } from '../../../renderers/dom/h'
-import type { VNode } from '../../../core/renderer'
+import { f } from '../../../renderers/dom/h'
+import type { FNode } from '../../../core/renderer'
 
 describe('VirtualList Component', () => {
   let container: HTMLElement
@@ -36,7 +36,7 @@ describe('VirtualList Component', () => {
   describe('VirtualList() - Component Creation', () => {
     it('should create VirtualList component with required props', () => {
       const items = signal([1, 2, 3])
-      const renderItem = (item: number) => h('div', {}, String(item))
+      const renderItem = (item: number) => f('div', {}, String(item))
 
       const component = VirtualList({
         items,
@@ -53,7 +53,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -63,7 +63,7 @@ describe('VirtualList Component', () => {
 
     it('should store all provided props', () => {
       const items = signal([1, 2, 3])
-      const renderItem = (item: number) => h('div', {}, String(item))
+      const renderItem = (item: number) => f('div', {}, String(item))
       const onScroll = vi.fn()
       const onVisibleRangeChange = vi.fn()
       const getKey = (item: number, index: number) => `item-${index}`
@@ -95,7 +95,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -107,7 +107,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: '100vh',
         width: '100%',
         itemSize: 50,
@@ -121,7 +121,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: { mode: 'fixed', itemHeight: 75 },
       })
@@ -133,7 +133,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: { mode: 'variable', estimatedItemHeight: 60 },
       })
@@ -150,7 +150,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -180,7 +180,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -188,10 +188,10 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => {
+        (fnode: FNode) => {
           const el = document.createElement('div')
-          if (typeof vnode === 'object' && 'children' in vnode) {
-            el.textContent = String(vnode.children[0])
+          if (typeof fnode === 'object' && 'children' in fnode) {
+            el.textContent = String(fnode.children[0])
           }
           return el
         },
@@ -210,7 +210,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: '100vh',
         width: '50%',
         itemSize: 50,
@@ -219,7 +219,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -233,7 +233,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -241,7 +241,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -256,7 +256,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -264,7 +264,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -281,7 +281,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3, 4, 5])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, `Item ${item}`),
+        children: (item: number) => f('div', {}, `Item ${item}`),
         height: 200,
         itemSize: 50,
       })
@@ -290,10 +290,10 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => {
+        (fnode: FNode) => {
           const el = document.createElement('div')
-          if (typeof vnode === 'object' && 'children' in vnode) {
-            el.textContent = String(vnode.children[0])
+          if (typeof fnode === 'object' && 'children' in fnode) {
+            el.textContent = String(fnode.children[0])
           }
           mountedNodes.push(el)
           return el
@@ -312,7 +312,7 @@ describe('VirtualList Component', () => {
       const component = VirtualList({
         items,
         children: (item: number, index: () => number) =>
-          h('div', {}, `Item ${index()}`),
+          f('div', {}, `Item ${index()}`),
         height: 200,
         itemSize: 50,
       })
@@ -320,10 +320,10 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => {
+        (fnode: FNode) => {
           const el = document.createElement('div')
-          if (typeof vnode === 'object' && 'children' in vnode) {
-            el.textContent = String(vnode.children[0])
+          if (typeof fnode === 'object' && 'children' in fnode) {
+            el.textContent = String(fnode.children[0])
           }
           return el
         },
@@ -351,7 +351,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -359,7 +359,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -375,7 +375,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 2,
@@ -385,7 +385,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => {
+        (fnode: FNode) => {
           const el = document.createElement('div')
           mountedElements.push(el)
           return el
@@ -404,7 +404,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 50 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: { mode: 'fixed', itemHeight: 75 },
       })
@@ -412,7 +412,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -430,7 +430,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 50 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: { mode: 'variable', estimatedItemHeight: 60 },
       })
@@ -438,7 +438,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -458,7 +458,7 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 2,
@@ -468,7 +468,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -484,7 +484,7 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         onVisibleRangeChange,
@@ -493,7 +493,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -514,7 +514,7 @@ describe('VirtualList Component', () => {
       const onScroll = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         onScroll,
@@ -523,7 +523,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -542,7 +542,7 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 1,
@@ -552,7 +552,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -574,7 +574,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -587,7 +587,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -609,7 +609,7 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 3,
@@ -619,7 +619,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -634,7 +634,7 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 3,
@@ -644,7 +644,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -662,7 +662,7 @@ describe('VirtualList Component', () => {
 
       const component1 = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 1,
@@ -671,7 +671,7 @@ describe('VirtualList Component', () => {
 
       const component2 = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 5,
@@ -684,13 +684,13 @@ describe('VirtualList Component', () => {
       const dispose1 = mountVirtualListComponent(
         component1,
         container1,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       const dispose2 = mountVirtualListComponent(
         component2,
         container2,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose1, dispose2)
@@ -708,7 +708,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 1000 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -717,7 +717,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => {
+        (fnode: FNode) => {
           const el = document.createElement('div')
           mountedElements.push(el)
           return el
@@ -734,7 +734,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 10000 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -743,7 +743,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => {
+        (fnode: FNode) => {
           const el = document.createElement('div')
           mountedElements.push(el)
           return el
@@ -759,7 +759,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 5000 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -767,7 +767,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -786,7 +786,7 @@ describe('VirtualList Component', () => {
       const cleanupFn = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 1,
@@ -795,7 +795,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         cleanupFn
       )
       disposeCallbacks.push(dispose)
@@ -815,7 +815,7 @@ describe('VirtualList Component', () => {
       const component = VirtualList({
         items,
         children: (item: number, index: () => number) =>
-          h('div', {}, `Item ${index()}`),
+          f('div', {}, `Item ${index()}`),
         height: 200,
         itemSize: 50,
         overscan: 0,
@@ -824,10 +824,10 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => {
+        (fnode: FNode) => {
           const el = document.createElement('div')
-          if (typeof vnode === 'object' && 'children' in vnode) {
-            el.textContent = String(vnode.children[0])
+          if (typeof fnode === 'object' && 'children' in fnode) {
+            el.textContent = String(fnode.children[0])
           }
           return el
         },
@@ -868,7 +868,7 @@ describe('VirtualList Component', () => {
 
       const component = VirtualList({
         items,
-        children: (item: Item) => h('div', {}, item.name),
+        children: (item: Item) => f('div', {}, item.name),
         height: 400,
         itemSize: 50,
         getKey,
@@ -877,7 +877,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -891,7 +891,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -899,7 +899,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -922,7 +922,7 @@ describe('VirtualList Component', () => {
 
       const component = VirtualList({
         items,
-        children: (item: Item) => h('div', {}, String(item.value)),
+        children: (item: Item) => f('div', {}, String(item.value)),
         height: 400,
         itemSize: 50,
         getKey: (item: Item) => item.id,
@@ -931,7 +931,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -954,7 +954,7 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         onVisibleRangeChange,
@@ -963,7 +963,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -983,7 +983,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -991,7 +991,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1011,7 +1011,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1019,7 +1019,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1038,7 +1038,7 @@ describe('VirtualList Component', () => {
       const onVisibleRangeChange = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         onVisibleRangeChange,
@@ -1047,7 +1047,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1064,7 +1064,7 @@ describe('VirtualList Component', () => {
       const items = signal([1])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1072,7 +1072,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1088,7 +1088,7 @@ describe('VirtualList Component', () => {
       const items = signal<number[] | null>(null)
       const component = VirtualList({
         items: () => items() || [],
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1096,7 +1096,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1108,7 +1108,7 @@ describe('VirtualList Component', () => {
       const items = signal<number[]>([])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1116,7 +1116,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1137,7 +1137,7 @@ describe('VirtualList Component', () => {
       const cleanupFn = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1145,7 +1145,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         cleanupFn
       )
       disposeCallbacks.push(dispose)
@@ -1169,7 +1169,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 10,
         itemSize: 50,
       })
@@ -1177,7 +1177,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1190,7 +1190,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 1,
       })
@@ -1198,7 +1198,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1213,7 +1213,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 1000,
       })
@@ -1221,7 +1221,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1236,7 +1236,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
         overscan: 0,
@@ -1245,7 +1245,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1260,7 +1260,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1273,7 +1273,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
 
@@ -1293,7 +1293,7 @@ describe('VirtualList Component', () => {
       const cleanupFn = vi.fn()
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1301,7 +1301,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         cleanupFn
       )
 
@@ -1318,7 +1318,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1326,7 +1326,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
 
@@ -1341,7 +1341,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1349,7 +1349,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
 
@@ -1373,7 +1373,7 @@ describe('VirtualList Component', () => {
       })
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1381,7 +1381,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         cleanupFn
       )
 
@@ -1399,7 +1399,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1407,7 +1407,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1420,7 +1420,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1428,7 +1428,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1444,7 +1444,7 @@ describe('VirtualList Component', () => {
       const items = signal([1, 2, 3])
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 400,
         itemSize: 50,
       })
@@ -1452,7 +1452,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)
@@ -1471,7 +1471,7 @@ describe('VirtualList Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = VirtualList({
         items,
-        children: (item: number) => h('div', {}, String(item)),
+        children: (item: number) => f('div', {}, String(item)),
         height: 200,
         itemSize: 50,
         overscan: 0,
@@ -1480,7 +1480,7 @@ describe('VirtualList Component', () => {
       const dispose = mountVirtualListComponent(
         component,
         container,
-        (vnode: VNode) => document.createElement('div'),
+        (fnode: FNode) => document.createElement('div'),
         () => {}
       )
       disposeCallbacks.push(dispose)

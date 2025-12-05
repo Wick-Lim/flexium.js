@@ -57,7 +57,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { hydrate, type HydrateOptions } from '../hydrate'
-import { h, Fragment } from '../h'
+import { f, Fragment } from '../h'
 import { signal, effect } from '../../../core/signal'
 
 describe('DOM Hydration', () => {
@@ -75,9 +75,9 @@ describe('DOM Hydration', () => {
   describe('hydrate() - main function', () => {
     it('should hydrate simple element', () => {
       container.innerHTML = '<div class="test">Hello</div>'
-      const vnode = h('div', { class: 'test' }, 'Hello')
+      const fnode = f('div', { class: 'test' }, 'Hello')
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
 
       const div = container.querySelector('div')
       expect(div).not.toBeNull()
@@ -88,9 +88,9 @@ describe('DOM Hydration', () => {
     it('should attach event handlers during hydration', () => {
       container.innerHTML = '<button>Click me</button>'
       const onClick = vi.fn()
-      const vnode = h('button', { onclick: onClick }, 'Click me')
+      const fnode = f('button', { onclick: onClick }, 'Click me')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const button = container.querySelector('button')
       button?.click()
@@ -100,9 +100,9 @@ describe('DOM Hydration', () => {
     it('should call onMismatch callback when provided', () => {
       container.innerHTML = '<div>Wrong</div>'
       const onMismatch = vi.fn()
-      const vnode = h('div', {}, 'Correct')
+      const fnode = f('div', {}, 'Correct')
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalledWith(
         expect.stringContaining('Text mismatch'),
@@ -113,19 +113,19 @@ describe('DOM Hydration', () => {
 
     it('should not throw when recoverMismatch is false', () => {
       container.innerHTML = '<div>Wrong</div>'
-      const vnode = h('div', {}, 'Correct')
+      const fnode = f('div', {}, 'Correct')
 
       expect(() => {
-        hydrate(vnode, container, { recoverMismatch: false })
+        hydrate(fnode, container, { recoverMismatch: false })
       }).not.toThrow()
     })
 
     it('should handle empty container', () => {
       container.innerHTML = ''
       const onMismatch = vi.fn()
-      const vnode = h('div', {}, 'Content')
+      const fnode = f('div', {}, 'Content')
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalledWith(
         expect.stringContaining('No DOM node found'),
@@ -138,26 +138,26 @@ describe('DOM Hydration', () => {
   describe('hydrateNode() - text nodes', () => {
     it('should hydrate text node with matching content', () => {
       container.innerHTML = 'Hello World'
-      const vnode = 'Hello World'
+      const fnode = 'Hello World'
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
       expect(container.textContent).toBe('Hello World')
     })
 
     it('should hydrate number as text', () => {
       container.innerHTML = '42'
-      const vnode = 42
+      const fnode = 42
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
       expect(container.textContent).toBe('42')
     })
 
     it('should detect text mismatch', () => {
       container.innerHTML = 'Wrong Text'
       const onMismatch = vi.fn()
-      const vnode = 'Correct Text'
+      const fnode = 'Correct Text'
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalledWith(
         expect.stringContaining('Text mismatch'),
@@ -168,9 +168,9 @@ describe('DOM Hydration', () => {
 
     it('should correct text mismatch automatically', () => {
       container.innerHTML = 'Wrong Text'
-      const vnode = 'Correct Text'
+      const fnode = 'Correct Text'
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       expect(container.textContent).toBe('Correct Text')
     })
@@ -178,9 +178,9 @@ describe('DOM Hydration', () => {
     it('should detect wrong node type for text', () => {
       container.innerHTML = '<div>Element</div>'
       const onMismatch = vi.fn()
-      const vnode = 'Text'
+      const fnode = 'Text'
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalledWith(
         expect.stringContaining('Expected text node'),
@@ -191,19 +191,19 @@ describe('DOM Hydration', () => {
   })
 
   describe('hydrateNode() - null/undefined/false', () => {
-    it('should handle null vnode', () => {
+    it('should handle null fnode', () => {
       container.innerHTML = '<div>Content</div>'
 
       expect(() => hydrate(null, container)).not.toThrow()
     })
 
-    it('should handle undefined vnode', () => {
+    it('should handle undefined fnode', () => {
       container.innerHTML = '<div>Content</div>'
 
       expect(() => hydrate(undefined, container)).not.toThrow()
     })
 
-    it('should handle false vnode', () => {
+    it('should handle false fnode', () => {
       container.innerHTML = '<div>Content</div>'
 
       expect(() => hydrate(false, container)).not.toThrow()
@@ -301,10 +301,10 @@ describe('DOM Hydration', () => {
 
   describe('hydrateNode() - function components', () => {
     it('should hydrate simple function component', () => {
-      const MyComponent = () => h('div', { class: 'component' }, 'Component')
+      const MyComponent = () => f('div', { class: 'component' }, 'Component')
       container.innerHTML = '<div class="component">Component</div>'
 
-      hydrate(h(MyComponent, {}), container)
+      hydrate(f(MyComponent, {}), container)
 
       const div = container.querySelector('.component')
       expect(div).not.toBeNull()
@@ -313,44 +313,44 @@ describe('DOM Hydration', () => {
 
     it('should pass props to function component', () => {
       const Greeting = (props: { name: string }) =>
-        h('div', {}, `Hello, ${props.name}!`)
+        f('div', {}, `Hello, ${props.name}!`)
 
       container.innerHTML = '<div>Hello, World!</div>'
 
-      hydrate(h(Greeting, { name: 'World' }), container)
+      hydrate(f(Greeting, { name: 'World' }), container)
 
       expect(container.textContent).toBe('Hello, World!')
     })
 
     it('should hydrate component with children', () => {
       const Wrapper = (props: { children: any }) =>
-        h('div', { class: 'wrapper' }, props.children)
+        f('div', { class: 'wrapper' }, props.children)
 
       container.innerHTML = '<div class="wrapper"><span>Child</span></div>'
 
-      hydrate(h(Wrapper, {}, h('span', {}, 'Child')), container)
+      hydrate(f(Wrapper, {}, f('span', {}, 'Child')), container)
 
       const wrapper = container.querySelector('.wrapper')
       expect(wrapper?.querySelector('span')).not.toBeNull()
     })
 
     it('should hydrate nested components', () => {
-      const Inner = () => h('span', {}, 'Inner')
-      const Outer = () => h('div', {}, h(Inner, {}))
+      const Inner = () => f('span', {}, 'Inner')
+      const Outer = () => f('div', {}, f(Inner, {}))
 
       container.innerHTML = '<div><span>Inner</span></div>'
 
-      hydrate(h(Outer, {}), container)
+      hydrate(f(Outer, {}), container)
 
       expect(container.querySelector('span')?.textContent).toBe('Inner')
     })
 
     it('should attach events in function components', () => {
       const onClick = vi.fn()
-      const Button = () => h('button', { onclick: onClick }, 'Click')
+      const Button = () => f('button', { onclick: onClick }, 'Click')
 
       container.innerHTML = '<button>Click</button>'
-      hydrate(h(Button, {}), container)
+      hydrate(f(Button, {}), container)
 
       container.querySelector('button')?.click()
       expect(onClick).toHaveBeenCalledTimes(1)
@@ -361,14 +361,14 @@ describe('DOM Hydration', () => {
     it('should hydrate fragment with multiple children', () => {
       container.innerHTML = '<span>First</span><span>Second</span>'
 
-      const vnode = h(
+      const fnode = f(
         Fragment,
         {},
-        h('span', {}, 'First'),
-        h('span', {}, 'Second')
+        f('span', {}, 'First'),
+        f('span', {}, 'Second')
       )
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(2)
@@ -379,15 +379,15 @@ describe('DOM Hydration', () => {
     it('should hydrate fragment with mixed children', () => {
       container.innerHTML = 'Text<div>Element</div>More text'
 
-      const vnode = h(
+      const fnode = f(
         Fragment,
         {},
         'Text',
-        h('div', {}, 'Element'),
+        f('div', {}, 'Element'),
         'More text'
       )
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       expect(container.querySelector('div')?.textContent).toBe('Element')
     })
@@ -395,13 +395,13 @@ describe('DOM Hydration', () => {
     it('should hydrate null fragment type', () => {
       container.innerHTML = '<span>A</span><span>B</span>'
 
-      const vnode = {
+      const fnode = {
         type: null,
         props: {},
-        children: [h('span', {}, 'A'), h('span', {}, 'B')],
+        children: [f('span', {}, 'A'), f('span', {}, 'B')],
       }
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(2)
@@ -410,18 +410,18 @@ describe('DOM Hydration', () => {
     it('should handle empty fragment', () => {
       container.innerHTML = '<div>Before</div>'
 
-      const vnode = h(Fragment, {})
+      const fnode = f(Fragment, {})
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
     })
   })
 
   describe('hydrateNode() - elements', () => {
     it('should hydrate basic element', () => {
       container.innerHTML = '<div>Content</div>'
-      const vnode = h('div', {}, 'Content')
+      const fnode = f('div', {}, 'Content')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       expect(container.querySelector('div')).not.toBeNull()
     })
@@ -429,9 +429,9 @@ describe('DOM Hydration', () => {
     it('should detect tag name mismatch', () => {
       container.innerHTML = '<div>Content</div>'
       const onMismatch = vi.fn()
-      const vnode = h('span', {}, 'Content')
+      const fnode = f('span', {}, 'Content')
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalledWith(
         expect.stringContaining('Tag mismatch'),
@@ -442,17 +442,17 @@ describe('DOM Hydration', () => {
 
     it('should handle case-insensitive tag matching', () => {
       container.innerHTML = '<DIV>Content</DIV>'
-      const vnode = h('div', {}, 'Content')
+      const fnode = f('div', {}, 'Content')
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
     })
 
     it('should detect element expected but got text', () => {
       container.innerHTML = 'Just text'
       const onMismatch = vi.fn()
-      const vnode = h('div', {}, 'Content')
+      const fnode = f('div', {}, 'Content')
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalledWith(
         expect.stringContaining('Expected element node'),
@@ -464,9 +464,9 @@ describe('DOM Hydration', () => {
     it('should hydrate nested elements', () => {
       container.innerHTML = '<div><span><em>Nested</em></span></div>'
 
-      const vnode = h('div', {}, h('span', {}, h('em', {}, 'Nested')))
+      const fnode = f('div', {}, f('span', {}, f('em', {}, 'Nested')))
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       expect(container.querySelector('em')?.textContent).toBe('Nested')
     })
@@ -474,15 +474,15 @@ describe('DOM Hydration', () => {
     it('should hydrate elements with multiple children', () => {
       container.innerHTML = '<ul><li>A</li><li>B</li><li>C</li></ul>'
 
-      const vnode = h(
+      const fnode = f(
         'ul',
         {},
-        h('li', {}, 'A'),
-        h('li', {}, 'B'),
-        h('li', {}, 'C')
+        f('li', {}, 'A'),
+        f('li', {}, 'B'),
+        f('li', {}, 'C')
       )
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const items = container.querySelectorAll('li')
       expect(items.length).toBe(3)
@@ -496,9 +496,9 @@ describe('DOM Hydration', () => {
     it('should attach click event', () => {
       container.innerHTML = '<button>Click</button>'
       const onClick = vi.fn()
-      const vnode = h('button', { onclick: onClick }, 'Click')
+      const fnode = f('button', { onclick: onClick }, 'Click')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       container.querySelector('button')?.click()
       expect(onClick).toHaveBeenCalledTimes(1)
@@ -510,14 +510,14 @@ describe('DOM Hydration', () => {
       const onBlur = vi.fn()
       const onChange = vi.fn()
 
-      const vnode = h('input', {
+      const fnode = f('input', {
         type: 'text',
         onfocus: onFocus,
         onblur: onBlur,
         onchange: onChange,
       })
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const input = container.querySelector('input')!
       input.dispatchEvent(new Event('focus'))
@@ -532,9 +532,9 @@ describe('DOM Hydration', () => {
     it('should handle custom event names', () => {
       container.innerHTML = '<div>Custom</div>'
       const onCustom = vi.fn()
-      const vnode = h('div', { oncustom: onCustom }, 'Custom')
+      const fnode = f('div', { oncustom: onCustom }, 'Custom')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       container.querySelector('div')?.dispatchEvent(new Event('custom'))
       expect(onCustom).toHaveBeenCalledTimes(1)
@@ -544,9 +544,9 @@ describe('DOM Hydration', () => {
       container.innerHTML = '<button>Click</button>'
       const onClick = vi.fn()
       // JSX often produces onClick, should become click
-      const vnode = h('button', { onClick: onClick }, 'Click')
+      const fnode = f('button', { onClick: onClick }, 'Click')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       container.querySelector('button')?.click()
       expect(onClick).toHaveBeenCalledTimes(1)
@@ -556,33 +556,33 @@ describe('DOM Hydration', () => {
   describe('hydrateProps() - special props', () => {
     it('should skip children prop', () => {
       container.innerHTML = '<div>Content</div>'
-      const vnode = h('div', { children: 'ignored' }, 'Content')
+      const fnode = f('div', { children: 'ignored' }, 'Content')
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
     })
 
     it('should skip key prop', () => {
       container.innerHTML = '<div>Content</div>'
-      const vnode = h('div', { key: 'my-key' }, 'Content')
+      const fnode = f('div', { key: 'my-key' }, 'Content')
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
     })
 
     it('should call ref callback with element', () => {
       container.innerHTML = '<div>Content</div>'
       const ref = vi.fn()
-      const vnode = h('div', { ref }, 'Content')
+      const fnode = f('div', { ref }, 'Content')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       expect(ref).toHaveBeenCalledWith(container.querySelector('div'))
     })
 
     it('should not call ref if not a function', () => {
       container.innerHTML = '<div>Content</div>'
-      const vnode = h('div', { ref: 'not-a-function' }, 'Content')
+      const fnode = f('div', { ref: 'not-a-function' }, 'Content')
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
     })
   })
 
@@ -590,9 +590,9 @@ describe('DOM Hydration', () => {
     it('should set up reactive class attribute', async () => {
       container.innerHTML = '<div class="initial">Content</div>'
       const className = signal('initial')
-      const vnode = h('div', { class: className }, 'Content')
+      const fnode = f('div', { class: className }, 'Content')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const div = container.querySelector('div')!
       expect(div.className).toBe('initial')
@@ -606,9 +606,9 @@ describe('DOM Hydration', () => {
     it('should handle className prop as class attribute', async () => {
       container.innerHTML = '<div class="initial">Content</div>'
       const className = signal('initial')
-      const vnode = h('div', { className }, 'Content')
+      const fnode = f('div', { className }, 'Content')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const div = container.querySelector('div')!
 
@@ -621,9 +621,9 @@ describe('DOM Hydration', () => {
     it('should set up reactive style object', async () => {
       container.innerHTML = '<div style="color: red;">Content</div>'
       const styleSignal = signal({ color: 'red' })
-      const vnode = h('div', { style: styleSignal }, 'Content')
+      const fnode = f('div', { style: styleSignal }, 'Content')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const div = container.querySelector('div') as HTMLElement
 
@@ -637,9 +637,9 @@ describe('DOM Hydration', () => {
     it('should set up reactive value property', async () => {
       container.innerHTML = '<input type="text" value="initial" />'
       const value = signal('initial')
-      const vnode = h('input', { type: 'text', value })
+      const fnode = f('input', { type: 'text', value })
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const input = container.querySelector('input') as HTMLInputElement
 
@@ -652,9 +652,9 @@ describe('DOM Hydration', () => {
     it('should set up reactive custom attribute', async () => {
       container.innerHTML = '<div data-value="initial">Content</div>'
       const dataValue = signal('initial')
-      const vnode = h('div', { 'data-value': dataValue }, 'Content')
+      const fnode = f('div', { 'data-value': dataValue }, 'Content')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const div = container.querySelector('div')!
 
@@ -672,9 +672,9 @@ describe('DOM Hydration', () => {
 
       container.innerHTML = '<div class="wrong">Content</div>'
       const onMismatch = vi.fn()
-      const vnode = h('div', { class: 'correct' }, 'Content')
+      const fnode = f('div', { class: 'correct' }, 'Content')
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalledWith(
         expect.stringContaining('Class mismatch'),
@@ -690,9 +690,9 @@ describe('DOM Hydration', () => {
 
       container.innerHTML = '<div class="wrong">Content</div>'
       const onMismatch = vi.fn()
-      const vnode = h('div', { class: 'correct' }, 'Content')
+      const fnode = f('div', { class: 'correct' }, 'Content')
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       // Should only be called for text mismatch, not class mismatch
       expect(onMismatch).not.toHaveBeenCalledWith(
@@ -708,9 +708,9 @@ describe('DOM Hydration', () => {
       ;(globalThis as any).__DEV__ = true
 
       container.innerHTML = '<div class="test">Content</div>'
-      const vnode = h('div', { className: 'test' }, 'Content')
+      const fnode = f('div', { className: 'test' }, 'Content')
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
       ;(globalThis as any).__DEV__ = originalDev
     })
   })
@@ -719,9 +719,9 @@ describe('DOM Hydration', () => {
     it('should detect and report all mismatches', () => {
       container.innerHTML = '<span class="wrong">Wrong text</span>'
       const onMismatch = vi.fn()
-      const vnode = h('div', { class: 'correct' }, 'Correct text')
+      const fnode = f('div', { class: 'correct' }, 'Correct text')
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalled()
     })
@@ -730,14 +730,14 @@ describe('DOM Hydration', () => {
       container.innerHTML = '<div>Wrong</div><div>Correct</div>'
       const onMismatch = vi.fn()
 
-      const vnode = h(
+      const fnode = f(
         Fragment,
         {},
-        h('div', {}, 'Wrong'),
-        h('div', {}, 'Correct')
+        f('div', {}, 'Wrong'),
+        f('div', {}, 'Correct')
       )
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       // Should still hydrate the second div
       expect(container.querySelectorAll('div').length).toBe(2)
@@ -747,14 +747,14 @@ describe('DOM Hydration', () => {
       container.innerHTML = '<div>Only one</div>'
       const onMismatch = vi.fn()
 
-      const vnode = h(
+      const fnode = f(
         Fragment,
         {},
-        h('div', {}, 'Only one'),
-        h('div', {}, 'Missing')
+        f('div', {}, 'Only one'),
+        f('div', {}, 'Missing')
       )
 
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(onMismatch).toHaveBeenCalledWith(
         expect.stringContaining('No DOM node found'),
@@ -766,9 +766,9 @@ describe('DOM Hydration', () => {
     it('should handle extra DOM nodes gracefully', () => {
       container.innerHTML = '<div>One</div><div>Two</div><div>Three</div>'
 
-      const vnode = h(Fragment, {}, h('div', {}, 'One'))
+      const fnode = f(Fragment, {}, f('div', {}, 'One'))
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
     })
   })
 
@@ -778,16 +778,16 @@ describe('DOM Hydration', () => {
       const textNode = document.createTextNode('')
       container.appendChild(textNode)
 
-      const vnode = ''
+      const fnode = ''
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
     })
 
     it('should handle zero as text', () => {
       container.innerHTML = '0'
-      const vnode = 0
+      const fnode = 0
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
       expect(container.textContent).toBe('0')
     })
 
@@ -804,13 +804,13 @@ describe('DOM Hydration', () => {
         </div>
       `.trim()
 
-      const vnode = h(
+      const fnode = f(
         'div',
         {},
-        h('div', {}, h('div', {}, h('div', {}, h('span', {}, 'Deep'))))
+        f('div', {}, f('div', {}, f('div', {}, f('span', {}, 'Deep'))))
       )
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       expect(container.querySelector('span')?.textContent).toBe('Deep')
     })
@@ -818,16 +818,16 @@ describe('DOM Hydration', () => {
     it('should handle mixed content types', () => {
       container.innerHTML = 'Text<div>Element</div>42<span>More</span>'
 
-      const vnode = h(
+      const fnode = f(
         Fragment,
         {},
         'Text',
-        h('div', {}, 'Element'),
+        f('div', {}, 'Element'),
         42,
-        h('span', {}, 'More')
+        f('span', {}, 'More')
       )
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       expect(container.querySelector('div')?.textContent).toBe('Element')
       expect(container.querySelector('span')?.textContent).toBe('More')
@@ -836,9 +836,9 @@ describe('DOM Hydration', () => {
     it('should handle array children', () => {
       container.innerHTML = '<div><span>A</span><span>B</span></div>'
 
-      const vnode = h('div', {}, [h('span', {}, 'A'), h('span', {}, 'B')])
+      const fnode = f('div', {}, [f('span', {}, 'A'), f('span', {}, 'B')])
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(2)
@@ -847,15 +847,15 @@ describe('DOM Hydration', () => {
     it('should handle null/undefined/false in children array', () => {
       container.innerHTML = '<div><span>A</span><span>B</span></div>'
 
-      const vnode = h('div', {}, [
-        h('span', {}, 'A'),
+      const fnode = f('div', {}, [
+        f('span', {}, 'A'),
         null,
         undefined,
         false,
-        h('span', {}, 'B'),
+        f('span', {}, 'B'),
       ])
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(2)
@@ -865,18 +865,18 @@ describe('DOM Hydration', () => {
       const NullComponent = () => null
       container.innerHTML = '<div>Before</div>'
 
-      const vnode = h(NullComponent, {})
+      const fnode = f(NullComponent, {})
 
-      expect(() => hydrate(vnode, container)).not.toThrow()
+      expect(() => hydrate(fnode, container)).not.toThrow()
     })
 
     it('should handle component returning fragment', () => {
       const FragmentComponent = () =>
-        h(Fragment, {}, h('span', {}, 'A'), h('span', {}, 'B'))
+        f(Fragment, {}, f('span', {}, 'A'), f('span', {}, 'B'))
 
       container.innerHTML = '<span>A</span><span>B</span>'
 
-      hydrate(h(FragmentComponent, {}), container)
+      hydrate(f(FragmentComponent, {}), container)
 
       expect(container.querySelectorAll('span').length).toBe(2)
     })
@@ -890,11 +890,11 @@ describe('DOM Hydration', () => {
 
       // Note: Real browser parsing creates text nodes for whitespace
       // This test verifies we handle that gracefully
-      const vnode = h('div', {}, h('span', {}, 'Content'))
+      const fnode = f('div', {}, f('span', {}, 'Content'))
 
       // May have mismatches due to whitespace text nodes
       const onMismatch = vi.fn()
-      hydrate(vnode, container, { onMismatch })
+      hydrate(fnode, container, { onMismatch })
 
       expect(container.querySelector('span')?.textContent).toBe('Content')
     })
@@ -907,14 +907,14 @@ describe('DOM Hydration', () => {
 
       container.innerHTML = '<div><button>+</button><span>0</span></div>'
 
-      const vnode = h(
+      const fnode = f(
         'div',
         {},
-        h('button', { onclick: increment }, '+'),
-        h('span', {}, count)
+        f('button', { onclick: increment }, '+'),
+        f('span', {}, count)
       )
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const button = container.querySelector('button')!
       const span = container.querySelector('span')!
@@ -939,9 +939,9 @@ describe('DOM Hydration', () => {
 
       container.innerHTML = '<div><h1>Title</h1><p>Description</p></div>'
 
-      const vnode = h('div', {}, h('h1', {}, title), h('p', {}, description))
+      const fnode = f('div', {}, f('h1', {}, title), f('p', {}, description))
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const h1 = container.querySelector('h1')!
       const p = container.querySelector('p')!
@@ -961,13 +961,13 @@ describe('DOM Hydration', () => {
       container.innerHTML = '<ul><li>A</li><li>B</li><li>C</li></ul>'
 
       const List = () =>
-        h(
+        f(
           'ul',
           {},
-          items.value.map((item) => h('li', {}, item))
+          items.value.map((item) => f('li', {}, item))
         )
 
-      hydrate(h(List, {}), container)
+      hydrate(f(List, {}), container)
 
       expect(container.querySelectorAll('li').length).toBe(3)
     })
@@ -975,12 +975,12 @@ describe('DOM Hydration', () => {
     it('should handle nested components with signals', async () => {
       const name = signal('World')
 
-      const Greeting = () => h('span', {}, () => `Hello, ${name.value}!`)
-      const Container = () => h('div', {}, h(Greeting, {}))
+      const Greeting = () => f('span', {}, () => `Hello, ${name.value}!`)
+      const Container = () => f('div', {}, f(Greeting, {}))
 
       container.innerHTML = '<div><span>Hello, World!</span></div>'
 
-      hydrate(h(Container, {}), container)
+      hydrate(f(Container, {}), container)
 
       name.value = 'Flexium'
       await Promise.resolve()
@@ -997,14 +997,14 @@ describe('DOM Hydration', () => {
       container.innerHTML =
         '<input id="user-input" value="user" /><input id="email-input" value="user@example.com" />'
 
-      const vnode = h(
+      const fnode = f(
         Fragment,
         {},
-        h('input', { id: 'user-input', value: username }),
-        h('input', { id: 'email-input', value: email })
+        f('input', { id: 'user-input', value: username }),
+        f('input', { id: 'email-input', value: email })
       )
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       const usernameInput = container.querySelector(
         '#user-input'
@@ -1036,9 +1036,9 @@ describe('DOM Hydration', () => {
       console.warn = consoleWarnSpy
 
       container.innerHTML = '<div>Wrong</div>'
-      const vnode = h('div', {}, 'Correct')
+      const fnode = f('div', {}, 'Correct')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('[Flexium Hydration]')
@@ -1055,9 +1055,9 @@ describe('DOM Hydration', () => {
       console.warn = consoleWarnSpy
 
       container.innerHTML = '<div>Wrong</div>'
-      const vnode = h('div', {}, 'Correct')
+      const fnode = f('div', {}, 'Correct')
 
-      hydrate(vnode, container)
+      hydrate(fnode, container)
 
       // May still correct the mismatch, but shouldn't log
       expect(consoleWarnSpy).not.toHaveBeenCalled()

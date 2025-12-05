@@ -7,10 +7,10 @@
  * ```
  */
 
-import type { VNode } from '../../types'
+import type { FNode } from '../../types'
 import type { DrawLineProps } from '../types'
 
-export function DrawLine(props: DrawLineProps): VNode {
+export function DrawLine(props: DrawLineProps): FNode {
   return {
     type: 'canvas-line',
     props,

@@ -14,11 +14,11 @@
  * ```
  */
 
-import type { VNode } from '../types'
+import type { FNode } from '../types'
 import type { ScrollViewProps } from './types'
 import { normalizeStyle } from './utils'
 
-export function ScrollView(props: ScrollViewProps): VNode {
+export function ScrollView(props: ScrollViewProps): FNode {
   const {
     children,
     style,

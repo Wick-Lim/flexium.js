@@ -11,7 +11,7 @@ import {
   ErrorBoundaryCtx,
 } from '../error-boundary'
 import { signal } from '../signal'
-import { h } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/h'
 import { mountReactive } from '../../renderers/dom/reactive'
 
 describe('ErrorBoundary', () => {
@@ -28,11 +28,11 @@ describe('ErrorBoundary', () => {
 
   describe('basic functionality', () => {
     it('should render children when no error', () => {
-      const ChildComponent = () => h('div', { class: 'child' }, 'Hello')
+      const ChildComponent = () => f('div', { class: 'child' }, 'Hello')
 
       const boundary = ErrorBoundary({
-        fallback: h('div', {}, 'Error occurred'),
-        children: h(ChildComponent, {}),
+        fallback: f('div', {}, 'Error occurred'),
+        children: f(ChildComponent, {}),
       })
 
       const result = boundary()
@@ -41,8 +41,8 @@ describe('ErrorBoundary', () => {
 
     it('should accept static fallback', () => {
       const boundary = ErrorBoundary({
-        fallback: h('div', { class: 'fallback' }, 'Static fallback'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', { class: 'fallback' }, 'Static fallback'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = boundary()
@@ -51,12 +51,12 @@ describe('ErrorBoundary', () => {
 
     it('should accept function fallback', () => {
       const fallbackFn = vi.fn(({ error, reset }) =>
-        h('div', {}, `Error: ${error.message}`)
+        f('div', {}, `Error: ${error.message}`)
       )
 
       const boundary = ErrorBoundary({
         fallback: fallbackFn,
-        children: h('div', {}, 'Content'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = boundary()
@@ -72,8 +72,8 @@ describe('ErrorBoundary', () => {
 
       const onError = vi.fn()
       const boundary = ErrorBoundary({
-        fallback: h('div', { class: 'error' }, 'Error caught'),
-        children: () => h(ThrowingComponent, {}),
+        fallback: f('div', { class: 'error' }, 'Error caught'),
+        children: () => f(ThrowingComponent, {}),
         onError,
       })
 
@@ -92,9 +92,9 @@ describe('ErrorBoundary', () => {
         fallback: ({ error }) => {
           expect(error).toBeInstanceOf(Error)
           expect(error.message).toBe('string error')
-          return h('div', {}, 'Caught')
+          return f('div', {}, 'Caught')
         },
-        children: h('div', {}, 'Content'),
+        children: f('div', {}, 'Content'),
         onError,
       })
 
@@ -109,9 +109,9 @@ describe('ErrorBoundary', () => {
       const boundary = ErrorBoundary({
         fallback: ({ retryCount, reset }) => {
           retryCounts.push(retryCount)
-          return h('button', { onclick: reset }, `Retry (${retryCount})`)
+          return f('button', { onclick: reset }, `Retry (${retryCount})`)
         },
-        children: h('div', {}, 'Content'),
+        children: f('div', {}, 'Content'),
       })
 
       boundary()
@@ -122,8 +122,8 @@ describe('ErrorBoundary', () => {
       const onReset = vi.fn()
 
       const boundary = ErrorBoundary({
-        fallback: ({ reset }) => h('button', { onclick: reset }, 'Retry'),
-        children: h('div', {}, 'Content'),
+        fallback: ({ reset }) => f('button', { onclick: reset }, 'Retry'),
+        children: f('div', {}, 'Content'),
         onReset,
       })
 
@@ -138,16 +138,16 @@ describe('ErrorBoundary', () => {
 
       const ChildWithContext = () => {
         // In real usage, would use useContext
-        return h('div', {}, 'Child')
+        return f('div', {}, 'Child')
       }
 
       const boundary = ErrorBoundary({
-        fallback: h('div', {}, 'Error'),
-        children: h(ChildWithContext, {}),
+        fallback: f('div', {}, 'Error'),
+        children: f(ChildWithContext, {}),
       })
 
       const result = boundary()
-      // Context is provided via h(ErrorBoundaryCtx.Provider, ...)
+      // Context is provided via f(ErrorBoundaryCtx.Provider, ...)
       expect(result).not.toBeNull()
     })
   })
@@ -194,7 +194,7 @@ describe('ErrorBoundary', () => {
       })
 
       const boundary = ErrorBoundary({
-        fallback: h('div', {}, 'Fallback'),
+        fallback: f('div', {}, 'Fallback'),
         children: () => {
           throw new Error('Component error')
         },
@@ -211,8 +211,8 @@ describe('ErrorBoundary', () => {
       })
 
       const boundary = ErrorBoundary({
-        fallback: ({ reset }) => h('button', { onclick: reset }, 'Retry'),
-        children: h('div', {}, 'Content'),
+        fallback: ({ reset }) => f('button', { onclick: reset }, 'Retry'),
+        children: f('div', {}, 'Content'),
         onReset,
       })
 
@@ -231,7 +231,7 @@ describe('ErrorBoundary', () => {
       })
 
       const boundary = ErrorBoundary({
-        fallback: h('div', {}, 'Error'),
+        fallback: f('div', {}, 'Error'),
         children: () => {
           throw new Error('Test')
         },
@@ -250,12 +250,12 @@ describe('ErrorBoundary', () => {
   describe('nested boundaries', () => {
     it('should allow nested ErrorBoundary components', () => {
       const innerBoundary = ErrorBoundary({
-        fallback: h('div', { class: 'inner-fallback' }, 'Inner error'),
-        children: h('div', {}, 'Inner content'),
+        fallback: f('div', { class: 'inner-fallback' }, 'Inner error'),
+        children: f('div', {}, 'Inner content'),
       })
 
       const outerBoundary = ErrorBoundary({
-        fallback: h('div', { class: 'outer-fallback' }, 'Outer error'),
+        fallback: f('div', { class: 'outer-fallback' }, 'Outer error'),
         children: innerBoundary,
       })
 
@@ -271,7 +271,7 @@ describe('ErrorBoundary', () => {
 
       const fallbackFn = vi.fn(({ error }) => {
         receivedError = error
-        return h('div', {}, error.message)
+        return f('div', {}, error.message)
       })
 
       const boundary = ErrorBoundary({
@@ -293,7 +293,7 @@ describe('ErrorBoundary', () => {
 
       const fallbackFn = vi.fn(({ reset }) => {
         resetFn = reset
-        return h('button', { onclick: reset }, 'Reset')
+        return f('button', { onclick: reset }, 'Reset')
       })
 
       const boundary = ErrorBoundary({

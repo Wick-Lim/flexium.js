@@ -7,10 +7,10 @@
  * ```
  */
 
-import type { VNode } from '../../types'
+import type { FNode } from '../../types'
 import type { DrawCircleProps } from '../types'
 
-export function DrawCircle(props: DrawCircleProps): VNode {
+export function DrawCircle(props: DrawCircleProps): FNode {
   return {
     type: 'canvas-circle',
     props,

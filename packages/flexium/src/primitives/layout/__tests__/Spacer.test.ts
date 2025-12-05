@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { Spacer } from '../Spacer'
 
 describe('Spacer', () => {
-  it('should create a VNode with display flex', () => {
+  it('should create a FNode with display flex', () => {
     const result = Spacer({}) as any
     expect(result).toBeDefined()
     expect(result.type).toBe('div')

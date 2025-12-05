@@ -1,5 +1,5 @@
-import { h } from '../../renderers/dom/h'
-import { VNode } from '../../core/renderer'
+import { f } from '../../renderers/dom/h'
+import { FNode } from '../../core/renderer'
 import {
   BaseComponentProps,
   AlignItems,
@@ -30,7 +30,7 @@ export interface StackProps extends BaseComponentProps {
  * </Stack>
  * ```
  */
-export function Stack(props: StackProps): VNode {
+export function Stack(props: StackProps): FNode {
   const {
     children,
     align,
@@ -71,10 +71,10 @@ export function Stack(props: StackProps): VNode {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stackedChildren = kids.map((child: any) => {
     if (!child || typeof child !== 'object') return child
-    // In a real implementation we would clone the VNode and merge styles
+    // In a real implementation we would clone the FNode and merge styles
     // For now, we assume the renderer handles grid overlap or we rely on the container
     // Actually, to make Stack work, children need grid-area: 1/1/2/2 or similar.
-    // Since we can't easily clone VNodes here without helper, we might rely on CSS selector
+    // Since we can't easily clone FNodes here without helper, we might rely on CSS selector
     // or wrapping. Let's wrap in a div if we must, or assume direct children support style injection.
     // For this MVP restoration, we'll just return children. The grid container forces overlap
     // if we set grid-template-areas or similar, but simplest is grid-column: 1 / -1, grid-row: 1 / -1 on children.
@@ -89,5 +89,5 @@ export function Stack(props: StackProps): VNode {
   // To enforce stacking, we'd ideally inject style to children.
   // For now, let's just render the container.
 
-  return h(as, { style: finalStyles, className, ...props }, stackedChildren)
+  return f(as, { style: finalStyles, className, ...props }, stackedChildren)
 }

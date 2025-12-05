@@ -113,7 +113,7 @@ export function mountReactive(
 
     let currentNode: Node | null = startNode
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let currentVNode: any = null
+    let currentFNode: any = null
     let currentFNodeList: FNode[] = []
 
     const dispose = effect(() => {
@@ -125,14 +125,14 @@ export function mountReactive(
       if (!currentContainer) return
 
       if (Array.isArray(value)) {
-        const newVNodes = value.filter((c) => c != null)
+        const newFNodes = value.filter((c) => c != null)
         if (currentFNodeList.length > 0) {
           const nextSibling = startNode.nextSibling
-          // Note: reconcileArrays expects parent, oldVNodes, newVNodes, nextSibling
+          // Note: reconcileArrays expects parent, oldFNodes, newFNodes, nextSibling
           reconcileArrays(
             currentContainer,
             currentFNodeList,
-            newVNodes,
+            newFNodes,
             nextSibling
           )
         } else {
@@ -142,7 +142,7 @@ export function mountReactive(
             } catch (e) {}
           }
           const fragment = document.createDocumentFragment()
-          for (const child of newVNodes) {
+          for (const child of newFNodes) {
             const childNode = mountReactive(child, fragment)
             if (childNode && typeof child === 'object') {
               child._node = childNode
@@ -150,27 +150,27 @@ export function mountReactive(
           }
           currentContainer.insertBefore(fragment, startNode.nextSibling)
         }
-        currentFNodeList = newVNodes
-        currentVNode = value
+        currentFNodeList = newFNodes
+        currentFNode = value
         currentNode = startNode
         return
       }
 
       if (currentFNodeList.length > 0) {
-        for (const childVNode of currentFNodeList) {
+        for (const childFNode of currentFNodeList) {
           if (
-            childVNode._node &&
-            childVNode._node.parentNode === currentContainer
+            childFNode._node &&
+            childFNode._node.parentNode === currentContainer
           ) {
             try {
-              currentContainer.removeChild(childVNode._node)
+              currentContainer.removeChild(childFNode._node)
             } catch (e) {}
           }
         }
         currentFNodeList = []
       }
 
-      if (value !== currentVNode) {
+      if (value !== currentFNode) {
         if (
           (typeof value === 'string' || typeof value === 'number') &&
           currentNode &&
@@ -204,7 +204,7 @@ export function mountReactive(
             currentNode = startNode
           }
         }
-        currentVNode = value
+        currentFNode = value
       }
     })
 
@@ -234,7 +234,7 @@ export function mountReactive(
     return textNode
   }
 
-  // Handle VNodes
+  // Handle FNodes
   if (isFNode(vnode)) {
     // Handle For component specially (direct DOM caching)
     if (vnode.type === For) {

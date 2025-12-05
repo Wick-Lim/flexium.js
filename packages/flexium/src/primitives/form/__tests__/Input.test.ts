@@ -10,7 +10,7 @@ import { signal, effect } from '../../../core/signal'
 import { createInput, createInputField, type InputProps } from '../Input'
 
 describe('Input Component', () => {
-  describe('createInput() - Basic VNode creation', () => {
+  describe('createInput() - Basic FNode creation', () => {
     it('should create an input element with default type', () => {
       const { element } = createInput({})
 

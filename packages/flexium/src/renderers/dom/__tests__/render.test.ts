@@ -13,7 +13,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, createRoot, mount, update } from '../render'
-import { h, Fragment } from '../h'
+import { f, Fragment } from '../h'
 import { signal } from '../../../core/signal'
 
 describe('DOM Render Module', () => {
@@ -30,7 +30,7 @@ describe('DOM Render Module', () => {
 
   describe('render() - primary entry point', () => {
     it('should render a simple element', () => {
-      render(h('div', { class: 'test' }, 'Hello'), container)
+      render(f('div', { class: 'test' }, 'Hello'), container)
 
       const div = container.querySelector('.test')
       expect(div).not.toBeNull()
@@ -60,14 +60,14 @@ describe('DOM Render Module', () => {
     })
 
     it('should return the rendered DOM node', () => {
-      const result = render(h('div', {}, 'Content'), container)
+      const result = render(f('div', {}, 'Content'), container)
       expect(result).not.toBeNull()
       expect(result?.nodeType).toBeDefined()
     })
 
     it('should add to existing content', () => {
       container.innerHTML = '<span>Old</span>'
-      render(h('div', {}, 'New'), container)
+      render(f('div', {}, 'New'), container)
 
       // render() uses renderReactive which appends rather than replaces
       expect(container.querySelector('span')).not.toBeNull()
@@ -76,7 +76,7 @@ describe('DOM Render Module', () => {
 
     it('should handle reactive signals (delegated to renderReactive)', async () => {
       const count = signal(0)
-      render(h('div', {}, count), container)
+      render(f('div', {}, count), container)
 
       expect(container.textContent).toContain('0')
 
@@ -87,7 +87,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should render function as lazy component', () => {
-      const lazyDiv = () => h('div', { class: 'lazy' }, 'Lazy Content')
+      const lazyDiv = () => f('div', { class: 'lazy' }, 'Lazy Content')
       render(lazyDiv, container)
 
       const div = container.querySelector('.lazy')
@@ -98,7 +98,7 @@ describe('DOM Render Module', () => {
 
   describe('mounting VNodes - element creation', () => {
     it('should mount a simple element with text', () => {
-      render(h('p', {}, 'Paragraph text'), container)
+      render(f('p', {}, 'Paragraph text'), container)
 
       const p = container.querySelector('p')
       expect(p).not.toBeNull()
@@ -107,7 +107,7 @@ describe('DOM Render Module', () => {
 
     it('should mount nested elements', () => {
       render(
-        h('div', { class: 'outer' }, h('span', { class: 'inner' }, 'Nested')),
+        f('div', { class: 'outer' }, f('span', { class: 'inner' }, 'Nested')),
         container
       )
 
@@ -120,12 +120,12 @@ describe('DOM Render Module', () => {
 
     it('should mount elements with multiple children', () => {
       render(
-        h(
+        f(
           'ul',
           {},
-          h('li', {}, 'Item 1'),
-          h('li', {}, 'Item 2'),
-          h('li', {}, 'Item 3')
+          f('li', {}, 'Item 1'),
+          f('li', {}, 'Item 2'),
+          f('li', {}, 'Item 3')
         ),
         container
       )
@@ -139,10 +139,10 @@ describe('DOM Render Module', () => {
 
     it('should mount deeply nested elements', () => {
       render(
-        h(
+        f(
           'div',
           {},
-          h('div', {}, h('div', {}, h('span', { id: 'deep' }, 'Deep')))
+          f('div', {}, f('div', {}, f('span', { id: 'deep' }, 'Deep')))
         ),
         container
       )
@@ -154,14 +154,14 @@ describe('DOM Render Module', () => {
 
     it('should mount elements with mixed children types', () => {
       render(
-        h(
+        f(
           'div',
           {},
           'Text ',
-          h('strong', {}, 'Bold'),
+          f('strong', {}, 'Bold'),
           ' ',
           42,
-          h('em', {}, 'Italic')
+          f('em', {}, 'Italic')
         ),
         container
       )
@@ -177,7 +177,7 @@ describe('DOM Render Module', () => {
   describe('mounting VNodes - props and attributes', () => {
     it('should set element attributes', () => {
       render(
-        h('div', { id: 'myid', title: 'tooltip', 'data-custom': 'value' }),
+        f('div', { id: 'myid', title: 'tooltip', 'data-custom': 'value' }),
         container
       )
 
@@ -188,21 +188,21 @@ describe('DOM Render Module', () => {
     })
 
     it('should set className', () => {
-      render(h('div', { className: 'one two three' }), container)
+      render(f('div', { className: 'one two three' }), container)
 
       const div = container.querySelector('div')
       expect(div?.className).toBe('one two three')
     })
 
     it('should set class prop', () => {
-      render(h('div', { class: 'test-class' }), container)
+      render(f('div', { class: 'test-class' }), container)
 
       const div = container.querySelector('div')
       expect(div?.className).toBe('test-class')
     })
 
     it('should handle style object', () => {
-      render(h('div', { style: { color: 'red', fontSize: '20px' } }), container)
+      render(f('div', { style: { color: 'red', fontSize: '20px' } }), container)
 
       const div = container.querySelector('div') as HTMLElement
       expect(div?.style.color).toBe('red')
@@ -210,7 +210,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle boolean attributes', () => {
-      render(h('input', { disabled: true, checked: false }), container)
+      render(f('input', { disabled: true, checked: false }), container)
 
       const input = container.querySelector('input')
       expect(input?.hasAttribute('disabled')).toBe(true)
@@ -218,7 +218,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle empty props', () => {
-      render(h('div', {}, 'Content'), container)
+      render(f('div', {}, 'Content'), container)
 
       const div = container.querySelector('div')
       expect(div).not.toBeNull()
@@ -226,7 +226,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle null props', () => {
-      render(h('div', null, 'Content'), container)
+      render(f('div', null, 'Content'), container)
 
       const div = container.querySelector('div')
       expect(div).not.toBeNull()
@@ -236,7 +236,7 @@ describe('DOM Render Module', () => {
   describe('mounting VNodes - event handlers', () => {
     it('should attach click event handler', () => {
       const onClick = vi.fn()
-      render(h('button', { onclick: onClick }, 'Click me'), container)
+      render(f('button', { onclick: onClick }, 'Click me'), container)
 
       const button = container.querySelector('button')
       button?.click()
@@ -249,7 +249,7 @@ describe('DOM Render Module', () => {
       const onMouseLeave = vi.fn()
 
       render(
-        h(
+        f(
           'div',
           {
             onclick: onClick,
@@ -273,7 +273,7 @@ describe('DOM Render Module', () => {
 
     it('should pass event object to handler', () => {
       const onClick = vi.fn()
-      render(h('button', { onclick: onClick }, 'Click'), container)
+      render(f('button', { onclick: onClick }, 'Click'), container)
 
       const button = container.querySelector('button')
       button?.click()
@@ -287,7 +287,7 @@ describe('DOM Render Module', () => {
 
     it('should handle input events', () => {
       const onInput = vi.fn()
-      render(h('input', { oninput: onInput }), container)
+      render(f('input', { oninput: onInput }), container)
 
       const input = container.querySelector('input')
       // Use bubbles: true for event delegation to work
@@ -300,8 +300,8 @@ describe('DOM Render Module', () => {
   describe('function components', () => {
     it('should render function component', () => {
       const MyComponent = () =>
-        h('div', { class: 'component' }, 'Component Content')
-      render(h(MyComponent, {}), container)
+        f('div', { class: 'component' }, 'Component Content')
+      render(f(MyComponent, {}), container)
 
       const div = container.querySelector('.component')
       expect(div).not.toBeNull()
@@ -310,19 +310,19 @@ describe('DOM Render Module', () => {
 
     it('should pass props to function component', () => {
       const Greeting = (props: { name: string }) =>
-        h('div', {}, `Hello, ${props.name}!`)
+        f('div', {}, `Hello, ${props.name}!`)
 
-      render(h(Greeting, { name: 'World' }), container)
+      render(f(Greeting, { name: 'World' }), container)
 
       expect(container.textContent).toContain('Hello, World!')
     })
 
     it('should pass children to function component', () => {
       const Wrapper = (props: { children: any }) =>
-        h('div', { class: 'wrapper' }, props.children)
+        f('div', { class: 'wrapper' }, props.children)
 
       render(
-        h(Wrapper, {}, h('span', {}, 'Child 1'), h('span', {}, 'Child 2')),
+        f(Wrapper, {}, f('span', {}, 'Child 1'), f('span', {}, 'Child 2')),
         container
       )
 
@@ -334,11 +334,11 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle nested function components', () => {
-      const Inner = () => h('span', { class: 'inner' }, 'Inner')
-      const Middle = () => h('div', { class: 'middle' }, h(Inner, {}))
-      const Outer = () => h('div', { class: 'outer' }, h(Middle, {}))
+      const Inner = () => f('span', { class: 'inner' }, 'Inner')
+      const Middle = () => f('div', { class: 'middle' }, f(Inner, {}))
+      const Outer = () => f('div', { class: 'outer' }, f(Middle, {}))
 
-      render(h(Outer, {}), container)
+      render(f(Outer, {}), container)
 
       expect(container.querySelector('.outer')).not.toBeNull()
       expect(container.querySelector('.middle')).not.toBeNull()
@@ -347,25 +347,25 @@ describe('DOM Render Module', () => {
 
     it('should handle component returning null', () => {
       const EmptyComponent = () => null
-      render(h(EmptyComponent, {}), container)
+      render(f(EmptyComponent, {}), container)
 
       expect(container.children.length).toBe(0)
     })
 
     it('should handle component returning text', () => {
       const TextComponent = () => 'Just text'
-      render(h(TextComponent, {}), container)
+      render(f(TextComponent, {}), container)
 
       expect(container.textContent).toContain('Just text')
     })
 
     it('should handle component returning array', () => {
       const ListComponent = () => [
-        h('div', { key: '1' }, 'Item 1'),
-        h('div', { key: '2' }, 'Item 2'),
+        f('div', { key: '1' }, 'Item 1'),
+        f('div', { key: '2' }, 'Item 2'),
       ]
 
-      render(h(ListComponent, {}), container)
+      render(f(ListComponent, {}), container)
 
       const divs = container.querySelectorAll('div')
       expect(divs.length).toBe(2)
@@ -375,12 +375,12 @@ describe('DOM Render Module', () => {
   describe('Fragment handling', () => {
     it('should render Fragment with multiple children', () => {
       render(
-        h(
+        f(
           Fragment,
           {},
-          h('span', {}, 'First'),
-          h('span', {}, 'Second'),
-          h('span', {}, 'Third')
+          f('span', {}, 'First'),
+          f('span', {}, 'Second'),
+          f('span', {}, 'Third')
         ),
         container
       )
@@ -393,24 +393,24 @@ describe('DOM Render Module', () => {
     })
 
     it('should render Fragment with single child', () => {
-      render(h(Fragment, {}, h('div', {}, 'Single')), container)
+      render(f(Fragment, {}, f('div', {}, 'Single')), container)
 
       expect(container.querySelector('div')?.textContent).toBe('Single')
     })
 
     it('should render empty Fragment', () => {
-      render(h(Fragment, {}), container)
+      render(f(Fragment, {}), container)
       expect(container.children.length).toBe(0)
     })
 
     it('should render nested Fragments', () => {
       render(
-        h(
+        f(
           Fragment,
           {},
-          h('div', {}, 'Before'),
-          h(Fragment, {}, h('span', {}, 'Nested 1'), h('span', {}, 'Nested 2')),
-          h('div', {}, 'After')
+          f('div', {}, 'Before'),
+          f(Fragment, {}, f('span', {}, 'Nested 1'), f('span', {}, 'Nested 2')),
+          f('div', {}, 'After')
         ),
         container
       )
@@ -423,7 +423,7 @@ describe('DOM Render Module', () => {
 
     it('should handle Fragment with mixed content', () => {
       render(
-        h(Fragment, {}, 'Text', h('strong', {}, 'Bold'), 42, null, undefined),
+        f(Fragment, {}, 'Text', f('strong', {}, 'Bold'), 42, null, undefined),
         container
       )
 
@@ -432,8 +432,8 @@ describe('DOM Render Module', () => {
       expect(container.textContent).toContain('42')
     })
 
-    it('should render fragment type VNode', () => {
-      const frag = h('fragment', {}, h('div', {}, 'One'), h('div', {}, 'Two'))
+    it('should render fragment type FNode', () => {
+      const frag = f('fragment', {}, f('div', {}, 'One'), f('div', {}, 'Two'))
       render(frag, container)
 
       const divs = container.querySelectorAll('div')
@@ -443,7 +443,7 @@ describe('DOM Render Module', () => {
 
   describe('array flattening and children', () => {
     it('should flatten array children', () => {
-      render(h('div', {}, [h('span', {}, '1'), h('span', {}, '2')]), container)
+      render(f('div', {}, [f('span', {}, '1'), f('span', {}, '2')]), container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(2)
@@ -451,9 +451,9 @@ describe('DOM Render Module', () => {
 
     it('should flatten nested arrays', () => {
       render(
-        h('div', {}, [
-          [h('span', {}, '1'), h('span', {}, '2')],
-          [h('span', {}, '3')],
+        f('div', {}, [
+          [f('span', {}, '1'), f('span', {}, '2')],
+          [f('span', {}, '3')],
         ]),
         container
       )
@@ -464,7 +464,7 @@ describe('DOM Render Module', () => {
 
     it('should handle array with null and undefined', () => {
       render(
-        h('div', {}, [h('span', {}, 'A'), null, undefined, h('span', {}, 'B')]),
+        f('div', {}, [f('span', {}, 'A'), null, undefined, f('span', {}, 'B')]),
         container
       )
 
@@ -475,24 +475,24 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle empty array', () => {
-      render(h('div', {}, []), container)
+      render(f('div', {}, []), container)
 
       const div = container.querySelector('div')
       expect(div?.children.length).toBe(0)
     })
 
     it('should handle array of text nodes', () => {
-      render(h('div', {}, ['Hello', ' ', 'World']), container)
+      render(f('div', {}, ['Hello', ' ', 'World']), container)
 
       expect(container.textContent).toBe('Hello World')
     })
 
     it('should handle array of mixed types', () => {
       render(
-        h('div', {}, [
+        f('div', {}, [
           'Text',
           42,
-          h('span', {}, 'Element'),
+          f('span', {}, 'Element'),
           true,
           false,
           null,
@@ -539,7 +539,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should create multiple text nodes', () => {
-      render(h('div', {}, 'First', 'Second', 'Third'), container)
+      render(f('div', {}, 'First', 'Second', 'Third'), container)
 
       expect(container.textContent).toBe('FirstSecondThird')
     })
@@ -557,12 +557,12 @@ describe('DOM Render Module', () => {
   describe('edge cases - falsy children', () => {
     it('should skip null children', () => {
       render(
-        h(
+        f(
           'div',
           {},
-          h('span', {}, 'Visible'),
+          f('span', {}, 'Visible'),
           null,
-          h('span', {}, 'Also Visible')
+          f('span', {}, 'Also Visible')
         ),
         container
       )
@@ -573,7 +573,7 @@ describe('DOM Render Module', () => {
 
     it('should skip undefined children', () => {
       render(
-        h('div', {}, h('span', {}, 'A'), undefined, h('span', {}, 'B')),
+        f('div', {}, f('span', {}, 'A'), undefined, f('span', {}, 'B')),
         container
       )
 
@@ -582,14 +582,14 @@ describe('DOM Render Module', () => {
     })
 
     it('should skip false children', () => {
-      render(h('div', {}, false, h('span', {}, 'Visible'), false), container)
+      render(f('div', {}, false, f('span', {}, 'Visible'), false), container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(1)
     })
 
     it('should skip true children', () => {
-      render(h('div', {}, true, h('span', {}, 'Visible'), true), container)
+      render(f('div', {}, true, f('span', {}, 'Visible'), true), container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(1)
@@ -598,11 +598,11 @@ describe('DOM Render Module', () => {
     it('should handle conditional rendering with boolean', () => {
       const showContent = false
       render(
-        h(
+        f(
           'div',
           {},
-          showContent && h('span', {}, 'Hidden'),
-          h('span', {}, 'Always Visible')
+          showContent && f('span', {}, 'Hidden'),
+          f('span', {}, 'Always Visible')
         ),
         container
       )
@@ -614,7 +614,7 @@ describe('DOM Render Module', () => {
 
     it('should handle all falsy types together', () => {
       render(
-        h('div', {}, null, undefined, false, true, h('span', {}, 'Only This')),
+        f('div', {}, null, undefined, false, true, f('span', {}, 'Only This')),
         container
       )
 
@@ -636,7 +636,7 @@ describe('DOM Render Module', () => {
 
     it('should render content via root', () => {
       const root = createRoot(container)
-      root.render(h('div', { class: 'root-test' }, 'Hello Root'))
+      root.render(f('div', { class: 'root-test' }, 'Hello Root'))
 
       const div = container.querySelector('.root-test')
       expect(div).not.toBeNull()
@@ -646,17 +646,17 @@ describe('DOM Render Module', () => {
     it('should replace content on re-render', () => {
       const root = createRoot(container)
 
-      root.render(h('div', {}, 'First'))
+      root.render(f('div', {}, 'First'))
       expect(container.textContent).toContain('First')
 
-      root.render(h('div', {}, 'Second'))
+      root.render(f('div', {}, 'Second'))
       expect(container.textContent).toContain('Second')
       expect(container.textContent).not.toContain('First')
     })
 
     it('should unmount content', () => {
       const root = createRoot(container)
-      root.render(h('div', {}, 'Content'))
+      root.render(f('div', {}, 'Content'))
 
       expect(container.children.length).toBeGreaterThan(0)
 
@@ -667,9 +667,9 @@ describe('DOM Render Module', () => {
     it('should handle multiple renders before unmount', () => {
       const root = createRoot(container)
 
-      root.render(h('div', {}, 'One'))
-      root.render(h('div', {}, 'Two'))
-      root.render(h('div', {}, 'Three'))
+      root.render(f('div', {}, 'One'))
+      root.render(f('div', {}, 'Two'))
+      root.render(f('div', {}, 'Three'))
 
       expect(container.textContent).toContain('Three')
 
@@ -680,7 +680,7 @@ describe('DOM Render Module', () => {
 
   describe('mount() - convenience function', () => {
     it('should mount with container-first API', () => {
-      mount(container, h('div', { class: 'mounted' }, 'Mounted'))
+      mount(container, f('div', { class: 'mounted' }, 'Mounted'))
 
       const div = container.querySelector('.mounted')
       expect(div).not.toBeNull()
@@ -688,7 +688,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should return rendered node', () => {
-      const result = mount(container, h('div', {}, 'Content'))
+      const result = mount(container, f('div', {}, 'Content'))
 
       expect(result).not.toBeNull()
       expect(result?.nodeType).toBeDefined()
@@ -698,8 +698,8 @@ describe('DOM Render Module', () => {
       const container1 = document.createElement('div')
       const container2 = document.createElement('div')
 
-      render(h('div', {}, 'Test'), container1)
-      mount(container2, h('div', {}, 'Test'))
+      render(f('div', {}, 'Test'), container1)
+      mount(container2, f('div', {}, 'Test'))
 
       expect(container1.innerHTML).toBe(container2.innerHTML)
     })
@@ -707,49 +707,49 @@ describe('DOM Render Module', () => {
 
   describe('update() - reconciliation', () => {
     it('should update element props', () => {
-      const oldVNode = h('div', { class: 'old', id: 'test' }, 'Content')
+      const oldVNode = f('div', { class: 'old', id: 'test' }, 'Content')
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
       expect(div?.className).toBe('old')
 
-      const newVNode = h('div', { class: 'new', id: 'test' }, 'Content')
+      const newVNode = f('div', { class: 'new', id: 'test' }, 'Content')
       update(div, oldVNode, newVNode)
 
       expect(div?.className).toBe('new')
     })
 
     it('should update text content', () => {
-      const oldVNode = h('div', {}, 'Old Text')
+      const oldVNode = f('div', {}, 'Old Text')
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
       expect(div?.textContent).toBe('Old Text')
 
-      const newVNode = h('div', {}, 'New Text')
+      const newVNode = f('div', {}, 'New Text')
       update(div, oldVNode, newVNode)
 
       expect(div?.textContent).toBe('New Text')
     })
 
     it('should update children', () => {
-      const oldVNode = h(
+      const oldVNode = f(
         'div',
         {},
-        h('span', {}, 'Child 1'),
-        h('span', {}, 'Child 2')
+        f('span', {}, 'Child 1'),
+        f('span', {}, 'Child 2')
       )
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
       expect(div?.querySelectorAll('span').length).toBe(2)
 
-      const newVNode = h(
+      const newVNode = f(
         'div',
         {},
-        h('span', {}, 'Updated 1'),
-        h('span', {}, 'Updated 2'),
-        h('span', {}, 'New 3')
+        f('span', {}, 'Updated 1'),
+        f('span', {}, 'Updated 2'),
+        f('span', {}, 'New 3')
       )
       update(div, oldVNode, newVNode)
 
@@ -761,18 +761,18 @@ describe('DOM Render Module', () => {
     })
 
     it('should remove excess children', () => {
-      const oldVNode = h(
+      const oldVNode = f(
         'div',
         {},
-        h('span', {}, '1'),
-        h('span', {}, '2'),
-        h('span', {}, '3')
+        f('span', {}, '1'),
+        f('span', {}, '2'),
+        f('span', {}, '3')
       )
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {}, h('span', {}, '1'))
+      const newVNode = f('div', {}, f('span', {}, '1'))
       update(div, oldVNode, newVNode)
 
       // The update function has a simple reconciliation that may not remove all children
@@ -783,17 +783,17 @@ describe('DOM Render Module', () => {
     })
 
     it('should add new children', () => {
-      const oldVNode = h('div', {}, h('span', {}, '1'))
+      const oldVNode = f('div', {}, f('span', {}, '1'))
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h(
+      const newVNode = f(
         'div',
         {},
-        h('span', {}, '1'),
-        h('span', {}, '2'),
-        h('span', {}, '3')
+        f('span', {}, '1'),
+        f('span', {}, '2'),
+        f('span', {}, '3')
       )
       update(div, oldVNode, newVNode)
 
@@ -801,13 +801,13 @@ describe('DOM Render Module', () => {
     })
 
     it('should replace node when type changes', () => {
-      const oldVNode = h('div', { class: 'old' }, 'Content')
+      const oldVNode = f('div', { class: 'old' }, 'Content')
       render(oldVNode, container)
 
       const oldDiv = container.querySelector('div')
       expect(oldDiv).not.toBeNull()
 
-      const newVNode = h('span', { class: 'new' }, 'Content')
+      const newVNode = f('span', { class: 'new' }, 'Content')
       update(oldDiv as HTMLElement, oldVNode, newVNode)
 
       expect(container.querySelector('div')).toBeNull()
@@ -815,24 +815,24 @@ describe('DOM Render Module', () => {
     })
 
     it('should update text node to element', () => {
-      const oldVNode = h('div', {}, 'Text Only')
+      const oldVNode = f('div', {}, 'Text Only')
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {}, h('strong', {}, 'Element Now'))
+      const newVNode = f('div', {}, f('strong', {}, 'Element Now'))
       update(div, oldVNode, newVNode)
 
       expect(div?.querySelector('strong')).not.toBeNull()
     })
 
     it('should update element to text node', () => {
-      const oldVNode = h('div', {}, h('strong', {}, 'Element'))
+      const oldVNode = f('div', {}, f('strong', {}, 'Element'))
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {}, 'Text Only')
+      const newVNode = f('div', {}, 'Text Only')
       update(div, oldVNode, newVNode)
 
       expect(div?.querySelector('strong')).toBeNull()
@@ -840,24 +840,24 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle empty to non-empty children', () => {
-      const oldVNode = h('div', {})
+      const oldVNode = f('div', {})
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {}, h('span', {}, 'Now has content'))
+      const newVNode = f('div', {}, f('span', {}, 'Now has content'))
       update(div, oldVNode, newVNode)
 
       expect(div?.querySelector('span')).not.toBeNull()
     })
 
     it('should handle non-empty to empty children', () => {
-      const oldVNode = h('div', {}, h('span', {}, 'Has content'))
+      const oldVNode = f('div', {}, f('span', {}, 'Has content'))
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {})
+      const newVNode = f('div', {})
       update(div, oldVNode, newVNode)
 
       expect(div?.children.length).toBe(0)
@@ -867,31 +867,31 @@ describe('DOM Render Module', () => {
   describe('complex scenarios', () => {
     it('should render complex nested structure', () => {
       render(
-        h(
+        f(
           'div',
           { class: 'app' },
-          h(
+          f(
             'header',
             {},
-            h('h1', {}, 'Title'),
-            h(
+            f('h1', {}, 'Title'),
+            f(
               'nav',
               {},
-              h('a', { href: '#' }, 'Home'),
-              h('a', { href: '#' }, 'About')
+              f('a', { href: '#' }, 'Home'),
+              f('a', { href: '#' }, 'About')
             )
           ),
-          h(
+          f(
             'main',
             {},
-            h(
+            f(
               'article',
               {},
-              h('h2', {}, 'Article Title'),
-              h('p', {}, 'Article content here.')
+              f('h2', {}, 'Article Title'),
+              f('p', {}, 'Article content here.')
             )
           ),
-          h('footer', {}, h('p', {}, 'Copyright 2024'))
+          f('footer', {}, f('p', {}, 'Copyright 2024'))
         ),
         container
       )
@@ -906,10 +906,10 @@ describe('DOM Render Module', () => {
     it('should handle list rendering', () => {
       const items = ['Apple', 'Banana', 'Cherry']
       render(
-        h(
+        f(
           'ul',
           {},
-          items.map((item) => h('li', { key: item }, item))
+          items.map((item) => f('li', { key: item }, item))
         ),
         container
       )
@@ -922,44 +922,44 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle dynamic component selection', () => {
-      const Button = () => h('button', {}, 'Button')
-      const Link = () => h('a', { href: '#' }, 'Link')
+      const Button = () => f('button', {}, 'Button')
+      const Link = () => f('a', { href: '#' }, 'Link')
 
       const type = 'button'
       const Component = type === 'button' ? Button : Link
 
-      render(h(Component, {}), container)
+      render(f(Component, {}), container)
 
       expect(container.querySelector('button')).not.toBeNull()
     })
 
     it('should handle HOC pattern', () => {
       const withWrapper = (Component: Function) => (props: any) =>
-        h('div', { class: 'wrapper' }, h(Component, props))
+        f('div', { class: 'wrapper' }, f(Component, props))
 
-      const Inner = () => h('span', {}, 'Inner')
+      const Inner = () => f('span', {}, 'Inner')
       const Wrapped = withWrapper(Inner)
 
-      render(h(Wrapped, {}), container)
+      render(f(Wrapped, {}), container)
 
       expect(container.querySelector('.wrapper span')).not.toBeNull()
     })
 
     it('should render form with various input types', () => {
       render(
-        h(
+        f(
           'form',
           {},
-          h('input', { type: 'text', placeholder: 'Name' }),
-          h('input', { type: 'email', placeholder: 'Email' }),
-          h('textarea', { placeholder: 'Message' }),
-          h(
+          f('input', { type: 'text', placeholder: 'Name' }),
+          f('input', { type: 'email', placeholder: 'Email' }),
+          f('textarea', { placeholder: 'Message' }),
+          f(
             'select',
             {},
-            h('option', { value: '1' }, 'Option 1'),
-            h('option', { value: '2' }, 'Option 2')
+            f('option', { value: '1' }, 'Option 1'),
+            f('option', { value: '2' }, 'Option 2')
           ),
-          h('button', { type: 'submit' }, 'Submit')
+          f('button', { type: 'submit' }, 'Submit')
         ),
         container
       )
@@ -978,10 +978,10 @@ describe('DOM Render Module', () => {
 
       const start = performance.now()
       render(
-        h(
+        f(
           'div',
           {},
-          items.map((item, i) => h('div', { key: i }, item))
+          items.map((item, i) => f('div', { key: i }, item))
         ),
         container
       )
@@ -992,12 +992,12 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle very deep nesting', () => {
-      let vnode = h('div', { id: 'deepest' }, 'Deep')
+      let fnode = f('div', { id: 'deepest' }, 'Deep')
       for (let i = 0; i < 50; i++) {
-        vnode = h('div', {}, vnode)
+        fnode = f('div', {}, fnode)
       }
 
-      render(vnode, container)
+      render(fnode, container)
 
       expect(container.querySelector('#deepest')).not.toBeNull()
     })
@@ -1010,12 +1010,12 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle components that return components', () => {
-      const Inner = () => h('span', {}, 'Inner')
+      const Inner = () => f('span', {}, 'Inner')
       const Middle = () => Inner
-      const Outer = () => h(Middle as any, {})
+      const Outer = () => f(Middle as any, {})
 
       // This tests the lazy evaluation chain
-      render(h(Outer, {}), container)
+      render(f(Outer, {}), container)
 
       // The exact behavior depends on implementation
       // At minimum, it should not crash
@@ -1028,18 +1028,18 @@ describe('DOM Render Module', () => {
 
       // Should not throw or cause infinite loop
       expect(() => {
-        render(h('div', { 'data-value': props.value }), container)
+        render(f('div', { 'data-value': props.value }), container)
       }).not.toThrow()
     })
 
-    it('should handle same vnode mounted multiple times', () => {
-      const vnode = h('div', {}, 'Shared')
+    it('should handle same fnode mounted multiple times', () => {
+      const fnode = f('div', {}, 'Shared')
 
       const container1 = document.createElement('div')
       const container2 = document.createElement('div')
 
-      render(vnode, container1)
-      render(vnode, container2)
+      render(fnode, container1)
+      render(fnode, container2)
 
       expect(container1.querySelector('div')?.textContent).toBe('Shared')
       expect(container2.querySelector('div')?.textContent).toBe('Shared')

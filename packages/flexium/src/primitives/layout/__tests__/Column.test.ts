@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { Column } from '../Column'
 
 describe('Column', () => {
-  it('should create a VNode with display flex and column direction', () => {
+  it('should create a FNode with display flex and column direction', () => {
     const result = Column({ children: [] }) as any
     expect(result).toBeDefined()
     expect(result.type).toBe('div')

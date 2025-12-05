@@ -8,7 +8,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { signal } from '../signal'
 import { For, Show, Switch, Match, isForComponent, FOR_MARKER } from '../flow'
-import { h } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/h'
 import { mountReactive } from '../../renderers/dom/reactive'
 
 describe('Control Flow Components', () => {
@@ -24,7 +24,7 @@ describe('Control Flow Components', () => {
       const items = signal([1, 2, 3])
       const result = For({
         each: items,
-        children: (item) => h('div', {}, [String(item)]),
+        children: (item) => f('div', {}, [String(item)]),
       })
 
       expect(isForComponent(result)).toBe(true)
@@ -35,15 +35,15 @@ describe('Control Flow Components', () => {
       const items = signal(['a', 'b', 'c'])
 
       const List = () => {
-        return h('div', { id: 'list' }, [
+        return f('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item) => h('span', {}, [item]),
+            children: (item) => f('span', {}, [item]),
           }) as any,
         ])
       }
 
-      mountReactive(h(List), container)
+      mountReactive(f(List), container)
 
       await new Promise((resolve) => setTimeout(resolve, 10))
 
@@ -58,15 +58,15 @@ describe('Control Flow Components', () => {
       const items = signal(['a', 'b'])
 
       const List = () => {
-        return h('div', { id: 'list' }, [
+        return f('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item) => h('span', {}, [item]),
+            children: (item) => f('span', {}, [item]),
           }) as any,
         ])
       }
 
-      mountReactive(h(List), container)
+      mountReactive(f(List), container)
 
       await new Promise((resolve) => setTimeout(resolve, 10))
 
@@ -85,15 +85,15 @@ describe('Control Flow Components', () => {
       const items = signal(['a', 'b', 'c'])
 
       const List = () => {
-        return h('div', { id: 'list' }, [
+        return f('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item) => h('span', {}, [item]),
+            children: (item) => f('span', {}, [item]),
           }) as any,
         ])
       }
 
-      mountReactive(h(List), container)
+      mountReactive(f(List), container)
 
       await new Promise((resolve) => setTimeout(resolve, 10))
 
@@ -112,15 +112,15 @@ describe('Control Flow Components', () => {
       const items = signal(['first', 'second', 'third'])
 
       const List = () => {
-        return h('div', { id: 'list' }, [
+        return f('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item, index) => h('span', {}, [`${index()}: ${item}`]),
+            children: (item, index) => f('span', {}, [`${index()}: ${item}`]),
           }) as any,
         ])
       }
 
-      mountReactive(h(List), container)
+      mountReactive(f(List), container)
 
       await new Promise((resolve) => setTimeout(resolve, 10))
 
@@ -134,15 +134,15 @@ describe('Control Flow Components', () => {
       const items = signal<string[]>([])
 
       const List = () => {
-        return h('div', { id: 'list' }, [
+        return f('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item) => h('span', {}, [item]),
+            children: (item) => f('span', {}, [item]),
           }) as any,
         ])
       }
 
-      mountReactive(h(List), container)
+      mountReactive(f(List), container)
 
       await new Promise((resolve) => setTimeout(resolve, 10))
 
@@ -157,7 +157,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: isVisible,
-        children: [h('div', {}, ['visible'])],
+        children: [f('div', {}, ['visible'])],
       })
 
       const result = showFn()
@@ -169,7 +169,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: isVisible,
-        children: [h('div', {}, ['visible'])],
+        children: [f('div', {}, ['visible'])],
       })
 
       const result = showFn()
@@ -178,12 +178,12 @@ describe('Control Flow Components', () => {
 
     it('should render fallback when condition is falsy', () => {
       const isVisible = signal(false)
-      const fallback = h('div', {}, ['fallback'])
+      const fallback = f('div', {}, ['fallback'])
 
       const showFn = Show({
         when: isVisible,
         fallback,
-        children: [h('div', {}, ['visible'])],
+        children: [f('div', {}, ['visible'])],
       })
 
       const result = showFn()
@@ -195,7 +195,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: user,
-        children: [(u: { name: string }) => h('div', {}, [`Hello ${u.name}`])],
+        children: [(u: { name: string }) => f('div', {}, [`Hello ${u.name}`])],
       })
 
       const result = showFn() as any
@@ -208,8 +208,8 @@ describe('Control Flow Components', () => {
       // Test the function behavior directly
       const showFn = Show({
         when: isVisible,
-        fallback: h('div', {}, ['hidden']),
-        children: [h('div', {}, ['visible'])],
+        fallback: f('div', {}, ['hidden']),
+        children: [f('div', {}, ['visible'])],
       })
 
       // Initial state - visible
@@ -232,7 +232,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: value,
-        children: [h('div', {}, ['content'])],
+        children: [f('div', {}, ['content'])],
       })
 
       const result = showFn()
@@ -244,7 +244,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: value,
-        children: [h('div', {}, ['content'])],
+        children: [f('div', {}, ['content'])],
       })
 
       const result = showFn()
@@ -259,9 +259,9 @@ describe('Control Flow Components', () => {
         when: isVisible,
         fallback: () => {
           fallbackCalled = true
-          return h('div', {}, ['fallback'])
+          return f('div', {}, ['fallback'])
         },
-        children: [h('div', {}, ['visible'])],
+        children: [f('div', {}, ['visible'])],
       })
 
       showFn()
@@ -275,14 +275,14 @@ describe('Control Flow Components', () => {
 
       const switchFn = Switch({
         children: [
-          h(Match as any, { when: () => status.value === 'loading' }, [
-            h('div', {}, ['Loading...']),
+          f(Match as any, { when: () => status.value === 'loading' }, [
+            f('div', {}, ['Loading...']),
           ]),
-          h(Match as any, { when: () => status.value === 'error' }, [
-            h('div', {}, ['Error!']),
+          f(Match as any, { when: () => status.value === 'error' }, [
+            f('div', {}, ['Error!']),
           ]),
-          h(Match as any, { when: () => status.value === 'success' }, [
-            h('div', {}, ['Success!']),
+          f(Match as any, { when: () => status.value === 'success' }, [
+            f('div', {}, ['Success!']),
           ]),
         ],
       })
@@ -293,16 +293,16 @@ describe('Control Flow Components', () => {
 
     it('should render fallback when no match', () => {
       const status = signal('unknown')
-      const fallback = h('div', {}, ['Unknown status'])
+      const fallback = f('div', {}, ['Unknown status'])
 
       const switchFn = Switch({
         fallback,
         children: [
-          h(Match as any, { when: () => status.value === 'loading' }, [
-            h('div', {}, ['Loading...']),
+          f(Match as any, { when: () => status.value === 'loading' }, [
+            f('div', {}, ['Loading...']),
           ]),
-          h(Match as any, { when: () => status.value === 'error' }, [
-            h('div', {}, ['Error!']),
+          f(Match as any, { when: () => status.value === 'error' }, [
+            f('div', {}, ['Error!']),
           ]),
         ],
       })
@@ -316,8 +316,8 @@ describe('Control Flow Components', () => {
 
       const switchFn = Switch({
         children: [
-          h(Match as any, { when: () => status.value === 'loading' }, [
-            h('div', {}, ['Loading...']),
+          f(Match as any, { when: () => status.value === 'loading' }, [
+            f('div', {}, ['Loading...']),
           ]),
         ],
       })
@@ -332,8 +332,8 @@ describe('Control Flow Components', () => {
 
       const switchFn = Switch({
         children: [
-          h(Match as any, { when: a }, [h('div', {}, ['First'])]),
-          h(Match as any, { when: b }, [h('div', {}, ['Second'])]),
+          f(Match as any, { when: a }, [f('div', {}, ['First'])]),
+          f(Match as any, { when: b }, [f('div', {}, ['Second'])]),
         ],
       })
 
@@ -345,16 +345,16 @@ describe('Control Flow Components', () => {
       const status = signal<'loading' | 'success' | 'error'>('loading')
 
       const switchFn = Switch({
-        fallback: h('div', {}, ['Unknown']),
+        fallback: f('div', {}, ['Unknown']),
         children: [
-          h(Match as any, { when: () => status.value === 'loading' }, [
-            h('div', {}, ['Loading...']),
+          f(Match as any, { when: () => status.value === 'loading' }, [
+            f('div', {}, ['Loading...']),
           ]),
-          h(Match as any, { when: () => status.value === 'success' }, [
-            h('div', {}, ['Success!']),
+          f(Match as any, { when: () => status.value === 'success' }, [
+            f('div', {}, ['Success!']),
           ]),
-          h(Match as any, { when: () => status.value === 'error' }, [
-            h('div', {}, ['Error!']),
+          f(Match as any, { when: () => status.value === 'error' }, [
+            f('div', {}, ['Error!']),
           ]),
         ],
       })
@@ -379,8 +379,8 @@ describe('Control Flow Components', () => {
 
       const switchFn = Switch({
         children: [
-          h(Match as any, { when: user }, [
-            (u: { name: string }) => h('div', {}, [`User: ${u.name}`]),
+          f(Match as any, { when: user }, [
+            (u: { name: string }) => f('div', {}, [`User: ${u.name}`]),
           ]),
         ],
       })
@@ -395,7 +395,7 @@ describe('Control Flow Components', () => {
       const items = signal([1, 2, 3])
       const result = For({
         each: items,
-        children: (item) => h('div', {}, [String(item)]),
+        children: (item) => f('div', {}, [String(item)]),
       })
 
       expect(isForComponent(result)).toBe(true)
@@ -409,8 +409,8 @@ describe('Control Flow Components', () => {
     })
 
     it('should return false for VNodes', () => {
-      const vnode = h('div', {}, ['test'])
-      expect(isForComponent(vnode)).toBe(false)
+      const fnode = f('div', {}, ['test'])
+      expect(isForComponent(fnode)).toBe(false)
     })
   })
 })

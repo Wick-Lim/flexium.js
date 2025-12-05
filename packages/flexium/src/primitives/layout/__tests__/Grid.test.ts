@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { Grid } from '../Grid'
 
 describe('Grid', () => {
-  it('should create a VNode with display grid', () => {
+  it('should create a FNode with display grid', () => {
     const result = Grid({ children: [] }) as any
     expect(result).toBeDefined()
     expect(result.type).toBe('div')

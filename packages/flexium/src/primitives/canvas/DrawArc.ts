@@ -7,10 +7,10 @@
  * ```
  */
 
-import type { VNode } from '../../types'
+import type { FNode } from '../../types'
 import type { DrawArcProps } from '../types'
 
-export function DrawArc(props: DrawArcProps): VNode {
+export function DrawArc(props: DrawArcProps): FNode {
   return {
     type: 'canvas-arc',
     props,

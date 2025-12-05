@@ -1,5 +1,5 @@
-import { h } from '../../renderers/dom/h'
-import { VNode } from '../../core/renderer'
+import { f } from '../../renderers/dom/h'
+import { FNode } from '../../core/renderer'
 import {
   BaseComponentProps,
   ResponsiveValue,
@@ -50,7 +50,7 @@ function toGridTemplate(value: number | string): string {
  * </Grid>
  * ```
  */
-export function Grid(props: GridProps): VNode {
+export function Grid(props: GridProps): FNode {
   const {
     children,
     cols,
@@ -102,5 +102,5 @@ export function Grid(props: GridProps): VNode {
     userStyle
   )
 
-  return h(as, { style: finalStyles, className, ...props }, children)
+  return f(as, { style: finalStyles, className, ...props }, children)
 }

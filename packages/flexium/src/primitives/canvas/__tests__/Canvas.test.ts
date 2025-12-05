@@ -102,67 +102,67 @@ describe('Canvas Component', () => {
     callbacks.forEach((cb) => cb(performance.now()))
   }
 
-  describe('VNode Creation', () => {
-    it('should create a canvas VNode with correct type', () => {
-      const vnode = Canvas({ width: 300, height: 200 })
+  describe('FNode Creation', () => {
+    it('should create a canvas FNode with correct type', () => {
+      const fnode = Canvas({ width: 300, height: 200 })
 
-      expect(vnode.type).toBe('canvas')
-      expect(vnode.children).toEqual([])
+      expect(fnode.type).toBe('canvas')
+      expect(fnode.children).toEqual([])
     })
 
     it('should pass width and height props', () => {
-      const vnode = Canvas({ width: 400, height: 300 })
+      const fnode = Canvas({ width: 400, height: 300 })
 
-      expect(vnode.props.width).toBe(400)
-      expect(vnode.props.height).toBe(300)
+      expect(fnode.props.width).toBe(400)
+      expect(fnode.props.height).toBe(300)
     })
 
     it('should pass id prop', () => {
-      const vnode = Canvas({ width: 300, height: 200, id: 'my-canvas' })
+      const fnode = Canvas({ width: 300, height: 200, id: 'my-canvas' })
 
-      expect(vnode.props.id).toBe('my-canvas')
+      expect(fnode.props.id).toBe('my-canvas')
     })
 
     it('should normalize and pass style prop', () => {
       const style = { backgroundColor: 'white', borderRadius: 4 }
-      const vnode = Canvas({ width: 300, height: 200, style })
+      const fnode = Canvas({ width: 300, height: 200, style })
 
-      expect(vnode.props.style).toBeDefined()
-      expect(vnode.props.style.backgroundColor).toBe('white')
+      expect(fnode.props.style).toBeDefined()
+      expect(fnode.props.style.backgroundColor).toBe('white')
       // borderRadius gets normalized to '4px' string by normalizeStyle
-      expect(vnode.props.style.borderRadius).toBe('4px')
+      expect(fnode.props.style.borderRadius).toBe('4px')
     })
 
     it('should pass additional props', () => {
-      const vnode = Canvas({
+      const fnode = Canvas({
         width: 300,
         height: 200,
         className: 'canvas-element',
         'data-testid': 'test-canvas',
       } as any)
 
-      expect(vnode.props.className).toBe('canvas-element')
-      expect(vnode.props['data-testid']).toBe('test-canvas')
+      expect(fnode.props.className).toBe('canvas-element')
+      expect(fnode.props['data-testid']).toBe('test-canvas')
     })
 
     it('should have a ref callback', () => {
-      const vnode = Canvas({ width: 300, height: 200 })
+      const fnode = Canvas({ width: 300, height: 200 })
 
-      expect(vnode.props.ref).toBeDefined()
-      expect(typeof vnode.props.ref).toBe('function')
+      expect(fnode.props.ref).toBeDefined()
+      expect(typeof fnode.props.ref).toBe('function')
     })
   })
 
   describe('Canvas Mounting', () => {
     it('should not error when ref is called with null', () => {
-      const vnode = Canvas({ width: 300, height: 200 })
+      const fnode = Canvas({ width: 300, height: 200 })
 
-      expect(() => vnode.props.ref(null)).not.toThrow()
+      expect(() => fnode.props.ref(null)).not.toThrow()
     })
 
     it('should get 2d context when mounted', () => {
-      const vnode = Canvas({ width: 300, height: 200 })
-      vnode.props.ref(mockCanvas)
+      const fnode = Canvas({ width: 300, height: 200 })
+      fnode.props.ref(mockCanvas)
 
       expect(mockCanvas.getContext).toHaveBeenCalledWith('2d')
     })
@@ -172,16 +172,16 @@ describe('Canvas Component', () => {
         getContext: vi.fn(() => null),
       } as unknown as HTMLCanvasElement
 
-      const vnode = Canvas({ width: 300, height: 200 })
+      const fnode = Canvas({ width: 300, height: 200 })
 
-      expect(() => vnode.props.ref(invalidCanvas)).not.toThrow()
+      expect(() => fnode.props.ref(invalidCanvas)).not.toThrow()
     })
 
     it('should start rendering when ref is called', async () => {
-      const vnode = Canvas({ width: 300, height: 200 })
+      const fnode = Canvas({ width: 300, height: 200 })
 
       // Call ref to mount
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
 
       // Wait for dynamic import and effect setup
       await new Promise((resolve) => setTimeout(resolve, 50))
@@ -193,8 +193,8 @@ describe('Canvas Component', () => {
 
   describe('Canvas Rendering', () => {
     it('should clear canvas before rendering', async () => {
-      const vnode = Canvas({ width: 300, height: 200 })
-      vnode.props.ref(mockCanvas)
+      const fnode = Canvas({ width: 300, height: 200 })
+      fnode.props.ref(mockCanvas)
 
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
@@ -210,9 +210,9 @@ describe('Canvas Component', () => {
         height: 30,
         fill: 'blue',
       })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -225,9 +225,9 @@ describe('Canvas Component', () => {
         DrawRect({ x: 0, y: 0, width: 10, height: 10, fill: 'red' }),
         DrawCircle({ x: 50, y: 50, radius: 20, fill: 'blue' }),
       ]
-      const vnode = Canvas({ width: 300, height: 200, children })
+      const fnode = Canvas({ width: 300, height: 200, children })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -251,9 +251,9 @@ describe('Canvas Component', () => {
         }),
         DrawPath({ d: 'M 10 10 L 50 50', stroke: 'purple' }),
       ]
-      const vnode = Canvas({ width: 300, height: 200, children })
+      const fnode = Canvas({ width: 300, height: 200, children })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -264,9 +264,9 @@ describe('Canvas Component', () => {
     })
 
     it('should handle undefined children', async () => {
-      const vnode = Canvas({ width: 300, height: 200, children: undefined })
+      const fnode = Canvas({ width: 300, height: 200, children: undefined })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -275,9 +275,9 @@ describe('Canvas Component', () => {
     })
 
     it('should handle null children', async () => {
-      const vnode = Canvas({ width: 300, height: 200, children: null })
+      const fnode = Canvas({ width: 300, height: 200, children: null })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -286,9 +286,9 @@ describe('Canvas Component', () => {
     })
 
     it('should handle empty array children', async () => {
-      const vnode = Canvas({ width: 300, height: 200, children: [] })
+      const fnode = Canvas({ width: 300, height: 200, children: [] })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -299,9 +299,9 @@ describe('Canvas Component', () => {
 
   describe('RequestAnimationFrame Integration', () => {
     it('should use requestAnimationFrame for rendering', async () => {
-      const vnode = Canvas({ width: 300, height: 200 })
+      const fnode = Canvas({ width: 300, height: 200 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
 
       expect(rafSpy).toHaveBeenCalled()
@@ -310,9 +310,9 @@ describe('Canvas Component', () => {
     it('should schedule RAF when signal changes', async () => {
       const x = signal(10)
       const child = DrawRect({ x, y: 10, width: 50, height: 30, fill: 'blue' })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -329,9 +329,9 @@ describe('Canvas Component', () => {
     it('should handle RAF scheduling with batched updates', async () => {
       const x = signal(10)
       const child = DrawRect({ x, y: 10, width: 50, height: 30, fill: 'blue' })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -346,9 +346,9 @@ describe('Canvas Component', () => {
     })
 
     it('should cancel RAF on cleanup', async () => {
-      const vnode = Canvas({ width: 300, height: 200 })
+      const fnode = Canvas({ width: 300, height: 200 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
 
       const rafIdValue = rafSpy.mock.results[0]?.value
@@ -362,9 +362,9 @@ describe('Canvas Component', () => {
     it('should re-render when signal changes', async () => {
       const x = signal(10)
       const child = DrawRect({ x, y: 10, width: 50, height: 30, fill: 'blue' })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -389,9 +389,9 @@ describe('Canvas Component', () => {
       const x = signal(10)
       const y = signal(20)
       const child = DrawRect({ x, y, width: 50, height: 30, fill: 'blue' })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -421,9 +421,9 @@ describe('Canvas Component', () => {
     it('should react to fill color signal changes', async () => {
       const fill = signal('red')
       const child = DrawRect({ x: 10, y: 10, width: 50, height: 30, fill })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -442,9 +442,9 @@ describe('Canvas Component', () => {
     it('should handle mixed static and signal props', async () => {
       const x = signal(10)
       const child = DrawRect({ x, y: 20, width: 50, height: 30, fill: 'green' })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -469,9 +469,9 @@ describe('Canvas Component', () => {
         DrawRect({ x: rectX, y: 10, width: 50, height: 30, fill: 'red' }),
         DrawCircle({ x: 150, y: 100, radius: circleRadius, fill: 'blue' }),
       ]
-      const vnode = Canvas({ width: 300, height: 200, children })
+      const fnode = Canvas({ width: 300, height: 200, children })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -502,9 +502,9 @@ describe('Canvas Component', () => {
 
   describe('Canvas Dimensions', () => {
     it('should use provided width for clearing', async () => {
-      const vnode = Canvas({ width: 400, height: 300 })
+      const fnode = Canvas({ width: 400, height: 300 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -512,9 +512,9 @@ describe('Canvas Component', () => {
     })
 
     it('should use provided height for clearing', async () => {
-      const vnode = Canvas({ width: 500, height: 400 })
+      const fnode = Canvas({ width: 500, height: 400 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -522,9 +522,9 @@ describe('Canvas Component', () => {
     })
 
     it('should clear entire canvas area', async () => {
-      const vnode = Canvas({ width: 800, height: 600 })
+      const fnode = Canvas({ width: 800, height: 600 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -532,9 +532,9 @@ describe('Canvas Component', () => {
     })
 
     it('should handle small canvas dimensions', async () => {
-      const vnode = Canvas({ width: 50, height: 50 })
+      const fnode = Canvas({ width: 50, height: 50 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -542,9 +542,9 @@ describe('Canvas Component', () => {
     })
 
     it('should handle large canvas dimensions', async () => {
-      const vnode = Canvas({ width: 2000, height: 1500 })
+      const fnode = Canvas({ width: 2000, height: 1500 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -558,9 +558,9 @@ describe('Canvas Component', () => {
         DrawRect({ x: 10, y: 10, width: 50, height: 30, fill: 'red' }),
         DrawCircle({ x: 100, y: 100, radius: 25, fill: 'blue' }),
       ]
-      const vnode = Canvas({ width: 300, height: 200, children })
+      const fnode = Canvas({ width: 300, height: 200, children })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -578,9 +578,9 @@ describe('Canvas Component', () => {
         fill: 'blue',
         opacity,
       })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -595,9 +595,9 @@ describe('Canvas Component', () => {
     it('should handle rapid signal updates efficiently', async () => {
       const x = signal(0)
       const child = DrawRect({ x, y: 10, width: 50, height: 30, fill: 'blue' })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
 
       // Rapidly update signal
@@ -619,22 +619,22 @@ describe('Canvas Component', () => {
         undefined,
         DrawCircle({ x: 100, y: 100, radius: 25, fill: 'blue' }),
       ]
-      const vnode = Canvas({
+      const fnode = Canvas({
         width: 300,
         height: 200,
         children: children as any,
       })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
 
       expect(() => flushRAF()).not.toThrow()
     })
 
     it('should handle zero dimensions', async () => {
-      const vnode = Canvas({ width: 0, height: 0 })
+      const fnode = Canvas({ width: 0, height: 0 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -642,9 +642,9 @@ describe('Canvas Component', () => {
     })
 
     it('should clear canvas even with no children', async () => {
-      const vnode = Canvas({ width: 300, height: 200 })
+      const fnode = Canvas({ width: 300, height: 200 })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -654,10 +654,10 @@ describe('Canvas Component', () => {
     })
 
     it('should handle remounting gracefully', async () => {
-      const vnode = Canvas({ width: 300, height: 200 })
+      const fnode = Canvas({ width: 300, height: 200 })
 
       // First mount
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -665,11 +665,11 @@ describe('Canvas Component', () => {
       vi.clearAllMocks()
 
       // Unmount
-      vnode.props.ref(null)
+      fnode.props.ref(null)
       await new Promise((resolve) => setTimeout(resolve, 50))
 
       // Remount
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -684,9 +684,9 @@ describe('Canvas Component', () => {
       const width = signal(50)
       const height = signal(30)
       const child = DrawRect({ x, y, width, height, fill: 'blue' })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -707,16 +707,16 @@ describe('Canvas Component', () => {
     it('should not render if canvas is unmounted', async () => {
       const x = signal(10)
       const child = DrawRect({ x, y: 10, width: 50, height: 30, fill: 'blue' })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
       vi.clearAllMocks()
 
       // Unmount
-      vnode.props.ref(null)
+      fnode.props.ref(null)
       await new Promise((resolve) => setTimeout(resolve, 50))
 
       // Change signal after unmount
@@ -741,9 +741,9 @@ describe('Canvas Component', () => {
         strokeWidth: 2,
         opacity: 0.8,
       })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -756,9 +756,9 @@ describe('Canvas Component', () => {
     it('should handle DrawCircle with signals', async () => {
       const radius = signal(30)
       const child = DrawCircle({ x: 150, y: 150, radius, fill: 'purple' })
-      const vnode = Canvas({ width: 300, height: 300, children: child })
+      const fnode = Canvas({ width: 300, height: 300, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -784,9 +784,9 @@ describe('Canvas Component', () => {
         stroke: 'black',
         strokeWidth: 2,
       })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -814,9 +814,9 @@ describe('Canvas Component', () => {
         fill: 'black',
         fontSize: 16,
       })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -843,9 +843,9 @@ describe('Canvas Component', () => {
         endAngle,
         fill: 'yellow',
       })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 
@@ -863,9 +863,9 @@ describe('Canvas Component', () => {
     it('should handle DrawPath with signal path data', async () => {
       const d = signal('M 10 10 L 50 50')
       const child = DrawPath({ d, stroke: 'green', strokeWidth: 2 })
-      const vnode = Canvas({ width: 300, height: 200, children: child })
+      const fnode = Canvas({ width: 300, height: 200, children: child })
 
-      vnode.props.ref(mockCanvas)
+      fnode.props.ref(mockCanvas)
       await new Promise((resolve) => setTimeout(resolve, 50))
       flushRAF()
 

@@ -238,7 +238,7 @@ export function update(
  * @example
  * const root = createRoot(document.body);
  * const count = signal(0);
- * root.render(h('div', {}, [count]));
+ * root.render(f('div', {}, [count]));
  * // Later: count.value++ will automatically update the DOM
  */
 export function createRoot(container: HTMLElement) {

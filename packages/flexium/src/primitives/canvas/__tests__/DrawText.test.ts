@@ -27,8 +27,8 @@ describe('DrawText', () => {
     } as unknown as CanvasRenderingContext2D
   })
 
-  describe('VNode Creation', () => {
-    it('should create a text VNode with correct type', () => {
+  describe('FNode Creation', () => {
+    it('should create a text FNode with correct type', () => {
       const text = DrawText({ x: 10, y: 20, text: 'Hello' })
 
       expect(text.type).toBe('canvas-text')

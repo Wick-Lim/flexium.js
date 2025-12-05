@@ -16,11 +16,11 @@
  * ```
  */
 
-import type { VNode } from '../types'
+import type { FNode } from '../types'
 import type { PressableProps } from './types'
 import { normalizeStyle } from './utils'
 
-export function Pressable(props: PressableProps): VNode {
+export function Pressable(props: PressableProps): FNode {
   const {
     children,
     onPress,

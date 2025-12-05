@@ -16,11 +16,11 @@
  * ```
  */
 
-import type { VNode } from '../types'
+import type { FNode } from '../types'
 import type { ImageProps } from './types'
 import { normalizeStyle } from './utils'
 
-export function Image(props: ImageProps): VNode {
+export function Image(props: ImageProps): FNode {
   const { src, alt, width, height, style, onLoad, onError, ...rest } = props
 
   const imageStyle = {

@@ -1,5 +1,5 @@
-import { h } from '../../renderers/dom/h'
-import { VNode } from '../../core/renderer'
+import { f } from '../../renderers/dom/h'
+import { FNode } from '../../core/renderer'
 import {
   BaseComponentProps,
   ResponsiveValue,
@@ -38,7 +38,7 @@ export interface SpacerProps extends BaseComponentProps {
  * </Row>
  * ```
  */
-export function Spacer(props: SpacerProps): VNode {
+export function Spacer(props: SpacerProps): FNode {
   const {
     size,
     width,
@@ -81,5 +81,5 @@ export function Spacer(props: SpacerProps): VNode {
 
   const finalStyles = mergeStyles({ ...styles, ...generatedStyles }, userStyle)
 
-  return h(as, { style: finalStyles, className, ...props }, [])
+  return f(as, { style: finalStyles, className, ...props }, [])
 }

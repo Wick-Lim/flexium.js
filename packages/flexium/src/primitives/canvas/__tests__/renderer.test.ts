@@ -72,7 +72,7 @@ describe('Canvas Renderer', () => {
   })
 
   describe('DrawRect', () => {
-    it('should create a rect VNode', () => {
+    it('should create a rect FNode', () => {
       const rect = DrawRect({ x: 10, y: 20, width: 100, height: 50 })
 
       expect(rect.type).toBe('canvas-rect')
@@ -150,7 +150,7 @@ describe('Canvas Renderer', () => {
   })
 
   describe('DrawCircle', () => {
-    it('should create a circle VNode', () => {
+    it('should create a circle FNode', () => {
       const circle = DrawCircle({ x: 50, y: 50, radius: 25 })
 
       expect(circle.type).toBe('canvas-circle')
@@ -186,7 +186,7 @@ describe('Canvas Renderer', () => {
   })
 
   describe('DrawLine', () => {
-    it('should create a line VNode', () => {
+    it('should create a line FNode', () => {
       const line = DrawLine({ x1: 0, y1: 0, x2: 100, y2: 100 })
 
       expect(line.type).toBe('canvas-line')
@@ -217,7 +217,7 @@ describe('Canvas Renderer', () => {
   })
 
   describe('DrawText', () => {
-    it('should create a text VNode', () => {
+    it('should create a text FNode', () => {
       const text = DrawText({ x: 10, y: 30, text: 'Hello' })
 
       expect(text.type).toBe('canvas-text')
@@ -243,7 +243,7 @@ describe('Canvas Renderer', () => {
   })
 
   describe('DrawArc', () => {
-    it('should create an arc VNode', () => {
+    it('should create an arc FNode', () => {
       const arc = DrawArc({
         x: 50,
         y: 50,
@@ -275,7 +275,7 @@ describe('Canvas Renderer', () => {
   })
 
   describe('DrawPath', () => {
-    it('should create a path VNode', () => {
+    it('should create a path FNode', () => {
       const path = DrawPath({ d: 'M 10 10 L 100 10', stroke: 'black' })
 
       expect(path.type).toBe('canvas-path')

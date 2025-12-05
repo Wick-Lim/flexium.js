@@ -2,7 +2,7 @@
  * Router Utils Tests
  *
  * Comprehensive tests for route parsing and matching utilities including:
- * - createRoutesFromChildren VNode parsing
+ * - createRoutesFromChildren FNode parsing
  * - matchRoutes algorithm and nested route matching
  * - Route path compilation and regex generation
  * - Parameter extraction from matched paths
@@ -12,15 +12,15 @@
 
 import { describe, it, expect } from 'vitest'
 import { createRoutesFromChildren, matchRoutes } from '../utils'
-import type { RouteDef, VNode } from '../types'
+import type { RouteDef, FNode } from '../types'
 
 describe('Router Utils', () => {
-  // Helper function to create VNode-like objects for testing
-  const createVNode = (
+  // Helper function to create FNode-like objects for testing
+  const createFNode = (
     type: Function,
     props: Record<string, any>,
     children?: any
-  ): VNode => ({
+  ): FNode => ({
     type,
     props,
     children,
@@ -45,59 +45,59 @@ describe('Router Utils', () => {
 
   describe('createRoutesFromChildren', () => {
     describe('Single Route Creation', () => {
-      it('should create route from single VNode', () => {
-        const vnode = createVNode(MockRoute, {
+      it('should create route from single FNode', () => {
+        const fnode = createFNode(MockRoute, {
           path: '/users',
           component: () => null,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes).toHaveLength(1)
         expect(routes[0].path).toBe('/users')
         expect(typeof routes[0].component).toBe('function')
       })
 
-      it('should extract path from VNode props', () => {
-        const vnode = createVNode(MockRoute, {
+      it('should extract path from FNode props', () => {
+        const fnode = createFNode(MockRoute, {
           path: '/about',
           component: () => null,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].path).toBe('/about')
       })
 
-      it('should extract component from VNode props', () => {
+      it('should extract component from FNode props', () => {
         const testComponent = () => 'test'
-        const vnode = createVNode(MockRoute, {
+        const fnode = createFNode(MockRoute, {
           path: '/test',
           component: testComponent,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].component).toBe(testComponent)
       })
 
       it('should default path to empty string if not provided', () => {
-        const vnode = createVNode(MockRoute, {
+        const fnode = createFNode(MockRoute, {
           component: () => null,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].path).toBe('')
       })
 
       it('should set index to false by default', () => {
-        const vnode = createVNode(MockRoute, {
+        const fnode = createFNode(MockRoute, {
           path: '/test',
           component: () => null,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].index).toBe(false)
       })
@@ -106,9 +106,9 @@ describe('Router Utils', () => {
     describe('Multiple Routes Creation', () => {
       it('should create routes from array of VNodes', () => {
         const vnodes = [
-          createVNode(MockRoute, { path: '/users', component: () => null }),
-          createVNode(MockRoute, { path: '/posts', component: () => null }),
-          createVNode(MockRoute, { path: '/comments', component: () => null }),
+          createFNode(MockRoute, { path: '/users', component: () => null }),
+          createFNode(MockRoute, { path: '/posts', component: () => null }),
+          createFNode(MockRoute, { path: '/comments', component: () => null }),
         ]
 
         const routes = createRoutesFromChildren(vnodes)
@@ -121,9 +121,9 @@ describe('Router Utils', () => {
 
       it('should maintain order of routes', () => {
         const vnodes = [
-          createVNode(MockRoute, { path: '/first', component: () => null }),
-          createVNode(MockRoute, { path: '/second', component: () => null }),
-          createVNode(MockRoute, { path: '/third', component: () => null }),
+          createFNode(MockRoute, { path: '/first', component: () => null }),
+          createFNode(MockRoute, { path: '/second', component: () => null }),
+          createFNode(MockRoute, { path: '/third', component: () => null }),
         ]
 
         const routes = createRoutesFromChildren(vnodes)
@@ -137,9 +137,9 @@ describe('Router Utils', () => {
 
       it('should handle mixed route configurations', () => {
         const vnodes = [
-          createVNode(MockRoute, { path: '/static', component: () => null }),
-          createVNode(MockRoute, { path: '/users/:id', component: () => null }),
-          createVNode(MockRoute, { index: true, component: () => null }),
+          createFNode(MockRoute, { path: '/static', component: () => null }),
+          createFNode(MockRoute, { path: '/users/:id', component: () => null }),
+          createFNode(MockRoute, { index: true, component: () => null }),
         ]
 
         const routes = createRoutesFromChildren(vnodes)
@@ -153,12 +153,12 @@ describe('Router Utils', () => {
 
     describe('Nested Routes', () => {
       it('should parse nested route children', () => {
-        const childVNode = createVNode(MockRoute, {
+        const childVNode = createFNode(MockRoute, {
           path: ':id',
           component: () => null,
         })
 
-        const parentVNode = createVNode(
+        const parentVNode = createFNode(
           MockRoute,
           { path: '/users', component: () => null },
           [childVNode]
@@ -173,24 +173,24 @@ describe('Router Utils', () => {
       })
 
       it('should handle multiple levels of nesting', () => {
-        const level3VNode = createVNode(MockRoute, {
+        const level3VNode = createFNode(MockRoute, {
           path: 'comments',
           component: () => null,
         })
 
-        const level2VNode = createVNode(
+        const level2VNode = createFNode(
           MockRoute,
           { path: ':postId', component: () => null },
           [level3VNode]
         )
 
-        const level1VNode = createVNode(
+        const level1VNode = createFNode(
           MockRoute,
           { path: 'posts', component: () => null },
           [level2VNode]
         )
 
-        const rootVNode = createVNode(
+        const rootVNode = createFNode(
           MockRoute,
           { path: '/users/:userId', component: () => null },
           [level1VNode]
@@ -208,12 +208,12 @@ describe('Router Utils', () => {
 
       it('should handle multiple children at same level', () => {
         const children = [
-          createVNode(MockRoute, { path: 'profile', component: () => null }),
-          createVNode(MockRoute, { path: 'settings', component: () => null }),
-          createVNode(MockRoute, { path: 'posts', component: () => null }),
+          createFNode(MockRoute, { path: 'profile', component: () => null }),
+          createFNode(MockRoute, { path: 'settings', component: () => null }),
+          createFNode(MockRoute, { path: 'posts', component: () => null }),
         ]
 
-        const parentVNode = createVNode(
+        const parentVNode = createFNode(
           MockRoute,
           { path: '/users/:id', component: () => null },
           children
@@ -230,12 +230,12 @@ describe('Router Utils', () => {
       })
 
       it('should create empty children array when no children provided', () => {
-        const vnode = createVNode(MockRoute, {
+        const fnode = createFNode(MockRoute, {
           path: '/leaf',
           component: () => null,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].children).toEqual([])
       })
@@ -243,34 +243,34 @@ describe('Router Utils', () => {
 
     describe('Index Routes', () => {
       it('should set index to true when index prop is true', () => {
-        const vnode = createVNode(MockRoute, {
+        const fnode = createFNode(MockRoute, {
           index: true,
           component: () => null,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].index).toBe(true)
       })
 
       it('should set path to empty string for index routes', () => {
-        const vnode = createVNode(MockRoute, {
+        const fnode = createFNode(MockRoute, {
           index: true,
           component: () => null,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].path).toBe('')
       })
 
       it('should handle index route as child', () => {
-        const indexVNode = createVNode(MockRoute, {
+        const indexVNode = createFNode(MockRoute, {
           index: true,
           component: () => null,
         })
 
-        const parentVNode = createVNode(
+        const parentVNode = createFNode(
           MockRoute,
           { path: '/', component: () => null },
           [indexVNode]
@@ -285,34 +285,34 @@ describe('Router Utils', () => {
     describe('Route Guards', () => {
       it('should extract beforeEnter guard from props', () => {
         const guard = () => true
-        const vnode = createVNode(MockRoute, {
+        const fnode = createFNode(MockRoute, {
           path: '/protected',
           component: () => null,
           beforeEnter: guard,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].beforeEnter).toBe(guard)
       })
 
       it('should handle routes without guards', () => {
-        const vnode = createVNode(MockRoute, {
+        const fnode = createFNode(MockRoute, {
           path: '/public',
           component: () => null,
         })
 
-        const routes = createRoutesFromChildren(vnode)
+        const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].beforeEnter).toBeUndefined()
       })
     })
 
-    describe('Non-VNode Filtering', () => {
+    describe('Non-FNode Filtering', () => {
       it('should skip null children', () => {
         const children = [
           null,
-          createVNode(MockRoute, { path: '/valid', component: () => null }),
+          createFNode(MockRoute, { path: '/valid', component: () => null }),
         ]
 
         const routes = createRoutesFromChildren(children)
@@ -324,7 +324,7 @@ describe('Router Utils', () => {
       it('should skip undefined children', () => {
         const children = [
           undefined,
-          createVNode(MockRoute, { path: '/valid', component: () => null }),
+          createFNode(MockRoute, { path: '/valid', component: () => null }),
         ]
 
         const routes = createRoutesFromChildren(children)
@@ -335,7 +335,7 @@ describe('Router Utils', () => {
       it('should skip string children', () => {
         const children = [
           'text node',
-          createVNode(MockRoute, { path: '/valid', component: () => null }),
+          createFNode(MockRoute, { path: '/valid', component: () => null }),
         ]
 
         const routes = createRoutesFromChildren(children)
@@ -346,7 +346,7 @@ describe('Router Utils', () => {
       it('should skip number children', () => {
         const children = [
           123,
-          createVNode(MockRoute, { path: '/valid', component: () => null }),
+          createFNode(MockRoute, { path: '/valid', component: () => null }),
         ]
 
         const routes = createRoutesFromChildren(children)
@@ -358,7 +358,7 @@ describe('Router Utils', () => {
         const children = [
           true,
           false,
-          createVNode(MockRoute, { path: '/valid', component: () => null }),
+          createFNode(MockRoute, { path: '/valid', component: () => null }),
         ]
 
         const routes = createRoutesFromChildren(children)
@@ -366,7 +366,7 @@ describe('Router Utils', () => {
         expect(routes).toHaveLength(1)
       })
 
-      it('should handle array with only non-VNode children', () => {
+      it('should handle array with only non-FNode children', () => {
         const children = ['text', null, undefined, 123, true]
 
         const routes = createRoutesFromChildren(children)

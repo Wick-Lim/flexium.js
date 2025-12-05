@@ -9,7 +9,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Suspense, SuspenseCtx } from '../suspense'
 import { signal } from '../signal'
-import { h } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/h'
 import { useContext } from '../context'
 
 describe('Suspense', () => {
@@ -43,8 +43,8 @@ describe('Suspense', () => {
   describe('Basic Suspense rendering', () => {
     it('should render children when no pending promises', () => {
       const suspenseFn = Suspense({
-        fallback: h('div', { class: 'fallback' }, 'Loading...'),
-        children: h('div', { class: 'content' }, 'Content loaded'),
+        fallback: f('div', { class: 'fallback' }, 'Loading...'),
+        children: f('div', { class: 'content' }, 'Content loaded'),
       })
 
       const result = suspenseFn()
@@ -55,8 +55,8 @@ describe('Suspense', () => {
       const pendingPromise = createPendingPromise() // Cleaned up in afterEach
 
       const suspenseFn = Suspense({
-        fallback: h('div', { class: 'fallback' }, 'Loading...'),
-        children: h('div', { class: 'content' }, 'Content'),
+        fallback: f('div', { class: 'fallback' }, 'Loading...'),
+        children: f('div', { class: 'content' }, 'Content'),
       })
 
       // Get the context value and register a promise
@@ -67,11 +67,11 @@ describe('Suspense', () => {
     })
 
     it('should accept function as fallback', () => {
-      const fallbackFn = () => h('div', { class: 'loading' }, 'Please wait...')
+      const fallbackFn = () => f('div', { class: 'loading' }, 'Please wait...')
 
       const suspenseFn = Suspense({
         fallback: fallbackFn,
-        children: h('div', {}, 'Content'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn()
@@ -79,10 +79,10 @@ describe('Suspense', () => {
     })
 
     it('should accept function as children', () => {
-      const childrenFn = () => h('div', { class: 'dynamic' }, 'Dynamic content')
+      const childrenFn = () => f('div', { class: 'dynamic' }, 'Dynamic content')
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
+        fallback: f('div', {}, 'Loading...'),
         children: childrenFn,
       })
 
@@ -93,7 +93,7 @@ describe('Suspense', () => {
     it('should accept text content as fallback', () => {
       const suspenseFn = Suspense({
         fallback: 'Loading...',
-        children: h('div', {}, 'Content'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn()
@@ -102,7 +102,7 @@ describe('Suspense', () => {
 
     it('should accept text content as children', () => {
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
+        fallback: f('div', {}, 'Loading...'),
         children: 'Content loaded',
       })
 
@@ -119,8 +119,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', { class: 'fallback' }, 'Loading...'),
-        children: h('div', { class: 'content' }, 'Content'),
+        fallback: f('div', { class: 'fallback' }, 'Loading...'),
+        children: f('div', { class: 'content' }, 'Content'),
       })
 
       // Initial render - no promises pending
@@ -141,8 +141,8 @@ describe('Suspense', () => {
       const promise2 = createPendingPromise()
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -161,8 +161,8 @@ describe('Suspense', () => {
 
     it('should provide registerPromise function via context', () => {
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -181,8 +181,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', { class: 'fallback' }, 'Loading...'),
-        children: h('div', { class: 'content' }, 'Loaded!'),
+        fallback: f('div', { class: 'fallback' }, 'Loading...'),
+        children: f('div', { class: 'content' }, 'Loaded!'),
       })
 
       // Get initial result
@@ -218,8 +218,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -241,8 +241,8 @@ describe('Suspense', () => {
       const promise = Promise.resolve()
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -275,8 +275,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'All loaded!'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'All loaded!'),
       })
 
       const result = suspenseFn() as any
@@ -327,8 +327,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -367,8 +367,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -408,8 +408,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -445,8 +445,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -481,8 +481,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -508,12 +508,12 @@ describe('Suspense', () => {
   describe('Nested Suspense boundaries', () => {
     it('should support nested Suspense components', () => {
       const innerSuspense = Suspense({
-        fallback: h('div', { class: 'inner-fallback' }, 'Inner loading...'),
-        children: h('div', { class: 'inner-content' }, 'Inner content'),
+        fallback: f('div', { class: 'inner-fallback' }, 'Inner loading...'),
+        children: f('div', { class: 'inner-content' }, 'Inner content'),
       })
 
       const outerSuspense = Suspense({
-        fallback: h('div', { class: 'outer-fallback' }, 'Outer loading...'),
+        fallback: f('div', { class: 'outer-fallback' }, 'Outer loading...'),
         children: innerSuspense,
       })
 
@@ -533,12 +533,12 @@ describe('Suspense', () => {
       })
 
       const innerSuspense = Suspense({
-        fallback: h('div', {}, 'Inner loading'),
-        children: h('div', {}, 'Inner content'),
+        fallback: f('div', {}, 'Inner loading'),
+        children: f('div', {}, 'Inner content'),
       })
 
       const outerSuspense = Suspense({
-        fallback: h('div', {}, 'Outer loading'),
+        fallback: f('div', {}, 'Outer loading'),
         children: innerSuspense,
       })
 
@@ -574,16 +574,16 @@ describe('Suspense', () => {
         if (ctx) {
           ctx.registerPromise(innerPromise)
         }
-        return h('div', {}, 'Inner loaded')
+        return f('div', {}, 'Inner loaded')
       }
 
       const innerSuspense = Suspense({
-        fallback: h('div', { class: 'inner' }, 'Inner loading'),
-        children: h(InnerComponent, {}),
+        fallback: f('div', { class: 'inner' }, 'Inner loading'),
+        children: f(InnerComponent, {}),
       })
 
       const outerSuspense = Suspense({
-        fallback: h('div', { class: 'outer' }, 'Outer loading'),
+        fallback: f('div', { class: 'outer' }, 'Outer loading'),
         children: innerSuspense,
       })
 
@@ -593,17 +593,17 @@ describe('Suspense', () => {
 
     it('should handle deeply nested Suspense boundaries', () => {
       const level3 = Suspense({
-        fallback: h('div', {}, 'Level 3 loading'),
-        children: h('div', {}, 'Level 3 content'),
+        fallback: f('div', {}, 'Level 3 loading'),
+        children: f('div', {}, 'Level 3 content'),
       })
 
       const level2 = Suspense({
-        fallback: h('div', {}, 'Level 2 loading'),
+        fallback: f('div', {}, 'Level 2 loading'),
         children: level3,
       })
 
       const level1 = Suspense({
-        fallback: h('div', {}, 'Level 1 loading'),
+        fallback: f('div', {}, 'Level 1 loading'),
         children: level2,
       })
 
@@ -621,8 +621,8 @@ describe('Suspense', () => {
 
     it('should provide context value to children', () => {
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -638,12 +638,12 @@ describe('Suspense', () => {
 
       const ChildComponent = () => {
         capturedContext = useContext(SuspenseCtx)
-        return h('div', {}, 'Child')
+        return f('div', {}, 'Child')
       }
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading'),
-        children: h(ChildComponent, {}),
+        fallback: f('div', {}, 'Loading'),
+        children: f(ChildComponent, {}),
       })
 
       suspenseFn()
@@ -661,13 +661,13 @@ describe('Suspense', () => {
 
     it('should provide fresh context for each Suspense instance', () => {
       const suspense1 = Suspense({
-        fallback: h('div', {}, 'Loading 1'),
-        children: h('div', {}, 'Content 1'),
+        fallback: f('div', {}, 'Loading 1'),
+        children: f('div', {}, 'Content 1'),
       })
 
       const suspense2 = Suspense({
-        fallback: h('div', {}, 'Loading 2'),
-        children: h('div', {}, 'Content 2'),
+        fallback: f('div', {}, 'Loading 2'),
+        children: f('div', {}, 'Content 2'),
       })
 
       const result1 = suspense1() as any
@@ -681,8 +681,8 @@ describe('Suspense', () => {
     it('should create Suspense component for reactive use', () => {
       const Component = () => {
         return Suspense({
-          fallback: h('div', { id: 'fallback' }, 'Loading...'),
-          children: h('div', { id: 'content' }, 'Loaded!'),
+          fallback: f('div', { id: 'fallback' }, 'Loading...'),
+          children: f('div', { id: 'content' }, 'Loaded!'),
         })
       }
 
@@ -695,11 +695,11 @@ describe('Suspense', () => {
 
       const Component = () => {
         return Suspense({
-          fallback: h('div', { id: 'fallback' }, 'Loading...'),
+          fallback: f('div', { id: 'fallback' }, 'Loading...'),
           children: () =>
             isLoading.value
-              ? h('div', { id: 'loading-state' }, 'Still loading')
-              : h('div', { id: 'loaded-state' }, 'Loaded!'),
+              ? f('div', { id: 'loading-state' }, 'Still loading')
+              : f('div', { id: 'loaded-state' }, 'Loaded!'),
         })
       }
 
@@ -711,7 +711,7 @@ describe('Suspense', () => {
   describe('Edge cases', () => {
     it('should handle empty children', () => {
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading'),
+        fallback: f('div', {}, 'Loading'),
         children: null,
       })
 
@@ -721,7 +721,7 @@ describe('Suspense', () => {
 
     it('should handle undefined children', () => {
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading'),
+        fallback: f('div', {}, 'Loading'),
         children: undefined,
       })
 
@@ -731,11 +731,11 @@ describe('Suspense', () => {
 
     it('should handle array children', () => {
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading'),
+        fallback: f('div', {}, 'Loading'),
         children: [
-          h('div', {}, 'Child 1'),
-          h('div', {}, 'Child 2'),
-          h('div', {}, 'Child 3'),
+          f('div', {}, 'Child 1'),
+          f('div', {}, 'Child 2'),
+          f('div', {}, 'Child 3'),
         ],
       })
 
@@ -747,8 +747,8 @@ describe('Suspense', () => {
       const promise = Promise.resolve()
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -763,8 +763,8 @@ describe('Suspense', () => {
 
     it('should handle zero pending count', () => {
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading'),
+        children: f('div', {}, 'Content'),
       })
 
       // Multiple renders with no promises
@@ -779,8 +779,8 @@ describe('Suspense', () => {
       const promises = Array.from({ length: 100 }, () => Promise.resolve())
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading many...'),
-        children: h('div', {}, 'All loaded!'),
+        fallback: f('div', {}, 'Loading many...'),
+        children: f('div', {}, 'All loaded!'),
       })
 
       const result = suspenseFn() as any
@@ -805,8 +805,8 @@ describe('Suspense', () => {
       ]
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -836,13 +836,13 @@ describe('Suspense', () => {
         if (ctx) {
           ctx.registerPromise(fetchData)
         }
-        return h('div', { class: 'data' }, 'Data loaded')
+        return f('div', { class: 'data' }, 'Data loaded')
       }
 
       const App = () => {
         return Suspense({
-          fallback: h('div', { class: 'spinner' }, 'Fetching data...'),
-          children: h(DataComponent, {}),
+          fallback: f('div', { class: 'spinner' }, 'Fetching data...'),
+          children: f(DataComponent, {}),
         })
       }
 
@@ -858,8 +858,8 @@ describe('Suspense', () => {
       ]
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading images...'),
-        children: h('div', {}, 'Gallery loaded'),
+        fallback: f('div', {}, 'Loading images...'),
+        children: f('div', {}, 'Gallery loaded'),
       })
 
       const result = suspenseFn() as any
@@ -878,7 +878,7 @@ describe('Suspense', () => {
       const loadComponent = () =>
         new Promise((resolve) =>
           setTimeout(
-            () => resolve({ default: () => h('div', {}, 'Lazy component') }),
+            () => resolve({ default: () => f('div', {}, 'Lazy component') }),
             10
           )
         )
@@ -886,8 +886,8 @@ describe('Suspense', () => {
       const promise = loadComponent()
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading component...'),
-        children: h('div', {}, 'Component ready'),
+        fallback: f('div', {}, 'Loading component...'),
+        children: f('div', {}, 'Component ready'),
       })
 
       const result = suspenseFn() as any
@@ -918,8 +918,8 @@ describe('Suspense', () => {
       })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading profile...'),
-        children: h('div', {}, 'Profile complete'),
+        fallback: f('div', {}, 'Loading profile...'),
+        children: f('div', {}, 'Profile complete'),
       })
 
       const result = suspenseFn() as any
@@ -971,8 +971,8 @@ describe('Suspense', () => {
         })
 
       const suspenseFn = Suspense({
-        fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Loaded'),
+        fallback: f('div', {}, 'Loading...'),
+        children: f('div', {}, 'Loaded'),
       })
 
       // First attempt
