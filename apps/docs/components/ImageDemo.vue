@@ -31,13 +31,19 @@ onMounted(() => {
 
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <div style="font-size: 12px; color: #6b7280;">fill</div>
-            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">Fill (stretched)</div>
+            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                <span>Fill</span>
+                <span style="font-size: 12px; opacity: 0.8; font-weight: 400;">(stretched)</span>
+              </div>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <div style="font-size: 12px; color: #6b7280;">none</div>
             <div style="width: 100%; height: 150px; background: #f3f4f6; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-              <div style="width: 120px; height: 80px; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">None (actual size)</div>
+              <div style="width: 120px; height: 80px; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
+                <span>None</span>
+                <span style="font-size: 11px; opacity: 0.8; font-weight: 400;">(actual size)</span>
+              </div>
             </div>
           </div>
         </div>
