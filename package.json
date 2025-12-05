@@ -1,6 +1,6 @@
 {
   "name": "flexium-monorepo",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "private": true,
   "description": "Flexium - Fine-grained reactive UI framework (monorepo)",
   "type": "module",
@@ -9,6 +9,7 @@
     "build:flexium": "turbo run build --filter=flexium",
     "build:create-flexium": "turbo run build --filter=create-flexium",
     "build:eslint-plugin": "turbo run build --filter=eslint-plugin-flexium",
+    "build:vite-plugin": "turbo run build --filter=vite-plugin-flexium",
     "build:docs": "turbo run build --filter=@flexium/docs",
     "dev": "turbo run dev --parallel",
     "dev:flexium": "turbo run dev --filter=flexium",
@@ -18,6 +19,11 @@
     "bench": "node tests/performance/benchmark.mjs",
     "bench:compare": "node tests/performance/comparison-benchmark.mjs",
     "test:e2e": "npx playwright test -c tests/playwright.config.ts",
+    "test:e2e:chromium": "npx playwright test -c tests/playwright.config.ts --project=chromium",
+    "test:e2e:firefox": "npx playwright test -c tests/playwright.config.ts --project=firefox",
+    "test:e2e:webkit": "npx playwright test -c tests/playwright.config.ts --project=webkit",
+    "test:e2e:mobile": "npx playwright test -c tests/playwright.config.ts --project=mobile-chrome --project=mobile-safari",
+    "test:a11y": "npx playwright test -c tests/playwright.config.ts tests/e2e/accessibility.spec.ts",
     "test:cli": "./tests/unit/test-simple.sh",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
@@ -54,6 +60,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "@playwright/test": "^1.56.1",
     "jsdom": "^24.1.3",
     "turbo": "^2.6.1"

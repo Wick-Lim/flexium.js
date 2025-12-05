@@ -68,7 +68,43 @@ jobs:
         run: npm run test:unit
 
   test-e2e:
-    name: E2E Tests
+    name: E2E Tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright (${{ matrix.browser }})
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Run E2E tests (${{ matrix.browser }})
+        run: npx playwright test -c tests/playwright.config.ts --project=${{ matrix.browser }}
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: tests/test-results/
+          retention-days: 7
+
+  test-a11y:
+    name: Accessibility Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -88,8 +124,16 @@ jobs:
       - name: Build packages
         run: npm run build
 
-      - name: Run E2E tests
-        run: npm run test:e2e
+      - name: Run accessibility tests
+        run: npm run test:a11y -- --project=chromium
+
+      - name: Upload accessibility report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report
+          path: tests/test-results/
+          retention-days: 7
 
   build:
     name: Build

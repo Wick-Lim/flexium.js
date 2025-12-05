@@ -83,6 +83,10 @@ async function deploy(type) {
     console.error('❌ eslint-plugin-flexium build failed');
     process.exit(1);
   }
+  if (!run('npm run build:vite-plugin')) {
+    console.error('❌ vite-plugin-flexium build failed');
+    process.exit(1);
+  }
 
   // 5. Run tests
   console.log('\n🧪 Running tests...');
@@ -112,6 +116,12 @@ async function deploy(type) {
     process.exit(1);
   }
 
+  console.log('\n  Publishing vite-plugin-flexium...');
+  if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/vite-plugin-flexium') })) {
+    console.error('❌ Failed to publish vite-plugin-flexium');
+    process.exit(1);
+  }
+
   // 7. Git commit and tag
   console.log('\n📝 Creating git commit and tag...');
   run(`git add -A`);
@@ -124,6 +134,7 @@ async function deploy(type) {
   console.log(`   - https://www.npmjs.com/package/flexium`);
   console.log(`   - https://www.npmjs.com/package/create-flexium`);
   console.log(`   - https://www.npmjs.com/package/eslint-plugin-flexium`);
+  console.log(`   - https://www.npmjs.com/package/vite-plugin-flexium`);
   console.log(`   GitHub: https://github.com/Wick-Lim/flexium.js/releases/tag/v${newVersion}\n`);
 }
 

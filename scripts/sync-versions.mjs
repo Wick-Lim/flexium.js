@@ -26,6 +26,7 @@ const FILES_TO_SYNC = [
   { path: 'packages/flexium/package.json', type: 'json', field: 'version' },
   { path: 'packages/create-flexium/package.json', type: 'json', field: 'version' },
   { path: 'packages/eslint-plugin-flexium/package.json', type: 'json', field: 'version' },
+  { path: 'packages/vite-plugin-flexium/package.json', type: 'json', field: 'version' },
   { path: 'apps/docs/package.json', type: 'json', field: 'version' },
 
   // Source files
