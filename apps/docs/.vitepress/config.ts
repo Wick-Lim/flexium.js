@@ -162,8 +162,6 @@ export default defineConfig({
             { text: '&lt;For /&gt;', link: '/guide/flow#for' },
             { text: '&lt;Show /&gt;', link: '/guide/flow#show' },
             { text: '&lt;Switch /&gt;', link: '/guide/flow#switch' },
-            { text: 'createContext()', link: '/guide/context#createcontext' },
-            { text: 'useContext()', link: '/guide/context#usecontext' },
             { text: '&lt;Suspense /&gt;', link: '/guide/suspense' },
             { text: '&lt;ErrorBoundary /&gt;', link: '/guide/error-handling' }
           ]
@@ -211,6 +209,7 @@ export default defineConfig({
           text: 'Advanced',
           collapsed: true,
           items: [
+            { text: 'Context API', link: '/guide/context' },
             { text: 'Animation', link: '/guide/animation' },
             { text: 'Styling', link: '/guide/styling' },
             { text: 'Advanced API', link: '/guide/advanced-api' },
