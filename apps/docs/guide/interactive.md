@@ -844,4 +844,4 @@ const mouse: MouseState = useMouse()
 - Learn more about [Canvas Primitives](/guide/canvas)
 - Explore [Animation](/guide/animation) for easing and tweening
 - Check out [Performance](/guide/performance) optimization tips
-- See [Game Examples](/examples/games) for more inspiration
+- See the [Showcase](/showcase) for live demos
