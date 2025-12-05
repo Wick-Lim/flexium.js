@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
 import { state } from 'flexium/core'
-import { h, render } from 'flexium/dom'
+import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
@@ -30,7 +30,7 @@ function TodoDemo() {
     setTodos(prev => prev.filter(t => t.id !== id))
   }
 
-  return h('div', {
+  return f('div', {
     style: {
       padding: '24px',
       background: '#f9fafb',
@@ -40,11 +40,11 @@ function TodoDemo() {
       boxSizing: 'border-box'
     }
   }, [
-    h('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Todo List']),
+    f('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Todo List']),
 
     // Input row
-    h('div', { style: { display: 'flex', gap: '8px', marginBottom: '16px' } }, [
-      h('input', {
+    f('div', { style: { display: 'flex', gap: '8px', marginBottom: '16px' } }, [
+      f('input', {
         type: 'text',
         placeholder: 'Add a new todo...',
         value: inputValue,
@@ -58,7 +58,7 @@ function TodoDemo() {
           fontSize: '14px'
         }
       }),
-      h('button', {
+      f('button', {
         onclick: addTodo,
         style: {
           padding: '10px 16px',
@@ -73,9 +73,9 @@ function TodoDemo() {
     ]),
 
     // Todo list - render function for reactivity
-    h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } },
+    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } },
       () => todos().map(todo =>
-        h('div', {
+        f('div', {
           key: todo.id,
           style: {
             display: 'flex',
@@ -87,20 +87,20 @@ function TodoDemo() {
             border: '1px solid #e5e7eb'
           }
         }, [
-          h('input', {
+          f('input', {
             type: 'checkbox',
             checked: todo.done,
             onchange: () => toggleTodo(todo.id),
             style: { width: '18px', height: '18px', cursor: 'pointer' }
           }),
-          h('span', {
+          f('span', {
             style: {
               flex: 1,
               textDecoration: todo.done ? 'line-through' : 'none',
               color: todo.done ? '#9ca3af' : '#374151'
             }
           }, [todo.text]),
-          h('button', {
+          f('button', {
             onclick: () => deleteTodo(todo.id),
             style: {
               padding: '4px 8px',

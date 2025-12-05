@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
 import { state } from 'flexium/core'
-import { h, render } from 'flexium/dom'
+import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 let timerInterval = null
@@ -52,7 +52,7 @@ function TimerDemo() {
     }
   }
 
-  return h('div', {
+  return f('div', {
     style: {
       padding: '24px',
       background: '#f9fafb',
@@ -63,10 +63,10 @@ function TimerDemo() {
       textAlign: 'center'
     }
   }, [
-    h('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Stopwatch']),
+    f('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Stopwatch']),
 
     // Timer display
-    h('div', {
+    f('div', {
       style: {
         fontSize: '48px',
         fontWeight: '700',
@@ -81,9 +81,9 @@ function TimerDemo() {
     }, [() => formatTime(seconds())]),
 
     // Buttons
-    h('div', { style: { display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' } }, [
+    f('div', { style: { display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' } }, [
       // Start/Stop button - use a function to render reactively
-      () => h('button', {
+      () => f('button', {
         onclick: startStop,
         style: {
           padding: '12px 24px',
@@ -99,7 +99,7 @@ function TimerDemo() {
         }
       }, [isRunning() ? 'Stop' : 'Start']),
 
-      h('button', {
+      f('button', {
         onclick: addLap,
         style: {
           padding: '12px 24px',
@@ -113,7 +113,7 @@ function TimerDemo() {
         }
       }, ['Lap']),
 
-      h('button', {
+      f('button', {
         onclick: reset,
         style: {
           padding: '12px 24px',
@@ -129,7 +129,7 @@ function TimerDemo() {
     ]),
 
     // Laps
-    h('div', {
+    f('div', {
       style: {
         maxHeight: '150px',
         overflowY: 'auto',
@@ -139,9 +139,9 @@ function TimerDemo() {
       () => {
         const lapList = laps()
         if (lapList.length === 0) return null
-        return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
+        return f('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
           lapList.map((lap, i) =>
-            h('div', {
+            f('div', {
               style: {
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -152,8 +152,8 @@ function TimerDemo() {
                 fontFamily: 'monospace'
               }
             }, [
-              h('span', { style: { color: '#6b7280' } }, [`Lap ${lapList.length - i}`]),
-              h('span', { style: { fontWeight: '600' } }, [formatTime(lap)])
+              f('span', { style: { color: '#6b7280' } }, [`Lap ${lapList.length - i}`]),
+              f('span', { style: { fontWeight: '600' } }, [formatTime(lap)])
             ])
           )
         )

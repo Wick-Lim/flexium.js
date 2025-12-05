@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
 import { state, computed } from 'flexium/core'
-import { h, render } from 'flexium/dom'
+import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 let cleanup = null
@@ -12,7 +12,7 @@ function Counter() {
   // Use computed for derived value
   const doubled = computed(() => count() * 2)
 
-  const containerNode = h('div', {
+  const containerNode = f('div', {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -29,7 +29,7 @@ function Counter() {
     }
   }, [
     // Title
-    h('h1', {
+    f('h1', {
       style: {
         fontSize: '32px',
         fontWeight: 'bold',
@@ -40,7 +40,7 @@ function Counter() {
     }, ['Flexium Playground']),
 
     // Count display
-    h('div', {
+    f('div', {
       style: {
         display: 'flex',
         flexDirection: 'column',
@@ -48,7 +48,7 @@ function Counter() {
         gap: '8px'
       }
     }, [
-      h('div', {
+      f('div', {
         style: {
           fontSize: '14px',
           color: '#6b7280',
@@ -58,7 +58,7 @@ function Counter() {
         }
       }, ['Current Count']),
 
-      h('div', {
+      f('div', {
         style: {
           fontSize: '72px',
           fontWeight: '800',
@@ -70,7 +70,7 @@ function Counter() {
     ]),
 
     // Doubled display
-    h('div', {
+    f('div', {
       style: {
         fontSize: '18px',
         color: '#4b5563',
@@ -81,20 +81,20 @@ function Counter() {
       }
     }, [
       'Doubled: ',
-      h('span', {
+      f('span', {
         style: { fontWeight: 'bold', color: '#2563eb' }
       }, [doubled]) // Direct computed binding
     ]),
 
     // Buttons
-    h('div', {
+    f('div', {
       style: {
         display: 'flex',
         gap: '12px',
         marginTop: '16px'
       }
     }, [
-      h('button', {
+      f('button', {
         onclick: () => { setCount(c => c - 1) },
         style: {
           padding: '12px 24px',
@@ -110,7 +110,7 @@ function Counter() {
         }
       }, ['- Decrement']),
 
-      h('button', {
+      f('button', {
         onclick: () => { setCount(0) },
         style: {
           padding: '12px 24px',
@@ -125,7 +125,7 @@ function Counter() {
         }
       }, ['Reset']),
 
-      h('button', {
+      f('button', {
         onclick: () => { setCount(c => c + 1) },
         style: {
           padding: '12px 24px',
@@ -142,7 +142,7 @@ function Counter() {
       }, ['+ Increment'])
     ]),
     
-    h('p', {
+    f('p', {
         style: {
             marginTop: '1rem',
             color: '#6b7280',

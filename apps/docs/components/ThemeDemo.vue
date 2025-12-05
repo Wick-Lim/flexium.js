@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
 import { state } from 'flexium/core'
-import { h, render } from 'flexium/dom'
+import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
@@ -11,7 +11,7 @@ function ThemeDemo() {
 
   const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
-  return h('div', {
+  return f('div', {
     style: () => ({
       padding: '24px',
       background: isDark() ? '#1f2937' : '#f9fafb',
@@ -22,7 +22,7 @@ function ThemeDemo() {
       transition: 'all 0.3s ease'
     })
   }, [
-    h('h3', {
+    f('h3', {
       style: () => ({
         margin: '0 0 20px',
         color: isDark() ? '#f9fafb' : '#374151',
@@ -31,7 +31,7 @@ function ThemeDemo() {
     }, ['Theme Switcher']),
 
     // Theme toggle
-    h('div', {
+    f('div', {
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -43,13 +43,13 @@ function ThemeDemo() {
         transition: 'background 0.3s'
       }
     }, [
-      h('span', {
+      f('span', {
         style: () => ({
           color: isDark() ? '#e5e7eb' : '#374151',
           fontWeight: '500'
         })
       }, ['Dark Mode']),
-      h('button', {
+      f('button', {
         onclick: () => setIsDark(d => !d),
         style: () => ({
           width: '56px',
@@ -62,7 +62,7 @@ function ThemeDemo() {
           transition: 'background 0.3s'
         })
       }, [
-        h('div', {
+        f('div', {
           style: () => ({
             width: '24px',
             height: '24px',
@@ -79,8 +79,8 @@ function ThemeDemo() {
     ]),
 
     // Color picker
-    h('div', { style: { marginBottom: '20px' } }, [
-      h('span', {
+    f('div', { style: { marginBottom: '20px' } }, [
+      f('span', {
         style: () => ({
           display: 'block',
           marginBottom: '12px',
@@ -88,9 +88,9 @@ function ThemeDemo() {
           fontWeight: '500'
         })
       }, ['Primary Color']),
-      h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } },
+      f('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } },
         colors.map(color =>
-          h('button', {
+          f('button', {
             onclick: () => setPrimaryColor(color),
             style: () => ({
               width: '36px',
@@ -108,7 +108,7 @@ function ThemeDemo() {
     ]),
 
     // Preview card
-    h('div', {
+    f('div', {
       style: () => ({
         padding: '16px',
         background: isDark() ? '#111827' : 'white',
@@ -117,7 +117,7 @@ function ThemeDemo() {
         transition: 'all 0.3s'
       })
     }, [
-      h('div', {
+      f('div', {
         style: () => ({
           fontSize: '18px',
           fontWeight: '600',
@@ -125,14 +125,14 @@ function ThemeDemo() {
           marginBottom: '8px'
         })
       }, ['Preview Card']),
-      h('p', {
+      f('p', {
         style: () => ({
           margin: 0,
           color: isDark() ? '#9ca3af' : '#6b7280',
           fontSize: '14px'
         })
       }, ['This card updates reactively as you change theme settings.']),
-      h('button', {
+      f('button', {
         style: () => ({
           marginTop: '12px',
           padding: '8px 16px',
