@@ -20,7 +20,15 @@ export { Text } from './primitives/Text'
 export { Image } from './primitives/Image'
 export { Pressable } from './primitives/Pressable'
 export { ScrollView } from './primitives/ScrollView'
-export { Canvas, DrawRect, DrawCircle, DrawPath, DrawText, DrawLine, DrawArc } from './primitives/canvas'
+export {
+  Canvas,
+  DrawRect,
+  DrawCircle,
+  DrawPath,
+  DrawText,
+  DrawLine,
+  DrawArc,
+} from './primitives/canvas'
 export { normalizeStyle } from './primitives/utils'
 
 // Types

@@ -15,7 +15,7 @@ export {
   untrack,
   onCleanup,
   isSignal,
-  createResource
+  createResource,
 } from './core/signal'
 
 export type { Signal, Computed, Resource } from './core/signal'

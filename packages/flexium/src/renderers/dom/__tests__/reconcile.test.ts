@@ -36,7 +36,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -51,7 +51,7 @@ describe('DOM Reconciliation', () => {
       // First mount the items
       const initialVNodes = [
         h('div', { key: 'a' }, 'A'),
-        h('div', { key: 'b' }, 'B')
+        h('div', { key: 'b' }, 'B'),
       ]
 
       for (const vnode of initialVNodes) {
@@ -74,7 +74,7 @@ describe('DOM Reconciliation', () => {
       // Initial mount
       const oldVNodes = [
         h('div', { key: 'a', class: 'item' }, 'A'),
-        h('div', { key: 'b', class: 'item' }, 'B')
+        h('div', { key: 'b', class: 'item' }, 'B'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -91,7 +91,7 @@ describe('DOM Reconciliation', () => {
       // Update with same keys
       const newVNodes = [
         h('div', { key: 'a', class: 'item' }, 'A Updated'),
-        h('div', { key: 'b', class: 'item' }, 'B Updated')
+        h('div', { key: 'b', class: 'item' }, 'B Updated'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -107,7 +107,7 @@ describe('DOM Reconciliation', () => {
       // Initial: B, C
       const oldVNodes = [
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -125,7 +125,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -143,7 +143,7 @@ describe('DOM Reconciliation', () => {
       // Initial: A, B
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
-        h('div', { key: 'b' }, 'B')
+        h('div', { key: 'b' }, 'B'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -161,7 +161,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -180,7 +180,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -197,7 +197,7 @@ describe('DOM Reconciliation', () => {
       // New: A, C (remove B)
       const newVNodes = [
         h('div', { key: 'a' }, 'A'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -213,7 +213,7 @@ describe('DOM Reconciliation', () => {
       // Initial: A, C
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -231,7 +231,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -251,7 +251,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -270,7 +270,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'c' }, 'C'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'a' }, 'A')
+        h('div', { key: 'a' }, 'A'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -290,7 +290,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -309,7 +309,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'c' }, 'C'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'a' }, 'A')
+        h('div', { key: 'a' }, 'A'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -324,7 +324,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -343,7 +343,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'b' }, 'B'),
         h('div', { key: 'c' }, 'C'),
-        h('div', { key: 'a' }, 'A')
+        h('div', { key: 'a' }, 'A'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -362,7 +362,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -381,7 +381,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'c' }, 'C'),
         h('div', { key: 'a' }, 'A'),
-        h('div', { key: 'b' }, 'B')
+        h('div', { key: 'b' }, 'B'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -401,7 +401,7 @@ describe('DOM Reconciliation', () => {
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
         h('div', { key: 'c' }, 'C'),
-        h('div', { key: 'd' }, 'D')
+        h('div', { key: 'd' }, 'D'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -420,7 +420,7 @@ describe('DOM Reconciliation', () => {
         h('div', { key: 'e' }, 'E'),
         h('div', { key: 'd' }, 'D'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'f' }, 'F')
+        h('div', { key: 'f' }, 'F'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -442,7 +442,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', {}, 'A'),
         h('div', {}, 'B'),
-        h('div', {}, 'C')
+        h('div', {}, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -456,10 +456,7 @@ describe('DOM Reconciliation', () => {
       const oldFirst = container.children[0]
 
       // New: div, div (remove one)
-      const newVNodes = [
-        h('div', {}, 'A Updated'),
-        h('div', {}, 'B Updated')
-      ]
+      const newVNodes = [h('div', {}, 'A Updated'), h('div', {}, 'B Updated')]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
 
@@ -475,7 +472,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', {}, 'Unkeyed'),
-        h('div', { key: 'b' }, 'B')
+        h('div', { key: 'b' }, 'B'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -493,7 +490,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'b' }, 'B'),
         h('div', {}, 'Unkeyed Updated'),
-        h('div', { key: 'a' }, 'A')
+        h('div', { key: 'a' }, 'A'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -538,7 +535,11 @@ describe('DOM Reconciliation', () => {
       expect(div?.id).toBe('test')
 
       // Update via reconciliation
-      const newVNode = h('div', { class: 'new', id: 'test', title: 'tooltip' }, 'Content')
+      const newVNode = h(
+        'div',
+        { class: 'new', id: 'test', title: 'tooltip' },
+        'Content'
+      )
       const newVNodes = [newVNode]
       const oldVNodes = [oldVNode]
 
@@ -551,7 +552,11 @@ describe('DOM Reconciliation', () => {
 
     it('should remove attributes when they are removed from props', () => {
       // Initial render
-      const oldVNode = h('div', { class: 'test', title: 'tooltip', id: 'myid' }, 'Content')
+      const oldVNode = h(
+        'div',
+        { class: 'test', title: 'tooltip', id: 'myid' },
+        'Content'
+      )
       const node = mountReactive(oldVNode, container)
       oldVNode._node = node
 
@@ -570,7 +575,11 @@ describe('DOM Reconciliation', () => {
 
     it('should update style attributes', () => {
       // Initial render
-      const oldVNode = h('div', { style: { color: 'red', fontSize: '14px' } }, 'Styled')
+      const oldVNode = h(
+        'div',
+        { style: { color: 'red', fontSize: '14px' } },
+        'Styled'
+      )
       const node = mountReactive(oldVNode, container)
       oldVNode._node = node
 
@@ -578,7 +587,11 @@ describe('DOM Reconciliation', () => {
       expect(div?.style.color).toBe('red')
 
       // Update style
-      const newVNode = h('div', { style: { color: 'blue', fontSize: '16px' } }, 'Styled')
+      const newVNode = h(
+        'div',
+        { style: { color: 'blue', fontSize: '16px' } },
+        'Styled'
+      )
       const newVNodes = [newVNode]
       const oldVNodes = [oldVNode]
 
@@ -591,9 +604,7 @@ describe('DOM Reconciliation', () => {
     it('should handle different element types with same key', () => {
       // This test verifies that isSameKey checks both key AND type
       // When the type changes, the node is not reused even if keys match
-      const oldVNodes = [
-        h('div', { key: 'item' }, 'A div')
-      ]
+      const oldVNodes = [h('div', { key: 'item' }, 'A div')]
 
       for (const vnode of oldVNodes) {
         const node = mountReactive(vnode, undefined)
@@ -608,9 +619,7 @@ describe('DOM Reconciliation', () => {
 
       // Change type from div to span with same key
       // isSameKey should return false, so old div is removed and new span created
-      const newVNodes = [
-        h('span', { key: 'item' }, 'A span')
-      ]
+      const newVNodes = [h('span', { key: 'item' }, 'A span')]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
 
@@ -699,9 +708,7 @@ describe('DOM Reconciliation', () => {
       expect(div?.firstChild?.nodeType).toBe(Node.TEXT_NODE)
 
       // Update to have nested element
-      const newVNode = h('div', {},
-        h('span', {}, 'Nested element')
-      )
+      const newVNode = h('div', {}, h('span', {}, 'Nested element'))
       reconcileArrays(container, [oldVNode], [newVNode], null)
 
       expect(div?.querySelector('span')).not.toBeNull()
@@ -713,14 +720,12 @@ describe('DOM Reconciliation', () => {
     it('should work with signal-driven lists', async () => {
       const items = signal([
         { id: 1, text: 'Item 1' },
-        { id: 2, text: 'Item 2' }
+        { id: 2, text: 'Item 2' },
       ])
 
       const Component = () => {
-        return h('div', {},
-          () => items.value.map(item =>
-            h('div', { key: item.id }, item.text)
-          )
+        return h('div', {}, () =>
+          items.value.map((item) => h('div', { key: item.id }, item.text))
         )
       }
 
@@ -732,7 +737,7 @@ describe('DOM Reconciliation', () => {
       // Update signal
       items.value = [
         { id: 2, text: 'Item 2 Updated' },
-        { id: 1, text: 'Item 1 Updated' }
+        { id: 1, text: 'Item 1 Updated' },
       ]
 
       await Promise.resolve()
@@ -745,8 +750,8 @@ describe('DOM Reconciliation', () => {
       const count = signal(100)
 
       const Component = () => {
-        return h('div', { class: 'list-container' },
-          () => Array.from({ length: count.value }, (_, i) =>
+        return h('div', { class: 'list-container' }, () =>
+          Array.from({ length: count.value }, (_, i) =>
             h('div', { key: i, class: 'list-item' }, `Item ${i}`)
           )
         )
@@ -768,7 +773,9 @@ describe('DOM Reconciliation', () => {
 
   describe('edge cases', () => {
     it('should handle null and undefined in children', () => {
-      const oldVNode = h('div', {},
+      const oldVNode = h(
+        'div',
+        {},
         h('span', { key: 'a' }, 'A'),
         null,
         undefined,
@@ -786,7 +793,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -803,7 +810,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'd' }, 'D'),
         h('div', { key: 'e' }, 'E'),
-        h('div', { key: 'f' }, 'F')
+        h('div', { key: 'f' }, 'F'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -815,9 +822,7 @@ describe('DOM Reconciliation', () => {
     })
 
     it('should handle single item to multiple items', () => {
-      const oldVNodes = [
-        h('div', { key: 'a' }, 'A')
-      ]
+      const oldVNodes = [h('div', { key: 'a' }, 'A')]
 
       for (const vnode of oldVNodes) {
         const node = mountReactive(vnode, undefined)
@@ -832,7 +837,7 @@ describe('DOM Reconciliation', () => {
       const newVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -845,7 +850,7 @@ describe('DOM Reconciliation', () => {
       const oldVNodes = [
         h('div', { key: 'a' }, 'A'),
         h('div', { key: 'b' }, 'B'),
-        h('div', { key: 'c' }, 'C')
+        h('div', { key: 'c' }, 'C'),
       ]
 
       for (const vnode of oldVNodes) {
@@ -858,9 +863,7 @@ describe('DOM Reconciliation', () => {
 
       const oldB = container.children[1]
 
-      const newVNodes = [
-        h('div', { key: 'b' }, 'B')
-      ]
+      const newVNodes = [h('div', { key: 'b' }, 'B')]
 
       reconcileArrays(container, oldVNodes, newVNodes, null)
 
@@ -895,7 +898,7 @@ describe('DOM Reconciliation', () => {
       // This is an error case, but should not crash
       const oldVNodes = [
         h('div', { key: 'a' }, 'A1'),
-        h('div', { key: 'a' }, 'A2') // Duplicate key
+        h('div', { key: 'a' }, 'A2'), // Duplicate key
       ]
 
       for (const vnode of oldVNodes) {
@@ -906,9 +909,7 @@ describe('DOM Reconciliation', () => {
         }
       }
 
-      const newVNodes = [
-        h('div', { key: 'a' }, 'A Updated')
-      ]
+      const newVNodes = [h('div', { key: 'a' }, 'A Updated')]
 
       // Should not throw
       expect(() => {
@@ -930,9 +931,9 @@ describe('DOM Reconciliation', () => {
       }
 
       // Reverse the list
-      const newVNodes = [...oldVNodes].reverse().map((vnode, i) =>
-        h('div', { key: 999 - i }, `Item ${999 - i}`)
-      )
+      const newVNodes = [...oldVNodes]
+        .reverse()
+        .map((vnode, i) => h('div', { key: 999 - i }, `Item ${999 - i}`))
 
       const start = performance.now()
       reconcileArrays(container, oldVNodes, newVNodes, null)
@@ -953,7 +954,7 @@ describe('DOM Reconciliation', () => {
 
       const newVNodes = [
         h('div', { key: 'a' }, 'A'),
-        h('div', { key: 'b' }, 'B')
+        h('div', { key: 'b' }, 'B'),
       ]
 
       reconcileArrays(container, [], newVNodes, marker)
@@ -967,7 +968,7 @@ describe('DOM Reconciliation', () => {
     it('should append when nextSibling is null', () => {
       const newVNodes = [
         h('div', { key: 'a' }, 'A'),
-        h('div', { key: 'b' }, 'B')
+        h('div', { key: 'b' }, 'B'),
       ]
 
       reconcileArrays(container, [], newVNodes, null)

@@ -24,7 +24,7 @@ describe('Control Flow Components', () => {
       const items = signal([1, 2, 3])
       const result = For({
         each: items,
-        children: (item) => h('div', {}, [String(item)])
+        children: (item) => h('div', {}, [String(item)]),
       })
 
       expect(isForComponent(result)).toBe(true)
@@ -38,8 +38,8 @@ describe('Control Flow Components', () => {
         return h('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item) => h('span', {}, [item])
-          }) as any
+            children: (item) => h('span', {}, [item]),
+          }) as any,
         ])
       }
 
@@ -61,8 +61,8 @@ describe('Control Flow Components', () => {
         return h('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item) => h('span', {}, [item])
-          }) as any
+            children: (item) => h('span', {}, [item]),
+          }) as any,
         ])
       }
 
@@ -88,8 +88,8 @@ describe('Control Flow Components', () => {
         return h('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item) => h('span', {}, [item])
-          }) as any
+            children: (item) => h('span', {}, [item]),
+          }) as any,
         ])
       }
 
@@ -115,8 +115,8 @@ describe('Control Flow Components', () => {
         return h('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item, index) => h('span', {}, [`${index()}: ${item}`])
-          }) as any
+            children: (item, index) => h('span', {}, [`${index()}: ${item}`]),
+          }) as any,
         ])
       }
 
@@ -137,8 +137,8 @@ describe('Control Flow Components', () => {
         return h('div', { id: 'list' }, [
           For({
             each: items,
-            children: (item) => h('span', {}, [item])
-          }) as any
+            children: (item) => h('span', {}, [item]),
+          }) as any,
         ])
       }
 
@@ -157,7 +157,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: isVisible,
-        children: [h('div', {}, ['visible'])]
+        children: [h('div', {}, ['visible'])],
       })
 
       const result = showFn()
@@ -169,7 +169,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: isVisible,
-        children: [h('div', {}, ['visible'])]
+        children: [h('div', {}, ['visible'])],
       })
 
       const result = showFn()
@@ -183,7 +183,7 @@ describe('Control Flow Components', () => {
       const showFn = Show({
         when: isVisible,
         fallback,
-        children: [h('div', {}, ['visible'])]
+        children: [h('div', {}, ['visible'])],
       })
 
       const result = showFn()
@@ -195,7 +195,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: user,
-        children: [(u: { name: string }) => h('div', {}, [`Hello ${u.name}`])]
+        children: [(u: { name: string }) => h('div', {}, [`Hello ${u.name}`])],
       })
 
       const result = showFn() as any
@@ -209,7 +209,7 @@ describe('Control Flow Components', () => {
       const showFn = Show({
         when: isVisible,
         fallback: h('div', {}, ['hidden']),
-        children: [h('div', {}, ['visible'])]
+        children: [h('div', {}, ['visible'])],
       })
 
       // Initial state - visible
@@ -232,7 +232,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: value,
-        children: [h('div', {}, ['content'])]
+        children: [h('div', {}, ['content'])],
       })
 
       const result = showFn()
@@ -244,7 +244,7 @@ describe('Control Flow Components', () => {
 
       const showFn = Show({
         when: value,
-        children: [h('div', {}, ['content'])]
+        children: [h('div', {}, ['content'])],
       })
 
       const result = showFn()
@@ -261,7 +261,7 @@ describe('Control Flow Components', () => {
           fallbackCalled = true
           return h('div', {}, ['fallback'])
         },
-        children: [h('div', {}, ['visible'])]
+        children: [h('div', {}, ['visible'])],
       })
 
       showFn()
@@ -276,15 +276,15 @@ describe('Control Flow Components', () => {
       const switchFn = Switch({
         children: [
           h(Match as any, { when: () => status.value === 'loading' }, [
-            h('div', {}, ['Loading...'])
+            h('div', {}, ['Loading...']),
           ]),
           h(Match as any, { when: () => status.value === 'error' }, [
-            h('div', {}, ['Error!'])
+            h('div', {}, ['Error!']),
           ]),
           h(Match as any, { when: () => status.value === 'success' }, [
-            h('div', {}, ['Success!'])
-          ])
-        ]
+            h('div', {}, ['Success!']),
+          ]),
+        ],
       })
 
       const result = switchFn() as any
@@ -299,12 +299,12 @@ describe('Control Flow Components', () => {
         fallback,
         children: [
           h(Match as any, { when: () => status.value === 'loading' }, [
-            h('div', {}, ['Loading...'])
+            h('div', {}, ['Loading...']),
           ]),
           h(Match as any, { when: () => status.value === 'error' }, [
-            h('div', {}, ['Error!'])
-          ])
-        ]
+            h('div', {}, ['Error!']),
+          ]),
+        ],
       })
 
       const result = switchFn()
@@ -317,9 +317,9 @@ describe('Control Flow Components', () => {
       const switchFn = Switch({
         children: [
           h(Match as any, { when: () => status.value === 'loading' }, [
-            h('div', {}, ['Loading...'])
-          ])
-        ]
+            h('div', {}, ['Loading...']),
+          ]),
+        ],
       })
 
       const result = switchFn()
@@ -333,8 +333,8 @@ describe('Control Flow Components', () => {
       const switchFn = Switch({
         children: [
           h(Match as any, { when: a }, [h('div', {}, ['First'])]),
-          h(Match as any, { when: b }, [h('div', {}, ['Second'])])
-        ]
+          h(Match as any, { when: b }, [h('div', {}, ['Second'])]),
+        ],
       })
 
       const result = switchFn() as any
@@ -348,15 +348,15 @@ describe('Control Flow Components', () => {
         fallback: h('div', {}, ['Unknown']),
         children: [
           h(Match as any, { when: () => status.value === 'loading' }, [
-            h('div', {}, ['Loading...'])
+            h('div', {}, ['Loading...']),
           ]),
           h(Match as any, { when: () => status.value === 'success' }, [
-            h('div', {}, ['Success!'])
+            h('div', {}, ['Success!']),
           ]),
           h(Match as any, { when: () => status.value === 'error' }, [
-            h('div', {}, ['Error!'])
-          ])
-        ]
+            h('div', {}, ['Error!']),
+          ]),
+        ],
       })
 
       // Initial state - loading
@@ -380,9 +380,9 @@ describe('Control Flow Components', () => {
       const switchFn = Switch({
         children: [
           h(Match as any, { when: user }, [
-            (u: { name: string }) => h('div', {}, [`User: ${u.name}`])
-          ])
-        ]
+            (u: { name: string }) => h('div', {}, [`User: ${u.name}`]),
+          ]),
+        ],
       })
 
       const result = switchFn() as any
@@ -395,7 +395,7 @@ describe('Control Flow Components', () => {
       const items = signal([1, 2, 3])
       const result = For({
         each: items,
-        children: (item) => h('div', {}, [String(item)])
+        children: (item) => h('div', {}, [String(item)]),
       })
 
       expect(isForComponent(result)).toBe(true)

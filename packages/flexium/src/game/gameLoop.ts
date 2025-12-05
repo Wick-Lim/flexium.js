@@ -28,12 +28,7 @@ export interface GameLoop {
  * Create a game loop with delta time and optional fixed timestep
  */
 export function createGameLoop(options: GameLoopOptions = {}): GameLoop {
-  const {
-    fixedFps = 60,
-    onUpdate,
-    onFixedUpdate,
-    onRender,
-  } = options
+  const { fixedFps = 60, onUpdate, onFixedUpdate, onRender } = options
 
   const fixedDelta = 1 / fixedFps
   let running = false
@@ -43,6 +38,7 @@ export function createGameLoop(options: GameLoopOptions = {}): GameLoop {
   let fps = 0
   let frameCount = 0
   let fpsTime = 0
+  let isFirstFrame = true
 
   function loop(currentTime: number): void {
     if (!running) return
@@ -51,6 +47,14 @@ export function createGameLoop(options: GameLoopOptions = {}): GameLoop {
 
     // Convert to seconds
     const time = currentTime / 1000
+
+    // Initialize lastTime on first frame and skip processing
+    if (isFirstFrame) {
+      lastTime = time
+      isFirstFrame = false
+      return
+    }
+
     const delta = Math.min(time - lastTime, 0.25) // Cap at 250ms
     lastTime = time
 
@@ -89,7 +93,7 @@ export function createGameLoop(options: GameLoopOptions = {}): GameLoop {
     start() {
       if (running) return
       running = true
-      lastTime = performance.now() / 1000
+      isFirstFrame = true
       accumulator = 0
       rafId = requestAnimationFrame(loop)
     },

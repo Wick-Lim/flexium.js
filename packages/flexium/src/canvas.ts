@@ -38,11 +38,11 @@ export { unwrapSignal } from './primitives/canvas/utils'
 
 // Canvas types
 export type {
-    CanvasProps,
-    DrawRectProps,
-    DrawCircleProps,
-    DrawArcProps,
-    DrawLineProps,
-    DrawPathProps,
-    DrawTextProps
+  CanvasProps,
+  DrawRectProps,
+  DrawCircleProps,
+  DrawArcProps,
+  DrawLineProps,
+  DrawPathProps,
+  DrawTextProps,
 } from './primitives/types'

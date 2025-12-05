@@ -107,7 +107,7 @@ export function useMouse(options: UseMouseOptions = {}): MouseState {
     buttons.value = new Set()
   }
 
-  function handleContextMenu(e: Event): void {
+  function handleContextMenu(_e: Event): void {
     // Prevent context menu in game contexts if needed
     // e.preventDefault()
   }

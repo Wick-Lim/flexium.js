@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-flexium",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "description": "Vite plugin for Flexium - JSX transform, HMR, and dev tools integration",
   "publishConfig": {
     "access": "public"

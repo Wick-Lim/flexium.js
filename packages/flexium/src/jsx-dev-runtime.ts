@@ -12,4 +12,4 @@
  * - Source location tracking
  */
 
-export { jsx, jsxs, Fragment, jsxDEV } from './jsx-runtime';
+export { jsx, jsxs, Fragment, jsxDEV } from './jsx-runtime'

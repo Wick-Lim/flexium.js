@@ -86,7 +86,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
 
           // Recurse into child nodes
           for (const key in node) {
-            const child = (node as Record<string, unknown>)[key];
+            const child = (node as unknown as Record<string, unknown>)[key];
             if (child && typeof child === "object") {
               if (Array.isArray(child)) {
                 for (const item of child) {

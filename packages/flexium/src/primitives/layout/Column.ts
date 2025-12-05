@@ -1,21 +1,29 @@
-import { h } from '../../renderers/dom/h';
-import { VNode } from '../../core/renderer';
-import { BaseComponentProps, AlignItems, JustifyContent, ResponsiveValue, stylePropsToCSS, mergeStyles, getBaseValue } from './types';
+import { h } from '../../renderers/dom/h'
+import { VNode } from '../../core/renderer'
+import {
+  BaseComponentProps,
+  AlignItems,
+  JustifyContent,
+  ResponsiveValue,
+  stylePropsToCSS,
+  mergeStyles,
+  getBaseValue,
+} from './types'
 
 /**
  * Props for Column component - vertical flex container
  */
 export interface ColumnProps extends BaseComponentProps {
   /** Align items on cross axis (horizontal) */
-  align?: ResponsiveValue<AlignItems>;
+  align?: ResponsiveValue<AlignItems>
   /** Justify items on main axis (vertical) */
-  justify?: ResponsiveValue<JustifyContent>;
+  justify?: ResponsiveValue<JustifyContent>
   /** Enable wrapping of items */
-  wrap?: ResponsiveValue<boolean>;
+  wrap?: ResponsiveValue<boolean>
   /** Reverse the direction */
-  reverse?: boolean;
+  reverse?: boolean
   /** HTML element to render */
-  as?: string;
+  as?: string
 }
 
 /**
@@ -29,8 +37,8 @@ function mapJustifyContent(value: JustifyContent): string {
     between: 'space-between',
     around: 'space-around',
     evenly: 'space-evenly',
-  };
-  return map[value] || value;
+  }
+  return map[value] || value
 }
 
 /**
@@ -43,8 +51,8 @@ function mapAlignItems(value: AlignItems): string {
     end: 'flex-end',
     stretch: 'stretch',
     baseline: 'baseline',
-  };
-  return map[value] || value;
+  }
+  return map[value] || value
 }
 
 /**
@@ -90,40 +98,43 @@ export function Column(props: ColumnProps): VNode {
     onMouseLeave,
     // Extract style props
     ...styleProps
-  } = props;
+  } = props
 
   // Generate styles from style props
-  const generatedStyles = stylePropsToCSS(styleProps);
+  const generatedStyles = stylePropsToCSS(styleProps)
 
   // Build flex container styles
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const flexStyles: Record<string, any> = {
     display: 'flex',
     flexDirection: reverse ? 'column-reverse' : 'column',
-  };
+  }
 
   // Handle alignment
-  const alignValue = getBaseValue(align);
+  const alignValue = getBaseValue(align)
   if (alignValue) {
-    flexStyles.alignItems = mapAlignItems(alignValue as AlignItems);
+    flexStyles.alignItems = mapAlignItems(alignValue as AlignItems)
   }
 
   // Handle justification
-  const justifyValue = getBaseValue(justify);
+  const justifyValue = getBaseValue(justify)
   if (justifyValue) {
-    flexStyles.justifyContent = mapJustifyContent(justifyValue as JustifyContent);
+    flexStyles.justifyContent = mapJustifyContent(
+      justifyValue as JustifyContent
+    )
   }
 
   // Handle wrap
-  const wrapValue = getBaseValue(wrap);
+  const wrapValue = getBaseValue(wrap)
   if (wrapValue) {
-    flexStyles.flexWrap = 'wrap';
+    flexStyles.flexWrap = 'wrap'
   }
 
   // Merge all styles
   const finalStyles = mergeStyles(
     { ...flexStyles, ...generatedStyles },
     userStyle
-  );
+  )
 
   // Create element
   return h(
@@ -141,5 +152,5 @@ export function Column(props: ColumnProps): VNode {
       onMouseLeave,
     },
     children
-  );
+  )
 }

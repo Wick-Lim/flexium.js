@@ -28,7 +28,7 @@ export function Pressable(props: PressableProps): VNode {
     onPressOut,
     disabled,
     style,
-    activeOpacity = 0.7,
+    activeOpacity: _activeOpacity = 0.7,
     ...rest
   } = props
 

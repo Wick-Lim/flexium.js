@@ -12,11 +12,11 @@ export {
   type FieldState,
   type FormState,
   type FormConfig,
-} from './Form';
+} from './Form'
 
 export {
   createInput,
   createInputField,
   type InputType,
   type InputProps,
-} from './Input';
+} from './Input'

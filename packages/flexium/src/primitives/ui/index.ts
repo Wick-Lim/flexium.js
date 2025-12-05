@@ -9,7 +9,7 @@ export {
   type ButtonSize,
   type ButtonType,
   type ButtonProps,
-} from './Button';
+} from './Button'
 
 export {
   createText,
@@ -22,4 +22,4 @@ export {
   type TextDecoration,
   type TextTransform,
   type TextProps,
-} from './Text';
+} from './Text'

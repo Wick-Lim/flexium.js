@@ -35,10 +35,11 @@ describe('Portal Component', () => {
   describe('Portal rendering to different container', () => {
     it('should render children to specified mount point', () => {
       // Portal must be used as a component, not called directly
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('div', { class: 'portal-content' }, 'Portal Content')
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h('div', { class: 'portal-content' }, 'Portal Content'),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -49,9 +50,10 @@ describe('Portal Component', () => {
     })
 
     it('should render to document.body by default', () => {
-      const App = () => Portal({
-        children: h('div', { class: 'portal-default' }, 'Default Target')
-      })
+      const App = () =>
+        Portal({
+          children: h('div', { class: 'portal-default' }, 'Default Target'),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -67,10 +69,11 @@ describe('Portal Component', () => {
     })
 
     it('should leave placeholder comment in original location', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('div', {}, 'Content')
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h('div', {}, 'Content'),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -86,28 +89,32 @@ describe('Portal Component', () => {
     })
 
     it('should render multiple children to portal target', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: [
-          h('div', { class: 'child-1' }, 'Child 1'),
-          h('div', { class: 'child-2' }, 'Child 2'),
-          h('div', { class: 'child-3' }, 'Child 3')
-        ]
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: [
+            h('div', { class: 'child-1' }, 'Child 1'),
+            h('div', { class: 'child-2' }, 'Child 2'),
+            h('div', { class: 'child-3' }, 'Child 3'),
+          ],
+        })
 
       mountReactive(h(App, {}), container)
 
-      expect(portalTarget.querySelectorAll('div').length).toBeGreaterThanOrEqual(3)
+      expect(
+        portalTarget.querySelectorAll('div').length
+      ).toBeGreaterThanOrEqual(3)
       expect(portalTarget.querySelector('.child-1')).not.toBeNull()
       expect(portalTarget.querySelector('.child-2')).not.toBeNull()
       expect(portalTarget.querySelector('.child-3')).not.toBeNull()
     })
 
     it('should render text content to portal target', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: 'Simple text content'
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: 'Simple text content',
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -115,12 +122,14 @@ describe('Portal Component', () => {
     })
 
     it('should render component children to portal target', () => {
-      const PortalChild = () => h('div', { class: 'component-child' }, 'Component')
+      const PortalChild = () =>
+        h('div', { class: 'component-child' }, 'Component')
 
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h(PortalChild, {})
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h(PortalChild, {}),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -131,10 +140,11 @@ describe('Portal Component', () => {
 
   describe('Portal cleanup on unmount', () => {
     it('should remove portal content when container is cleaned up', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('div', { class: 'cleanup-test' }, 'Test')
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h('div', { class: 'cleanup-test' }, 'Test'),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -151,10 +161,11 @@ describe('Portal Component', () => {
     it('should cleanup reactive bindings in portal content', async () => {
       const count = signal(0)
 
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('div', { class: 'reactive-content' }, count)
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h('div', { class: 'reactive-content' }, count),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -174,14 +185,19 @@ describe('Portal Component', () => {
     })
 
     it('should cleanup nested elements in portal', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('div', { class: 'outer' },
-          h('div', { class: 'middle' },
-            h('div', { class: 'inner' }, 'Nested')
-          )
-        )
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h(
+            'div',
+            { class: 'outer' },
+            h(
+              'div',
+              { class: 'middle' },
+              h('div', { class: 'inner' }, 'Nested')
+            )
+          ),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -203,15 +219,26 @@ describe('Portal Component', () => {
       innerTarget.id = 'inner-target'
       document.body.appendChild(innerTarget)
 
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('div', { class: 'outer-content' },
-          h(() => Portal({
-            mount: innerTarget,
-            children: h('div', { class: 'inner-content' }, 'Nested Portal')
-          }), {})
-        )
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h(
+            'div',
+            { class: 'outer-content' },
+            h(
+              () =>
+                Portal({
+                  mount: innerTarget,
+                  children: h(
+                    'div',
+                    { class: 'inner-content' },
+                    'Nested Portal'
+                  ),
+                }),
+              {}
+            )
+          ),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -234,13 +261,18 @@ describe('Portal Component', () => {
       innerTarget.id = 'inner-target'
       document.body.appendChild(innerTarget)
 
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h(() => Portal({
-          mount: innerTarget,
-          children: h('div', { class: 'nested' }, 'Content')
-        }), {})
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h(
+            () =>
+              Portal({
+                mount: innerTarget,
+                children: h('div', { class: 'nested' }, 'Content'),
+              }),
+            {}
+          ),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -261,10 +293,27 @@ describe('Portal Component', () => {
       document.body.appendChild(target1)
       document.body.appendChild(target2)
 
-      const App = () => h('div', {},
-        h(() => Portal({ mount: target1, children: h('div', { class: 'portal-1' }, 'Portal 1') }), {}),
-        h(() => Portal({ mount: target2, children: h('div', { class: 'portal-2' }, 'Portal 2') }), {})
-      )
+      const App = () =>
+        h(
+          'div',
+          {},
+          h(
+            () =>
+              Portal({
+                mount: target1,
+                children: h('div', { class: 'portal-1' }, 'Portal 1'),
+              }),
+            {}
+          ),
+          h(
+            () =>
+              Portal({
+                mount: target2,
+                children: h('div', { class: 'portal-2' }, 'Portal 2'),
+              }),
+            {}
+          )
+        )
 
       mountReactive(h(App, {}), container)
 
@@ -291,10 +340,11 @@ describe('Portal Component', () => {
 
       const currentTarget = signal(target1)
 
-      const DynamicPortal = () => Portal({
-        mount: currentTarget.value,
-        children: h('div', { class: 'dynamic' }, 'Dynamic Content')
-      })
+      const DynamicPortal = () =>
+        Portal({
+          mount: currentTarget.value,
+          children: h('div', { class: 'dynamic' }, 'Dynamic Content'),
+        })
 
       mountReactive(h(DynamicPortal, {}), container)
 
@@ -314,10 +364,11 @@ describe('Portal Component', () => {
 
   describe('Cross-document mounting', () => {
     it('should handle portal to same document', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('div', { class: 'same-doc' }, 'Same Document')
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h('div', { class: 'same-doc' }, 'Same Document'),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -328,14 +379,21 @@ describe('Portal Component', () => {
     it('should render portal with event handlers', () => {
       const clickHandler = vi.fn()
 
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('button', { onclick: clickHandler, class: 'portal-button' }, 'Click Me')
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h(
+            'button',
+            { onclick: clickHandler, class: 'portal-button' },
+            'Click Me'
+          ),
+        })
 
       mountReactive(h(App, {}), container)
 
-      const button = portalTarget.querySelector('.portal-button') as HTMLButtonElement
+      const button = portalTarget.querySelector(
+        '.portal-button'
+      ) as HTMLButtonElement
       expect(button).not.toBeNull()
 
       button.click()
@@ -345,10 +403,11 @@ describe('Portal Component', () => {
     it('should maintain reactivity across portal boundary', async () => {
       const text = signal('Initial')
 
-      const App = () => Portal({
-        mount: portalTarget,
-        children: h('div', { class: 'reactive' }, text)
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: h('div', { class: 'reactive' }, text),
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -363,10 +422,12 @@ describe('Portal Component', () => {
     it('should support conditional rendering in portal', async () => {
       const show = signal(true)
 
-      const App = () => Portal({
-        mount: portalTarget,
-        children: () => show.value ? h('div', { class: 'conditional' }, 'Visible') : null
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: () =>
+            show.value ? h('div', { class: 'conditional' }, 'Visible') : null,
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -381,28 +442,31 @@ describe('Portal Component', () => {
 
   describe('Edge cases', () => {
     it('should handle null children', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: null
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: null,
+        })
 
       expect(() => mountReactive(h(App, {}), container)).not.toThrow()
     })
 
     it('should handle undefined children', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: undefined as any
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: undefined as any,
+        })
 
       expect(() => mountReactive(h(App, {}), container)).not.toThrow()
     })
 
     it('should handle empty array children', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: []
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: [],
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -411,18 +475,19 @@ describe('Portal Component', () => {
     })
 
     it('should handle mixed children types', () => {
-      const App = () => Portal({
-        mount: portalTarget,
-        children: [
-          'Text',
-          h('span', {}, 'Element'),
-          42,
-          null,
-          undefined,
-          false,
-          h('div', {}, 'Another element')
-        ]
-      })
+      const App = () =>
+        Portal({
+          mount: portalTarget,
+          children: [
+            'Text',
+            h('span', {}, 'Element'),
+            42,
+            null,
+            undefined,
+            false,
+            h('div', {}, 'Another element'),
+          ],
+        })
 
       mountReactive(h(App, {}), container)
 
@@ -434,14 +499,26 @@ describe('Portal Component', () => {
     })
 
     it('should handle portal as child of component', () => {
-      const Wrapper = (props: { children: any }) => h('div', { class: 'wrapper' }, props.children)
+      const Wrapper = (props: { children: any }) =>
+        h('div', { class: 'wrapper' }, props.children)
 
-      const App = () => h(Wrapper, {},
-        h(() => Portal({
-          mount: portalTarget,
-          children: h('div', { class: 'in-portal' }, 'Portal in Component')
-        }), {})
-      )
+      const App = () =>
+        h(
+          Wrapper,
+          {},
+          h(
+            () =>
+              Portal({
+                mount: portalTarget,
+                children: h(
+                  'div',
+                  { class: 'in-portal' },
+                  'Portal in Component'
+                ),
+              }),
+            {}
+          )
+        )
 
       mountReactive(h(App, {}), container)
 

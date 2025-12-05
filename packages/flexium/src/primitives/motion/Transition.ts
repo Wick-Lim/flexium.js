@@ -5,7 +5,7 @@
  * Works seamlessly with Show, For, and conditional rendering.
  */
 
-import { effect, onCleanup, signal } from '../../core/signal'
+import { onCleanup } from '../../core/signal'
 import type { AnimatableProps, MotionController } from './Motion'
 import { MotionController as MC } from './Motion'
 import { h } from '../../renderers/dom/h'
@@ -56,6 +56,7 @@ export interface TransitionProps {
   /** Callback when exit animation completes */
   onExitComplete?: () => void
   /** Children to animate */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: any
 }
 
@@ -72,49 +73,49 @@ function getPresetKeyframes(preset: TransitionPreset): {
       return {
         enter: { opacity: 0 },
         enterTo: { opacity: 1 },
-        exit: { opacity: 0 }
+        exit: { opacity: 0 },
       }
     case 'slide-up':
       return {
         enter: { opacity: 0, y: 20 },
         enterTo: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -20 }
+        exit: { opacity: 0, y: -20 },
       }
     case 'slide-down':
       return {
         enter: { opacity: 0, y: -20 },
         enterTo: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: 20 }
+        exit: { opacity: 0, y: 20 },
       }
     case 'slide-left':
       return {
         enter: { opacity: 0, x: 20 },
         enterTo: { opacity: 1, x: 0 },
-        exit: { opacity: 0, x: -20 }
+        exit: { opacity: 0, x: -20 },
       }
     case 'slide-right':
       return {
         enter: { opacity: 0, x: -20 },
         enterTo: { opacity: 1, x: 0 },
-        exit: { opacity: 0, x: 20 }
+        exit: { opacity: 0, x: 20 },
       }
     case 'scale':
       return {
         enter: { scale: 0.9 },
         enterTo: { scale: 1 },
-        exit: { scale: 0.9 }
+        exit: { scale: 0.9 },
       }
     case 'scale-fade':
       return {
         enter: { opacity: 0, scale: 0.95 },
         enterTo: { opacity: 1, scale: 1 },
-        exit: { opacity: 0, scale: 0.95 }
+        exit: { opacity: 0, scale: 0.95 },
       }
     default:
       return {
         enter: {},
         enterTo: {},
-        exit: {}
+        exit: {},
       }
   }
 }
@@ -162,7 +163,7 @@ export function Transition(props: TransitionProps) {
     onEnterComplete,
     onExitStart,
     onExitComplete,
-    children
+    children,
   } = props
 
   // Get keyframes from preset or custom props
@@ -185,11 +186,7 @@ export function Transition(props: TransitionProps) {
     if (element && controller) {
       onExitStart?.()
 
-      await controller.animateExit(
-        exit,
-        exitTiming.duration,
-        exitTiming.easing
-      )
+      await controller.animateExit(exit, exitTiming.duration, exitTiming.easing)
 
       onExitComplete?.()
     }
@@ -217,11 +214,11 @@ export function Transition(props: TransitionProps) {
               duration: enterTiming.duration,
               easing: enterTiming.easing,
               delay: (enterTiming.delay ?? 0) + additionalDelay,
-              onAnimationComplete: onEnterComplete
+              onAnimationComplete: onEnterComplete,
             })
           }
         })
-      }
+      },
     },
     children
   )
@@ -234,6 +231,7 @@ export interface TransitionGroupProps {
   /** Delay between each child animation (stagger effect) */
   stagger?: number
   /** Children (should contain Transition components) */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: any
 }
 
@@ -258,7 +256,7 @@ export function TransitionGroup(props: TransitionGroupProps) {
 
   const context: TransitionGroupContext = {
     registerChild: () => childIndex++,
-    staggerDelay: stagger
+    staggerDelay: stagger,
   }
 
   return () => {
@@ -315,7 +313,7 @@ export const transitions = {
     enterTo: { opacity: 1, scale: 1, y: 0 },
     exit: { opacity: 0, scale: 0.95, y: 10 },
     enterTiming: { duration: 200, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
-    exitTiming: { duration: 150, easing: 'ease-in' }
+    exitTiming: { duration: 150, easing: 'ease-in' },
   }),
 
   dropdown: createTransition({
@@ -323,7 +321,7 @@ export const transitions = {
     enterTo: { opacity: 1, y: 0, scale: 1 },
     exit: { opacity: 0, y: -8, scale: 0.95 },
     enterTiming: { duration: 150, easing: 'ease-out' },
-    exitTiming: { duration: 100, easing: 'ease-in' }
+    exitTiming: { duration: 100, easing: 'ease-in' },
   }),
 
   tooltip: createTransition({
@@ -331,7 +329,7 @@ export const transitions = {
     enterTo: { opacity: 1, scale: 1 },
     exit: { opacity: 0, scale: 0.9 },
     enterTiming: { duration: 100, easing: 'ease-out' },
-    exitTiming: { duration: 75, easing: 'ease-in' }
+    exitTiming: { duration: 75, easing: 'ease-in' },
   }),
 
   notification: createTransition({
@@ -339,7 +337,7 @@ export const transitions = {
     enterTo: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: 100 },
     enterTiming: { duration: 300, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
-    exitTiming: { duration: 200, easing: 'ease-in' }
+    exitTiming: { duration: 200, easing: 'ease-in' },
   }),
 
   page: createTransition({
@@ -347,6 +345,6 @@ export const transitions = {
     enterTo: { opacity: 1 },
     exit: { opacity: 0 },
     enterTiming: { duration: 200, easing: 'ease-out' },
-    exitTiming: { duration: 150, easing: 'ease-in' }
-  })
+    exitTiming: { duration: 150, easing: 'ease-in' },
+  }),
 } as const

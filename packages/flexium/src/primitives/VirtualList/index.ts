@@ -3,7 +3,7 @@ export {
   isVirtualListComponent,
   mountVirtualListComponent,
   VIRTUALLIST_MARKER,
-} from './VirtualList';
+} from './VirtualList'
 
 export type {
   VirtualListProps,
@@ -13,4 +13,4 @@ export type {
   VariableSizeConfig,
   SizeConfig,
   ItemsGetter,
-} from './types';
+} from './types'

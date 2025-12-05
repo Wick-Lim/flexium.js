@@ -32,7 +32,10 @@ describe('Router', () => {
     })
 
     it('should extract multiple params', () => {
-      const result = matchPath('/users/123/posts/456', '/users/:userId/posts/:postId')
+      const result = matchPath(
+        '/users/123/posts/456',
+        '/users/:userId/posts/:postId'
+      )
       expect(result.matches).toBe(true)
       expect(result.params).toEqual({ userId: '123', postId: '456' })
     })
@@ -61,18 +64,21 @@ describe('Router', () => {
   })
 
   describe('matchRoutes', () => {
-    const createRoute = (path: string, children: RouteDef[] = []): RouteDef => ({
+    const createRoute = (
+      path: string,
+      children: RouteDef[] = []
+    ): RouteDef => ({
       path,
       index: false,
       component: () => null,
-      children
+      children,
     })
 
     it('should match simple routes', () => {
       const routes: RouteDef[] = [
         createRoute('/'),
         createRoute('/users'),
-        createRoute('/posts')
+        createRoute('/posts'),
       ]
 
       const result = matchRoutes(routes, '/users')
@@ -83,11 +89,7 @@ describe('Router', () => {
 
     it('should match nested routes', () => {
       const routes: RouteDef[] = [
-        createRoute('/', [
-          createRoute('users', [
-            createRoute(':id')
-          ])
-        ])
+        createRoute('/', [createRoute('users', [createRoute(':id')])]),
       ]
 
       const result = matchRoutes(routes, '/users/123')
@@ -100,21 +102,14 @@ describe('Router', () => {
     })
 
     it('should return null for unmatched routes', () => {
-      const routes: RouteDef[] = [
-        createRoute('/users'),
-        createRoute('/posts')
-      ]
+      const routes: RouteDef[] = [createRoute('/users'), createRoute('/posts')]
 
       const result = matchRoutes(routes, '/settings')
       expect(result).toBeNull()
     })
 
     it('should match root with nested routes', () => {
-      const routes: RouteDef[] = [
-        createRoute('/', [
-          createRoute('about')
-        ])
-      ]
+      const routes: RouteDef[] = [createRoute('/', [createRoute('about')])]
 
       const result = matchRoutes(routes, '/about')
       expect(result).not.toBeNull()
@@ -126,7 +121,7 @@ describe('Router', () => {
         path: '',
         index: true,
         component: () => null,
-        children: []
+        children: [],
       }
 
       const routes: RouteDef[] = [
@@ -134,8 +129,8 @@ describe('Router', () => {
           path: '/',
           index: false,
           component: () => null,
-          children: [indexRoute]
-        }
+          children: [indexRoute],
+        },
       ]
 
       const result = matchRoutes(routes, '/')
@@ -148,29 +143,31 @@ describe('Router', () => {
         createRoute('/', [
           createRoute('users', [
             createRoute(':userId', [
-              createRoute('posts', [
-                createRoute(':postId')
-              ])
-            ])
-          ])
-        ])
+              createRoute('posts', [createRoute(':postId')]),
+            ]),
+          ]),
+        ]),
       ]
 
       const result = matchRoutes(routes, '/users/42/posts/99')
       expect(result).not.toBeNull()
 
       // Each match accumulates params from parent routes
-      const lastMatch = result?.[result!.length - 1]
+      const lastMatch = result?.[result.length - 1]
       expect(lastMatch?.params).toEqual({ userId: '42', postId: '99' })
     })
   })
 
   describe('createRoutesFromChildren', () => {
-    const createVNode = (type: Function, props: Record<string, any>, children?: any) => ({
+    const createVNode = (
+      type: Function,
+      props: Record<string, any>,
+      children?: any
+    ) => ({
       type,
       props,
       children,
-      key: undefined
+      key: undefined,
     })
 
     const MockRoute = () => null
@@ -178,7 +175,7 @@ describe('Router', () => {
     it('should create routes from single VNode', () => {
       const vnode = createVNode(MockRoute, {
         path: '/users',
-        component: () => null
+        component: () => null,
       })
 
       const routes = createRoutesFromChildren(vnode)
@@ -189,7 +186,7 @@ describe('Router', () => {
     it('should create routes from array of VNodes', () => {
       const vnodes = [
         createVNode(MockRoute, { path: '/users', component: () => null }),
-        createVNode(MockRoute, { path: '/posts', component: () => null })
+        createVNode(MockRoute, { path: '/posts', component: () => null }),
       ]
 
       const routes = createRoutesFromChildren(vnodes)
@@ -199,7 +196,10 @@ describe('Router', () => {
     })
 
     it('should handle nested routes', () => {
-      const nestedVNode = createVNode(MockRoute, { path: ':id', component: () => null })
+      const nestedVNode = createVNode(MockRoute, {
+        path: ':id',
+        component: () => null,
+      })
       const parentVNode = createVNode(
         MockRoute,
         { path: '/users', component: () => null },
@@ -218,7 +218,7 @@ describe('Router', () => {
         'text node',
         null,
         undefined,
-        createVNode(MockRoute, { path: '/users', component: () => null })
+        createVNode(MockRoute, { path: '/users', component: () => null }),
       ]
 
       const routes = createRoutesFromChildren(children)
@@ -229,7 +229,7 @@ describe('Router', () => {
     it('should handle index routes', () => {
       const vnode = createVNode(MockRoute, {
         index: true,
-        component: () => null
+        component: () => null,
       })
 
       const routes = createRoutesFromChildren(vnode)
@@ -269,7 +269,9 @@ describe('Router', () => {
 
     it('should throw error when used outside Router', () => {
       const TestComponent = () => {
-        expect(() => useRouter()).toThrow('useRouter must be used within a <Router> component')
+        expect(() => useRouter()).toThrow(
+          'useRouter must be used within a <Router> component'
+        )
         return h('div', {}, 'test')
       }
 
@@ -292,7 +294,7 @@ describe('Router', () => {
 
       // Router is a functional component that returns a function
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })]
+        children: [h(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -318,7 +320,7 @@ describe('Router', () => {
       document.body.appendChild(container)
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })]
+        children: [h(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -347,9 +349,9 @@ describe('Router', () => {
       const RouterApp = Router({
         children: [
           h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-            h(Route, { path: 'users/:id', component: TestComponent })
-          ])
-        ]
+            h(Route, { path: 'users/:id', component: TestComponent }),
+          ]),
+        ],
       })
 
       mountReactive(RouterApp, container)
@@ -383,7 +385,7 @@ describe('Router', () => {
       document.body.appendChild(container)
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })]
+        children: [h(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -396,14 +398,16 @@ describe('Router', () => {
 
     it('should apply class attribute', () => {
       const TestComponent = () => {
-        return h('div', {}, [h(Link, { to: '/users', class: 'nav-link active' }, 'Users')])
+        return h('div', {}, [
+          h(Link, { to: '/users', class: 'nav-link active' }, 'Users'),
+        ])
       }
 
       const container = document.createElement('div')
       document.body.appendChild(container)
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })]
+        children: [h(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -421,7 +425,7 @@ describe('Router', () => {
       document.body.appendChild(container)
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })]
+        children: [h(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -429,7 +433,10 @@ describe('Router', () => {
       const link = container.querySelector('a')
       expect(link).not.toBeNull()
 
-      const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true })
+      const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+      })
       const preventDefaultSpy = vi.spyOn(clickEvent, 'preventDefault')
 
       link?.dispatchEvent(clickEvent)
@@ -442,7 +449,7 @@ describe('Router', () => {
       const TestComponent = () => {
         return h('nav', {}, [
           h(Link, { to: '/about' }, 'About'),
-          h(Link, { to: '/contact' }, 'Contact')
+          h(Link, { to: '/contact' }, 'Contact'),
         ])
       }
 
@@ -450,7 +457,7 @@ describe('Router', () => {
       document.body.appendChild(container)
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })]
+        children: [h(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -459,11 +466,15 @@ describe('Router', () => {
       expect(links.length).toBe(2)
 
       // Click first link
-      links[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+      links[0].dispatchEvent(
+        new MouseEvent('click', { bubbles: true, cancelable: true })
+      )
       expect(window.history.pushState).toHaveBeenCalledWith({}, '', '/about')
 
       // Click second link
-      links[1].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+      links[1].dispatchEvent(
+        new MouseEvent('click', { bubbles: true, cancelable: true })
+      )
       expect(window.history.pushState).toHaveBeenCalledWith({}, '', '/contact')
     })
 
@@ -472,8 +483,8 @@ describe('Router', () => {
         return h('div', {}, [
           h(Link, { to: '/profile' }, [
             h('span', { class: 'icon' }, '👤'),
-            h('span', {}, 'Profile')
-          ])
+            h('span', {}, 'Profile'),
+          ]),
         ])
       }
 
@@ -481,7 +492,7 @@ describe('Router', () => {
       document.body.appendChild(container)
 
       const RouterApp = Router({
-        children: [h(Route, { path: '/', component: TestComponent })]
+        children: [h(Route, { path: '/', component: TestComponent })],
       })
 
       mountReactive(RouterApp, container)
@@ -504,10 +515,8 @@ describe('Router', () => {
 
     it('should render nested route component', () => {
       const ChildComponent = () => h('div', { id: 'child' }, 'Child Content')
-      const ParentComponent = () => h('div', { id: 'parent' }, [
-        h('h1', {}, 'Parent'),
-        h(Outlet, {})
-      ])
+      const ParentComponent = () =>
+        h('div', { id: 'parent' }, [h('h1', {}, 'Parent'), h(Outlet, {})])
 
       const container = document.createElement('div')
       document.body.appendChild(container)
@@ -518,10 +527,10 @@ describe('Router', () => {
         children: [
           h(Route, { path: '/', component: () => h(Outlet, {}) }, [
             h(Route, { path: 'parent', component: ParentComponent }, [
-              h(Route, { path: 'child', component: ChildComponent })
-            ])
-          ])
-        ]
+              h(Route, { path: 'child', component: ChildComponent }),
+            ]),
+          ]),
+        ],
       })
 
       mountReactive(RouterApp, container)
@@ -536,10 +545,8 @@ describe('Router', () => {
     })
 
     it('should render null when no child route matches', () => {
-      const ParentComponent = () => h('div', { id: 'parent' }, [
-        h('h1', {}, 'Parent'),
-        h(Outlet, {})
-      ])
+      const ParentComponent = () =>
+        h('div', { id: 'parent' }, [h('h1', {}, 'Parent'), h(Outlet, {})])
 
       const container = document.createElement('div')
       document.body.appendChild(container)
@@ -549,9 +556,9 @@ describe('Router', () => {
       const RouterApp = Router({
         children: [
           h(Route, { path: '/', component: () => h(Outlet, {}) }, [
-            h(Route, { path: 'parent', component: ParentComponent })
-          ])
-        ]
+            h(Route, { path: 'parent', component: ParentComponent }),
+          ]),
+        ],
       })
 
       mountReactive(RouterApp, container)
@@ -570,14 +577,10 @@ describe('Router', () => {
 
     it('should handle multiple levels of nesting', () => {
       const Level3 = () => h('div', { id: 'level3' }, 'Level 3')
-      const Level2 = () => h('div', { id: 'level2' }, [
-        h('span', {}, 'Level 2'),
-        h(Outlet, {})
-      ])
-      const Level1 = () => h('div', { id: 'level1' }, [
-        h('span', {}, 'Level 1'),
-        h(Outlet, {})
-      ])
+      const Level2 = () =>
+        h('div', { id: 'level2' }, [h('span', {}, 'Level 2'), h(Outlet, {})])
+      const Level1 = () =>
+        h('div', { id: 'level1' }, [h('span', {}, 'Level 1'), h(Outlet, {})])
 
       const container = document.createElement('div')
       document.body.appendChild(container)
@@ -589,11 +592,11 @@ describe('Router', () => {
           h(Route, { path: '/', component: () => h(Outlet, {}) }, [
             h(Route, { path: 'level1', component: Level1 }, [
               h(Route, { path: 'level2', component: Level2 }, [
-                h(Route, { path: 'level3', component: Level3 })
-              ])
-            ])
-          ])
-        ]
+                h(Route, { path: 'level3', component: Level3 }),
+              ]),
+            ]),
+          ]),
+        ],
       })
 
       mountReactive(RouterApp, container)
@@ -611,10 +614,8 @@ describe('Router', () => {
         return h('div', { id: 'child' }, `User: ${props.params.userId}`)
       }
 
-      const ParentComponent = () => h('div', { id: 'parent' }, [
-        h('h1', {}, 'Users'),
-        h(Outlet, {})
-      ])
+      const ParentComponent = () =>
+        h('div', { id: 'parent' }, [h('h1', {}, 'Users'), h(Outlet, {})])
 
       const container = document.createElement('div')
       document.body.appendChild(container)
@@ -625,10 +626,10 @@ describe('Router', () => {
         children: [
           h(Route, { path: '/', component: () => h(Outlet, {}) }, [
             h(Route, { path: 'users', component: ParentComponent }, [
-              h(Route, { path: ':userId', component: ChildComponent })
-            ])
-          ])
-        ]
+              h(Route, { path: ':userId', component: ChildComponent }),
+            ]),
+          ]),
+        ],
       })
 
       mountReactive(RouterApp, container)
@@ -653,10 +654,8 @@ describe('Router', () => {
     it('should update when route changes', () => {
       const AboutComponent = () => h('div', { id: 'about' }, 'About Page')
       const ContactComponent = () => h('div', { id: 'contact' }, 'Contact Page')
-      const LayoutComponent = () => h('div', { id: 'layout' }, [
-        h('header', {}, 'Header'),
-        h(Outlet, {})
-      ])
+      const LayoutComponent = () =>
+        h('div', { id: 'layout' }, [h('header', {}, 'Header'), h(Outlet, {})])
 
       const container = document.createElement('div')
       document.body.appendChild(container)
@@ -667,9 +666,9 @@ describe('Router', () => {
         children: [
           h(Route, { path: '/', component: LayoutComponent }, [
             h(Route, { path: 'about', component: AboutComponent }),
-            h(Route, { path: 'contact', component: ContactComponent })
-          ])
-        ]
+            h(Route, { path: 'contact', component: ContactComponent }),
+          ]),
+        ],
       })
 
       mountReactive(RouterApp, container)

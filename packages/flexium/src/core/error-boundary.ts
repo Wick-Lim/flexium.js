@@ -1,40 +1,42 @@
-import { createContext, useContext } from './context';
-import { signal } from './signal';
-import { h } from '../renderers/dom/h';
-import type { VNodeChild, VNode } from './renderer';
-import { ErrorCodes, logError } from './errors';
+import { createContext, useContext } from './context'
+import { signal } from './signal'
+import { h } from '../renderers/dom/h'
+import type { VNodeChild, VNode } from './renderer'
+import { ErrorCodes, logError } from './errors'
 
 export interface ErrorBoundaryContextValue {
-    setError: (error: Error | unknown) => void;
-    clearError: () => void;
-    retry: () => void;
+  setError: (error: unknown) => void
+  clearError: () => void
+  retry: () => void
 }
 
 /** Props for the fallback component */
 export interface ErrorFallbackProps {
-    error: Error;
-    errorInfo: ErrorInfo | null;
-    reset: () => void;
-    retryCount: number;
+  error: Error
+  errorInfo: ErrorInfo | null
+  reset: () => void
+  retryCount: number
 }
 
 export interface ErrorBoundaryProps {
-    /** Fallback UI to render when an error occurs. Can be a VNode or a function that receives error info */
-    fallback: VNodeChild | ((props: ErrorFallbackProps) => VNode | null);
-    /** Children to render */
-    children: VNodeChild;
-    /** Callback when an error is caught */
-    onError?: (error: Error, errorInfo: ErrorInfo) => void;
-    /** Callback when error is reset */
-    onReset?: () => void;
+  /** Fallback UI to render when an error occurs. Can be a VNode or a function that receives error info */
+  fallback: VNodeChild | ((props: ErrorFallbackProps) => VNode | null)
+  /** Children to render */
+  children: VNodeChild
+  /** Callback when an error is caught */
+  onError?: (error: Error, errorInfo: ErrorInfo) => void
+  /** Callback when error is reset */
+  onReset?: () => void
 }
 
 export interface ErrorInfo {
-    componentStack?: string;
-    timestamp: number;
+  componentStack?: string
+  timestamp: number
 }
 
-export const ErrorBoundaryCtx = createContext<ErrorBoundaryContextValue | null>(null);
+export const ErrorBoundaryCtx = createContext<ErrorBoundaryContextValue | null>(
+  null
+)
 
 /**
  * ErrorBoundary - Catches errors in child components and displays a fallback UI
@@ -55,84 +57,97 @@ export const ErrorBoundaryCtx = createContext<ErrorBoundaryContextValue | null>(
  * ```
  */
 export function ErrorBoundary(props: ErrorBoundaryProps) {
-    const { fallback, children, onError, onReset } = props;
+  const { fallback, children, onError, onReset } = props
 
-    const error = signal<Error | null>(null);
-    const errorInfo = signal<ErrorInfo | null>(null);
-    const retryCount = signal(0);
+  const error = signal<Error | null>(null)
+  const errorInfo = signal<ErrorInfo | null>(null)
+  const retryCount = signal(0)
 
-    const setError = (err: Error | unknown) => {
-        const errorObj = err instanceof Error ? err : new Error(String(err));
-        const info: ErrorInfo = {
-            timestamp: Date.now(),
-            componentStack: (err as Error & { componentStack?: string })?.componentStack
-        };
+  const setError = (err: unknown) => {
+    const errorObj = err instanceof Error ? err : new Error(String(err))
+    const info: ErrorInfo = {
+      timestamp: Date.now(),
+      componentStack: (err as Error & { componentStack?: string })
+        ?.componentStack,
+    }
 
-        error.value = errorObj;
-        errorInfo.value = info;
+    error.value = errorObj
+    errorInfo.value = info
 
-        // Call onError callback if provided
-        if (onError) {
-            try {
-                onError(errorObj, info);
-            } catch (callbackError) {
-                logError(ErrorCodes.ERROR_BOUNDARY_CALLBACK_FAILED, { callback: 'onError' }, callbackError);
-            }
-        }
-    };
+    // Call onError callback if provided
+    if (onError) {
+      try {
+        onError(errorObj, info)
+      } catch (callbackError) {
+        logError(
+          ErrorCodes.ERROR_BOUNDARY_CALLBACK_FAILED,
+          { callback: 'onError' },
+          callbackError
+        )
+      }
+    }
+  }
 
-    const clearError = () => {
-        error.value = null;
-        errorInfo.value = null;
-    };
+  const clearError = () => {
+    error.value = null
+    errorInfo.value = null
+  }
 
-    const retry = () => {
-        clearError();
-        retryCount.value++;
-        if (onReset) {
-            try {
-                onReset();
-            } catch (callbackError) {
-                logError(ErrorCodes.ERROR_BOUNDARY_CALLBACK_FAILED, { callback: 'onReset' }, callbackError);
-            }
-        }
-    };
+  const retry = () => {
+    clearError()
+    retryCount.value++
+    if (onReset) {
+      try {
+        onReset()
+      } catch (callbackError) {
+        logError(
+          ErrorCodes.ERROR_BOUNDARY_CALLBACK_FAILED,
+          { callback: 'onReset' },
+          callbackError
+        )
+      }
+    }
+  }
 
-    const contextValue: ErrorBoundaryContextValue = {
-        setError,
-        clearError,
-        retry
-    };
+  const contextValue: ErrorBoundaryContextValue = {
+    setError,
+    clearError,
+    retry,
+  }
 
-    // Create a wrapper that catches render errors
-    const safeRender = (content: VNodeChild): VNodeChild => {
-        try {
-            return typeof content === 'function' ? (content as () => VNodeChild)() : content;
-        } catch (renderError) {
-            setError(renderError);
-            return null;
-        }
-    };
+  // Create a wrapper that catches render errors
+  const safeRender = (content: VNodeChild): VNodeChild => {
+    try {
+      return typeof content === 'function'
+        ? (content as () => VNodeChild)()
+        : content
+    } catch (renderError) {
+      setError(renderError)
+      return null
+    }
+  }
 
-    return () => {
-        if (error.value) {
-            // Render fallback if an error occurred
-            if (typeof fallback === 'function') {
-                return h(fallback, {
-                    error: error.value,
-                    errorInfo: errorInfo.value,
-                    reset: retry,
-                    retryCount: retryCount.value
-                });
-            }
-            return fallback;
-        }
+  return () => {
+    if (error.value) {
+      // Render fallback if an error occurred
+      if (typeof fallback === 'function') {
+        return h(fallback, {
+          error: error.value,
+          errorInfo: errorInfo.value,
+          reset: retry,
+          retryCount: retryCount.value,
+        })
+      }
+      return fallback
+    }
 
-        // Provide context to children and render them with error catching
-        return h(ErrorBoundaryCtx.Provider, { value: contextValue },
-            safeRender(children)
-        );
-    };
+    // Provide context to children and render them with error catching
+    return h(
+      ErrorBoundaryCtx.Provider,
+      { value: contextValue },
+      safeRender(children)
+    )
+  }
 }
 
 /**
@@ -156,17 +171,17 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
  * ```
  */
 export function useErrorBoundary(): ErrorBoundaryContextValue {
-    const ctx = useContext(ErrorBoundaryCtx);
-    if (!ctx) {
-        // Return a no-op implementation if not within an ErrorBoundary
-        return {
-            setError: (err) => {
-                logError(ErrorCodes.UNCAUGHT_RENDER_ERROR, undefined, err);
-                throw err;
-            },
-            clearError: () => {},
-            retry: () => {}
-        };
+  const ctx = useContext(ErrorBoundaryCtx)
+  if (!ctx) {
+    // Return a no-op implementation if not within an ErrorBoundary
+    return {
+      setError: (err) => {
+        logError(ErrorCodes.UNCAUGHT_RENDER_ERROR, undefined, err)
+        throw err
+      },
+      clearError: () => {},
+      retry: () => {},
     }
-    return ctx;
+  }
+  return ctx
 }

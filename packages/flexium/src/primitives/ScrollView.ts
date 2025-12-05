@@ -24,7 +24,7 @@ export function ScrollView(props: ScrollViewProps): VNode {
     style,
     horizontal = false,
     showsHorizontalScrollIndicator = true,
-    showsVerticalScrollIndicator = true,
+    showsVerticalScrollIndicator: _showsVerticalScrollIndicator = true,
     ...rest
   } = props
 
@@ -46,6 +46,7 @@ export function ScrollView(props: ScrollViewProps): VNode {
     type: 'div',
     props: {
       ...rest,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       style: normalizeStyle(scrollStyle as any),
     },
     children: Array.isArray(children) ? children : children ? [children] : [],

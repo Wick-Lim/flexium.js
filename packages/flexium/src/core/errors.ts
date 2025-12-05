@@ -48,20 +48,21 @@ export const ErrorCodes = {
   // Resource/Async errors (9xx)
   RESOURCE_FETCH_FAILED: 'FLX901',
   RESOURCE_TIMEOUT: 'FLX902',
-} as const;
+} as const
 
-export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
+export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes]
 
 interface ErrorDefinition {
-  message: string;
-  suggestion?: string;
+  message: string
+  suggestion?: string
 }
 
 // Error message definitions with suggestions
 const errorDefinitions: Record<ErrorCode, ErrorDefinition> = {
   [ErrorCodes.EFFECT_EXECUTION_FAILED]: {
     message: 'Effect execution failed',
-    suggestion: 'Check the effect callback for runtime errors. Consider wrapping async operations in try-catch.',
+    suggestion:
+      'Check the effect callback for runtime errors. Consider wrapping async operations in try-catch.',
   },
   [ErrorCodes.CLEANUP_OUTSIDE_EFFECT]: {
     message: 'onCleanup must be called from within an effect',
@@ -69,11 +70,13 @@ const errorDefinitions: Record<ErrorCode, ErrorDefinition> = {
   },
   [ErrorCodes.SIGNAL_UPDATE_DURING_RENDER]: {
     message: 'Signal was updated during render',
-    suggestion: 'Avoid updating signals inside render functions. Use effect() for side effects.',
+    suggestion:
+      'Avoid updating signals inside render functions. Use effect() for side effects.',
   },
   [ErrorCodes.CONTEXT_MISSING_PROVIDER]: {
     message: 'Context used outside of Provider',
-    suggestion: 'Wrap your component tree with the appropriate Context.Provider.',
+    suggestion:
+      'Wrap your component tree with the appropriate Context.Provider.',
   },
   [ErrorCodes.ROUTER_OUTSIDE_PROVIDER]: {
     message: 'useRouter must be used within a <Router> component',
@@ -93,19 +96,23 @@ const errorDefinitions: Record<ErrorCode, ErrorDefinition> = {
   },
   [ErrorCodes.BUTTON_MISSING_ARIA_LABEL]: {
     message: 'IconButton is missing an aria-label',
-    suggestion: 'Add an aria-label prop to IconButton for screen reader accessibility.',
+    suggestion:
+      'Add an aria-label prop to IconButton for screen reader accessibility.',
   },
   [ErrorCodes.HYDRATION_MISMATCH]: {
     message: 'Hydration mismatch detected',
-    suggestion: 'Ensure server and client render the same content. Check for browser-only code.',
+    suggestion:
+      'Ensure server and client render the same content. Check for browser-only code.',
   },
   [ErrorCodes.HYDRATION_TEXT_MISMATCH]: {
     message: 'Text content mismatch during hydration',
-    suggestion: 'Server and client rendered different text. Check for Date.now(), Math.random(), or client-only data.',
+    suggestion:
+      'Server and client rendered different text. Check for Date.now(), Math.random(), or client-only data.',
   },
   [ErrorCodes.HYDRATION_TAG_MISMATCH]: {
     message: 'Element tag mismatch during hydration',
-    suggestion: 'Server and client rendered different elements. Verify conditional rendering logic.',
+    suggestion:
+      'Server and client rendered different elements. Verify conditional rendering logic.',
   },
   [ErrorCodes.DEVTOOLS_LISTENER_ERROR]: {
     message: 'DevTools listener threw an error',
@@ -113,7 +120,8 @@ const errorDefinitions: Record<ErrorCode, ErrorDefinition> = {
   },
   [ErrorCodes.UNCAUGHT_RENDER_ERROR]: {
     message: 'Uncaught error during render',
-    suggestion: 'Wrap components with <ErrorBoundary> to catch and handle errors gracefully.',
+    suggestion:
+      'Wrap components with <ErrorBoundary> to catch and handle errors gracefully.',
   },
   [ErrorCodes.ERROR_BOUNDARY_CALLBACK_FAILED]: {
     message: 'ErrorBoundary callback failed',
@@ -121,27 +129,33 @@ const errorDefinitions: Record<ErrorCode, ErrorDefinition> = {
   },
   [ErrorCodes.COMPUTED_EXECUTION_FAILED]: {
     message: 'Computed value execution failed',
-    suggestion: 'Check the computed callback for runtime errors. Ensure all dependencies are valid.',
+    suggestion:
+      'Check the computed callback for runtime errors. Ensure all dependencies are valid.',
   },
   [ErrorCodes.ASYNC_VALIDATION_FAILED]: {
     message: 'Async form validation failed',
-    suggestion: 'Check the async validation function and ensure it handles errors properly.',
+    suggestion:
+      'Check the async validation function and ensure it handles errors properly.',
   },
   [ErrorCodes.COMPONENT_RENDER_FAILED]: {
     message: 'Component render failed',
-    suggestion: 'Check the component function for runtime errors. Consider wrapping with <ErrorBoundary>.',
+    suggestion:
+      'Check the component function for runtime errors. Consider wrapping with <ErrorBoundary>.',
   },
   [ErrorCodes.HYDRATION_ATTRIBUTE_MISMATCH]: {
     message: 'Attribute mismatch during hydration',
-    suggestion: 'Server and client rendered different attribute values. Check for dynamic attributes.',
+    suggestion:
+      'Server and client rendered different attribute values. Check for dynamic attributes.',
   },
   [ErrorCodes.DOM_CLEANUP_FAILED]: {
     message: 'DOM cleanup operation failed',
-    suggestion: 'A node may have been removed from the DOM unexpectedly. Check for manual DOM manipulation.',
+    suggestion:
+      'A node may have been removed from the DOM unexpectedly. Check for manual DOM manipulation.',
   },
   [ErrorCodes.EVENT_HANDLER_FAILED]: {
     message: 'Event handler threw an error',
-    suggestion: 'Check your event handler callback. Consider adding try-catch for async operations.',
+    suggestion:
+      'Check your event handler callback. Consider adding try-catch for async operations.',
   },
   [ErrorCodes.KEYBOARD_HANDLER_FAILED]: {
     message: 'Keyboard event handler failed',
@@ -149,20 +163,22 @@ const errorDefinitions: Record<ErrorCode, ErrorDefinition> = {
   },
   [ErrorCodes.RESOURCE_FETCH_FAILED]: {
     message: 'Resource fetch failed',
-    suggestion: 'Check the async function and network connectivity. The resource will show an error state.',
+    suggestion:
+      'Check the async function and network connectivity. The resource will show an error state.',
   },
   [ErrorCodes.RESOURCE_TIMEOUT]: {
     message: 'Resource fetch timed out',
-    suggestion: 'The async operation took too long. Consider adding a timeout handler or retry logic.',
+    suggestion:
+      'The async operation took too long. Consider adding a timeout handler or retry logic.',
   },
-};
+}
 
 export interface FlexiumErrorInfo {
-  code: ErrorCode;
-  message: string;
-  suggestion?: string;
-  context?: Record<string, unknown>;
-  originalError?: unknown;
+  code: ErrorCode
+  message: string
+  suggestion?: string
+  context?: Record<string, unknown>
+  originalError?: unknown
 }
 
 /**
@@ -173,34 +189,34 @@ export function createErrorInfo(
   context?: Record<string, unknown>,
   originalError?: unknown
 ): FlexiumErrorInfo {
-  const definition = errorDefinitions[code];
+  const definition = errorDefinitions[code]
   return {
     code,
     message: definition.message,
     suggestion: definition.suggestion,
     context,
     originalError,
-  };
+  }
 }
 
 /**
  * Format error message for console output
  */
 export function formatErrorMessage(info: FlexiumErrorInfo): string {
-  let message = `[Flexium ${info.code}] ${info.message}`;
+  let message = `[Flexium ${info.code}] ${info.message}`
 
   if (info.context && Object.keys(info.context).length > 0) {
     const contextStr = Object.entries(info.context)
       .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-      .join(', ');
-    message += ` (${contextStr})`;
+      .join(', ')
+    message += ` (${contextStr})`
   }
 
   if (info.suggestion) {
-    message += `\n  → ${info.suggestion}`;
+    message += `\n  → ${info.suggestion}`
   }
 
-  return message;
+  return message
 }
 
 /**
@@ -211,13 +227,13 @@ export function logError(
   context?: Record<string, unknown>,
   originalError?: unknown
 ): void {
-  const info = createErrorInfo(code, context, originalError);
-  const message = formatErrorMessage(info);
+  const info = createErrorInfo(code, context, originalError)
+  const message = formatErrorMessage(info)
 
   if (originalError) {
-    console.error(message, originalError);
+    console.error(message, originalError)
   } else {
-    console.error(message);
+    console.error(message)
   }
 }
 
@@ -228,26 +244,26 @@ export function logWarning(
   code: ErrorCode,
   context?: Record<string, unknown>
 ): void {
-  const info = createErrorInfo(code, context);
-  const message = formatErrorMessage(info);
-  console.warn(message);
+  const info = createErrorInfo(code, context)
+  const message = formatErrorMessage(info)
+  console.warn(message)
 }
 
 /**
  * Create a FlexiumError with standardized information
  */
 export class FlexiumError extends Error {
-  code: ErrorCode;
-  suggestion?: string;
-  context?: Record<string, unknown>;
+  code: ErrorCode
+  suggestion?: string
+  context?: Record<string, unknown>
 
   constructor(code: ErrorCode, context?: Record<string, unknown>) {
-    const definition = errorDefinitions[code];
-    super(definition.message);
-    this.name = 'FlexiumError';
-    this.code = code;
-    this.suggestion = definition.suggestion;
-    this.context = context;
+    const definition = errorDefinitions[code]
+    super(definition.message)
+    this.name = 'FlexiumError'
+    this.code = code
+    this.suggestion = definition.suggestion
+    this.context = context
   }
 
   toString(): string {
@@ -256,6 +272,6 @@ export class FlexiumError extends Error {
       message: this.message,
       suggestion: this.suggestion,
       context: this.context,
-    });
+    })
   }
 }

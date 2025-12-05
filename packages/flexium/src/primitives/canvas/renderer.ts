@@ -17,6 +17,7 @@ import { unwrapSignal } from './utils'
  */
 export function renderCanvasChildren(
   ctx: CanvasRenderingContext2D,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: any,
   _width: number,
   _height: number
@@ -87,7 +88,10 @@ function renderRect(ctx: CanvasRenderingContext2D, props: DrawRectProps): void {
 /**
  * Render circle
  */
-function renderCircle(ctx: CanvasRenderingContext2D, props: DrawCircleProps): void {
+function renderCircle(
+  ctx: CanvasRenderingContext2D,
+  props: DrawCircleProps
+): void {
   const x = unwrapSignal(props.x)
   const y = unwrapSignal(props.y)
   const radius = unwrapSignal(props.radius)

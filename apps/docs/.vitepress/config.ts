@@ -135,7 +135,7 @@ export default defineConfig({
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.4.10',
+        text: 'v0.4.11',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -172,6 +172,7 @@ export default defineConfig({
           items: [
             { text: 'render()', link: '/guide/jsx' },
             { text: '&lt;Portal /&gt;', link: '/guide/portal' },
+            { text: 'Primitives', link: '/guide/primitives' },
             { text: '&lt;Row /&gt;', link: '/reference/primitives/row' },
             { text: '&lt;Column /&gt;', link: '/reference/primitives/column' },
             { text: '&lt;Grid /&gt;', link: '/reference/primitives/grid' },
@@ -212,17 +213,37 @@ export default defineConfig({
             { text: 'Context API', link: '/guide/context' },
             { text: 'Styling', link: '/guide/styling' },
             { text: 'Animation', link: '/guide/animation' },
+            { text: 'Motion', link: '/guide/motion' },
+            { text: 'Transitions', link: '/guide/transitions' },
+            { text: 'Forms', link: '/guide/forms' },
+            { text: 'Game Development', link: '/guide/game' },
+            { text: 'Advanced API', link: '/guide/advanced-api' },
             { text: 'Performance', link: '/guide/performance' },
             { text: 'TypeScript', link: '/guide/typescript' },
             { text: 'Testing', link: '/guide/testing' },
             { text: 'SSR', link: '/guide/ssr' },
             { text: 'DevTools', link: '/guide/devtools' }
           ]
+        },
+        {
+          text: 'Ecosystem',
+          collapsed: true,
+          items: [
+            { text: 'ESLint Plugin', link: '/guide/eslint-plugin' },
+            { text: 'Vite Plugin', link: '/guide/vite-plugin' }
+          ]
+        },
+        {
+          text: 'Migration',
+          collapsed: true,
+          items: [
+            { text: 'Migration to v1', link: '/guide/migration-v1' }
+          ]
         }
       ],
       '/reference/': [
         {
-          text: 'flexium/dom',
+          text: 'Layout Primitives',
           collapsed: false,
           items: [
             { text: '&lt;Row /&gt;', link: '/reference/primitives/row' },
@@ -230,14 +251,37 @@ export default defineConfig({
             { text: '&lt;Grid /&gt;', link: '/reference/primitives/grid' },
             { text: '&lt;Stack /&gt;', link: '/reference/primitives/stack' },
             { text: '&lt;Spacer /&gt;', link: '/reference/primitives/spacer' },
-            { text: '&lt;ScrollView /&gt;', link: '/reference/primitives/scrollview' },
-            { text: '&lt;Text /&gt;', link: '/reference/primitives/text' },
-            { text: '&lt;Image /&gt;', link: '/reference/primitives/image' },
-            { text: '&lt;Pressable /&gt;', link: '/reference/primitives/pressable' }
+            { text: '&lt;ScrollView /&gt;', link: '/reference/primitives/scrollview' }
           ]
         },
         {
-          text: 'flexium/canvas',
+          text: 'UI Primitives',
+          collapsed: false,
+          items: [
+            { text: '&lt;Text /&gt;', link: '/reference/primitives/text' },
+            { text: '&lt;UIText /&gt;', link: '/reference/primitives/ui-text' },
+            { text: '&lt;Image /&gt;', link: '/reference/primitives/image' },
+            { text: '&lt;Pressable /&gt;', link: '/reference/primitives/pressable' },
+            { text: '&lt;Button /&gt;', link: '/reference/primitives/button' },
+            { text: '&lt;VirtualList /&gt;', link: '/reference/primitives/virtuallist' }
+          ]
+        },
+        {
+          text: 'Form Primitives',
+          collapsed: false,
+          items: [
+            { text: 'Form', link: '/reference/primitives/form' }
+          ]
+        },
+        {
+          text: 'Motion Primitives',
+          collapsed: false,
+          items: [
+            { text: 'Motion', link: '/reference/primitives/motion' }
+          ]
+        },
+        {
+          text: 'Canvas Primitives',
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/reference/canvas/canvas' },
@@ -247,6 +291,13 @@ export default defineConfig({
             { text: '&lt;DrawLine /&gt;', link: '/reference/canvas/line' },
             { text: '&lt;DrawPath /&gt;', link: '/reference/canvas/path' },
             { text: '&lt;DrawText /&gt;', link: '/reference/canvas/text' }
+          ]
+        },
+        {
+          text: 'Router',
+          collapsed: false,
+          items: [
+            { text: 'Router API', link: '/reference/router' }
           ]
         }
       ],

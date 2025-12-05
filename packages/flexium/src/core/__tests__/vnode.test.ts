@@ -18,7 +18,7 @@ describe('createFNode', () => {
         type: 'div',
         props: {},
         children: [],
-        key: undefined
+        key: undefined,
       })
     })
 
@@ -98,10 +98,10 @@ describe('createFNode', () => {
         createFNode('div', {}, []),
         createFNode('span', { className: 'test' }, []),
         createFNode('p', {}, ['text'], 1),
-        createFNode('button', { onClick: () => {} }, ['Click'], 'btn')
+        createFNode('button', { onClick: () => {} }, ['Click'], 'btn'),
       ]
 
-      const shapes = nodes.map(node => Object.keys(node).join(','))
+      const shapes = nodes.map((node) => Object.keys(node).join(','))
       const uniqueShapes = new Set(shapes)
 
       expect(uniqueShapes.size).toBe(1)
@@ -116,7 +116,7 @@ describe('createFNode', () => {
         style: { color: 'red', fontSize: 16 },
         onClick: () => {},
         'data-testid': 'my-component',
-        disabled: false
+        disabled: false,
       }
       const node = createFNode('button', props, [])
 
@@ -138,14 +138,7 @@ describe('createFNode', () => {
 
     it('should handle mixed children types', () => {
       const childNode = createFNode('span', {}, [])
-      const children = [
-        'text',
-        123,
-        true,
-        null,
-        undefined,
-        childNode
-      ]
+      const children = ['text', 123, true, null, undefined, childNode]
       const node = createFNode('div', {}, children)
 
       expect(node.children).toEqual(children)
@@ -156,7 +149,7 @@ describe('createFNode', () => {
       const nestedChildren = [
         ['a', 'b'],
         createFNode('span', {}, []),
-        ['c', 'd']
+        ['c', 'd'],
       ]
       const node = createFNode('div', {}, nestedChildren)
 
@@ -246,7 +239,7 @@ describe('createFNode', () => {
     it('should accept any string as type', () => {
       const types = ['div', 'span', 'custom-element', 'MyComponent']
 
-      types.forEach(type => {
+      types.forEach((type) => {
         const node = createFNode(type, {}, [])
         expect(node.type).toBe(type)
       })
@@ -254,8 +247,14 @@ describe('createFNode', () => {
 
     it('should accept any function as type', () => {
       const Component1 = () => null
-      const Component2 = function() { return null }
-      const Component3 = class { render() { return null } }
+      const Component2 = function () {
+        return null
+      }
+      const Component3 = class {
+        render() {
+          return null
+        }
+      }
 
       expect(createFNode(Component1, {}, []).type).toBe(Component1)
       expect(createFNode(Component2, {}, []).type).toBe(Component2)

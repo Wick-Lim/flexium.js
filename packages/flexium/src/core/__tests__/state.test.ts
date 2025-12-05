@@ -267,27 +267,24 @@ describe('State API', () => {
 
     it('should handle nested object updates', () => {
       const [data, setData] = state({
-        user: { name: 'Alice', settings: { theme: 'light' } }
+        user: { name: 'Alice', settings: { theme: 'light' } },
       })
 
       setData({
-        user: { name: 'Bob', settings: { theme: 'dark' } }
+        user: { name: 'Bob', settings: { theme: 'dark' } },
       })
 
       expect(data()).toEqual({
-        user: { name: 'Bob', settings: { theme: 'dark' } }
+        user: { name: 'Bob', settings: { theme: 'dark' } },
       })
     })
 
     it('should handle functional update with complex state', () => {
       const [todos, setTodos] = state([
-        { id: 1, text: 'Learn Flexium', done: false }
+        { id: 1, text: 'Learn Flexium', done: false },
       ])
 
-      setTodos((prev) => [
-        ...prev,
-        { id: 2, text: 'Build app', done: false }
-      ])
+      setTodos((prev) => [...prev, { id: 2, text: 'Build app', done: false }])
 
       expect(todos()).toHaveLength(2)
       expect(todos()[1].text).toBe('Build app')

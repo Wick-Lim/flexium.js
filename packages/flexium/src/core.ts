@@ -28,12 +28,7 @@ export {
 } from './core/signal'
 
 // Types
-export type {
-  Signal,
-  Computed,
-  Resource,
-  DevToolsHooks,
-} from './core/signal'
+export type { Signal, Computed, Resource, DevToolsHooks } from './core/signal'
 
 // State management
 import { state as coreState, clearGlobalState } from './core/state'
@@ -42,22 +37,28 @@ import { For } from './core/flow'
 
 // Enhanced state function with .map helper
 function state<T>(
-  initialValueOrFetcher: T | ((...args: any[]) => T | Promise<T>),
+  initialValueOrFetcher: T | ((...args: unknown[]) => T | Promise<T>),
   options?: { key?: string }
 ): [StateGetter<T>, StateSetter<T>] {
-  const [getter, setter] = coreState(initialValueOrFetcher, options);
+  const [getter, setter] = coreState(initialValueOrFetcher, options)
 
   // Inject .map for list rendering optimization
-  (getter as any).map = (renderFn: (item: T extends (infer U)[] ? U : any, index: () => number) => any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(getter as any).map = (
+    renderFn: (
+      item: T extends (infer U)[] ? U : unknown,
+      index: () => number
+    ) => unknown
+  ) => {
     return {
-        type: For,
-        props: { each: getter },
-        children: [renderFn],
-        key: null
-    };
-  };
+      type: For,
+      props: { each: getter },
+      children: [renderFn],
+      key: null,
+    }
+  }
 
-  return [getter, setter];
+  return [getter, setter]
 }
 
 export { state, clearGlobalState }

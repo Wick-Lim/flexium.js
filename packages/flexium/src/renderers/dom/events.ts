@@ -1,7 +1,7 @@
-import type { EventHandler } from '../../core/renderer';
+import type { EventHandler } from '../../core/renderer'
 
 // Map of event names to global listener status
-const globalListeners = new Set<string>();
+const globalListeners = new Set<string>()
 
 // Events that do not bubble and must be captured
 const NON_BUBBLING_EVENTS = new Set([
@@ -11,37 +11,37 @@ const NON_BUBBLING_EVENTS = new Set([
   'mouseleave',
   'load',
   'unload',
-  'scroll'
-]);
+  'scroll',
+])
 
 // WeakMap to store event handlers for each node
 // Key: DOM Node, Value: Map<EventName, Handler>
-const nodeHandlers = new WeakMap<Node, Map<string, EventHandler>>();
+const nodeHandlers = new WeakMap<Node, Map<string, EventHandler>>()
 
 /**
  * Global event dispatcher that handles delegation
  */
 function dispatchEvent(event: Event) {
-  let target = event.target as Node | null;
-  const eventType = event.type.toLowerCase();
-  const bubbles = !NON_BUBBLING_EVENTS.has(eventType);
+  let target = event.target as Node | null
+  const eventType = event.type.toLowerCase()
+  const bubbles = !NON_BUBBLING_EVENTS.has(eventType)
 
   // Bubble up from target to document (or just target if non-bubbling)
   while (target && target !== document) {
-    const handlers = nodeHandlers.get(target);
+    const handlers = nodeHandlers.get(target)
     if (handlers && handlers.has(eventType)) {
-      const handler = handlers.get(eventType);
+      const handler = handlers.get(eventType)
       if (handler) {
-        handler(event);
+        handler(event)
         if (event.cancelBubble) {
-          break;
+          break
         }
       }
     }
-    
-    if (!bubbles) break; // Stop if event doesn't bubble
-    
-    target = target.parentNode;
+
+    if (!bubbles) break // Stop if event doesn't bubble
+
+    target = target.parentNode
   }
 }
 
@@ -50,9 +50,9 @@ function dispatchEvent(event: Event) {
  */
 function ensureGlobalListener(eventName: string) {
   if (!globalListeners.has(eventName)) {
-    const capture = NON_BUBBLING_EVENTS.has(eventName);
-    document.addEventListener(eventName, dispatchEvent, { capture });
-    globalListeners.add(eventName);
+    const capture = NON_BUBBLING_EVENTS.has(eventName)
+    document.addEventListener(eventName, dispatchEvent, { capture })
+    globalListeners.add(eventName)
   }
 }
 
@@ -65,26 +65,26 @@ export const eventDelegator = {
    */
   on(node: Node, eventName: string, handler: EventHandler) {
     // normalize event name (e.g., 'click' -> 'click')
-    const lowerEvent = eventName.toLowerCase();
-    
-    let handlers = nodeHandlers.get(node);
+    const lowerEvent = eventName.toLowerCase()
+
+    let handlers = nodeHandlers.get(node)
     if (!handlers) {
-      handlers = new Map();
-      nodeHandlers.set(node, handlers);
+      handlers = new Map()
+      nodeHandlers.set(node, handlers)
     }
-    
-    handlers.set(lowerEvent, handler);
-    ensureGlobalListener(lowerEvent);
+
+    handlers.set(lowerEvent, handler)
+    ensureGlobalListener(lowerEvent)
   },
 
   /**
    * Detach an event handler from a node
    */
   off(node: Node, eventName: string) {
-    const lowerEvent = eventName.toLowerCase();
-    const handlers = nodeHandlers.get(node);
+    const lowerEvent = eventName.toLowerCase()
+    const handlers = nodeHandlers.get(node)
     if (handlers) {
-      handlers.delete(lowerEvent);
+      handlers.delete(lowerEvent)
     }
-  }
-};
+  },
+}

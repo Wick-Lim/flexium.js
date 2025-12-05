@@ -9,9 +9,11 @@ import type { CommonStyle, TextStyle } from './types'
  */
 export function normalizeStyle(
   style?: CommonStyle | TextStyle
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> {
   if (!style) return {}
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const css: Record<string, any> = {}
 
   // Layout
@@ -61,7 +63,8 @@ export function normalizeStyle(
 
   // Sizing
   if (style.width !== undefined)
-    css.width = typeof style.width === 'number' ? `${style.width}px` : style.width
+    css.width =
+      typeof style.width === 'number' ? `${style.width}px` : style.width
   if (style.height !== undefined)
     css.height =
       typeof style.height === 'number' ? `${style.height}px` : style.height
@@ -111,8 +114,7 @@ export function normalizeStyle(
   // Text-specific (if TextStyle)
   const textStyle = style as TextStyle
   if (textStyle.color) css.color = textStyle.color
-  if (textStyle.fontSize !== undefined)
-    css.fontSize = `${textStyle.fontSize}px`
+  if (textStyle.fontSize !== undefined) css.fontSize = `${textStyle.fontSize}px`
   if (textStyle.fontWeight) css.fontWeight = textStyle.fontWeight
   if (textStyle.fontFamily) css.fontFamily = textStyle.fontFamily
   if (textStyle.fontStyle) css.fontStyle = textStyle.fontStyle

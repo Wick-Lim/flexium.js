@@ -8,21 +8,21 @@
  * or createReactiveRoot from './reactive'.
  */
 
-import type { VNode, VNodeChild } from '../../core/renderer';
-import type { JSX } from '../../jsx-runtime';
-import { domRenderer } from './index';
-import { isVNode } from './h';
-import { renderReactive, createReactiveRoot } from './reactive';
+import type { VNode, VNodeChild } from '../../core/renderer'
+import type { JSX } from '../../jsx-runtime'
+import { domRenderer } from './index'
+import { isVNode } from './h'
+import { renderReactive, createReactiveRoot } from './reactive'
 
 /**
  * Internal node data stored on DOM nodes
  */
 interface NodeData {
-  vnode: VNode | null;
-  props: Record<string, unknown>;
+  vnode: VNode | null
+  props: Record<string, unknown>
 }
 
-const NODE_DATA = new WeakMap<Node, NodeData>();
+const NODE_DATA = new WeakMap<Node, NodeData>()
 
 /**
  * Render a component to a DOM container with automatic reactivity
@@ -46,7 +46,7 @@ export function render(
   container: HTMLElement
 ): Node | null {
   // Use reactive rendering for automatic signal tracking
-  return renderReactive(vnode, container);
+  return renderReactive(vnode, container)
 }
 
 /**
@@ -55,73 +55,73 @@ export function render(
 function mountVNode(vnode: VNodeChild | Function): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
   if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
-    return null;
+    return null
   }
 
   // Handle arrays of children
   if (Array.isArray(vnode)) {
-    const fragment = document.createDocumentFragment();
+    const fragment = document.createDocumentFragment()
     for (const child of vnode) {
-      const childNode = mountVNode(child);
+      const childNode = mountVNode(child)
       if (childNode) {
-        fragment.appendChild(childNode);
+        fragment.appendChild(childNode)
       }
     }
-    return fragment;
+    return fragment
   }
 
   // Handle functions (lazy components)
   if (typeof vnode === 'function') {
-    return mountVNode(vnode());
+    return mountVNode(vnode())
   }
 
   // Handle text nodes
   if (typeof vnode === 'string' || typeof vnode === 'number') {
-    return domRenderer.createTextNode(String(vnode));
+    return domRenderer.createTextNode(String(vnode))
   }
 
   // Handle VNodes
   if (isVNode(vnode)) {
     // Handle function components
     if (typeof vnode.type === 'function') {
-      const component = vnode.type as Function;
-      const result = component({ ...vnode.props, children: vnode.children });
-      return mountVNode(result);
+      const component = vnode.type
+      const result = component({ ...vnode.props, children: vnode.children })
+      return mountVNode(result)
     }
 
     // Handle fragments
     if (vnode.type === 'fragment') {
-      const fragment = document.createDocumentFragment();
+      const fragment = document.createDocumentFragment()
       for (const child of vnode.children) {
-        const childNode = mountVNode(child);
+        const childNode = mountVNode(child)
         if (childNode) {
-          fragment.appendChild(childNode);
+          fragment.appendChild(childNode)
         }
       }
-      return fragment;
+      return fragment
     }
 
     // Handle built-in elements
-    const node = domRenderer.createNode(vnode.type as string, vnode.props);
+    const node = domRenderer.createNode(vnode.type, vnode.props)
 
     // Store node data for future reconciliation
     NODE_DATA.set(node, {
       vnode,
       props: vnode.props,
-    });
+    })
 
     // Mount children
     for (const child of vnode.children) {
-      const childNode = mountVNode(child);
+      const childNode = mountVNode(child)
       if (childNode) {
-        domRenderer.appendChild(node, childNode);
+        domRenderer.appendChild(node, childNode)
       }
     }
 
-    return node;
+    return node
   }
 
-  return null;
+  return null
 }
 
 /**
@@ -129,18 +129,18 @@ function mountVNode(vnode: VNodeChild | Function): Node | null {
  */
 function unmount(node: Node): void {
   // Clean up children first
-  const childNodes = Array.from(node.childNodes);
+  const childNodes = Array.from(node.childNodes)
   for (const child of childNodes) {
-    unmount(child);
+    unmount(child)
   }
 
   // Remove from parent
   if (node.parentNode) {
-    node.parentNode.removeChild(node);
+    node.parentNode.removeChild(node)
   }
 
   // Clean up stored data
-  NODE_DATA.delete(node);
+  NODE_DATA.delete(node)
 }
 
 /**
@@ -154,72 +154,72 @@ export function update(
 ): void {
   // If types don't match, replace the node
   if (oldVNode.type !== newVNode.type) {
-    const newNode = mountVNode(newVNode);
+    const newNode = mountVNode(newVNode)
     if (newNode && node.parentNode) {
-      node.parentNode.replaceChild(newNode, node);
+      node.parentNode.replaceChild(newNode, node)
     }
-    unmount(node);
-    return;
+    unmount(node)
+    return
   }
 
   // Update props
-  domRenderer.updateNode(node, oldVNode.props, newVNode.props);
+  domRenderer.updateNode(node, oldVNode.props, newVNode.props)
 
   // Update stored data
   NODE_DATA.set(node, {
     vnode: newVNode,
     props: newVNode.props,
-  });
+  })
 
   // Update children (simple approach for now)
-  const oldChildren = oldVNode.children;
-  const newChildren = newVNode.children;
+  const oldChildren = oldVNode.children
+  const newChildren = newVNode.children
 
   // Simple reconciliation: update/add/remove based on index
-  const maxLength = Math.max(oldChildren.length, newChildren.length);
+  const maxLength = Math.max(oldChildren.length, newChildren.length)
 
   for (let i = 0; i < maxLength; i++) {
-    const oldChild = oldChildren[i];
-    const newChild = newChildren[i];
-    const childNode = node.childNodes[i];
+    const oldChild = oldChildren[i]
+    const newChild = newChildren[i]
+    const childNode = node.childNodes[i]
 
     if (!newChild) {
       // Remove old child
       if (childNode) {
-        unmount(childNode);
+        unmount(childNode)
       }
     } else if (!oldChild) {
       // Add new child
-      const newChildNode = mountVNode(newChild);
+      const newChildNode = mountVNode(newChild)
       if (newChildNode) {
-        domRenderer.appendChild(node, newChildNode);
+        domRenderer.appendChild(node, newChildNode)
       }
     } else if (typeof oldChild === 'string' || typeof oldChild === 'number') {
       // Update text node
       if (typeof newChild === 'string' || typeof newChild === 'number') {
         if (oldChild !== newChild && childNode) {
-          domRenderer.updateTextNode(childNode as Text, String(newChild));
+          domRenderer.updateTextNode(childNode as Text, String(newChild))
         }
       } else {
         // Replace text with element
-        const newChildNode = mountVNode(newChild);
+        const newChildNode = mountVNode(newChild)
         if (newChildNode && childNode) {
-          node.replaceChild(newChildNode, childNode);
-          unmount(childNode);
+          node.replaceChild(newChildNode, childNode)
+          unmount(childNode)
         }
       }
     } else if (isVNode(oldChild)) {
       if (typeof newChild === 'string' || typeof newChild === 'number') {
         // Replace element with text
-        const newChildNode = mountVNode(newChild);
+        const newChildNode = mountVNode(newChild)
         if (newChildNode && childNode) {
-          node.replaceChild(newChildNode, childNode);
-          unmount(childNode);
+          node.replaceChild(newChildNode, childNode)
+          unmount(childNode)
         }
       } else if (isVNode(newChild)) {
         // Update element
         if (childNode instanceof HTMLElement) {
-          update(childNode, oldChild, newChild);
+          update(childNode, oldChild, newChild)
         }
       }
     }
@@ -243,7 +243,7 @@ export function update(
  */
 export function createRoot(container: HTMLElement) {
   // Use reactive root for automatic signal tracking
-  return createReactiveRoot(container);
+  return createReactiveRoot(container)
 }
 
 /**
@@ -263,5 +263,5 @@ export function mount(
   container: HTMLElement,
   component: JSX.Element
 ): Node | null {
-  return render(component, container);
+  return render(component, container)
 }

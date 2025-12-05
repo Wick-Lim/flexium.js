@@ -14,7 +14,7 @@ import {
   popProvider,
   captureContext,
   runWithContext,
-  type Context
+  type Context,
 } from '../context'
 
 describe('Context API', () => {
@@ -33,7 +33,10 @@ describe('Context API', () => {
     it('should create context with object default value', () => {
       const UserContext = createContext({ name: 'Guest', role: 'viewer' })
 
-      expect(UserContext.defaultValue).toEqual({ name: 'Guest', role: 'viewer' })
+      expect(UserContext.defaultValue).toEqual({
+        name: 'Guest',
+        role: 'viewer',
+      })
     })
 
     it('should create context with null default value', () => {
@@ -378,7 +381,7 @@ describe('Context API', () => {
       const result = runWithContext(snapshot, () => {
         return {
           theme: useContext(ThemeContext),
-          language: useContext(LanguageContext)
+          language: useContext(LanguageContext),
         }
       })
 
@@ -527,15 +530,15 @@ describe('Context API', () => {
     it('should handle complex nested object values', () => {
       const ComplexContext = createContext({
         user: { name: '', profile: { avatar: '', bio: '' } },
-        settings: { theme: 'light', notifications: true }
+        settings: { theme: 'light', notifications: true },
       })
 
       const complexValue = {
         user: {
           name: 'Alice',
-          profile: { avatar: 'avatar.png', bio: 'Developer' }
+          profile: { avatar: 'avatar.png', bio: 'Developer' },
         },
-        settings: { theme: 'dark', notifications: false }
+        settings: { theme: 'dark', notifications: false },
       }
 
       pushProvider(ComplexContext.id, complexValue)
@@ -633,7 +636,7 @@ describe('Context API', () => {
 
       const AuthContext = createContext<AuthState>({
         isAuthenticated: false,
-        user: null
+        user: null,
       })
 
       // Anonymous user
@@ -642,7 +645,7 @@ describe('Context API', () => {
       // User logs in
       pushProvider(AuthContext.id, {
         isAuthenticated: true,
-        user: { id: '123', name: 'Alice' }
+        user: { id: '123', name: 'Alice' },
       })
 
       const authState = useContext(AuthContext)
@@ -672,13 +675,13 @@ describe('Context API', () => {
 
       const I18nContext = createContext<I18nState>({
         locale: 'en',
-        translations: { hello: 'Hello' }
+        translations: { hello: 'Hello' },
       })
 
       // Change to French
       pushProvider(I18nContext.id, {
         locale: 'fr',
-        translations: { hello: 'Bonjour' }
+        translations: { hello: 'Bonjour' },
       })
 
       expect(useContext(I18nContext).translations.hello).toBe('Bonjour')
@@ -690,7 +693,7 @@ describe('Context API', () => {
       popProvider(I18nContext.id)
       pushProvider(I18nContext.id, {
         locale: 'es',
-        translations: { hello: 'Hola' }
+        translations: { hello: 'Hola' },
       })
 
       expect(useContext(I18nContext).translations.hello).toBe('Hola')

@@ -37,7 +37,7 @@ describe('Suspense', () => {
   afterEach(() => {
     container.remove()
     // Resolve all pending promises to allow cleanup
-    pendingResolvers.forEach(resolve => resolve())
+    pendingResolvers.forEach((resolve) => resolve())
     pendingResolvers = []
   })
 
@@ -45,7 +45,7 @@ describe('Suspense', () => {
     it('should render children when no pending promises', () => {
       const suspenseFn = Suspense({
         fallback: h('div', { class: 'fallback' }, 'Loading...'),
-        children: h('div', { class: 'content' }, 'Content loaded')
+        children: h('div', { class: 'content' }, 'Content loaded'),
       })
 
       const result = suspenseFn()
@@ -57,7 +57,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', { class: 'fallback' }, 'Loading...'),
-        children: h('div', { class: 'content' }, 'Content')
+        children: h('div', { class: 'content' }, 'Content'),
       })
 
       // Get the context value and register a promise
@@ -72,7 +72,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: fallbackFn,
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn()
@@ -84,7 +84,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: childrenFn
+        children: childrenFn,
       })
 
       const result = suspenseFn()
@@ -94,7 +94,7 @@ describe('Suspense', () => {
     it('should accept text content as fallback', () => {
       const suspenseFn = Suspense({
         fallback: 'Loading...',
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn()
@@ -104,7 +104,7 @@ describe('Suspense', () => {
     it('should accept text content as children', () => {
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: 'Content loaded'
+        children: 'Content loaded',
       })
 
       const result = suspenseFn()
@@ -121,7 +121,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', { class: 'fallback' }, 'Loading...'),
-        children: h('div', { class: 'content' }, 'Content')
+        children: h('div', { class: 'content' }, 'Content'),
       })
 
       // Initial render - no promises pending
@@ -143,7 +143,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -163,7 +163,7 @@ describe('Suspense', () => {
     it('should provide registerPromise function via context', () => {
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -183,7 +183,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', { class: 'fallback' }, 'Loading...'),
-        children: h('div', { class: 'content' }, 'Loaded!')
+        children: h('div', { class: 'content' }, 'Loaded!'),
       })
 
       // Get initial result
@@ -195,7 +195,7 @@ describe('Suspense', () => {
 
       // Should show fallback
       result = suspenseFn()
-      const fallbackResult = result as any
+      const fallbackResult = result
       expect(fallbackResult.children).toContain('Loading...')
 
       // Resolve the promise
@@ -205,7 +205,7 @@ describe('Suspense', () => {
       await promise
 
       // Wait for reactive update
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Should now show content
       result = suspenseFn()
@@ -220,7 +220,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -231,7 +231,7 @@ describe('Suspense', () => {
       // Resolve promise
       resolvePromise!()
       await promise
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Should render children now
       const finalResult = suspenseFn()
@@ -243,7 +243,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -252,7 +252,7 @@ describe('Suspense', () => {
       contextValue.registerPromise(promise)
 
       await promise
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       const finalResult = suspenseFn()
       expect(finalResult).toBeDefined()
@@ -265,13 +265,19 @@ describe('Suspense', () => {
       let resolve2: () => void
       let resolve3: () => void
 
-      const promise1 = new Promise<void>(r => { resolve1 = r })
-      const promise2 = new Promise<void>(r => { resolve2 = r })
-      const promise3 = new Promise<void>(r => { resolve3 = r })
+      const promise1 = new Promise<void>((r) => {
+        resolve1 = r
+      })
+      const promise2 = new Promise<void>((r) => {
+        resolve2 = r
+      })
+      const promise3 = new Promise<void>((r) => {
+        resolve3 = r
+      })
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'All loaded!')
+        children: h('div', {}, 'All loaded!'),
       })
 
       const result = suspenseFn() as any
@@ -289,7 +295,7 @@ describe('Suspense', () => {
       // Resolve first promise
       resolve1!()
       await promise1
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Still pending
       current = suspenseFn() as any
@@ -298,7 +304,7 @@ describe('Suspense', () => {
       // Resolve second promise
       resolve2!()
       await promise2
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Still pending
       current = suspenseFn() as any
@@ -307,7 +313,7 @@ describe('Suspense', () => {
       // Resolve third promise
       resolve3!()
       await promise3
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Now should show content
       current = suspenseFn()
@@ -317,11 +323,13 @@ describe('Suspense', () => {
     it('should handle mix of fast and slow promises', async () => {
       const fastPromise = Promise.resolve()
       let resolveSlow: () => void
-      const slowPromise = new Promise<void>(r => { resolveSlow = r })
+      const slowPromise = new Promise<void>((r) => {
+        resolveSlow = r
+      })
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -332,7 +340,7 @@ describe('Suspense', () => {
 
       // Wait for fast promise
       await fastPromise
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Still pending because of slow promise
       let current = suspenseFn() as any
@@ -341,7 +349,7 @@ describe('Suspense', () => {
       // Resolve slow promise
       resolveSlow!()
       await slowPromise
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Now should show content
       current = suspenseFn()
@@ -352,12 +360,16 @@ describe('Suspense', () => {
       let resolve1: () => void
       let resolve2: () => void
 
-      const promise1 = new Promise<void>(r => { resolve1 = r })
-      const promise2 = new Promise<void>(r => { resolve2 = r })
+      const promise1 = new Promise<void>((r) => {
+        resolve1 = r
+      })
+      const promise2 = new Promise<void>((r) => {
+        resolve2 = r
+      })
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -369,7 +381,7 @@ describe('Suspense', () => {
       // Resolve first promise
       resolve1!()
       await promise1
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Register second promise after first resolves
       contextValue.registerPromise(promise2)
@@ -381,7 +393,7 @@ describe('Suspense', () => {
       // Resolve second promise
       resolve2!()
       await promise2
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Now should show content
       current = suspenseFn()
@@ -398,7 +410,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -415,7 +427,7 @@ describe('Suspense', () => {
 
       // Wait for rejection to be handled
       await promise.catch(() => {})
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Should render children (count decremented despite error)
       current = suspenseFn()
@@ -426,12 +438,16 @@ describe('Suspense', () => {
       let reject1: (reason: any) => void
       let reject2: (reason: any) => void
 
-      const promise1 = new Promise<void>((resolve, reject) => { reject1 = reject })
-      const promise2 = new Promise<void>((resolve, reject) => { reject2 = reject })
+      const promise1 = new Promise<void>((resolve, reject) => {
+        reject1 = reject
+      })
+      const promise2 = new Promise<void>((resolve, reject) => {
+        reject2 = reject
+      })
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -447,7 +463,7 @@ describe('Suspense', () => {
       // Wait for rejections
       await promise1.catch(() => {})
       await promise2.catch(() => {})
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Should render children
       const current = suspenseFn()
@@ -458,12 +474,16 @@ describe('Suspense', () => {
       let resolve1: () => void
       let reject2: (reason: any) => void
 
-      const promise1 = new Promise<void>(r => { resolve1 = r })
-      const promise2 = new Promise<void>((resolve, reject) => { reject2 = reject })
+      const promise1 = new Promise<void>((r) => {
+        resolve1 = r
+      })
+      const promise2 = new Promise<void>((resolve, reject) => {
+        reject2 = reject
+      })
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -478,7 +498,7 @@ describe('Suspense', () => {
 
       await promise1
       await promise2.catch(() => {})
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Should render children
       const current = suspenseFn()
@@ -490,12 +510,12 @@ describe('Suspense', () => {
     it('should support nested Suspense components', () => {
       const innerSuspense = Suspense({
         fallback: h('div', { class: 'inner-fallback' }, 'Inner loading...'),
-        children: h('div', { class: 'inner-content' }, 'Inner content')
+        children: h('div', { class: 'inner-content' }, 'Inner content'),
       })
 
       const outerSuspense = Suspense({
         fallback: h('div', { class: 'outer-fallback' }, 'Outer loading...'),
-        children: innerSuspense
+        children: innerSuspense,
       })
 
       const result = outerSuspense()
@@ -506,17 +526,21 @@ describe('Suspense', () => {
       let resolveOuter: () => void
       let resolveInner: () => void
 
-      const outerPromise = new Promise<void>(r => { resolveOuter = r })
-      const innerPromise = new Promise<void>(r => { resolveInner = r })
+      const outerPromise = new Promise<void>((r) => {
+        resolveOuter = r
+      })
+      const innerPromise = new Promise<void>((r) => {
+        resolveInner = r
+      })
 
       const innerSuspense = Suspense({
         fallback: h('div', {}, 'Inner loading'),
-        children: h('div', {}, 'Inner content')
+        children: h('div', {}, 'Inner content'),
       })
 
       const outerSuspense = Suspense({
         fallback: h('div', {}, 'Outer loading'),
-        children: innerSuspense
+        children: innerSuspense,
       })
 
       // Get contexts
@@ -533,7 +557,7 @@ describe('Suspense', () => {
       // Resolve outer promise
       resolveOuter!()
       await outerPromise
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Outer should now show inner suspense
       current = outerSuspense()
@@ -542,7 +566,9 @@ describe('Suspense', () => {
 
     it('should allow independent resolution of nested boundaries', async () => {
       let resolveInner: () => void
-      const innerPromise = new Promise<void>(r => { resolveInner = r })
+      const innerPromise = new Promise<void>((r) => {
+        resolveInner = r
+      })
 
       const InnerComponent = () => {
         const ctx = useContext(SuspenseCtx)
@@ -554,12 +580,12 @@ describe('Suspense', () => {
 
       const innerSuspense = Suspense({
         fallback: h('div', { class: 'inner' }, 'Inner loading'),
-        children: h(InnerComponent, {})
+        children: h(InnerComponent, {}),
       })
 
       const outerSuspense = Suspense({
         fallback: h('div', { class: 'outer' }, 'Outer loading'),
-        children: innerSuspense
+        children: innerSuspense,
       })
 
       const result = outerSuspense()
@@ -569,17 +595,17 @@ describe('Suspense', () => {
     it('should handle deeply nested Suspense boundaries', () => {
       const level3 = Suspense({
         fallback: h('div', {}, 'Level 3 loading'),
-        children: h('div', {}, 'Level 3 content')
+        children: h('div', {}, 'Level 3 content'),
       })
 
       const level2 = Suspense({
         fallback: h('div', {}, 'Level 2 loading'),
-        children: level3
+        children: level3,
       })
 
       const level1 = Suspense({
         fallback: h('div', {}, 'Level 1 loading'),
-        children: level2
+        children: level2,
       })
 
       const result = level1()
@@ -597,7 +623,7 @@ describe('Suspense', () => {
     it('should provide context value to children', () => {
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -618,7 +644,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading'),
-        children: h(ChildComponent, {})
+        children: h(ChildComponent, {}),
       })
 
       suspenseFn()
@@ -637,12 +663,12 @@ describe('Suspense', () => {
     it('should provide fresh context for each Suspense instance', () => {
       const suspense1 = Suspense({
         fallback: h('div', {}, 'Loading 1'),
-        children: h('div', {}, 'Content 1')
+        children: h('div', {}, 'Content 1'),
       })
 
       const suspense2 = Suspense({
         fallback: h('div', {}, 'Loading 2'),
-        children: h('div', {}, 'Content 2')
+        children: h('div', {}, 'Content 2'),
       })
 
       const result1 = suspense1() as any
@@ -657,13 +683,13 @@ describe('Suspense', () => {
       const Component = () => {
         return Suspense({
           fallback: h('div', { id: 'fallback' }, 'Loading...'),
-          children: h('div', { id: 'content' }, 'Loaded!')
+          children: h('div', { id: 'content' }, 'Loaded!'),
         })
       }
 
       mountReactive(h(Component, {}), container)
 
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Should render content (no pending promises)
       const content = container.querySelector('#content')
@@ -672,7 +698,9 @@ describe('Suspense', () => {
 
     it('should update DOM when promise resolves', async () => {
       let resolvePromise: () => void
-      const promise = new Promise<void>(r => { resolvePromise = r })
+      const promise = new Promise<void>((r) => {
+        resolvePromise = r
+      })
 
       const Component = () => {
         const ctx = useContext(SuspenseCtx)
@@ -685,13 +713,13 @@ describe('Suspense', () => {
       const App = () => {
         return Suspense({
           fallback: h('div', { id: 'fallback' }, 'Loading...'),
-          children: h(Component, {})
+          children: h(Component, {}),
         })
       }
 
       mountReactive(h(App, {}), container)
 
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Should show content initially
       expect(container.textContent).toBeTruthy()
@@ -703,22 +731,23 @@ describe('Suspense', () => {
       const Component = () => {
         return Suspense({
           fallback: h('div', { id: 'fallback' }, 'Loading...'),
-          children: () => isLoading.value
-            ? h('div', { id: 'loading-state' }, 'Still loading')
-            : h('div', { id: 'loaded-state' }, 'Loaded!')
+          children: () =>
+            isLoading.value
+              ? h('div', { id: 'loading-state' }, 'Still loading')
+              : h('div', { id: 'loaded-state' }, 'Loaded!'),
         })
       }
 
       mountReactive(h(Component, {}), container)
 
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Initial state
       expect(container.querySelector('#loaded-state')).toBeTruthy()
 
       // Change signal
       isLoading.value = true
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       expect(container.querySelector('#loading-state')).toBeTruthy()
     })
@@ -728,7 +757,7 @@ describe('Suspense', () => {
     it('should handle empty children', () => {
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading'),
-        children: null
+        children: null,
       })
 
       const result = suspenseFn()
@@ -738,7 +767,7 @@ describe('Suspense', () => {
     it('should handle undefined children', () => {
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading'),
-        children: undefined
+        children: undefined,
       })
 
       const result = suspenseFn()
@@ -751,8 +780,8 @@ describe('Suspense', () => {
         children: [
           h('div', {}, 'Child 1'),
           h('div', {}, 'Child 2'),
-          h('div', {}, 'Child 3')
-        ]
+          h('div', {}, 'Child 3'),
+        ],
       })
 
       const result = suspenseFn()
@@ -764,7 +793,7 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
@@ -780,7 +809,7 @@ describe('Suspense', () => {
     it('should handle zero pending count', () => {
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       // Multiple renders with no promises
@@ -796,18 +825,18 @@ describe('Suspense', () => {
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading many...'),
-        children: h('div', {}, 'All loaded!')
+        children: h('div', {}, 'All loaded!'),
       })
 
       const result = suspenseFn() as any
       const contextValue = result.props.value
 
       // Register all promises
-      promises.forEach(p => contextValue.registerPromise(p))
+      promises.forEach((p) => contextValue.registerPromise(p))
 
       // Wait for all to resolve
       await Promise.all(promises)
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       const finalResult = suspenseFn()
       expect(finalResult).toBeDefined()
@@ -815,25 +844,25 @@ describe('Suspense', () => {
 
     it('should maintain correct count with concurrent operations', async () => {
       const promises = [
-        new Promise(resolve => setTimeout(resolve, 10)),
-        new Promise(resolve => setTimeout(resolve, 20)),
-        new Promise(resolve => setTimeout(resolve, 5))
+        new Promise((resolve) => setTimeout(resolve, 10)),
+        new Promise((resolve) => setTimeout(resolve, 20)),
+        new Promise((resolve) => setTimeout(resolve, 5)),
       ]
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = suspenseFn() as any
       const contextValue = result.props.value
 
       // Register all at once
-      promises.forEach(p => contextValue.registerPromise(p))
+      promises.forEach((p) => contextValue.registerPromise(p))
 
       // Wait for all to resolve
       await Promise.all(promises)
-      await new Promise(resolve => setTimeout(resolve, 30))
+      await new Promise((resolve) => setTimeout(resolve, 30))
 
       const finalResult = suspenseFn()
       expect(finalResult).toBeDefined()
@@ -843,7 +872,9 @@ describe('Suspense', () => {
   describe('Real-world scenarios', () => {
     it('should handle data fetching scenario', async () => {
       let resolveData: (value: any) => void
-      const fetchData = new Promise(r => { resolveData = r })
+      const fetchData = new Promise((r) => {
+        resolveData = r
+      })
 
       const DataComponent = () => {
         const ctx = useContext(SuspenseCtx)
@@ -856,7 +887,7 @@ describe('Suspense', () => {
       const App = () => {
         return Suspense({
           fallback: h('div', { class: 'spinner' }, 'Fetching data...'),
-          children: h(DataComponent, {})
+          children: h(DataComponent, {}),
         })
       }
 
@@ -866,38 +897,42 @@ describe('Suspense', () => {
 
     it('should handle image loading scenario', async () => {
       const imagePromises = [
-        new Promise(resolve => setTimeout(() => resolve('img1.jpg'), 10)),
-        new Promise(resolve => setTimeout(() => resolve('img2.jpg'), 15)),
-        new Promise(resolve => setTimeout(() => resolve('img3.jpg'), 5))
+        new Promise((resolve) => setTimeout(() => resolve('img1.jpg'), 10)),
+        new Promise((resolve) => setTimeout(() => resolve('img2.jpg'), 15)),
+        new Promise((resolve) => setTimeout(() => resolve('img3.jpg'), 5)),
       ]
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading images...'),
-        children: h('div', {}, 'Gallery loaded')
+        children: h('div', {}, 'Gallery loaded'),
       })
 
       const result = suspenseFn() as any
       const contextValue = result.props.value
 
-      imagePromises.forEach(p => contextValue.registerPromise(p))
+      imagePromises.forEach((p) => contextValue.registerPromise(p))
 
       await Promise.all(imagePromises)
-      await new Promise(resolve => setTimeout(resolve, 20))
+      await new Promise((resolve) => setTimeout(resolve, 20))
 
       const finalResult = suspenseFn()
       expect(finalResult).toBeDefined()
     })
 
     it('should handle code splitting scenario', async () => {
-      const loadComponent = () => new Promise(resolve =>
-        setTimeout(() => resolve({ default: () => h('div', {}, 'Lazy component') }), 10)
-      )
+      const loadComponent = () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () => resolve({ default: () => h('div', {}, 'Lazy component') }),
+            10
+          )
+        )
 
       const promise = loadComponent()
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading component...'),
-        children: h('div', {}, 'Component ready')
+        children: h('div', {}, 'Component ready'),
       })
 
       const result = suspenseFn() as any
@@ -906,7 +941,7 @@ describe('Suspense', () => {
       contextValue.registerPromise(promise)
 
       await promise
-      await new Promise(resolve => setTimeout(resolve, 15))
+      await new Promise((resolve) => setTimeout(resolve, 15))
 
       const finalResult = suspenseFn()
       expect(finalResult).toBeDefined()
@@ -917,13 +952,19 @@ describe('Suspense', () => {
       let resolvePosts: () => void
       let resolveComments: () => void
 
-      const userPromise = new Promise<void>(r => { resolveUser = r })
-      const postsPromise = new Promise<void>(r => { resolvePosts = r })
-      const commentsPromise = new Promise<void>(r => { resolveComments = r })
+      const userPromise = new Promise<void>((r) => {
+        resolveUser = r
+      })
+      const postsPromise = new Promise<void>((r) => {
+        resolvePosts = r
+      })
+      const commentsPromise = new Promise<void>((r) => {
+        resolveComments = r
+      })
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading profile...'),
-        children: h('div', {}, 'Profile complete')
+        children: h('div', {}, 'Profile complete'),
       })
 
       const result = suspenseFn() as any
@@ -937,7 +978,7 @@ describe('Suspense', () => {
       // User loads first
       resolveUser!()
       await userPromise
-      await new Promise(resolve => setTimeout(resolve, 5))
+      await new Promise((resolve) => setTimeout(resolve, 5))
 
       // Still loading (posts and comments pending)
       let current = suspenseFn() as any
@@ -946,7 +987,7 @@ describe('Suspense', () => {
       // Posts load
       resolvePosts!()
       await postsPromise
-      await new Promise(resolve => setTimeout(resolve, 5))
+      await new Promise((resolve) => setTimeout(resolve, 5))
 
       // Still loading (comments pending)
       current = suspenseFn() as any
@@ -955,7 +996,7 @@ describe('Suspense', () => {
       // Comments load
       resolveComments!()
       await commentsPromise
-      await new Promise(resolve => setTimeout(resolve, 5))
+      await new Promise((resolve) => setTimeout(resolve, 5))
 
       // All loaded
       current = suspenseFn()
@@ -964,18 +1005,19 @@ describe('Suspense', () => {
 
     it('should handle retry after error scenario', async () => {
       let attempt = 0
-      const createFetch = () => new Promise((resolve, reject) => {
-        attempt++
-        if (attempt < 3) {
-          reject(new Error('Network error'))
-        } else {
-          resolve('Success')
-        }
-      })
+      const createFetch = () =>
+        new Promise((resolve, reject) => {
+          attempt++
+          if (attempt < 3) {
+            reject(new Error('Network error'))
+          } else {
+            resolve('Success')
+          }
+        })
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),
-        children: h('div', {}, 'Loaded')
+        children: h('div', {}, 'Loaded'),
       })
 
       // First attempt
@@ -996,7 +1038,7 @@ describe('Suspense', () => {
       result.props.value.registerPromise(promise)
       await promise
 
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       const finalResult = suspenseFn()
       expect(finalResult).toBeDefined()

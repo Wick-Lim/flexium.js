@@ -6,7 +6,12 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { createForm, validators, type FormData, type ValidationRule } from '../Form'
+import {
+  createForm,
+  validators,
+  type FormData,
+  type ValidationRule,
+} from '../Form'
 
 describe('Form Component', () => {
   describe('createForm with initial values', () => {

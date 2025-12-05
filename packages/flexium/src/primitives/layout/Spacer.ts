@@ -1,18 +1,25 @@
-import { h } from '../../renderers/dom/h';
-import { VNode } from '../../core/renderer';
-import { BaseComponentProps, ResponsiveValue, stylePropsToCSS, mergeStyles, getBaseValue, toCSSValue } from './types';
+import { h } from '../../renderers/dom/h'
+import { VNode } from '../../core/renderer'
+import {
+  BaseComponentProps,
+  ResponsiveValue,
+  stylePropsToCSS,
+  mergeStyles,
+  getBaseValue,
+  toCSSValue,
+} from './types'
 
 export interface SpacerProps extends BaseComponentProps {
   /** Size on main axis (width for Row, height for Column) */
-  size?: ResponsiveValue<number | string>;
+  size?: ResponsiveValue<number | string>
   /** Explicit width */
-  width?: ResponsiveValue<number | string>;
+  width?: ResponsiveValue<number | string>
   /** Explicit height */
-  height?: ResponsiveValue<number | string>;
+  height?: ResponsiveValue<number | string>
   /** Flex grow factor (defaults to 1 if no size specified) */
-  flex?: ResponsiveValue<number>;
+  flex?: ResponsiveValue<number>
   /** HTML element to render */
-  as?: string;
+  as?: string
 }
 
 /**
@@ -41,40 +48,38 @@ export function Spacer(props: SpacerProps): VNode {
     className,
     style: userStyle,
     ...styleProps
-  } = props;
+  } = props
 
-  const generatedStyles = stylePropsToCSS(styleProps);
-  
+  const generatedStyles = stylePropsToCSS(styleProps)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const styles: Record<string, any> = {
     display: 'flex',
-  };
+  }
 
   // If explicit size provided, use it
-  const sizeVal = getBaseValue(size);
+  const sizeVal = getBaseValue(size)
   if (sizeVal !== undefined) {
-    styles.flexBasis = toCSSValue(sizeVal as string | number);
-    styles.flexGrow = 0;
-    styles.flexShrink = 0;
+    styles.flexBasis = toCSSValue(sizeVal)
+    styles.flexGrow = 0
+    styles.flexShrink = 0
   } else {
     // Otherwise check width/height
-    const w = getBaseValue(width);
-    const h = getBaseValue(height);
-    
+    const w = getBaseValue(width)
+    const h = getBaseValue(height)
+
     if (w !== undefined || h !== undefined) {
-        if (w !== undefined) styles.width = toCSSValue(w as string | number);
-        if (h !== undefined) styles.height = toCSSValue(h as string | number);
-        styles.flexGrow = 0;
-        styles.flexShrink = 0;
+      if (w !== undefined) styles.width = toCSSValue(w)
+      if (h !== undefined) styles.height = toCSSValue(h)
+      styles.flexGrow = 0
+      styles.flexShrink = 0
     } else {
-        // If no size at all, act as flexible spacer
-        styles.flexGrow = getBaseValue(flex) ?? 1;
+      // If no size at all, act as flexible spacer
+      styles.flexGrow = getBaseValue(flex) ?? 1
     }
   }
 
-  const finalStyles = mergeStyles(
-    { ...styles, ...generatedStyles },
-    userStyle
-  );
+  const finalStyles = mergeStyles({ ...styles, ...generatedStyles }, userStyle)
 
-  return h(as, { style: finalStyles, className, ...props }, []);
+  return h(as, { style: finalStyles, className, ...props }, [])
 }

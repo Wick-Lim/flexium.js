@@ -14,7 +14,7 @@ import {
   logError,
   logWarning,
   type ErrorCode,
-  type FlexiumErrorInfo
+  type FlexiumErrorInfo,
 } from '../errors'
 
 describe('ErrorCodes', () => {
@@ -39,7 +39,7 @@ describe('ErrorCodes', () => {
   it('should have correct error code format (FLXxxx)', () => {
     const codeValues = Object.values(ErrorCodes)
 
-    codeValues.forEach(code => {
+    codeValues.forEach((code) => {
       expect(code).toMatch(/^FLX\d{3}$/)
     })
   })
@@ -89,7 +89,9 @@ describe('createErrorInfo', () => {
 
     expect(info.code).toBe('FLX101')
     expect(info.message).toBe('Effect execution failed')
-    expect(info.suggestion).toBe('Check the effect callback for runtime errors. Consider wrapping async operations in try-catch.')
+    expect(info.suggestion).toBe(
+      'Check the effect callback for runtime errors. Consider wrapping async operations in try-catch.'
+    )
   })
 
   it('should include context when provided', () => {
@@ -128,7 +130,7 @@ describe('createErrorInfo', () => {
   it('should work for all error codes', () => {
     const errorCodes = Object.values(ErrorCodes)
 
-    errorCodes.forEach(code => {
+    errorCodes.forEach((code) => {
       const info = createErrorInfo(code as ErrorCode)
 
       expect(info.code).toBe(code)
@@ -142,7 +144,7 @@ describe('formatErrorMessage', () => {
   it('should format basic error message', () => {
     const info: FlexiumErrorInfo = {
       code: ErrorCodes.EFFECT_EXECUTION_FAILED,
-      message: 'Effect execution failed'
+      message: 'Effect execution failed',
     }
 
     const formatted = formatErrorMessage(info)
@@ -154,21 +156,25 @@ describe('formatErrorMessage', () => {
     const info: FlexiumErrorInfo = {
       code: ErrorCodes.CLEANUP_OUTSIDE_EFFECT,
       message: 'onCleanup must be called from within an effect',
-      suggestion: 'Move the onCleanup() call inside an effect() callback.'
+      suggestion: 'Move the onCleanup() call inside an effect() callback.',
     }
 
     const formatted = formatErrorMessage(info)
 
     expect(formatted).toContain('[Flexium FLX102]')
-    expect(formatted).toContain('onCleanup must be called from within an effect')
-    expect(formatted).toContain('→ Move the onCleanup() call inside an effect() callback.')
+    expect(formatted).toContain(
+      'onCleanup must be called from within an effect'
+    )
+    expect(formatted).toContain(
+      '→ Move the onCleanup() call inside an effect() callback.'
+    )
   })
 
   it('should include context in formatted message', () => {
     const info: FlexiumErrorInfo = {
       code: ErrorCodes.EFFECT_EXECUTION_FAILED,
       message: 'Effect execution failed',
-      context: { component: 'App', line: 10 }
+      context: { component: 'App', line: 10 },
     }
 
     const formatted = formatErrorMessage(info)
@@ -184,8 +190,8 @@ describe('formatErrorMessage', () => {
       context: {
         expected: 'div',
         actual: 'span',
-        path: ['App', 'Container', 'Item']
-      }
+        path: ['App', 'Container', 'Item'],
+      },
     }
 
     const formatted = formatErrorMessage(info)
@@ -199,7 +205,7 @@ describe('formatErrorMessage', () => {
     const info: FlexiumErrorInfo = {
       code: ErrorCodes.EFFECT_EXECUTION_FAILED,
       message: 'Effect execution failed',
-      context: {}
+      context: {},
     }
 
     const formatted = formatErrorMessage(info)
@@ -209,10 +215,10 @@ describe('formatErrorMessage', () => {
   })
 
   it('should format complete error info with all fields', () => {
-    const info = createErrorInfo(
-      ErrorCodes.CONTEXT_MISSING_PROVIDER,
-      { context: 'UserContext', component: 'UserProfile' }
-    )
+    const info = createErrorInfo(ErrorCodes.CONTEXT_MISSING_PROVIDER, {
+      context: 'UserContext',
+      component: 'UserProfile',
+    })
 
     const formatted = formatErrorMessage(info)
 
@@ -220,7 +226,9 @@ describe('formatErrorMessage', () => {
     expect(formatted).toContain('Context used outside of Provider')
     expect(formatted).toContain('context: "UserContext"')
     expect(formatted).toContain('component: "UserProfile"')
-    expect(formatted).toContain('→ Wrap your component tree with the appropriate Context.Provider.')
+    expect(formatted).toContain(
+      '→ Wrap your component tree with the appropriate Context.Provider.'
+    )
   })
 })
 
@@ -281,7 +289,9 @@ describe('logError', () => {
     logError(ErrorCodes.CLEANUP_OUTSIDE_EFFECT)
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('→ Move the onCleanup() call inside an effect() callback.')
+      expect.stringContaining(
+        '→ Move the onCleanup() call inside an effect() callback.'
+      )
     )
   })
 })
@@ -349,7 +359,9 @@ describe('FlexiumError', () => {
   it('should set suggestion property', () => {
     const error = new FlexiumError(ErrorCodes.CONTEXT_MISSING_PROVIDER)
 
-    expect(error.suggestion).toBe('Wrap your component tree with the appropriate Context.Provider.')
+    expect(error.suggestion).toBe(
+      'Wrap your component tree with the appropriate Context.Provider.'
+    )
   })
 
   it('should set context when provided', () => {
@@ -365,9 +377,13 @@ describe('FlexiumError', () => {
     const errorString = error.toString()
 
     expect(errorString).toContain('[Flexium FLX102]')
-    expect(errorString).toContain('onCleanup must be called from within an effect')
+    expect(errorString).toContain(
+      'onCleanup must be called from within an effect'
+    )
     expect(errorString).toContain('component: "TestComponent"')
-    expect(errorString).toContain('→ Move the onCleanup() call inside an effect() callback.')
+    expect(errorString).toContain(
+      '→ Move the onCleanup() call inside an effect() callback.'
+    )
   })
 
   it('should be throwable', () => {
@@ -393,7 +409,7 @@ describe('FlexiumError', () => {
   it('should work for all error codes', () => {
     const errorCodes = Object.values(ErrorCodes)
 
-    errorCodes.forEach(code => {
+    errorCodes.forEach((code) => {
       const error = new FlexiumError(code as ErrorCode)
 
       expect(error.code).toBe(code)
@@ -416,7 +432,7 @@ describe('FlexiumError', () => {
       boolean: true,
       null: null,
       array: [1, 2, 3],
-      object: { nested: 'value' }
+      object: { nested: 'value' },
     }
     const error = new FlexiumError(ErrorCodes.HYDRATION_MISMATCH, context)
 

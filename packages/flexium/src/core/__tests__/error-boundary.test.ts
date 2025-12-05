@@ -5,7 +5,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { ErrorBoundary, useErrorBoundary, ErrorBoundaryCtx } from '../error-boundary'
+import {
+  ErrorBoundary,
+  useErrorBoundary,
+  ErrorBoundaryCtx,
+} from '../error-boundary'
 import { signal } from '../signal'
 import { h } from '../../renderers/dom/h'
 import { mountReactive } from '../../renderers/dom/reactive'
@@ -28,7 +32,7 @@ describe('ErrorBoundary', () => {
 
       const boundary = ErrorBoundary({
         fallback: h('div', {}, 'Error occurred'),
-        children: h(ChildComponent, {})
+        children: h(ChildComponent, {}),
       })
 
       const result = boundary()
@@ -38,7 +42,7 @@ describe('ErrorBoundary', () => {
     it('should accept static fallback', () => {
       const boundary = ErrorBoundary({
         fallback: h('div', { class: 'fallback' }, 'Static fallback'),
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = boundary()
@@ -52,7 +56,7 @@ describe('ErrorBoundary', () => {
 
       const boundary = ErrorBoundary({
         fallback: fallbackFn,
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       const result = boundary()
@@ -70,7 +74,7 @@ describe('ErrorBoundary', () => {
       const boundary = ErrorBoundary({
         fallback: h('div', { class: 'error' }, 'Error caught'),
         children: () => h(ThrowingComponent, {}),
-        onError
+        onError,
       })
 
       // Trigger render which should catch error
@@ -91,7 +95,7 @@ describe('ErrorBoundary', () => {
           return h('div', {}, 'Caught')
         },
         children: h('div', {}, 'Content'),
-        onError
+        onError,
       })
 
       boundary()
@@ -100,14 +104,14 @@ describe('ErrorBoundary', () => {
 
   describe('retry functionality', () => {
     it('should increment retry count on retry', () => {
-      let retryCounts: number[] = []
+      const retryCounts: number[] = []
 
       const boundary = ErrorBoundary({
         fallback: ({ retryCount, reset }) => {
           retryCounts.push(retryCount)
           return h('button', { onclick: reset }, `Retry (${retryCount})`)
         },
-        children: h('div', {}, 'Content')
+        children: h('div', {}, 'Content'),
       })
 
       boundary()
@@ -120,7 +124,7 @@ describe('ErrorBoundary', () => {
       const boundary = ErrorBoundary({
         fallback: ({ reset }) => h('button', { onclick: reset }, 'Retry'),
         children: h('div', {}, 'Content'),
-        onReset
+        onReset,
       })
 
       boundary()
@@ -130,7 +134,7 @@ describe('ErrorBoundary', () => {
 
   describe('context', () => {
     it('should provide ErrorBoundaryCtx to children', () => {
-      let contextValue: any = null
+      const contextValue: any = null
 
       const ChildWithContext = () => {
         // In real usage, would use useContext
@@ -139,7 +143,7 @@ describe('ErrorBoundary', () => {
 
       const boundary = ErrorBoundary({
         fallback: h('div', {}, 'Error'),
-        children: h(ChildWithContext, {})
+        children: h(ChildWithContext, {}),
       })
 
       const result = boundary()
@@ -194,7 +198,7 @@ describe('ErrorBoundary', () => {
         children: () => {
           throw new Error('Component error')
         },
-        onError
+        onError,
       })
 
       // Should not throw even if onError throws
@@ -209,7 +213,7 @@ describe('ErrorBoundary', () => {
       const boundary = ErrorBoundary({
         fallback: ({ reset }) => h('button', { onclick: reset }, 'Retry'),
         children: h('div', {}, 'Content'),
-        onReset
+        onReset,
       })
 
       // Should render without throwing
@@ -231,7 +235,7 @@ describe('ErrorBoundary', () => {
         children: () => {
           throw new Error('Test')
         },
-        onError
+        onError,
       })
 
       boundary()
@@ -247,12 +251,12 @@ describe('ErrorBoundary', () => {
     it('should allow nested ErrorBoundary components', () => {
       const innerBoundary = ErrorBoundary({
         fallback: h('div', { class: 'inner-fallback' }, 'Inner error'),
-        children: h('div', {}, 'Inner content')
+        children: h('div', {}, 'Inner content'),
       })
 
       const outerBoundary = ErrorBoundary({
         fallback: h('div', { class: 'outer-fallback' }, 'Outer error'),
-        children: innerBoundary
+        children: innerBoundary,
       })
 
       const result = outerBoundary()
@@ -274,7 +278,7 @@ describe('ErrorBoundary', () => {
         fallback: fallbackFn,
         children: () => {
           throw testError
-        }
+        },
       })
 
       boundary()
@@ -296,7 +300,7 @@ describe('ErrorBoundary', () => {
         fallback: fallbackFn,
         children: () => {
           throw new Error('Test')
-        }
+        },
       })
 
       boundary()

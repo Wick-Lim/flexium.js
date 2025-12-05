@@ -11,12 +11,12 @@
  * Using any intentionally for cross-platform flexibility (DOM Node, Canvas, etc.)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type RenderNode = any;
+export type RenderNode = any
 
 /**
  * Event handler function type
  */
-export type EventHandler = (event: Event) => void;
+export type EventHandler = (event: Event) => void
 
 /**
  * Core renderer interface that all platform renderers must implement
@@ -28,7 +28,7 @@ export interface Renderer {
    * @param props - Properties to apply to the node
    * @returns The created node
    */
-  createNode(type: string, props: Record<string, unknown>): RenderNode;
+  createNode(type: string, props: Record<string, unknown>): RenderNode
 
   /**
    * Update the properties of an existing node
@@ -40,14 +40,14 @@ export interface Renderer {
     node: RenderNode,
     oldProps: Record<string, unknown>,
     newProps: Record<string, unknown>
-  ): void;
+  ): void
 
   /**
    * Append a child node to a parent node
    * @param parent - The parent node
    * @param child - The child node to append
    */
-  appendChild(parent: RenderNode, child: RenderNode): void;
+  appendChild(parent: RenderNode, child: RenderNode): void
 
   /**
    * Insert a child node before a reference node
@@ -59,28 +59,28 @@ export interface Renderer {
     parent: RenderNode,
     child: RenderNode,
     beforeChild: RenderNode | null
-  ): void;
+  ): void
 
   /**
    * Remove a child node from a parent node
    * @param parent - The parent node
    * @param child - The child node to remove
    */
-  removeChild(parent: RenderNode, child: RenderNode): void;
+  removeChild(parent: RenderNode, child: RenderNode): void
 
   /**
    * Create a text node
    * @param text - The text content
    * @returns The created text node
    */
-  createTextNode(text: string): RenderNode;
+  createTextNode(text: string): RenderNode
 
   /**
    * Update the text content of a text node
    * @param node - The text node to update
    * @param text - The new text content
    */
-  updateTextNode(node: RenderNode, text: string): void;
+  updateTextNode(node: RenderNode, text: string): void
 
   /**
    * Add an event listener to a node
@@ -88,7 +88,7 @@ export interface Renderer {
    * @param event - The event name (e.g., 'click', 'press')
    * @param handler - The event handler function
    */
-  addEventListener(node: RenderNode, event: string, handler: EventHandler): void;
+  addEventListener(node: RenderNode, event: string, handler: EventHandler): void
 
   /**
    * Remove an event listener from a node
@@ -100,7 +100,7 @@ export interface Renderer {
     node: RenderNode,
     event: string,
     handler: EventHandler
-  ): void;
+  ): void
 }
 
 /**
@@ -108,75 +108,82 @@ export interface Renderer {
  */
 export interface CommonProps {
   // Layout
-  width?: number | string;
-  height?: number | string;
-  padding?: number;
-  paddingTop?: number;
-  paddingRight?: number;
-  paddingBottom?: number;
-  paddingLeft?: number;
-  margin?: number;
-  marginTop?: number;
-  marginRight?: number;
-  marginBottom?: number;
-  marginLeft?: number;
+  width?: number | string
+  height?: number | string
+  padding?: number
+  paddingTop?: number
+  paddingRight?: number
+  paddingBottom?: number
+  paddingLeft?: number
+  margin?: number
+  marginTop?: number
+  marginRight?: number
+  marginBottom?: number
+  marginLeft?: number
 
   // Flexbox
-  flexDirection?: 'row' | 'column';
+  flexDirection?: 'row' | 'column'
   justifyContent?:
-  | 'flex-start'
-  | 'flex-end'
-  | 'center'
-  | 'space-between'
-  | 'space-around'
-  | 'space-evenly';
-  alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
-  gap?: number;
-  flex?: number;
-  flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
+    | 'flex-start'
+    | 'flex-end'
+    | 'center'
+    | 'space-between'
+    | 'space-around'
+    | 'space-evenly'
+  alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline'
+  gap?: number
+  flex?: number
+  flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse'
 
   // Visual
-  bg?: string; // background color
-  color?: string; // text color
-  borderRadius?: number;
-  borderWidth?: number;
-  borderColor?: string;
-  opacity?: number;
+  bg?: string // background color
+  color?: string // text color
+  borderRadius?: number
+  borderWidth?: number
+  borderColor?: string
+  opacity?: number
 
   // Typography (for text nodes)
-  fontSize?: number;
-  fontWeight?: number | string;
-  fontFamily?: string;
-  lineHeight?: number;
-  textAlign?: 'left' | 'center' | 'right';
+  fontSize?: number
+  fontWeight?: number | string
+  fontFamily?: string
+  lineHeight?: number
+  textAlign?: 'left' | 'center' | 'right'
 
   // Events (platform-agnostic event names)
-  onPress?: EventHandler; // Maps to click/touch
-  onHover?: EventHandler;
-  onChange?: EventHandler;
-  onFocus?: EventHandler;
-  onBlur?: EventHandler;
+  onPress?: EventHandler // Maps to click/touch
+  onHover?: EventHandler
+  onChange?: EventHandler
+  onFocus?: EventHandler
+  onBlur?: EventHandler
 }
 
 /**
  * Child types that can be rendered
  */
-export type FNodeChild = FNode | string | number | boolean | null | undefined | FNodeChild[];
+export type FNodeChild =
+  | FNode
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | FNodeChild[]
 
 /**
  * Flexium Node - lightweight element descriptor for JSX
  * (Not a Virtual DOM - just a simple descriptor that gets immediately converted to real DOM)
  */
 export interface FNode {
-  type: string | Function;
-  props: Record<string, unknown>;
-  children: FNodeChild[];
-  key?: string | number;
-  _node?: RenderNode; // Internal reference to the rendered node
+  type: string | Function
+  props: Record<string, unknown>
+  children: FNodeChild[]
+  key?: string | number
+  _node?: RenderNode // Internal reference to the rendered node
 }
 
 // Legacy aliases for backward compatibility (deprecated)
 /** @deprecated Use FNode instead */
-export type VNode = FNode;
+export type VNode = FNode
 /** @deprecated Use FNodeChild instead */
-export type VNodeChild = FNodeChild;
+export type VNodeChild = FNodeChild

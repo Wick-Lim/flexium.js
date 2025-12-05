@@ -6,56 +6,88 @@
  * will be updated, without re-rendering the entire component tree.
  */
 
-import type { VNode } from '../../core/renderer';
-import { effect, isSignal, onCleanup } from '../../core/signal';
-import type { Signal, Computed } from '../../core/signal';
-import { domRenderer } from './index';
-import { isVNode } from './h';
-import { pushProvider, popProvider, useContext, captureContext, runWithContext } from '../../core/context';
-import { reconcileArrays } from './reconcile';
-import { SuspenseCtx } from '../../core/suspense';
-import { ErrorBoundaryCtx } from '../../core/error-boundary';
-import { isForComponent, mountForComponent, For, ForComponent } from '../../core/flow';
-import type { StateGetter } from '../../core/state';
-import { isVirtualListComponent, mountVirtualListComponent, VirtualListComponent } from '../../primitives/VirtualList';
+import type { VNode } from '../../core/renderer'
+import { effect, isSignal, onCleanup } from '../../core/signal'
+import type { Signal, Computed } from '../../core/signal'
+import { domRenderer } from './index'
+import { isVNode } from './h'
+import {
+  pushProvider,
+  popProvider,
+  useContext,
+  captureContext,
+  runWithContext,
+} from '../../core/context'
+import { reconcileArrays } from './reconcile'
+import { SuspenseCtx } from '../../core/suspense'
+import { ErrorBoundaryCtx } from '../../core/error-boundary'
+import {
+  isForComponent,
+  mountForComponent,
+  For,
+  ForComponent,
+} from '../../core/flow'
+import type { StateGetter } from '../../core/state'
+import {
+  isVirtualListComponent,
+  mountVirtualListComponent,
+  VirtualListComponent,
+} from '../../primitives/VirtualList'
 
-const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>();
+const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>()
 
 export function mountReactive(
-  vnode: VNode | string | number | boolean | Signal<any> | Computed<any> | null | undefined | Function | any[] | ForComponent<any> | VirtualListComponent<any>,
+  vnode:
+    | VNode
+    | string
+    | number
+    | boolean
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | Signal<any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | Computed<any>
+    | null
+    | undefined
+    | Function
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | any[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | ForComponent<any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | VirtualListComponent<any>,
   container?: Node
 ): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
   if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
-    return null;
+    return null
   }
 
   // Handle VirtualList component
   if (isVirtualListComponent(vnode)) {
-    const parent = container || document.createDocumentFragment();
+    const parent = container || document.createDocumentFragment()
 
     const virtualListDispose = mountVirtualListComponent(
       vnode,
       parent,
       (childVnode) => mountReactive(childVnode),
       cleanupReactive
-    );
+    )
 
     // Create a marker for cleanup tracking
-    const marker = document.createTextNode('');
+    const marker = document.createTextNode('')
     if (!REACTIVE_BINDINGS.has(marker)) {
-      REACTIVE_BINDINGS.set(marker, new Set());
+      REACTIVE_BINDINGS.set(marker, new Set())
     }
-    REACTIVE_BINDINGS.get(marker)!.add(virtualListDispose);
+    REACTIVE_BINDINGS.get(marker)!.add(virtualListDispose)
 
-    return container ? parent.firstChild : parent;
+    return container ? parent.firstChild : parent
   }
 
   // Handle For component with direct DOM caching (no VNode intermediate)
   if (isForComponent(vnode)) {
-    const startMarker = document.createTextNode('');
-    const parent = container || document.createDocumentFragment();
-    domRenderer.appendChild(parent, startMarker);
+    const startMarker = document.createTextNode('')
+    const parent = container || document.createDocumentFragment()
+    domRenderer.appendChild(parent, startMarker)
 
     const forDispose = mountForComponent(
       vnode,
@@ -63,119 +95,143 @@ export function mountReactive(
       startMarker,
       (childVnode) => mountReactive(childVnode),
       cleanupReactive
-    );
+    )
 
     if (!REACTIVE_BINDINGS.has(startMarker)) {
-      REACTIVE_BINDINGS.set(startMarker, new Set());
+      REACTIVE_BINDINGS.set(startMarker, new Set())
     }
-    REACTIVE_BINDINGS.get(startMarker)!.add(forDispose);
+    REACTIVE_BINDINGS.get(startMarker)!.add(forDispose)
 
-    return container ? startMarker : parent;
+    return container ? startMarker : parent
   }
 
   // Handle signals and functions (reactive children)
   if (isSignal(vnode) || typeof vnode === 'function') {
-    const startNode = document.createTextNode('');
-    const parent = container || document.createDocumentFragment();
-    domRenderer.appendChild(parent, startNode);
+    const startNode = document.createTextNode('')
+    const parent = container || document.createDocumentFragment()
+    domRenderer.appendChild(parent, startNode)
 
-    let currentNode: Node | null = startNode;
-    let currentVNode: any = null;
-    let currentVNodeList: VNode[] = []; 
+    let currentNode: Node | null = startNode
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let currentVNode: any = null
+    let currentVNodeList: VNode[] = []
 
     const dispose = effect(() => {
-      const value = isSignal(vnode) ? (vnode as Signal<any>).value : (vnode as Function)();
-      const currentContainer = startNode.parentNode; 
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const value = isSignal(vnode) ? (vnode as Signal<any>).value : vnode()
+      const currentContainer = startNode.parentNode
+
       // Safety check: if node is detached, we can't update siblings
-      if (!currentContainer) return;
+      if (!currentContainer) return
 
       if (Array.isArray(value)) {
-        const newVNodes = value.filter(c => c != null);
+        const newVNodes = value.filter((c) => c != null)
         if (currentVNodeList.length > 0) {
-            const nextSibling = startNode.nextSibling; 
-            // Note: reconcileArrays expects parent, oldVNodes, newVNodes, nextSibling
-            reconcileArrays(currentContainer, currentVNodeList, newVNodes, nextSibling);
+          const nextSibling = startNode.nextSibling
+          // Note: reconcileArrays expects parent, oldVNodes, newVNodes, nextSibling
+          reconcileArrays(
+            currentContainer,
+            currentVNodeList,
+            newVNodes,
+            nextSibling
+          )
         } else {
-            if (currentNode && currentNode !== startNode) {
-                 try { currentContainer.removeChild(currentNode); } catch(e) {}
+          if (currentNode && currentNode !== startNode) {
+            try {
+              currentContainer.removeChild(currentNode)
+            } catch (e) {}
+          }
+          const fragment = document.createDocumentFragment()
+          for (const child of newVNodes) {
+            const childNode = mountReactive(child, fragment)
+            if (childNode && typeof child === 'object') {
+              child._node = childNode
             }
-            const fragment = document.createDocumentFragment();
-            for (const child of newVNodes) {
-              const childNode = mountReactive(child, fragment);
-              if (childNode && typeof child === 'object') {
-                (child as any)._node = childNode;
-              }
-            }
-            currentContainer.insertBefore(fragment, startNode.nextSibling);
+          }
+          currentContainer.insertBefore(fragment, startNode.nextSibling)
         }
-        currentVNodeList = newVNodes;
-        currentVNode = value;
-        currentNode = startNode; 
-        return;
+        currentVNodeList = newVNodes
+        currentVNode = value
+        currentNode = startNode
+        return
       }
 
       if (currentVNodeList.length > 0) {
-         for (const childVNode of currentVNodeList) {
-             if (childVNode._node && childVNode._node.parentNode === currentContainer) {
-                 try { currentContainer.removeChild(childVNode._node); } catch(e) {}
-             }
-         }
-         currentVNodeList = [];
+        for (const childVNode of currentVNodeList) {
+          if (
+            childVNode._node &&
+            childVNode._node.parentNode === currentContainer
+          ) {
+            try {
+              currentContainer.removeChild(childVNode._node)
+            } catch (e) {}
+          }
+        }
+        currentVNodeList = []
       }
 
       if (value !== currentVNode) {
-        if ((typeof value === 'string' || typeof value === 'number') &&
-          currentNode && currentNode.nodeType === Node.TEXT_NODE && currentNode !== startNode) {
-          domRenderer.updateTextNode(currentNode as Text, String(value));
+        if (
+          (typeof value === 'string' || typeof value === 'number') &&
+          currentNode &&
+          currentNode.nodeType === Node.TEXT_NODE &&
+          currentNode !== startNode
+        ) {
+          domRenderer.updateTextNode(currentNode as Text, String(value))
         } else {
-          const newNode = mountReactive(value);
+          const newNode = mountReactive(value)
           if (newNode) {
-              if (currentNode && currentNode !== startNode) {
-                  if (currentNode.parentNode === currentContainer) {
-                      currentContainer.replaceChild(newNode, currentNode);
-                  } else {
-                      currentContainer.insertBefore(newNode, startNode.nextSibling);
-                  }
+            if (currentNode && currentNode !== startNode) {
+              if (currentNode.parentNode === currentContainer) {
+                currentContainer.replaceChild(newNode, currentNode)
               } else {
-                  currentContainer.insertBefore(newNode, startNode.nextSibling);
+                currentContainer.insertBefore(newNode, startNode.nextSibling)
               }
-              currentNode = newNode;
+            } else {
+              currentContainer.insertBefore(newNode, startNode.nextSibling)
+            }
+            currentNode = newNode
           } else {
-              if (currentNode && currentNode !== startNode && currentNode.parentNode === currentContainer) {
-                  try { currentContainer.removeChild(currentNode); } catch(e) {}
-              }
-              currentNode = startNode;
+            if (
+              currentNode &&
+              currentNode !== startNode &&
+              currentNode.parentNode === currentContainer
+            ) {
+              try {
+                currentContainer.removeChild(currentNode)
+              } catch (e) {}
+            }
+            currentNode = startNode
           }
         }
-        currentVNode = value;
+        currentVNode = value
       }
-    });
+    })
 
     if (!REACTIVE_BINDINGS.has(startNode)) {
-      REACTIVE_BINDINGS.set(startNode, new Set());
+      REACTIVE_BINDINGS.set(startNode, new Set())
     }
-    REACTIVE_BINDINGS.get(startNode)!.add(dispose);
+    REACTIVE_BINDINGS.get(startNode)!.add(dispose)
 
-    return container ? startNode : parent;
+    return container ? startNode : parent
   }
 
   if (Array.isArray(vnode)) {
-    const fragment = document.createDocumentFragment();
+    const fragment = document.createDocumentFragment()
     for (const child of vnode) {
-      mountReactive(child, fragment);
+      mountReactive(child, fragment)
     }
     if (container) {
-        domRenderer.appendChild(container, fragment);
+      domRenderer.appendChild(container, fragment)
     }
-    return fragment;
+    return fragment
   }
 
   // Handle text nodes
   if (typeof vnode === 'string' || typeof vnode === 'number') {
-    const textNode = domRenderer.createTextNode(String(vnode));
-    if (container) domRenderer.appendChild(container, textNode);
-    return textNode;
+    const textNode = domRenderer.createTextNode(String(vnode))
+    if (container) domRenderer.appendChild(container, textNode)
+    return textNode
   }
 
   // Handle VNodes
@@ -183,239 +239,263 @@ export function mountReactive(
     // Handle For component specially (direct DOM caching)
     if (vnode.type === For) {
       const forComp = For({
-        each: vnode.props.each as unknown as StateGetter<unknown[]>,
-        children: vnode.children as unknown as ((item: unknown, index: () => number) => VNode)[]
-      });
-      return mountReactive(forComp, container);
+        each: vnode.props.each as StateGetter<unknown[]>,
+        children: vnode.children as unknown as ((
+          item: unknown,
+          index: () => number
+        ) => VNode)[],
+      })
+      return mountReactive(forComp, container)
     }
 
     // Handle function components
     if (typeof vnode.type === 'function') {
-      const component = vnode.type as Function;
-      const startNode = document.createTextNode('');
-      const parent = container || document.createDocumentFragment();
-      domRenderer.appendChild(parent, startNode);
+      const component = vnode.type
+      const startNode = document.createTextNode('')
+      const parent = container || document.createDocumentFragment()
+      domRenderer.appendChild(parent, startNode)
 
-      let currentNodes: Node[] = [];
-      const contextSnapshot = captureContext();
+      let currentNodes: Node[] = []
+      const contextSnapshot = captureContext()
 
       const dispose = effect(() => {
         runWithContext(contextSnapshot, () => {
-          const contextId = (component as any)._contextId;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const contextId = (component as any)._contextId
           if (contextId) {
-            pushProvider(contextId, vnode.props.value);
+            pushProvider(contextId, vnode.props.value)
           }
-          
+
           onCleanup(() => {
-              const currentParent = startNode.parentNode;
-              if (currentParent) {
-                  let nodeToRemove = startNode.nextSibling;
-                  for (let i = 0; i < currentNodes.length; i++) {
-                      if (nodeToRemove) {
-                          const next = nodeToRemove.nextSibling;
-                          cleanupReactive(nodeToRemove);
-                          try {
-                              currentParent.removeChild(nodeToRemove);
-                          } catch (e) {}
-                          nodeToRemove = next;
-                      }
-                  }
-              } else {
-                  // If startNode is detached, just cleanup reactions
-                  currentNodes.forEach(cleanupReactive);
+            const currentParent = startNode.parentNode
+            if (currentParent) {
+              let nodeToRemove = startNode.nextSibling
+              for (let i = 0; i < currentNodes.length; i++) {
+                if (nodeToRemove) {
+                  const next = nodeToRemove.nextSibling
+                  cleanupReactive(nodeToRemove)
+                  try {
+                    currentParent.removeChild(nodeToRemove)
+                  } catch (e) {}
+                  nodeToRemove = next
+                }
               }
-              currentNodes = [];
-          });
+            } else {
+              // If startNode is detached, just cleanup reactions
+              currentNodes.forEach(cleanupReactive)
+            }
+            currentNodes = []
+          })
 
           try {
-            let result;
+            let result
             try {
-              result = component({ ...vnode.props, children: vnode.children });
+              result = component({ ...vnode.props, children: vnode.children })
             } catch (err) {
               if (err instanceof Promise) {
-                  const suspense = useContext(SuspenseCtx);
-                  if (suspense) {
-                      suspense.registerPromise(err);
-                      result = null;
-                  } else {
-                      throw err; 
-                  }
+                const suspense = useContext(SuspenseCtx)
+                if (suspense) {
+                  suspense.registerPromise(err)
+                  result = null
+                } else {
+                  throw err
+                }
               } else {
-                  const errorBoundary = useContext(ErrorBoundaryCtx);
-                  if (errorBoundary) {
-                      errorBoundary.setError(err);
-                      result = null; 
-                  } else {
-                      throw err;
-                  }
+                const errorBoundary = useContext(ErrorBoundaryCtx)
+                if (errorBoundary) {
+                  errorBoundary.setError(err)
+                  result = null
+                } else {
+                  throw err
+                }
               }
             }
 
-            const fragment = document.createDocumentFragment();
-            mountReactive(result, fragment);
-            
-            const currentParent = startNode.parentNode;
+            const fragment = document.createDocumentFragment()
+            mountReactive(result, fragment)
+
+            const currentParent = startNode.parentNode
             if (currentParent) {
-                currentNodes = Array.from(fragment.childNodes);
-                currentParent.insertBefore(fragment, startNode.nextSibling);
+              currentNodes = Array.from(fragment.childNodes)
+              currentParent.insertBefore(fragment, startNode.nextSibling)
             }
-            
           } finally {
             if (contextId) {
-              popProvider(contextId);
+              popProvider(contextId)
             }
           }
-        });
-      });
+        })
+      })
 
       if (!REACTIVE_BINDINGS.has(startNode)) {
-        REACTIVE_BINDINGS.set(startNode, new Set());
+        REACTIVE_BINDINGS.set(startNode, new Set())
       }
-      REACTIVE_BINDINGS.get(startNode)!.add(dispose);
+      REACTIVE_BINDINGS.get(startNode)!.add(dispose)
 
-      return container ? startNode : parent;
+      return container ? startNode : parent
     }
 
     // Handle fragments
     if (vnode.type === 'fragment') {
-      const fragment = document.createDocumentFragment();
+      const fragment = document.createDocumentFragment()
       for (const child of vnode.children) {
-        mountReactive(child, fragment);
+        mountReactive(child, fragment)
       }
       if (container) {
-        domRenderer.appendChild(container, fragment);
+        domRenderer.appendChild(container, fragment)
       }
-      return fragment;
+      return fragment
     }
 
     // Handle built-in elements
-    const node = domRenderer.createNode(vnode.type as string, vnode.props);
-    const disposeProps = setupReactiveProps(node, vnode.props);
+    const node = domRenderer.createNode(vnode.type, vnode.props)
+    const disposeProps = setupReactiveProps(node, vnode.props)
     if (disposeProps.length > 0) {
-      REACTIVE_BINDINGS.set(node, new Set(disposeProps));
+      REACTIVE_BINDINGS.set(node, new Set(disposeProps))
     }
 
     for (const child of vnode.children) {
-      mountReactive(child, node);
+      mountReactive(child, node)
     }
 
     if (container) {
-      domRenderer.appendChild(container, node);
+      domRenderer.appendChild(container, node)
     }
 
-    return node;
+    return node
   }
 
-  return null;
+  return null
 }
 
 function setupReactiveProps(
   node: HTMLElement,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   props: Record<string, any>
 ): (() => void)[] {
-  const disposers: (() => void)[] = [];
+  const disposers: (() => void)[] = []
   for (const key in props) {
-    const value = props[key];
-    if (key.startsWith('on')) continue;
+    const value = props[key]
+    if (key.startsWith('on')) continue
 
     if (isSignal(value)) {
       const dispose = effect(() => {
-        domRenderer.updateNode(node, { [key]: undefined }, { [key]: value.value });
-      });
-      disposers.push(dispose);
-      continue;
+        domRenderer.updateNode(
+          node,
+          { [key]: undefined },
+          { [key]: value.value }
+        )
+      })
+      disposers.push(dispose)
+      continue
     }
 
     if (typeof value === 'function') {
       const dispose = effect(() => {
         try {
-          domRenderer.updateNode(node, { [key]: undefined }, { [key]: value() });
+          domRenderer.updateNode(node, { [key]: undefined }, { [key]: value() })
         } catch (e) {}
-      });
-      disposers.push(dispose);
+      })
+      disposers.push(dispose)
     }
   }
-  return disposers;
+  return disposers
 }
 
 export function cleanupReactive(node: Node): void {
-  const bindings = REACTIVE_BINDINGS.get(node);
+  const bindings = REACTIVE_BINDINGS.get(node)
   if (bindings) {
-    bindings.forEach((dispose) => dispose());
-    REACTIVE_BINDINGS.delete(node);
+    bindings.forEach((dispose) => dispose())
+    REACTIVE_BINDINGS.delete(node)
   }
   if (node.childNodes) {
-    node.childNodes.forEach((child) => cleanupReactive(child));
+    node.childNodes.forEach((child) => cleanupReactive(child))
   }
 }
 
 export function renderReactive(
-  vnode: VNode | string | number | Signal<any> | Computed<any> | null | undefined | Function | any[],
+  vnode:
+    | VNode
+    | string
+    | number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | Signal<any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | Computed<any>
+    | null
+    | undefined
+    | Function
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | any[],
   container: HTMLElement
 ): Node | null {
-  return mountReactive(vnode, container);
+  return mountReactive(vnode, container)
 }
 
 export function createReactiveRoot(container: HTMLElement) {
-  let rootDispose: (() => void) | null = null;
-  let currentRootNode: Node | null = null; 
+  let rootDispose: (() => void) | null = null
+  let currentRootNode: Node | null = null
 
   return {
     render(vnode: VNode) {
       if (currentRootNode) {
-        cleanupReactive(currentRootNode);
-        container.innerHTML = ''; 
-        currentRootNode = null;
+        cleanupReactive(currentRootNode)
+        container.innerHTML = ''
+        currentRootNode = null
       }
       if (rootDispose) {
-        rootDispose();
-        rootDispose = null;
+        rootDispose()
+        rootDispose = null
       }
 
       rootDispose = effect(() => {
-        container.innerHTML = '';
-        currentRootNode = mountReactive(vnode, container);
-      });
+        container.innerHTML = ''
+        currentRootNode = mountReactive(vnode, container)
+      })
     },
     unmount() {
       if (rootDispose) {
-        rootDispose();
-        rootDispose = null;
+        rootDispose()
+        rootDispose = null
       }
-      cleanupReactive(container); 
-      container.innerHTML = '';
+      cleanupReactive(container)
+      container.innerHTML = ''
     },
-  };
+  }
 }
 
 export function reactiveText(getText: () => string): Text {
-  const textNode = document.createTextNode('');
+  const textNode = document.createTextNode('')
   const dispose = effect(() => {
-    const text = getText();
-    domRenderer.updateTextNode(textNode, text);
-  });
-  REACTIVE_BINDINGS.set(textNode, new Set([dispose]));
-  return textNode;
+    const text = getText()
+    domRenderer.updateTextNode(textNode, text)
+  })
+  REACTIVE_BINDINGS.set(textNode, new Set([dispose]))
+  return textNode
 }
 
 export function bind<T>(
   signal: Signal<T> | Computed<T>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transform?: (value: T) => Record<string, any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, Signal<any> | Computed<any>> {
   if (transform) {
-    return { __signal__: signal };
+    return { __signal__: signal }
   }
-  return { value: signal };
+  return { value: signal }
 }
 
 export function ReactiveText(props: {
-  children?: any[];
-  [key: string]: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  children?: any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
 }): VNode {
-  const { children = [], ...otherProps } = props;
+  const { children = [], ...otherProps } = props
   return {
     type: 'span',
     props: otherProps,
     children: children,
-  };
+  }
 }

@@ -1,30 +1,37 @@
-import { h } from '../../renderers/dom/h';
-import { VNode } from '../../core/renderer';
-import { BaseComponentProps, ResponsiveValue, stylePropsToCSS, mergeStyles, getBaseValue, toCSSValue } from './types';
+import { h } from '../../renderers/dom/h'
+import { VNode } from '../../core/renderer'
+import {
+  BaseComponentProps,
+  ResponsiveValue,
+  stylePropsToCSS,
+  mergeStyles,
+  getBaseValue,
+  toCSSValue,
+} from './types'
 
 export interface GridProps extends BaseComponentProps {
   /** Number of columns or column template */
-  cols?: ResponsiveValue<number | string>;
+  cols?: ResponsiveValue<number | string>
   /** Number of rows or row template */
-  rows?: ResponsiveValue<number | string>;
+  rows?: ResponsiveValue<number | string>
   /** Column gap */
-  columnGap?: ResponsiveValue<number | string>;
+  columnGap?: ResponsiveValue<number | string>
   /** Row gap */
-  rowGap?: ResponsiveValue<number | string>;
+  rowGap?: ResponsiveValue<number | string>
   /** Grid auto flow */
-  flow?: 'row' | 'column' | 'dense' | 'row dense' | 'column dense';
+  flow?: 'row' | 'column' | 'dense' | 'row dense' | 'column dense'
   /** Auto columns size */
-  autoColumns?: ResponsiveValue<string>;
+  autoColumns?: ResponsiveValue<string>
   /** Auto rows size */
-  autoRows?: ResponsiveValue<string>;
-  as?: string;
+  autoRows?: ResponsiveValue<string>
+  as?: string
 }
 
 function toGridTemplate(value: number | string): string {
-    if (typeof value === 'number') {
-        return `repeat(${value}, 1fr)`;
-    }
-    return value;
+  if (typeof value === 'number') {
+    return `repeat(${value}, 1fr)`
+  }
+  return value
 }
 
 /**
@@ -57,42 +64,43 @@ export function Grid(props: GridProps): VNode {
     className,
     style: userStyle,
     ...styleProps
-  } = props;
+  } = props
 
-  const generatedStyles = stylePropsToCSS(styleProps);
-  
+  const generatedStyles = stylePropsToCSS(styleProps)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const gridStyles: Record<string, any> = {
     display: 'grid',
-  };
+  }
 
-  const colsValue = getBaseValue(cols);
+  const colsValue = getBaseValue(cols)
   if (colsValue !== undefined) {
-    gridStyles.gridTemplateColumns = toGridTemplate(colsValue as string | number);
+    gridStyles.gridTemplateColumns = toGridTemplate(colsValue)
   }
 
-  const rowsValue = getBaseValue(rows);
+  const rowsValue = getBaseValue(rows)
   if (rowsValue !== undefined) {
-    gridStyles.gridTemplateRows = toGridTemplate(rowsValue as string | number);
+    gridStyles.gridTemplateRows = toGridTemplate(rowsValue)
   }
 
-  const colGap = getBaseValue(columnGap);
+  const colGap = getBaseValue(columnGap)
   if (colGap !== undefined) {
-    gridStyles.columnGap = toCSSValue(colGap as string | number);
+    gridStyles.columnGap = toCSSValue(colGap)
   }
 
-  const rGap = getBaseValue(rowGap);
+  const rGap = getBaseValue(rowGap)
   if (rGap !== undefined) {
-    gridStyles.rowGap = toCSSValue(rGap as string | number);
+    gridStyles.rowGap = toCSSValue(rGap)
   }
-  
+
   if (flow) {
-      gridStyles.gridAutoFlow = flow;
+    gridStyles.gridAutoFlow = flow
   }
 
   const finalStyles = mergeStyles(
     { ...gridStyles, ...generatedStyles },
     userStyle
-  );
+  )
 
-  return h(as, { style: finalStyles, className, ...props }, children);
+  return h(as, { style: finalStyles, className, ...props }, children)
 }

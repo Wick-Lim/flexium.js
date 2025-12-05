@@ -136,6 +136,7 @@ declare global {
       noscript: HTMLAttributes
 
       // Custom Flexium components
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       fragment: { children?: any }
     }
 
@@ -150,6 +151,7 @@ declare global {
       id?: string
       class?: string
       className?: string
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       style?: string | Record<string, any>
       title?: string
       lang?: string
@@ -176,6 +178,7 @@ declare global {
       'aria-atomic'?: boolean | 'true' | 'false'
 
       // Data attributes (allow any data-* attribute)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [key: `data-${string}`]: any
 
       // Event handlers (DOM Level 0 style)
@@ -210,6 +213,7 @@ declare global {
       ontouchcancel?: (event: TouchEvent) => void
 
       // Children
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       children?: any
     }
 
@@ -234,9 +238,27 @@ declare global {
     }
 
     interface InputHTMLAttributes extends HTMLAttributes {
-      type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url' | 'search' |
-             'date' | 'time' | 'datetime-local' | 'month' | 'week' | 'color' |
-             'checkbox' | 'radio' | 'file' | 'submit' | 'reset' | 'button' | 'hidden'
+      type?:
+        | 'text'
+        | 'password'
+        | 'email'
+        | 'number'
+        | 'tel'
+        | 'url'
+        | 'search'
+        | 'date'
+        | 'time'
+        | 'datetime-local'
+        | 'month'
+        | 'week'
+        | 'color'
+        | 'checkbox'
+        | 'radio'
+        | 'file'
+        | 'submit'
+        | 'reset'
+        | 'button'
+        | 'hidden'
       name?: string
       value?: string | number
       defaultValue?: string | number

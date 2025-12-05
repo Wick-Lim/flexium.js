@@ -5,7 +5,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mountReactive, cleanupReactive, createReactiveRoot, reactiveText } from '../reactive'
+import {
+  mountReactive,
+  cleanupReactive,
+  createReactiveRoot,
+  reactiveText,
+} from '../reactive'
 import { h, f, Fragment } from '../h'
 import { signal } from '../../../core/signal'
 
@@ -68,7 +73,9 @@ describe('DOM Reactive Rendering', () => {
       })
 
       it('should render nested elements', () => {
-        const vnode = h('div', {},
+        const vnode = h(
+          'div',
+          {},
           h('span', { class: 'child' }, 'Child 1'),
           h('span', { class: 'child' }, 'Child 2')
         )
@@ -92,7 +99,11 @@ describe('DOM Reactive Rendering', () => {
 
       it('should render with style object', () => {
         // Note: style object uses CSS property names (hyphenated)
-        const vnode = h('div', { style: { color: 'red', 'font-size': '14px' } }, 'Styled')
+        const vnode = h(
+          'div',
+          { style: { color: 'red', 'font-size': '14px' } },
+          'Styled'
+        )
         mountReactive(vnode, container)
 
         const div = container.querySelector('div')
@@ -101,7 +112,9 @@ describe('DOM Reactive Rendering', () => {
       })
 
       it('should render Fragment', () => {
-        const vnode = h(Fragment, {},
+        const vnode = h(
+          Fragment,
+          {},
           h('span', {}, 'First'),
           h('span', {}, 'Second')
         )
@@ -114,7 +127,8 @@ describe('DOM Reactive Rendering', () => {
 
     describe('function components', () => {
       it('should render simple function component', () => {
-        const MyComponent = () => h('div', { class: 'my-component' }, 'Component')
+        const MyComponent = () =>
+          h('div', { class: 'my-component' }, 'Component')
         const vnode = h(MyComponent, {})
         mountReactive(vnode, container)
 
@@ -135,13 +149,13 @@ describe('DOM Reactive Rendering', () => {
       it('should render component children', () => {
         const Wrapper = (props: { children: any }) =>
           h('div', { class: 'wrapper' }, props.children)
-        const vnode = h(Wrapper, {},
-          h('span', {}, 'Child content')
-        )
+        const vnode = h(Wrapper, {}, h('span', {}, 'Child content'))
         mountReactive(vnode, container)
 
         const wrapper = container.querySelector('.wrapper')
-        expect(wrapper?.querySelector('span')?.textContent).toBe('Child content')
+        expect(wrapper?.querySelector('span')?.textContent).toBe(
+          'Child content'
+        )
       })
     })
 
@@ -206,7 +220,9 @@ describe('DOM Reactive Rendering', () => {
     describe('arrays', () => {
       it('should render array of children', () => {
         const items = ['A', 'B', 'C']
-        const vnode = h('ul', {},
+        const vnode = h(
+          'ul',
+          {},
           items.map((item, i) => h('li', { key: i }, item))
         )
         mountReactive(vnode, container)
@@ -240,11 +256,7 @@ describe('DOM Reactive Rendering', () => {
     })
 
     it('should recursively cleanup child nodes', () => {
-      const vnode = h('div', {},
-        h('span', {},
-          h('button', {}, 'Click')
-        )
-      )
+      const vnode = h('div', {}, h('span', {}, h('button', {}, 'Click')))
       mountReactive(vnode, container)
 
       // Should not throw
@@ -336,8 +348,8 @@ describe('DOM Reactive Rendering', () => {
     it('should handle conditional rendering', () => {
       const show = signal(true)
 
-      const vnode = h('div', {},
-        () => show.value ? h('span', {}, 'Visible') : null
+      const vnode = h('div', {}, () =>
+        show.value ? h('span', {}, 'Visible') : null
       )
       mountReactive(vnode, container)
 
@@ -345,7 +357,9 @@ describe('DOM Reactive Rendering', () => {
     })
 
     it('should handle mixed children types', () => {
-      const vnode = h('div', {},
+      const vnode = h(
+        'div',
+        {},
         'Text',
         h('span', {}, 'Element'),
         42,

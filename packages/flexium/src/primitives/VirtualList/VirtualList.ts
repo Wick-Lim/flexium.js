@@ -1,14 +1,14 @@
-import { signal, effect } from '../../core/signal';
-import type { VNode } from '../../core/renderer';
+import { signal, effect } from '../../core/signal'
+import type { VNode } from '../../core/renderer'
 import type {
   VirtualListProps,
   VirtualListComponent,
   VirtualListCacheEntry,
   SizeConfig,
-} from './types';
+} from './types'
 
 /** Marker symbol for VirtualList components */
-export const VIRTUALLIST_MARKER = Symbol('flexium.virtuallist');
+export const VIRTUALLIST_MARKER = Symbol('flexium.virtuallist')
 
 /**
  * Check if a value is a VirtualListComponent
@@ -21,7 +21,7 @@ export function isVirtualListComponent<T>(
     typeof value === 'object' &&
     VIRTUALLIST_MARKER in value &&
     (value as Record<symbol, unknown>)[VIRTUALLIST_MARKER] === true
-  );
+  )
 }
 
 /**
@@ -56,7 +56,7 @@ export function VirtualList<T>(
     getKey,
     onScroll,
     onVisibleRangeChange,
-  } = props;
+  } = props
 
   const component: VirtualListComponent<T> = {
     [VIRTUALLIST_MARKER]: true,
@@ -69,9 +69,9 @@ export function VirtualList<T>(
     getKey,
     onScroll,
     onVisibleRangeChange,
-  };
+  }
 
-  return component;
+  return component
 }
 
 /**
@@ -79,13 +79,13 @@ export function VirtualList<T>(
  */
 function getItemHeight(config: number | SizeConfig, _index: number): number {
   if (typeof config === 'number') {
-    return config;
+    return config
   }
   if (config.mode === 'fixed') {
-    return config.itemHeight;
+    return config.itemHeight
   }
   // Variable mode - use estimated height
-  return config.estimatedItemHeight;
+  return config.estimatedItemHeight
 }
 
 /**
@@ -98,21 +98,21 @@ function calculateVisibleRangeFixed(
   totalItems: number,
   overscan: number
 ): { startIndex: number; endIndex: number; totalHeight: number } {
-  const totalHeight = totalItems * itemHeight;
+  const totalHeight = totalItems * itemHeight
 
   if (totalItems === 0) {
-    return { startIndex: 0, endIndex: -1, totalHeight: 0 };
+    return { startIndex: 0, endIndex: -1, totalHeight: 0 }
   }
 
-  const start = Math.floor(scrollTop / itemHeight);
-  const visibleCount = Math.ceil(viewportHeight / itemHeight);
-  const end = start + visibleCount;
+  const start = Math.floor(scrollTop / itemHeight)
+  const visibleCount = Math.ceil(viewportHeight / itemHeight)
+  const end = start + visibleCount
 
   return {
     startIndex: Math.max(0, start - overscan),
     endIndex: Math.min(totalItems - 1, end + overscan),
     totalHeight,
-  };
+  }
 }
 
 /**
@@ -134,61 +134,61 @@ export function mountVirtualListComponent<T>(
     getKey,
     onScroll,
     onVisibleRangeChange,
-  } = comp;
+  } = comp
 
   // Create container structure
-  const container = document.createElement('div');
-  container.style.height = typeof height === 'number' ? `${height}px` : height;
+  const container = document.createElement('div')
+  container.style.height = typeof height === 'number' ? `${height}px` : height
   container.style.width = width
     ? typeof width === 'number'
       ? `${width}px`
       : width
-    : '100%';
-  container.style.overflow = 'auto';
-  container.style.position = 'relative';
+    : '100%'
+  container.style.overflow = 'auto'
+  container.style.position = 'relative'
 
   // Accessibility attributes
-  container.setAttribute('role', 'list');
-  container.setAttribute('tabindex', '0');
+  container.setAttribute('role', 'list')
+  container.setAttribute('tabindex', '0')
 
-  const innerContainer = document.createElement('div');
-  innerContainer.style.position = 'relative';
-  innerContainer.style.width = '100%';
-  innerContainer.style.willChange = 'transform';
+  const innerContainer = document.createElement('div')
+  innerContainer.style.position = 'relative'
+  innerContainer.style.width = '100%'
+  innerContainer.style.willChange = 'transform'
 
-  container.appendChild(innerContainer);
-  parent.appendChild(container);
+  container.appendChild(innerContainer)
+  parent.appendChild(container)
 
   // Reactive state
-  const scrollTopSig = signal(0);
-  const cache = new Map<string | number, VirtualListCacheEntry<T>>();
+  const scrollTopSig = signal(0)
+  const cache = new Map<string | number, VirtualListCacheEntry<T>>()
 
   // Track previous visible range
-  let prevStartIndex = -1;
-  let prevEndIndex = -1;
+  let prevStartIndex = -1
+  let prevEndIndex = -1
 
   // Scroll handler
   const handleScroll = () => {
-    scrollTopSig.set(container.scrollTop);
-    onScroll?.(container.scrollTop);
-  };
+    scrollTopSig.set(container.scrollTop)
+    onScroll?.(container.scrollTop)
+  }
 
-  container.addEventListener('scroll', handleScroll, { passive: true });
+  container.addEventListener('scroll', handleScroll, { passive: true })
 
   // Get key for item
   const getItemKey = (item: T, index: number): string | number => {
     if (getKey) {
-      return getKey(item, index);
+      return getKey(item, index)
     }
-    return index;
-  };
+    return index
+  }
 
   // Main render effect
   const disposeEffect = effect(() => {
-    const list = items() || [];
-    const currentScrollTop = scrollTopSig();
-    const viewportHeight = container.clientHeight || parseFloat(String(height));
-    const itemHeight = getItemHeight(itemSize, 0);
+    const list = items() || []
+    const currentScrollTop = scrollTopSig()
+    const viewportHeight = container.clientHeight || parseFloat(String(height))
+    const itemHeight = getItemHeight(itemSize, 0)
 
     // Calculate visible range
     const { startIndex, endIndex, totalHeight } = calculateVisibleRangeFixed(
@@ -197,51 +197,51 @@ export function mountVirtualListComponent<T>(
       itemHeight,
       list.length,
       overscan
-    );
+    )
 
     // Update spacer height
-    innerContainer.style.height = `${totalHeight}px`;
+    innerContainer.style.height = `${totalHeight}px`
 
     // Update ARIA attributes
-    container.setAttribute('aria-rowcount', String(list.length));
+    container.setAttribute('aria-rowcount', String(list.length))
 
     // Notify visible range change
     if (startIndex !== prevStartIndex || endIndex !== prevEndIndex) {
-      onVisibleRangeChange?.(startIndex, endIndex);
-      prevStartIndex = startIndex;
-      prevEndIndex = endIndex;
+      onVisibleRangeChange?.(startIndex, endIndex)
+      prevStartIndex = startIndex
+      prevEndIndex = endIndex
     }
 
     // Track which keys are currently visible
-    const visibleKeys = new Set<string | number>();
+    const visibleKeys = new Set<string | number>()
 
     // Render visible items
     for (let i = startIndex; i <= endIndex && i < list.length; i++) {
-      const item = list[i];
-      const key = getItemKey(item, i);
-      visibleKeys.add(key);
+      const item = list[i]
+      const key = getItemKey(item, i)
+      visibleKeys.add(key)
 
-      let entry = cache.get(key);
+      let entry = cache.get(key)
 
       if (!entry) {
         // Create new item
-        const indexSig = signal(i);
-        const vnode = renderItem(item, () => indexSig());
-        const node = mountFn(vnode);
+        const indexSig = signal(i)
+        const vnode = renderItem(item, () => indexSig())
+        const node = mountFn(vnode)
 
         if (node && node instanceof HTMLElement) {
           // Position the item
-          node.style.position = 'absolute';
-          node.style.top = '0';
-          node.style.left = '0';
-          node.style.right = '0';
-          node.style.transform = `translateY(${i * itemHeight}px)`;
-          node.style.height = `${itemHeight}px`;
-          node.style.boxSizing = 'border-box';
-          node.setAttribute('role', 'listitem');
-          node.setAttribute('aria-rowindex', String(i + 1));
+          node.style.position = 'absolute'
+          node.style.top = '0'
+          node.style.left = '0'
+          node.style.right = '0'
+          node.style.transform = `translateY(${i * itemHeight}px)`
+          node.style.height = `${itemHeight}px`
+          node.style.boxSizing = 'border-box'
+          node.setAttribute('role', 'listitem')
+          node.setAttribute('aria-rowindex', String(i + 1))
 
-          innerContainer.appendChild(node);
+          innerContainer.appendChild(node)
 
           entry = {
             item,
@@ -250,51 +250,51 @@ export function mountVirtualListComponent<T>(
             indexSig,
             dispose: () => {
               try {
-                cleanupFn(node);
+                cleanupFn(node)
               } catch {
                 // Ignore cleanup errors
               }
             },
-          };
-          cache.set(key, entry);
+          }
+          cache.set(key, entry)
         }
       } else {
         // Update existing item position
         if (entry.indexSig.peek() !== i) {
-          entry.indexSig.set(i);
+          entry.indexSig.set(i)
         }
-        const node = entry.node as HTMLElement;
-        node.style.transform = `translateY(${i * itemHeight}px)`;
-        node.setAttribute('aria-rowindex', String(i + 1));
+        const node = entry.node as HTMLElement
+        node.style.transform = `translateY(${i * itemHeight}px)`
+        node.setAttribute('aria-rowindex', String(i + 1))
       }
     }
 
     // Remove items no longer visible
     for (const [key, entry] of cache) {
       if (!visibleKeys.has(key)) {
-        entry.dispose();
+        entry.dispose()
         if (entry.node.parentNode === innerContainer) {
-          innerContainer.removeChild(entry.node);
+          innerContainer.removeChild(entry.node)
         }
-        cache.delete(key);
+        cache.delete(key)
       }
     }
-  });
+  })
 
   // Cleanup function
   return () => {
-    disposeEffect();
-    container.removeEventListener('scroll', handleScroll);
+    disposeEffect()
+    container.removeEventListener('scroll', handleScroll)
 
     for (const entry of cache.values()) {
-      entry.dispose();
+      entry.dispose()
     }
-    cache.clear();
+    cache.clear()
 
     if (container.parentNode === parent) {
-      parent.removeChild(container);
+      parent.removeChild(container)
     }
-  };
+  }
 }
 
-export default VirtualList;
+export default VirtualList

@@ -52,10 +52,12 @@ describe('Event Delegation System', () => {
       grandchild.click()
 
       expect(handler).toHaveBeenCalledTimes(1)
-      expect(handler).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'click',
-        target: grandchild
-      }))
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'click',
+          target: grandchild,
+        })
+      )
     })
 
     it('should bubble event up the DOM tree', () => {
@@ -248,7 +250,7 @@ describe('Event Delegation System', () => {
       eventDelegator.on(container, 'focus', vi.fn())
 
       const focusCall = addEventListenerSpy.mock.calls.find(
-        call => call[0] === 'focus'
+        (call) => call[0] === 'focus'
       )
 
       if (focusCall) {
@@ -346,14 +348,16 @@ describe('Event Delegation System', () => {
       // Use lowercase to match the normalization in events.ts
       const customEvent = new CustomEvent('mycustomevent', {
         bubbles: true,
-        detail: { data: 'test' }
+        detail: { data: 'test' },
       })
       child.dispatchEvent(customEvent)
 
       expect(handler).toHaveBeenCalledTimes(1)
-      expect(handler).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'mycustomevent'
-      }))
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'mycustomevent',
+        })
+      )
     })
 
     it('should handle event.target correctly', () => {

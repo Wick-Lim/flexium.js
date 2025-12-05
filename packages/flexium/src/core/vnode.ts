@@ -1,4 +1,4 @@
-import type { FNode, FNodeChild } from './renderer';
+import type { FNode, FNodeChild } from './renderer'
 
 /**
  * Creates an FNode ensuring consistent object shape (Monomorphism).
@@ -21,9 +21,9 @@ export function createFNode(
     type,
     props,
     children,
-    key: key ?? undefined
-  };
+    key: key ?? undefined,
+  }
 }
 
 /** @deprecated Use createFNode instead */
-export const createVNode = createFNode;
+export const createVNode = createFNode

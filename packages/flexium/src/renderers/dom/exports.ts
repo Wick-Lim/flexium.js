@@ -6,10 +6,10 @@
  */
 
 // Renderer implementation
-export { DOMRenderer, domRenderer } from './index';
+export { DOMRenderer, domRenderer } from './index'
 
 // Rendering functions
-export { render, update, createRoot } from './render';
+export { render, update, createRoot } from './render'
 
 // Reactive rendering
 export {
@@ -19,10 +19,10 @@ export {
   reactiveText,
   bind,
   ReactiveText,
-} from './reactive';
+} from './reactive'
 
 // JSX factory
-export { h, Fragment, isVNode, createTextVNode } from './h';
+export { h, Fragment, isVNode, createTextVNode } from './h'
 
 // Types from core
 export type {
@@ -31,4 +31,4 @@ export type {
   EventHandler,
   CommonProps,
   VNode,
-} from '../../core/renderer';
+} from '../../core/renderer'

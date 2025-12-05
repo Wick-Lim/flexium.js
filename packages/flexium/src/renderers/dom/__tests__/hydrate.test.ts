@@ -361,7 +361,9 @@ describe('DOM Hydration', () => {
     it('should hydrate fragment with multiple children', () => {
       container.innerHTML = '<span>First</span><span>Second</span>'
 
-      const vnode = h(Fragment, {},
+      const vnode = h(
+        Fragment,
+        {},
         h('span', {}, 'First'),
         h('span', {}, 'Second')
       )
@@ -377,7 +379,9 @@ describe('DOM Hydration', () => {
     it('should hydrate fragment with mixed children', () => {
       container.innerHTML = 'Text<div>Element</div>More text'
 
-      const vnode = h(Fragment, {},
+      const vnode = h(
+        Fragment,
+        {},
         'Text',
         h('div', {}, 'Element'),
         'More text'
@@ -394,10 +398,7 @@ describe('DOM Hydration', () => {
       const vnode = {
         type: null,
         props: {},
-        children: [
-          h('span', {}, 'A'),
-          h('span', {}, 'B')
-        ]
+        children: [h('span', {}, 'A'), h('span', {}, 'B')],
       }
 
       hydrate(vnode, container)
@@ -463,11 +464,7 @@ describe('DOM Hydration', () => {
     it('should hydrate nested elements', () => {
       container.innerHTML = '<div><span><em>Nested</em></span></div>'
 
-      const vnode = h('div', {},
-        h('span', {},
-          h('em', {}, 'Nested')
-        )
-      )
+      const vnode = h('div', {}, h('span', {}, h('em', {}, 'Nested')))
 
       hydrate(vnode, container)
 
@@ -477,7 +474,9 @@ describe('DOM Hydration', () => {
     it('should hydrate elements with multiple children', () => {
       container.innerHTML = '<ul><li>A</li><li>B</li><li>C</li></ul>'
 
-      const vnode = h('ul', {},
+      const vnode = h(
+        'ul',
+        {},
         h('li', {}, 'A'),
         h('li', {}, 'B'),
         h('li', {}, 'C')
@@ -515,7 +514,7 @@ describe('DOM Hydration', () => {
         type: 'text',
         onfocus: onFocus,
         onblur: onBlur,
-        onchange: onChange
+        onchange: onChange,
       })
 
       hydrate(vnode, container)
@@ -682,7 +681,6 @@ describe('DOM Hydration', () => {
         expect.anything(),
         expect.anything()
       )
-
       ;(globalThis as any).__DEV__ = originalDev
     })
 
@@ -702,7 +700,6 @@ describe('DOM Hydration', () => {
         expect.anything(),
         expect.anything()
       )
-
       ;(globalThis as any).__DEV__ = originalDev
     })
 
@@ -714,7 +711,6 @@ describe('DOM Hydration', () => {
       const vnode = h('div', { className: 'test' }, 'Content')
 
       expect(() => hydrate(vnode, container)).not.toThrow()
-
       ;(globalThis as any).__DEV__ = originalDev
     })
   })
@@ -734,7 +730,9 @@ describe('DOM Hydration', () => {
       container.innerHTML = '<div>Wrong</div><div>Correct</div>'
       const onMismatch = vi.fn()
 
-      const vnode = h(Fragment, {},
+      const vnode = h(
+        Fragment,
+        {},
         h('div', {}, 'Wrong'),
         h('div', {}, 'Correct')
       )
@@ -749,7 +747,9 @@ describe('DOM Hydration', () => {
       container.innerHTML = '<div>Only one</div>'
       const onMismatch = vi.fn()
 
-      const vnode = h(Fragment, {},
+      const vnode = h(
+        Fragment,
+        {},
         h('div', {}, 'Only one'),
         h('div', {}, 'Missing')
       )
@@ -766,9 +766,7 @@ describe('DOM Hydration', () => {
     it('should handle extra DOM nodes gracefully', () => {
       container.innerHTML = '<div>One</div><div>Two</div><div>Three</div>'
 
-      const vnode = h(Fragment, {},
-        h('div', {}, 'One')
-      )
+      const vnode = h(Fragment, {}, h('div', {}, 'One'))
 
       expect(() => hydrate(vnode, container)).not.toThrow()
     })
@@ -806,14 +804,10 @@ describe('DOM Hydration', () => {
         </div>
       `.trim()
 
-      const vnode = h('div', {},
-        h('div', {},
-          h('div', {},
-            h('div', {},
-              h('span', {}, 'Deep')
-            )
-          )
-        )
+      const vnode = h(
+        'div',
+        {},
+        h('div', {}, h('div', {}, h('div', {}, h('span', {}, 'Deep'))))
       )
 
       hydrate(vnode, container)
@@ -824,7 +818,9 @@ describe('DOM Hydration', () => {
     it('should handle mixed content types', () => {
       container.innerHTML = 'Text<div>Element</div>42<span>More</span>'
 
-      const vnode = h(Fragment, {},
+      const vnode = h(
+        Fragment,
+        {},
         'Text',
         h('div', {}, 'Element'),
         42,
@@ -840,10 +836,7 @@ describe('DOM Hydration', () => {
     it('should handle array children', () => {
       container.innerHTML = '<div><span>A</span><span>B</span></div>'
 
-      const vnode = h('div', {}, [
-        h('span', {}, 'A'),
-        h('span', {}, 'B')
-      ])
+      const vnode = h('div', {}, [h('span', {}, 'A'), h('span', {}, 'B')])
 
       hydrate(vnode, container)
 
@@ -859,7 +852,7 @@ describe('DOM Hydration', () => {
         null,
         undefined,
         false,
-        h('span', {}, 'B')
+        h('span', {}, 'B'),
       ])
 
       hydrate(vnode, container)
@@ -878,10 +871,8 @@ describe('DOM Hydration', () => {
     })
 
     it('should handle component returning fragment', () => {
-      const FragmentComponent = () => h(Fragment, {},
-        h('span', {}, 'A'),
-        h('span', {}, 'B')
-      )
+      const FragmentComponent = () =>
+        h(Fragment, {}, h('span', {}, 'A'), h('span', {}, 'B'))
 
       container.innerHTML = '<span>A</span><span>B</span>'
 
@@ -899,9 +890,7 @@ describe('DOM Hydration', () => {
 
       // Note: Real browser parsing creates text nodes for whitespace
       // This test verifies we handle that gracefully
-      const vnode = h('div', {},
-        h('span', {}, 'Content')
-      )
+      const vnode = h('div', {}, h('span', {}, 'Content'))
 
       // May have mismatches due to whitespace text nodes
       const onMismatch = vi.fn()
@@ -918,7 +907,9 @@ describe('DOM Hydration', () => {
 
       container.innerHTML = '<div><button>+</button><span>0</span></div>'
 
-      const vnode = h('div', {},
+      const vnode = h(
+        'div',
+        {},
         h('button', { onclick: increment }, '+'),
         h('span', {}, count)
       )
@@ -948,10 +939,7 @@ describe('DOM Hydration', () => {
 
       container.innerHTML = '<div><h1>Title</h1><p>Description</p></div>'
 
-      const vnode = h('div', {},
-        h('h1', {}, title),
-        h('p', {}, description)
-      )
+      const vnode = h('div', {}, h('h1', {}, title), h('p', {}, description))
 
       hydrate(vnode, container)
 
@@ -972,9 +960,12 @@ describe('DOM Hydration', () => {
 
       container.innerHTML = '<ul><li>A</li><li>B</li><li>C</li></ul>'
 
-      const List = () => h('ul', {},
-        items.value.map(item => h('li', {}, item))
-      )
+      const List = () =>
+        h(
+          'ul',
+          {},
+          items.value.map((item) => h('li', {}, item))
+        )
 
       hydrate(h(List, {}), container)
 
@@ -994,24 +985,33 @@ describe('DOM Hydration', () => {
       name.value = 'Flexium'
       await Promise.resolve()
 
-      expect(container.querySelector('span')?.textContent).toBe('Hello, Flexium!')
+      expect(container.querySelector('span')?.textContent).toBe(
+        'Hello, Flexium!'
+      )
     })
 
     it('should hydrate form with multiple reactive inputs', async () => {
       const username = signal('user')
       const email = signal('user@example.com')
 
-      container.innerHTML = '<input id="user-input" value="user" /><input id="email-input" value="user@example.com" />'
+      container.innerHTML =
+        '<input id="user-input" value="user" /><input id="email-input" value="user@example.com" />'
 
-      const vnode = h(Fragment, {},
+      const vnode = h(
+        Fragment,
+        {},
         h('input', { id: 'user-input', value: username }),
         h('input', { id: 'email-input', value: email })
       )
 
       hydrate(vnode, container)
 
-      const usernameInput = container.querySelector('#user-input') as HTMLInputElement
-      const emailInput = container.querySelector('#email-input') as HTMLInputElement
+      const usernameInput = container.querySelector(
+        '#user-input'
+      ) as HTMLInputElement
+      const emailInput = container.querySelector(
+        '#email-input'
+      ) as HTMLInputElement
 
       // Verify initial values match
       expect(usernameInput.value).toBe('user')
@@ -1043,7 +1043,6 @@ describe('DOM Hydration', () => {
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('[Flexium Hydration]')
       )
-
       ;(globalThis as any).__DEV__ = originalDev
       console.warn = originalWarn
     })
@@ -1062,7 +1061,6 @@ describe('DOM Hydration', () => {
 
       // May still correct the mismatch, but shouldn't log
       expect(consoleWarnSpy).not.toHaveBeenCalled()
-
       ;(globalThis as any).__DEV__ = originalDev
       console.warn = originalWarn
     })

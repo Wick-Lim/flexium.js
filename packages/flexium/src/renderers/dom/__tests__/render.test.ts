@@ -107,9 +107,7 @@ describe('DOM Render Module', () => {
 
     it('should mount nested elements', () => {
       render(
-        h('div', { class: 'outer' },
-          h('span', { class: 'inner' }, 'Nested')
-        ),
+        h('div', { class: 'outer' }, h('span', { class: 'inner' }, 'Nested')),
         container
       )
 
@@ -122,7 +120,9 @@ describe('DOM Render Module', () => {
 
     it('should mount elements with multiple children', () => {
       render(
-        h('ul', {},
+        h(
+          'ul',
+          {},
           h('li', {}, 'Item 1'),
           h('li', {}, 'Item 2'),
           h('li', {}, 'Item 3')
@@ -139,12 +139,10 @@ describe('DOM Render Module', () => {
 
     it('should mount deeply nested elements', () => {
       render(
-        h('div', {},
-          h('div', {},
-            h('div', {},
-              h('span', { id: 'deep' }, 'Deep')
-            )
-          )
+        h(
+          'div',
+          {},
+          h('div', {}, h('div', {}, h('span', { id: 'deep' }, 'Deep')))
         ),
         container
       )
@@ -156,7 +154,9 @@ describe('DOM Render Module', () => {
 
     it('should mount elements with mixed children types', () => {
       render(
-        h('div', {},
+        h(
+          'div',
+          {},
           'Text ',
           h('strong', {}, 'Bold'),
           ' ',
@@ -176,7 +176,10 @@ describe('DOM Render Module', () => {
 
   describe('mounting VNodes - props and attributes', () => {
     it('should set element attributes', () => {
-      render(h('div', { id: 'myid', title: 'tooltip', 'data-custom': 'value' }), container)
+      render(
+        h('div', { id: 'myid', title: 'tooltip', 'data-custom': 'value' }),
+        container
+      )
 
       const div = container.querySelector('div')
       expect(div?.id).toBe('myid')
@@ -246,11 +249,15 @@ describe('DOM Render Module', () => {
       const onMouseLeave = vi.fn()
 
       render(
-        h('div', {
-          onclick: onClick,
-          onmouseenter: onMouseEnter,
-          onmouseleave: onMouseLeave
-        }, 'Interactive'),
+        h(
+          'div',
+          {
+            onclick: onClick,
+            onmouseenter: onMouseEnter,
+            onmouseleave: onMouseLeave,
+          },
+          'Interactive'
+        ),
         container
       )
 
@@ -271,9 +278,11 @@ describe('DOM Render Module', () => {
       const button = container.querySelector('button')
       button?.click()
 
-      expect(onClick).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'click'
-      }))
+      expect(onClick).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'click',
+        })
+      )
     })
 
     it('should handle input events', () => {
@@ -290,7 +299,8 @@ describe('DOM Render Module', () => {
 
   describe('function components', () => {
     it('should render function component', () => {
-      const MyComponent = () => h('div', { class: 'component' }, 'Component Content')
+      const MyComponent = () =>
+        h('div', { class: 'component' }, 'Component Content')
       render(h(MyComponent, {}), container)
 
       const div = container.querySelector('.component')
@@ -312,10 +322,7 @@ describe('DOM Render Module', () => {
         h('div', { class: 'wrapper' }, props.children)
 
       render(
-        h(Wrapper, {},
-          h('span', {}, 'Child 1'),
-          h('span', {}, 'Child 2')
-        ),
+        h(Wrapper, {}, h('span', {}, 'Child 1'), h('span', {}, 'Child 2')),
         container
       )
 
@@ -355,7 +362,7 @@ describe('DOM Render Module', () => {
     it('should handle component returning array', () => {
       const ListComponent = () => [
         h('div', { key: '1' }, 'Item 1'),
-        h('div', { key: '2' }, 'Item 2')
+        h('div', { key: '2' }, 'Item 2'),
       ]
 
       render(h(ListComponent, {}), container)
@@ -368,7 +375,9 @@ describe('DOM Render Module', () => {
   describe('Fragment handling', () => {
     it('should render Fragment with multiple children', () => {
       render(
-        h(Fragment, {},
+        h(
+          Fragment,
+          {},
           h('span', {}, 'First'),
           h('span', {}, 'Second'),
           h('span', {}, 'Third')
@@ -384,12 +393,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should render Fragment with single child', () => {
-      render(
-        h(Fragment, {},
-          h('div', {}, 'Single')
-        ),
-        container
-      )
+      render(h(Fragment, {}, h('div', {}, 'Single')), container)
 
       expect(container.querySelector('div')?.textContent).toBe('Single')
     })
@@ -401,12 +405,11 @@ describe('DOM Render Module', () => {
 
     it('should render nested Fragments', () => {
       render(
-        h(Fragment, {},
+        h(
+          Fragment,
+          {},
           h('div', {}, 'Before'),
-          h(Fragment, {},
-            h('span', {}, 'Nested 1'),
-            h('span', {}, 'Nested 2')
-          ),
+          h(Fragment, {}, h('span', {}, 'Nested 1'), h('span', {}, 'Nested 2')),
           h('div', {}, 'After')
         ),
         container
@@ -420,13 +423,7 @@ describe('DOM Render Module', () => {
 
     it('should handle Fragment with mixed content', () => {
       render(
-        h(Fragment, {},
-          'Text',
-          h('strong', {}, 'Bold'),
-          42,
-          null,
-          undefined
-        ),
+        h(Fragment, {}, 'Text', h('strong', {}, 'Bold'), 42, null, undefined),
         container
       )
 
@@ -436,10 +433,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should render fragment type VNode', () => {
-      const frag = h('fragment', {},
-        h('div', {}, 'One'),
-        h('div', {}, 'Two')
-      )
+      const frag = h('fragment', {}, h('div', {}, 'One'), h('div', {}, 'Two'))
       render(frag, container)
 
       const divs = container.querySelectorAll('div')
@@ -449,15 +443,7 @@ describe('DOM Render Module', () => {
 
   describe('array flattening and children', () => {
     it('should flatten array children', () => {
-      render(
-        h('div', {},
-          [
-            h('span', {}, '1'),
-            h('span', {}, '2')
-          ]
-        ),
-        container
-      )
+      render(h('div', {}, [h('span', {}, '1'), h('span', {}, '2')]), container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(2)
@@ -465,17 +451,10 @@ describe('DOM Render Module', () => {
 
     it('should flatten nested arrays', () => {
       render(
-        h('div', {},
-          [
-            [
-              h('span', {}, '1'),
-              h('span', {}, '2')
-            ],
-            [
-              h('span', {}, '3')
-            ]
-          ]
-        ),
+        h('div', {}, [
+          [h('span', {}, '1'), h('span', {}, '2')],
+          [h('span', {}, '3')],
+        ]),
         container
       )
 
@@ -485,14 +464,7 @@ describe('DOM Render Module', () => {
 
     it('should handle array with null and undefined', () => {
       render(
-        h('div', {},
-          [
-            h('span', {}, 'A'),
-            null,
-            undefined,
-            h('span', {}, 'B')
-          ]
-        ),
+        h('div', {}, [h('span', {}, 'A'), null, undefined, h('span', {}, 'B')]),
         container
       )
 
@@ -510,27 +482,22 @@ describe('DOM Render Module', () => {
     })
 
     it('should handle array of text nodes', () => {
-      render(
-        h('div', {}, ['Hello', ' ', 'World']),
-        container
-      )
+      render(h('div', {}, ['Hello', ' ', 'World']), container)
 
       expect(container.textContent).toBe('Hello World')
     })
 
     it('should handle array of mixed types', () => {
       render(
-        h('div', {},
-          [
-            'Text',
-            42,
-            h('span', {}, 'Element'),
-            true,
-            false,
-            null,
-            undefined
-          ]
-        ),
+        h('div', {}, [
+          'Text',
+          42,
+          h('span', {}, 'Element'),
+          true,
+          false,
+          null,
+          undefined,
+        ]),
         container
       )
 
@@ -572,14 +539,7 @@ describe('DOM Render Module', () => {
     })
 
     it('should create multiple text nodes', () => {
-      render(
-        h('div', {},
-          'First',
-          'Second',
-          'Third'
-        ),
-        container
-      )
+      render(h('div', {}, 'First', 'Second', 'Third'), container)
 
       expect(container.textContent).toBe('FirstSecondThird')
     })
@@ -597,7 +557,9 @@ describe('DOM Render Module', () => {
   describe('edge cases - falsy children', () => {
     it('should skip null children', () => {
       render(
-        h('div', {},
+        h(
+          'div',
+          {},
           h('span', {}, 'Visible'),
           null,
           h('span', {}, 'Also Visible')
@@ -611,11 +573,7 @@ describe('DOM Render Module', () => {
 
     it('should skip undefined children', () => {
       render(
-        h('div', {},
-          h('span', {}, 'A'),
-          undefined,
-          h('span', {}, 'B')
-        ),
+        h('div', {}, h('span', {}, 'A'), undefined, h('span', {}, 'B')),
         container
       )
 
@@ -624,28 +582,14 @@ describe('DOM Render Module', () => {
     })
 
     it('should skip false children', () => {
-      render(
-        h('div', {},
-          false,
-          h('span', {}, 'Visible'),
-          false
-        ),
-        container
-      )
+      render(h('div', {}, false, h('span', {}, 'Visible'), false), container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(1)
     })
 
     it('should skip true children', () => {
-      render(
-        h('div', {},
-          true,
-          h('span', {}, 'Visible'),
-          true
-        ),
-        container
-      )
+      render(h('div', {}, true, h('span', {}, 'Visible'), true), container)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(1)
@@ -654,7 +598,9 @@ describe('DOM Render Module', () => {
     it('should handle conditional rendering with boolean', () => {
       const showContent = false
       render(
-        h('div', {},
+        h(
+          'div',
+          {},
           showContent && h('span', {}, 'Hidden'),
           h('span', {}, 'Always Visible')
         ),
@@ -668,13 +614,7 @@ describe('DOM Render Module', () => {
 
     it('should handle all falsy types together', () => {
       render(
-        h('div', {},
-          null,
-          undefined,
-          false,
-          true,
-          h('span', {}, 'Only This')
-        ),
+        h('div', {}, null, undefined, false, true, h('span', {}, 'Only This')),
         container
       )
 
@@ -793,7 +733,9 @@ describe('DOM Render Module', () => {
     })
 
     it('should update children', () => {
-      const oldVNode = h('div', {},
+      const oldVNode = h(
+        'div',
+        {},
         h('span', {}, 'Child 1'),
         h('span', {}, 'Child 2')
       )
@@ -802,7 +744,9 @@ describe('DOM Render Module', () => {
       const div = container.querySelector('div') as HTMLElement
       expect(div?.querySelectorAll('span').length).toBe(2)
 
-      const newVNode = h('div', {},
+      const newVNode = h(
+        'div',
+        {},
         h('span', {}, 'Updated 1'),
         h('span', {}, 'Updated 2'),
         h('span', {}, 'New 3')
@@ -817,7 +761,9 @@ describe('DOM Render Module', () => {
     })
 
     it('should remove excess children', () => {
-      const oldVNode = h('div', {},
+      const oldVNode = h(
+        'div',
+        {},
         h('span', {}, '1'),
         h('span', {}, '2'),
         h('span', {}, '3')
@@ -826,9 +772,7 @@ describe('DOM Render Module', () => {
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {},
-        h('span', {}, '1')
-      )
+      const newVNode = h('div', {}, h('span', {}, '1'))
       update(div, oldVNode, newVNode)
 
       // The update function has a simple reconciliation that may not remove all children
@@ -839,14 +783,14 @@ describe('DOM Render Module', () => {
     })
 
     it('should add new children', () => {
-      const oldVNode = h('div', {},
-        h('span', {}, '1')
-      )
+      const oldVNode = h('div', {}, h('span', {}, '1'))
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {},
+      const newVNode = h(
+        'div',
+        {},
         h('span', {}, '1'),
         h('span', {}, '2'),
         h('span', {}, '3')
@@ -876,18 +820,14 @@ describe('DOM Render Module', () => {
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {},
-        h('strong', {}, 'Element Now')
-      )
+      const newVNode = h('div', {}, h('strong', {}, 'Element Now'))
       update(div, oldVNode, newVNode)
 
       expect(div?.querySelector('strong')).not.toBeNull()
     })
 
     it('should update element to text node', () => {
-      const oldVNode = h('div', {},
-        h('strong', {}, 'Element')
-      )
+      const oldVNode = h('div', {}, h('strong', {}, 'Element'))
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
@@ -905,18 +845,14 @@ describe('DOM Render Module', () => {
 
       const div = container.querySelector('div') as HTMLElement
 
-      const newVNode = h('div', {},
-        h('span', {}, 'Now has content')
-      )
+      const newVNode = h('div', {}, h('span', {}, 'Now has content'))
       update(div, oldVNode, newVNode)
 
       expect(div?.querySelector('span')).not.toBeNull()
     })
 
     it('should handle non-empty to empty children', () => {
-      const oldVNode = h('div', {},
-        h('span', {}, 'Has content')
-      )
+      const oldVNode = h('div', {}, h('span', {}, 'Has content'))
       render(oldVNode, container)
 
       const div = container.querySelector('div') as HTMLElement
@@ -931,23 +867,31 @@ describe('DOM Render Module', () => {
   describe('complex scenarios', () => {
     it('should render complex nested structure', () => {
       render(
-        h('div', { class: 'app' },
-          h('header', {},
+        h(
+          'div',
+          { class: 'app' },
+          h(
+            'header',
+            {},
             h('h1', {}, 'Title'),
-            h('nav', {},
+            h(
+              'nav',
+              {},
               h('a', { href: '#' }, 'Home'),
               h('a', { href: '#' }, 'About')
             )
           ),
-          h('main', {},
-            h('article', {},
+          h(
+            'main',
+            {},
+            h(
+              'article',
+              {},
               h('h2', {}, 'Article Title'),
               h('p', {}, 'Article content here.')
             )
           ),
-          h('footer', {},
-            h('p', {}, 'Copyright 2024')
-          )
+          h('footer', {}, h('p', {}, 'Copyright 2024'))
         ),
         container
       )
@@ -962,8 +906,10 @@ describe('DOM Render Module', () => {
     it('should handle list rendering', () => {
       const items = ['Apple', 'Banana', 'Cherry']
       render(
-        h('ul', {},
-          items.map(item => h('li', { key: item }, item))
+        h(
+          'ul',
+          {},
+          items.map((item) => h('li', { key: item }, item))
         ),
         container
       )
@@ -1001,11 +947,15 @@ describe('DOM Render Module', () => {
 
     it('should render form with various input types', () => {
       render(
-        h('form', {},
+        h(
+          'form',
+          {},
           h('input', { type: 'text', placeholder: 'Name' }),
           h('input', { type: 'email', placeholder: 'Email' }),
           h('textarea', { placeholder: 'Message' }),
-          h('select', {},
+          h(
+            'select',
+            {},
             h('option', { value: '1' }, 'Option 1'),
             h('option', { value: '2' }, 'Option 2')
           ),
@@ -1028,7 +978,9 @@ describe('DOM Render Module', () => {
 
       const start = performance.now()
       render(
-        h('div', {},
+        h(
+          'div',
+          {},
           items.map((item, i) => h('div', { key: i }, item))
         ),
         container

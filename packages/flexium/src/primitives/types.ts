@@ -86,7 +86,19 @@ export interface CommonStyle {
 export interface TextStyle extends CommonStyle {
   color?: string
   fontSize?: number
-  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900' | number
+  fontWeight?:
+    | 'normal'
+    | 'bold'
+    | '100'
+    | '200'
+    | '300'
+    | '400'
+    | '500'
+    | '600'
+    | '700'
+    | '800'
+    | '900'
+    | number
   fontFamily?: string
   fontStyle?: 'normal' | 'italic'
   textAlign?: 'left' | 'center' | 'right' | 'justify'
@@ -100,6 +112,7 @@ export interface TextStyle extends CommonStyle {
  * Universal text display
  */
 export interface TextProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children?: any
   style?: TextStyle
   onClick?: () => void
@@ -126,6 +139,7 @@ export interface ImageProps {
  * Universal touchable/clickable element
  */
 export interface PressableProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children?: any
   onPress: () => void
   onPressIn?: () => void
@@ -139,6 +153,7 @@ export interface PressableProps {
  * ScrollView component props
  */
 export interface ScrollViewProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children?: any
   style?: CommonStyle
   horizontal?: boolean
@@ -154,6 +169,7 @@ export interface ScrollViewProps {
 export interface CanvasProps {
   width: number
   height: number
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children?: any
   style?: CommonStyle
   id?: string

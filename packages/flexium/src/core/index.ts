@@ -13,5 +13,5 @@ export {
   root,
   isSignal,
   type Signal,
-  type Computed
-} from './signal';
+  type Computed,
+} from './signal'

@@ -5,130 +5,135 @@
  * Supports transforms, opacity, spring physics, and layout animations
  */
 
-import { effect, type Signal } from '../../core/signal';
+import { effect, type Signal } from '../../core/signal'
 
 /**
  * Animation properties that can be animated
  */
 export interface AnimatableProps {
-  x?: number;
-  y?: number;
-  scale?: number;
-  scaleX?: number;
-  scaleY?: number;
-  rotate?: number; // in degrees
-  opacity?: number;
-  width?: number | string;
-  height?: number | string;
+  x?: number
+  y?: number
+  scale?: number
+  scaleX?: number
+  scaleY?: number
+  rotate?: number // in degrees
+  opacity?: number
+  width?: number | string
+  height?: number | string
 }
 
 /**
  * Spring physics configuration
  */
 export interface SpringConfig {
-  tension?: number;  // Default: 170
-  friction?: number; // Default: 26
-  mass?: number;     // Default: 1
+  tension?: number // Default: 170
+  friction?: number // Default: 26
+  mass?: number // Default: 1
 }
 
 /**
  * Motion component props
  */
 export interface MotionProps {
-  element?: HTMLElement | null;
-  initial?: AnimatableProps;
-  animate?: AnimatableProps;
-  exit?: AnimatableProps;
-  duration?: number; // in milliseconds
-  spring?: SpringConfig;
-  easing?: string; // CSS easing function
-  delay?: number;
-  onAnimationStart?: () => void;
-  onAnimationComplete?: () => void;
+  element?: HTMLElement | null
+  initial?: AnimatableProps
+  animate?: AnimatableProps
+  exit?: AnimatableProps
+  duration?: number // in milliseconds
+  spring?: SpringConfig
+  easing?: string // CSS easing function
+  delay?: number
+  onAnimationStart?: () => void
+  onAnimationComplete?: () => void
 }
 
 /**
  * Convert animatable props to Web Animations API keyframe
  */
 function propsToKeyframe(props: AnimatableProps): Keyframe {
-  const keyframe: Keyframe = {};
+  const keyframe: Keyframe = {}
 
-  const transforms: string[] = [];
+  const transforms: string[] = []
 
   if (props.x !== undefined) {
-    transforms.push(`translateX(${props.x}px)`);
+    transforms.push(`translateX(${props.x}px)`)
   }
 
   if (props.y !== undefined) {
-    transforms.push(`translateY(${props.y}px)`);
+    transforms.push(`translateY(${props.y}px)`)
   }
 
   if (props.scale !== undefined) {
-    transforms.push(`scale(${props.scale})`);
+    transforms.push(`scale(${props.scale})`)
   } else {
     if (props.scaleX !== undefined) {
-      transforms.push(`scaleX(${props.scaleX})`);
+      transforms.push(`scaleX(${props.scaleX})`)
     }
     if (props.scaleY !== undefined) {
-      transforms.push(`scaleY(${props.scaleY})`);
+      transforms.push(`scaleY(${props.scaleY})`)
     }
   }
 
   if (props.rotate !== undefined) {
-    transforms.push(`rotate(${props.rotate}deg)`);
+    transforms.push(`rotate(${props.rotate}deg)`)
   }
 
   if (transforms.length > 0) {
-    keyframe.transform = transforms.join(' ');
+    keyframe.transform = transforms.join(' ')
   }
 
   if (props.opacity !== undefined) {
-    keyframe.opacity = props.opacity.toString();
+    keyframe.opacity = props.opacity.toString()
   }
 
   if (props.width !== undefined) {
-    keyframe.width = typeof props.width === 'number' ? `${props.width}px` : props.width;
+    keyframe.width =
+      typeof props.width === 'number' ? `${props.width}px` : props.width
   }
 
   if (props.height !== undefined) {
-    keyframe.height = typeof props.height === 'number' ? `${props.height}px` : props.height;
+    keyframe.height =
+      typeof props.height === 'number' ? `${props.height}px` : props.height
   }
 
-  return keyframe;
+  return keyframe
 }
 
 /**
  * Calculate spring-based duration and easing
  * Based on spring physics formula
  */
-function springToTiming(spring: SpringConfig): { duration: number; easing: string } {
-  const tension = spring.tension ?? 170;
-  const friction = spring.friction ?? 26;
-  const mass = spring.mass ?? 1;
+function springToTiming(spring: SpringConfig): {
+  duration: number
+  easing: string
+} {
+  const tension = spring.tension ?? 170
+  const friction = spring.friction ?? 26
+  const mass = spring.mass ?? 1
 
   // Calculate damping ratio and natural frequency
-  const k = tension;
-  const c = friction;
-  const m = mass;
+  const k = tension
+  const c = friction
+  const m = mass
 
-  const naturalFreq = Math.sqrt(k / m);
-  const dampingRatio = c / (2 * Math.sqrt(k * m));
+  const naturalFreq = Math.sqrt(k / m)
+  const dampingRatio = c / (2 * Math.sqrt(k * m))
 
   // Calculate duration (time to settle within 1% of final value)
-  const duration = (4.6 / (dampingRatio * naturalFreq)) * 1000;
+  const duration = (4.6 / (dampingRatio * naturalFreq)) * 1000
 
   // Create spring easing curve
   // For underdamped (bouncy) springs
   if (dampingRatio < 1) {
     // Use cubic-bezier that approximates spring behavior
     // Values tuned for natural spring feel
-    const easing = `cubic-bezier(0.34, 1.56, 0.64, 1)`;
-    return { duration, easing };
+    const easing = `cubic-bezier(0.34, 1.56, 0.64, 1)`
+    return { duration, easing }
   }
 
   // For critically damped or overdamped springs
-  const easing = `cubic-bezier(0.22, 1, 0.36, 1)`;
-  return { duration, easing };
+  const easing = `cubic-bezier(0.22, 1, 0.36, 1)`
+  return { duration, easing }
 }
 
 /**
@@ -136,92 +141,97 @@ function springToTiming(spring: SpringConfig): { duration: number; easing: strin
  * Manages animations for a single element using Web Animations API
  */
 export class MotionController {
-  private element: HTMLElement;
-  private animation: Animation | null = null;
-  private resizeObserver: ResizeObserver | null = null;
-  private previousSize: { width: number; height: number } | null = null;
+  private element: HTMLElement
+  private animation: Animation | null = null
+  private resizeObserver: ResizeObserver | null = null
+  private previousSize: { width: number; height: number } | null = null
 
   constructor(element: HTMLElement) {
-    this.element = element;
+    this.element = element
   }
 
   /**
    * Animate from initial to animate props
    */
   animate(props: MotionProps): void {
-    const { initial, animate, duration = 300, spring, easing = 'ease-out', delay = 0 } = props;
+    const {
+      initial,
+      animate,
+      duration = 300,
+      spring,
+      easing = 'ease-out',
+      delay = 0,
+    } = props
 
-    if (!animate) return;
+    if (!animate) return
 
     // Cancel any running animation
-    this.cancel();
+    this.cancel()
 
     // Apply initial state immediately if provided
     if (initial) {
-      const initialKeyframe = propsToKeyframe(initial);
+      const initialKeyframe = propsToKeyframe(initial)
       Object.assign(this.element.style, {
         transform: initialKeyframe.transform || '',
         opacity: initialKeyframe.opacity || '',
         width: initialKeyframe.width || '',
         height: initialKeyframe.height || '',
-      });
+      })
     }
 
     // Create keyframes
-    const from = initial ? propsToKeyframe(initial) : {};
-    const to = propsToKeyframe(animate);
+    const from = initial ? propsToKeyframe(initial) : {}
+    const to = propsToKeyframe(animate)
 
     // Calculate timing
-    let animDuration = duration;
-    let animEasing = easing;
+    let animDuration = duration
+    let animEasing = easing
 
     if (spring) {
-      const timing = springToTiming(spring);
-      animDuration = timing.duration;
-      animEasing = timing.easing;
+      const timing = springToTiming(spring)
+      animDuration = timing.duration
+      animEasing = timing.easing
     }
 
     // Create animation
-    this.animation = this.element.animate(
-      [from, to],
-      {
-        duration: animDuration,
-        easing: animEasing,
-        delay,
-        fill: 'forwards',
-      }
-    );
+    this.animation = this.element.animate([from, to], {
+      duration: animDuration,
+      easing: animEasing,
+      delay,
+      fill: 'forwards',
+    })
 
     // Handle callbacks
     if (props.onAnimationStart) {
-      props.onAnimationStart();
+      props.onAnimationStart()
     }
 
     this.animation.onfinish = () => {
       if (props.onAnimationComplete) {
-        props.onAnimationComplete();
+        props.onAnimationComplete()
       }
-    };
+    }
   }
 
   /**
    * Animate exit (used when element is being removed)
    */
-  async animateExit(exitProps: AnimatableProps, duration = 300, easing = 'ease-in'): Promise<void> {
-    this.cancel();
+  async animateExit(
+    exitProps: AnimatableProps,
+    duration = 300,
+    easing = 'ease-in'
+  ): Promise<void> {
+    this.cancel()
 
-    const to = propsToKeyframe(exitProps);
+    const to = propsToKeyframe(exitProps)
 
-    this.animation = this.element.animate(
-      [{}, to],
-      {
-        duration,
-        easing,
-        fill: 'forwards',
-      }
-    );
+    this.animation = this.element.animate([{}, to], {
+      duration,
+      easing,
+      fill: 'forwards',
+    })
 
-    await this.animation.finished;
+    await this.animation.finished
   }
 
   /**
@@ -229,8 +239,8 @@ export class MotionController {
    */
   enableLayoutAnimation(duration = 300, easing = 'ease-out'): void {
     // Store initial size
-    const rect = this.element.getBoundingClientRect();
-    this.previousSize = { width: rect.width, height: rect.height };
+    const rect = this.element.getBoundingClientRect()
+    this.previousSize = { width: rect.width, height: rect.height }
 
     // Watch for size changes
     this.resizeObserver = new ResizeObserver((entries) => {
@@ -239,12 +249,12 @@ export class MotionController {
           this.previousSize = {
             width: entry.contentRect.width,
             height: entry.contentRect.height,
-          };
-          return;
+          }
+          return
         }
 
-        const newWidth = entry.contentRect.width;
-        const newHeight = entry.contentRect.height;
+        const newWidth = entry.contentRect.width
+        const newHeight = entry.contentRect.height
 
         // Only animate if size actually changed
         if (
@@ -252,7 +262,7 @@ export class MotionController {
           newHeight !== this.previousSize.height
         ) {
           // Animate from previous size to new size
-          this.cancel();
+          this.cancel()
 
           this.animation = this.element.animate(
             [
@@ -270,14 +280,14 @@ export class MotionController {
               easing,
               fill: 'forwards',
             }
-          );
+          )
 
-          this.previousSize = { width: newWidth, height: newHeight };
+          this.previousSize = { width: newWidth, height: newHeight }
         }
       }
-    });
+    })
 
-    this.resizeObserver.observe(this.element);
+    this.resizeObserver.observe(this.element)
   }
 
   /**
@@ -285,9 +295,9 @@ export class MotionController {
    */
   disableLayoutAnimation(): void {
     if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      this.resizeObserver = null;
-      this.previousSize = null;
+      this.resizeObserver.disconnect()
+      this.resizeObserver = null
+      this.previousSize = null
     }
   }
 
@@ -296,8 +306,8 @@ export class MotionController {
    */
   cancel(): void {
     if (this.animation) {
-      this.animation.cancel();
-      this.animation = null;
+      this.animation.cancel()
+      this.animation = null
     }
   }
 
@@ -305,8 +315,8 @@ export class MotionController {
    * Cleanup all animations and observers
    */
   dispose(): void {
-    this.cancel();
-    this.disableLayoutAnimation();
+    this.cancel()
+    this.disableLayoutAnimation()
   }
 }
 
@@ -322,27 +332,28 @@ export class MotionController {
  * document.body.appendChild(motionDiv.element);
  */
 export function createMotion(props: MotionProps & { tagName?: string }): {
-  element: HTMLElement;
-  controller: MotionController;
-  update: (newProps: MotionProps) => void;
-  dispose: () => void;
+  element: HTMLElement
+  controller: MotionController
+  update: (newProps: MotionProps) => void
+  dispose: () => void
 } {
-  const element = props.element || document.createElement(props.tagName || 'div');
-  const controller = new MotionController(element);
+  const element =
+    props.element || document.createElement(props.tagName || 'div')
+  const controller = new MotionController(element)
 
   // Initial animation
-  controller.animate(props);
+  controller.animate(props)
 
   return {
     element,
     controller,
     update: (newProps: MotionProps) => {
-      controller.animate(newProps);
+      controller.animate(newProps)
     },
     dispose: () => {
-      controller.dispose();
+      controller.dispose()
     },
-  };
+  }
 }
 
 /**
@@ -355,23 +366,26 @@ export function createMotion(props: MotionProps & { tagName?: string }): {
  *   animate: visible.value ? { opacity: 1 } : { opacity: 0 },
  * });
  */
-export function useMotion(element: HTMLElement, propsSignal: Signal<MotionProps>): {
-  controller: MotionController;
-  dispose: () => void;
+export function useMotion(
+  element: HTMLElement,
+  propsSignal: Signal<MotionProps>
+): {
+  controller: MotionController
+  dispose: () => void
 } {
-  const controller = new MotionController(element);
+  const controller = new MotionController(element)
 
   // Watch for prop changes
   const dispose = effect(() => {
-    const props = propsSignal.value;
-    controller.animate(props);
-  });
+    const props = propsSignal.value
+    controller.animate(props)
+  })
 
   return {
     controller,
     dispose: () => {
-      dispose();
-      controller.dispose();
+      dispose()
+      controller.dispose()
     },
-  };
+  }
 }
