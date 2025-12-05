@@ -8,6 +8,7 @@
 import { effect, onCleanup, signal } from '../../core/signal'
 import type { AnimatableProps, MotionController } from './Motion'
 import { MotionController as MC } from './Motion'
+import { h } from '../../renderers/dom/h'
 
 /**
  * Preset animation types
@@ -170,14 +171,7 @@ export function Transition(props: TransitionProps) {
   const enterTo = customEnterTo ?? presetFrames?.enterTo ?? {}
   const exit = customExit ?? presetFrames?.exit ?? {}
 
-  // TODO: Implement element binding and animation
-  // The Transition component needs a ref wrapper approach to capture the rendered element
-  // and create a MotionController. Current implementation is incomplete and causes TS errors.
-  // For now, this component acts as a pass-through.
-
-  /* Dead code commented out - causes TypeScript errors due to never-assigned variables
-
-  // Track the mounted element
+  // Track the mounted element and controller
   let element: HTMLElement | null = null
   let controller: MotionController | null = null
 
@@ -186,55 +180,51 @@ export function Transition(props: TransitionProps) {
   const staggerDelay = currentTransitionGroup?.staggerDelay ?? 0
   const additionalDelay = staggerIndex * staggerDelay
 
-  // Return a function that wraps children and handles animations
-  return () => {
-    // This runs during render - we need to capture the element after mount
-    // and run the enter animation
+  // Setup cleanup for exit animation
+  onCleanup(async () => {
+    if (element && controller) {
+      onExitStart?.()
 
-    // Schedule enter animation after DOM update
-    queueMicrotask(() => {
-      // Find the first element child
-      // This is a simplified approach - in production you'd want better element tracking
-      if (!element && typeof children === 'object' && children !== null) {
-        // If children is a VNode with a rendered element, we'd access it here
-        // For now, this is a placeholder for the actual implementation
-      }
+      await controller.animateExit(
+        exit,
+        exitTiming.duration,
+        exitTiming.easing
+      )
 
-      if (element && controller) {
-        onEnterStart?.()
+      onExitComplete?.()
+    }
+  })
 
-        controller.animate({
-          initial: enter,
-          animate: enterTo,
-          duration: enterTiming.duration,
-          easing: enterTiming.easing,
-          delay: (enterTiming.delay ?? 0) + additionalDelay,
-          onAnimationComplete: onEnterComplete
+  // Return wrapper div with ref to capture element
+  return h(
+    'div',
+    {
+      style: { display: 'contents' },
+      ref: (el: HTMLElement | null) => {
+        if (!el) return
+
+        element = el
+        controller = new MC(el)
+
+        // Schedule enter animation after DOM update
+        queueMicrotask(() => {
+          if (controller) {
+            onEnterStart?.()
+
+            controller.animate({
+              initial: enter,
+              animate: enterTo,
+              duration: enterTiming.duration,
+              easing: enterTiming.easing,
+              delay: (enterTiming.delay ?? 0) + additionalDelay,
+              onAnimationComplete: onEnterComplete
+            })
+          }
         })
       }
-    })
-
-    // Setup cleanup for exit animation
-    onCleanup(async () => {
-      if (element && controller) {
-        onExitStart?.()
-
-        await controller.animateExit(
-          exit,
-          exitTiming.duration,
-          exitTiming.easing
-        )
-
-        onExitComplete?.()
-      }
-    })
-
-    return children
-  }
-  */
-
-  // Pass-through implementation until element binding is implemented
-  return children
+    },
+    children
+  )
 }
 
 /**

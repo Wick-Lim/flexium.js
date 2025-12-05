@@ -195,7 +195,10 @@ export default defineConfig({
           items: [
             { text: 'Column', link: '/reference/primitives/column' },
             { text: 'Row', link: '/reference/primitives/row' },
-            { text: 'ScrollView', link: '/reference/primitives/scrollview' }
+            { text: 'ScrollView', link: '/reference/primitives/scrollview' },
+            { text: 'Spacer', link: '/reference/primitives/spacer' },
+            { text: 'Grid', link: '/reference/primitives/grid' },
+            { text: 'Stack', link: '/reference/primitives/stack' }
           ]
         },
         {

@@ -20,6 +20,7 @@ export interface RouteProps {
     index?: boolean;
     component: Function;
     children?: VNodeChild; // Nested routes
+    beforeEnter?: (params: Record<string, string>) => boolean | Promise<boolean>;
 }
 
 export interface RouteMatch {
@@ -34,6 +35,7 @@ export interface RouteDef {
     index: boolean;
     component: Function;
     children: RouteDef[];
+    beforeEnter?: (params: Record<string, string>) => boolean | Promise<boolean>;
     // We might need the original VNode props if we want to support other props
 }
 

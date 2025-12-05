@@ -55,20 +55,27 @@ export function Router(props: { children: VNodeChild }) {
     return () => {
         const ms = matches();
         // console.log('Router render, matches:', ms.length);
-        
+
         // No match? Render nothing or 404?
         // Ideally user provides a "*" route.
         if (ms.length === 0) return null;
-        
+
         const rootMatch = ms[0];
+
+        // Check beforeEnter guard
+        if (rootMatch.route.beforeEnter) {
+            const result = rootMatch.route.beforeEnter(rootMatch.params);
+            if (result === false) return null;
+        }
+
         const RootComponent = rootMatch.route.component;
-        
+
         // We need to provide RouterCtx AND RouteDepthCtx (0 + 1 = 1 for next outlet)
         // Wait, Outlet at depth 0 should render match[0]?
         // No, Router renders match[0] (Root Layout).
         // Root Layout contains Outlet. Outlet renders match[1].
         // So Outlet needs depth 1.
-        
+
         return h(RouterCtx.Provider, { value: routerContext }, [
             h(RouteDepthCtx.Provider, { value: 1 }, [
                 h(RootComponent, { params: rootMatch.params })
@@ -97,13 +104,20 @@ export function Outlet() {
     
     return () => {
         const ms = router.matches();
-        
+
         // Check if we have a match at this depth
         if (depth >= ms.length) return null;
-        
+
         const match = ms[depth];
+
+        // Check beforeEnter guard
+        if (match.route.beforeEnter) {
+            const result = match.route.beforeEnter(match.params);
+            if (result === false) return null;
+        }
+
         const Component = match.route.component;
-        
+
         // Render component and provide next depth
         return h(RouteDepthCtx.Provider, { value: depth + 1 }, [
             h(Component, { params: match.params })

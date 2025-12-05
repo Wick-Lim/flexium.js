@@ -21,14 +21,15 @@ export function createRoutesFromChildren(children: VNodeChild): RouteDef[] {
             continue;
         }
 
-        const { path, index, component } = child.props as { path?: string; index?: boolean; component: Function };
+        const { path, index, component, beforeEnter } = child.props as { path?: string; index?: boolean; component: Function; beforeEnter?: (params: Record<string, string>) => boolean | Promise<boolean> };
         const nestedChildren = child.children;
-        
+
         const route: RouteDef = {
             path: path || '',
             index: !!index,
             component,
-            children: nestedChildren ? createRoutesFromChildren(nestedChildren) : []
+            children: nestedChildren ? createRoutesFromChildren(nestedChildren) : [],
+            beforeEnter
         };
         
         routes.push(route);
