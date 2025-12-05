@@ -230,7 +230,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Layout Primitives',
+          text: 'flexium/primitives',
           collapsed: false,
           items: [
             { text: '&lt;Row /&gt;', link: '/docs/primitives/row' },
@@ -238,13 +238,7 @@ export default defineConfig({
             { text: '&lt;Grid /&gt;', link: '/docs/primitives/grid' },
             { text: '&lt;Stack /&gt;', link: '/docs/primitives/stack' },
             { text: '&lt;Spacer /&gt;', link: '/docs/primitives/spacer' },
-            { text: '&lt;ScrollView /&gt;', link: '/docs/primitives/scrollview' }
-          ]
-        },
-        {
-          text: 'UI Primitives',
-          collapsed: false,
-          items: [
+            { text: '&lt;ScrollView /&gt;', link: '/docs/primitives/scrollview' },
             { text: '&lt;Text /&gt;', link: '/docs/primitives/text' },
             { text: '&lt;Image /&gt;', link: '/docs/primitives/image' },
             { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
