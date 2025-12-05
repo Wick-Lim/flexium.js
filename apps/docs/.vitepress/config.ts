@@ -161,7 +161,7 @@ export default defineConfig({
             { text: 'effect()', link: '/guide/effects' },
             { text: '&lt;For /&gt;', link: '/guide/flow#for' },
             { text: '&lt;Show /&gt;', link: '/guide/flow#show' },
-            { text: '&lt;Switch /&gt; / &lt;Match /&gt;', link: '/guide/flow#switch-match' },
+            { text: '&lt;Switch /&gt;', link: '/guide/flow#switch' },
             { text: 'createContext()', link: '/guide/context#createcontext' },
             { text: 'useContext()', link: '/guide/context#usecontext' },
             { text: '&lt;Suspense /&gt;', link: '/guide/suspense' },
