@@ -1,46 +1,46 @@
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
-type MessageIds = 'sideEffectInComputed';
+type MessageIds = "sideEffectInComputed";
 type Options = [];
 
 const SIDE_EFFECT_PATTERNS = [
   // Console methods
-  'log',
-  'warn',
-  'error',
-  'info',
-  'debug',
+  "log",
+  "warn",
+  "error",
+  "info",
+  "debug",
   // DOM mutations
-  'appendChild',
-  'removeChild',
-  'insertBefore',
-  'replaceChild',
-  'remove',
-  'setAttribute',
-  'removeAttribute',
-  'classList',
+  "appendChild",
+  "removeChild",
+  "insertBefore",
+  "replaceChild",
+  "remove",
+  "setAttribute",
+  "removeAttribute",
+  "classList",
   // Network
-  'fetch',
-  'XMLHttpRequest',
+  "fetch",
+  "XMLHttpRequest",
   // Storage
-  'setItem',
-  'removeItem',
-  'clear',
+  "setItem",
+  "removeItem",
+  "clear",
   // Timers
-  'setTimeout',
-  'setInterval',
+  "setTimeout",
+  "setInterval",
   // Events
-  'addEventListener',
-  'removeEventListener',
-  'dispatchEvent',
+  "addEventListener",
+  "removeEventListener",
+  "dispatchEvent",
 ];
 
 const rule: TSESLint.RuleModule<MessageIds, Options> = {
   defaultOptions: [],
   meta: {
-    type: 'problem',
+    type: "problem",
     docs: {
-      description: 'Disallow side effects in computed functions',
+      description: "Disallow side effects in computed functions",
     },
     messages: {
       sideEffectInComputed:
@@ -55,8 +55,8 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       CallExpression(node: TSESTree.CallExpression) {
         // Track entering computed()
         if (
-          node.callee.type === 'Identifier' &&
-          node.callee.name === 'computed'
+          node.callee.type === "Identifier" &&
+          node.callee.name === "computed"
         ) {
           insideComputed = true;
           return;
@@ -64,9 +64,9 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
 
         // Also check state() with a function argument (derived state)
         if (
-          node.callee.type === 'Identifier' &&
-          node.callee.name === 'state' &&
-          node.arguments[0]?.type === 'ArrowFunctionExpression'
+          node.callee.type === "Identifier" &&
+          node.callee.name === "state" &&
+          node.arguments[0]?.type === "ArrowFunctionExpression"
         ) {
           // This is derived state, treat like computed
           insideComputed = true;
@@ -77,19 +77,19 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         if (insideComputed) {
           // Check member expression calls
           if (
-            node.callee.type === 'MemberExpression' &&
-            node.callee.property.type === 'Identifier'
+            node.callee.type === "MemberExpression" &&
+            node.callee.property.type === "Identifier"
           ) {
             const methodName = node.callee.property.name;
 
             // Check console methods
             if (
-              node.callee.object.type === 'Identifier' &&
-              node.callee.object.name === 'console'
+              node.callee.object.type === "Identifier" &&
+              node.callee.object.name === "console"
             ) {
               context.report({
                 node,
-                messageId: 'sideEffectInComputed',
+                messageId: "sideEffectInComputed",
                 data: { method: `console.${methodName}` },
               });
               return;
@@ -99,19 +99,19 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
             if (SIDE_EFFECT_PATTERNS.includes(methodName)) {
               context.report({
                 node,
-                messageId: 'sideEffectInComputed',
+                messageId: "sideEffectInComputed",
                 data: { method: methodName },
               });
             }
           }
 
           // Check direct calls like fetch(), setTimeout()
-          if (node.callee.type === 'Identifier') {
+          if (node.callee.type === "Identifier") {
             const funcName = node.callee.name;
             if (SIDE_EFFECT_PATTERNS.includes(funcName)) {
               context.report({
                 node,
-                messageId: 'sideEffectInComputed',
+                messageId: "sideEffectInComputed",
                 data: { method: funcName },
               });
             }
@@ -119,11 +119,11 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         }
       },
 
-      'CallExpression:exit'(node: TSESTree.CallExpression) {
+      "CallExpression:exit"(node: TSESTree.CallExpression) {
         // Track exiting computed()
         if (
-          node.callee.type === 'Identifier' &&
-          (node.callee.name === 'computed' || node.callee.name === 'state')
+          node.callee.type === "Identifier" &&
+          (node.callee.name === "computed" || node.callee.name === "state")
         ) {
           insideComputed = false;
         }

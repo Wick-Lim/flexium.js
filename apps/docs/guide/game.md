@@ -1,0 +1,847 @@
+---
+title: Game Development - Build Canvas Games with Flexium
+description: Create interactive canvas-based games with Flexium's game loop, keyboard, and mouse input systems. Optimized for performance with delta time and fixed timestep.
+head:
+  - - meta
+    - property: og:title
+      content: Game Development - Flexium
+  - - meta
+    - property: og:description
+      content: Complete game development toolkit with game loop, keyboard/mouse input, and reactive canvas rendering.
+---
+
+# Game Development
+
+Flexium provides a complete game development toolkit for building interactive canvas-based games with a proper game loop, keyboard input, mouse input, and declarative rendering.
+
+## Why Flexium for Games?
+
+Traditional game development with canvas requires:
+- Manual game loop management
+- Complex input state tracking
+- Imperative rendering code
+- Delta time calculations
+- Fixed timestep for physics
+
+Flexium handles all of this for you with a clean, reactive API.
+
+## Quick Example
+
+```tsx
+import { createGameLoop, useKeyboard, Keys } from 'flexium/game'
+import { Canvas, Circle } from 'flexium/canvas'
+
+function SimpleGame() {
+  let x = 200
+  let y = 200
+  const speed = 200 // pixels per second
+
+  const keyboard = useKeyboard()
+
+  const game = createGameLoop({
+    onUpdate: (delta) => {
+      // Handle input
+      if (keyboard.isPressed(Keys.ArrowRight)) x += speed * delta
+      if (keyboard.isPressed(Keys.ArrowLeft)) x -= speed * delta
+      if (keyboard.isPressed(Keys.ArrowUp)) y -= speed * delta
+      if (keyboard.isPressed(Keys.ArrowDown)) y += speed * delta
+    },
+    onRender: () => {
+      // Render will trigger canvas update
+      return (
+        <Canvas width={400} height={400}>
+          <Circle x={x} y={y} radius={20} fill="blue" />
+        </Canvas>
+      )
+    }
+  })
+
+  game.start()
+
+  return null // Rendering happens in game loop
+}
+```
+
+## Game Loop
+
+The game loop is the heart of any game. It handles timing, updates, and rendering.
+
+### createGameLoop()
+
+Creates a game loop with delta time and optional fixed timestep for physics.
+
+```tsx
+import { createGameLoop } from 'flexium/game'
+
+const game = createGameLoop({
+  fixedFps: 60,           // Target FPS for physics (default: 60)
+  onUpdate: (delta) => {
+    // Called every frame
+    // delta = time since last frame in seconds
+  },
+  onFixedUpdate: (fixedDelta) => {
+    // Called at fixed intervals
+    // fixedDelta = 1/fixedFps (e.g., 1/60 = 0.016666...)
+  },
+  onRender: (alpha) => {
+    // Called every frame for rendering
+    // alpha = interpolation factor (0-1) for smooth rendering
+  }
+})
+
+game.start()     // Start the loop
+game.stop()      // Stop the loop
+game.isRunning() // Check if running
+game.getFps()    // Get current FPS
+```
+
+### Delta Time
+
+Delta time represents the time elapsed since the last frame in seconds. Use it to make movement frame-rate independent:
+
+```tsx
+const speed = 100 // pixels per second
+
+createGameLoop({
+  onUpdate: (delta) => {
+    // Without delta: moves 1 pixel per frame (varies with FPS)
+    x += 1
+
+    // With delta: moves 100 pixels per second (consistent)
+    x += speed * delta
+  }
+})
+```
+
+### Fixed Timestep
+
+For physics simulations, use `onFixedUpdate` to ensure deterministic behavior:
+
+```tsx
+const game = createGameLoop({
+  fixedFps: 60, // Physics runs at 60 FPS
+
+  onUpdate: (delta) => {
+    // Variable timestep - good for input and game logic
+  },
+
+  onFixedUpdate: (fixedDelta) => {
+    // Fixed timestep - perfect for physics
+    // Always called with fixedDelta = 1/60 = 0.016666...
+    velocityY += gravity * fixedDelta
+    y += velocityY * fixedDelta
+  },
+
+  onRender: (alpha) => {
+    // Interpolate between physics states for smooth rendering
+    const renderY = y + velocityY * alpha * fixedDelta
+  }
+})
+```
+
+**When to use each:**
+- `onUpdate`: Input handling, game logic, AI
+- `onFixedUpdate`: Physics, collision detection
+- `onRender`: Drawing to canvas
+
+### FPS Counter
+
+Monitor performance with the built-in FPS counter:
+
+```tsx
+const game = createGameLoop({
+  onRender: () => {
+    const fps = game.getFps()
+    console.log(`Running at ${fps} FPS`)
+  }
+})
+```
+
+## Keyboard Input
+
+`useKeyboard()` provides reactive keyboard state tracking with support for key press, hold, and release detection.
+
+### Basic Usage
+
+```tsx
+import { useKeyboard, Keys } from 'flexium/game'
+
+const keyboard = useKeyboard()
+
+// Check if key is currently pressed
+if (keyboard.isPressed(Keys.Space)) {
+  player.jump()
+}
+
+// Check if key was just pressed this frame
+if (keyboard.isJustPressed(Keys.KeyE)) {
+  player.interact()
+}
+
+// Check if key was just released this frame
+if (keyboard.isJustReleased(Keys.ShiftLeft)) {
+  player.stopSprinting()
+}
+
+// Get all pressed keys
+const pressedKeys = keyboard.getPressedKeys()
+console.log(pressedKeys) // ['keyw', 'space', ...]
+```
+
+### Keys Enum
+
+The `Keys` enum provides convenient constants for common keys:
+
+```tsx
+import { Keys } from 'flexium/game'
+
+// Arrow keys
+Keys.ArrowUp, Keys.ArrowDown, Keys.ArrowLeft, Keys.ArrowRight
+
+// WASD
+Keys.KeyW, Keys.KeyA, Keys.KeyS, Keys.KeyD
+
+// Common keys
+Keys.Space, Keys.Enter, Keys.Escape, Keys.Tab
+
+// Modifiers
+Keys.ShiftLeft, Keys.ShiftRight
+Keys.ControlLeft, Keys.ControlRight
+Keys.AltLeft, Keys.AltRight
+
+// Numbers
+Keys.Digit0, Keys.Digit1, Keys.Digit2, ..., Keys.Digit9
+```
+
+### Custom Target
+
+By default, keyboard events are tracked on `window`. You can specify a different target:
+
+```tsx
+const canvasElement = document.querySelector('canvas')
+const keyboard = useKeyboard(canvasElement)
+```
+
+### Movement Example
+
+```tsx
+const keyboard = useKeyboard()
+const speed = 200
+
+createGameLoop({
+  onUpdate: (delta) => {
+    let vx = 0
+    let vy = 0
+
+    // WASD movement
+    if (keyboard.isPressed(Keys.KeyW)) vy -= 1
+    if (keyboard.isPressed(Keys.KeyS)) vy += 1
+    if (keyboard.isPressed(Keys.KeyA)) vx -= 1
+    if (keyboard.isPressed(Keys.KeyD)) vx += 1
+
+    // Normalize diagonal movement
+    if (vx !== 0 && vy !== 0) {
+      const length = Math.sqrt(vx * vx + vy * vy)
+      vx /= length
+      vy /= length
+    }
+
+    // Apply movement
+    player.x += vx * speed * delta
+    player.y += vy * speed * delta
+
+    // Sprint modifier
+    if (keyboard.isPressed(Keys.ShiftLeft)) {
+      player.speed = speed * 2
+    } else {
+      player.speed = speed
+    }
+  }
+})
+```
+
+### Reactive Keyboard State
+
+Access the reactive signal for advanced use cases:
+
+```tsx
+const keyboard = useKeyboard()
+
+// Watch for any key state changes
+effect(() => {
+  const pressedKeys = keyboard.keys.value
+  console.log('Pressed keys:', Array.from(pressedKeys))
+})
+```
+
+### Pattern: isPressed vs isJustPressed
+
+- **`isPressed(key)`**: True while key is held down (continuous)
+  - Use for: Movement, aiming, holding actions
+
+- **`isJustPressed(key)`**: True only on the first frame when key is pressed (one-shot)
+  - Use for: Jumping, shooting, interactions, menu navigation
+
+- **`isJustReleased(key)`**: True only when key is released (one-shot)
+  - Use for: Charge-up actions, sprint toggle
+
+```tsx
+onUpdate: (delta) => {
+  // Continuous movement
+  if (keyboard.isPressed(Keys.ArrowRight)) {
+    player.x += speed * delta
+  }
+
+  // One-shot jump
+  if (keyboard.isJustPressed(Keys.Space)) {
+    if (player.onGround) {
+      player.velocityY = -jumpForce
+    }
+  }
+
+  // Toggle sprint on release
+  if (keyboard.isJustReleased(Keys.ShiftLeft)) {
+    player.isSprinting = !player.isSprinting
+  }
+}
+```
+
+### Cleanup
+
+Call `clearFrameState()` at the end of each frame to reset just-pressed/just-released states:
+
+```tsx
+const keyboard = useKeyboard()
+
+createGameLoop({
+  onUpdate: (delta) => {
+    // Handle input
+    if (keyboard.isJustPressed(Keys.Space)) {
+      console.log('Jump!')
+    }
+  },
+  onRender: () => {
+    // Clear frame state after processing
+    keyboard.clearFrameState()
+  }
+})
+```
+
+Don't forget to dispose when done:
+
+```tsx
+onCleanup(() => {
+  keyboard.dispose()
+})
+```
+
+## Mouse Input
+
+`useMouse()` provides reactive mouse state tracking with position, buttons, and wheel delta.
+
+### Basic Usage
+
+```tsx
+import { useMouse, MouseButton } from 'flexium/game'
+
+const mouse = useMouse()
+
+// Get current mouse position
+const pos = mouse.position.value
+console.log(pos.x, pos.y)
+
+// Check button states
+if (mouse.isLeftPressed()) {
+  player.shoot()
+}
+
+if (mouse.isRightPressed()) {
+  player.aim()
+}
+
+if (mouse.isMiddlePressed()) {
+  camera.reset()
+}
+
+// Or use button numbers directly
+if (mouse.isPressed(MouseButton.Left)) {
+  // same as isLeftPressed()
+}
+```
+
+### Mouse Position
+
+The position is relative to the target element (or canvas if specified):
+
+```tsx
+const mouse = useMouse({ canvas: myCanvas })
+
+// Position is in canvas coordinates
+effect(() => {
+  const pos = mouse.position.value
+  console.log(`Mouse at: ${pos.x}, ${pos.y}`)
+})
+```
+
+### Mouse Delta
+
+Track mouse movement since last frame:
+
+```tsx
+const mouse = useMouse()
+
+onUpdate: (delta) => {
+  const delta = mouse.delta.value
+
+  // Camera rotation based on mouse movement
+  camera.rotateX(delta.y * sensitivity)
+  camera.rotateY(delta.x * sensitivity)
+}
+```
+
+### Mouse Wheel
+
+Detect scroll wheel input:
+
+```tsx
+const mouse = useMouse()
+
+onUpdate: () => {
+  const wheel = mouse.wheelDelta.value
+
+  if (wheel !== 0) {
+    camera.zoom += wheel * zoomSpeed
+  }
+}
+```
+
+### Canvas Integration
+
+When using with canvas, provide the canvas element for proper coordinate calculation:
+
+```tsx
+function Game() {
+  let canvasRef: HTMLCanvasElement | undefined
+
+  const mouse = useMouse({
+    canvas: () => canvasRef // Pass as getter or direct reference
+  })
+
+  return (
+    <Canvas
+      ref={(el) => canvasRef = el}
+      width={800}
+      height={600}
+    >
+      <Circle
+        x={mouse.position.value.x}
+        y={mouse.position.value.y}
+        radius={10}
+        fill="red"
+      />
+    </Canvas>
+  )
+}
+```
+
+### MouseButton Enum
+
+```tsx
+import { MouseButton } from 'flexium/game'
+
+MouseButton.Left   // 0
+MouseButton.Middle // 1
+MouseButton.Right  // 2
+```
+
+### Cleanup
+
+Clear frame state and dispose when done:
+
+```tsx
+const mouse = useMouse()
+
+createGameLoop({
+  onRender: () => {
+    // Clear delta after each frame
+    mouse.clearFrameState()
+  }
+})
+
+onCleanup(() => {
+  mouse.dispose()
+})
+```
+
+## Complete Example: Top-Down Shooter
+
+Here's a complete game combining all the systems:
+
+```tsx
+import { createGameLoop, useKeyboard, useMouse, Keys } from 'flexium/game'
+import { Canvas, Circle, Rect, CanvasText } from 'flexium/canvas'
+import { state } from 'flexium/core'
+
+function TopDownShooter() {
+  // Game state
+  const [score, setScore] = state(0)
+  const player = { x: 400, y: 300, radius: 20, speed: 250 }
+  const bullets: Array<{ x: number; y: number; vx: number; vy: number }> = []
+  const enemies: Array<{ x: number; y: number; radius: 15 }> = []
+
+  // Input
+  const keyboard = useKeyboard()
+  const mouse = useMouse()
+
+  // Spawn enemies
+  let spawnTimer = 0
+  const spawnInterval = 2 // seconds
+
+  // Game loop
+  const game = createGameLoop({
+    onUpdate: (delta) => {
+      // Player movement
+      let vx = 0
+      let vy = 0
+
+      if (keyboard.isPressed(Keys.KeyW)) vy -= 1
+      if (keyboard.isPressed(Keys.KeyS)) vy += 1
+      if (keyboard.isPressed(Keys.KeyA)) vx -= 1
+      if (keyboard.isPressed(Keys.KeyD)) vx += 1
+
+      // Normalize diagonal movement
+      if (vx !== 0 && vy !== 0) {
+        const len = Math.sqrt(vx * vx + vy * vy)
+        vx /= len
+        vy /= len
+      }
+
+      player.x += vx * player.speed * delta
+      player.y += vy * player.speed * delta
+
+      // Keep player in bounds
+      player.x = Math.max(player.radius, Math.min(800 - player.radius, player.x))
+      player.y = Math.max(player.radius, Math.min(600 - player.radius, player.y))
+
+      // Shooting
+      if (mouse.isLeftPressed()) {
+        const mousePos = mouse.position.value
+        const dx = mousePos.x - player.x
+        const dy = mousePos.y - player.y
+        const len = Math.sqrt(dx * dx + dy * dy)
+
+        bullets.push({
+          x: player.x,
+          y: player.y,
+          vx: (dx / len) * 500,
+          vy: (dy / len) * 500
+        })
+      }
+
+      // Update bullets
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i]
+        bullet.x += bullet.vx * delta
+        bullet.y += bullet.vy * delta
+
+        // Remove off-screen bullets
+        if (bullet.x < 0 || bullet.x > 800 || bullet.y < 0 || bullet.y > 600) {
+          bullets.splice(i, 1)
+        }
+      }
+
+      // Spawn enemies
+      spawnTimer += delta
+      if (spawnTimer >= spawnInterval) {
+        spawnTimer = 0
+        const side = Math.floor(Math.random() * 4)
+        let x, y
+
+        switch (side) {
+          case 0: x = Math.random() * 800; y = -20; break // top
+          case 1: x = Math.random() * 800; y = 620; break // bottom
+          case 2: x = -20; y = Math.random() * 600; break // left
+          case 3: x = 820; y = Math.random() * 600; break // right
+        }
+
+        enemies.push({ x, y, radius: 15 })
+      }
+
+      // Move enemies toward player
+      for (const enemy of enemies) {
+        const dx = player.x - enemy.x
+        const dy = player.y - enemy.y
+        const len = Math.sqrt(dx * dx + dy * dy)
+
+        enemy.x += (dx / len) * 100 * delta
+        enemy.y += (dy / len) * 100 * delta
+      }
+
+      // Collision: bullets vs enemies
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i]
+
+        for (let j = enemies.length - 1; j >= 0; j--) {
+          const enemy = enemies[j]
+          const dx = bullet.x - enemy.x
+          const dy = bullet.y - enemy.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+
+          if (dist < enemy.radius + 5) {
+            bullets.splice(i, 1)
+            enemies.splice(j, 1)
+            setScore(s => s + 10)
+            break
+          }
+        }
+      }
+
+      // Clear input states
+      keyboard.clearFrameState()
+      mouse.clearFrameState()
+    },
+
+    onRender: () => {
+      // Render will happen here or separately
+    }
+  })
+
+  game.start()
+
+  // Render function
+  return () => (
+    <Canvas width={800} height={600} style={{ border: '2px solid black' }}>
+      {/* Background */}
+      <Rect x={0} y={0} width={800} height={600} fill="#111" />
+
+      {/* Player */}
+      <Circle
+        x={player.x}
+        y={player.y}
+        radius={player.radius}
+        fill="blue"
+        stroke="white"
+        strokeWidth={2}
+      />
+
+      {/* Crosshair at mouse */}
+      <Circle
+        x={mouse.position.value.x}
+        y={mouse.position.value.y}
+        radius={3}
+        stroke="white"
+        strokeWidth={1}
+      />
+
+      {/* Bullets */}
+      {bullets.map((bullet, i) => (
+        <Circle
+          key={i}
+          x={bullet.x}
+          y={bullet.y}
+          radius={5}
+          fill="yellow"
+        />
+      ))}
+
+      {/* Enemies */}
+      {enemies.map((enemy, i) => (
+        <Circle
+          key={i}
+          x={enemy.x}
+          y={enemy.y}
+          radius={enemy.radius}
+          fill="red"
+          stroke="darkred"
+          strokeWidth={2}
+        />
+      ))}
+
+      {/* Score */}
+      <CanvasText
+        x={10}
+        y={30}
+        text={`Score: ${score()}`}
+        fontSize={24}
+        fontWeight="bold"
+        fill="white"
+      />
+
+      {/* FPS */}
+      <CanvasText
+        x={700}
+        y={30}
+        text={`FPS: ${game.getFps()}`}
+        fontSize={16}
+        fill="white"
+      />
+    </Canvas>
+  )
+}
+```
+
+## Best Practices
+
+### 1. Use Delta Time
+
+Always use delta time for movement and time-based calculations:
+
+```tsx
+// Bad - frame rate dependent
+x += 5
+
+// Good - frame rate independent
+x += speed * delta
+```
+
+### 2. Separate Logic and Rendering
+
+Keep game logic in `onUpdate` and rendering in `onRender`:
+
+```tsx
+createGameLoop({
+  onUpdate: (delta) => {
+    // Game logic, physics, input
+    updatePlayer(delta)
+    updateEnemies(delta)
+    checkCollisions()
+  },
+
+  onRender: (alpha) => {
+    // Only rendering
+    drawEverything()
+  }
+})
+```
+
+### 3. Use Fixed Timestep for Physics
+
+Physics simulations should use `onFixedUpdate`:
+
+```tsx
+createGameLoop({
+  fixedFps: 60,
+
+  onFixedUpdate: (fixedDelta) => {
+    // Deterministic physics
+    velocity.y += gravity * fixedDelta
+    position.y += velocity.y * fixedDelta
+  }
+})
+```
+
+### 4. Clear Input States
+
+Always clear frame-specific input states:
+
+```tsx
+createGameLoop({
+  onRender: () => {
+    keyboard.clearFrameState()
+    mouse.clearFrameState()
+  }
+})
+```
+
+### 5. Cleanup Resources
+
+Dispose of input handlers when done:
+
+```tsx
+onCleanup(() => {
+  game.stop()
+  keyboard.dispose()
+  mouse.dispose()
+})
+```
+
+### 6. Use Object Pools
+
+For bullets, particles, etc., reuse objects instead of creating new ones:
+
+```tsx
+const bulletPool: Bullet[] = []
+
+function getBullet() {
+  return bulletPool.pop() || createBullet()
+}
+
+function returnBullet(bullet: Bullet) {
+  bulletPool.push(bullet)
+}
+```
+
+### 7. Cap Delta Time
+
+The game loop automatically caps delta at 250ms to prevent spiral of death. If you do manual timing, cap it:
+
+```tsx
+const cappedDelta = Math.min(delta, 0.1) // Cap at 100ms
+```
+
+## Integration with Canvas
+
+Flexium's game module integrates seamlessly with Canvas primitives:
+
+```tsx
+import { createGameLoop } from 'flexium/game'
+import { Canvas, Circle, Rect } from 'flexium/canvas'
+import { state } from 'flexium/core'
+
+function GameExample() {
+  const [entities, setEntities] = state([
+    { x: 100, y: 100, color: 'red' },
+    { x: 200, y: 150, color: 'blue' }
+  ])
+
+  createGameLoop({
+    onUpdate: (delta) => {
+      // Update entity positions
+      setEntities(prev => prev.map(e => ({
+        ...e,
+        x: e.x + Math.sin(Date.now() / 1000) * 100 * delta
+      })))
+    }
+  })
+
+  return (
+    <Canvas width={400} height={300}>
+      {entities().map((e, i) => (
+        <Circle
+          key={i}
+          x={e.x}
+          y={e.y}
+          radius={20}
+          fill={e.color}
+        />
+      ))}
+    </Canvas>
+  )
+}
+```
+
+The canvas automatically re-renders when state changes, giving you the best of both worlds: imperative game loop control with declarative rendering.
+
+## TypeScript Support
+
+All game APIs are fully typed:
+
+```tsx
+import type { GameLoop, KeyboardState, MouseState } from 'flexium/game'
+
+const game: GameLoop = createGameLoop({
+  onUpdate: (delta: number) => {
+    // delta is typed as number
+  }
+})
+
+const keyboard: KeyboardState = useKeyboard()
+const mouse: MouseState = useMouse()
+```
+
+## Next Steps
+
+- Learn more about [Canvas Primitives](/guide/canvas)
+- Explore [Animation](/guide/animation) for easing and tweening
+- Check out [Performance](/guide/performance) optimization tips
+- See [Game Examples](/examples/games) for more inspiration

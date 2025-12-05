@@ -1,20 +1,20 @@
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 import {
   isInsideReactiveContext,
   isInsideJSX,
   isFunctionComponent,
-} from '../utils/ast-helpers';
+} from "../utils/ast-helpers";
 
-type MessageIds = 'signalOutsideReactive';
+type MessageIds = "signalOutsideReactive";
 type Options = [];
 
 const rule: TSESLint.RuleModule<MessageIds, Options> = {
   defaultOptions: [],
   meta: {
-    type: 'problem',
+    type: "problem",
     docs: {
       description:
-        'Disallow reading signal values outside of reactive contexts',
+        "Disallow reading signal values outside of reactive contexts",
     },
     messages: {
       signalOutsideReactive:
@@ -30,31 +30,31 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       // Track signal declarations
       VariableDeclarator(node: TSESTree.VariableDeclarator) {
         if (
-          node.init?.type === 'CallExpression' &&
-          node.init.callee.type === 'Identifier'
+          node.init?.type === "CallExpression" &&
+          node.init.callee.type === "Identifier"
         ) {
           const calleeName = node.init.callee.name;
 
           // signal() creates a signal
-          if (calleeName === 'signal') {
-            if (node.id.type === 'Identifier') {
+          if (calleeName === "signal") {
+            if (node.id.type === "Identifier") {
               signalVariables.add(node.id.name);
             }
           }
 
           // state() returns [getter, setter]
-          if (calleeName === 'state') {
+          if (calleeName === "state") {
             if (
-              node.id.type === 'ArrayPattern' &&
-              node.id.elements[0]?.type === 'Identifier'
+              node.id.type === "ArrayPattern" &&
+              node.id.elements[0]?.type === "Identifier"
             ) {
               signalVariables.add(node.id.elements[0].name);
             }
           }
 
           // computed() creates a read-only signal
-          if (calleeName === 'computed') {
-            if (node.id.type === 'Identifier') {
+          if (calleeName === "computed") {
+            if (node.id.type === "Identifier") {
               signalVariables.add(node.id.name);
             }
           }
@@ -64,9 +64,9 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       // Check .value property access
       MemberExpression(node: TSESTree.MemberExpression) {
         if (
-          node.property.type === 'Identifier' &&
-          node.property.name === 'value' &&
-          node.object.type === 'Identifier' &&
+          node.property.type === "Identifier" &&
+          node.property.name === "value" &&
+          node.object.type === "Identifier" &&
           signalVariables.has(node.object.name)
         ) {
           // Check if we're inside a function component (which is implicitly reactive)
@@ -84,7 +84,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
           ) {
             context.report({
               node,
-              messageId: 'signalOutsideReactive',
+              messageId: "signalOutsideReactive",
               data: {
                 name: node.object.name,
               },
@@ -96,7 +96,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       // Check signal() function call (e.g., count())
       CallExpression(node: TSESTree.CallExpression) {
         if (
-          node.callee.type === 'Identifier' &&
+          node.callee.type === "Identifier" &&
           signalVariables.has(node.callee.name) &&
           node.arguments.length === 0
         ) {
@@ -115,7 +115,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
           ) {
             context.report({
               node,
-              messageId: 'signalOutsideReactive',
+              messageId: "signalOutsideReactive",
               data: {
                 name: node.callee.name,
               },

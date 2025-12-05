@@ -1,25 +1,25 @@
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
-type MessageIds = 'missingCleanup';
+type MessageIds = "missingCleanup";
 type Options = [];
 
 const CLEANUP_REQUIRED_PATTERNS = [
-  'addEventListener',
-  'setTimeout',
-  'setInterval',
-  'subscribe',
-  'on',
-  'observe',
-  'watch',
+  "addEventListener",
+  "setTimeout",
+  "setInterval",
+  "subscribe",
+  "on",
+  "observe",
+  "watch",
 ];
 
 const rule: TSESLint.RuleModule<MessageIds, Options> = {
   defaultOptions: [],
   meta: {
-    type: 'suggestion',
+    type: "suggestion",
     docs: {
       description:
-        'Enforce cleanup functions in effects that add event listeners or timers',
+        "Enforce cleanup functions in effects that add event listeners or timers",
     },
     messages: {
       missingCleanup:
@@ -32,8 +32,8 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       CallExpression(node: TSESTree.CallExpression) {
         // Check if this is an effect() call
         if (
-          node.callee.type !== 'Identifier' ||
-          node.callee.name !== 'effect'
+          node.callee.type !== "Identifier" ||
+          node.callee.name !== "effect"
         ) {
           return;
         }
@@ -43,8 +43,8 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         if (!callback) return;
 
         if (
-          callback.type !== 'ArrowFunctionExpression' &&
-          callback.type !== 'FunctionExpression'
+          callback.type !== "ArrowFunctionExpression" &&
+          callback.type !== "FunctionExpression"
         ) {
           return;
         }
@@ -56,13 +56,13 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         // Helper to check if a node contains cleanup-requiring patterns
         function checkForCleanupPatterns(
           node: TSESTree.Node,
-          methods: string[]
+          methods: string[],
         ) {
-          if (node.type === 'CallExpression') {
+          if (node.type === "CallExpression") {
             // Check member expression calls like element.addEventListener
             if (
-              node.callee.type === 'MemberExpression' &&
-              node.callee.property.type === 'Identifier'
+              node.callee.type === "MemberExpression" &&
+              node.callee.property.type === "Identifier"
             ) {
               const methodName = node.callee.property.name;
               if (CLEANUP_REQUIRED_PATTERNS.includes(methodName)) {
@@ -71,7 +71,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
             }
 
             // Check direct calls like setTimeout
-            if (node.callee.type === 'Identifier') {
+            if (node.callee.type === "Identifier") {
               const funcName = node.callee.name;
               if (CLEANUP_REQUIRED_PATTERNS.includes(funcName)) {
                 methods.push(funcName);
@@ -80,24 +80,21 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
           }
 
           // Check return statement
-          if (node.type === 'ReturnStatement' && node.argument) {
+          if (node.type === "ReturnStatement" && node.argument) {
             hasReturnStatement = true;
           }
 
           // Recurse into child nodes
           for (const key in node) {
             const child = (node as Record<string, unknown>)[key];
-            if (child && typeof child === 'object') {
+            if (child && typeof child === "object") {
               if (Array.isArray(child)) {
                 for (const item of child) {
-                  if (item && typeof item === 'object' && 'type' in item) {
-                    checkForCleanupPatterns(
-                      item as TSESTree.Node,
-                      methods
-                    );
+                  if (item && typeof item === "object" && "type" in item) {
+                    checkForCleanupPatterns(item as TSESTree.Node, methods);
                   }
                 }
-              } else if ('type' in child) {
+              } else if ("type" in child) {
                 checkForCleanupPatterns(child as TSESTree.Node, methods);
               }
             }
@@ -105,7 +102,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         }
 
         // Analyze the callback body
-        if (callback.body.type === 'BlockStatement') {
+        if (callback.body.type === "BlockStatement") {
           checkForCleanupPatterns(callback.body, cleanupRequiredMethods);
         }
 
@@ -113,7 +110,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         if (cleanupRequiredMethods.length > 0 && !hasReturnStatement) {
           context.report({
             node: callback,
-            messageId: 'missingCleanup',
+            messageId: "missingCleanup",
             data: {
               method: cleanupRequiredMethods[0],
             },

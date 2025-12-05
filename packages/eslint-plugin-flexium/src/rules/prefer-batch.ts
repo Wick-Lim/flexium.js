@@ -1,26 +1,26 @@
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
-type MessageIds = 'preferBatch';
+type MessageIds = "preferBatch";
 type Options = [{ threshold?: number }];
 
 const rule: TSESLint.RuleModule<MessageIds, Options> = {
   defaultOptions: [{ threshold: 2 }],
   meta: {
-    type: 'suggestion',
+    type: "suggestion",
     docs: {
       description:
-        'Suggest using batch() when multiple signals are updated consecutively',
+        "Suggest using batch() when multiple signals are updated consecutively",
     },
     messages: {
       preferBatch:
-        'Multiple signal updates ({{count}}) detected. Consider using batch() to prevent cascading re-renders.',
+        "Multiple signal updates ({{count}}) detected. Consider using batch() to prevent cascading re-renders.",
     },
     schema: [
       {
-        type: 'object',
+        type: "object",
         properties: {
           threshold: {
-            type: 'number',
+            type: "number",
             minimum: 2,
           },
         },
@@ -42,11 +42,11 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     function isSignalUpdate(node: TSESTree.Node): boolean {
       // Check assignment to .value property
       if (
-        node.type === 'AssignmentExpression' &&
-        node.left.type === 'MemberExpression' &&
-        node.left.property.type === 'Identifier' &&
-        node.left.property.name === 'value' &&
-        node.left.object.type === 'Identifier' &&
+        node.type === "AssignmentExpression" &&
+        node.left.type === "MemberExpression" &&
+        node.left.property.type === "Identifier" &&
+        node.left.property.name === "value" &&
+        node.left.object.type === "Identifier" &&
         signalVariables.has(node.left.object.name)
       ) {
         return true;
@@ -54,11 +54,11 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
 
       // Check .set() call
       if (
-        node.type === 'CallExpression' &&
-        node.callee.type === 'MemberExpression' &&
-        node.callee.property.type === 'Identifier' &&
-        node.callee.property.name === 'set' &&
-        node.callee.object.type === 'Identifier' &&
+        node.type === "CallExpression" &&
+        node.callee.type === "MemberExpression" &&
+        node.callee.property.type === "Identifier" &&
+        node.callee.property.name === "set" &&
+        node.callee.object.type === "Identifier" &&
         signalVariables.has(node.callee.object.name)
       ) {
         return true;
@@ -66,9 +66,9 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
 
       // Check setter call from state() (e.g., setCount(5))
       if (
-        node.type === 'CallExpression' &&
-        node.callee.type === 'Identifier' &&
-        node.callee.name.startsWith('set') &&
+        node.type === "CallExpression" &&
+        node.callee.type === "Identifier" &&
+        node.callee.name.startsWith("set") &&
         node.arguments.length > 0
       ) {
         return true;
@@ -81,7 +81,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       if (consecutiveUpdates.length >= threshold) {
         context.report({
           node: consecutiveUpdates[0],
-          messageId: 'preferBatch',
+          messageId: "preferBatch",
           data: {
             count: String(consecutiveUpdates.length),
           },
@@ -94,23 +94,23 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       // Track signal declarations
       VariableDeclarator(node: TSESTree.VariableDeclarator) {
         if (
-          node.init?.type === 'CallExpression' &&
-          node.init.callee.type === 'Identifier'
+          node.init?.type === "CallExpression" &&
+          node.init.callee.type === "Identifier"
         ) {
           const calleeName = node.init.callee.name;
 
-          if (calleeName === 'signal' && node.id.type === 'Identifier') {
+          if (calleeName === "signal" && node.id.type === "Identifier") {
             signalVariables.add(node.id.name);
           }
 
           if (
-            calleeName === 'state' &&
-            node.id.type === 'ArrayPattern' &&
-            node.id.elements[1]?.type === 'Identifier'
+            calleeName === "state" &&
+            node.id.type === "ArrayPattern" &&
+            node.id.elements[1]?.type === "Identifier"
           ) {
             // Track the setter name
             signalVariables.add(node.id.elements[1].name);
-            if (node.id.elements[0]?.type === 'Identifier') {
+            if (node.id.elements[0]?.type === "Identifier") {
               signalVariables.add(node.id.elements[0].name);
             }
           }
@@ -122,11 +122,9 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         const ancestors = context.getAncestors();
         for (const ancestor of ancestors) {
           if (
-            ancestor.type === 'CallExpression' &&
-            (ancestor as TSESTree.CallExpression).callee.type ===
-              'Identifier' &&
-            ((ancestor as TSESTree.CallExpression).callee as TSESTree.Identifier)
-              .name === 'batch'
+            ancestor.type === "CallExpression" &&
+            ancestor.callee.type === "Identifier" &&
+            ancestor.callee.name === "batch"
           ) {
             return; // Already inside batch, don't warn
           }
@@ -136,8 +134,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
 
         // Check if this statement is consecutive to the last one
         const isConsecutive =
-          lastStatementEnd === -1 ||
-          node.range![0] - lastStatementEnd < 50; // Allow some whitespace
+          lastStatementEnd === -1 || node.range[0] - lastStatementEnd < 50; // Allow some whitespace
 
         if (isUpdate) {
           if (isConsecutive) {
@@ -150,14 +147,14 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
           checkConsecutiveUpdates();
         }
 
-        lastStatementEnd = node.range![1];
+        lastStatementEnd = node.range[1];
       },
 
-      'Program:exit'() {
+      "Program:exit"() {
         checkConsecutiveUpdates();
       },
 
-      'BlockStatement:exit'() {
+      "BlockStatement:exit"() {
         checkConsecutiveUpdates();
       },
     };
