@@ -174,8 +174,8 @@ export default defineConfig({
             { text: '&lt;Portal /&gt;', link: '/guide/portal' },
             { text: '&lt;Row /&gt;', link: '/reference/primitives/row' },
             { text: '&lt;Column /&gt;', link: '/reference/primitives/column' },
-            { text: '&lt;Stack /&gt;', link: '/reference/primitives/stack' },
             { text: '&lt;Grid /&gt;', link: '/reference/primitives/grid' },
+            { text: '&lt;Stack /&gt;', link: '/reference/primitives/stack' },
             { text: '&lt;Spacer /&gt;', link: '/reference/primitives/spacer' },
             { text: '&lt;ScrollView /&gt;', link: '/reference/primitives/scrollview' },
             { text: '&lt;Text /&gt;', link: '/reference/primitives/text' },
@@ -190,10 +190,10 @@ export default defineConfig({
             { text: '&lt;Canvas /&gt;', link: '/guide/canvas' },
             { text: '&lt;Rect /&gt;', link: '/reference/canvas/rect' },
             { text: '&lt;Circle /&gt;', link: '/reference/canvas/circle' },
-            { text: '&lt;Line /&gt;', link: '/reference/canvas/line' },
             { text: '&lt;Arc /&gt;', link: '/reference/canvas/arc' },
+            { text: '&lt;Line /&gt;', link: '/reference/canvas/line' },
             { text: '&lt;Path /&gt;', link: '/reference/canvas/path' },
-            { text: '&lt;Text /&gt; (Canvas)', link: '/reference/canvas/text' }
+            { text: '&lt;CanvasText /&gt;', link: '/reference/canvas/text' }
           ]
         },
         {
@@ -210,13 +210,12 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: 'Context API', link: '/guide/context' },
-            { text: 'Animation', link: '/guide/animation' },
             { text: 'Styling', link: '/guide/styling' },
-            { text: 'Advanced API', link: '/guide/advanced-api' },
+            { text: 'Animation', link: '/guide/animation' },
             { text: 'Performance', link: '/guide/performance' },
-            { text: 'Server-Side Rendering', link: '/guide/ssr' },
             { text: 'TypeScript', link: '/guide/typescript' },
             { text: 'Testing', link: '/guide/testing' },
+            { text: 'SSR', link: '/guide/ssr' },
             { text: 'DevTools', link: '/guide/devtools' }
           ]
         }
@@ -228,8 +227,8 @@ export default defineConfig({
           items: [
             { text: '&lt;Row /&gt;', link: '/reference/primitives/row' },
             { text: '&lt;Column /&gt;', link: '/reference/primitives/column' },
-            { text: '&lt;Stack /&gt;', link: '/reference/primitives/stack' },
             { text: '&lt;Grid /&gt;', link: '/reference/primitives/grid' },
+            { text: '&lt;Stack /&gt;', link: '/reference/primitives/stack' },
             { text: '&lt;Spacer /&gt;', link: '/reference/primitives/spacer' },
             { text: '&lt;ScrollView /&gt;', link: '/reference/primitives/scrollview' },
             { text: '&lt;Text /&gt;', link: '/reference/primitives/text' },
@@ -244,10 +243,10 @@ export default defineConfig({
             { text: '&lt;Canvas /&gt;', link: '/reference/canvas/canvas' },
             { text: '&lt;Rect /&gt;', link: '/reference/canvas/rect' },
             { text: '&lt;Circle /&gt;', link: '/reference/canvas/circle' },
-            { text: '&lt;Path /&gt;', link: '/reference/canvas/path' },
-            { text: '&lt;Text /&gt;', link: '/reference/canvas/text' },
+            { text: '&lt;Arc /&gt;', link: '/reference/canvas/arc' },
             { text: '&lt;Line /&gt;', link: '/reference/canvas/line' },
-            { text: '&lt;Arc /&gt;', link: '/reference/canvas/arc' }
+            { text: '&lt;Path /&gt;', link: '/reference/canvas/path' },
+            { text: '&lt;CanvasText /&gt;', link: '/reference/canvas/text' }
           ]
         }
       ],
