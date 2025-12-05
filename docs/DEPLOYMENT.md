@@ -578,8 +578,8 @@ For quick prototypes or no-build setups:
 
   <script type="module">
     // Import from CDN (when available)
-    import { signal, computed, effect } from 'https://cdn.jsdelivr.net/npm/flexium@0.4.0/dist/index.mjs'
-    import { h, render } from 'https://cdn.jsdelivr.net/npm/flexium@0.4.0/dist/dom.mjs'
+    import { signal, computed, effect } from 'https://cdn.jsdelivr.net/npm/flexium@0.4.1/dist/index.mjs'
+    import { h, render } from 'https://cdn.jsdelivr.net/npm/flexium@0.4.1/dist/dom.mjs'
 
     const count = signal(0)
     const doubled = computed(() => count.value * 2)
@@ -597,9 +597,9 @@ For quick prototypes or no-build setups:
 ```
 
 **CDN Options**:
-- jsDelivr: `https://cdn.jsdelivr.net/npm/flexium@0.4.0/dist/index.mjs`
-- unpkg: `https://unpkg.com/flexium@0.4.0/dist/index.mjs`
-- esm.sh: `https://esm.sh/flexium@0.4.0`
+- jsDelivr: `https://cdn.jsdelivr.net/npm/flexium@0.4.1/dist/index.mjs`
+- unpkg: `https://unpkg.com/flexium@0.4.1/dist/index.mjs`
+- esm.sh: `https://esm.sh/flexium@0.4.1`
 
 **Note**: CDN is great for prototypes but not recommended for production (slower, less control).
 

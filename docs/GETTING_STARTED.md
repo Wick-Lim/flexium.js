@@ -100,7 +100,7 @@ npm install -D typescript
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "flexium": "^0.4.0"
+    "flexium": "^0.4.1"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
