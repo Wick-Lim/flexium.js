@@ -1,3 +1,7 @@
+---
+title: Route - Route Definition
+---
+
 # &lt;Route /&gt;
 
 Define a route that renders a component when the path matches.

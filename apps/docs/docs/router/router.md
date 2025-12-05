@@ -1,3 +1,7 @@
+---
+title: Router - Client-Side Routing
+---
+
 # &lt;Router /&gt;
 
 Root component that enables client-side routing.

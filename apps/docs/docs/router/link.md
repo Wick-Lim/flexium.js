@@ -1,3 +1,7 @@
+---
+title: Link - Navigation Component
+---
+
 # &lt;Link /&gt;
 
 Navigate between routes without full page reload.

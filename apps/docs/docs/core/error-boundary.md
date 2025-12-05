@@ -1,3 +1,7 @@
+---
+title: ErrorBoundary - Error Handling
+---
+
 # &lt;ErrorBoundary /&gt;
 
 Catch and handle errors gracefully in your component tree.

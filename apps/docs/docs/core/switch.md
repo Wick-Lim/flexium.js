@@ -1,3 +1,7 @@
+---
+title: Switch & Match - Multi-Condition Rendering
+---
+
 # &lt;Switch /&gt; & &lt;Match /&gt;
 
 Render content based on multiple conditions, similar to switch/case.

@@ -1,3 +1,7 @@
+---
+title: Show - Conditional Rendering
+---
+
 # &lt;Show /&gt;
 
 Conditionally render content based on a boolean condition.

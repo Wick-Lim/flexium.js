@@ -1,3 +1,7 @@
+---
+title: Suspense - Async Loading
+---
+
 # &lt;Suspense /&gt;
 
 Handle async operations with loading states.
