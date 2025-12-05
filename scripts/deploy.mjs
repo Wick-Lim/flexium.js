@@ -69,10 +69,14 @@ async function deploy(type) {
     process.exit(1);
   }
 
-  // 4. Build
-  console.log('\n🔨 Building...');
-  if (!run('npm run build')) {
-    console.error('❌ Build failed');
+  // 4. Build only npm packages (flexium & create-flexium)
+  console.log('\n🔨 Building npm packages...');
+  if (!run('npm run build:flexium')) {
+    console.error('❌ flexium build failed');
+    process.exit(1);
+  }
+  if (!run('npm run build:create-flexium')) {
+    console.error('❌ create-flexium build failed');
     process.exit(1);
   }
 
