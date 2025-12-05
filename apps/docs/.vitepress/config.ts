@@ -170,6 +170,7 @@ export default defineConfig({
           text: 'Cross-Platform Guides',
           items: [
             { text: 'Primitives Overview', link: '/guide/primitives' },
+            { text: 'Animation', link: '/guide/animation' },
             { text: 'Canvas Rendering Guide', link: '/guide/canvas' },
             { text: 'Styling', link: '/guide/styling' }
           ]

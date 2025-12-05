@@ -9,4 +9,15 @@ export {
   type AnimatableProps,
   type SpringConfig,
   type MotionProps,
-} from './Motion';
+} from './Motion'
+
+export {
+  Transition,
+  TransitionGroup,
+  createTransition,
+  transitions,
+  type TransitionPreset,
+  type TransitionTiming,
+  type TransitionProps,
+  type TransitionGroupProps,
+} from './Transition'
