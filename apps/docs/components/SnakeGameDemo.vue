@@ -265,9 +265,6 @@ onMounted(() => {
       </div>
     `
 
-    const canvas = container.value.querySelector('canvas')
-    canvas?.focus()
-
     container.value.querySelector('.pause-btn')?.addEventListener('click', () => {
       if (!gameOver) paused = !paused
     })
