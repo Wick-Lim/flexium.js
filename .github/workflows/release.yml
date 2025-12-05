@@ -37,12 +37,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish flexium to npm
-        run: cd packages/flexium && npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish create-flexium to npm
-        run: cd packages/create-flexium && npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # npm 배포는 로컬에서 수동으로 진행
+      # cd packages/flexium && npm publish --access public
+      # cd packages/create-flexium && npm publish --access public
