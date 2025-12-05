@@ -249,10 +249,10 @@ export function createRoot(container: HTMLElement) {
  * Mount a component to a DOM container
  *
  * Convenience function with container-first argument order.
- * Equivalent to render(vnode, container).
+ * Equivalent to render(component, container).
  *
  * @param container - DOM element to render into
- * @param vnode - Virtual node to render
+ * @param component - JSX component or element to render
  * @returns The rendered DOM node
  *
  * @example
@@ -260,7 +260,7 @@ export function createRoot(container: HTMLElement) {
  */
 export function mount(
   container: HTMLElement,
-  vnode: VNode | string | number | null | undefined | Function
+  component: JSX.Element
 ): Node | null {
-  return render(vnode, container);
+  return render(component, container);
 }

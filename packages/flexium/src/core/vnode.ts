@@ -1,7 +1,7 @@
-import type { VNode, VNodeChild } from './renderer';
+import type { FNode, FNodeChild } from './renderer';
 
 /**
- * Creates a VNode ensuring consistent object shape (Monomorphism).
+ * Creates an FNode ensuring consistent object shape (Monomorphism).
  * This is crucial for JS engine optimization (Hidden Classes).
  *
  * @param type - Element type
@@ -9,12 +9,12 @@ import type { VNode, VNodeChild } from './renderer';
  * @param children - Element children
  * @param key - Optional key for reconciliation
  */
-export function createVNode(
+export function createFNode(
   type: string | Function,
   props: Record<string, unknown>,
-  children: VNodeChild[],
+  children: FNodeChild[],
   key?: string | number | null
-): VNode {
+): FNode {
   // Always create the object with the exact same properties in the exact same order.
   // `key` is included even if undefined/null to maintain shape.
   return {
@@ -24,3 +24,6 @@ export function createVNode(
     key: key ?? undefined
   };
 }
+
+/** @deprecated Use createFNode instead */
+export const createVNode = createFNode;

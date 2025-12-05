@@ -1,36 +1,36 @@
 /**
- * JSX Factory Function (h)
+ * JSX Factory Function (f)
  *
- * This module provides the JSX factory function for creating virtual nodes.
+ * This module provides the JSX factory function for creating Flexium nodes.
  * It's used by the JSX transpiler to convert JSX syntax into function calls.
  *
  * Usage in tsconfig.json:
  * {
  *   "compilerOptions": {
  *     "jsx": "react",
- *     "jsxFactory": "h",
+ *     "jsxFactory": "f",
  *     "jsxFragmentFactory": "Fragment"
  *   }
  * }
  */
 
-import type { VNode } from '../../core/renderer';
-import { createVNode } from '../../core/vnode';
+import type { FNode } from '../../core/renderer';
+import { createFNode } from '../../core/vnode';
 
 /**
- * JSX factory function
- * Creates a virtual node from JSX syntax
+ * JSX factory function for Flexium
+ * Creates a Flexium node from JSX syntax
  *
  * @param type - Element type (string for built-in, function for components)
  * @param props - Element properties
  * @param children - Child elements
- * @returns Virtual node
+ * @returns Flexium node
  */
-export function h(
+export function f(
   type: string | Function,
   props: Record<string, any> | null,
   ...children: any[]
-): VNode {
+): FNode {
   // Normalize props
   const normalizedProps = props || {};
 
@@ -45,15 +45,18 @@ export function h(
     (child) => child !== null && child !== undefined && child !== false
   );
 
-  return createVNode(type, normalizedProps, normalizedChildren, key);
+  return createFNode(type, normalizedProps, normalizedChildren, key);
 }
+
+/** @deprecated Use f() instead */
+export const h = f;
 
 /**
  * Fragment component
  * Renders children without a wrapper element
  */
-export function Fragment(props: { children?: any[] }): VNode {
-  return createVNode('fragment', {}, props.children || []);
+export function Fragment(props: { children?: any[] }): FNode {
+  return createFNode('fragment', {}, props.children || []);
 }
 
 /**
@@ -74,9 +77,9 @@ function flattenChildren(children: any[]): any[] {
 }
 
 /**
- * Check if a value is a VNode
+ * Check if a value is an FNode
  */
-export function isVNode(value: any): value is VNode {
+export function isFNode(value: any): value is FNode {
   return (
     value !== null &&
     typeof value === 'object' &&
@@ -85,6 +88,9 @@ export function isVNode(value: any): value is VNode {
     'children' in value
   );
 }
+
+/** @deprecated Use isFNode instead */
+export const isVNode = isFNode;
 
 /**
  * Create a text node

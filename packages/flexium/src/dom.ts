@@ -10,11 +10,11 @@ export { state } from './core/state'
 
 // DOM renderer
 export { DOMRenderer, domRenderer } from './renderers/dom'
-export { h, Fragment, isVNode, createTextVNode } from './renderers/dom/h'
+export { f, h, Fragment } from './renderers/dom/h'
 export { render, createRoot, mount } from './renderers/dom/render'
 export { mountReactive, createReactiveRoot } from './renderers/dom/reactive'
 export { Portal } from './renderers/dom/portal'
 export { hydrate } from './renderers/dom/hydrate'
 
-// Types
-export type { Renderer, VNode, CommonProps } from './core/renderer'
+// Types (public API - no VNode exposure)
+export type { Renderer, CommonProps } from './core/renderer'

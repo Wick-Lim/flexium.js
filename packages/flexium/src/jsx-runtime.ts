@@ -4,11 +4,11 @@
  * This module provides the automatic JSX runtime for Flexium.
  * It implements the new JSX transform introduced in React 17+.
  *
- * With automatic JSX runtime, you no longer need to import `h`:
+ * With automatic JSX runtime, you no longer need to import `f`:
  *
  * Before (classic):
  * ```tsx
- * import { h } from 'flexium/dom'
+ * import { f } from 'flexium/dom'
  * function App() {
  *   return <div>Hello</div>
  * }
@@ -32,8 +32,8 @@
  * ```
  */
 
-import type { VNode } from './core/renderer';
-import { createVNode } from './core/vnode';
+import type { FNode } from './core/renderer';
+import { createFNode } from './core/vnode';
 
 /**
  * Flatten nested children arrays
@@ -76,17 +76,17 @@ function filterChildren(children: any[]): any[] {
  *
  * @param type - Element type (string for built-in, function for components)
  * @param props - Element properties including children
- * @returns Virtual node
+ * @returns Flexium node
  */
 export function jsx(
   type: string | Function,
   props: Record<string, any>
-): VNode {
+): FNode {
   // Extract children from props
   // Manual extraction is faster than destructuring
   const key = props.key;
   const restProps: Record<string, any> = {};
-  
+
   for (const k in props) {
     if (k !== 'key' && k !== 'children') {
       restProps[k] = props[k];
@@ -106,7 +106,7 @@ export function jsx(
     }
   }
 
-  return createVNode(type, restProps, normalizedChildren, key);
+  return createFNode(type, restProps, normalizedChildren, key);
 }
 
 /**
@@ -115,18 +115,18 @@ export function jsx(
  *
  * @param type - Element type
  * @param props - Element properties
- * @returns Virtual node
+ * @returns Flexium node
  */
 export function jsxs(
   type: string | Function,
   props: Record<string, any>
-): VNode {
+): FNode {
   // For jsxs, we know children is an array passed as a prop
   // We can skip flattening, but we still need to filter
-  
+
   const key = props.key;
   const restProps: Record<string, any> = {};
-  
+
   for (const k in props) {
     if (k !== 'key' && k !== 'children') {
       restProps[k] = props[k];
@@ -143,15 +143,15 @@ export function jsxs(
     normalizedChildren = [children];
   }
 
-  return createVNode(type, restProps, normalizedChildren, key);
+  return createFNode(type, restProps, normalizedChildren, key);
 }
 
 /**
  * Fragment component for JSX
  * Renders children without a wrapper element
  */
-export function Fragment(props: { children?: any[] }): VNode {
-  return createVNode('fragment', {}, props.children || []);
+export function Fragment(props: { children?: any[] }): FNode {
+  return createFNode('fragment', {}, props.children || []);
 }
 
 /**

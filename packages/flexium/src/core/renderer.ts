@@ -161,15 +161,22 @@ export interface CommonProps {
 /**
  * Child types that can be rendered
  */
-export type VNodeChild = VNode | string | number | boolean | null | undefined | VNodeChild[];
+export type FNodeChild = FNode | string | number | boolean | null | undefined | FNodeChild[];
 
 /**
- * Virtual node structure used for JSX/h function
+ * Flexium Node - lightweight element descriptor for JSX
+ * (Not a Virtual DOM - just a simple descriptor that gets immediately converted to real DOM)
  */
-export interface VNode {
+export interface FNode {
   type: string | Function;
   props: Record<string, unknown>;
-  children: VNodeChild[];
+  children: FNodeChild[];
   key?: string | number;
   _node?: RenderNode; // Internal reference to the rendered node
 }
+
+// Legacy aliases for backward compatibility (deprecated)
+/** @deprecated Use FNode instead */
+export type VNode = FNode;
+/** @deprecated Use FNodeChild instead */
+export type VNodeChild = FNodeChild;
