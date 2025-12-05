@@ -158,7 +158,7 @@ Flexium uses Vitest for testing:
 
 ```typescript
 import { describe, it, expect } from 'vitest'
-import { signal, computed, effect } from 'flexium'
+import { signal, computed, effect } from 'flexium/core'
 
 describe('Signal System', () => {
   it('should create a signal', () => {
@@ -414,7 +414,7 @@ npm run build
 ### Runtime Issues
 
 **"signal is not a function"**
-- Import from correct package: `import { signal } from 'flexium'`
+- Import from correct package: `import { signal } from 'flexium/core'`
 - Ensure library is built: `npm run build`
 
 **Components not updating**

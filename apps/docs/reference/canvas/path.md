@@ -17,7 +17,7 @@ Draws a custom SVG-like path on the canvas.
 ## Usage
 
 ```tsx
-import { Canvas, Path } from 'flexium';
+import { Canvas, Path } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
   <Path

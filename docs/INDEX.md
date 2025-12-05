@@ -120,7 +120,7 @@ npm install flexium
 ### Basic Usage
 
 ```typescript
-import { signal, computed, effect } from 'flexium'
+import { signal, computed, effect } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 const count = signal(0)
@@ -224,7 +224,7 @@ For deep dives into the architecture:
 
 ## Project Status
 
-**Current Version:** 0.3.0
+**Current Version:** 0.4.0
 
 **Status:** Early development
 

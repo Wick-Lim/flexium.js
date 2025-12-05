@@ -17,7 +17,7 @@ Draws a straight line on the canvas.
 ## Usage
 
 ```tsx
-import { Canvas, Line } from 'flexium';
+import { Canvas, Line } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
   <Line

@@ -8,7 +8,7 @@ Import `Portal` from `flexium/dom` and specify a mount target:
 
 ```tsx
 import { Portal } from 'flexium/dom'
-import { state } from 'flexium'
+import { state, Show } from 'flexium/core'
 
 function App() {
   const [showModal, setShowModal] = state(false)
@@ -92,7 +92,8 @@ A complete modal implementation:
 
 ```tsx
 import { Portal } from 'flexium/dom'
-import { state, effect, Column, Row, Text, Pressable } from 'flexium'
+import { state, effect, Show } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 interface ModalProps {
   isOpen: boolean
@@ -196,7 +197,7 @@ Portals are perfect for tooltips that need to escape overflow containers:
 
 ```tsx
 import { Portal } from 'flexium/dom'
-import { state } from 'flexium'
+import { state, Show } from 'flexium/core'
 
 function Tooltip(props: { content: string; children: any }) {
   const [show, setShow] = state(false)
@@ -259,7 +260,7 @@ function App() {
 
 ```tsx
 import { Portal } from 'flexium/dom'
-import { state, effect } from 'flexium'
+import { state, effect, Show } from 'flexium/core'
 
 function Dropdown(props: { trigger: any; children: any }) {
   const [open, setOpen] = state(false)

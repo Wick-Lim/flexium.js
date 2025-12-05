@@ -17,7 +17,7 @@ Draws a rectangle on the canvas.
 ## Usage
 
 ```tsx
-import { Canvas, Rect } from 'flexium';
+import { Canvas, Rect } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
   <Rect

@@ -132,11 +132,11 @@ export default defineConfig({
 
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
-      { text: 'Reference', link: '/reference/primitives/column' },
+      { text: 'Reference', link: '/reference/core/state' },
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.3.3',
+        text: 'v0.4.0',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -189,28 +189,35 @@ export default defineConfig({
           ]
         }
       ],
-      '/reference/': [ // New reference sidebar
+      '/reference/': [
         {
-          text: 'Layout Primitives',
+          text: 'flexium/core',
+          collapsed: false,
           items: [
-            { text: 'Column', link: '/reference/primitives/column' },
-            { text: 'Row', link: '/reference/primitives/row' },
-            { text: 'ScrollView', link: '/reference/primitives/scrollview' },
-            { text: 'Spacer', link: '/reference/primitives/spacer' },
-            { text: 'Grid', link: '/reference/primitives/grid' },
-            { text: 'Stack', link: '/reference/primitives/stack' }
+            { text: 'state()', link: '/reference/core/state' },
+            { text: 'effect()', link: '/reference/core/effect' },
+            { text: 'signal() / computed()', link: '/reference/core/signal' },
+            { text: 'batch() / untrack()', link: '/reference/core/batch' },
+            { text: 'onMount() / onCleanup()', link: '/reference/core/lifecycle' },
+            { text: 'For / Show / Switch / Match', link: '/reference/core/flow' },
+            { text: 'createContext() / useContext()', link: '/reference/core/context' },
+            { text: 'Suspense', link: '/reference/core/suspense' },
+            { text: 'ErrorBoundary', link: '/reference/core/error-boundary' }
           ]
         },
         {
-          text: 'Content Primitives',
+          text: 'flexium/dom',
+          collapsed: false,
           items: [
-             { text: 'Text', link: '/reference/primitives/text' },
-             { text: 'Image', link: '/reference/primitives/image' },
-             { text: 'Pressable', link: '/reference/primitives/pressable' },
+            { text: 'render() / createRoot()', link: '/reference/dom/render' },
+            { text: 'mount() / hydrate()', link: '/reference/dom/mount' },
+            { text: 'Portal', link: '/reference/dom/portal' },
+            { text: 'h() / f() / Fragment', link: '/reference/dom/h' }
           ]
         },
         {
-          text: 'Canvas API',
+          text: 'flexium/canvas',
+          collapsed: false,
           items: [
             { text: 'Canvas', link: '/reference/canvas/canvas' },
             { text: 'Rect', link: '/reference/canvas/rect' },
@@ -219,6 +226,32 @@ export default defineConfig({
             { text: 'Text', link: '/reference/canvas/text' },
             { text: 'Line', link: '/reference/canvas/line' },
             { text: 'Arc', link: '/reference/canvas/arc' }
+          ]
+        },
+        {
+          text: 'flexium/primitives',
+          collapsed: false,
+          items: [
+            { text: 'Column', link: '/reference/primitives/column' },
+            { text: 'Row', link: '/reference/primitives/row' },
+            { text: 'Stack', link: '/reference/primitives/stack' },
+            { text: 'Grid', link: '/reference/primitives/grid' },
+            { text: 'Spacer', link: '/reference/primitives/spacer' },
+            { text: 'ScrollView', link: '/reference/primitives/scrollview' },
+            { text: 'Text', link: '/reference/primitives/text' },
+            { text: 'Image', link: '/reference/primitives/image' },
+            { text: 'Pressable', link: '/reference/primitives/pressable' }
+          ]
+        },
+        {
+          text: 'flexium/router',
+          collapsed: false,
+          items: [
+            { text: 'Router / Route', link: '/reference/router/router' },
+            { text: 'Link', link: '/reference/router/link' },
+            { text: 'Outlet', link: '/reference/router/outlet' },
+            { text: 'useParams() / useLocation()', link: '/reference/router/hooks' },
+            { text: 'Route Guards', link: '/reference/router/guards' }
           ]
         }
       ],

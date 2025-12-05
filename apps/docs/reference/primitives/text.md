@@ -17,7 +17,7 @@ Renders text content.
 ## Usage
 
 ```tsx
-import { Text } from 'flexium';
+import { Text } from 'flexium/primitives';
 
 function App() {
   return (

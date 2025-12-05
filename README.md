@@ -24,7 +24,7 @@ Flexium unifies all state concepts into one function.
 ### 1. Local State (Like `useState`)
 
 ```javascript
-import { state } from 'flexium';
+import { state } from 'flexium/core';
 
 function Counter() {
   // Create local state
@@ -99,7 +99,7 @@ const [double] = state(() => count() * 2);
 Flexium uses a signal-based reactivity system. Components run once, and only the parts that depend on changed state will update.
 
 ```javascript
-import { state, effect } from 'flexium';
+import { state, effect } from 'flexium/core';
 
 const [count, setCount] = state(0);
 

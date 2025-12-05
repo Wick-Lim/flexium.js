@@ -15,7 +15,8 @@ export {
   onCleanup,
   createResource,
   onMount,
-  untrack
+  untrack,
+  batch
 } from './core/signal';
 
 export { state } from './core/state';

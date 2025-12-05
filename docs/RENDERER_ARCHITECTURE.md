@@ -135,7 +135,7 @@ The reactive system integrates signals with the renderer for fine-grained update
 
 **Example:**
 ```typescript
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 import { createReactiveRoot } from 'flexium/dom';
 
 function Counter() {
@@ -352,7 +352,7 @@ const [count, setCount] = useState(0);
 ### 4. Batch Multiple Updates
 
 ```typescript
-import { batch } from 'flexium';
+import { batch } from 'flexium/core';
 
 // ✅ Good - single update
 batch(() => {
@@ -410,7 +410,7 @@ flexium/
 
 ```typescript
 // Core
-import { signal, computed, effect } from 'flexium';
+import { signal, computed, effect } from 'flexium/core';
 
 // DOM Renderer
 import { render, createRoot, h } from 'flexium/dom';

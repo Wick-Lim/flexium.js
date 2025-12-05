@@ -17,7 +17,7 @@ The `Canvas` component acts as a container for all canvas-based drawings. It cre
 ## Usage
 
 ```tsx
-import { Canvas, Rect, Circle } from 'flexium';
+import { Canvas, Rect, Circle } from 'flexium/canvas';
 
 function DrawingApp() {
   return (

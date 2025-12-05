@@ -113,7 +113,7 @@ effect(() => {
 ### Detection
 
 ```typescript
-import { isSignal } from 'flexium';
+import { isSignal } from 'flexium/core';
 
 isSignal(count)     // true
 isSignal(5)         // false

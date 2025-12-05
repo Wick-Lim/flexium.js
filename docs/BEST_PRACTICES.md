@@ -114,7 +114,7 @@ userSettings.value = { ...userSettings.value, theme: 'light' }
 When updating multiple signals at once, use `batch()` to prevent unnecessary re-renders:
 
 ```typescript
-import { batch } from 'flexium'
+import { batch } from 'flexium/core'
 
 const firstName = signal('John')
 const lastName = signal('Doe')
@@ -177,7 +177,7 @@ export function UserProfile({ userId }: { userId: number }) {
 Follow this consistent structure:
 
 ```typescript
-import { signal, computed, effect } from 'flexium'
+import { signal, computed, effect } from 'flexium/core'
 import { h } from 'flexium/dom'
 
 // 1. Types/Interfaces
@@ -423,7 +423,7 @@ effect(() => {
 For lists with 100+ items, use virtualization:
 
 ```typescript
-import { signal, computed } from 'flexium'
+import { signal, computed } from 'flexium/core'
 
 function VirtualList({ items, itemHeight = 50, visibleCount = 20 }) {
   const scrollTop = signal(0)
@@ -542,7 +542,7 @@ const doubled = computed(() => count.value * 2)
 
 ```typescript
 import { describe, it, expect } from 'vitest'
-import { signal, computed, effect } from 'flexium'
+import { signal, computed, effect } from 'flexium/core'
 
 describe('Counter Signal', () => {
   it('should initialize with correct value', () => {
@@ -683,7 +683,7 @@ export function addTodo(text: string) {
 
 ```typescript
 // services/userService.ts
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 
 const users = signal<User[]>([])
 const loading = signal(false)

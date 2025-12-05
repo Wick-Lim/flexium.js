@@ -8,7 +8,7 @@
  * @example
  * ```tsx
  * import { Canvas, Rect, Circle } from 'flexium/canvas'
- * import { signal } from 'flexium'
+ * import { signal } from 'flexium/core'
  *
  * const x = signal(50)
  *

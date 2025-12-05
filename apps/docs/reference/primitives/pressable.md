@@ -17,7 +17,7 @@ A wrapper for making views respond to touches or clicks.
 ## Usage
 
 ```tsx
-import { Pressable, Text } from 'flexium';
+import { Pressable, Text } from 'flexium/primitives';
 
 function Button() {
   return (

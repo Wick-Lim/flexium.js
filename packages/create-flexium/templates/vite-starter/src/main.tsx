@@ -1,4 +1,4 @@
-import { signal, computed } from 'flexium'
+import { signal, computed } from 'flexium/core'
 import { render } from 'flexium/dom'
 import { Router, Route, Link, useRouter } from 'flexium/router'
 

@@ -15,14 +15,30 @@ import { useContext } from '../context'
 
 describe('Suspense', () => {
   let container: HTMLElement
+  // Track pending promises to resolve them in cleanup
+  let pendingResolvers: Array<() => void> = []
+
+  // Helper to create a "never resolves" promise that can be cleaned up
+  const createPendingPromise = () => {
+    let resolver: () => void
+    const promise = new Promise<void>((resolve) => {
+      resolver = resolve
+    })
+    pendingResolvers.push(resolver!)
+    return promise
+  }
 
   beforeEach(() => {
     container = document.createElement('div')
     document.body.appendChild(container)
+    pendingResolvers = []
   })
 
   afterEach(() => {
     container.remove()
+    // Resolve all pending promises to allow cleanup
+    pendingResolvers.forEach(resolve => resolve())
+    pendingResolvers = []
   })
 
   describe('Basic Suspense rendering', () => {
@@ -37,7 +53,7 @@ describe('Suspense', () => {
     })
 
     it('should render fallback when there are pending promises', () => {
-      const pendingPromise = new Promise(() => {}) // Never resolves
+      const pendingPromise = createPendingPromise() // Cleaned up in afterEach
 
       const suspenseFn = Suspense({
         fallback: h('div', { class: 'fallback' }, 'Loading...'),
@@ -122,8 +138,8 @@ describe('Suspense', () => {
     })
 
     it('should increment pending count when promise registered', () => {
-      const promise1 = new Promise(() => {})
-      const promise2 = new Promise(() => {})
+      const promise1 = createPendingPromise()
+      const promise2 = createPendingPromise()
 
       const suspenseFn = Suspense({
         fallback: h('div', {}, 'Loading...'),

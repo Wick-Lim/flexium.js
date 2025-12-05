@@ -396,7 +396,7 @@ Want to build your own example? Here's the basic structure:
 
 ```tsx
 // NEW: No h import needed with automatic JSX runtime!
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function App() {

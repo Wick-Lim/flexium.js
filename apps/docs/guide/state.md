@@ -20,7 +20,7 @@ It handles local state, shared global state, async data fetching, and derived va
 The `state` function returns a tuple of `[getter, setter]`, similar to React's `useState`, but with supercharged capabilities.
 
 ```tsx
-import { state } from 'flexium';
+import { state } from 'flexium/core';
 
 const [count, setCount] = state(0);
 ```
@@ -51,7 +51,7 @@ To share state across components, simply provide a unique `key` in the options.
 
 ```tsx
 // store/theme.ts
-import { state } from 'flexium';
+import { state } from 'flexium/core';
 
 // Initialize with a default value
 export const useTheme = () => state('light', { key: 'theme' });
@@ -141,7 +141,7 @@ Computed state is read-only by default (the setter is no-op or throws, depending
 While `state()` manages data, `effect()` handles side effects like DOM manipulation, logging, or subscriptions.
 
 ```tsx
-import { state, effect } from 'flexium';
+import { state, effect } from 'flexium/core';
 
 const [count, setCount] = state(0);
 

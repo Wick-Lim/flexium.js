@@ -17,9 +17,9 @@ Build an interactive drawing application with Flexium's Canvas API.
 ## Basic Drawing App
 
 ```tsx
-import { state } from 'flexium'
-import { Canvas, Path, Circle } from 'flexium'
-import { Column, Row, Text, Pressable } from 'flexium'
+import { state } from 'flexium/core'
+import { Canvas, Path, Circle } from 'flexium/canvas'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 interface Point {
   x: number
@@ -163,9 +163,9 @@ function DrawingApp() {
 ## With Undo/Redo
 
 ```tsx
-import { state } from 'flexium'
-import { Canvas, Path } from 'flexium'
-import { Column, Row, Text, Pressable } from 'flexium'
+import { state } from 'flexium/core'
+import { Canvas, Path } from 'flexium/canvas'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 interface Point {
   x: number

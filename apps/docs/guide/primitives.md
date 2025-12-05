@@ -23,7 +23,7 @@ Flexium uses `Row` and `Column` for all layout needs. This aligns with the Flexb
 Vertical layout container.
 
 ```tsx
-import { Column } from 'flexium'
+import { Column } from 'flexium/primitives'
 
 <Column gap={10} padding={20}>
   <Text>Top</Text>
@@ -39,7 +39,7 @@ import { Column } from 'flexium'
 Horizontal layout container.
 
 ```tsx
-import { Row } from 'flexium'
+import { Row } from 'flexium/primitives'
 
 <Row justify="between" align="center">
   <Text>Left</Text>
@@ -57,7 +57,7 @@ import { Row } from 'flexium'
 Renders text content.
 
 ```tsx
-import { Text } from 'flexium'
+import { Text } from 'flexium/primitives'
 
 <Text style={{ fontSize: 20, color: 'blue' }}>
   Hello World
@@ -72,7 +72,7 @@ import { Text } from 'flexium'
 Renders images.
 
 ```tsx
-import { Image } from 'flexium'
+import { Image } from 'flexium/primitives'
 
 <Image
   src="/logo.png"
@@ -92,7 +92,7 @@ import { Image } from 'flexium'
 A wrapper for making views respond to touches or clicks.
 
 ```tsx
-import { Pressable, Text } from 'flexium'
+import { Pressable, Text } from 'flexium/primitives'
 
 <Pressable onPress={() => console.log('Pressed')}>
   <Text>Button</Text>
@@ -109,7 +109,7 @@ import { Pressable, Text } from 'flexium'
 A scrolling container.
 
 ```tsx
-import { ScrollView, Column } from 'flexium'
+import { ScrollView, Column } from 'flexium/primitives'
 
 <ScrollView style={{ height: 400 }}>
   <Column>
@@ -124,7 +124,7 @@ import { ScrollView, Column } from 'flexium'
 ## Full Example
 
 ```tsx
-import { Column, Row, Text, Image, Pressable, ScrollView } from 'flexium'
+import { Column, Row, Text, Image, Pressable, ScrollView } from 'flexium/primitives'
 
 function App() {
   return (

@@ -17,8 +17,8 @@ This example demonstrates form handling with validation in Flexium.
 ## Basic Form
 
 ```tsx
-import { state } from 'flexium'
-import { Column, Row, Text, Pressable } from 'flexium'
+import { state } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function BasicForm() {
   const [name, setName] = state('')

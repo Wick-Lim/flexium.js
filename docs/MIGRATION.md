@@ -45,6 +45,8 @@ function Counter() {
 
 **Flexium:**
 ```typescript
+import { signal } from 'flexium/core'
+
 function Counter() {
   const count = signal(0)
 
@@ -81,6 +83,8 @@ function TodoList() {
 
 **Flexium:**
 ```typescript
+import { signal, computed } from 'flexium/core'
+
 function TodoList() {
   const todos = signal([])
 
@@ -915,7 +919,7 @@ function Card({ title }: Props) {
 Test signals directly:
 
 ```typescript
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 
 test('counter increments', () => {
   const count = signal(0)

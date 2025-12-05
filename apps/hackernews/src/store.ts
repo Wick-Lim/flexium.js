@@ -1,4 +1,4 @@
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 import { fetchIds, fetchItem, fetchUser } from './api'
 
 // Types

@@ -17,7 +17,7 @@ A container that supports scrolling.
 ## Usage
 
 ```tsx
-import { ScrollView, Column, Text } from 'flexium';
+import { ScrollView, Column, Text } from 'flexium/primitives';
 
 function App() {
   return (

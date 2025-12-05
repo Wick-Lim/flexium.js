@@ -238,7 +238,7 @@ Create `.vscode/launch.json` for debugging:
 To debug signal values:
 
 ```typescript
-import { signal, effect } from 'flexium'
+import { signal, effect } from 'flexium/core'
 
 const count = signal(0)
 

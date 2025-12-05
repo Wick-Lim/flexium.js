@@ -17,9 +17,9 @@ Create interactive data visualizations with Flexium's Canvas API.
 ## Bar Chart
 
 ```tsx
-import { state } from 'flexium'
-import { Canvas, Rect, Line, CanvasText } from 'flexium'
-import { Column, Row, Text, Pressable } from 'flexium'
+import { state } from 'flexium/core'
+import { Canvas, Rect, Line, CanvasText } from 'flexium/canvas'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 interface DataPoint {
   label: string
@@ -126,8 +126,8 @@ function BarChart() {
 ## Line Chart
 
 ```tsx
-import { state } from 'flexium'
-import { Canvas, Path, Circle, Line } from 'flexium'
+import { state } from 'flexium/core'
+import { Canvas, Path, Circle, Line } from 'flexium/canvas'
 
 function LineChart() {
   const [data] = state([
@@ -197,9 +197,9 @@ function LineChart() {
 ## Pie Chart
 
 ```tsx
-import { state } from 'flexium'
-import { Canvas, Path } from 'flexium'
-import { Column, Row, Text } from 'flexium'
+import { state } from 'flexium/core'
+import { Canvas, Path } from 'flexium/canvas'
+import { Column, Row, Text } from 'flexium/primitives'
 
 function PieChart() {
   const [data] = state([

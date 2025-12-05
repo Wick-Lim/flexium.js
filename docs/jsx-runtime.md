@@ -86,7 +86,7 @@ Flexium exports the following from `flexium/jsx-runtime`:
 ### Basic Component
 
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {

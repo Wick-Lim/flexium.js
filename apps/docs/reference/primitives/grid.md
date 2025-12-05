@@ -19,7 +19,7 @@ The `Grid` component is a primitive layout component based on CSS Grid. It suppo
 ## Usage
 
 ```tsx
-import { Grid } from 'flexium';
+import { Grid } from 'flexium/primitives';
 
 function App() {
   return (
@@ -38,7 +38,7 @@ function App() {
 ### Responsive Grid
 
 ```tsx
-import { Grid } from 'flexium';
+import { Grid } from 'flexium/primitives';
 
 function App() {
   return (
@@ -59,7 +59,7 @@ function App() {
 ### Custom Template
 
 ```tsx
-import { Grid } from 'flexium';
+import { Grid } from 'flexium/primitives';
 
 function App() {
   return (

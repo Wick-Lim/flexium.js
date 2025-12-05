@@ -19,7 +19,7 @@ The `Column` component is the primary primitive for vertical layouts. It renders
 ## Usage
 
 ```tsx
-import { Column, Text } from 'flexium';
+import { Column, Text } from 'flexium/primitives';
 
 function App() {
   return (

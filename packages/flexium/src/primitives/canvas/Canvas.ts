@@ -39,7 +39,7 @@ export function Canvas(props: CanvasProps): VNode {
 
         // Render canvas children with effect for reactivity
         // Import effect and onCleanup dynamically to avoid circular deps
-        import('../../index').then(({ effect, onCleanup }) => {
+        import('../../core/signal').then(({ effect, onCleanup }) => {
           let rafId: number | undefined
 
           effect(() => {

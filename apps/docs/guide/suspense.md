@@ -7,7 +7,8 @@ Suspense lets you display a fallback UI while waiting for async content to load.
 Wrap async content with `<Suspense>` and provide a fallback:
 
 ```tsx
-import { Suspense, state, render } from 'flexium'
+import { Suspense, state } from 'flexium/core'
+import { render } from 'flexium/dom'
 
 function UserProfile() {
   const [user] = state(async () => {
@@ -107,6 +108,9 @@ This allows the header to appear first while other sections continue loading.
 Use the `loading` property from state to show inline loading indicators:
 
 ```tsx
+import { state, For, Show } from 'flexium/core'
+import { Row, Column, Text, Pressable } from 'flexium/primitives'
+
 function UserList() {
   const [users, { refetch }] = state(async () => fetchUsers())
 
@@ -134,7 +138,8 @@ function UserList() {
 Combine Suspense with ErrorBoundary for complete async handling:
 
 ```tsx
-import { Suspense, ErrorBoundary } from 'flexium'
+import { Suspense, ErrorBoundary } from 'flexium/core'
+import { Column, Text, Pressable } from 'flexium/primitives'
 
 function App() {
   return (

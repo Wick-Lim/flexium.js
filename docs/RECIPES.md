@@ -22,7 +22,7 @@ Common patterns and solutions for building applications with Flexium.
 ### Basic Data Fetching with state()
 
 ```tsx
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function UserProfile({ userId }) {
@@ -55,7 +55,7 @@ function UserProfile({ userId }) {
 ### Dependent Data Fetching
 
 ```tsx
-import { state, effect } from 'flexium'
+import { state, effect } from 'flexium/core'
 
 function PostWithComments({ postId }) {
   const [post] = state(async () => {
@@ -89,7 +89,7 @@ function PostWithComments({ postId }) {
 ### Caching & Revalidation
 
 ```tsx
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 
 // Global cached state with stale-while-revalidate pattern
 const [products, { refetch }] = state(
@@ -120,7 +120,7 @@ function ProductList() {
 ### Controlled Form with Validation
 
 ```tsx
-import { state, computed } from 'flexium'
+import { state, computed } from 'flexium/core'
 
 function ContactForm() {
   const [name, setName] = state('')
@@ -200,7 +200,7 @@ function ContactForm() {
 ### Dynamic Form Fields
 
 ```tsx
-import { state, For } from 'flexium'
+import { state, For } from 'flexium/core'
 
 function DynamicForm() {
   const [fields, setFields] = state([{ id: 1, value: '' }])
@@ -243,7 +243,7 @@ function DynamicForm() {
 ### Sortable List
 
 ```tsx
-import { state, computed } from 'flexium'
+import { state, computed } from 'flexium/core'
 
 function SortableTable({ data }) {
   const [sortKey, setSortKey] = state('name')
@@ -299,7 +299,7 @@ function SortableTable({ data }) {
 ### Filtered List with Search
 
 ```tsx
-import { state, computed } from 'flexium'
+import { state, computed } from 'flexium/core'
 
 function FilteredList({ items }) {
   const [search, setSearch] = state('')
@@ -344,7 +344,7 @@ function FilteredList({ items }) {
 ### Transition on State Change
 
 ```tsx
-import { state, effect } from 'flexium'
+import { state, effect } from 'flexium/core'
 
 function FadeTransition({ children, show }) {
   const [visible, setVisible] = state(show())
@@ -378,7 +378,7 @@ function FadeTransition({ children, show }) {
 ### Animated Counter
 
 ```tsx
-import { state, effect } from 'flexium'
+import { state, effect } from 'flexium/core'
 
 function AnimatedCounter({ value }) {
   const [displayed, setDisplayed] = state(value())
@@ -414,7 +414,7 @@ function AnimatedCounter({ value }) {
 ### Auth Context Pattern
 
 ```tsx
-import { state, createContext, useContext } from 'flexium'
+import { state, createContext, useContext } from 'flexium/core'
 
 const AuthContext = createContext(null)
 
@@ -475,7 +475,7 @@ function Profile() {
 ### LocalStorage Sync
 
 ```tsx
-import { state, effect } from 'flexium'
+import { state, effect } from 'flexium/core'
 
 function createPersistedState(key, initial) {
   // Load from localStorage
@@ -521,7 +521,7 @@ function Settings() {
 ### Optimistic Todo Toggle
 
 ```tsx
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 
 function TodoItem({ todo, onUpdate }) {
   const [optimisticDone, setOptimisticDone] = state(todo.done)
@@ -557,7 +557,7 @@ function TodoItem({ todo, onUpdate }) {
 ### Load More Pattern
 
 ```tsx
-import { state, onMount } from 'flexium'
+import { state, onMount } from 'flexium/core'
 
 function InfiniteList() {
   const [items, setItems] = state([])
@@ -619,7 +619,7 @@ function InfiniteList() {
 ### Debounced Search
 
 ```tsx
-import { state, effect } from 'flexium'
+import { state, effect } from 'flexium/core'
 
 function debounce(fn, delay) {
   let timeout
@@ -674,7 +674,8 @@ function SearchInput() {
 ### Modal Component
 
 ```tsx
-import { state, Show, Portal } from 'flexium'
+import { state, Show } from 'flexium/core'
+import { Portal } from 'flexium/dom'
 
 function Modal({ isOpen, onClose, title, children }) {
   // Close on escape key

@@ -82,7 +82,7 @@ The `<ErrorBoundary>` component catches JavaScript errors thrown anywhere in the
 Wrap any part of your application with `ErrorBoundary` to protect it from crashes.
 
 ```jsx
-import { ErrorBoundary } from 'flexium';
+import { ErrorBoundary } from 'flexium/core';
 
 function App() {
   return (
@@ -146,7 +146,7 @@ When using a function fallback, you receive:
 For programmatic error handling, use the `useErrorBoundary` hook:
 
 ```jsx
-import { useErrorBoundary } from 'flexium';
+import { useErrorBoundary } from 'flexium/core';
 
 function MyComponent() {
   const { setError, clearError, retry } = useErrorBoundary();
@@ -178,6 +178,8 @@ If `useErrorBoundary` is called outside of an `ErrorBoundary`, the error will be
 Combine them for complete async error handling:
 
 ```jsx
+import { ErrorBoundary, Suspense } from 'flexium/core'
+
 <ErrorBoundary fallback={<div>Error loading data</div>}>
   <Suspense fallback={<div>Loading...</div>}>
     <AsyncDataComponent />
@@ -190,7 +192,7 @@ Combine them for complete async error handling:
 Effects support an `onError` option for localized error handling:
 
 ```jsx
-import { effect } from 'flexium';
+import { effect } from 'flexium/core';
 
 effect(
   () => {

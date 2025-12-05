@@ -17,7 +17,7 @@ Renders an image.
 ## Usage
 
 ```tsx
-import { Image } from 'flexium';
+import { Image } from 'flexium/primitives';
 
 function App() {
   return (

@@ -21,7 +21,7 @@ The `<For>` component is used for rendering lists. It is much more efficient tha
 ### Usage
 
 ```tsx
-import { For, state } from 'flexium';
+import { For, state } from 'flexium/core';
 
 function TodoList() {
   const [todos, setTodos] = state([
@@ -63,7 +63,7 @@ The `<Show>` component renders its children when the `when` condition is truthy.
 ### Usage
 
 ```tsx
-import { Show, state } from 'flexium';
+import { Show, state } from 'flexium/core';
 
 function UserProfile() {
   const [user, setUser] = state(null);
@@ -102,7 +102,7 @@ The `<Switch>` component renders the first `<Match>` child whose `when` conditio
 ### Usage
 
 ```tsx
-import { Switch, Match, state } from 'flexium';
+import { Switch, Match, state } from 'flexium/core';
 
 function DataFetcher() {
   const [status, setStatus] = state('loading'); // 'loading' | 'error' | 'success'

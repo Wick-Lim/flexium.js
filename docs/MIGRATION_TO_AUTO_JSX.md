@@ -17,7 +17,7 @@ Flexium now supports the **automatic JSX runtime**, introduced in React 17. This
 ```tsx
 // Had to import h in every file that uses JSX
 import { h } from 'flexium/dom';
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 
 function Counter() {
   const count = signal(0);
@@ -29,7 +29,7 @@ function Counter() {
 
 ```tsx
 // No h import needed!
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 import { render } from 'flexium/dom';
 
 function Counter() {
@@ -80,7 +80,8 @@ function App() {
 
 **After:**
 ```tsx
-import { signal, render } from 'flexium/dom';
+import { signal } from 'flexium/core';
+import { render } from 'flexium/dom';
 
 function App() {
   return <div>Hello</div>;

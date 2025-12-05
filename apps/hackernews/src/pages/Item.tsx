@@ -1,4 +1,4 @@
-import { state, effect } from 'flexium'
+import { state, effect } from 'flexium/core'
 import { useRouter, Link } from 'flexium/router'
 import { loadItem, useItem } from '../store'
 

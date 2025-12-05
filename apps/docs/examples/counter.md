@@ -15,8 +15,8 @@ head:
 This example demonstrates state management and interaction.
 
 ```tsx
-import { state } from 'flexium'
-import { Column, Row, Text, Pressable } from 'flexium'
+import { state } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 export default function Counter() {
   const [count, setCount] = state(0)

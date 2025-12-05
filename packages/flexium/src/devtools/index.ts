@@ -272,7 +272,7 @@ export function unregisterComponent(id: number): void {
  * @example
  * ```tsx
  * import { createNamedSignal } from 'flexium/devtools';
- * import { signal } from 'flexium';
+ * import { signal } from 'flexium/core';
  *
  * // Shows as "count" in devtools
  * const count = createNamedSignal('count', 0, signal);

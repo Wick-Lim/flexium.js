@@ -19,7 +19,7 @@ The `Row` component is the primary primitive for horizontal layouts. It renders 
 ## Usage
 
 ```tsx
-import { Row, Text } from 'flexium';
+import { Row, Text } from 'flexium/primitives';
 
 function App() {
   return (

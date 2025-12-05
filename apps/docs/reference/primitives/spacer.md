@@ -19,7 +19,7 @@ The `Spacer` component is used to create space between elements or push elements
 ## Usage
 
 ```tsx
-import { Row, Text, Spacer } from 'flexium';
+import { Row, Text, Spacer } from 'flexium/primitives';
 
 function App() {
   return (
@@ -35,7 +35,7 @@ function App() {
 ### Fixed Size Spacer
 
 ```tsx
-import { Column, Text, Spacer } from 'flexium';
+import { Column, Text, Spacer } from 'flexium/primitives';
 
 function App() {
   return (
@@ -51,7 +51,7 @@ function App() {
 ### Explicit Dimensions
 
 ```tsx
-import { Row, Spacer } from 'flexium';
+import { Row, Spacer } from 'flexium/primitives';
 
 function App() {
   return (

@@ -1,7 +1,7 @@
 // Signal System Tests
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { signal, computed, effect, root } from '../../packages/flexium/dist/test-exports.mjs';
+import { signal, computed, effect, root, batch, untrack } from '../../packages/flexium/dist/test-exports.mjs';
 
 // ==========================================
 // Signal Tests

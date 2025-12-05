@@ -17,7 +17,7 @@ Draws text on the canvas. Note: This component is exported as `CanvasText` to av
 ## Usage
 
 ```tsx
-import { Canvas, CanvasText } from 'flexium';
+import { Canvas, CanvasText } from 'flexium/canvas';
 
 <Canvas width={300} height={100}>
   <CanvasText

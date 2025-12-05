@@ -32,12 +32,12 @@ A simple counter demonstrating `state()` and `computed()` - the building blocks 
 
 ::: details View Source Code
 ```tsx
-import { state } from 'flexium'
-import { computed } from 'flexium/advanced'
+import { state, computed } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Counter() {
   const [count, setCount] = state(0)
-  const doubled = computed(() => count() * 2)
+  const [doubled] = state(() => count() * 2)
 
   return (
     <Column gap={16} padding={24}>
@@ -72,7 +72,8 @@ A fully functional todo list with add, toggle, and delete operations. Shows how 
 
 ::: details View Source Code
 ```tsx
-import { state, For } from 'flexium'
+import { state, For } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function TodoApp() {
   const [todos, setTodos] = state([
@@ -142,7 +143,8 @@ A precise stopwatch with lap recording. Demonstrates timer-based state updates a
 
 ::: details View Source Code
 ```tsx
-import { state, effect } from 'flexium'
+import { state, effect, For } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Stopwatch() {
   const [seconds, setSeconds] = state(0)
@@ -209,7 +211,8 @@ Interactive theme customization with dark mode toggle and color picker. Shows re
 
 ::: details View Source Code
 ```tsx
-import { state } from 'flexium'
+import { state } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function ThemeSwitcher() {
   const [isDark, setIsDark] = state(false)
@@ -282,8 +285,8 @@ Interactive canvas with particle trail effects. Move your mouse to see smooth, r
 
 ::: details View Source Code
 ```tsx
-import { state, effect } from 'flexium'
-import { Canvas, Circle } from 'flexium'
+import { state, effect, For } from 'flexium/core'
+import { Canvas, Circle } from 'flexium/canvas'
 
 function ParticleCanvas() {
   const [mouseX, setMouseX] = state(150)

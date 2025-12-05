@@ -19,7 +19,7 @@ head:
 The `effect` function takes a callback that executes immediately, and then re-executes whenever any tracked signal within it updates.
 
 ```tsx
-import { state, effect } from 'flexium';
+import { state, effect } from 'flexium/core';
 
 const [count, setCount] = state(0);
 

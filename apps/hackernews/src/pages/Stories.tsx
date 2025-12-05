@@ -1,4 +1,4 @@
-import { state, effect, For } from 'flexium'
+import { state, effect, For } from 'flexium/core'
 import { Link } from 'flexium/router'
 import { loadStories, useList, useItem } from '../store'
 

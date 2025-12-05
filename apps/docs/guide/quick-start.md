@@ -51,7 +51,7 @@ Update your `tsconfig.json`:
 Create `src/App.tsx`:
 
 ```tsx
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 
 export function App() {
   const [count, setCount] = state(0)
@@ -59,7 +59,7 @@ export function App() {
   return (
     <div style={{ padding: '20px' }}>
       <h1>Counter: {count}</h1>
-      <button 
+      <button
         onclick={() => setCount(c => c + 1)}
         style={{ padding: '10px 20px', fontSize: '16px' }}
       >

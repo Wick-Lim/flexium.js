@@ -17,7 +17,7 @@ Draws a circle on the canvas.
 ## Usage
 
 ```tsx
-import { Canvas, Circle } from 'flexium';
+import { Canvas, Circle } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
   <Circle

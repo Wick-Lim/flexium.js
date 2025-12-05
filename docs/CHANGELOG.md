@@ -40,7 +40,7 @@ import type { VNode } from 'flexium/dom'
 
 // After
 import { f } from 'flexium/dom'
-import type { FNode } from 'flexium'
+import type { FNode } from 'flexium/core'
 
 // Or use automatic JSX runtime (recommended)
 // tsconfig.json: { "jsx": "react-jsx", "jsxImportSource": "flexium" }

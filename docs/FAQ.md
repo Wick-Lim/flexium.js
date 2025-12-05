@@ -100,7 +100,7 @@ pnpm add flexium
    ```
 3. Create your app:
    ```typescript
-   import { signal } from 'flexium'
+   import { signal } from 'flexium/core'
    import { render } from 'flexium/dom'
 
    const count = signal(0)
@@ -124,7 +124,7 @@ Yes, but TypeScript is **highly recommended** for:
 
 JavaScript usage:
 ```javascript
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 // Works fine, but no type checking
@@ -140,7 +140,7 @@ const count = signal(0)
 Signals are **reactive primitives** that hold values and notify subscribers when they change.
 
 ```typescript
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 
 const count = signal(0)    // Create
 count.value = 5            // Update (triggers subscribers)
@@ -207,7 +207,7 @@ items.value = [...items.value, 4]
 Effects are **side effects** that run when signals change:
 
 ```typescript
-import { effect } from 'flexium'
+import { effect } from 'flexium/core'
 
 const count = signal(0)
 
@@ -249,7 +249,7 @@ effect(() => {
 `batch()` groups multiple signal updates to prevent cascading re-renders:
 
 ```typescript
-import { batch } from 'flexium'
+import { batch } from 'flexium/core'
 
 const firstName = signal('John')
 const lastName = signal('Doe')
@@ -591,7 +591,7 @@ Use Vitest or Jest with jsdom:
 
 ```typescript
 import { describe, it, expect } from 'vitest'
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 describe('Counter', () => {

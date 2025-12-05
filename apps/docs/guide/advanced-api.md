@@ -202,8 +202,8 @@ import { signal, computed } from 'flexium'
 // After (v0.3.0+)
 import { signal, computed } from 'flexium/advanced'
 
-// Or use the recommended API
-import { state } from 'flexium'
+// Current (v0.4.0+)
+import { state } from 'flexium/core'
 ```
 
 This change separates the "easy-to-use" API from the "power-user" API, making it clearer which primitives are intended for typical usage.

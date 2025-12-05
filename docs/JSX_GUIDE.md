@@ -44,7 +44,7 @@ Add to your `tsconfig.json`:
 
 ```tsx
 // No h import needed!
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
@@ -85,7 +85,7 @@ The automatic JSX runtime automatically imports the JSX factory functions, so yo
 **Example:**
 ```tsx
 // ✅ NEW: No h import needed
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function App() {
@@ -111,7 +111,7 @@ The classic JSX runtime where you manually import the `h` function.
 **Example:**
 ```tsx
 // ❌ OLD: h import required
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { h, render } from 'flexium/dom'
 
 function App() {
@@ -211,7 +211,7 @@ module.exports = {
 ### Basic Component
 
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Greeting() {
@@ -235,7 +235,7 @@ render(<Greeting />, document.getElementById('app'))
 ### Using Computed Values
 
 ```tsx
-import { signal, computed } from 'flexium'
+import { signal, computed } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Calculator() {
@@ -265,7 +265,7 @@ function Calculator() {
 ### Lists and Arrays
 
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function TodoList() {
@@ -302,7 +302,7 @@ function TodoList() {
 ### Conditional Rendering
 
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function LoginForm() {
@@ -361,7 +361,7 @@ function MultipleElements2() {
 ### Component Composition
 
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Button({ children, onclick }) {
@@ -461,7 +461,7 @@ function Counter() {
 
 **Flexium:**
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 
 function Counter() {
   const count = signal(0)
@@ -492,7 +492,7 @@ function Calculator() {
 
 **Flexium:**
 ```tsx
-import { signal, computed } from 'flexium'
+import { signal, computed } from 'flexium/core'
 
 function Calculator() {
   const a = signal(5)
@@ -522,7 +522,7 @@ function Logger() {
 
 **Flexium:**
 ```tsx
-import { signal, effect } from 'flexium'
+import { signal, effect } from 'flexium/core'
 
 function Logger() {
   const count = signal(0)
@@ -566,7 +566,7 @@ function Button({ children, onclick, disabled }: ButtonProps) {
 ### Typing Signals
 
 ```tsx
-import { signal, Signal } from 'flexium'
+import { signal, Signal } from 'flexium/core'
 
 interface Todo {
   id: number
@@ -719,7 +719,7 @@ const div: JSX.Element = (
 
 **Before:**
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { h, render, Fragment } from 'flexium/dom'
 
 function App() {
@@ -729,7 +729,7 @@ function App() {
 
 **After:**
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 // Note: Fragment still needs to be imported if used
 import { Fragment } from 'flexium/dom'
@@ -784,7 +784,7 @@ function TodoApp() {
 
 **Flexium Code:**
 ```tsx
-import { signal, computed, effect } from 'flexium'
+import { signal, computed, effect } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function TodoApp() {
@@ -828,11 +828,11 @@ Always use automatic JSX runtime for cleaner code:
 
 ```tsx
 // ✅ Good
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 // ❌ Avoid
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { h, render } from 'flexium/dom'
 ```
 

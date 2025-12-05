@@ -102,7 +102,7 @@ Create `tsconfig.json`:
 Create `src/app.tsx`:
 
 ```tsx
-import { signal, computed } from 'flexium'
+import { signal, computed } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 // Create reactive state
@@ -234,7 +234,7 @@ Update `package.json` to include a build script:
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "flexium": "^0.3.0"
+    "flexium": "^0.4.0"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
@@ -347,7 +347,7 @@ function TodoList() {
 
 **Effects (Side Effects)**:
 ```tsx
-import { effect } from 'flexium'
+import { effect } from 'flexium/core'
 
 // Runs when count changes
 effect(() => {

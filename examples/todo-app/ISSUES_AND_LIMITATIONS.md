@@ -382,7 +382,7 @@ const todo = { title: 'Buy milk' }; // Missing required fields
 
 | Limitation | Reason | Production Fix |
 |------------|--------|----------------|
-| Inline signal implementation | Standalone demo | Import from 'flexium' |
+| Inline signal implementation | Standalone demo | Import from 'flexium/core' |
 | No TypeScript | Simplicity | Use .tsx files |
 | No build step | Standalone HTML | Use Vite/webpack |
 | Template string rendering | No JSX | Use JSX with tsup |

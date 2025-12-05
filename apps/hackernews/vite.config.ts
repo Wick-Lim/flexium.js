@@ -9,6 +9,7 @@ export default defineConfig({
         alias: {
             'flexium/jsx-dev-runtime': path.resolve(__dirname, '../../packages/flexium/src/jsx-dev-runtime.ts'),
             'flexium/jsx-runtime': path.resolve(__dirname, '../../packages/flexium/src/jsx-runtime.ts'),
+            'flexium/core': path.resolve(__dirname, '../../packages/flexium/src/core.ts'),
             'flexium/dom': path.resolve(__dirname, '../../packages/flexium/src/dom.ts'),
             'flexium/router': path.resolve(__dirname, '../../packages/flexium/src/router/index.ts'),
             'flexium': path.resolve(__dirname, '../../packages/flexium/src/index.ts')

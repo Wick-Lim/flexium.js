@@ -33,7 +33,7 @@ pnpm add flexium
 ```html
 <!-- Not recommended for production -->
 <script type="module">
-  import { signal, computed, effect } from 'https://esm.sh/flexium'
+  import { signal, computed, effect } from 'https://esm.sh/flexium/core'
   import { render } from 'https://esm.sh/flexium/dom'
 
   // Your code here
@@ -100,7 +100,7 @@ npm install -D typescript
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "flexium": "^0.3.0"
+    "flexium": "^0.4.0"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
@@ -189,7 +189,7 @@ Vite provides:
 Create `src/app.tsx`:
 
 ```tsx
-import { signal, computed } from 'flexium'
+import { signal, computed } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 // Create reactive state
@@ -339,7 +339,7 @@ open http://localhost:8000
 Signals are the foundation of Flexium's reactivity system.
 
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 
 // Create a signal
 const count = signal(0)
@@ -392,7 +392,7 @@ todos.value = todos.value.map(t =>
 Computed values automatically recalculate when their dependencies change.
 
 ```tsx
-import { signal, computed } from 'flexium'
+import { signal, computed } from 'flexium/core'
 
 const firstName = signal('John')
 const lastName = signal('Doe')
@@ -438,7 +438,7 @@ const completionRate = computed(() =>
 Effects run when their dependencies change.
 
 ```tsx
-import { signal, effect } from 'flexium'
+import { signal, effect } from 'flexium/core'
 
 const count = signal(0)
 

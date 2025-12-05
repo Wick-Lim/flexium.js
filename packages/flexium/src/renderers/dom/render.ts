@@ -9,6 +9,7 @@
  */
 
 import type { VNode, VNodeChild } from '../../core/renderer';
+import type { JSX } from '../../jsx-runtime';
 import { domRenderer } from './index';
 import { isVNode } from './h';
 import { renderReactive, createReactiveRoot } from './reactive';

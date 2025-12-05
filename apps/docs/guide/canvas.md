@@ -29,7 +29,7 @@ Traditional canvas code is imperative and hard to maintain. Flexium makes it dec
 ## Basic Usage
 
 ```tsx
-import { Canvas, Rect, Circle } from 'flexium'
+import { Canvas, Rect, Circle } from 'flexium/canvas'
 
 <Canvas width={400} height={400}>
   <Rect x={50} y={50} width={100} height={100} fill="blue" />
@@ -42,8 +42,8 @@ import { Canvas, Rect, Circle } from 'flexium'
 Canvas elements update automatically when state changes:
 
 ```tsx
-import { state, effect } from 'flexium'
-import { Canvas, Circle } from 'flexium'
+import { state, effect } from 'flexium/core'
+import { Canvas, Circle } from 'flexium/canvas'
 
 function AnimatedCircle() {
   const [x, setX] = state(50)
@@ -167,8 +167,8 @@ Draw arcs:
 Combine with event handlers for interactivity:
 
 ```tsx
-import { state } from 'flexium'
-import { Canvas, Circle } from 'flexium'
+import { state } from 'flexium/core'
+import { Canvas, Circle } from 'flexium/canvas'
 
 function InteractiveCanvas() {
   const [mouseX, setMouseX] = state(200)
@@ -227,8 +227,8 @@ For advanced use cases, access the underlying canvas:
 ## Example: Real-Time Chart
 
 ```tsx
-import { state, effect } from 'flexium'
-import { Canvas, Line, Circle, CanvasText } from 'flexium'
+import { state, effect } from 'flexium/core'
+import { Canvas, Line, Circle, CanvasText } from 'flexium/canvas'
 
 function RealtimeChart() {
   const [dataPoints, setDataPoints] = state([50, 60, 55, 70, 65, 80])

@@ -3,6 +3,7 @@ import { defineConfig } from 'tsup'
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
+    core: 'src/core.ts',
     advanced: 'src/advanced.ts',
     dom: 'src/dom.ts',
     canvas: 'src/canvas.ts',

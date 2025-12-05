@@ -12,7 +12,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
 import { renderToString } from '../../packages/flexium/dist/server.mjs';
-import { signal } from '../../packages/flexium/dist/index.mjs';
+import { signal } from '../../packages/flexium/dist/core.mjs';
 import { h } from '../../packages/flexium/dist/dom.mjs';
 
 describe('renderToString - Basic Elements', () => {

@@ -32,7 +32,7 @@ Add to your `tsconfig.json`:
 
 ```typescript
 // app.tsx
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 import { h } from 'flexium/dom';
 
 function Counter() {
@@ -185,7 +185,7 @@ Text input field:
 ### Basic Signal
 
 ```typescript
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 
 function Example() {
   const name = signal('World');
@@ -205,7 +205,7 @@ function Example() {
 ### Computed Values
 
 ```typescript
-import { signal, computed } from 'flexium';
+import { signal, computed } from 'flexium/core';
 
 function Calculator() {
   const a = signal(5);
@@ -233,7 +233,7 @@ function Calculator() {
 ### Effects
 
 ```typescript
-import { signal, effect } from 'flexium';
+import { signal, effect } from 'flexium/core';
 
 function Logger() {
   const count = signal(0);
@@ -259,7 +259,7 @@ function Logger() {
 ### Batching Updates
 
 ```typescript
-import { signal, batch } from 'flexium';
+import { signal, batch } from 'flexium/core';
 
 function BatchExample() {
   const firstName = signal('John');
@@ -287,7 +287,7 @@ function BatchExample() {
 ### Form with Validation
 
 ```typescript
-import { signal, computed } from 'flexium';
+import { signal, computed } from 'flexium/core';
 
 function LoginForm() {
   const email = signal('');
@@ -332,7 +332,7 @@ function LoginForm() {
 ### List Rendering
 
 ```typescript
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 
 function TodoList() {
   const todos = signal([
@@ -377,7 +377,7 @@ function TodoList() {
 ### Conditional Rendering
 
 ```typescript
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 
 function ConditionalExample() {
   const showDetails = signal(false);

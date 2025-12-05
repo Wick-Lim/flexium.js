@@ -40,10 +40,10 @@ const [user, setUser] = state<User | null>(null);
 
 ## FNode Children Types
 
-As of v0.3.3, Flexium uses FNode (Flexium Node) as its core element type:
+As of v0.4.0, Flexium uses FNode (Flexium Node) as its core element type:
 
 ```tsx
-import type { FNodeChild, FNode } from 'flexium';
+import type { FNodeChild, FNode } from 'flexium/core';
 
 // FNodeChild supports: FNode, string, number, boolean, null, undefined, and arrays
 type FNodeChild = FNode | string | number | boolean | null | undefined | FNodeChild[];

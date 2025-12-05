@@ -9,7 +9,7 @@ Flexium now supports **automatic reactive bindings**, eliminating the need for m
 Previously, developers had to manually create effects to bind signals to DOM updates:
 
 ```typescript
-import { signal, effect } from 'flexium';
+import { signal, effect } from 'flexium/core';
 import { h, render } from 'flexium/dom';
 
 const count = signal(0);
@@ -37,7 +37,7 @@ This approach was:
 With automatic reactive bindings, signals can be used directly in your UI:
 
 ```typescript
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 import { h, render } from 'flexium/dom';
 
 const count = signal(0);
@@ -139,7 +139,7 @@ function Counter() {
 Signals are automatically detected using the `isSignal()` function:
 
 ```typescript
-import { isSignal } from 'flexium';
+import { isSignal } from 'flexium/core';
 
 const count = signal(0);
 isSignal(count); // true
@@ -294,7 +294,7 @@ effect(() => {
 ### Counter
 
 ```typescript
-import { signal } from 'flexium';
+import { signal } from 'flexium/core';
 import { h, render } from 'flexium/dom';
 
 function Counter() {
@@ -314,7 +314,7 @@ render(h(Counter), document.body);
 ### Form with Reactive Validation
 
 ```typescript
-import { signal, computed } from 'flexium';
+import { signal, computed } from 'flexium/core';
 import { h, render } from 'flexium/dom';
 
 function Form() {
@@ -344,7 +344,7 @@ render(h(Form), document.body);
 ### Real-time Dashboard
 
 ```typescript
-import { signal, computed } from 'flexium';
+import { signal, computed } from 'flexium/core';
 import { h, render } from 'flexium/dom';
 
 function Dashboard() {

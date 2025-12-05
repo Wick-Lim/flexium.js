@@ -17,7 +17,7 @@ Draws an arc on the canvas.
 ## Usage
 
 ```tsx
-import { Canvas, Arc } from 'flexium';
+import { Canvas, Arc } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
   <Arc

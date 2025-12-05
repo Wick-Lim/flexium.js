@@ -9,7 +9,7 @@ The `<For>` component renders a list of items based on a reactive array. It is m
 ### Usage
 
 ```jsx
-import { For, state } from 'flexium';
+import { For, state } from 'flexium/core';
 
 function List() {
   const [items, setItems] = state(['A', 'B', 'C']);
@@ -56,7 +56,7 @@ The `<Show>` component handles conditional rendering. It avoids re-rendering the
 ### Usage
 
 ```jsx
-import { Show, state } from 'flexium';
+import { Show, state } from 'flexium/core';
 
 function Toggle() {
   const [loggedIn, setLoggedIn] = state(false);

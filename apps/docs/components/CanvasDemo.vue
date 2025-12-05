@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 
 const container = ref(null)
 let frameId = null

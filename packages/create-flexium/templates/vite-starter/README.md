@@ -85,7 +85,7 @@ Create new components in the `src/` directory:
 
 ```tsx
 // src/MyComponent.tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 
 export function MyComponent() {
   const count = signal(0)
@@ -120,7 +120,7 @@ function App() {
 Signals are the core of Flexium's reactivity:
 
 ```tsx
-import { signal, computed, effect } from 'flexium'
+import { signal, computed, effect } from 'flexium/core'
 
 // Create a signal
 const count = signal(0)

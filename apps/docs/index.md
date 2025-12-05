@@ -54,7 +54,7 @@ features:
 ## Quick Example
 
 ```tsx
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 
 function Counter() {
   // Local state with unified API

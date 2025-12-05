@@ -17,8 +17,8 @@ This example demonstrates animated canvas rendering with Flexium's reactive Canv
 ## Basic Animation
 
 ```tsx
-import { state, effect } from 'flexium'
-import { Canvas, Circle } from 'flexium'
+import { state, effect } from 'flexium/core'
+import { Canvas, Circle } from 'flexium/canvas'
 
 function AnimatedCircle() {
   const [x, setX] = state(100)

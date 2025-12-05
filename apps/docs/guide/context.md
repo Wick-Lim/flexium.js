@@ -7,7 +7,7 @@ The Context API allows you to share data across components without prop drilling
 Use `createContext()` to create a context with a default value:
 
 ```tsx
-import { createContext, useContext } from 'flexium'
+import { createContext, useContext } from 'flexium/core'
 
 // Create a context with a default value
 const ThemeContext = createContext('light')
@@ -59,7 +59,9 @@ function ThemedButton() {
 Here's a complete theme switching example:
 
 ```tsx
-import { state, createContext, useContext, render, Row, Column, Text, Pressable } from 'flexium'
+import { state, createContext, useContext } from 'flexium/core'
+import { render } from 'flexium/dom'
+import { Row, Column, Text, Pressable } from 'flexium/primitives'
 
 // 1. Create the context
 const ThemeContext = createContext<'light' | 'dark'>('light')

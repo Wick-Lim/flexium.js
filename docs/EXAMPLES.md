@@ -145,6 +145,8 @@ The classic counter example - perfect for first-time users.
 
 **Code Snippet**:
 ```tsx
+import { signal } from 'flexium/core'
+
 const count = signal(0)
 
 function Counter() {
@@ -267,6 +269,8 @@ Classic todo app with Motion animations.
 
 **Code Snippet**:
 ```tsx
+import { signal, computed } from 'flexium/core'
+
 const todos = signal<Todo[]>([])
 const remaining = computed(() =>
   todos.value.filter(t => !t.done).length
@@ -523,7 +527,7 @@ Want to create your own example? Here's a template:
 ### 2. Create TypeScript File
 
 ```tsx
-import { signal, computed, effect } from 'flexium'
+import { signal, computed, effect } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 // Your code here
@@ -567,6 +571,8 @@ python3 -m http.server 8000
 ### Signal Updates
 
 ```tsx
+import { signal, computed, effect } from 'flexium/core'
+
 // Primitives
 const count = signal(0)
 count.value++ // Direct mutation
@@ -593,6 +599,8 @@ const fullName = computed(() =>
 ### Effects
 
 ```tsx
+import { signal, computed, effect } from 'flexium/core'
+
 // Run on dependency changes
 effect(() => {
   console.log('Count:', count.value)

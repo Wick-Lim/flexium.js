@@ -17,8 +17,8 @@ A complete todo list application demonstrating state management and list operati
 ## Basic Todo List
 
 ```tsx
-import { state, For } from 'flexium'
-import { Column, Row, Text, Pressable } from 'flexium'
+import { state, For } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 interface Todo {
   id: number
@@ -114,8 +114,8 @@ function TodoApp() {
 ## With Filtering
 
 ```tsx
-import { state, For } from 'flexium'
-import { Column, Row, Text, Pressable } from 'flexium'
+import { state, For } from 'flexium/core'
+import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function TodoAppWithFilter() {
   const [todos, setTodos] = state<Todo[]>([

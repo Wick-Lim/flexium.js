@@ -150,7 +150,7 @@ Development mode variant of `jsx`. Currently identical to `jsx`, but future vers
 
 ### Basic Counter
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
@@ -171,7 +171,7 @@ render(<Counter />, document.getElementById('app'))
 
 ### Todo List
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function TodoList() {
@@ -208,6 +208,8 @@ function TodoList() {
 
 ### Conditional Rendering
 ```tsx
+import { signal } from 'flexium/core'
+
 function Greeting({ user }) {
   return (
     <div>
@@ -379,7 +381,7 @@ function Counter() {
 
 **After (Flexium):**
 ```tsx
-import { signal } from 'flexium'
+import { signal } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
@@ -525,7 +527,7 @@ function App() {
 ### Component Types
 
 ```typescript
-import type { VNode } from 'flexium'
+import type { VNode } from 'flexium/core'
 
 // Functional component type
 type FC<P = {}> = (props: P) => VNode

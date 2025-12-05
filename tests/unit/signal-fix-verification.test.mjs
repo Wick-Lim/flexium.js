@@ -7,7 +7,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { signal, computed, effect } from '../../packages/flexium/dist/test-exports.mjs';
+import { signal, computed, effect, batch, untrack } from '../../packages/flexium/dist/test-exports.mjs';
 
 test('CRITICAL: effect writing to signal does not cause infinite loop', async () => {
   const count = signal(0);

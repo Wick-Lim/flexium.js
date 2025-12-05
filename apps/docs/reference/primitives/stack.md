@@ -19,7 +19,7 @@ The `Stack` component is a primitive layout component for layering children on t
 ## Usage
 
 ```tsx
-import { Stack, Image, Text } from 'flexium';
+import { Stack, Image, Text } from 'flexium/primitives';
 
 function App() {
   return (
@@ -34,7 +34,7 @@ function App() {
 ### Centered Overlay
 
 ```tsx
-import { Stack, Image, Text } from 'flexium';
+import { Stack, Image, Text } from 'flexium/primitives';
 
 function App() {
   return (
@@ -51,7 +51,7 @@ function App() {
 ### Multiple Layers
 
 ```tsx
-import { Stack } from 'flexium';
+import { Stack } from 'flexium/primitives';
 
 function App() {
   return (
