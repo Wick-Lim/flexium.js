@@ -28,7 +28,9 @@ import ThemeDemo from './components/ThemeDemo.vue'
 
 A simple counter demonstrating `state()` and `computed()` - the building blocks of Flexium reactivity.
 
-<ShowcaseDemo />
+<ClientOnly>
+  <ShowcaseDemo />
+</ClientOnly>
 
 ::: details View Source Code
 ```tsx
@@ -68,7 +70,9 @@ function Counter() {
 
 A fully functional todo list with add, toggle, and delete operations. Shows how Flexium handles list state and dynamic rendering.
 
-<TodoDemo />
+<ClientOnly>
+  <TodoDemo />
+</ClientOnly>
 
 ::: details View Source Code
 ```tsx
@@ -139,7 +143,9 @@ function TodoApp() {
 
 A precise stopwatch with lap recording. Demonstrates timer-based state updates and list management.
 
-<TimerDemo />
+<ClientOnly>
+  <TimerDemo />
+</ClientOnly>
 
 ::: details View Source Code
 ```tsx
@@ -207,7 +213,9 @@ function Stopwatch() {
 
 Interactive theme customization with dark mode toggle and color picker. Shows reactive style bindings.
 
-<ThemeDemo />
+<ClientOnly>
+  <ThemeDemo />
+</ClientOnly>
 
 ::: details View Source Code
 ```tsx
@@ -281,7 +289,9 @@ function ThemeSwitcher() {
 
 Interactive canvas with particle trail effects. Move your mouse to see smooth, reactive canvas rendering.
 
-<CanvasDemo />
+<ClientOnly>
+  <CanvasDemo />
+</ClientOnly>
 
 ::: details View Source Code
 ```tsx
