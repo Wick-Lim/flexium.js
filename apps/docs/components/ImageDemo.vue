@@ -19,9 +19,7 @@ onMounted(() => {
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <div style="font-size: 12px; color: #6b7280;">cover</div>
-            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; overflow: hidden;">
-              <div style="width: 100%; height: 100%; background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 150\"><rect fill=\"%234f46e5\" width=\"200\" height=\"150\"/><text x=\"50%\" y=\"50%\" fill=\"white\" font-size=\"16\" text-anchor=\"middle\" dy=\".3em\">Cover</text></svg>'); background-size: cover; background-position: center;"></div>
-            </div>
+            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">Cover</div>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 8px;">
