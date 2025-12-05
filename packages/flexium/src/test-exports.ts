@@ -40,6 +40,6 @@ export { ErrorBoundary } from './core/error-boundary' // New export
 // State
 
 // DOM
-export { h, render } from './renderers/dom/exports'
+export { f, render } from './renderers/dom/exports'
 export { domRenderer } from './renderers/dom/index'
 export { Portal } from './renderers/dom/portal'

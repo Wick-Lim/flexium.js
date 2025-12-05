@@ -1,6 +1,115 @@
-# Migration Guide: Optimized Primitives Imports
+# Migration Guide
 
-## Overview
+## v1.0 Breaking Changes (Deprecated API Removal)
+
+### Overview
+Flexium v1.0 removes deprecated APIs that were marked for removal. These were legacy names from earlier versions that have been replaced with clearer, more descriptive alternatives.
+
+### Breaking Changes
+
+#### 1. Type Aliases Removed
+
+**VNode → FNode**
+```typescript
+// ❌ Before (no longer works)
+import type { VNode } from 'flexium'
+const node: VNode = { ... }
+
+// ✅ After
+import type { FNode } from 'flexium'
+const node: FNode = { ... }
+```
+
+**VNodeChild → FNodeChild**
+```typescript
+// ❌ Before (no longer works)
+import type { VNodeChild } from 'flexium'
+const child: VNodeChild = ...
+
+// ✅ After
+import type { FNodeChild } from 'flexium'
+const child: FNodeChild = ...
+```
+
+#### 2. Function Exports Removed
+
+**h() → f()**
+```typescript
+// ❌ Before (no longer works)
+import { h } from 'flexium/dom'
+const element = h('div', { class: 'container' }, 'Hello')
+
+// ✅ After
+import { f } from 'flexium/dom'
+const element = f('div', { class: 'container' }, 'Hello')
+```
+
+**isVNode() → isFNode()**
+```typescript
+// ❌ Before (no longer works)
+import { isVNode } from 'flexium/dom'
+if (isVNode(value)) { ... }
+
+// ✅ After
+import { isFNode } from 'flexium/dom'
+if (isFNode(value)) { ... }
+```
+
+**createVNode() → createFNode()**
+```typescript
+// ❌ Before (no longer works)
+import { createVNode } from 'flexium'
+const node = createVNode('div', {}, [])
+
+// ✅ After
+import { createFNode } from 'flexium'
+const node = createFNode('div', {}, [])
+```
+
+### Migration Steps
+
+#### Automated Migration with Find & Replace
+
+1. **Update Type Imports**:
+   - Find: `VNode`
+   - Replace with: `FNode`
+   - Find: `VNodeChild`
+   - Replace with: `FNodeChild`
+
+2. **Update Function Calls**:
+   - Find: `\bh\(`
+   - Replace with: `f(`
+   - Find: `isVNode(`
+   - Replace with: `isFNode(`
+   - Find: `createVNode(`
+   - Replace with: `createFNode(`
+
+3. **Update Imports**:
+```typescript
+// Before
+import { h, isVNode } from 'flexium/dom'
+import type { VNode, VNodeChild } from 'flexium'
+
+// After
+import { f, isFNode } from 'flexium/dom'
+import type { FNode, FNodeChild } from 'flexium'
+```
+
+### Why These Changes?
+
+The old "VNode" (Virtual Node) naming was misleading because Flexium doesn't use a traditional Virtual DOM. Instead, Flexium uses a lightweight element descriptor system called "FNode" (Flexium Node) that's immediately converted to real DOM, making it more accurate and less confusing for developers familiar with other frameworks.
+
+### Need Help?
+
+If you encounter issues during migration:
+- File an issue: https://github.com/Wick-Lim/flexium.js/issues
+- Check the examples in the repository for updated patterns
+
+---
+
+## v0.4.7+ Optimized Primitives Imports
+
+### Overview
 Flexium v0.4.7+ introduces split entry points for primitives, reducing the core bundle from ~71KB to ~1.7KB.
 
 ## Quick Migration

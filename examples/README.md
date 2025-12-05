@@ -18,6 +18,16 @@ npx http-server
 # Then open http://localhost:8000/examples/ in your browser
 ```
 
+## Quick Navigation
+
+- [Featured Examples](#-featured-examples) - Production-ready showcase apps
+- [Examples by Difficulty](#examples-by-difficulty) - Organized learning path
+- [Advanced Examples](#-advanced-examples) - Complex features and patterns
+- [Feature Matrix](#feature-matrix) - Find examples by feature
+- [Common Patterns](#common-patterns) - Code snippets and best practices
+
+---
+
 ## 🌟 FEATURED EXAMPLES
 
 ### 1. Todo App (`/todo-app`) ⭐ PRODUCTION DEMO
@@ -105,6 +115,425 @@ open examples/showcase/index.html
 
 ---
 
+## Examples by Difficulty
+
+### Beginner Examples
+
+Perfect for getting started with Flexium basics.
+
+#### 1. Counter (`/counter`)
+
+**Learn the fundamentals of reactive state**
+
+**Demonstrates:**
+- Basic signal() usage
+- Layout primitives (Row, Column)
+- Event handling
+- Fine-grained reactivity
+
+**Key Concepts:**
+```typescript
+const count = signal(0)
+count.value++ // Direct mutation triggers updates
+```
+
+**Files:**
+- `/counter/index.html` - HTML setup with styling
+- `/counter/app.ts` - Flexium counter implementation
+
+**What You'll Learn:**
+- How to create and use signals
+- How Row and Column work for layouts
+- How Button and Text components handle styling
+- Why Flexium only updates changed elements (no re-render)
+
+**Time to Complete:** 5 minutes
+
+---
+
+### Intermediate Examples
+
+Build on the basics with more complex state and interactions.
+
+#### 2. Todo App (`/todo`)
+
+**Master array manipulation and derived state**
+
+**Demonstrates:**
+- Array signals and list rendering
+- computed() for derived values
+- Motion component for animations
+- Complex state management
+- Conditional rendering
+- Multiple filters
+
+**Key Concepts:**
+```typescript
+const todos = signal<Todo[]>([])
+const remaining = computed(() =>
+  todos.value.filter(t => !t.done).length
+)
+```
+
+**Files:**
+- `/todo/index.html` - HTML setup
+- `/todo/app.ts` - Full-featured todo app with animations
+
+**What You'll Learn:**
+- Working with arrays in signals
+- Using computed for derived state
+- Animating list items with Motion
+- Building filters and actions
+- Managing complex application state
+
+**Time to Complete:** 15 minutes
+
+---
+
+#### 3. Snake Game (`/snake-game`) 🎮
+
+**Build an interactive game with Flexium**
+
+**Demonstrates:**
+- Game Module APIs (useKeyboard, useMouse, createGameLoop)
+- Canvas primitives (Canvas, DrawRect, DrawText)
+- Frame-independent movement with delta time
+- Reactive game state management
+- Collision detection
+- Progressive difficulty
+
+**Features:**
+- Arrow keys or WASD for movement
+- Space or mouse click to pause
+- Speed increases with score
+- Visual grid and smooth rendering
+
+**Game Mechanics:**
+- Snake grows by eating food
+- Game over on collision
+- Restart with Enter key
+
+**What You'll Learn:**
+- Using game-specific APIs
+- Canvas rendering with JSX
+- Input handling (keyboard & mouse)
+- Game loop patterns
+- State-driven game logic
+
+**Time to Complete:** 20 minutes
+
+---
+
+#### 4. Error Boundary (`/error-boundary`)
+
+**Handle errors gracefully in your apps**
+
+**Demonstrates:**
+- ErrorBoundary component usage
+- Custom fallback UI patterns
+- Error recovery strategies
+- Nested error boundaries
+- useErrorBoundary hook
+- Async error handling
+
+**Features:**
+- Basic error catching with fallback
+- Detailed error information display
+- Independent error boundaries
+- Retry/recovery mechanisms
+- Error logging callbacks
+
+**What You'll Learn:**
+- Isolating errors to prevent app crashes
+- Creating user-friendly error UI
+- Programmatic error triggering
+- Error boundary best practices
+
+**Time to Complete:** 15 minutes
+
+---
+
+#### 5. Suspense Demo (`/suspense-demo`)
+
+**Master async data loading patterns**
+
+**Demonstrates:**
+- Suspense component for loading states
+- createResource API for data fetching
+- Nested suspense boundaries
+- Integration with ErrorBoundary
+- Parallel data fetching
+- Manual promise registration
+
+**Features:**
+- Basic suspense with loading fallback
+- Multiple independent boundaries
+- Nested hierarchical loading
+- Error handling with retry
+- Progressive content rendering
+
+**What You'll Learn:**
+- Managing async state elegantly
+- Creating loading skeletons
+- Handling loading errors
+- Progressive data loading
+- Resource refetching patterns
+
+**Time to Complete:** 20 minutes
+
+---
+
+### Advanced Examples
+
+Complex real-world patterns and performance optimizations.
+
+#### 6. Dashboard (`/dashboard`)
+
+**Build complex, responsive layouts**
+
+**Demonstrates:**
+- Grid layout with responsive breakpoints
+- Real-time data updates with effect()
+- Complex nested layouts
+- Multiple signals and computed values
+- Hover states and interactions
+- Card-based UI patterns
+
+**Key Concepts:**
+```typescript
+<Grid cols={{ base: 1, sm: 2, lg: 4 }} gap={20}>
+  {stats.value.map(stat => <Card key={stat.id}>...)}
+</Grid>
+
+effect(() => {
+  // Simulate real-time updates
+  const interval = setInterval(() => {
+    stats.value = updateRandomStat(stats.value)
+  }, 3000)
+  return () => clearInterval(interval)
+})
+```
+
+**Files:**
+- `/dashboard/index.html` - HTML setup
+- `/dashboard/app.ts` - Full dashboard with real-time updates
+
+**What You'll Learn:**
+- Building responsive layouts with Grid
+- Handling real-time data updates
+- Using effects for side effects (timers, subscriptions)
+- Creating complex nested component structures
+- Proper cleanup with effect return functions
+- Building production-ready UI patterns
+
+**Time to Complete:** 25 minutes
+
+---
+
+#### 7. Virtual List (`/virtual-list`)
+
+**Efficiently render massive datasets**
+
+**Demonstrates:**
+- VirtualList component for performance
+- Windowing/virtualization techniques
+- Fixed item heights
+- Programmatic scrolling
+- Overscan buffer configuration
+- Real-time statistics
+
+**Features:**
+- Handle 10,000+ items effortlessly
+- Only render visible items
+- Smooth 60fps scrolling
+- Custom item rendering
+- Scroll to any position
+- Accessibility support
+
+**Performance:**
+- ~20-30 DOM nodes (vs 100,000)
+- <1MB memory (vs 50-100MB)
+- Fast initial render
+- Minimal CPU usage
+
+**What You'll Learn:**
+- When and why to use virtualization
+- Optimizing large list rendering
+- Scroll performance techniques
+- Memory management patterns
+
+**Time to Complete:** 20 minutes
+
+---
+
+#### 8. SSR Example (`/ssr-example`)
+
+**Server-Side Rendering with hydration**
+
+**Demonstrates:**
+- renderToString() for SSR
+- hydrate() for client activation
+- Universal component rendering
+- Signal behavior in SSR
+- Express server setup
+- Vite SSR configuration
+
+**Features:**
+- Server renders static HTML
+- Client hydrates for interactivity
+- No layout shift or flicker
+- SEO-friendly content
+- Fast initial load
+- Progressive enhancement
+
+**What You'll Learn:**
+- How SSR works in Flexium
+- Setting up SSR with Express
+- Hydration process and patterns
+- Signal serialization
+- Error handling in SSR
+- Data fetching strategies
+
+**Time to Complete:** 30 minutes
+
+---
+
+#### 9. Accessibility Demo (`/accessibility`)
+
+**Build WCAG 2.1 AA compliant apps**
+
+**Demonstrates:**
+- ARIA attributes and semantic HTML
+- Keyboard navigation patterns
+- Focus management and trapping
+- Form accessibility
+- Screen reader support
+- Color contrast compliance
+- Modal dialog patterns
+- Live region announcements
+- Reduced motion support
+
+**Features:**
+- Skip link to main content
+- Focus indicators on all elements
+- Proper label associations
+- Error announcements
+- High contrast support
+- Toast notifications
+- WCAG 2.1 AA checklist
+
+**What You'll Learn:**
+- Building inclusive web apps
+- ARIA roles, states, and properties
+- Keyboard navigation best practices
+- Screen reader testing
+- Accessibility testing tools
+- Common a11y pitfalls to avoid
+
+**Time to Complete:** 35 minutes
+
+---
+
+## 🆕 Advanced Examples
+
+### Game Development
+
+#### Snake Game (`/snake-game`) 🎮
+Classic snake game demonstrating Flexium's game development capabilities with keyboard/mouse input, canvas rendering, and frame-independent movement.
+
+**APIs:** useKeyboard(), useMouse(), createGameLoop(), Canvas, DrawRect, DrawText
+
+**Difficulty:** Intermediate
+
+---
+
+### Error Handling
+
+#### Error Boundary (`/error-boundary`)
+Comprehensive error handling patterns with error boundaries, fallback UI, recovery strategies, and nested boundaries.
+
+**APIs:** ErrorBoundary, useErrorBoundary, fallback props, onError/onReset callbacks
+
+**Difficulty:** Intermediate
+
+---
+
+### Async Patterns
+
+#### Suspense Demo (`/suspense-demo`)
+Elegant async data loading with suspense boundaries, loading states, error handling, and nested hierarchical loading.
+
+**APIs:** Suspense, createResource, ErrorBoundary, SuspenseCtx, manual promise registration
+
+**Difficulty:** Intermediate
+
+---
+
+### Performance
+
+#### Virtual List (`/virtual-list`)
+High-performance list rendering for thousands of items using virtualization/windowing techniques.
+
+**APIs:** VirtualList, itemSize, overscan, programmatic scrolling, getKey
+
+**Difficulty:** Advanced
+
+---
+
+### Server-Side Rendering
+
+#### SSR Example (`/ssr-example`)
+Complete SSR implementation with Express server, renderToString(), client hydration, and universal rendering.
+
+**APIs:** renderToString, hydrate, Express middleware, Vite SSR config
+
+**Difficulty:** Advanced
+
+---
+
+### Accessibility
+
+#### Accessibility Demo (`/accessibility`)
+WCAG 2.1 AA compliant application showcasing keyboard navigation, screen readers, ARIA attributes, focus management, and inclusive design patterns.
+
+**APIs:** ARIA roles/properties/states, semantic HTML, live regions, focus trap
+
+**Difficulty:** Advanced
+
+---
+
+## Feature Matrix
+
+Find examples by the features they demonstrate:
+
+| Example | Signals | Computed | Effects | Arrays | Forms | Canvas | SSR | Game | A11y | Perf |
+|---------|---------|----------|---------|--------|-------|--------|-----|------|------|------|
+| **Counter** | ✅ | ✅ | - | - | - | - | - | - | ✅ | - |
+| **Todo** | ✅ | ✅ | ✅ | ✅ | - | - | - | - | - | - |
+| **Dashboard** | ✅ | ✅ | ✅ | ✅ | - | - | - | - | - | - |
+| **Todo App** | ✅ | ✅ | ✅ | ✅ | ✅ | - | - | - | ✅ | - |
+| **Showcase** | ✅ | ✅ | ✅ | ✅ | ✅ | - | - | - | ✅ | - |
+| **Snake Game** | ✅ | ✅ | ✅ | ✅ | - | ✅ | - | ✅ | - | ✅ |
+| **Error Boundary** | ✅ | - | - | - | - | - | - | - | - | - |
+| **Suspense Demo** | ✅ | - | - | - | - | - | - | - | - | - |
+| **Virtual List** | ✅ | ✅ | - | ✅ | - | - | - | - | ✅ | ✅ |
+| **SSR Example** | ✅ | ✅ | ✅ | ✅ | ✅ | - | ✅ | - | - | - |
+| **Accessibility** | ✅ | ✅ | ✅ | ✅ | ✅ | - | - | - | ✅ | - |
+
+**Legend:**
+- **Signals**: Reactive state with signal()
+- **Computed**: Derived values with computed()
+- **Effects**: Side effects with effect()
+- **Arrays**: Array manipulation and list rendering
+- **Forms**: Form handling and validation
+- **Canvas**: Canvas rendering and drawing
+- **SSR**: Server-Side Rendering
+- **Game**: Game development features
+- **A11y**: Accessibility features
+- **Perf**: Performance optimizations
+
+---
+
 ## 🆕 Automatic Reactivity Examples
 
 ### auto-reactive-demo.ts
@@ -185,116 +614,6 @@ render(button, document.body);
 
 ---
 
-## Examples Overview
-
-### 1. Counter (`/counter`)
-
-**Difficulty:** Beginner
-
-**Demonstrates:**
-- Basic signal() usage
-- Layout primitives (Row, Column)
-- Event handling
-- Fine-grained reactivity
-
-**Key Concepts:**
-```typescript
-const count = signal(0)
-count.value++ // Direct mutation triggers updates
-```
-
-**Files:**
-- `/counter/index.html` - HTML setup with styling
-- `/counter/app.ts` - Flexium counter implementation
-
-**What You'll Learn:**
-- How to create and use signals
-- How Row and Column work for layouts
-- How Button and Text components handle styling
-- Why Flexium only updates changed elements (no re-render)
-
-**Time to Complete:** 5 minutes
-
----
-
-### 2. Todo App (`/todo`)
-
-**Difficulty:** Intermediate
-
-**Demonstrates:**
-- Array signals and list rendering
-- computed() for derived values
-- Motion component for animations
-- Complex state management
-- Conditional rendering
-- Multiple filters
-
-**Key Concepts:**
-```typescript
-const todos = signal<Todo[]>([])
-const remaining = computed(() =>
-  todos.value.filter(t => !t.done).length
-)
-```
-
-**Files:**
-- `/todo/index.html` - HTML setup
-- `/todo/app.ts` - Full-featured todo app with animations
-
-**What You'll Learn:**
-- Working with arrays in signals
-- Using computed for derived state
-- Animating list items with Motion
-- Building filters and actions
-- Managing complex application state
-
-**Time to Complete:** 15 minutes
-
----
-
-### 3. Dashboard (`/dashboard`)
-
-**Difficulty:** Advanced
-
-**Demonstrates:**
-- Grid layout with responsive breakpoints
-- Real-time data updates with effect()
-- Complex nested layouts
-- Multiple signals and computed values
-- Hover states and interactions
-- Card-based UI patterns
-
-**Key Concepts:**
-```typescript
-<Grid cols={{ base: 1, sm: 2, lg: 4 }} gap={20}>
-  {stats.value.map(stat => <Card key={stat.id}>...)}
-</Grid>
-
-effect(() => {
-  // Simulate real-time updates
-  const interval = setInterval(() => {
-    stats.value = updateRandomStat(stats.value)
-  }, 3000)
-  return () => clearInterval(interval)
-})
-```
-
-**Files:**
-- `/dashboard/index.html` - HTML setup
-- `/dashboard/app.ts` - Full dashboard with real-time updates
-
-**What You'll Learn:**
-- Building responsive layouts with Grid
-- Handling real-time data updates
-- Using effects for side effects (timers, subscriptions)
-- Creating complex nested component structures
-- Proper cleanup with effect return functions
-- Building production-ready UI patterns
-
-**Time to Complete:** 25 minutes
-
----
-
 ## Common Patterns
 
 ### Signal Updates
@@ -360,6 +679,8 @@ items.value = items.value.filter(x => x !== 2)
   </Motion>
 ))}
 ```
+
+---
 
 ## Building from Scratch
 
@@ -454,6 +775,8 @@ npx serve .
 
 **Note:** With automatic JSX runtime, you no longer need to import `h`! Just configure `tsconfig.json` and start writing JSX. See the [JSX Guide](/docs/JSX_GUIDE.md) for more details.
 
+---
+
 ## Tips & Best Practices
 
 ### Performance
@@ -519,6 +842,8 @@ npx serve .
    const todos = signal<Todo[]>([])
    ```
 
+---
+
 ## Next Steps
 
 1. Run each example and explore the code
@@ -526,6 +851,8 @@ npx serve .
 3. Build your own example using these as templates
 4. Read the [API Documentation](/docs/API.md) for complete reference
 5. Check the [Migration Guide](/docs/MIGRATION.md) if coming from React/Vue/Svelte
+
+---
 
 ## Need Help?
 

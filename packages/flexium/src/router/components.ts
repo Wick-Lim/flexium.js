@@ -2,10 +2,10 @@ import { computed } from '../core/signal'
 import { createLocation } from './core'
 import { createRoutesFromChildren, matchRoutes } from './utils'
 import { LinkProps, RouteProps, RouterContext } from './types'
-import { h } from '../renderers/dom/h'
+import { f } from '../renderers/dom/h'
 import { RouterCtx, RouteDepthCtx } from './context'
 import { useContext } from '../core/context'
-import type { VNodeChild } from '../core/renderer'
+import type { FNodeChild } from '../core/renderer'
 
 // Helper to use Router Context
 export function useRouter(): RouterContext {
@@ -16,7 +16,7 @@ export function useRouter(): RouterContext {
   return ctx
 }
 
-export function Router(props: { children: VNodeChild }) {
+export function Router(props: { children: FNodeChild }) {
   const [location, navigate] = createLocation()
 
   // Parse route configuration from children
@@ -76,9 +76,9 @@ export function Router(props: { children: VNodeChild }) {
     // Root Layout contains Outlet. Outlet renders match[1].
     // So Outlet needs depth 1.
 
-    return h(RouterCtx.Provider, { value: routerContext }, [
-      h(RouteDepthCtx.Provider, { value: 1 }, [
-        h(RootComponent, { params: rootMatch.params }),
+    return f(RouterCtx.Provider, { value: routerContext }, [
+      f(RouteDepthCtx.Provider, { value: 1 }, [
+        f(RootComponent, { params: rootMatch.params }),
       ]),
     ])
   }
@@ -119,8 +119,8 @@ export function Outlet() {
     const Component = match.route.component
 
     // Render component and provide next depth
-    return h(RouteDepthCtx.Provider, { value: depth + 1 }, [
-      h(Component, { params: match.params }),
+    return f(RouteDepthCtx.Provider, { value: depth + 1 }, [
+      f(Component, { params: match.params }),
     ])
   }
 }
@@ -133,7 +133,7 @@ export function Link(props: LinkProps) {
     router.navigate(props.to)
   }
 
-  return h(
+  return f(
     'a',
     {
       href: props.to,

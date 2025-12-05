@@ -135,7 +135,7 @@ export default defineConfig({
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.4.11',
+        text: 'v0.5.0',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -217,6 +217,7 @@ export default defineConfig({
             { text: 'Transitions', link: '/guide/transitions' },
             { text: 'Forms', link: '/guide/forms' },
             { text: 'Game Development', link: '/guide/game' },
+            { text: 'Batch API', link: '/guide/batch' },
             { text: 'Advanced API', link: '/guide/advanced-api' },
             { text: 'Performance', link: '/guide/performance' },
             { text: 'TypeScript', link: '/guide/typescript' },
@@ -298,6 +299,20 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Router API', link: '/reference/router' }
+          ]
+        },
+        {
+          text: 'Hooks',
+          collapsed: false,
+          items: [
+            { text: 'Hooks API', link: '/reference/hooks' }
+          ]
+        },
+        {
+          text: 'Type Reference',
+          collapsed: false,
+          items: [
+            { text: 'Types', link: '/reference/types' }
           ]
         }
       ],

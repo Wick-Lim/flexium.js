@@ -6,11 +6,11 @@
  * will be updated, without re-rendering the entire component tree.
  */
 
-import type { VNode } from '../../core/renderer'
+import type { FNode } from '../../core/renderer'
 import { effect, isSignal, onCleanup } from '../../core/signal'
 import type { Signal, Computed } from '../../core/signal'
 import { domRenderer } from './index'
-import { isVNode } from './h'
+import { isFNode } from './h'
 import {
   pushProvider,
   popProvider,
@@ -38,7 +38,7 @@ const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>()
 
 export function mountReactive(
   vnode:
-    | VNode
+    | FNode
     | string
     | number
     | boolean
@@ -83,7 +83,7 @@ export function mountReactive(
     return container ? parent.firstChild : parent
   }
 
-  // Handle For component with direct DOM caching (no VNode intermediate)
+  // Handle For component with direct DOM caching (no FNode intermediate)
   if (isForComponent(vnode)) {
     const startMarker = document.createTextNode('')
     const parent = container || document.createDocumentFragment()
@@ -114,7 +114,7 @@ export function mountReactive(
     let currentNode: Node | null = startNode
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let currentVNode: any = null
-    let currentVNodeList: VNode[] = []
+    let currentFNodeList: FNode[] = []
 
     const dispose = effect(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -126,12 +126,12 @@ export function mountReactive(
 
       if (Array.isArray(value)) {
         const newVNodes = value.filter((c) => c != null)
-        if (currentVNodeList.length > 0) {
+        if (currentFNodeList.length > 0) {
           const nextSibling = startNode.nextSibling
           // Note: reconcileArrays expects parent, oldVNodes, newVNodes, nextSibling
           reconcileArrays(
             currentContainer,
-            currentVNodeList,
+            currentFNodeList,
             newVNodes,
             nextSibling
           )
@@ -150,14 +150,14 @@ export function mountReactive(
           }
           currentContainer.insertBefore(fragment, startNode.nextSibling)
         }
-        currentVNodeList = newVNodes
+        currentFNodeList = newVNodes
         currentVNode = value
         currentNode = startNode
         return
       }
 
-      if (currentVNodeList.length > 0) {
-        for (const childVNode of currentVNodeList) {
+      if (currentFNodeList.length > 0) {
+        for (const childVNode of currentFNodeList) {
           if (
             childVNode._node &&
             childVNode._node.parentNode === currentContainer
@@ -167,7 +167,7 @@ export function mountReactive(
             } catch (e) {}
           }
         }
-        currentVNodeList = []
+        currentFNodeList = []
       }
 
       if (value !== currentVNode) {
@@ -235,7 +235,7 @@ export function mountReactive(
   }
 
   // Handle VNodes
-  if (isVNode(vnode)) {
+  if (isFNode(vnode)) {
     // Handle For component specially (direct DOM caching)
     if (vnode.type === For) {
       const forComp = For({
@@ -243,7 +243,7 @@ export function mountReactive(
         children: vnode.children as unknown as ((
           item: unknown,
           index: () => number
-        ) => VNode)[],
+        ) => FNode)[],
       })
       return mountReactive(forComp, container)
     }
@@ -415,7 +415,7 @@ export function cleanupReactive(node: Node): void {
 
 export function renderReactive(
   vnode:
-    | VNode
+    | FNode
     | string
     | number
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -437,7 +437,7 @@ export function createReactiveRoot(container: HTMLElement) {
   let currentRootNode: Node | null = null
 
   return {
-    render(vnode: VNode) {
+    render(vnode: FNode) {
       if (currentRootNode) {
         cleanupReactive(currentRootNode)
         container.innerHTML = ''
@@ -491,7 +491,7 @@ export function ReactiveText(props: {
   children?: any[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
-}): VNode {
+}): FNode {
   const { children = [], ...otherProps } = props
   return {
     type: 'span',

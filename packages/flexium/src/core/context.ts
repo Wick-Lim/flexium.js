@@ -1,17 +1,17 @@
-import type { VNodeChild } from './renderer'
+import type { FNodeChild } from './renderer'
 
 const contextStack = new Map<symbol, unknown[]>()
 
 export interface Context<T> {
   id: symbol
-  Provider: (props: { value: T; children: VNodeChild }) => VNodeChild
+  Provider: (props: { value: T; children: FNodeChild }) => FNodeChild
   defaultValue: T
 }
 
 export function createContext<T>(defaultValue: T): Context<T> {
   const id = Symbol('context')
 
-  const Provider = (props: { value: T; children: VNodeChild }): VNodeChild => {
+  const Provider = (props: { value: T; children: FNodeChild }): FNodeChild => {
     return props.children
   }
   ;(Provider as unknown as { _contextId: symbol })._contextId = id

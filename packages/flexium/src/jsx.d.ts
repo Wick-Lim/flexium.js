@@ -6,14 +6,14 @@
  * and provides proper type checking and autocomplete support.
  */
 
-import type { VNode } from './core/renderer'
+import type { FNode } from './core/renderer'
 
 declare global {
   namespace JSX {
     /**
      * The result type of JSX expressions
      */
-    type Element = VNode
+    type Element = FNode
 
     /**
      * Props that are valid for all JSX elements

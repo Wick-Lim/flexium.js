@@ -22,7 +22,7 @@ export {
 } from './reactive'
 
 // JSX factory
-export { h, Fragment, isVNode, createTextVNode } from './h'
+export { f, Fragment, isFNode, createTextVNode } from './h'
 
 // Types from core
 export type {
@@ -30,5 +30,5 @@ export type {
   RenderNode,
   EventHandler,
   CommonProps,
-  VNode,
+  FNode,
 } from '../../core/renderer'

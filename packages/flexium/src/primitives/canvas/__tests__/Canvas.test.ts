@@ -307,7 +307,7 @@ describe('Canvas Component', () => {
       expect(rafSpy).toHaveBeenCalled()
     })
 
-    it.skip('should schedule RAF when signal changes', async () => {
+    it('should schedule RAF when signal changes', async () => {
       const x = signal(10)
       const child = DrawRect({ x, y: 10, width: 50, height: 30, fill: 'blue' })
       const vnode = Canvas({ width: 300, height: 200, children: child })
@@ -359,7 +359,7 @@ describe('Canvas Component', () => {
   })
 
   describe('Signal Reactivity', () => {
-    it.skip('should re-render when signal changes', async () => {
+    it('should re-render when signal changes', async () => {
       const x = signal(10)
       const child = DrawRect({ x, y: 10, width: 50, height: 30, fill: 'blue' })
       const vnode = Canvas({ width: 300, height: 200, children: child })
@@ -385,7 +385,7 @@ describe('Canvas Component', () => {
       )
     })
 
-    it.skip('should react to multiple signal changes', async () => {
+    it('should react to multiple signal changes', async () => {
       const x = signal(10)
       const y = signal(20)
       const child = DrawRect({ x, y, width: 50, height: 30, fill: 'blue' })
@@ -418,7 +418,7 @@ describe('Canvas Component', () => {
       )
     })
 
-    it.skip('should react to fill color signal changes', async () => {
+    it('should react to fill color signal changes', async () => {
       const fill = signal('red')
       const child = DrawRect({ x: 10, y: 10, width: 50, height: 30, fill })
       const vnode = Canvas({ width: 300, height: 200, children: child })
@@ -439,7 +439,7 @@ describe('Canvas Component', () => {
       expect(mockContext.fillStyle).toBe('blue')
     })
 
-    it.skip('should handle mixed static and signal props', async () => {
+    it('should handle mixed static and signal props', async () => {
       const x = signal(10)
       const child = DrawRect({ x, y: 20, width: 50, height: 30, fill: 'green' })
       const vnode = Canvas({ width: 300, height: 200, children: child })
@@ -462,7 +462,7 @@ describe('Canvas Component', () => {
       )
     })
 
-    it.skip('should react to signals in different primitives', async () => {
+    it('should react to signals in different primitives', async () => {
       const rectX = signal(10)
       const circleRadius = signal(20)
       const children = [
@@ -568,7 +568,7 @@ describe('Canvas Component', () => {
       expect(mockContext.restore).toHaveBeenCalledTimes(2)
     })
 
-    it.skip('should maintain context state isolation between renders', async () => {
+    it('should maintain context state isolation between renders', async () => {
       const opacity = signal(0.5)
       const child = DrawRect({
         x: 10,
@@ -678,7 +678,7 @@ describe('Canvas Component', () => {
   })
 
   describe('Performance', () => {
-    it.skip('should batch multiple signal changes', async () => {
+    it('should batch multiple signal changes', async () => {
       const x = signal(10)
       const y = signal(20)
       const width = signal(50)
@@ -753,7 +753,7 @@ describe('Canvas Component', () => {
       expect(mockContext.lineWidth).toBe(2)
     })
 
-    it.skip('should handle DrawCircle with signals', async () => {
+    it('should handle DrawCircle with signals', async () => {
       const radius = signal(30)
       const child = DrawCircle({ x: 150, y: 150, radius, fill: 'purple' })
       const vnode = Canvas({ width: 300, height: 300, children: child })
@@ -773,7 +773,7 @@ describe('Canvas Component', () => {
       expect(mockContext.arc.mock.calls.length).toBeGreaterThan(initialCount)
     })
 
-    it.skip('should handle DrawLine with signal coordinates', async () => {
+    it('should handle DrawLine with signal coordinates', async () => {
       const x2 = signal(100)
       const y2 = signal(100)
       const child = DrawLine({
@@ -805,7 +805,7 @@ describe('Canvas Component', () => {
       )
     })
 
-    it.skip('should handle DrawText with signal text', async () => {
+    it('should handle DrawText with signal text', async () => {
       const text = signal('Hello')
       const child = DrawText({
         x: 50,
@@ -833,7 +833,7 @@ describe('Canvas Component', () => {
       )
     })
 
-    it.skip('should handle DrawArc with signal angles', async () => {
+    it('should handle DrawArc with signal angles', async () => {
       const endAngle = signal(Math.PI)
       const child = DrawArc({
         x: 100,
@@ -860,7 +860,7 @@ describe('Canvas Component', () => {
       expect(mockContext.arc.mock.calls.length).toBeGreaterThan(initialArcCount)
     })
 
-    it.skip('should handle DrawPath with signal path data', async () => {
+    it('should handle DrawPath with signal path data', async () => {
       const d = signal('M 10 10 L 50 50')
       const child = DrawPath({ d, stroke: 'green', strokeWidth: 2 })
       const vnode = Canvas({ width: 300, height: 200, children: child })

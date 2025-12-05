@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+# Cancel in-progress runs when a new workflow with the same group name is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
@@ -156,12 +162,89 @@ jobs:
       - name: Check bundle size
         run: |
           echo "📦 Bundle sizes:"
-          ls -lh packages/flexium/dist/*.mjs 2>/dev/null || echo "No .mjs files"
-          ls -lh packages/flexium/dist/*.js 2>/dev/null || echo "No .js files"
+          echo ""
+          echo "flexium:"
+          ls -lh packages/flexium/dist/*.mjs packages/flexium/dist/*.js 2>/dev/null || echo "No build files"
+          echo ""
+          echo "eslint-plugin-flexium:"
+          ls -lh packages/eslint-plugin-flexium/dist/*.js packages/eslint-plugin-flexium/dist/*.cjs 2>/dev/null || echo "No build files"
+          echo ""
+          echo "vite-plugin-flexium:"
+          ls -lh packages/vite-plugin-flexium/dist/*.js packages/vite-plugin-flexium/dist/*.cjs 2>/dev/null || echo "No build files"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: packages/flexium/dist/
+          path: |
+            packages/flexium/dist/
+            packages/eslint-plugin-flexium/dist/
+            packages/vite-plugin-flexium/dist/
           retention-days: 7
+
+  # Validate package publish readiness
+  publish-dry-run:
+    name: Publish Dry Run
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test, build]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all packages
+        run: npm run build
+
+      - name: Validate package contents
+        run: |
+          echo "Testing npm pack for all publishable packages..."
+
+          echo ""
+          echo "📦 flexium:"
+          cd packages/flexium
+          npm pack --dry-run
+          cd ../..
+
+          echo ""
+          echo "📦 create-flexium:"
+          cd packages/create-flexium
+          npm pack --dry-run
+          cd ../..
+
+          echo ""
+          echo "📦 eslint-plugin-flexium:"
+          cd packages/eslint-plugin-flexium
+          npm pack --dry-run
+          cd ../..
+
+          echo ""
+          echo "📦 vite-plugin-flexium:"
+          cd packages/vite-plugin-flexium
+          npm pack --dry-run
+          cd ../..
+
+      - name: Check package.json files
+        run: |
+          echo "Checking package.json configurations..."
+
+          for pkg in flexium create-flexium eslint-plugin-flexium vite-plugin-flexium; do
+            echo ""
+            echo "Checking packages/$pkg/package.json:"
+            node -e "
+              const pkg = require('./packages/$pkg/package.json');
+              console.log('  Name:', pkg.name);
+              console.log('  Version:', pkg.version);
+              console.log('  License:', pkg.license);
+              console.log('  Repository:', pkg.repository?.url || 'missing');
+              console.log('  Files:', pkg.files?.join(', ') || 'not specified');
+              console.log('  PublishConfig:', JSON.stringify(pkg.publishConfig || {}));
+            "
+          done

@@ -1,6 +1,6 @@
 {
   "name": "create-flexium",
-  "version": "0.4.11",
+  "version": "0.5.0",
   "publishConfig": {
     "access": "public"
   },
@@ -12,10 +12,12 @@
   "files": [
     "index.js",
     "README.md",
-    "templates"
+    "templates",
+    "__tests__"
   ],
   "scripts": {
-    "test": "rm -rf test-project && node index.js test-project 1 && rm -rf test-project",
+    "test": "node --test __tests__/cli.test.js",
+    "test:quick": "rm -rf test-project && node index.js test-project 1 && rm -rf test-project",
     "test:e2e": "node test-e2e.mjs",
     "test:templates": "./test-template.sh"
   },

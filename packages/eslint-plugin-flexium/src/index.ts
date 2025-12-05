@@ -2,12 +2,28 @@ import noSignalOutsideReactive from "./rules/no-signal-outside-reactive";
 import effectCleanup from "./rules/effect-cleanup";
 import noSideEffectInComputed from "./rules/no-side-effect-in-computed";
 import preferBatch from "./rules/prefer-batch";
+import noMissingDependencies from "./rules/no-missing-dependencies";
+import effectDependenciesComplete from "./rules/effect-dependencies-complete";
+import noSignalMutation from "./rules/no-signal-mutation";
+import noEffectInRender from "./rules/no-effect-in-render";
+import preferComputed from "./rules/prefer-computed";
+import noCircularDependency from "./rules/no-circular-dependency";
+import componentNaming from "./rules/component-naming";
+import noSignalReassignment from "./rules/no-signal-reassignment";
 
 const rules = {
   "no-signal-outside-reactive": noSignalOutsideReactive,
   "effect-cleanup": effectCleanup,
   "no-side-effect-in-computed": noSideEffectInComputed,
   "prefer-batch": preferBatch,
+  "no-missing-dependencies": noMissingDependencies,
+  "effect-dependencies-complete": effectDependenciesComplete,
+  "no-signal-mutation": noSignalMutation,
+  "no-effect-in-render": noEffectInRender,
+  "prefer-computed": preferComputed,
+  "no-circular-dependency": noCircularDependency,
+  "component-naming": componentNaming,
+  "no-signal-reassignment": noSignalReassignment,
 };
 
 const configs = {
@@ -18,6 +34,14 @@ const configs = {
       "flexium/effect-cleanup": "warn",
       "flexium/no-side-effect-in-computed": "error",
       "flexium/prefer-batch": "off",
+      "flexium/no-missing-dependencies": "warn",
+      "flexium/effect-dependencies-complete": "warn",
+      "flexium/no-signal-mutation": "warn",
+      "flexium/no-effect-in-render": "error",
+      "flexium/prefer-computed": "off",
+      "flexium/no-circular-dependency": "error",
+      "flexium/component-naming": "warn",
+      "flexium/no-signal-reassignment": "error",
     },
   },
   strict: {
@@ -27,6 +51,14 @@ const configs = {
       "flexium/effect-cleanup": "error",
       "flexium/no-side-effect-in-computed": "error",
       "flexium/prefer-batch": "warn",
+      "flexium/no-missing-dependencies": "error",
+      "flexium/effect-dependencies-complete": "error",
+      "flexium/no-signal-mutation": "error",
+      "flexium/no-effect-in-render": "error",
+      "flexium/prefer-computed": "warn",
+      "flexium/no-circular-dependency": "error",
+      "flexium/component-naming": "error",
+      "flexium/no-signal-reassignment": "error",
     },
   },
   all: {
@@ -36,6 +68,14 @@ const configs = {
       "flexium/effect-cleanup": "error",
       "flexium/no-side-effect-in-computed": "error",
       "flexium/prefer-batch": "error",
+      "flexium/no-missing-dependencies": "error",
+      "flexium/effect-dependencies-complete": "error",
+      "flexium/no-signal-mutation": "error",
+      "flexium/no-effect-in-render": "error",
+      "flexium/prefer-computed": "error",
+      "flexium/no-circular-dependency": "error",
+      "flexium/component-naming": "error",
+      "flexium/no-signal-reassignment": "error",
     },
   },
 };

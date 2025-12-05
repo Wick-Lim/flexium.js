@@ -8,6 +8,14 @@ describe('eslint-plugin-flexium', () => {
     expect(rules['effect-cleanup']).toBeDefined();
     expect(rules['no-side-effect-in-computed']).toBeDefined();
     expect(rules['prefer-batch']).toBeDefined();
+    expect(rules['no-missing-dependencies']).toBeDefined();
+    expect(rules['effect-dependencies-complete']).toBeDefined();
+    expect(rules['no-signal-mutation']).toBeDefined();
+    expect(rules['no-effect-in-render']).toBeDefined();
+    expect(rules['prefer-computed']).toBeDefined();
+    expect(rules['no-circular-dependency']).toBeDefined();
+    expect(rules['component-naming']).toBeDefined();
+    expect(rules['no-signal-reassignment']).toBeDefined();
   });
 
   it('should export configs', () => {
@@ -25,6 +33,14 @@ describe('eslint-plugin-flexium', () => {
     expect(recommended.rules['flexium/effect-cleanup']).toBe('warn');
     expect(recommended.rules['flexium/no-side-effect-in-computed']).toBe('error');
     expect(recommended.rules['flexium/prefer-batch']).toBe('off');
+    expect(recommended.rules['flexium/no-missing-dependencies']).toBe('warn');
+    expect(recommended.rules['flexium/effect-dependencies-complete']).toBe('warn');
+    expect(recommended.rules['flexium/no-signal-mutation']).toBe('warn');
+    expect(recommended.rules['flexium/no-effect-in-render']).toBe('error');
+    expect(recommended.rules['flexium/prefer-computed']).toBe('off');
+    expect(recommended.rules['flexium/no-circular-dependency']).toBe('error');
+    expect(recommended.rules['flexium/component-naming']).toBe('warn');
+    expect(recommended.rules['flexium/no-signal-reassignment']).toBe('error');
   });
 
   it('strict config should have stricter rule settings', () => {
@@ -34,5 +50,13 @@ describe('eslint-plugin-flexium', () => {
     expect(strict.rules['flexium/effect-cleanup']).toBe('error');
     expect(strict.rules['flexium/no-side-effect-in-computed']).toBe('error');
     expect(strict.rules['flexium/prefer-batch']).toBe('warn');
+    expect(strict.rules['flexium/no-missing-dependencies']).toBe('error');
+    expect(strict.rules['flexium/effect-dependencies-complete']).toBe('error');
+    expect(strict.rules['flexium/no-signal-mutation']).toBe('error');
+    expect(strict.rules['flexium/no-effect-in-render']).toBe('error');
+    expect(strict.rules['flexium/prefer-computed']).toBe('warn');
+    expect(strict.rules['flexium/no-circular-dependency']).toBe('error');
+    expect(strict.rules['flexium/component-naming']).toBe('error');
+    expect(strict.rules['flexium/no-signal-reassignment']).toBe('error');
   });
 });

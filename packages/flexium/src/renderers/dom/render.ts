@@ -8,17 +8,17 @@
  * or createReactiveRoot from './reactive'.
  */
 
-import type { VNode, VNodeChild } from '../../core/renderer'
+import type { FNode, FNodeChild } from '../../core/renderer'
 import type { JSX } from '../../jsx-runtime'
 import { domRenderer } from './index'
-import { isVNode } from './h'
+import { isFNode } from './h'
 import { renderReactive, createReactiveRoot } from './reactive'
 
 /**
  * Internal node data stored on DOM nodes
  */
 interface NodeData {
-  vnode: VNode | null
+  vnode: FNode | null
   props: Record<string, unknown>
 }
 
@@ -32,17 +32,17 @@ const NODE_DATA = new WeakMap<Node, NodeData>()
  * - Signals in props automatically update element properties
  * - Component functions automatically re-render when signals change
  *
- * @param vnode - Virtual node to render
+ * @param vnode - Flexium node to render
  * @param container - DOM element to render into
  * @returns The rendered DOM node
  *
  * @example
  * const count = signal(0);
- * render(h('div', {}, [count]), document.body);
+ * render(f('div', {}, [count]), document.body);
  * // The div will automatically update when count changes
  */
 export function render(
-  vnode: VNode | string | number | null | undefined | Function,
+  vnode: FNode | string | number | null | undefined | Function,
   container: HTMLElement
 ): Node | null {
   // Use reactive rendering for automatic signal tracking
@@ -50,9 +50,9 @@ export function render(
 }
 
 /**
- * Mount a virtual node to create a DOM node (internal)
+ * Mount a flexium node to create a DOM node (internal)
  */
-function mountVNode(vnode: VNodeChild | Function): Node | null {
+function mountVNode(vnode: FNodeChild | Function): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
   if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
     return null
@@ -80,8 +80,8 @@ function mountVNode(vnode: VNodeChild | Function): Node | null {
     return domRenderer.createTextNode(String(vnode))
   }
 
-  // Handle VNodes
-  if (isVNode(vnode)) {
+  // Handle FNodes
+  if (isFNode(vnode)) {
     // Handle function components
     if (typeof vnode.type === 'function') {
       const component = vnode.type
@@ -144,13 +144,13 @@ function unmount(node: Node): void {
 }
 
 /**
- * Update an existing DOM node with a new virtual node
+ * Update an existing DOM node with a new flexium node
  * (Simple implementation - will be enhanced with proper reconciliation later)
  */
 export function update(
   node: HTMLElement,
-  oldVNode: VNode,
-  newVNode: VNode
+  oldVNode: FNode,
+  newVNode: FNode
 ): void {
   // If types don't match, replace the node
   if (oldVNode.type !== newVNode.type) {
@@ -208,7 +208,7 @@ export function update(
           unmount(childNode)
         }
       }
-    } else if (isVNode(oldChild)) {
+    } else if (isFNode(oldChild)) {
       if (typeof newChild === 'string' || typeof newChild === 'number') {
         // Replace element with text
         const newChildNode = mountVNode(newChild)
@@ -216,7 +216,7 @@ export function update(
           node.replaceChild(newChildNode, childNode)
           unmount(childNode)
         }
-      } else if (isVNode(newChild)) {
+      } else if (isFNode(newChild)) {
         // Update element
         if (childNode instanceof HTMLElement) {
           update(childNode, oldChild, newChild)

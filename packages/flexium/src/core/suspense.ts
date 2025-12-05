@@ -1,7 +1,7 @@
 import { createContext } from './context'
 import { signal } from './signal'
-import { h } from '../renderers/dom/h'
-import type { VNodeChild } from './renderer'
+import { f } from '../renderers/dom/h'
+import type { FNodeChild } from './renderer'
 
 export interface SuspenseContextValue {
   registerPromise: (promise: Promise<unknown>) => void
@@ -10,8 +10,8 @@ export interface SuspenseContextValue {
 export const SuspenseCtx = createContext<SuspenseContextValue | null>(null)
 
 export function Suspense(props: {
-  fallback: VNodeChild
-  children: VNodeChild
+  fallback: FNodeChild
+  children: FNodeChild
 }) {
   const pendingCount = signal(0)
 
@@ -54,6 +54,6 @@ export function Suspense(props: {
     // 10. mountReactive renders children. Child calls read(). Value is ready. No throw.
     // 11. Success.
 
-    return h(SuspenseCtx.Provider, { value: contextValue }, props.children)
+    return f(SuspenseCtx.Provider, { value: contextValue }, props.children)
   }
 }

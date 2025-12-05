@@ -1,5 +1,5 @@
 import { signal, effect } from '../../core/signal'
-import type { VNode } from '../../core/renderer'
+import type { FNode } from '../../core/renderer'
 import type {
   VirtualListProps,
   VirtualListComponent,
@@ -121,7 +121,7 @@ function calculateVisibleRangeFixed(
 export function mountVirtualListComponent<T>(
   comp: VirtualListComponent<T>,
   parent: Node,
-  mountFn: (vnode: VNode) => Node | null,
+  mountFn: (vnode: FNode) => Node | null,
   cleanupFn: (node: Node) => void
 ): () => void {
   const {

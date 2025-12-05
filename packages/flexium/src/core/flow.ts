@@ -1,12 +1,12 @@
-import { VNode } from '../core/renderer'
+import { FNode } from '../core/renderer'
 import { StateGetter } from '../core/state'
 import { signal, effect, Signal } from './signal'
 
 interface ForProps<T> {
   each: StateGetter<T[]>
   children:
-    | ((item: T, index: () => number) => VNode)
-    | ((item: T, index: () => number) => VNode)[]
+    | ((item: T, index: () => number) => FNode)
+    | ((item: T, index: () => number) => FNode)[]
 }
 
 /**
@@ -26,7 +26,7 @@ export const FOR_MARKER = Symbol('flexium.for')
 
 /**
  * <For> component for efficient list rendering.
- * Uses direct DOM caching - no VNode intermediate layer.
+ * Uses direct DOM caching - no FNode intermediate layer.
  *
  * Performance characteristics:
  * - O(1) for append/prepend
@@ -53,7 +53,7 @@ export function For<T>(props: ForProps<T>): ForComponent<T> {
 export interface ForComponent<T> {
   [FOR_MARKER]: true
   each: StateGetter<T[]>
-  renderItem: (item: T, index: () => number) => VNode
+  renderItem: (item: T, index: () => number) => FNode
 }
 
 /**
@@ -74,7 +74,7 @@ export function isForComponent(value: unknown): value is ForComponent<unknown> {
  *
  * @param forComp - The For component descriptor
  * @param parent - Parent DOM node
- * @param mountFn - Function to mount a VNode to DOM (from reactive.ts)
+ * @param mountFn - Function to mount an FNode to DOM (from reactive.ts)
  * @param cleanupFn - Function to cleanup a DOM node (from reactive.ts)
  * @returns Dispose function
  */
@@ -82,7 +82,7 @@ export function mountForComponent<T>(
   forComp: ForComponent<T>,
   parent: Node,
   startMarker: Node,
-  mountFn: (vnode: VNode) => Node | null,
+  mountFn: (vnode: FNode) => Node | null,
   cleanupFn: (node: Node) => void
 ): () => void {
   const { each, renderItem } = forComp
@@ -178,8 +178,8 @@ export function mountForComponent<T>(
 
 interface ShowProps<T> {
   when: StateGetter<T | undefined | null | false>
-  fallback?: VNode | (() => VNode)
-  children: VNode[] | ((item: T) => VNode)[]
+  fallback?: FNode | (() => FNode)
+  children: FNode[] | ((item: T) => FNode)[]
 }
 
 /**
@@ -202,12 +202,12 @@ export function Show<T>(props: ShowProps<T>) {
     if (value) {
       const child = props.children[0]
       return typeof child === 'function' && props.children.length === 1
-        ? (child as (item: T) => VNode)(value)
+        ? (child as (item: T) => FNode)(value)
         : child
     }
     if (props.fallback) {
       return typeof props.fallback === 'function'
-        ? (props.fallback as () => VNode)()
+        ? (props.fallback as () => FNode)()
         : props.fallback
     }
     return null
@@ -215,21 +215,21 @@ export function Show<T>(props: ShowProps<T>) {
 }
 
 interface SwitchProps {
-  fallback?: VNode
-  children: VNode[]
+  fallback?: FNode
+  children: FNode[]
 }
 
 interface MatchProps<T> {
   when: StateGetter<T | undefined | null | false>
-  children: VNode | ((item: T) => VNode)
+  children: FNode | ((item: T) => FNode)
 }
 
 /**
  * <Match> component to be used within <Switch>.
  * It does not render anything on its own.
  */
-export function Match<T>(props: MatchProps<T>): VNode {
-  return props as unknown as VNode
+export function Match<T>(props: MatchProps<T>): FNode {
+  return props as unknown as FNode
 }
 
 /**
@@ -258,7 +258,7 @@ export function Switch(props: SwitchProps) {
         'type' in child &&
         child.type === Match
       ) {
-        const matchNode = child as VNode & {
+        const matchNode = child as FNode & {
           props: { when: StateGetter<unknown> }
           children?: unknown[]
         }
@@ -271,8 +271,8 @@ export function Switch(props: SwitchProps) {
           if (matchChildren && matchChildren.length > 0) {
             const content = matchChildren[0]
             return typeof content === 'function'
-              ? (content as (val: unknown) => VNode | null)(value)
-              : (content as VNode | null)
+              ? (content as (val: unknown) => FNode | null)(value)
+              : (content as FNode | null)
           }
           return null
         }

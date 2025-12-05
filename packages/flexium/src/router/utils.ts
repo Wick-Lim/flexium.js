@@ -1,8 +1,8 @@
 import { RouteDef, RouteMatch } from './types'
-import type { VNodeChild, VNode } from '../core/renderer'
+import type { FNodeChild, FNode } from '../core/renderer'
 
-/** Type guard to check if a value is a VNode */
-function isVNode(value: VNodeChild): value is VNode {
+/** Type guard to check if a value is an FNode */
+function isFNode(value: FNodeChild): value is FNode {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -14,16 +14,16 @@ function isVNode(value: VNodeChild): value is VNode {
 
 /**
  * Flatten the children of <Router> or <Route> into a route configuration tree.
- * Note: This assumes `children` are VNodes representing <Route> components.
+ * Note: This assumes `children` are FNodes representing <Route> components.
  */
-export function createRoutesFromChildren(children: VNodeChild): RouteDef[] {
+export function createRoutesFromChildren(children: FNodeChild): RouteDef[] {
   const routes: RouteDef[] = []
 
   const childArray = Array.isArray(children) ? children : [children]
   // console.log('Parsing children:', childArray.length);
 
   for (const child of childArray) {
-    if (!isVNode(child)) {
+    if (!isFNode(child)) {
       continue
     }
 

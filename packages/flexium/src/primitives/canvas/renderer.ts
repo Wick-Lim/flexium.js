@@ -165,10 +165,10 @@ function renderText(ctx: CanvasRenderingContext2D, props: DrawTextProps): void {
   const text = unwrapSignal(props.text)
   const fill = unwrapSignal(props.fill)
   const fontSize = unwrapSignal(props.fontSize) || 12
-  const fontFamily = props.fontFamily || 'sans-serif'
-  const fontWeight = props.fontWeight || 'normal'
-  const textAlign = props.textAlign || 'left'
-  const textBaseline = props.textBaseline || 'alphabetic'
+  const fontFamily = unwrapSignal(props.fontFamily) || 'sans-serif'
+  const fontWeight = unwrapSignal(props.fontWeight) || 'normal'
+  const textAlign = unwrapSignal(props.textAlign) || 'left'
+  const textBaseline = unwrapSignal(props.textBaseline) || 'alphabetic'
 
   ctx.save()
 
@@ -222,7 +222,7 @@ function renderArc(ctx: CanvasRenderingContext2D, props: DrawArcProps): void {
   const radius = unwrapSignal(props.radius)
   const startAngle = unwrapSignal(props.startAngle)
   const endAngle = unwrapSignal(props.endAngle)
-  const counterclockwise = props.counterclockwise || false
+  const counterclockwise = unwrapSignal(props.counterclockwise) || false
   const fill = unwrapSignal(props.fill)
   const stroke = unwrapSignal(props.stroke)
   const strokeWidth = unwrapSignal(props.strokeWidth)

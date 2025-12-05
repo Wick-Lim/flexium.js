@@ -1,5 +1,5 @@
 import type { Signal } from '../../core/signal'
-import type { VNode } from '../../core/renderer'
+import type { FNode } from '../../core/renderer'
 
 /**
  * Getter function that returns the current value (signal-like)
@@ -33,7 +33,7 @@ export interface VirtualListProps<T> {
   items: ItemsGetter<T>
 
   /** Render function for each item */
-  children: (item: T, index: () => number) => VNode
+  children: (item: T, index: () => number) => FNode
 
   /** Container height (required for viewport calculation) */
   height: number | string
@@ -75,7 +75,7 @@ export interface VirtualListCacheEntry<T> {
 export interface VirtualListComponent<T> {
   [key: symbol]: true
   items: ItemsGetter<T>
-  renderItem: (item: T, index: () => number) => VNode
+  renderItem: (item: T, index: () => number) => FNode
   height: number | string
   width?: number | string
   itemSize: number | SizeConfig

@@ -1,7 +1,7 @@
 import { createContext, useContext } from './context'
 import { signal } from './signal'
-import { h } from '../renderers/dom/h'
-import type { VNodeChild, VNode } from './renderer'
+import { f } from '../renderers/dom/h'
+import type { FNodeChild, FNode } from './renderer'
 import { ErrorCodes, logError } from './errors'
 
 export interface ErrorBoundaryContextValue {
@@ -19,10 +19,10 @@ export interface ErrorFallbackProps {
 }
 
 export interface ErrorBoundaryProps {
-  /** Fallback UI to render when an error occurs. Can be a VNode or a function that receives error info */
-  fallback: VNodeChild | ((props: ErrorFallbackProps) => VNode | null)
+  /** Fallback UI to render when an error occurs. Can be an FNode or a function that receives error info */
+  fallback: FNodeChild | ((props: ErrorFallbackProps) => FNode | null)
   /** Children to render */
-  children: VNodeChild
+  children: FNodeChild
   /** Callback when an error is caught */
   onError?: (error: Error, errorInfo: ErrorInfo) => void
   /** Callback when error is reset */
@@ -116,10 +116,10 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
   }
 
   // Create a wrapper that catches render errors
-  const safeRender = (content: VNodeChild): VNodeChild => {
+  const safeRender = (content: FNodeChild): FNodeChild => {
     try {
       return typeof content === 'function'
-        ? (content as () => VNodeChild)()
+        ? (content as () => FNodeChild)()
         : content
     } catch (renderError) {
       setError(renderError)
@@ -131,7 +131,7 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
     if (error.value) {
       // Render fallback if an error occurred
       if (typeof fallback === 'function') {
-        return h(fallback, {
+        return f(fallback, {
           error: error.value,
           errorInfo: errorInfo.value,
           reset: retry,
@@ -142,7 +142,7 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
     }
 
     // Provide context to children and render them with error catching
-    return h(
+    return f(
       ErrorBoundaryCtx.Provider,
       { value: contextValue },
       safeRender(children)

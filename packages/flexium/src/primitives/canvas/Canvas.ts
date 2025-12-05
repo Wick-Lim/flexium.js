@@ -39,12 +39,13 @@ export function Canvas(props: CanvasProps): VNode {
 
         // Render canvas children with effect for reactivity
         // Import effect and onCleanup dynamically to avoid circular deps
-        import('../../core/signal').then(({ effect, onCleanup }) => {
+        import('../../core/signal').then(({ effect, onCleanup, isSignal }) => {
           let rafId: number | undefined
 
-          effect(() => {
-            // Use requestAnimationFrame for smooth rendering
-            if (rafId) cancelAnimationFrame(rafId)
+          const scheduleRender = () => {
+            if (rafId !== undefined) {
+              cancelAnimationFrame(rafId)
+            }
 
             rafId = requestAnimationFrame(() => {
               // Clear canvas
@@ -52,11 +53,37 @@ export function Canvas(props: CanvasProps): VNode {
 
               // Render all children
               renderCanvasChildren(ctx, children, width, height)
+
+              rafId = undefined
             })
+          }
+
+          effect(() => {
+            // To track signal dependencies, we need to access them in the effect
+            // Walk through children and touch any signals to track dependencies
+            const childArray = Array.isArray(children) ? children : [children]
+            for (const child of childArray) {
+              if (child && child.props) {
+                // Touch each prop to track signal dependencies
+                for (const key in child.props) {
+                  const value = child.props[key]
+                  // If it's a signal, access its value to track it
+                  if (isSignal(value)) {
+                    void value.value // Touch the signal to track dependency
+                  }
+                }
+              }
+            }
+
+            // Now schedule the actual render
+            scheduleRender()
 
             // Cleanup RAF when effect is disposed
             onCleanup(() => {
-              if (rafId) cancelAnimationFrame(rafId)
+              if (rafId !== undefined) {
+                cancelAnimationFrame(rafId)
+                rafId = undefined
+              }
             })
           })
         })

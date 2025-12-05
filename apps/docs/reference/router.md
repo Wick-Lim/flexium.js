@@ -502,6 +502,27 @@ function DashboardLayout() {
 }
 ```
 
+#### Deep Nesting
+
+Routes can be nested to any depth:
+
+```tsx
+<Router>
+  <Route path="/" component={RootLayout}>
+    <Route path="/admin" component={AdminLayout}>
+      <Route path="/admin/users" component={UsersLayout}>
+        <Route index component={UsersList} />
+        <Route path="/admin/users/:id" component={UserDetailLayout}>
+          <Route index component={UserProfile} />
+          <Route path="/admin/users/:id/edit" component={EditUser} />
+          <Route path="/admin/users/:id/permissions" component={UserPermissions} />
+        </Route>
+      </Route>
+    </Route>
+  </Route>
+</Router>
+```
+
 ### Programmatic Navigation
 
 Navigate using the `navigate` function from `useRouter()`:
@@ -528,9 +549,56 @@ function LoginForm() {
 }
 ```
 
-### Navigation Guards
+#### Navigation with Query Parameters
 
-Protect routes with `beforeEnter` guards:
+Pass data through query parameters:
+
+```tsx
+function SearchForm() {
+  const router = useRouter();
+
+  const handleSearch = (query: string, filters: object) => {
+    const params = new URLSearchParams({
+      q: query,
+      category: filters.category,
+      sort: filters.sort
+    });
+    router.navigate(`/search?${params.toString()}`);
+  };
+
+  return <form onsubmit={handleSearch}>{/* form */}</form>;
+}
+```
+
+#### Conditional Navigation
+
+Navigate based on conditions:
+
+```tsx
+function FormSubmit() {
+  const router = useRouter();
+
+  const handleSubmit = async (data) => {
+    const result = await submitData(data);
+
+    if (result.success) {
+      router.navigate(`/success?id=${result.id}`);
+    } else if (result.requiresAuth) {
+      router.navigate('/login?redirect=' + encodeURIComponent(window.location.pathname));
+    } else {
+      router.navigate('/error');
+    }
+  };
+
+  return <form onsubmit={handleSubmit}>{/* form */}</form>;
+}
+```
+
+### Route Guards & Authentication
+
+Protect routes with `beforeEnter` guards. Guards run before the route renders and can prevent navigation by returning `false`.
+
+#### Basic Authentication Guard
 
 ```tsx
 function App() {
@@ -547,7 +615,7 @@ function App() {
           const user = getCurrentUser();
           if (!user || !user.isAdmin) {
             // Redirect to login
-            router.navigate('/login');
+            window.location.href = '/login';
             return false;
           }
           return true;
@@ -556,6 +624,117 @@ function App() {
     </Router>
   );
 }
+```
+
+#### Async Guards
+
+Guards can be asynchronous for API calls or token validation:
+
+```tsx
+<Route
+  path="/premium"
+  component={PremiumContent}
+  beforeEnter={async (params) => {
+    try {
+      const subscription = await checkSubscription();
+      return subscription.active;
+    } catch (error) {
+      return false;
+    }
+  }}
+/>
+```
+
+#### Parameter-Based Guards
+
+Use route parameters in guard logic:
+
+```tsx
+<Route
+  path="/users/:id/edit"
+  component={EditUser}
+  beforeEnter={(params) => {
+    const currentUser = getCurrentUser();
+    const targetUserId = params.id;
+
+    // Users can only edit their own profile (unless admin)
+    return currentUser.id === targetUserId || currentUser.isAdmin;
+  }}
+/>
+```
+
+#### Role-Based Authorization
+
+Check user roles and permissions:
+
+```tsx
+function createRoleGuard(requiredRole: string) {
+  return (params: Record<string, string>) => {
+    const user = getCurrentUser();
+
+    if (!user) {
+      window.location.href = '/login';
+      return false;
+    }
+
+    if (!user.roles.includes(requiredRole)) {
+      window.location.href = '/unauthorized';
+      return false;
+    }
+
+    return true;
+  };
+}
+
+// Usage
+<Route
+  path="/admin"
+  component={AdminPanel}
+  beforeEnter={createRoleGuard('admin')}
+/>
+
+<Route
+  path="/moderator"
+  component={ModeratorPanel}
+  beforeEnter={createRoleGuard('moderator')}
+/>
+```
+
+#### Multiple Guard Conditions
+
+Combine multiple checks in a single guard:
+
+```tsx
+<Route
+  path="/workspace/:id"
+  component={Workspace}
+  beforeEnter={async (params) => {
+    const user = getCurrentUser();
+    const workspaceId = params.id;
+
+    // Check authentication
+    if (!user) {
+      window.location.href = '/login';
+      return false;
+    }
+
+    // Check workspace access
+    const hasAccess = await checkWorkspaceAccess(user.id, workspaceId);
+    if (!hasAccess) {
+      window.location.href = '/workspaces';
+      return false;
+    }
+
+    // Check subscription status
+    const subscription = await getSubscription(user.id);
+    if (!subscription.active) {
+      window.location.href = '/pricing';
+      return false;
+    }
+
+    return true;
+  }}
+/>
 ```
 
 ### Accessing Route Parameters
@@ -583,9 +762,11 @@ function UserProfile() {
 <Route path="/users/:id" component={UserProfile} />
 ```
 
-### Accessing Query Parameters
+### Query Parameters
 
-Access URL query parameters from the location object:
+Access and manipulate URL query parameters using the location object.
+
+#### Reading Query Parameters
 
 ```tsx
 import { useRouter } from 'flexium/router';
@@ -594,22 +775,145 @@ function SearchResults() {
   const router = useRouter();
   const location = router.location();
 
-  // If URL is /search?q=flexium&sort=date
-  const searchQuery = location.query.q;    // "flexium"
-  const sortBy = location.query.sort;      // "date"
+  // If URL is /search?q=flexium&sort=date&page=2
+  const searchQuery = location.query.q;     // "flexium"
+  const sortBy = location.query.sort;       // "date"
+  const page = location.query.page;         // "2"
 
   return (
     <div>
       <h1>Search Results for: {searchQuery}</h1>
-      <p>Sorted by: {sortBy}</p>
+      <p>Sorted by: {sortBy}, Page: {page}</p>
     </div>
   );
 }
 ```
 
-### 404 Not Found Routes
+#### Reactive Query Parameters
 
-Handle unmatched routes by using a wildcard path pattern:
+Query parameters are reactive and will trigger component re-renders:
+
+```tsx
+function ProductList() {
+  const router = useRouter();
+  const location = router.location();
+
+  // This will re-run whenever query params change
+  const category = location.query.category || 'all';
+  const priceRange = location.query.price || 'any';
+
+  return (
+    <div>
+      <h2>Category: {category}</h2>
+      <p>Price: {priceRange}</p>
+
+      {/* Links update query params */}
+      <nav>
+        <Link to="/products?category=electronics">Electronics</Link>
+        <Link to="/products?category=books">Books</Link>
+        <Link to="/products?category=clothing&price=under50">
+          Clothing Under $50
+        </Link>
+      </nav>
+    </div>
+  );
+}
+```
+
+#### Setting Query Parameters
+
+Update query parameters via navigation:
+
+```tsx
+function FilterBar() {
+  const router = useRouter();
+  const location = router.location();
+
+  const updateFilters = (filters: Record<string, string>) => {
+    const params = new URLSearchParams(filters);
+    router.navigate(`${location.pathname}?${params.toString()}`);
+  };
+
+  const applyFilter = () => {
+    updateFilters({
+      category: 'electronics',
+      price: '100-500',
+      brand: 'apple',
+      sort: 'price-asc'
+    });
+  };
+
+  return <button onclick={applyFilter}>Apply Filters</button>;
+}
+```
+
+#### Preserving Existing Query Parameters
+
+Merge new params with existing ones:
+
+```tsx
+function Pagination() {
+  const router = useRouter();
+  const location = router.location();
+
+  const goToPage = (page: number) => {
+    // Preserve existing query params
+    const params = new URLSearchParams(location.search);
+    params.set('page', page.toString());
+    router.navigate(`${location.pathname}?${params.toString()}`);
+  };
+
+  return (
+    <div>
+      <button onclick={() => goToPage(1)}>Page 1</button>
+      <button onclick={() => goToPage(2)}>Page 2</button>
+      <button onclick={() => goToPage(3)}>Page 3</button>
+    </div>
+  );
+}
+```
+
+#### Query Parameter Validation
+
+Validate and provide defaults for query parameters:
+
+```tsx
+function DataTable() {
+  const router = useRouter();
+  const location = router.location();
+
+  const getValidatedParams = () => {
+    const query = location.query;
+
+    // Validate and provide defaults
+    const page = Math.max(1, parseInt(query.page || '1', 10));
+    const limit = [10, 25, 50, 100].includes(parseInt(query.limit || '25', 10))
+      ? parseInt(query.limit, 10)
+      : 25;
+    const sort = ['asc', 'desc'].includes(query.sort)
+      ? query.sort
+      : 'asc';
+
+    return { page, limit, sort };
+  };
+
+  const params = getValidatedParams();
+
+  return (
+    <div>
+      <p>Page: {params.page}</p>
+      <p>Items per page: {params.limit}</p>
+      <p>Sort: {params.sort}</p>
+    </div>
+  );
+}
+```
+
+### 404 Not Found Handling
+
+Handle unmatched routes by using a wildcard path pattern.
+
+#### Basic 404 Page
 
 ```tsx
 function App() {
@@ -636,6 +940,405 @@ function NotFound() {
     </div>
   );
 }
+```
+
+#### Enhanced 404 with Suggestions
+
+Provide helpful links when a page isn't found:
+
+```tsx
+function NotFound() {
+  const router = useRouter();
+  const location = router.location();
+
+  const suggestions = [
+    { path: '/', label: 'Home', icon: '🏠' },
+    { path: '/products', label: 'Browse Products', icon: '🛍️' },
+    { path: '/about', label: 'About Us', icon: 'ℹ️' },
+    { path: '/contact', label: 'Contact Support', icon: '📧' }
+  ];
+
+  // Log 404 for analytics
+  useEffect(() => {
+    logPageNotFound(location.pathname);
+  });
+
+  return (
+    <div class="not-found-page">
+      <h1>404 - Page Not Found</h1>
+      <p>We couldn't find: <code>{location.pathname}</code></p>
+
+      <h2>Try one of these pages instead:</h2>
+      <ul class="suggestions">
+        {suggestions.map(item => (
+          <li>
+            <Link to={item.path}>
+              <span>{item.icon}</span>
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <button onclick={() => window.history.back()}>
+        Go Back
+      </button>
+    </div>
+  );
+}
+```
+
+#### Nested 404 Handling
+
+Handle 404s at different levels of your route hierarchy:
+
+```tsx
+<Router>
+  <Route path="/" component={RootLayout}>
+    <Route index component={Home} />
+
+    <Route path="/admin" component={AdminLayout}>
+      <Route index component={AdminDash} />
+      <Route path="/admin/users" component={Users} />
+      <Route path="/admin/settings" component={Settings} />
+
+      {/* Admin-specific 404 */}
+      <Route path="/admin/*" component={AdminNotFound} />
+    </Route>
+
+    <Route path="/docs" component={DocsLayout}>
+      <Route index component={DocsHome} />
+      <Route path="/docs/:page" component={DocPage} />
+
+      {/* Docs-specific 404 */}
+      <Route path="/docs/*" component={DocsNotFound} />
+    </Route>
+
+    {/* Global 404 - must be last */}
+    <Route path="*" component={NotFound} />
+  </Route>
+</Router>
+```
+
+#### Smart 404 with Search
+
+Suggest similar pages based on the requested URL:
+
+```tsx
+function SmartNotFound() {
+  const router = useRouter();
+  const location = router.location();
+
+  const availablePages = [
+    '/products',
+    '/product/laptop',
+    '/product/phone',
+    '/about',
+    '/contact'
+  ];
+
+  // Find similar routes
+  const suggestions = availablePages
+    .filter(page => {
+      const similarity = computeSimilarity(location.pathname, page);
+      return similarity > 0.5;
+    })
+    .slice(0, 3);
+
+  return (
+    <div>
+      <h1>404 - Page Not Found</h1>
+
+      {suggestions.length > 0 && (
+        <>
+          <h2>Did you mean?</h2>
+          <ul>
+            {suggestions.map(path => (
+              <li><Link to={path}>{path}</Link></li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <Link to="/">Return Home</Link>
+    </div>
+  );
+}
+```
+
+### Route Transitions
+
+Create smooth animations when navigating between routes.
+
+#### Basic Fade Transition
+
+```tsx
+import { signal, useEffect } from 'flexium';
+import { useRouter } from 'flexium/router';
+
+function TransitionWrapper({ children }) {
+  const router = useRouter();
+  const location = router.location();
+  const isTransitioning = signal(false);
+
+  useEffect(() => {
+    // Trigger transition on location change
+    isTransitioning.value = true;
+
+    const timeout = setTimeout(() => {
+      isTransitioning.value = false;
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  });
+
+  return (
+    <div
+      class={() => isTransitioning.value ? 'fade-out' : 'fade-in'}
+      style={{
+        opacity: isTransitioning.value ? 0 : 1,
+        transition: 'opacity 0.3s ease-in-out'
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Usage
+function App() {
+  return (
+    <Router>
+      <TransitionWrapper>
+        <Route path="/" component={Home} />
+        <Route path="/about" component={About} />
+      </TransitionWrapper>
+    </Router>
+  );
+}
+```
+
+#### Slide Transition
+
+```tsx
+function SlideTransition({ children }) {
+  const router = useRouter();
+  const location = router.location();
+  const isAnimating = signal(false);
+  const direction = signal<'left' | 'right'>('right');
+
+  useEffect(() => {
+    isAnimating.value = true;
+
+    setTimeout(() => {
+      isAnimating.value = false;
+    }, 400);
+  });
+
+  return (
+    <div
+      class="slide-container"
+      style={{
+        transform: isAnimating.value
+          ? `translateX(${direction.value === 'right' ? '100%' : '-100%'})`
+          : 'translateX(0)',
+        opacity: isAnimating.value ? 0 : 1,
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+#### Page Load Animation
+
+```tsx
+function PageTransition({ children }) {
+  const router = useRouter();
+  const location = router.location();
+  const isLoading = signal(true);
+
+  useEffect(() => {
+    isLoading.value = true;
+
+    // Simulate page load
+    const timeout = setTimeout(() => {
+      isLoading.value = false;
+    }, 150);
+
+    return () => clearTimeout(timeout);
+  });
+
+  return (
+    <>
+      {isLoading.value && (
+        <div class="page-loader">
+          <div class="spinner" />
+        </div>
+      )}
+
+      <div
+        class="page-content"
+        style={{
+          opacity: isLoading.value ? 0 : 1,
+          transform: isLoading.value ? 'translateY(20px)' : 'translateY(0)',
+          transition: 'opacity 0.2s, transform 0.2s'
+        }}
+      >
+        {children}
+      </div>
+    </>
+  );
+}
+```
+
+#### Route-Specific Transitions
+
+Apply different transitions based on routes:
+
+```tsx
+function RouteTransition({ children }) {
+  const router = useRouter();
+  const location = router.location();
+  const previousPath = signal('');
+
+  const getTransitionType = () => {
+    const current = location.pathname;
+    const previous = previousPath.value;
+
+    // Different transitions for different route patterns
+    if (current.startsWith('/admin')) return 'slide-left';
+    if (previous.startsWith('/admin') && !current.startsWith('/admin')) return 'slide-right';
+    if (current.includes('/detail')) return 'fade-up';
+
+    return 'fade';
+  };
+
+  useEffect(() => {
+    previousPath.value = location.pathname;
+  });
+
+  const transitionClass = getTransitionType();
+
+  return (
+    <div class={`transition-${transitionClass}`}>
+      {children}
+    </div>
+  );
+}
+```
+
+### Routing Modes
+
+Flexium's router uses the browser's History API by default for clean URLs.
+
+#### History Mode (Default)
+
+The router uses `pushState` for navigation, creating clean URLs without hash symbols:
+
+```
+https://example.com/
+https://example.com/about
+https://example.com/users/123
+https://example.com/products?category=electronics
+```
+
+This mode provides the best user experience and SEO benefits.
+
+**Key Features:**
+- Clean URLs without `#` symbols
+- Browser back/forward buttons work correctly
+- URLs are shareable and bookmarkable
+- Requires server configuration for direct URL access
+
+#### Server Configuration
+
+For single-page applications, configure your server to serve `index.html` for all routes:
+
+**Vercel (vercel.json):**
+```json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
+
+**Netlify (_redirects):**
+```
+/*    /index.html   200
+```
+
+**Nginx:**
+```nginx
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+**Apache (.htaccess):**
+```apache
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+```
+
+**Express.js:**
+```javascript
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/index.html'));
+});
+```
+
+#### Development Server
+
+When developing locally, ensure your dev server is configured for SPA mode:
+
+**Vite (vite.config.js):**
+```javascript
+export default {
+  // SPA fallback is enabled by default
+  server: {
+    historyApiFallback: true
+  }
+}
+```
+
+**Webpack DevServer:**
+```javascript
+module.exports = {
+  devServer: {
+    historyApiFallback: true
+  }
+}
+```
+
+#### Handling Base Path
+
+If your app is deployed to a subdirectory:
+
+```tsx
+// Prepend base path to all routes
+const basePath = '/my-app';
+
+function App() {
+  return (
+    <Router>
+      <Route path={`${basePath}/`} component={Home} />
+      <Route path={`${basePath}/about`} component={About} />
+    </Router>
+  );
+}
+
+// Update navigation
+<Link to={`${basePath}/about`}>About</Link>
 ```
 
 ---
@@ -791,6 +1494,228 @@ function DashboardLayout() {
       </main>
     </div>
   );
+}
+```
+
+---
+
+## Best Practices
+
+### Route Organization
+
+Organize routes hierarchically for maintainability:
+
+```tsx
+// Good: Hierarchical organization
+<Router>
+  <Route path="/" component={RootLayout}>
+    <Route index component={Home} />
+
+    {/* User-related routes */}
+    <Route path="/users" component={UsersLayout}>
+      <Route index component={UsersList} />
+      <Route path="/users/:id" component={UserProfile} />
+      <Route path="/users/:id/edit" component={EditUser} />
+    </Route>
+
+    {/* Admin routes */}
+    <Route path="/admin" component={AdminLayout} beforeEnter={checkAdmin}>
+      <Route index component={AdminDash} />
+      <Route path="/admin/settings" component={AdminSettings} />
+    </Route>
+  </Route>
+</Router>
+```
+
+### Loading States
+
+Show loading indicators during navigation:
+
+```tsx
+function App() {
+  const isLoading = signal(false);
+
+  return (
+    <Router>
+      {isLoading.value && <LoadingBar />}
+
+      <Route
+        path="/data/:id"
+        component={DataPage}
+        beforeEnter={async (params) => {
+          isLoading.value = true;
+          try {
+            await preloadData(params.id);
+            return true;
+          } finally {
+            isLoading.value = false;
+          }
+        }}
+      />
+    </Router>
+  );
+}
+```
+
+### Error Boundaries
+
+Wrap routes in error boundaries:
+
+```tsx
+function RouteErrorBoundary({ children }) {
+  const hasError = signal(false);
+  const error = signal<Error | null>(null);
+
+  try {
+    return children;
+  } catch (e) {
+    hasError.value = true;
+    error.value = e as Error;
+    return (
+      <div class="error-page">
+        <h1>Something went wrong</h1>
+        <p>{error.value?.message}</p>
+        <Link to="/">Go Home</Link>
+      </div>
+    );
+  }
+}
+```
+
+### Breadcrumbs
+
+Create breadcrumb navigation using route matches:
+
+```tsx
+function Breadcrumbs() {
+  const router = useRouter();
+  const matches = router.matches();
+
+  const breadcrumbs = matches.map((match, index) => ({
+    path: match.pathname,
+    label: getBreadcrumbLabel(match.route.path, match.params),
+    isLast: index === matches.length - 1
+  }));
+
+  return (
+    <nav class="breadcrumbs">
+      {breadcrumbs.map((crumb, index) => (
+        <>
+          {!crumb.isLast ? (
+            <Link to={crumb.path}>{crumb.label}</Link>
+          ) : (
+            <span>{crumb.label}</span>
+          )}
+          {!crumb.isLast && <span> / </span>}
+        </>
+      ))}
+    </nav>
+  );
+}
+```
+
+### Route Prefetching
+
+Prefetch data on link hover:
+
+```tsx
+function PrefetchLink({ to, children }) {
+  const router = useRouter();
+
+  const handleMouseEnter = () => {
+    // Prefetch data for the target route
+    prefetchRouteData(to);
+  };
+
+  return (
+    <Link to={to} onmouseenter={handleMouseEnter}>
+      {children}
+    </Link>
+  );
+}
+```
+
+### Active Link Styling
+
+Style active links based on current route:
+
+```tsx
+function NavLink({ to, children }) {
+  const router = useRouter();
+  const location = router.location();
+
+  const isActive = () => location.pathname === to;
+
+  return (
+    <Link
+      to={to}
+      class={() => `nav-link ${isActive() ? 'active' : ''}`}
+    >
+      {children}
+    </Link>
+  );
+}
+```
+
+### Scroll Restoration
+
+Restore scroll position on navigation:
+
+```tsx
+function ScrollManager() {
+  const router = useRouter();
+  const location = router.location();
+
+  useEffect(() => {
+    // Scroll to top on route change
+    window.scrollTo(0, 0);
+
+    // Or restore scroll position from history
+    // const scrollPos = getScrollPosition(location.pathname);
+    // if (scrollPos) window.scrollTo(0, scrollPos);
+  });
+
+  return null;
+}
+
+// Usage
+<Router>
+  <ScrollManager />
+  <Route path="/" component={Home} />
+  {/* other routes */}
+</Router>
+```
+
+### Route Meta Information
+
+Store and access route metadata:
+
+```tsx
+const routeConfig = [
+  {
+    path: '/',
+    component: Home,
+    meta: { title: 'Home', requiresAuth: false }
+  },
+  {
+    path: '/admin',
+    component: Admin,
+    meta: { title: 'Admin Panel', requiresAuth: true, roles: ['admin'] }
+  }
+];
+
+function DocumentTitle() {
+  const router = useRouter();
+  const location = router.location();
+
+  useEffect(() => {
+    const route = findRouteByPath(location.pathname);
+    if (route?.meta?.title) {
+      document.title = `${route.meta.title} - My App`;
+    }
+  });
+
+  return null;
 }
 ```
 

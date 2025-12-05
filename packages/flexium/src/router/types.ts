@@ -1,5 +1,5 @@
 import { Signal, Computed } from '../core/signal'
-import type { VNodeChild } from '../core/renderer'
+import type { FNodeChild } from '../core/renderer'
 
 export interface Location {
   pathname: string
@@ -19,7 +19,7 @@ export interface RouteProps {
   path?: string // path can be optional for layout routes or index
   index?: boolean
   component: Function
-  children?: VNodeChild // Nested routes
+  children?: FNodeChild // Nested routes
   beforeEnter?: (params: Record<string, string>) => boolean | Promise<boolean>
 }
 
@@ -36,11 +36,11 @@ export interface RouteDef {
   component: Function
   children: RouteDef[]
   beforeEnter?: (params: Record<string, string>) => boolean | Promise<boolean>
-  // We might need the original VNode props if we want to support other props
+  // We might need the original FNode props if we want to support other props
 }
 
 export interface LinkProps {
   to: string
   class?: string
-  children?: VNodeChild
+  children?: FNodeChild
 }

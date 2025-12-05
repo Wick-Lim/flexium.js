@@ -24,7 +24,7 @@ Most applications should use the `state()` API from the main `flexium` export. T
 ## Import
 
 ```tsx
-import { signal, computed, root, untrack } from 'flexium/advanced'
+import { signal, computed, batch, root, untrack } from 'flexium/advanced'
 ```
 
 ## API Overview
@@ -33,6 +33,7 @@ import { signal, computed, root, untrack } from 'flexium/advanced'
 |--------|-------------|
 | `signal(value)` | Create a raw reactive signal |
 | `computed(fn)` | Create a derived computed value |
+| `batch(fn)` | Batch multiple updates together ([Learn more](/guide/batch)) |
 | `root(fn)` | Create an isolated reactive scope |
 | `untrack(fn)` | Read values without creating dependencies |
 

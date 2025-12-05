@@ -1,0 +1,21 @@
+{
+  "name": "flexium-monorepo-starter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo starter template for Flexium projects",
+  "scripts": {
+    "dev": "pnpm --filter app dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
+    "test": "pnpm -r test",
+    "clean": "pnpm -r clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

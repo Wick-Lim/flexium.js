@@ -3,13 +3,13 @@
  * These types are used across multiple modules to ensure consistency
  */
 
-import type { VNode } from '../core/renderer'
+import type { FNode } from '../core/renderer'
 import type { Signal, Computed } from '../core/signal'
 
 /**
  * Valid child types that can be rendered
  */
-export type Child = VNode | string | number | boolean | null | undefined
+export type Child = FNode | string | number | boolean | null | undefined
 
 /**
  * Array of children
@@ -24,13 +24,13 @@ export type RenderFunction = () => Child | Children
 /**
  * Component function type
  */
-export type Component<P = Record<string, unknown>> = (props: P) => VNode | null
+export type Component<P = Record<string, unknown>> = (props: P) => FNode | null
 
 /**
  * Renderable node types for reactive rendering
  */
 export type RenderableNode =
-  | VNode
+  | FNode
   | string
   | number
   | boolean

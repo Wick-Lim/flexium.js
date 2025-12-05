@@ -38,6 +38,21 @@ const TEMPLATES = {
     description: 'Complete todo application showing best practices',
     path: './templates/todo-app-template',
   },
+  'ssr-starter': {
+    name: 'SSR (Server-Side Rendering)',
+    description: 'Express server with SSR for optimal performance and SEO',
+    path: './templates/ssr-starter',
+  },
+  'pwa-starter': {
+    name: 'PWA (Progressive Web App)',
+    description: 'Full PWA with offline support, service worker, and manifest',
+    path: './templates/pwa-starter',
+  },
+  'monorepo-starter': {
+    name: 'Monorepo (pnpm workspaces)',
+    description: 'Monorepo setup with shared packages and workspaces',
+    path: './templates/monorepo-starter',
+  },
 }
 
 // Create readline interface
@@ -78,20 +93,92 @@ function showTemplates() {
   })
 }
 
+// Validate project name
+function validateProjectName(name) {
+  // Check if empty
+  if (!name || name.trim() === '') {
+    return { valid: false, error: 'Project name cannot be empty' }
+  }
+
+  // Check for npm package name rules
+  const trimmedName = name.trim()
+
+  // Check length
+  if (trimmedName.length > 214) {
+    return { valid: false, error: 'Project name must be 214 characters or less' }
+  }
+
+  // Check for uppercase letters
+  if (trimmedName !== trimmedName.toLowerCase()) {
+    return { valid: false, error: 'Project name cannot contain uppercase letters' }
+  }
+
+  // Check for invalid characters (only lowercase, numbers, hyphens, underscores allowed)
+  const validNameRegex = /^[a-z0-9_-]+$/
+  if (!validNameRegex.test(trimmedName)) {
+    return {
+      valid: false,
+      error: 'Project name can only contain lowercase letters, numbers, hyphens, and underscores'
+    }
+  }
+
+  // Check if starts with dot or underscore
+  if (trimmedName.startsWith('.') || trimmedName.startsWith('_')) {
+    return { valid: false, error: 'Project name cannot start with a dot or underscore' }
+  }
+
+  // Reserved names
+  const reserved = ['node_modules', 'favicon.ico']
+  if (reserved.includes(trimmedName)) {
+    return { valid: false, error: `"${trimmedName}" is a reserved name` }
+  }
+
+  return { valid: true, name: trimmedName }
+}
+
 // Get project name from args or prompt
 async function getProjectName(rl, args) {
-  if (args[0]) {
-    return args[0]
+  let projectName = args[0]
+
+  if (!projectName) {
+    projectName = await question(rl, `${cyan}📝 Project name [default: my-flexium-app]:${reset} `)
+    projectName = projectName.trim() || 'my-flexium-app'
   }
-  const name = await question(rl, `${cyan}📝 Project name [default: my-flexium-app]:${reset} `)
-  return name.trim() || 'my-flexium-app'
+
+  // Validate project name
+  const validation = validateProjectName(projectName)
+  if (!validation.valid) {
+    console.log(`${red}❌ Invalid project name: ${validation.error}${reset}`)
+    console.log(`${yellow}💡 Examples: my-app, my-project-name, my_app${reset}\n`)
+
+    // Ask again if interactive
+    if (!args[0]) {
+      return getProjectName(rl, [])
+    } else {
+      process.exit(1)
+    }
+  }
+
+  return validation.name
 }
 
 // Get template choice
-async function getTemplateChoice(rl) {
+async function getTemplateChoice(rl, args) {
+  const templateKeys = Object.keys(TEMPLATES)
+
+  // Check if template choice is provided as command-line argument
+  if (args[1]) {
+    const index = parseInt(args[1]) - 1
+    if (!isNaN(index) && index >= 0 && index < templateKeys.length) {
+      return templateKeys[index]
+    }
+    // Invalid choice from args, use default
+    return templateKeys[0]
+  }
+
+  // Interactive mode - show templates and prompt
   showTemplates()
 
-  const templateKeys = Object.keys(TEMPLATES)
   const choice = await question(rl, `${cyan}📦 Select template [1-${templateKeys.length}] (default: 1):${reset} `)
   const index = parseInt(choice.trim()) - 1
 
@@ -142,11 +229,29 @@ function showNextSteps(projectName, templateKey) {
   console.log(`\n${bright}${green}🎉 All set! Next steps:${reset}\n`)
   console.log(`  ${cyan}cd ${projectName}${reset}`)
 
-  if (templateKey === 'vite-starter' || templateKey === 'todo-app') {
+  if (templateKey === 'vanilla-starter') {
+    console.log(`  ${cyan}npx serve .${reset}   ${reset}# or any HTTP server`)
+  } else if (templateKey === 'monorepo-starter') {
+    console.log(`  ${cyan}pnpm install${reset}  ${reset}# requires pnpm`)
+    console.log(`  ${cyan}pnpm dev${reset}`)
+  } else {
     console.log(`  ${cyan}npm install${reset}`)
     console.log(`  ${cyan}npm run dev${reset}`)
-  } else if (templateKey === 'vanilla-starter') {
-    console.log(`  ${cyan}npx serve .${reset}   ${reset}# or any HTTP server`)
+  }
+
+  // Template-specific tips
+  if (templateKey === 'ssr-starter') {
+    console.log(`\n${bright}💡 SSR Tips:${reset}`)
+    console.log(`  ${yellow}Run "npm run build" to build for production${reset}`)
+    console.log(`  ${yellow}Use "npm run preview" to test production build${reset}`)
+  } else if (templateKey === 'pwa-starter') {
+    console.log(`\n${bright}💡 PWA Tips:${reset}`)
+    console.log(`  ${yellow}Build and serve over HTTPS to test PWA features${reset}`)
+    console.log(`  ${yellow}Replace icons in public/icons/ with your own${reset}`)
+  } else if (templateKey === 'monorepo-starter') {
+    console.log(`\n${bright}💡 Monorepo Tips:${reset}`)
+    console.log(`  ${yellow}Install pnpm globally: npm install -g pnpm${reset}`)
+    console.log(`  ${yellow}Run "pnpm -r build" to build all packages${reset}`)
   }
 
   console.log(`\n${bright}📚 Learn more:${reset}`)
@@ -166,7 +271,7 @@ async function main() {
     const projectName = await getProjectName(rl, args)
 
     // Show templates and get choice
-    const templateKey = await getTemplateChoice(rl)
+    const templateKey = await getTemplateChoice(rl, args)
     const template = TEMPLATES[templateKey]
 
     console.log(`\n${green}✨ Selected:${reset} ${bright}${template.name}${reset}`)
