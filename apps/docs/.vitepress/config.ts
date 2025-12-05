@@ -225,7 +225,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'render()', link: '/docs/dom/render' },
-            { text: 'h()', link: '/docs/dom/h' },
+            { text: 'f()', link: '/docs/dom/f' },
             { text: '&lt;Portal /&gt;', link: '/docs/dom/portal' }
           ]
         },

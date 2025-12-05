@@ -50,9 +50,6 @@ export function f(
   return createFNode(type, normalizedProps, normalizedChildren, key)
 }
 
-/** @deprecated Use f() instead */
-export const h = f
-
 /**
  * Fragment component
  * Renders children without a wrapper element
@@ -94,9 +91,6 @@ export function isFNode(value: any): value is FNode {
     'children' in value
   )
 }
-
-/** @deprecated Use isFNode instead */
-export const isVNode = isFNode
 
 /**
  * Create a text node
