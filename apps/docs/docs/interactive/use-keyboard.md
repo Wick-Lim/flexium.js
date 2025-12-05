@@ -5,7 +5,7 @@ Track keyboard input for games and interactive applications.
 ## Import
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium/game'
+import { useKeyboard, Keys } from 'flexium/interactive'
 ```
 
 ## Signature
@@ -33,7 +33,7 @@ interface KeyboardState {
 ## Keys Constants
 
 ```ts
-import { Keys } from 'flexium/game'
+import { Keys } from 'flexium/interactive'
 
 Keys.ArrowUp
 Keys.ArrowDown
@@ -56,7 +56,7 @@ Keys.Alt
 function Game() {
   const keyboard = useKeyboard()
 
-  const gameLoop = createGameLoop({
+  const loop = createLoop({
     onUpdate: () => {
       if (keyboard.isPressed(Keys.ArrowUp)) {
         moveUp()
@@ -99,7 +99,7 @@ function PlayerController() {
 ```tsx
 const keyboard = useKeyboard()
 
-const gameLoop = createGameLoop({
+const loop = createLoop({
   onUpdate: () => {
     // Only jump on initial press, not while held
     if (keyboard.isJustPressed(Keys.Space)) {
@@ -166,5 +166,5 @@ function DebugOverlay() {
 
 ## See Also
 
-- [useMouse()](/docs/game/use-mouse)
-- [createGameLoop()](/docs/game/game-loop)
+- [useMouse()](/docs/interactive/use-mouse)
+- [createLoop()](/docs/interactive/loop)

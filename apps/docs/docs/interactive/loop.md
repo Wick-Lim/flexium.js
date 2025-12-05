@@ -1,25 +1,25 @@
-# createGameLoop()
+# createLoop()
 
-Create a consistent game loop with delta time.
+Create a consistent animation/game loop with delta time.
 
 ## Import
 
 ```tsx
-import { createGameLoop } from 'flexium/game'
+import { createLoop } from 'flexium/interactive'
 ```
 
 ## Signature
 
 ```ts
-function createGameLoop(options: GameLoopOptions): GameLoop
+function createLoop(options: LoopOptions): Loop
 
-interface GameLoopOptions {
+interface LoopOptions {
   onUpdate: (delta: number) => void
   onRender?: () => void
   targetFPS?: number
 }
 
-interface GameLoop {
+interface Loop {
   start: () => void
   stop: () => void
   isRunning: Accessor<boolean>
@@ -38,17 +38,17 @@ interface GameLoop {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `start` | `() => void` | Start the game loop |
-| `stop` | `() => void` | Stop the game loop |
+| `start` | `() => void` | Start the loop |
+| `stop` | `() => void` | Stop the loop |
 | `isRunning` | `Accessor<boolean>` | Whether loop is running |
 
 ## Usage
 
-### Basic Game Loop
+### Basic Loop
 
 ```tsx
 function Game() {
-  const gameLoop = createGameLoop({
+  const loop = createLoop({
     onUpdate: (delta) => {
       // delta is time since last frame in seconds
       updateGame(delta)
@@ -56,8 +56,8 @@ function Game() {
   })
 
   effect(() => {
-    gameLoop.start()
-    return () => gameLoop.stop()
+    loop.start()
+    return () => loop.stop()
   })
 
   return <Canvas />
@@ -69,7 +69,7 @@ function Game() {
 ```tsx
 const speed = 200 // pixels per second
 
-const gameLoop = createGameLoop({
+const loop = createLoop({
   onUpdate: (delta) => {
     // Consistent movement regardless of frame rate
     player.x += speed * delta
@@ -80,7 +80,7 @@ const gameLoop = createGameLoop({
 ### Separate Update and Render
 
 ```tsx
-const gameLoop = createGameLoop({
+const loop = createLoop({
   onUpdate: (delta) => {
     // Physics, AI, input handling
     updatePhysics(delta)
@@ -102,7 +102,7 @@ const gameLoop = createGameLoop({
 let accumulator = 0
 const FIXED_STEP = 1 / 60 // 60 updates per second
 
-const gameLoop = createGameLoop({
+const loop = createLoop({
   onUpdate: (delta) => {
     accumulator += delta
 
@@ -124,7 +124,7 @@ function PausableGame() {
   const [paused, setPaused] = state(false)
   const keyboard = useKeyboard()
 
-  const gameLoop = createGameLoop({
+  const loop = createLoop({
     onUpdate: (delta) => {
       if (paused()) return
       updateGame(delta)
@@ -156,7 +156,7 @@ function FPSCounter() {
   let frameCount = 0
   let lastTime = performance.now()
 
-  const gameLoop = createGameLoop({
+  const loop = createLoop({
     onUpdate: () => {
       frameCount++
       const now = performance.now()
@@ -170,20 +170,20 @@ function FPSCounter() {
   })
 
   effect(() => {
-    gameLoop.start()
-    return () => gameLoop.stop()
+    loop.start()
+    return () => loop.stop()
   })
 
   return <div>FPS: {fps}</div>
 }
 ```
 
-### Game State Machine
+### State Machine
 
 ```tsx
 const [gameState, setGameState] = state('menu')
 
-const gameLoop = createGameLoop({
+const loop = createLoop({
   onUpdate: (delta) => {
     switch (gameState()) {
       case 'menu':
@@ -219,6 +219,6 @@ const gameLoop = createGameLoop({
 
 ## See Also
 
-- [useKeyboard()](/docs/game/use-keyboard)
-- [useMouse()](/docs/game/use-mouse)
+- [useKeyboard()](/docs/interactive/use-keyboard)
+- [useMouse()](/docs/interactive/use-mouse)
 - [&lt;Canvas /&gt;](/docs/canvas/canvas)

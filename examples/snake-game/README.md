@@ -1,12 +1,12 @@
-# Snake Game - Flexium Game Module Example
+# Snake Game - Flexium Interactive Module Example
 
-A classic Snake game implementation demonstrating Flexium's game development capabilities.
+A classic Snake game implementation demonstrating Flexium's interactive development capabilities.
 
 ## Features Demonstrated
 
 This example showcases the following Flexium APIs:
 
-### Game Module APIs
+### Interactive Module APIs
 
 - **`useKeyboard()`** - Reactive keyboard input handling
   - Arrow keys and WASD for snake movement
@@ -18,7 +18,7 @@ This example showcases the following Flexium APIs:
   - Click anywhere on screen to pause/unpause
   - Demonstrates canvas-independent mouse interaction
 
-- **`createGameLoop()`** - Game loop with delta time
+- **`createLoop()`** - Animation loop with delta time
   - Smooth frame-independent animation
   - Delta time based movement
   - Progressive difficulty (speed increases with score)
@@ -89,9 +89,9 @@ snake-game/
 
 ## Key Implementation Details
 
-### Game Loop
+### Animation Loop
 ```tsx
-const gameLoop = createGameLoop({
+const loop = createLoop({
   onUpdate: (delta) => {
     moveTimer += delta
     if (moveTimer >= getCurrentSpeed()) {

@@ -5,7 +5,7 @@ Track mouse position and button states.
 ## Import
 
 ```tsx
-import { useMouse } from 'flexium/game'
+import { useMouse } from 'flexium/interactive'
 ```
 
 ## Signature
@@ -81,7 +81,7 @@ function DrawingApp() {
 ```tsx
 const mouse = useMouse()
 
-const gameLoop = createGameLoop({
+const loop = createLoop({
   onUpdate: () => {
     if (mouse.isJustPressed(0)) {
       handleClick(mouse.x(), mouse.y())
@@ -208,11 +208,11 @@ function ContextMenuArea() {
 
 ## Notes
 
-- Use with `createGameLoop` for game input
+- Use with `createLoop` for interactive input
 - Position is relative to viewport by default
 - Prevent default context menu for right-click handling
 
 ## See Also
 
-- [useKeyboard()](/docs/game/use-keyboard)
-- [createGameLoop()](/docs/game/game-loop)
+- [useKeyboard()](/docs/interactive/use-keyboard)
+- [createLoop()](/docs/interactive/loop)

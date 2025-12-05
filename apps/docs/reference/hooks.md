@@ -24,8 +24,8 @@ Flexium provides a set of composable hooks that integrate seamlessly with the si
 | --- | --- | --- |
 | [`useContext()`](#usecontext) | `flexium/core` | Access values from a context provider |
 | [`useRouter()`](#userouter) | `flexium/router` | Access routing state and navigation |
-| [`useKeyboard()`](#usekeyboard) | `flexium/game` | Track keyboard input state |
-| [`useMouse()`](#usemouse) | `flexium/game` | Track mouse position and button state |
+| [`useKeyboard()`](#usekeyboard) | `flexium/interactive` | Track keyboard input state |
+| [`useMouse()`](#usemouse) | `flexium/interactive` | Track mouse position and button state |
 | [`useMotion()`](#usemotion) | `flexium/primitives/motion` | Create signal-driven animations |
 | [`useErrorBoundary()`](#useerrorboundary) | `flexium/core` | Handle errors in components |
 
@@ -451,7 +451,7 @@ For complete routing documentation, see the [Router API Reference](/reference/ro
 
 ---
 
-## Game Hooks
+## Interactive Hooks
 
 ### useKeyboard
 
@@ -486,7 +486,7 @@ Returns a `KeyboardState` object:
 #### Usage
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium/game';
+import { useKeyboard, Keys } from 'flexium/interactive';
 import { effect } from 'flexium';
 
 function PlayerController() {
@@ -527,13 +527,13 @@ function PlayerController() {
 #### Game Loop Integration
 
 ```tsx
-import { useKeyboard, Keys, useGameLoop } from 'flexium/game';
+import { useKeyboard, Keys, createLoop } from 'flexium/interactive';
 
 function Game() {
   const keyboard = useKeyboard();
   const player = signal({ x: 100, y: 100, jumping: false });
 
-  useGameLoop((dt) => {
+  createLoop((dt) => {
     const pos = { ...player.value };
 
     // Check for jump
@@ -574,7 +574,7 @@ function Game() {
 Flexium provides a `Keys` constant with common key codes:
 
 ```tsx
-import { Keys } from 'flexium/game';
+import { Keys } from 'flexium/interactive';
 
 // Arrow keys
 Keys.ArrowUp, Keys.ArrowDown, Keys.ArrowLeft, Keys.ArrowRight
@@ -670,7 +670,7 @@ Returns a `MouseState` object:
 #### Basic Usage
 
 ```tsx
-import { useMouse } from 'flexium/game';
+import { useMouse } from 'flexium/interactive';
 
 function MouseTracker() {
   const mouse = useMouse();
@@ -689,7 +689,7 @@ function MouseTracker() {
 #### Canvas Drawing
 
 ```tsx
-import { useMouse } from 'flexium/game';
+import { useMouse } from 'flexium/interactive';
 import { signal, effect } from 'flexium';
 
 function DrawingCanvas() {
@@ -727,14 +727,14 @@ function DrawingCanvas() {
 #### Game Loop Integration
 
 ```tsx
-import { useMouse, useGameLoop } from 'flexium/game';
+import { useMouse, createLoop } from 'flexium/interactive';
 
 function ShootingGame() {
   const mouse = useMouse();
   const crosshair = signal({ x: 0, y: 0 });
   const projectiles = signal<Array<{ x: number, y: number }>>([]);
 
-  useGameLoop((dt) => {
+  createLoop((dt) => {
     // Update crosshair position
     const pos = mouse.position();
     crosshair.value = { x: pos.x, y: pos.y };
@@ -812,7 +812,7 @@ function ZoomableView() {
 #### Mouse Button Constants
 
 ```tsx
-import { MouseButton } from 'flexium/game';
+import { MouseButton } from 'flexium/interactive';
 
 MouseButton.Left    // 0
 MouseButton.Middle  // 1
@@ -1463,5 +1463,5 @@ function useEverything() {
 - [State Management](/guide/state) - Working with signals and effects
 - [Context API](/guide/context) - Detailed context guide
 - [Router Guide](/guide/router) - Complete routing documentation
-- [Game Development](/guide/game) - Building games with Flexium
+- [Interactive Apps](/guide/interactive) - Building games with Flexium
 - [Animation](/guide/animation) - Animation techniques and patterns

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { createGameLoop } from '../gameLoop'
+import { createLoop } from '../loop'
 
-describe('createGameLoop', () => {
+describe('createLoop', () => {
   let mockRaf: typeof requestAnimationFrame
   let mockCancelRaf: typeof cancelAnimationFrame
   let callbacks: Array<(time: number) => void>
@@ -33,8 +33,8 @@ describe('createGameLoop', () => {
     cbs.forEach((cb) => cb(timeMs))
   }
 
-  it('should create a game loop with default options', () => {
-    const loop = createGameLoop()
+  it('should create a loop with default options', () => {
+    const loop = createLoop()
 
     expect(loop).toBeDefined()
     expect(typeof loop.start).toBe('function')
@@ -44,7 +44,7 @@ describe('createGameLoop', () => {
   })
 
   it('should start and stop correctly', () => {
-    const loop = createGameLoop()
+    const loop = createLoop()
 
     expect(loop.isRunning()).toBe(false)
 
@@ -56,7 +56,7 @@ describe('createGameLoop', () => {
   })
 
   it('should call requestAnimationFrame on start', () => {
-    const loop = createGameLoop()
+    const loop = createLoop()
 
     loop.start()
 
@@ -67,7 +67,7 @@ describe('createGameLoop', () => {
 
   it('should call onUpdate with delta time', () => {
     const onUpdate = vi.fn()
-    const loop = createGameLoop({ onUpdate })
+    const loop = createLoop({ onUpdate })
 
     loop.start()
     simulateFrame(1000) // First frame initializes lastTime
@@ -83,7 +83,7 @@ describe('createGameLoop', () => {
 
   it('should call onFixedUpdate', () => {
     const onFixedUpdate = vi.fn()
-    const loop = createGameLoop({
+    const loop = createLoop({
       fixedFps: 60,
       onFixedUpdate,
     })
@@ -99,7 +99,7 @@ describe('createGameLoop', () => {
 
   it('should call onRender with alpha value', () => {
     const onRender = vi.fn()
-    const loop = createGameLoop({ onRender })
+    const loop = createLoop({ onRender })
 
     loop.start()
     simulateFrame(1000) // First frame initializes lastTime
@@ -113,7 +113,7 @@ describe('createGameLoop', () => {
   })
 
   it('should not start if already running', () => {
-    const loop = createGameLoop()
+    const loop = createLoop()
 
     loop.start()
     const callCount = (mockRaf as ReturnType<typeof vi.fn>).mock.calls.length
@@ -127,13 +127,13 @@ describe('createGameLoop', () => {
   })
 
   it('should return 0 FPS initially', () => {
-    const loop = createGameLoop()
+    const loop = createLoop()
 
     expect(loop.getFps()).toBe(0)
   })
 
   it('should call cancelAnimationFrame on stop', () => {
-    const loop = createGameLoop()
+    const loop = createLoop()
 
     loop.start()
     loop.stop()
@@ -143,7 +143,7 @@ describe('createGameLoop', () => {
 
   it('should cap delta time at 250ms', () => {
     const onUpdate = vi.fn()
-    const loop = createGameLoop({ onUpdate })
+    const loop = createLoop({ onUpdate })
 
     loop.start()
     simulateFrame(1000) // First frame initializes lastTime
@@ -157,7 +157,7 @@ describe('createGameLoop', () => {
 
   it('should call onFixedUpdate multiple times for long frames', () => {
     const onFixedUpdate = vi.fn()
-    const loop = createGameLoop({
+    const loop = createLoop({
       fixedFps: 60, // 16.67ms per frame
       onFixedUpdate,
     })
@@ -173,7 +173,7 @@ describe('createGameLoop', () => {
 
   it('should stop processing after stop is called', () => {
     const onUpdate = vi.fn()
-    const loop = createGameLoop({ onUpdate })
+    const loop = createLoop({ onUpdate })
 
     loop.start()
     loop.stop()

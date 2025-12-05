@@ -1,13 +1,13 @@
 /**
- * Flexium Game
+ * Flexium Interactive
  *
- * Game development utilities for building canvas-based games.
- * Provides game loop, input handling, and more.
+ * Utilities for building interactive applications, games, and animations.
+ * Provides animation loop, input handling, and more.
  *
  * @example
  * ```tsx
  * import { Canvas, DrawRect } from 'flexium/canvas'
- * import { createGameLoop, useKeyboard, useMouse } from 'flexium/game'
+ * import { createLoop, useKeyboard, useMouse } from 'flexium/interactive'
  *
  * const keyboard = useKeyboard()
  * const mouse = useMouse()
@@ -15,7 +15,7 @@
  * const playerX = signal(100)
  * const playerY = signal(100)
  *
- * const game = createGameLoop({
+ * const loop = createLoop({
  *   onUpdate(delta) {
  *     const speed = 200 * delta
  *
@@ -28,9 +28,9 @@
  *   }
  * })
  *
- * game.start()
+ * loop.start()
  * ```
  */
 
-// Re-export all game utilities
-export * from './game/index'
+// Re-export all interactive utilities
+export * from './interactive/index'

@@ -7,7 +7,7 @@ export default defineConfig({
     advanced: 'src/advanced.ts',
     dom: 'src/dom.ts',
     canvas: 'src/canvas.ts',
-    game: 'src/game.ts',
+    interactive: 'src/interactive.ts',
     primitives: 'src/primitives.ts',
     'primitives/motion': 'src/primitives/motion/index.ts',
     'primitives/form': 'src/primitives/form/index.ts',

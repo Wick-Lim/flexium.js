@@ -1,15 +1,15 @@
 /**
- * Flexium Game Module
+ * Flexium Interactive Module
  *
- * Provides game development utilities for canvas-based games:
- * - Game loop with delta time and fixed timestep
+ * Provides utilities for interactive applications:
+ * - Animation loop with delta time and fixed timestep
  * - Keyboard input handling
  * - Mouse input handling
  */
 
-// Core game loop
-export { createGameLoop } from './gameLoop'
-export type { GameLoop, GameLoopOptions } from './gameLoop'
+// Core loop
+export { createLoop } from './loop'
+export type { Loop, LoopOptions } from './loop'
 
 // Input hooks
 export { useKeyboard, Keys } from './useKeyboard'

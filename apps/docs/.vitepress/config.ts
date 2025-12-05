@@ -136,7 +136,7 @@ export default defineConfig({
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.5.4',
+        text: 'v0.5.5',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -175,7 +175,7 @@ export default defineConfig({
             { text: 'Animation', link: '/guide/animation' },
             { text: 'Forms', link: '/guide/forms' },
             { text: 'Canvas', link: '/guide/canvas' },
-            { text: 'Game Development', link: '/guide/game' }
+            { text: 'Interactive Apps', link: '/guide/interactive' }
           ]
         },
         {
@@ -270,12 +270,12 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/game',
+          text: 'flexium/interactive',
           collapsed: false,
           items: [
-            { text: 'useKeyboard()', link: '/docs/game/use-keyboard' },
-            { text: 'useMouse()', link: '/docs/game/use-mouse' },
-            { text: 'createGameLoop()', link: '/docs/game/game-loop' }
+            { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },
+            { text: 'useMouse()', link: '/docs/interactive/use-mouse' },
+            { text: 'createLoop()', link: '/docs/interactive/loop' }
           ]
         },
         {

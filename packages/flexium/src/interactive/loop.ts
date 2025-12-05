@@ -1,8 +1,8 @@
 /**
- * Game Loop - Core game loop implementation with delta time and fixed timestep
+ * Loop - Core animation/game loop implementation with delta time and fixed timestep
  */
 
-export interface GameLoopOptions {
+export interface LoopOptions {
   /** Target FPS for fixed update (default: 60) */
   fixedFps?: number
   /** Called every frame with delta time in seconds */
@@ -13,10 +13,10 @@ export interface GameLoopOptions {
   onRender?: (alpha: number) => void
 }
 
-export interface GameLoop {
-  /** Start the game loop */
+export interface Loop {
+  /** Start the loop */
   start(): void
-  /** Stop the game loop */
+  /** Stop the loop */
   stop(): void
   /** Check if loop is running */
   isRunning(): boolean
@@ -25,9 +25,9 @@ export interface GameLoop {
 }
 
 /**
- * Create a game loop with delta time and optional fixed timestep
+ * Create an animation loop with delta time and optional fixed timestep
  */
-export function createGameLoop(options: GameLoopOptions = {}): GameLoop {
+export function createLoop(options: LoopOptions = {}): Loop {
   const { fixedFps = 60, onUpdate, onFixedUpdate, onRender } = options
 
   const fixedDelta = 1 / fixedFps

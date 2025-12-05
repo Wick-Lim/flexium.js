@@ -673,8 +673,8 @@ import { Router, Route, Link } from 'flexium/router';
 // Canvas
 import { Canvas } from 'flexium/canvas';
 
-// Game utilities
-import { useKeyboard, useMouse, gameLoop } from 'flexium/game';
+// Interactive utilities
+import { useKeyboard, useMouse, createLoop } from 'flexium/interactive';
 ```
 
 ### Analyze Bundle Size

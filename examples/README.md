@@ -195,7 +195,7 @@ const remaining = computed(() =>
 **Build an interactive game with Flexium**
 
 **Demonstrates:**
-- Game Module APIs (useKeyboard, useMouse, createGameLoop)
+- Interactive Module APIs (useKeyboard, useMouse, createLoop)
 - Canvas primitives (Canvas, DrawRect, DrawText)
 - Frame-independent movement with delta time
 - Reactive game state management
@@ -436,12 +436,12 @@ effect(() => {
 
 ## 🆕 Advanced Examples
 
-### Game Development
+### Interactive Apps
 
 #### Snake Game (`/snake-game`) 🎮
-Classic snake game demonstrating Flexium's game development capabilities with keyboard/mouse input, canvas rendering, and frame-independent movement.
+Classic snake game demonstrating Flexium's interactive development capabilities with keyboard/mouse input, canvas rendering, and frame-independent movement.
 
-**APIs:** useKeyboard(), useMouse(), createGameLoop(), Canvas, DrawRect, DrawText
+**APIs:** useKeyboard(), useMouse(), createLoop(), Canvas, DrawRect, DrawText
 
 **Difficulty:** Intermediate
 

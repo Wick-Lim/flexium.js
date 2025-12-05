@@ -1,6 +1,6 @@
 {
   "name": "flexium",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "A lightweight, signals-based UI framework with cross-platform renderers",
   "publishConfig": {
     "access": "public"
@@ -35,10 +35,10 @@
       "import": "./dist/canvas.mjs",
       "require": "./dist/canvas.js"
     },
-    "./game": {
-      "types": "./dist/game.d.ts",
-      "import": "./dist/game.mjs",
-      "require": "./dist/game.js"
+    "./interactive": {
+      "types": "./dist/interactive.d.ts",
+      "import": "./dist/interactive.mjs",
+      "require": "./dist/interactive.js"
     },
     "./primitives": {
       "types": "./dist/primitives.d.ts",

@@ -20,7 +20,7 @@ export default defineConfig({
       'flexium/core': '../../packages/flexium/dist/core.mjs',
       'flexium/dom': '../../packages/flexium/dist/dom.mjs',
       'flexium/canvas': '../../packages/flexium/dist/canvas.mjs',
-      'flexium/game': '../../packages/flexium/dist/game.mjs',
+      'flexium/interactive': '../../packages/flexium/dist/interactive.mjs',
       'flexium': '../../packages/flexium/dist/index.mjs'
     }
   }

@@ -293,7 +293,7 @@ A complete game built with Flexium's game module. Use arrow keys or WASD to cont
 import { signal, effect } from 'flexium/core'
 import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
-import { useKeyboard, createGameLoop, Keys } from 'flexium/game'
+import { useKeyboard, createLoop, Keys } from 'flexium/interactive'
 
 const snake = signal([{ x: 7, y: 7 }])
 const direction = signal('RIGHT')
@@ -303,7 +303,7 @@ const score = signal(0)
 function SnakeGame() {
   const keyboard = useKeyboard()
 
-  const gameLoop = createGameLoop({
+  const loop = createLoop({
     onUpdate: (delta) => {
       // Handle input and move snake
       moveSnake()
@@ -311,8 +311,8 @@ function SnakeGame() {
   })
 
   effect(() => {
-    gameLoop.start()
-    return () => gameLoop.stop()
+    loop.start()
+    return () => loop.stop()
   })
 
   return (

@@ -1,6 +1,6 @@
 ---
 title: Snake Game - Game Development
-description: Build a classic Snake game using Flexium's game module with keyboard input, game loop, and canvas rendering.
+description: Build a classic Snake game using Flexium's interactive module with keyboard input, game loop, and canvas rendering.
 head:
   - - meta
     - property: og:title
@@ -12,13 +12,13 @@ head:
 
 # Snake Game
 
-This example demonstrates game development with Flexium using the game module.
+This example demonstrates game development with Flexium using the interactive module.
 
 ## Features Demonstrated
 
 - `useKeyboard()` for arrow key input
 - `useMouse()` for mouse tracking and click events
-- `createGameLoop()` for game loop with delta time
+- `createLoop()` for game loop with delta time
 - Canvas primitives for rendering
 - Reactive state management with signals
 
@@ -28,7 +28,7 @@ This example demonstrates game development with Flexium using the game module.
 import { signal, effect } from 'flexium/core'
 import { mount } from 'flexium/dom'
 import { Canvas, DrawRect, DrawText } from 'flexium/canvas'
-import { useKeyboard, useMouse, createGameLoop, Keys } from 'flexium/game'
+import { useKeyboard, useMouse, createLoop, Keys } from 'flexium/interactive'
 
 // Game constants
 const GRID_SIZE = 20
@@ -62,7 +62,7 @@ function SnakeGame() {
   const mouse = useMouse()
 
   // Setup game loop
-  const gameLoop = createGameLoop({
+  const loop = createLoop({
     onUpdate: (delta) => {
       if (gameOver.value || paused.value) return
       // Move snake based on direction
@@ -72,8 +72,8 @@ function SnakeGame() {
 
   // Start game loop on mount
   effect(() => {
-    gameLoop.start()
-    return () => gameLoop.stop()
+    loop.start()
+    return () => loop.stop()
   })
 
   // Handle keyboard input
@@ -148,10 +148,10 @@ mount(SnakeGame, document.getElementById('app')!)
 
 ### Game Loop
 
-The `createGameLoop` hook provides a consistent update cycle with delta time:
+The `createLoop` hook provides a consistent update cycle with delta time:
 
 ```tsx
-const gameLoop = createGameLoop({
+const loop = createLoop({
   onUpdate: (delta) => {
     // delta is time since last frame in seconds
     moveTimer += delta

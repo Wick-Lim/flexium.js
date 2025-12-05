@@ -1,10 +1,10 @@
 /**
- * Snake Game - Flexium Game Module Example
+ * Snake Game - Flexium Interactive Module Example
  *
  * Demonstrates:
  * - useKeyboard() for arrow key input
  * - useMouse() for mouse tracking (pause on click)
- * - createGameLoop() for game loop with delta time
+ * - createLoop() for animation loop with delta time
  * - Canvas primitives for rendering
  * - Reactive state management with signals
  */
@@ -12,7 +12,7 @@
 import { signal, effect } from 'flexium/core'
 import { mount } from 'flexium/dom'
 import { Canvas, DrawRect, DrawText } from 'flexium/canvas'
-import { useKeyboard, useMouse, createGameLoop, Keys } from 'flexium/game'
+import { useKeyboard, useMouse, createLoop, Keys } from 'flexium/interactive'
 
 // Game constants
 const GRID_SIZE = 20
@@ -156,8 +156,8 @@ function SnakeGame() {
   const keyboard = useKeyboard()
   const mouse = useMouse()
 
-  // Setup game loop
-  const gameLoop = createGameLoop({
+  // Setup animation loop
+  const loop = createLoop({
     onUpdate: (delta) => {
       if (gameOver.value || paused.value) return
 
@@ -171,10 +171,10 @@ function SnakeGame() {
     }
   })
 
-  // Start game loop on mount
+  // Start loop on mount
   effect(() => {
-    gameLoop.start()
-    return () => gameLoop.stop()
+    loop.start()
+    return () => loop.stop()
   })
 
   // Handle keyboard input

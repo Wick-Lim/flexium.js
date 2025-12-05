@@ -1,23 +1,23 @@
 ---
-title: Game Development - Build Canvas Games with Flexium
-description: Create interactive canvas-based games with Flexium's game loop, keyboard, and mouse input systems. Optimized for performance with delta time and fixed timestep.
+title: Interactive Apps - Build Games & Interactive Applications with Flexium
+description: Create interactive canvas-based applications with Flexium's animation loop, keyboard, and mouse input systems. Optimized for performance with delta time and fixed timestep.
 head:
   - - meta
     - property: og:title
-      content: Game Development - Flexium
+      content: Interactive Apps - Flexium
   - - meta
     - property: og:description
-      content: Complete game development toolkit with game loop, keyboard/mouse input, and reactive canvas rendering.
+      content: Complete interactive toolkit with animation loop, keyboard/mouse input, and reactive canvas rendering.
 ---
 
-# Game Development
+# Interactive Applications
 
-Flexium provides a complete game development toolkit for building interactive canvas-based games with a proper game loop, keyboard input, mouse input, and declarative rendering.
+Flexium provides a complete toolkit for building interactive canvas-based applications and games with a proper animation loop, keyboard input, mouse input, and declarative rendering.
 
-## Why Flexium for Games?
+## Why Flexium for Interactive Apps?
 
-Traditional game development with canvas requires:
-- Manual game loop management
+Traditional interactive development with canvas requires:
+- Manual animation loop management
 - Complex input state tracking
 - Imperative rendering code
 - Delta time calculations
@@ -28,7 +28,7 @@ Flexium handles all of this for you with a clean, reactive API.
 ## Quick Example
 
 ```tsx
-import { createGameLoop, useKeyboard, Keys } from 'flexium/game'
+import { createLoop, useKeyboard, Keys } from 'flexium/interactive'
 import { Canvas, Circle } from 'flexium/canvas'
 
 function SimpleGame() {
@@ -38,7 +38,7 @@ function SimpleGame() {
 
   const keyboard = useKeyboard()
 
-  const game = createGameLoop({
+  const loop = createLoop({
     onUpdate: (delta) => {
       // Handle input
       if (keyboard.isPressed(Keys.ArrowRight)) x += speed * delta
@@ -56,24 +56,24 @@ function SimpleGame() {
     }
   })
 
-  game.start()
+  loop.start()
 
   return null // Rendering happens in game loop
 }
 ```
 
-## Game Loop
+## Animation Loop
 
-The game loop is the heart of any game. It handles timing, updates, and rendering.
+The animation loop is the heart of any interactive application. It handles timing, updates, and rendering.
 
-### createGameLoop()
+### createLoop()
 
-Creates a game loop with delta time and optional fixed timestep for physics.
+Creates an animation loop with delta time and optional fixed timestep for physics.
 
 ```tsx
-import { createGameLoop } from 'flexium/game'
+import { createLoop } from 'flexium/interactive'
 
-const game = createGameLoop({
+const loop = createLoop({
   fixedFps: 60,           // Target FPS for physics (default: 60)
   onUpdate: (delta) => {
     // Called every frame
@@ -89,10 +89,10 @@ const game = createGameLoop({
   }
 })
 
-game.start()     // Start the loop
-game.stop()      // Stop the loop
-game.isRunning() // Check if running
-game.getFps()    // Get current FPS
+loop.start()     // Start the loop
+loop.stop()      // Stop the loop
+loop.isRunning() // Check if running
+loop.getFps()    // Get current FPS
 ```
 
 ### Delta Time
@@ -102,7 +102,7 @@ Delta time represents the time elapsed since the last frame in seconds. Use it t
 ```tsx
 const speed = 100 // pixels per second
 
-createGameLoop({
+createLoop({
   onUpdate: (delta) => {
     // Without delta: moves 1 pixel per frame (varies with FPS)
     x += 1
@@ -118,7 +118,7 @@ createGameLoop({
 For physics simulations, use `onFixedUpdate` to ensure deterministic behavior:
 
 ```tsx
-const game = createGameLoop({
+const loop = createLoop({
   fixedFps: 60, // Physics runs at 60 FPS
 
   onUpdate: (delta) => {
@@ -149,9 +149,9 @@ const game = createGameLoop({
 Monitor performance with the built-in FPS counter:
 
 ```tsx
-const game = createGameLoop({
+const loop = createLoop({
   onRender: () => {
-    const fps = game.getFps()
+    const fps = loop.getFps()
     console.log(`Running at ${fps} FPS`)
   }
 })
@@ -164,7 +164,7 @@ const game = createGameLoop({
 ### Basic Usage
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium/game'
+import { useKeyboard, Keys } from 'flexium/interactive'
 
 const keyboard = useKeyboard()
 
@@ -193,7 +193,7 @@ console.log(pressedKeys) // ['keyw', 'space', ...]
 The `Keys` enum provides convenient constants for common keys:
 
 ```tsx
-import { Keys } from 'flexium/game'
+import { Keys } from 'flexium/interactive'
 
 // Arrow keys
 Keys.ArrowUp, Keys.ArrowDown, Keys.ArrowLeft, Keys.ArrowRight
@@ -228,7 +228,7 @@ const keyboard = useKeyboard(canvasElement)
 const keyboard = useKeyboard()
 const speed = 200
 
-createGameLoop({
+createLoop({
   onUpdate: (delta) => {
     let vx = 0
     let vy = 0
@@ -313,7 +313,7 @@ Call `clearFrameState()` at the end of each frame to reset just-pressed/just-rel
 ```tsx
 const keyboard = useKeyboard()
 
-createGameLoop({
+createLoop({
   onUpdate: (delta) => {
     // Handle input
     if (keyboard.isJustPressed(Keys.Space)) {
@@ -342,7 +342,7 @@ onCleanup(() => {
 ### Basic Usage
 
 ```tsx
-import { useMouse, MouseButton } from 'flexium/game'
+import { useMouse, MouseButton } from 'flexium/interactive'
 
 const mouse = useMouse()
 
@@ -447,7 +447,7 @@ function Game() {
 ### MouseButton Enum
 
 ```tsx
-import { MouseButton } from 'flexium/game'
+import { MouseButton } from 'flexium/interactive'
 
 MouseButton.Left   // 0
 MouseButton.Middle // 1
@@ -461,7 +461,7 @@ Clear frame state and dispose when done:
 ```tsx
 const mouse = useMouse()
 
-createGameLoop({
+createLoop({
   onRender: () => {
     // Clear delta after each frame
     mouse.clearFrameState()
@@ -478,7 +478,7 @@ onCleanup(() => {
 Here's a complete game combining all the systems:
 
 ```tsx
-import { createGameLoop, useKeyboard, useMouse, Keys } from 'flexium/game'
+import { createLoop, useKeyboard, useMouse, Keys } from 'flexium/interactive'
 import { Canvas, Circle, Rect, CanvasText } from 'flexium/canvas'
 import { state } from 'flexium/core'
 
@@ -498,7 +498,7 @@ function TopDownShooter() {
   const spawnInterval = 2 // seconds
 
   // Game loop
-  const game = createGameLoop({
+  const loop = createLoop({
     onUpdate: (delta) => {
       // Player movement
       let vx = 0
@@ -606,7 +606,7 @@ function TopDownShooter() {
     }
   })
 
-  game.start()
+  loop.start()
 
   // Render function
   return () => (
@@ -671,7 +671,7 @@ function TopDownShooter() {
       <CanvasText
         x={700}
         y={30}
-        text={`FPS: ${game.getFps()}`}
+        text={`FPS: ${loop.getFps()}`}
         fontSize={16}
         fill="white"
       />
@@ -699,7 +699,7 @@ x += speed * delta
 Keep game logic in `onUpdate` and rendering in `onRender`:
 
 ```tsx
-createGameLoop({
+createLoop({
   onUpdate: (delta) => {
     // Game logic, physics, input
     updatePlayer(delta)
@@ -719,7 +719,7 @@ createGameLoop({
 Physics simulations should use `onFixedUpdate`:
 
 ```tsx
-createGameLoop({
+createLoop({
   fixedFps: 60,
 
   onFixedUpdate: (fixedDelta) => {
@@ -735,7 +735,7 @@ createGameLoop({
 Always clear frame-specific input states:
 
 ```tsx
-createGameLoop({
+createLoop({
   onRender: () => {
     keyboard.clearFrameState()
     mouse.clearFrameState()
@@ -749,7 +749,7 @@ Dispose of input handlers when done:
 
 ```tsx
 onCleanup(() => {
-  game.stop()
+  loop.stop()
   keyboard.dispose()
   mouse.dispose()
 })
@@ -784,7 +784,7 @@ const cappedDelta = Math.min(delta, 0.1) // Cap at 100ms
 Flexium's game module integrates seamlessly with Canvas primitives:
 
 ```tsx
-import { createGameLoop } from 'flexium/game'
+import { createLoop } from 'flexium/interactive'
 import { Canvas, Circle, Rect } from 'flexium/canvas'
 import { state } from 'flexium/core'
 
@@ -794,7 +794,7 @@ function GameExample() {
     { x: 200, y: 150, color: 'blue' }
   ])
 
-  createGameLoop({
+  createLoop({
     onUpdate: (delta) => {
       // Update entity positions
       setEntities(prev => prev.map(e => ({
@@ -827,9 +827,9 @@ The canvas automatically re-renders when state changes, giving you the best of b
 All game APIs are fully typed:
 
 ```tsx
-import type { GameLoop, KeyboardState, MouseState } from 'flexium/game'
+import type { Loop, KeyboardState, MouseState } from 'flexium/interactive'
 
-const game: GameLoop = createGameLoop({
+const game: Loop = createLoop({
   onUpdate: (delta: number) => {
     // delta is typed as number
   }
