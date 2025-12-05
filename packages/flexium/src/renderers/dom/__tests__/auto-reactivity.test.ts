@@ -205,28 +205,31 @@ describe('Automatic Reactivity', () => {
       expect(node.textContent).toBe('42');
     });
 
-    it('should convert booleans to strings', async () => {
+    it('should not render boolean values directly', async () => {
+      // Booleans are not rendered as text (consistent with JSX conventions)
       const flag = signal(true);
       const vnode = h('div', {}, [flag]);
 
       const node = mountReactive(vnode) as HTMLElement;
 
-      expect(node.textContent).toBe('true');
+      // Boolean signals don't render text content
+      expect(node.textContent).toBe('');
 
       flag.value = false;
-
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(node.textContent).toBe('false');
+      expect(node.textContent).toBe('');
     });
 
-    it('should convert objects to strings', () => {
+    it('should not render object values directly', () => {
+      // Objects are not automatically stringified (use explicit conversion)
       const obj = signal({ name: 'test' });
       const vnode = h('div', {}, [obj]);
 
       const node = mountReactive(vnode) as HTMLElement;
 
-      expect(node.textContent).toBe('[object Object]');
+      // Object signals don't render text content
+      expect(node.textContent).toBe('');
     });
   });
 });

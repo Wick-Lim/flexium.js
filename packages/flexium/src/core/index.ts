@@ -9,6 +9,7 @@ export {
   computed,
   effect,
   untrack,
+  batch,
   root,
   isSignal,
   type Signal,

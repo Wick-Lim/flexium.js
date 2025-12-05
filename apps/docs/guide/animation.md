@@ -32,20 +32,21 @@ dispose()
 Use motion with reactive signals:
 
 ```tsx
-import { useMotion, signal } from 'flexium/primitives'
+import { useMotion } from 'flexium/primitives'
+import { state } from 'flexium'
 
-const isExpanded = signal(false)
+const [isExpanded, setIsExpanded] = state(false)
 
 const { controller, dispose } = useMotion(element, {
   value: {
-    animate: isExpanded.value
+    animate: isExpanded()
       ? { height: 'auto', opacity: 1 }
       : { height: 0, opacity: 0 }
   }
 })
 
 // Toggle animation
-isExpanded.value = true
+setIsExpanded(true)
 ```
 
 ### MotionController

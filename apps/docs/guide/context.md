@@ -59,8 +59,7 @@ function ThemedButton() {
 Here's a complete theme switching example:
 
 ```tsx
-import { state, createContext, useContext, render } from 'flexium'
-import { Row, Column, Text, Pressable } from 'flexium/primitives'
+import { state, createContext, useContext, render, Row, Column, Text, Pressable } from 'flexium'
 
 // 1. Create the context
 const ThemeContext = createContext<'light' | 'dark'>('light')

@@ -170,6 +170,13 @@ export function Transition(props: TransitionProps) {
   const enterTo = customEnterTo ?? presetFrames?.enterTo ?? {}
   const exit = customExit ?? presetFrames?.exit ?? {}
 
+  // TODO: Implement element binding and animation
+  // The Transition component needs a ref wrapper approach to capture the rendered element
+  // and create a MotionController. Current implementation is incomplete and causes TS errors.
+  // For now, this component acts as a pass-through.
+
+  /* Dead code commented out - causes TypeScript errors due to never-assigned variables
+
   // Track the mounted element
   let element: HTMLElement | null = null
   let controller: MotionController | null = null
@@ -224,6 +231,10 @@ export function Transition(props: TransitionProps) {
 
     return children
   }
+  */
+
+  // Pass-through implementation until element binding is implemented
+  return children
 }
 
 /**

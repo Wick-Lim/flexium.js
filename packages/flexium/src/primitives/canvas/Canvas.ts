@@ -38,8 +38,8 @@ export function Canvas(props: CanvasProps): VNode {
         if (!ctx) return
 
         // Render canvas children with effect for reactivity
-        // Import effect dynamically to avoid circular deps
-        import('../../index').then(({ effect }) => {
+        // Import effect and onCleanup dynamically to avoid circular deps
+        import('../../index').then(({ effect, onCleanup }) => {
           let rafId: number | undefined
 
           effect(() => {
@@ -52,6 +52,11 @@ export function Canvas(props: CanvasProps): VNode {
 
               // Render all children
               renderCanvasChildren(ctx, children, width, height)
+            })
+
+            // Cleanup RAF when effect is disposed
+            onCleanup(() => {
+              if (rafId) cancelAnimationFrame(rafId)
             })
           })
         })

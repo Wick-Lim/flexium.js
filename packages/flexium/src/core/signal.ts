@@ -52,6 +52,10 @@ interface IObservable {
 let activeEffect: ISubscriber | null = null;
 let owner: { cleanups: (() => void)[] } | null = null;
 
+// Batching state
+let batchDepth = 0;
+let batchQueue = new Set<ISubscriber>();
+
 /**
  * Runs a function once when the component mounts.
  * Unlike effect(), onMount does not track dependencies - it runs exactly once.
@@ -209,9 +213,14 @@ class SignalNode<T> implements IObservable {
   }
 
   notify(): void {
-    // Copy subscribers to avoid infinite loops when effects unsubscribe/resubscribe during execution
-    const subscribersToNotify = new Set(this.subscribers);
-    subscribersToNotify.forEach((sub) => sub.execute());
+    if (batchDepth > 0) {
+      // Queue subscribers for batched execution
+      this.subscribers.forEach((sub) => batchQueue.add(sub));
+    } else {
+      // Copy subscribers to avoid infinite loops when effects unsubscribe/resubscribe during execution
+      const subscribersToNotify = new Set(this.subscribers);
+      subscribersToNotify.forEach((sub) => sub.execute());
+    }
   }
 }
 
@@ -284,10 +293,15 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   }
 
   notify(): void {
-    // Run effects immediately - copy subscribers to avoid modification during iteration
-    const subscribersToNotify = new Set(this.subscribers);
-    for (const subscriber of subscribersToNotify) {
-      subscriber.execute();
+    if (batchDepth > 0) {
+      // Queue subscribers for batched execution
+      this.subscribers.forEach((sub) => batchQueue.add(sub));
+    } else {
+      // Run effects immediately - copy subscribers to avoid modification during iteration
+      const subscribersToNotify = new Set(this.subscribers);
+      for (const subscriber of subscribersToNotify) {
+        subscriber.execute();
+      }
     }
   }
 }
@@ -459,6 +473,41 @@ export function untrack<T>(fn: () => T): T {
     return fn();
   } finally {
     activeEffect = prev;
+  }
+}
+
+/**
+ * Batches multiple signal updates together.
+ * Effects will only run once after all updates complete.
+ *
+ * @param fn - Function containing signal updates to batch
+ * @returns The return value of fn
+ *
+ * @example
+ * ```tsx
+ * const count = signal(0);
+ * const name = signal('Alice');
+ *
+ * effect(() => console.log(count(), name())); // runs once
+ *
+ * batch(() => {
+ *   count.value = 1;
+ *   name.value = 'Bob';
+ * }); // effect runs only once after batch completes
+ * ```
+ */
+export function batch<T>(fn: () => T): T {
+  batchDepth++;
+  try {
+    return fn();
+  } finally {
+    batchDepth--;
+    if (batchDepth === 0) {
+      // Execute all queued subscribers
+      const queue = new Set(batchQueue);
+      batchQueue.clear();
+      queue.forEach((sub) => sub.execute());
+    }
   }
 }
 

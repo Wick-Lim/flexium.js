@@ -92,8 +92,7 @@ A complete modal implementation:
 
 ```tsx
 import { Portal } from 'flexium/dom'
-import { state, effect } from 'flexium'
-import { Column, Row, Text, Pressable } from 'flexium/primitives'
+import { state, effect, Column, Row, Text, Pressable } from 'flexium'
 
 interface ModalProps {
   isOpen: boolean
