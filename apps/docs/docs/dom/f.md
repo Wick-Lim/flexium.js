@@ -1,17 +1,17 @@
-# h()
+# f()
 
 Create virtual DOM nodes programmatically without JSX.
 
 ## Import
 
 ```ts
-import { h } from 'flexium/dom'
+import { f } from 'flexium/dom'
 ```
 
 ## Signature
 
 ```ts
-function h(
+function f(
   type: string | Component,
   props?: Props | null,
   ...children: Children[]
@@ -24,27 +24,27 @@ function h(
 
 ```ts
 // <div>Hello</div>
-h('div', null, 'Hello')
+f('div', null, 'Hello')
 
 // <div class="container">Content</div>
-h('div', { class: 'container' }, 'Content')
+f('div', { class: 'container' }, 'Content')
 
 // <button onclick={handler}>Click</button>
-h('button', { onclick: handleClick }, 'Click')
+f('button', { onclick: handleClick }, 'Click')
 ```
 
 ### Nested Elements
 
 ```ts
 // <div><span>Text</span></div>
-h('div', null,
-  h('span', null, 'Text')
+f('div', null,
+  f('span', null, 'Text')
 )
 
 // <ul><li>A</li><li>B</li></ul>
-h('ul', null,
-  h('li', null, 'A'),
-  h('li', null, 'B')
+f('ul', null,
+  f('li', null, 'A'),
+  f('li', null, 'B')
 )
 ```
 
@@ -52,10 +52,10 @@ h('ul', null,
 
 ```ts
 function Button(props) {
-  return h('button', { class: 'btn' }, props.children)
+  return f('button', { class: 'btn' }, props.children)
 }
 
-h(Button, null, 'Click me')
+f(Button, null, 'Click me')
 ```
 
 ### Reactive Values
@@ -63,16 +63,16 @@ h(Button, null, 'Click me')
 ```ts
 const [count, setCount] = state(0)
 
-h('div', null,
-  h('span', null, count), // Reactive binding
-  h('button', { onclick: () => setCount(c => c + 1) }, '+')
+f('div', null,
+  f('span', null, count), // Reactive binding
+  f('button', { onclick: () => setCount(c => c + 1) }, '+')
 )
 ```
 
 ### With Styles
 
 ```ts
-h('div', {
+f('div', {
   style: {
     display: 'flex',
     gap: '10px',
@@ -84,7 +84,7 @@ h('div', {
 ### Event Handlers
 
 ```ts
-h('input', {
+f('input', {
   type: 'text',
   value: inputValue,
   oninput: (e) => setInputValue(e.target.value),
@@ -100,14 +100,14 @@ function Counter() {
   const [count, setCount] = state(0)
   const doubled = computed(() => count() * 2)
 
-  return h('div', { class: 'counter' },
-    h('h1', null, 'Counter'),
-    h('p', null, 'Count: ', count),
-    h('p', null, 'Doubled: ', doubled),
-    h('div', { class: 'buttons' },
-      h('button', { onclick: () => setCount(c => c - 1) }, '-'),
-      h('button', { onclick: () => setCount(0) }, 'Reset'),
-      h('button', { onclick: () => setCount(c => c + 1) }, '+')
+  return f('div', { class: 'counter' },
+    f('h1', null, 'Counter'),
+    f('p', null, 'Count: ', count),
+    f('p', null, 'Doubled: ', doubled),
+    f('div', { class: 'buttons' },
+      f('button', { onclick: () => setCount(c => c - 1) }, '-'),
+      f('button', { onclick: () => setCount(0) }, 'Reset'),
+      f('button', { onclick: () => setCount(c => c + 1) }, '+')
     )
   )
 }
@@ -127,7 +127,7 @@ function Counter() {
 
 ## When to Use
 
-Use `h()` when:
+Use `f()` when:
 - Building components without a JSX transpiler
 - Creating dynamic element structures
 - Integrating with non-JSX codebases
@@ -135,7 +135,7 @@ Use `h()` when:
 
 ## Notes
 
-- JSX compiles to `h()` calls automatically
+- JSX compiles to `f()` calls automatically
 - Props use lowercase event names (`onclick`, not `onClick`)
 - Children can be strings, numbers, signals, or other nodes
 

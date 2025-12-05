@@ -87,5 +87,5 @@ disposeWidget?.()
 
 ## See Also
 
-- [h()](/docs/dom/h)
+- [f()](/docs/dom/f)
 - [&lt;Portal /&gt;](/docs/dom/portal)
