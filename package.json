@@ -21,7 +21,9 @@
     "format": "turbo run format",
     "clean": "turbo run clean && rm -rf node_modules",
     "version:sync": "node scripts/sync-versions.mjs",
-    "release": "npm run version:sync && npm run build && npm run test:unit"
+    "deploy:patch": "node scripts/deploy.mjs patch",
+    "deploy:minor": "node scripts/deploy.mjs minor",
+    "deploy:major": "node scripts/deploy.mjs major"
   },
   "workspaces": [
     "apps/*",
