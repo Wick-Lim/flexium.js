@@ -48,7 +48,7 @@ function TodoList() {
 | Prop | Type | Description |
 | :--- | :--- | :--- |
 | `each` | `StateGetter<T[]>` | The reactive array to iterate over. |
-| `children` | `(item: T, index: () => number) => VNode` | A render function that receives the item and a reactive index getter. |
+| `children` | `(item: T, index: () => number) => FNode` | A render function that receives the item and a reactive index getter. |
 
 ### Keying and Caching
 
@@ -90,8 +90,8 @@ function UserProfile() {
 | Prop | Type | Description |
 | :--- | :--- | :--- |
 | `when` | `StateGetter<T \| undefined \| null \| false>` | The reactive condition to check. |
-| `fallback` | `VNode \| (() => VNode)` | Content to render when the condition is falsy. |
-| `children` | `VNode \| ((item: T) => VNode)` | Content to render when the condition is truthy. Can be a function to access the truthy value. |
+| `fallback` | `FNode \| (() => FNode)` | Content to render when the condition is falsy. |
+| `children` | `FNode \| ((item: T) => FNode)` | Content to render when the condition is truthy. Can be a function to access the truthy value. |
 
 ---
 
@@ -129,11 +129,11 @@ function DataFetcher() {
 
 | Prop | Type | Description |
 | :--- | :--- | :--- |
-| `fallback` | `VNode` | Content to render if no `<Match>` condition is met. |
+| `fallback` | `FNode` | Content to render if no `<Match>` condition is met. |
 
 ### Props (`<Match>`)
 
 | Prop | Type | Description |
 | :--- | :--- | :--- |
 | `when` | `StateGetter<T \| undefined \| null \| false>` | The condition to check. |
-| `children` | `VNode \| ((item: T) => VNode)` | Content to render if this match is selected. |
+| `children` | `FNode \| ((item: T) => FNode)` | Content to render if this match is selected. |

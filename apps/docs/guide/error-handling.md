@@ -125,8 +125,8 @@ function App() {
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `fallback` | `VNode \| ((props) => VNode)` | UI to show when error occurs |
-| `children` | `VNodeChild` | Components to protect |
+| `fallback` | `FNode \| ((props) => FNode)` | UI to show when error occurs |
+| `children` | `FNodeChild` | Components to protect |
 | `onError` | `(error, errorInfo) => void` | Called when error is caught |
 | `onReset` | `() => void` | Called when reset is triggered |
 

@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2025-12-05
+
+### Flexium Signature API - The "F" Identity
+
+This release introduces Flexium's signature API naming convention, centered around the "F" prefix.
+
+#### Added
+- **`f()` JSX factory function** - Replaces `h()` as the primary JSX factory
+  - `h()` remains as a deprecated alias for backward compatibility
+  - Usage: `jsxFactory: "f"` in tsconfig.json
+- **`FNode` type** - Flexium Node, the core element descriptor type
+  - Not a Virtual DOM - immediately converts to real DOM with fine-grained reactivity
+  - `VNode` remains as a deprecated alias
+- **`isFNode()` utility** - Type guard for FNode
+- **`createFNode()` utility** - Creates FNode with consistent shape for JS engine optimization
+
+#### Changed
+- **Renamed core types for Flexium branding:**
+  - `VNode` → `FNode` (deprecated alias maintained)
+  - `VNodeChild` → `FNodeChild` (deprecated alias maintained)
+  - `isVNode` → `isFNode` (deprecated alias maintained)
+  - `createVNode` → `createFNode` (deprecated alias maintained)
+- **Updated JSX runtime** - Uses FNode internally
+- **Removed VNode from public API** - `flexium/dom` no longer exports VNode type
+
+#### Migration Guide
+```tsx
+// Before
+import { h } from 'flexium/dom'
+import type { VNode } from 'flexium/dom'
+
+// After
+import { f } from 'flexium/dom'
+import type { FNode } from 'flexium'
+
+// Or use automatic JSX runtime (recommended)
+// tsconfig.json: { "jsx": "react-jsx", "jsxImportSource": "flexium" }
+```
+
 ## [0.3.2] - 2025-12-05
 
 ### DX Improvements & DevTools Enhancement

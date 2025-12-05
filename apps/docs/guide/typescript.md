@@ -38,16 +38,20 @@ const [count, setCount] = state<number>(0);
 const [user, setUser] = state<User | null>(null);
 ```
 
-## VNode Children Types
+## FNode Children Types
 
-As of v0.3.1, Flexium provides improved type definitions for virtual node children:
+As of v0.3.3, Flexium uses FNode (Flexium Node) as its core element type:
 
 ```tsx
-import type { VNodeChild, VNode } from 'flexium';
+import type { FNodeChild, FNode } from 'flexium';
 
-// VNodeChild supports: VNode, string, number, boolean, null, undefined, and arrays
-type VNodeChild = VNode | string | number | boolean | null | undefined | VNodeChild[];
+// FNodeChild supports: FNode, string, number, boolean, null, undefined, and arrays
+type FNodeChild = FNode | string | number | boolean | null | undefined | FNodeChild[];
 ```
+
+::: tip FNode vs VNode
+FNode is not a Virtual DOM node. It's a lightweight descriptor that immediately converts to real DOM with fine-grained reactivity. The "F" stands for Flexium.
+:::
 
 This allows for more flexible JSX expressions:
 
