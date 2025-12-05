@@ -234,7 +234,7 @@ Update `package.json` to include a build script:
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "flexium": "^0.4.1"
+    "flexium": "^0.4.2"
   },
   "devDependencies": {
     "typescript": "^5.3.0"

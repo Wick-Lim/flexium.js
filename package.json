@@ -1,6 +1,6 @@
 {
   "name": "flexium-monorepo",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": true,
   "description": "Flexium - Fine-grained reactive UI framework (monorepo)",
   "type": "module",
@@ -19,7 +19,9 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "version:sync": "node scripts/sync-versions.mjs",
+    "release": "npm run version:sync && npm run build && npm run test:unit"
   },
   "workspaces": [
     "apps/*",

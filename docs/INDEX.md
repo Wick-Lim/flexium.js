@@ -224,7 +224,7 @@ For deep dives into the architecture:
 
 ## Project Status
 
-**Current Version:** 0.4.1
+**Current Version:** 0.4.2
 
 **Status:** Early development
 

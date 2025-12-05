@@ -1,6 +1,6 @@
 # Flexium Project Status
 
-**Current Version**: v0.4.1
+**Current Version**: v0.4.2
 
 **Last Updated**: November 22, 2025
 
