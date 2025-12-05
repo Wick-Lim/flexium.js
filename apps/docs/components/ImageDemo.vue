@@ -1,410 +1,131 @@
 <script setup>
-import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
-import { f, render } from 'flexium/dom'
-import { Image, Text, Column, Row, Pressable } from 'flexium/primitives'
+import { onMounted, ref } from 'vue'
 
 const container = ref(null)
 
-function ImageDemo() {
-  const [loadState, setLoadState] = state('idle')
-  const [errorState, setErrorState] = state('idle')
-  const [currentImage, setCurrentImage] = state(0)
-
-  const images = [
-    'https://picsum.photos/seed/flexium1/400/300',
-    'https://picsum.photos/seed/flexium2/400/300',
-    'https://picsum.photos/seed/flexium3/400/300',
-    'https://picsum.photos/seed/flexium4/400/300',
-  ]
-
-  const nextImage = () => {
-    setCurrentImage(i => (i + 1) % images.length)
-    setLoadState('loading')
-  }
-
-  const prevImage = () => {
-    setCurrentImage(i => (i - 1 + images.length) % images.length)
-    setLoadState('loading')
-  }
-
-  return Column({ gap: 24, style: { padding: '20px' } }, [
-    // Title
-    f('h3', {
-      style: {
-        fontSize: '20px',
-        fontWeight: 'bold',
-        color: '#111827',
-        marginTop: 0,
-        marginBottom: '8px',
-      }
-    }, ['Image Component']),
-
-    // Basic image
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginBottom: '8px',
-      }
-    }, ['Basic Image']),
-
-    Image({
-      src: 'https://picsum.photos/seed/flexium-basic/400/300',
-      alt: 'Placeholder image',
-      style: {
-        borderRadius: '8px',
-        width: '100%',
-        maxWidth: '400px',
-        height: 'auto',
-        border: '2px solid #e5e7eb',
-      }
-    }),
-
-    // Different sizes
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Different Sizes']),
-
-    Row({ gap: 12, wrap: true }, [
-      Column({ gap: 4, align: 'center' }, [
-        Image({
-          src: 'https://picsum.photos/seed/flexium-small/100/100',
-          alt: 'Small image',
-          width: 100,
-          height: 100,
-          style: {
-            borderRadius: '8px',
-            border: '2px solid #e5e7eb',
-          }
-        }),
-        Text({
-          style: {
-            fontSize: '12px',
-            color: '#6b7280',
-          }
-        }, ['100x100'])
-      ]),
-
-      Column({ gap: 4, align: 'center' }, [
-        Image({
-          src: 'https://picsum.photos/seed/flexium-medium/150/150',
-          alt: 'Medium image',
-          width: 150,
-          height: 150,
-          style: {
-            borderRadius: '8px',
-            border: '2px solid #e5e7eb',
-          }
-        }),
-        Text({
-          style: {
-            fontSize: '12px',
-            color: '#6b7280',
-          }
-        }, ['150x150'])
-      ]),
-
-      Column({ gap: 4, align: 'center' }, [
-        Image({
-          src: 'https://picsum.photos/seed/flexium-large/200/200',
-          alt: 'Large image',
-          width: 200,
-          height: 200,
-          style: {
-            borderRadius: '8px',
-            border: '2px solid #e5e7eb',
-          }
-        }),
-        Text({
-          style: {
-            fontSize: '12px',
-            color: '#6b7280',
-          }
-        }, ['200x200'])
-      ]),
-    ]),
-
-    // Rounded images
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Border Radius Variations']),
-
-    Row({ gap: 12, wrap: true, align: 'center' }, [
-      Column({ gap: 4, align: 'center' }, [
-        Image({
-          src: 'https://picsum.photos/seed/flexium-rounded1/120/120',
-          alt: 'Slightly rounded',
-          width: 120,
-          height: 120,
-          style: {
-            borderRadius: '8px',
-            border: '2px solid #e5e7eb',
-          }
-        }),
-        Text({
-          style: {
-            fontSize: '12px',
-            color: '#6b7280',
-          }
-        }, ['Rounded (8px)'])
-      ]),
-
-      Column({ gap: 4, align: 'center' }, [
-        Image({
-          src: 'https://picsum.photos/seed/flexium-rounded2/120/120',
-          alt: 'More rounded',
-          width: 120,
-          height: 120,
-          style: {
-            borderRadius: '16px',
-            border: '2px solid #e5e7eb',
-          }
-        }),
-        Text({
-          style: {
-            fontSize: '12px',
-            color: '#6b7280',
-          }
-        }, ['Rounded (16px)'])
-      ]),
-
-      Column({ gap: 4, align: 'center' }, [
-        Image({
-          src: 'https://picsum.photos/seed/flexium-circle/120/120',
-          alt: 'Circle',
-          width: 120,
-          height: 120,
-          style: {
-            borderRadius: '50%',
-            border: '2px solid #e5e7eb',
-          }
-        }),
-        Text({
-          style: {
-            fontSize: '12px',
-            color: '#6b7280',
-          }
-        }, ['Circle (50%)'])
-      ]),
-    ]),
-
-    // Image with loading state
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Image Gallery with Loading State']),
-
-    Column({ gap: 12, style: { width: '100%', maxWidth: '400px' } }, [
-      f('div', {
-        style: {
-          position: 'relative',
-          width: '100%',
-          backgroundColor: '#f3f4f6',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          border: '2px solid #e5e7eb',
-        }
-      }, [
-        Image({
-          src: () => images[currentImage()],
-          alt: 'Gallery image',
-          onLoad: () => setLoadState('loaded'),
-          onError: () => setLoadState('error'),
-          style: {
-            width: '100%',
-            height: 'auto',
-            display: 'block',
-          }
-        }),
-        // Loading overlay
-        () => loadState() === 'loading' ? f('div', {
-          style: {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(243, 244, 246, 0.8)',
-          }
-        }, [
-          Text({
-            style: {
-              fontSize: '16px',
-              fontWeight: '600',
-              color: '#6b7280',
-            }
-          }, ['Loading...'])
-        ]) : null
-      ]),
-
-      // Gallery controls
-      Row({ gap: 8, justify: 'between', align: 'center' }, [
-        Pressable({
-          onPress: prevImage,
-          style: {
-            padding: '8px 16px',
-            backgroundColor: '#4f46e5',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }
-        }, [
-          Text({
-            style: {
-              color: 'white',
-              fontWeight: '600',
-              fontSize: '14px',
-            }
-          }, ['← Previous'])
-        ]),
-
-        Text({
-          style: {
-            fontSize: '14px',
-            color: '#6b7280',
-          }
-        }, [() => `${currentImage() + 1} / ${images.length}`]),
-
-        Pressable({
-          onPress: nextImage,
-          style: {
-            padding: '8px 16px',
-            backgroundColor: '#4f46e5',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }
-        }, [
-          Text({
-            style: {
-              color: 'white',
-              fontWeight: '600',
-              fontSize: '14px',
-            }
-          }, ['Next →'])
-        ]),
-      ]),
-    ]),
-
-    // Error state example
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Error Handling']),
-
-    Column({ gap: 8, style: { width: '100%', maxWidth: '300px' } }, [
-      f('div', {
-        style: {
-          position: 'relative',
-          backgroundColor: '#fef2f2',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          border: '2px solid #fecaca',
-          minHeight: '150px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }
-      }, [
-        Image({
-          src: 'https://invalid-url-that-will-fail.com/image.jpg',
-          alt: 'This will fail to load',
-          onError: () => setErrorState('error'),
-          style: {
-            width: '100%',
-            height: 'auto',
-            display: () => errorState() === 'error' ? 'none' : 'block',
-          }
-        }),
-        // Error message
-        () => errorState() === 'error' ? Column({ gap: 8, align: 'center', style: { padding: '20px' } }, [
-          Text({
-            style: {
-              fontSize: '32px',
-            }
-          }, ['❌']),
-          Text({
-            style: {
-              fontSize: '14px',
-              fontWeight: '600',
-              color: '#dc2626',
-              textAlign: 'center',
-            }
-          }, ['Failed to load image'])
-        ]) : null
-      ]),
-      Text({
-        style: {
-          fontSize: '12px',
-          color: '#6b7280',
-          fontStyle: 'italic',
-        }
-      }, ['This image will intentionally fail to load'])
-    ]),
-
-    // Info text
-    f('p', {
-      style: {
-        marginTop: '16px',
-        color: '#6b7280',
-        fontSize: '14px',
-        fontStyle: 'italic',
-      }
-    }, ['The Image component provides a cross-platform way to display images with loading and error state handling.'])
-  ])
-}
-
 onMounted(() => {
-  if (container.value) {
-    const app = ImageDemo()
-    render(app, container.value)
-  }
-})
+  if (!container.value) return
 
-onUnmounted(() => {
-  if (container.value) {
-    container.value.innerHTML = ''
-  }
+  container.value.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 32px; padding: 24px; background: #f9fafb; border-radius: 12px;">
+      <div>
+        <h3 style="margin: 0 0 4px 0; color: #111; font-size: 20px; font-weight: 600;">Image Component Demo</h3>
+        <p style="margin: 0; color: #6b7280; font-size: 14px;">Display images with various object-fit modes and styling options</p>
+      </div>
+
+      <!-- Object Fit Modes -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Object Fit Modes</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 12px; color: #6b7280;">cover</div>
+            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; overflow: hidden;">
+              <div style="width: 100%; height: 100%; background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 150\"><rect fill=\"%234f46e5\" width=\"200\" height=\"150\"/><text x=\"50%\" y=\"50%\" fill=\"white\" font-size=\"16\" text-anchor=\"middle\" dy=\".3em\">Cover</text></svg>'); background-size: cover; background-position: center;"></div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 12px; color: #6b7280;">contain</div>
+            <div style="width: 100%; height: 150px; background: #f3f4f6; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+              <div style="width: 80%; height: 60%; background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">Contain</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 12px; color: #6b7280;">fill</div>
+            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">Fill (stretched)</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 12px; color: #6b7280;">none</div>
+            <div style="width: 100%; height: 150px; background: #f3f4f6; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+              <div style="width: 120px; height: 80px; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">None (actual size)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Border Radius -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Border Radius Variants</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center;">
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); border-radius: 0;"></div>
+            <div style="font-size: 12px; color: #6b7280;">none</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); border-radius: 8px;"></div>
+            <div style="font-size: 12px; color: #6b7280;">8px</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); border-radius: 16px;"></div>
+            <div style="font-size: 12px; color: #6b7280;">16px</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #ec4899 0%, #ef4444 100%); border-radius: 50%;"></div>
+            <div style="font-size: 12px; color: #6b7280;">circle</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avatar Examples -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Avatar Sizes</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: end;">
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 600;">A</div>
+            <div style="font-size: 12px; color: #6b7280;">xs</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 40px; height: 40px; background: #8b5cf6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: 600;">B</div>
+            <div style="font-size: 12px; color: #6b7280;">sm</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 56px; height: 56px; background: #ec4899; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 600;">C</div>
+            <div style="font-size: 12px; color: #6b7280;">md</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 72px; height: 72px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 600;">D</div>
+            <div style="font-size: 12px; color: #6b7280;">lg</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 96px; height: 96px; background: #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 600;">E</div>
+            <div style="font-size: 12px; color: #6b7280;">xl</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Gallery -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Gallery Layout</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;">
+          ${[1,2,3,4,5,6].map(i => `
+            <div style="aspect-ratio: 1; background: linear-gradient(135deg, hsl(${i * 60}, 70%, 60%) 0%, hsl(${i * 60 + 30}, 70%, 50%) 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+              ${i}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <p style="margin: 0; color: #6b7280; font-size: 13px; text-align: center;">
+        Image component provides consistent image rendering with loading states and fallbacks
+      </p>
+    </div>
+  `
 })
 </script>
 
 <template>
-  <div class="demo-wrapper">
+  <div class="showcase-wrapper">
     <div ref="container" class="flexium-container"></div>
   </div>
 </template>
 
 <style scoped>
-.demo-wrapper {
+.showcase-wrapper {
   margin: 40px 0;
-  padding: 20px;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  background: var(--vp-c-bg-alt);
+  border-radius: 12px;
+  overflow: hidden;
 }
 </style>

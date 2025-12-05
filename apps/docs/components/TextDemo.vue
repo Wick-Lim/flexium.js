@@ -1,407 +1,119 @@
 <script setup>
-import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
-import { f, render } from 'flexium/dom'
-import { Text, Column, Row, Pressable } from 'flexium/primitives'
+import { onMounted, ref } from 'vue'
 
 const container = ref(null)
 
-function TextDemo() {
-  const [dynamicText, setDynamicText] = state('Dynamic Text')
-  const [counter, setCounter] = state(0)
-
-  const texts = [
-    'Dynamic Text',
-    'Hello World!',
-    'Flexium is awesome!',
-    'Cross-platform UI',
-  ]
-
-  const rotateText = () => {
-    setCounter(c => {
-      const next = (c + 1) % texts.length
-      setDynamicText(texts[next])
-      return next
-    })
-  }
-
-  return Column({ gap: 24, style: { padding: '20px' } }, [
-    // Title
-    f('h3', {
-      style: {
-        fontSize: '20px',
-        fontWeight: 'bold',
-        color: '#111827',
-        marginTop: 0,
-        marginBottom: '8px',
-      }
-    }, ['Text Component']),
-
-    // Font sizes
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginBottom: '8px',
-      }
-    }, ['Font Sizes']),
-
-    Column({ gap: 8 }, [
-      Text({
-        style: {
-          fontSize: '12px',
-          color: '#374151',
-        }
-      }, ['Small text (12px)']),
-
-      Text({
-        style: {
-          fontSize: '14px',
-          color: '#374151',
-        }
-      }, ['Normal text (14px)']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-        }
-      }, ['Medium text (16px)']),
-
-      Text({
-        style: {
-          fontSize: '20px',
-          color: '#374151',
-        }
-      }, ['Large text (20px)']),
-
-      Text({
-        style: {
-          fontSize: '24px',
-          color: '#374151',
-        }
-      }, ['Extra large text (24px)']),
-
-      Text({
-        style: {
-          fontSize: '32px',
-          color: '#374151',
-        }
-      }, ['Heading text (32px)']),
-    ]),
-
-    // Font weights
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Font Weights']),
-
-    Column({ gap: 8 }, [
-      Text({
-        style: {
-          fontSize: '16px',
-          fontWeight: '300',
-          color: '#374151',
-        }
-      }, ['Light weight (300)']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          fontWeight: '400',
-          color: '#374151',
-        }
-      }, ['Normal weight (400)']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          fontWeight: '500',
-          color: '#374151',
-        }
-      }, ['Medium weight (500)']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          fontWeight: '600',
-          color: '#374151',
-        }
-      }, ['Semibold weight (600)']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          fontWeight: '700',
-          color: '#374151',
-        }
-      }, ['Bold weight (700)']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          fontWeight: '800',
-          color: '#374151',
-        }
-      }, ['Extra bold weight (800)']),
-    ]),
-
-    // Colors
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Text Colors']),
-
-    Row({ gap: 12, wrap: true }, [
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#111827',
-          fontWeight: '600',
-        }
-      }, ['Black']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#6b7280',
-          fontWeight: '600',
-        }
-      }, ['Gray']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#4f46e5',
-          fontWeight: '600',
-        }
-      }, ['Indigo']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#10b981',
-          fontWeight: '600',
-        }
-      }, ['Green']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#f59e0b',
-          fontWeight: '600',
-        }
-      }, ['Amber']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#ef4444',
-          fontWeight: '600',
-        }
-      }, ['Red']),
-    ]),
-
-    // Text styles
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Text Styles']),
-
-    Column({ gap: 8 }, [
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          fontStyle: 'italic',
-        }
-      }, ['Italic text']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          textDecoration: 'underline',
-        }
-      }, ['Underlined text']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          textDecoration: 'line-through',
-        }
-      }, ['Strikethrough text']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          textTransform: 'uppercase',
-        }
-      }, ['Uppercase text']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          textTransform: 'lowercase',
-        }
-      }, ['LOWERCASE TEXT']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          textTransform: 'capitalize',
-        }
-      }, ['capitalized text']),
-    ]),
-
-    // Text alignment
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Text Alignment']),
-
-    Column({ gap: 8, style: { width: '100%' } }, [
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          textAlign: 'left',
-          display: 'block',
-          width: '100%',
-        }
-      }, ['Left aligned text']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          textAlign: 'center',
-          display: 'block',
-          width: '100%',
-        }
-      }, ['Center aligned text']),
-
-      Text({
-        style: {
-          fontSize: '16px',
-          color: '#374151',
-          textAlign: 'right',
-          display: 'block',
-          width: '100%',
-        }
-      }, ['Right aligned text']),
-    ]),
-
-    // Dynamic text
-    f('h4', {
-      style: {
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#374151',
-        marginTop: '16px',
-        marginBottom: '8px',
-      }
-    }, ['Dynamic Text']),
-
-    Column({ gap: 12, align: 'start' }, [
-      f('div', {
-        style: {
-          padding: '16px',
-          backgroundColor: '#eff6ff',
-          borderRadius: '8px',
-          border: '2px solid #4f46e5',
-        }
-      }, [
-        Text({
-          style: {
-            fontSize: '18px',
-            fontWeight: '700',
-            color: '#4f46e5',
-          }
-        }, [dynamicText])
-      ]),
-
-      Pressable({
-        onPress: rotateText,
-        style: {
-          padding: '12px 24px',
-          backgroundColor: '#4f46e5',
-          borderRadius: '8px',
-          cursor: 'pointer',
-        }
-      }, [
-        Text({
-          style: {
-            color: 'white',
-            fontWeight: '600',
-          }
-        }, ['Change Text'])
-      ]),
-    ]),
-
-    // Info text
-    f('p', {
-      style: {
-        marginTop: '16px',
-        color: '#6b7280',
-        fontSize: '14px',
-        fontStyle: 'italic',
-      }
-    }, ['The Text component is a universal primitive for displaying text with full styling support.'])
-  ])
-}
-
 onMounted(() => {
-  if (container.value) {
-    const app = TextDemo()
-    render(app, container.value)
-  }
-})
+  if (!container.value) return
 
-onUnmounted(() => {
-  if (container.value) {
-    container.value.innerHTML = ''
-  }
+  container.value.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 32px; padding: 24px; background: #f9fafb; border-radius: 12px;">
+      <div>
+        <h3 style="margin: 0 0 4px 0; color: #111; font-size: 20px; font-weight: 600;">Text Component Demo</h3>
+        <p style="margin: 0; color: #6b7280; font-size: 14px;">Typography primitives with size, weight, and color variants</p>
+      </div>
+
+      <!-- Headings -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Heading Sizes</h4>
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+          <div style="font-size: 48px; font-weight: 800; color: #111; margin-bottom: 8px;">Heading 1</div>
+          <div style="font-size: 36px; font-weight: 700; color: #111; margin-bottom: 8px;">Heading 2</div>
+          <div style="font-size: 28px; font-weight: 700; color: #111; margin-bottom: 8px;">Heading 3</div>
+          <div style="font-size: 24px; font-weight: 600; color: #111; margin-bottom: 8px;">Heading 4</div>
+          <div style="font-size: 20px; font-weight: 600; color: #111; margin-bottom: 8px;">Heading 5</div>
+          <div style="font-size: 16px; font-weight: 600; color: #111;">Heading 6</div>
+        </div>
+      </div>
+
+      <!-- Body Text -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Body Text Sizes</h4>
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 18px; color: #374151;">Large body text (18px) - Good for introductions and emphasis</div>
+          <div style="font-size: 16px; color: #374151;">Default body text (16px) - Standard paragraph text</div>
+          <div style="font-size: 14px; color: #6b7280;">Small text (14px) - Secondary content and captions</div>
+          <div style="font-size: 12px; color: #9ca3af;">Extra small (12px) - Labels and fine print</div>
+        </div>
+      </div>
+
+      <!-- Font Weights -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Font Weights</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+          <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+            <div style="font-weight: 300; font-size: 24px; color: #111;">Light</div>
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">weight: 300</div>
+          </div>
+          <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+            <div style="font-weight: 400; font-size: 24px; color: #111;">Regular</div>
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">weight: 400</div>
+          </div>
+          <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+            <div style="font-weight: 500; font-size: 24px; color: #111;">Medium</div>
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">weight: 500</div>
+          </div>
+          <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+            <div style="font-weight: 600; font-size: 24px; color: #111;">Semibold</div>
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">weight: 600</div>
+          </div>
+          <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+            <div style="font-weight: 700; font-size: 24px; color: #111;">Bold</div>
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">weight: 700</div>
+          </div>
+          <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+            <div style="font-weight: 800; font-size: 24px; color: #111;">Extra Bold</div>
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">weight: 800</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colors -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Text Colors</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+          <div style="padding: 12px 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; color: #111; font-weight: 500;">Default</div>
+          <div style="padding: 12px 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; color: #6b7280; font-weight: 500;">Muted</div>
+          <div style="padding: 12px 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; color: #3b82f6; font-weight: 500;">Primary</div>
+          <div style="padding: 12px 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; color: #10b981; font-weight: 500;">Success</div>
+          <div style="padding: 12px 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; color: #f59e0b; font-weight: 500;">Warning</div>
+          <div style="padding: 12px 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; color: #ef4444; font-weight: 500;">Error</div>
+          <div style="padding: 12px 20px; background: #1f2937; border-radius: 8px; color: white; font-weight: 500;">Inverted</div>
+        </div>
+      </div>
+
+      <!-- Text Decorations -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Decorations & Styles</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+          <span style="text-decoration: underline; font-size: 16px;">Underlined</span>
+          <span style="text-decoration: line-through; font-size: 16px; color: #9ca3af;">Strikethrough</span>
+          <span style="font-style: italic; font-size: 16px;">Italic</span>
+          <span style="text-transform: uppercase; font-size: 14px; letter-spacing: 1px; font-weight: 600;">Uppercase</span>
+          <code style="font-family: monospace; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 14px;">Monospace</code>
+          <span style="background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; font-size: 18px;">Gradient</span>
+        </div>
+      </div>
+
+      <p style="margin: 0; color: #6b7280; font-size: 13px; text-align: center;">
+        Text component provides consistent typography across your application
+      </p>
+    </div>
+  `
 })
 </script>
 
 <template>
-  <div class="demo-wrapper">
+  <div class="showcase-wrapper">
     <div ref="container" class="flexium-container"></div>
   </div>
 </template>
 
 <style scoped>
-.demo-wrapper {
+.showcase-wrapper {
   margin: 40px 0;
-  padding: 20px;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  background: var(--vp-c-bg-alt);
+  border-radius: 12px;
+  overflow: hidden;
 }
 </style>

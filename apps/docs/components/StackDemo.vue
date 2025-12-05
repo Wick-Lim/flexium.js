@@ -1,297 +1,120 @@
 <script setup>
-import { onMounted, ref, onUnmounted } from 'vue'
-import { f, render } from 'flexium/dom'
-import { Stack, Row, Column } from 'flexium/primitives'
+import { onMounted, ref } from 'vue'
 
 const container = ref(null)
 
-function StackDemoApp() {
-  return f('div', {
-    style: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '32px',
-      width: '100%',
-    }
-  }, [
-    // Demo 1: Basic Stack - Image with Text Overlay
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Image with Text Overlay']),
-      Stack({
-        style: {
-          width: '100%',
-          height: '200px',
-          borderRadius: '8px',
-          overflow: 'hidden',
-        }
-      }, [
-        // Background image
-        f('div', {
-          style: {
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          }
-        }),
-        // Text overlay
-        f('div', {
-          style: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            height: '100%',
-            color: 'white',
-            fontSize: '32px',
-            fontWeight: 'bold',
-            textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          }
-        }, ['Hero Title'])
-      ])
-    ]),
-
-    // Demo 2: Centered Overlay
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Centered Content (align="center" justify="center")']),
-      Stack({
-        align: 'center',
-        justify: 'center',
-        style: {
-          width: '100%',
-          height: '200px',
-          borderRadius: '8px',
-        }
-      }, [
-        // Background layer
-        f('div', {
-          style: {
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-          }
-        }),
-        // Centered card
-        Column({
-          gap: 8,
-          align: 'center',
-          style: {
-            backgroundColor: 'white',
-            padding: '24px 32px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-          }
-        }, [
-          f('div', { style: { fontSize: '32px' } }, ['🎯']),
-          f('h5', { style: { margin: '0', fontSize: '18px', fontWeight: '600', color: '#111827' } }, ['Centered Card']),
-          f('p', { style: { margin: '0', fontSize: '14px', color: '#6b7280' } }, ['On top of background']),
-        ])
-      ])
-    ]),
-
-    // Demo 3: Corner Positioned Badge
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Corner Positioned Badge']),
-
-      Row({ gap: 16 }, [
-        // Top-right badge
-        f('div', { style: { flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-          f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['align="start" justify="end"']),
-          Stack({
-            align: 'start',
-            justify: 'end',
-            style: {
-              width: '100%',
-              height: '160px',
-              borderRadius: '8px',
-            }
-          }, [
-            f('div', {
-              style: {
-                width: '100%',
-                height: '100%',
-                backgroundColor: '#3b82f6',
-                borderRadius: '8px',
-              }
-            }),
-            f('div', {
-              style: {
-                backgroundColor: '#ef4444',
-                color: 'white',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: '600',
-                margin: '12px',
-              }
-            }, ['NEW'])
-          ])
-        ]),
-
-        // Bottom-right badge
-        f('div', { style: { flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-          f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['align="end" justify="end"']),
-          Stack({
-            align: 'end',
-            justify: 'end',
-            style: {
-              width: '100%',
-              height: '160px',
-              borderRadius: '8px',
-            }
-          }, [
-            f('div', {
-              style: {
-                width: '100%',
-                height: '100%',
-                backgroundColor: '#8b5cf6',
-                borderRadius: '8px',
-              }
-            }),
-            f('div', {
-              style: {
-                backgroundColor: '#10b981',
-                color: 'white',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: '600',
-                margin: '12px',
-              }
-            }, ['SALE'])
-          ])
-        ]),
-      ])
-    ]),
-
-    // Demo 4: Multiple Layers
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Multiple Stacked Layers']),
-      f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['Each layer is semi-transparent, creating depth']),
-      Stack({
-        style: {
-          width: '100%',
-          height: '240px',
-          borderRadius: '8px',
-        }
-      }, [
-        // Layer 1 - Background
-        f('div', {
-          style: {
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#3b82f6',
-            borderRadius: '8px',
-          }
-        }),
-        // Layer 2 - Semi-transparent overlay
-        f('div', {
-          style: {
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(139, 92, 246, 0.4)',
-          }
-        }),
-        // Layer 3 - Content
-        Column({
-          gap: 16,
-          align: 'center',
-          justify: 'center',
-          style: {
-            width: '100%',
-            height: '100%',
-            color: 'white',
-          }
-        }, [
-          f('div', { style: { fontSize: '48px' } }, ['🌟']),
-          f('h3', { style: { margin: '0', fontSize: '24px', fontWeight: 'bold' } }, ['Layered Design']),
-          f('p', { style: { margin: '0', fontSize: '14px', opacity: '0.9' } }, ['Multiple overlapping elements']),
-        ])
-      ])
-    ]),
-
-    // Demo 5: Card with Floating Action
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Card with Floating Action Button']),
-      Stack({
-        style: {
-          width: '100%',
-          maxWidth: '400px',
-        }
-      }, [
-        // Card base
-        Column({
-          gap: 12,
-          style: {
-            backgroundColor: '#ffffff',
-            padding: '24px',
-            borderRadius: '12px',
-            border: '1px solid #e5e7eb',
-          }
-        }, [
-          f('h5', { style: { margin: '0', fontSize: '18px', fontWeight: '600', color: '#111827' } }, ['Product Card']),
-          f('p', { style: { margin: '0', fontSize: '14px', color: '#6b7280', lineHeight: '1.5' } }, ['This card has a floating action button positioned absolutely on top of it using the Stack component.']),
-          f('div', { style: { fontSize: '20px', fontWeight: 'bold', color: '#3b82f6', marginTop: '8px' } }, ['$149.99']),
-        ]),
-        // Floating action button
-        f('div', {
-          style: {
-            position: 'absolute',
-            bottom: '20px',
-            right: '20px',
-          }
-        }, [
-          f('button', {
-            style: {
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              fontSize: '24px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }
-          }, ['🛒'])
-        ])
-      ])
-    ]),
-  ])
-}
-
 onMounted(() => {
-  if (container.value) {
-    const app = StackDemoApp()
-    render(app, container.value)
-  }
-})
+  if (!container.value) return
 
-onUnmounted(() => {
-  if (container.value) {
-    container.value.innerHTML = ''
-  }
+  container.value.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 32px; padding: 24px; background: #f9fafb; border-radius: 12px;">
+      <div>
+        <h3 style="margin: 0 0 4px 0; color: #111; font-size: 20px; font-weight: 600;">Stack Component Demo</h3>
+        <p style="margin: 0; color: #6b7280; font-size: 14px;">Overlay elements using absolute positioning with z-index control</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+        <!-- Basic Stack -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">Basic Stack (Layered)</h4>
+          <div style="position: relative; height: 200px; background: #f3f4f6; border-radius: 8px; overflow: hidden;">
+            <div style="position: absolute; top: 20px; left: 20px; width: 120px; height: 120px; background: #3b82f6; border-radius: 8px; opacity: 0.9;"></div>
+            <div style="position: absolute; top: 40px; left: 40px; width: 120px; height: 120px; background: #8b5cf6; border-radius: 8px; opacity: 0.9;"></div>
+            <div style="position: absolute; top: 60px; left: 60px; width: 120px; height: 120px; background: #ec4899; border-radius: 8px; opacity: 0.9;"></div>
+          </div>
+        </div>
+
+        <!-- Centered Stack -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">Centered Overlay</h4>
+          <div style="position: relative; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <div style="position: absolute; width: 160px; height: 160px; background: rgba(255,255,255,0.2); border-radius: 50%;"></div>
+            <div style="position: absolute; width: 120px; height: 120px; background: rgba(255,255,255,0.3); border-radius: 50%;"></div>
+            <div style="position: absolute; width: 80px; height: 80px; background: rgba(255,255,255,0.4); border-radius: 50%;"></div>
+            <div style="position: relative; color: white; font-weight: 700; font-size: 20px; z-index: 10;">Center</div>
+          </div>
+        </div>
+
+        <!-- Avatar Stack -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">Avatar Stack</h4>
+          <div style="position: relative; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <div style="display: flex; position: relative;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: #3b82f6; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">A</div>
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: #8b5cf6; border: 3px solid white; margin-left: -16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">B</div>
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: #ec4899; border: 3px solid white; margin-left: -16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">C</div>
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: #10b981; border: 3px solid white; margin-left: -16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">+3</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Badge Overlay -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">Badge Overlay</h4>
+          <div style="position: relative; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <div style="position: relative;">
+              <div style="width: 80px; height: 80px; background: #4f46e5; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 32px;">📦</span>
+              </div>
+              <div style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; background: #ef4444; border-radius: 50%; color: white; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid white;">3</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card with Overlay -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">Image Overlay</h4>
+          <div style="position: relative; height: 200px; border-radius: 8px; overflow: hidden;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);"></div>
+            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);"></div>
+            <div style="position: absolute; bottom: 16px; left: 16px; right: 16px; color: white;">
+              <div style="font-weight: 700; font-size: 18px;">Beautiful Sunset</div>
+              <div style="font-size: 14px; opacity: 0.8;">Gradient overlay effect</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">Loading Overlay</h4>
+          <div style="position: relative; height: 200px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <div style="padding: 16px;">
+              <div style="height: 16px; background: #e5e7eb; border-radius: 4px; margin-bottom: 12px; width: 60%;"></div>
+              <div style="height: 12px; background: #f3f4f6; border-radius: 4px; margin-bottom: 8px;"></div>
+              <div style="height: 12px; background: #f3f4f6; border-radius: 4px; width: 80%;"></div>
+            </div>
+            <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+              <div style="width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      </style>
+
+      <p style="margin: 0; color: #6b7280; font-size: 13px; text-align: center;">
+        Stack uses position: absolute to layer children on top of each other
+      </p>
+    </div>
+  `
 })
 </script>
 
 <template>
-  <div class="demo-wrapper">
+  <div class="showcase-wrapper">
     <div ref="container" class="flexium-container"></div>
   </div>
 </template>
 
 <style scoped>
-.demo-wrapper {
-  margin: 24px 0;
-  padding: 24px;
+.showcase-wrapper {
+  margin: 40px 0;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  background: var(--vp-c-bg-alt);
-}
-
-.flexium-container {
-  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
 }
 </style>

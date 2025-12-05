@@ -1,249 +1,99 @@
 <script setup>
-import { onMounted, ref, onUnmounted } from 'vue'
-import { f, render } from 'flexium/dom'
-import { Grid, Column } from 'flexium/primitives'
+import { onMounted, ref } from 'vue'
 
 const container = ref(null)
 
-function GridDemoApp() {
-  // Helper to create a grid item
-  const createGridItem = (number, color) => {
-    return f('div', {
-      style: {
-        backgroundColor: color,
-        padding: '24px',
-        borderRadius: '8px',
-        color: 'white',
-        fontWeight: '600',
-        fontSize: '18px',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '80px',
-      }
-    }, [String(number)])
-  }
-
-  const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16', '#f97316']
-
-  return f('div', {
-    style: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '32px',
-      width: '100%',
-    }
-  }, [
-    // Demo 1: Basic 3-Column Grid
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Basic Grid (cols={3})']),
-      Grid({
-        cols: 3,
-        gap: 16,
-        style: {
-          backgroundColor: '#f3f4f6',
-          padding: '16px',
-          borderRadius: '8px'
-        }
-      }, [
-        createGridItem(1, colors[0]),
-        createGridItem(2, colors[1]),
-        createGridItem(3, colors[2]),
-        createGridItem(4, colors[3]),
-        createGridItem(5, colors[4]),
-        createGridItem(6, colors[5]),
-      ])
-    ]),
-
-    // Demo 2: Responsive Grid
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Responsive Grid']),
-      f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['cols={{ base: 1, md: 2, lg: 3 }} - Resize window to see effect']),
-      Grid({
-        cols: { base: 1, md: 2, lg: 3 },
-        gap: 16,
-        style: {
-          backgroundColor: '#f3f4f6',
-          padding: '16px',
-          borderRadius: '8px'
-        }
-      }, [
-        createGridItem(1, colors[6]),
-        createGridItem(2, colors[7]),
-        createGridItem(3, colors[8]),
-        createGridItem(4, colors[0]),
-        createGridItem(5, colors[1]),
-        createGridItem(6, colors[2]),
-      ])
-    ]),
-
-    // Demo 3: Different Column Sizes
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Custom Column Template']),
-      f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['cols="2fr 1fr 1fr" - First column is twice as wide']),
-      Grid({
-        cols: '2fr 1fr 1fr',
-        gap: 16,
-        style: {
-          backgroundColor: '#f3f4f6',
-          padding: '16px',
-          borderRadius: '8px'
-        }
-      }, [
-        createGridItem('2x', colors[3]),
-        createGridItem('1x', colors[4]),
-        createGridItem('1x', colors[5]),
-      ])
-    ]),
-
-    // Demo 4: Column and Row Gap
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Different Row & Column Gaps']),
-      f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['columnGap={24}, rowGap={8}']),
-      Grid({
-        cols: 4,
-        columnGap: 24,
-        rowGap: 8,
-        style: {
-          backgroundColor: '#f3f4f6',
-          padding: '16px',
-          borderRadius: '8px'
-        }
-      }, [
-        createGridItem(1, colors[0]),
-        createGridItem(2, colors[1]),
-        createGridItem(3, colors[2]),
-        createGridItem(4, colors[3]),
-        createGridItem(5, colors[4]),
-        createGridItem(6, colors[5]),
-        createGridItem(7, colors[6]),
-        createGridItem(8, colors[7]),
-      ])
-    ]),
-
-    // Demo 5: Card Grid Example
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Product Card Grid']),
-      Grid({
-        cols: { base: 1, md: 2, lg: 3 },
-        gap: 20,
-      }, [
-        // Card 1
-        Column({
-          gap: 12,
-          style: {
-            backgroundColor: '#ffffff',
-            padding: '20px',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
-          }
-        }, [
-          f('div', {
-            style: {
-              backgroundColor: '#3b82f6',
-              height: '120px',
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontSize: '24px',
-            }
-          }, ['📱']),
-          f('h5', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#111827' } }, ['Product 1']),
-          f('p', { style: { margin: '0', fontSize: '14px', color: '#6b7280' } }, ['Description of product 1']),
-          f('div', { style: { fontSize: '18px', fontWeight: 'bold', color: '#3b82f6' } }, ['$99.99']),
-        ]),
-
-        // Card 2
-        Column({
-          gap: 12,
-          style: {
-            backgroundColor: '#ffffff',
-            padding: '20px',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
-          }
-        }, [
-          f('div', {
-            style: {
-              backgroundColor: '#8b5cf6',
-              height: '120px',
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontSize: '24px',
-            }
-          }, ['💻']),
-          f('h5', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#111827' } }, ['Product 2']),
-          f('p', { style: { margin: '0', fontSize: '14px', color: '#6b7280' } }, ['Description of product 2']),
-          f('div', { style: { fontSize: '18px', fontWeight: 'bold', color: '#8b5cf6' } }, ['$199.99']),
-        ]),
-
-        // Card 3
-        Column({
-          gap: 12,
-          style: {
-            backgroundColor: '#ffffff',
-            padding: '20px',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
-          }
-        }, [
-          f('div', {
-            style: {
-              backgroundColor: '#ec4899',
-              height: '120px',
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontSize: '24px',
-            }
-          }, ['🎧']),
-          f('h5', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#111827' } }, ['Product 3']),
-          f('p', { style: { margin: '0', fontSize: '14px', color: '#6b7280' } }, ['Description of product 3']),
-          f('div', { style: { fontSize: '18px', fontWeight: 'bold', color: '#ec4899' } }, ['$79.99']),
-        ]),
-      ])
-    ]),
-  ])
-}
-
 onMounted(() => {
-  if (container.value) {
-    const app = GridDemoApp()
-    render(app, container.value)
-  }
-})
+  if (!container.value) return
 
-onUnmounted(() => {
-  if (container.value) {
-    container.value.innerHTML = ''
-  }
+  const createBox = (text, color) => `
+    <div style="background: ${color}; padding: 20px; border-radius: 8px; color: white; font-weight: 600; font-size: 14px; text-align: center;">
+      ${text}
+    </div>
+  `
+
+  container.value.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 32px; padding: 24px; background: #f9fafb; border-radius: 12px;">
+      <div>
+        <h3 style="margin: 0 0 4px 0; color: #111; font-size: 20px; font-weight: 600;">Grid Component Demo</h3>
+        <p style="margin: 0; color: #6b7280; font-size: 14px;">CSS Grid layout with columns, rows, and gap controls</p>
+      </div>
+
+      <!-- Fixed Columns -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Fixed Columns (columns={3})</h4>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+          ${createBox('1', '#3b82f6')}
+          ${createBox('2', '#8b5cf6')}
+          ${createBox('3', '#ec4899')}
+          ${createBox('4', '#10b981')}
+          ${createBox('5', '#f59e0b')}
+          ${createBox('6', '#ef4444')}
+        </div>
+      </div>
+
+      <!-- Auto-fit Responsive -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Responsive (minChildWidth={150})</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+          ${createBox('Card 1', '#06b6d4')}
+          ${createBox('Card 2', '#84cc16')}
+          ${createBox('Card 3', '#f97316')}
+          ${createBox('Card 4', '#a855f7')}
+          ${createBox('Card 5', '#14b8a6')}
+        </div>
+      </div>
+
+      <!-- Different Gaps -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Column & Row Gap (columnGap={24}, rowGap={8})</h4>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 24px; row-gap: 8px; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+          ${createBox('A', '#3b82f6')}
+          ${createBox('B', '#8b5cf6')}
+          ${createBox('C', '#ec4899')}
+          ${createBox('D', '#10b981')}
+          ${createBox('E', '#f59e0b')}
+          ${createBox('F', '#ef4444')}
+        </div>
+      </div>
+
+      <!-- 4 Columns -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Four Columns (columns={4})</h4>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+          ${[1,2,3,4,5,6,7,8].map(i => createBox(i, `hsl(${i * 40}, 70%, 50%)`)).join('')}
+        </div>
+      </div>
+
+      <!-- Template Areas Example -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Custom Template</h4>
+        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 12px; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+          <div style="background: #3b82f6; padding: 20px; border-radius: 8px; color: white; font-weight: 600; text-align: center;">Sidebar</div>
+          <div style="background: #10b981; padding: 40px 20px; border-radius: 8px; color: white; font-weight: 600; text-align: center;">Main Content (2fr)</div>
+          <div style="background: #f59e0b; padding: 20px; border-radius: 8px; color: white; font-weight: 600; text-align: center;">Aside</div>
+        </div>
+      </div>
+
+      <p style="margin: 0; color: #6b7280; font-size: 13px; text-align: center;">
+        Grid uses CSS Grid for powerful two-dimensional layouts
+      </p>
+    </div>
+  `
 })
 </script>
 
 <template>
-  <div class="demo-wrapper">
+  <div class="showcase-wrapper">
     <div ref="container" class="flexium-container"></div>
   </div>
 </template>
 
 <style scoped>
-.demo-wrapper {
-  margin: 24px 0;
-  padding: 24px;
+.showcase-wrapper {
+  margin: 40px 0;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  background: var(--vp-c-bg-alt);
-}
-
-.flexium-container {
-  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
 }
 </style>

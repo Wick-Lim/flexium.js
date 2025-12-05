@@ -1,262 +1,105 @@
 <script setup>
-import { onMounted, ref, onUnmounted } from 'vue'
-import { f, render } from 'flexium/dom'
-import { Column, Row } from 'flexium/primitives'
+import { onMounted, ref } from 'vue'
 
 const container = ref(null)
 
-function ColumnDemoApp() {
-  // Helper to create a colored box
-  const createBox = (text, color, width = 'auto') => {
-    return f('div', {
-      style: {
-        backgroundColor: color,
-        padding: '16px 24px',
-        borderRadius: '8px',
-        color: 'white',
-        fontWeight: '600',
-        fontSize: '14px',
-        textAlign: 'center',
-        width,
-      }
-    }, [text])
-  }
-
-  return f('div', {
-    style: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '32px',
-      width: '100%',
-    }
-  }, [
-    // Demo 1: Basic Column with Gap
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Basic Column with Gap']),
-      Column({
-        gap: 16,
-        style: {
-          backgroundColor: '#f3f4f6',
-          padding: '16px',
-          borderRadius: '8px'
-        }
-      }, [
-        createBox('Item 1', '#3b82f6'),
-        createBox('Item 2', '#8b5cf6'),
-        createBox('Item 3', '#ec4899'),
-      ])
-    ]),
-
-    // Demo 2: Horizontal Alignment (align)
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Horizontal Alignment (align)']),
-
-      Row({ gap: 16 }, [
-        f('div', { style: { flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-          f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['align="start"']),
-          Column({
-            gap: 12,
-            align: 'start',
-            style: {
-              backgroundColor: '#f3f4f6',
-              padding: '16px',
-              borderRadius: '8px',
-              minHeight: '200px'
-            }
-          }, [
-            createBox('Short', '#3b82f6', '80px'),
-            createBox('Medium Width', '#8b5cf6', '140px'),
-            createBox('Wide Box', '#ec4899', '180px'),
-          ])
-        ]),
-
-        f('div', { style: { flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-          f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['align="center"']),
-          Column({
-            gap: 12,
-            align: 'center',
-            style: {
-              backgroundColor: '#f3f4f6',
-              padding: '16px',
-              borderRadius: '8px',
-              minHeight: '200px'
-            }
-          }, [
-            createBox('Short', '#3b82f6', '80px'),
-            createBox('Medium Width', '#8b5cf6', '140px'),
-            createBox('Wide Box', '#ec4899', '180px'),
-          ])
-        ]),
-
-        f('div', { style: { flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-          f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['align="end"']),
-          Column({
-            gap: 12,
-            align: 'end',
-            style: {
-              backgroundColor: '#f3f4f6',
-              padding: '16px',
-              borderRadius: '8px',
-              minHeight: '200px'
-            }
-          }, [
-            createBox('Short', '#3b82f6', '80px'),
-            createBox('Medium Width', '#8b5cf6', '140px'),
-            createBox('Wide Box', '#ec4899', '180px'),
-          ])
-        ]),
-      ])
-    ]),
-
-    // Demo 3: Vertical Distribution (justify)
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Vertical Distribution (justify)']),
-
-      Row({ gap: 16 }, [
-        f('div', { style: { flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-          f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['justify="start"']),
-          Column({
-            gap: 8,
-            justify: 'start',
-            style: {
-              backgroundColor: '#f3f4f6',
-              padding: '16px',
-              borderRadius: '8px',
-              minHeight: '200px'
-            }
-          }, [
-            createBox('A', '#10b981'),
-            createBox('B', '#f59e0b'),
-          ])
-        ]),
-
-        f('div', { style: { flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-          f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['justify="center"']),
-          Column({
-            gap: 8,
-            justify: 'center',
-            style: {
-              backgroundColor: '#f3f4f6',
-              padding: '16px',
-              borderRadius: '8px',
-              minHeight: '200px'
-            }
-          }, [
-            createBox('A', '#10b981'),
-            createBox('B', '#f59e0b'),
-          ])
-        ]),
-
-        f('div', { style: { flex: '1', display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-          f('p', { style: { margin: '0', fontSize: '12px', color: '#6b7280' } }, ['justify="between"']),
-          Column({
-            gap: 8,
-            justify: 'between',
-            style: {
-              backgroundColor: '#f3f4f6',
-              padding: '16px',
-              borderRadius: '8px',
-              minHeight: '200px'
-            }
-          }, [
-            createBox('A', '#10b981'),
-            createBox('B', '#f59e0b'),
-          ])
-        ]),
-      ])
-    ]),
-
-    // Demo 4: Form Layout Example
-    f('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-      f('h4', { style: { margin: '0', fontSize: '16px', fontWeight: '600', color: '#374151' } }, ['Form Layout Example']),
-      Column({
-        gap: 16,
-        style: {
-          backgroundColor: '#ffffff',
-          padding: '24px',
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb',
-          maxWidth: '400px'
-        }
-      }, [
-        Column({ gap: 6 }, [
-          f('label', { style: { fontSize: '14px', fontWeight: '500', color: '#374151' } }, ['Email']),
-          f('input', {
-            type: 'email',
-            placeholder: 'Enter your email',
-            style: {
-              padding: '10px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '14px',
-              outline: 'none',
-            }
-          }),
-        ]),
-
-        Column({ gap: 6 }, [
-          f('label', { style: { fontSize: '14px', fontWeight: '500', color: '#374151' } }, ['Password']),
-          f('input', {
-            type: 'password',
-            placeholder: 'Enter your password',
-            style: {
-              padding: '10px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '14px',
-              outline: 'none',
-            }
-          }),
-        ]),
-
-        f('button', {
-          style: {
-            padding: '12px',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            marginTop: '8px',
-          }
-        }, ['Sign In'])
-      ])
-    ]),
-  ])
-}
-
 onMounted(() => {
-  if (container.value) {
-    const app = ColumnDemoApp()
-    render(app, container.value)
-  }
-})
+  if (!container.value) return
 
-onUnmounted(() => {
-  if (container.value) {
-    container.value.innerHTML = ''
-  }
+  const createBox = (text, color) => `
+    <div style="background: ${color}; padding: 16px 24px; border-radius: 8px; color: white; font-weight: 600; font-size: 14px; text-align: center;">
+      ${text}
+    </div>
+  `
+
+  container.value.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 32px; padding: 24px; background: #f9fafb; border-radius: 12px;">
+      <div>
+        <h3 style="margin: 0 0 4px 0; color: #111; font-size: 20px; font-weight: 600;">Column Component Demo</h3>
+        <p style="margin: 0; color: #6b7280; font-size: 14px;">Vertical flex layout with gap and alignment options</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
+        <!-- Basic Column -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">Basic Column</h4>
+          <div style="display: flex; flex-direction: column; gap: 12px; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+            ${createBox('Item 1', '#3b82f6')}
+            ${createBox('Item 2', '#8b5cf6')}
+            ${createBox('Item 3', '#ec4899')}
+          </div>
+        </div>
+
+        <!-- Align Start -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">align="start"</h4>
+          <div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+            ${createBox('Short', '#10b981')}
+            ${createBox('Medium Width', '#f59e0b')}
+            ${createBox('Long Content Here', '#ef4444')}
+          </div>
+        </div>
+
+        <!-- Align Center -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">align="center"</h4>
+          <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+            ${createBox('Short', '#10b981')}
+            ${createBox('Medium Width', '#f59e0b')}
+            ${createBox('Long Content Here', '#ef4444')}
+          </div>
+        </div>
+
+        <!-- Align End -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">align="end"</h4>
+          <div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-end; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+            ${createBox('Short', '#10b981')}
+            ${createBox('Medium Width', '#f59e0b')}
+            ${createBox('Long Content Here', '#ef4444')}
+          </div>
+        </div>
+
+        <!-- Align Stretch -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">align="stretch"</h4>
+          <div style="display: flex; flex-direction: column; gap: 12px; align-items: stretch; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+            ${createBox('Full Width', '#06b6d4')}
+            ${createBox('Also Full', '#8b5cf6')}
+            ${createBox('Stretched', '#ec4899')}
+          </div>
+        </div>
+
+        <!-- Different Gaps -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #374151;">gap={24}</h4>
+          <div style="display: flex; flex-direction: column; gap: 24px; background: #f3f4f6; padding: 16px; border-radius: 8px;">
+            ${createBox('Wide', '#3b82f6')}
+            ${createBox('Gap', '#8b5cf6')}
+            ${createBox('Spacing', '#ec4899')}
+          </div>
+        </div>
+      </div>
+
+      <p style="margin: 0; color: #6b7280; font-size: 13px; text-align: center;">
+        Column uses flexbox with flex-direction: column for vertical layouts
+      </p>
+    </div>
+  `
 })
 </script>
 
 <template>
-  <div class="demo-wrapper">
+  <div class="showcase-wrapper">
     <div ref="container" class="flexium-container"></div>
   </div>
 </template>
 
 <style scoped>
-.demo-wrapper {
-  margin: 24px 0;
-  padding: 24px;
+.showcase-wrapper {
+  margin: 40px 0;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  background: var(--vp-c-bg-alt);
-}
-
-.flexium-container {
-  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
 }
 </style>
