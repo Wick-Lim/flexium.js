@@ -135,7 +135,7 @@ export default defineConfig({
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.5.0',
+        text: 'v0.5.1',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -234,13 +234,6 @@ export default defineConfig({
             { text: 'Vite Plugin', link: '/guide/vite-plugin' }
           ]
         },
-        {
-          text: 'Migration',
-          collapsed: true,
-          items: [
-            { text: 'Migration to v1', link: '/guide/migration-v1' }
-          ]
-        }
       ],
       '/reference/': [
         {

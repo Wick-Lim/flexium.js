@@ -8,15 +8,9 @@ export default defineConfig({
       'src/**/__tests__/*.test.ts',
     ],
 
-    // 기본 제외 항목 (hang 발생하는 테스트 제외)
+    // 기본 제외 항목
     exclude: [
       '**/node_modules/**',
-      '**/layout/__tests__/Row.test.ts',
-      '**/layout/__tests__/Column.test.ts',
-      '**/layout/__tests__/Grid.test.ts',
-      '**/layout/__tests__/Stack.test.ts',
-      '**/layout/__tests__/Spacer.test.ts',
-      '**/core/__tests__/suspense.test.ts',
     ],
 
     // DOM 테스트를 위한 환경 설정
