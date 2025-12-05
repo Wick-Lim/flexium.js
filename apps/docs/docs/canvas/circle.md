@@ -40,3 +40,11 @@ import { Canvas, Circle } from 'flexium/canvas';
 | `stroke` | `string \| Signal<string>` | The stroke color. |
 | `strokeWidth` | `number \| Signal<number>` | The width of the stroke. |
 | `opacity` | `number \| Signal<number>` | Opacity (0 to 1). |
+
+## Interactive Demo
+
+<script setup>
+import CircleDemo from '../../components/CircleDemo.vue'
+</script>
+
+<CircleDemo />

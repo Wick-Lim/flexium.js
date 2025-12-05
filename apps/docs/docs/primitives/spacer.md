@@ -16,6 +16,16 @@ A flexible spacing component.
 
 The `Spacer` component is used to create space between elements or push elements apart. By default, it grows to fill available space using `flex: 1`. It can be used in both horizontal (Row) and vertical (Column) layouts.
 
+<script setup>
+import SpacerDemo from '../../components/SpacerDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <SpacerDemo />
+</ClientOnly>
+
 ## Usage
 
 ```tsx

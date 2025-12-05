@@ -43,3 +43,11 @@ import { Canvas, Arc } from 'flexium/canvas';
 | `counterclockwise` | `boolean` | Draw counter-clockwise. |
 | `stroke` | `string \| Signal<string>` | The stroke color. |
 | `fill` | `string \| Signal<string>` | The fill color (if closing the path). |
+
+## Interactive Demo
+
+<script setup>
+import ArcDemo from '../../components/ArcDemo.vue'
+</script>
+
+<ArcDemo />

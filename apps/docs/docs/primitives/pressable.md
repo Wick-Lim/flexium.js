@@ -10,9 +10,19 @@ head:
       content: Pressable component for handling touch and click events. Universal interaction primitive for Flexium.
 ---
 
+<script setup>
+import PressableDemo from '../../components/PressableDemo.vue'
+</script>
+
 # Pressable
 
 The `Pressable` component is Flexium's universal primitive for handling user interactions through touch, click, and press events. It provides a cross-platform abstraction for making any content interactive with consistent behavior across web and mobile platforms.
+
+## Live Demo
+
+<ClientOnly>
+  <PressableDemo />
+</ClientOnly>
 
 ## Overview
 

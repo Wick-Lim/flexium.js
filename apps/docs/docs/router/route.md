@@ -139,6 +139,14 @@ function SearchPage() {
 - Use `*` for catch-all routes at the end
 - Nested routes inherit parent path prefix
 
+## Demo
+
+<script setup>
+import RouteDemo from '../../components/RouteDemo.vue'
+</script>
+
+<RouteDemo />
+
 ## See Also
 
 - [&lt;Router /&gt;](/docs/router/router)

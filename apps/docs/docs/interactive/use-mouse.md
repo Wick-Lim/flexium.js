@@ -212,6 +212,14 @@ function ContextMenuArea() {
 - Position is relative to viewport by default
 - Prevent default context menu for right-click handling
 
+## Demo
+
+<script setup>
+import UseMouseDemo from '../../components/UseMouseDemo.vue'
+</script>
+
+<UseMouseDemo />
+
 ## See Also
 
 - [useKeyboard()](/docs/interactive/use-keyboard)

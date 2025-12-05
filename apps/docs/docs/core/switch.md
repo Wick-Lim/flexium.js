@@ -2,9 +2,19 @@
 title: Switch & Match - Multi-Condition Rendering
 ---
 
+<script setup>
+import SwitchDemo from '../../components/SwitchDemo.vue'
+</script>
+
 # &lt;Switch /&gt; & &lt;Match /&gt;
 
 Render content based on multiple conditions, similar to switch/case.
+
+## Live Demo
+
+<ClientOnly>
+  <SwitchDemo />
+</ClientOnly>
 
 ## Import
 

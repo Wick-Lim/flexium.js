@@ -115,6 +115,14 @@ function App() {
 - Wrap your entire app for global routing
 - Combine with Link for navigation
 
+## Demo
+
+<script setup>
+import RouterDemo from '../../components/RouterDemo.vue'
+</script>
+
+<RouterDemo />
+
 ## See Also
 
 - [&lt;Route /&gt;](/docs/router/route)

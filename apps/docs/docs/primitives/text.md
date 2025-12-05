@@ -10,9 +10,19 @@ head:
       content: Text component for rendering text content in Flexium. Universal primitive with styling options.
 ---
 
+<script setup>
+import TextDemo from '../../components/TextDemo.vue'
+</script>
+
 # Text
 
 The `Text` component is the universal primitive for rendering text content in Flexium. It provides a consistent API across web and React Native platforms while supporting rich styling options, interactivity, and accessibility features.
+
+## Live Demo
+
+<ClientOnly>
+  <TextDemo />
+</ClientOnly>
 
 ## Overview
 

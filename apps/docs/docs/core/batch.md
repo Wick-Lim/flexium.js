@@ -1,6 +1,16 @@
+<script setup>
+import BatchDemo from '../../components/BatchDemo.vue'
+</script>
+
 # batch()
 
 Group multiple state updates to prevent intermediate renders.
+
+## Live Demo
+
+<ClientOnly>
+  <BatchDemo />
+</ClientOnly>
 
 ## Import
 

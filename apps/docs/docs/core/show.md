@@ -2,9 +2,19 @@
 title: Show - Conditional Rendering
 ---
 
+<script setup>
+import ShowDemo from '../../components/ShowDemo.vue'
+</script>
+
 # &lt;Show /&gt;
 
 Conditionally render content based on a boolean condition.
+
+## Live Demo
+
+<ClientOnly>
+  <ShowDemo />
+</ClientOnly>
 
 ## Import
 

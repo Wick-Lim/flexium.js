@@ -14,6 +14,16 @@ head:
 
 The `Row` component is a fundamental layout primitive in Flexium for arranging child elements horizontally. Built on flexbox, it provides a simple yet powerful API for creating horizontal layouts with precise control over alignment, spacing, and distribution.
 
+<script setup>
+import RowDemo from '../../components/RowDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <RowDemo />
+</ClientOnly>
+
 ## Overview
 
 `Row` renders as a flex container with `flex-direction: row`, making it ideal for horizontal arrangements such as navigation bars, button groups, form fields, and any UI pattern requiring side-by-side elements.

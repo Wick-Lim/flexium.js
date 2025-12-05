@@ -173,6 +173,14 @@ function Dropdown(props) {
 - Events still bubble through the React tree, not DOM tree
 - Use with `Show` for conditional portals
 
+## Demo
+
+<script setup>
+import PortalDemo from '../../components/PortalDemo.vue'
+</script>
+
+<PortalDemo />
+
 ## See Also
 
 - [render()](/docs/dom/render)

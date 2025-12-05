@@ -139,6 +139,14 @@ Use `f()` when:
 - Props use lowercase event names (`onclick`, not `onClick`)
 - Children can be strings, numbers, signals, or other nodes
 
+## Demo
+
+<script setup>
+import FDemo from '../../components/FDemo.vue'
+</script>
+
+<FDemo />
+
 ## See Also
 
 - [render()](/docs/dom/render)

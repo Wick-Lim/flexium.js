@@ -14,6 +14,16 @@ head:
 
 The `Column` component is a fundamental layout primitive in Flexium for arranging child elements vertically. Built on flexbox with `flex-direction: column`, it provides an intuitive API for creating vertical layouts with precise control over alignment, spacing, and distribution.
 
+<script setup>
+import ColumnDemo from '../../components/ColumnDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <ColumnDemo />
+</ClientOnly>
+
 ## Overview
 
 `Column` is the vertical counterpart to `Row`, making it essential for most UI layouts including forms, lists, cards, and content stacking. It renders as a flex container optimized for vertical arrangement of elements.

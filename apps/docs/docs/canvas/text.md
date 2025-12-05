@@ -41,3 +41,11 @@ import { Canvas, CanvasText } from 'flexium/canvas';
 | `fontSize` | `number \| Signal<number>` | Font size in pixels. |
 | `fontFamily` | `string` | Font family. |
 | `textAlign` | `'left' \| 'center' \| 'right'` | Text alignment. |
+
+## Interactive Demo
+
+<script setup>
+import CanvasTextDemo from '../../components/CanvasTextDemo.vue'
+</script>
+
+<CanvasTextDemo />

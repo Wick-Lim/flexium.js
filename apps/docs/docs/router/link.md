@@ -151,6 +151,14 @@ function Breadcrumbs({ items }) {
 - Use regular `<a>` for external links
 - `activeClass` matches current route path
 
+## Demo
+
+<script setup>
+import LinkDemo from '../../components/LinkDemo.vue'
+</script>
+
+<LinkDemo />
+
 ## See Also
 
 - [&lt;Router /&gt;](/docs/router/router)

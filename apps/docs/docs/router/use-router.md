@@ -166,6 +166,14 @@ function Pagination() {
 - All return values are reactive signals
 - Use effects to react to route changes
 
+## Demo
+
+<script setup>
+import UseRouterDemo from '../../components/UseRouterDemo.vue'
+</script>
+
+<UseRouterDemo />
+
 ## See Also
 
 - [&lt;Router /&gt;](/docs/router/router)

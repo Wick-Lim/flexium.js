@@ -10,9 +10,19 @@ head:
       content: Image component for rendering images in Flexium. Universal primitive with cross-platform support.
 ---
 
+<script setup>
+import ImageDemo from '../../components/ImageDemo.vue'
+</script>
+
 # Image
 
 The `Image` component is Flexium's universal primitive for displaying images across web and React Native platforms. It provides a consistent API for loading, sizing, and styling images with built-in error handling and lifecycle callbacks.
+
+## Live Demo
+
+<ClientOnly>
+  <ImageDemo />
+</ClientOnly>
 
 ## Overview
 

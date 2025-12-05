@@ -42,3 +42,11 @@ import { Canvas, Line } from 'flexium/canvas';
 | `stroke` | `string \| Signal<string>` | The line color. |
 | `strokeWidth` | `number \| Signal<number>` | The width of the line. |
 | `opacity` | `number \| Signal<number>` | Opacity (0 to 1). |
+
+## Interactive Demo
+
+<script setup>
+import LineDemo from '../../components/LineDemo.vue'
+</script>
+
+<LineDemo />

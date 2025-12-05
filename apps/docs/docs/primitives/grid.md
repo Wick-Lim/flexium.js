@@ -16,6 +16,16 @@ A two-dimensional layout component.
 
 The `Grid` component is a primitive layout component based on CSS Grid. It supports responsive columns, rows, gaps, and all standard grid properties for creating complex layouts.
 
+<script setup>
+import GridDemo from '../../components/GridDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <GridDemo />
+</ClientOnly>
+
 ## Usage
 
 ```tsx

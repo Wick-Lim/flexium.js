@@ -164,6 +164,14 @@ function DebugOverlay() {
 - Use `isPressed` for continuous actions
 - Remember to handle both lowercase and uppercase for letter keys
 
+## Demo
+
+<script setup>
+import UseKeyboardDemo from '../../components/UseKeyboardDemo.vue'
+</script>
+
+<UseKeyboardDemo />
+
 ## See Also
 
 - [useMouse()](/docs/interactive/use-mouse)

@@ -2,9 +2,19 @@
 title: Suspense - Async Loading
 ---
 
+<script setup>
+import SuspenseDemo from '../../components/SuspenseDemo.vue'
+</script>
+
 # &lt;Suspense /&gt;
 
 Handle async operations with loading states.
+
+## Live Demo
+
+<ClientOnly>
+  <SuspenseDemo />
+</ClientOnly>
 
 ## Import
 

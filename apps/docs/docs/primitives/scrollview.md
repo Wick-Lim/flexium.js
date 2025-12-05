@@ -10,9 +10,19 @@ head:
       content: ScrollView component for creating scrollable containers. Universal primitive with vertical and horizontal scroll.
 ---
 
+<script setup>
+import ScrollViewDemo from '../../components/ScrollViewDemo.vue'
+</script>
+
 # ScrollView
 
 The `ScrollView` component is Flexium's universal primitive for creating scrollable containers. It provides a consistent API for both vertical and horizontal scrolling across web and React Native platforms, with customizable scroll indicators and flexible layout options.
+
+## Live Demo
+
+<ClientOnly>
+  <ScrollViewDemo />
+</ClientOnly>
 
 ## Overview
 

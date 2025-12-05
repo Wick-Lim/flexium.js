@@ -16,6 +16,16 @@ A layered positioning component.
 
 The `Stack` component is a primitive layout component for layering children on top of each other. It uses CSS Grid to create perfect overlap, making it ideal for creating overlays, backgrounds, and layered UI elements.
 
+<script setup>
+import StackDemo from '../../components/StackDemo.vue'
+</script>
+
+## Live Demo
+
+<ClientOnly>
+  <StackDemo />
+</ClientOnly>
+
 ## Usage
 
 ```tsx

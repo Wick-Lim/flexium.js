@@ -10,11 +10,21 @@ head:
       content: Button primitives for creating accessible, interactive buttons in Flexium with unified press handling.
 ---
 
+<script setup>
+import ButtonDemo from '../../components/ButtonDemo.vue'
+</script>
+
 # Button
 
 Accessible button components with unified touch/click handlers and full ARIA support.
 
 The Button UI primitives provide `createButton` and `createIconButton` functions for creating interactive button elements that work consistently across mouse, touch, and keyboard interactions. These primitives include built-in loading states, disabled states, and comprehensive accessibility features.
+
+## Live Demo
+
+<ClientOnly>
+  <ButtonDemo />
+</ClientOnly>
 
 ## Import
 

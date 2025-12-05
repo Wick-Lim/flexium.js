@@ -85,6 +85,14 @@ disposeWidget?.()
 - Container must exist in the DOM before calling render
 - Each render call is independent
 
+## Demo
+
+<script setup>
+import RenderDemo from '../../components/RenderDemo.vue'
+</script>
+
+<RenderDemo />
+
 ## See Also
 
 - [f()](/docs/dom/f)

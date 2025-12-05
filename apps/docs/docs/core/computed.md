@@ -1,6 +1,16 @@
+<script setup>
+import ComputedDemo from '../../components/ComputedDemo.vue'
+</script>
+
 # computed()
 
 Create derived reactive values that automatically update when dependencies change.
+
+## Live Demo
+
+<ClientOnly>
+  <ComputedDemo />
+</ClientOnly>
 
 ## Import
 
