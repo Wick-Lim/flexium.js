@@ -4,8 +4,8 @@ This document outlines Flexium's development roadmap, from current status throug
 
 ## Table of Contents
 
-- [Current Release (v0.1.0)](#current-release-v010)
-- [Next Release (v0.2.0)](#next-release-v020)
+- [Current Release (v0.4.5)](#current-release-v045)
+- [Next Release (v0.5.0)](#next-release-v050)
 - [Stable Release (v1.0.0)](#stable-release-v100)
 - [Future Vision (v2.0.0+)](#future-vision-v200)
 - [Community Requests](#community-requests)
@@ -13,11 +13,11 @@ This document outlines Flexium's development roadmap, from current status throug
 
 ---
 
-## Current Release (v0.1.0)
+## Current Release (v0.4.5)
 
-**Status**: Alpha - Core functionality working, integration testing in progress
+**Status**: Beta - Feature-rich, comprehensive testing in place
 
-**Released**: November 2025
+**Released**: December 2025
 
 ### Completed Features
 
@@ -25,7 +25,7 @@ This document outlines Flexium's development roadmap, from current status throug
 - ✅ `signal()` - Fine-grained reactive primitives
 - ✅ `computed()` - Memoized derived values with dependency tracking
 - ✅ `effect()` - Side effects with automatic cleanup
-- ✅ `batch()` - Batched updates for performance
+- ✅ `batch()` - Batched updates for performance (micro-task scheduling)
 - ✅ `untrack()` - Read signals without tracking dependencies
 - ✅ `root()` - Root scope management for disposal
 - ✅ Performance: < 0.1ms updates, 175 bytes minified
@@ -54,6 +54,28 @@ This document outlines Flexium's development roadmap, from current status throug
 - ✅ `Button` - Unified handler, variants, loading states
 - ✅ `Text` - Semantic HTML with typography props
 
+#### Control Flow Components (NEW in v0.2.0+)
+- ✅ `Portal` - Render outside parent DOM hierarchy
+- ✅ `Transition` - Enter/exit animations with 7 presets (fade, slide, scale)
+- ✅ `TransitionGroup` - Staggered animations for lists
+- ✅ `Show` - Conditional rendering with fallback support
+- ✅ `For` - Optimized list rendering with direct DOM caching
+- ✅ `Switch/Match` - Multi-branch conditionals
+
+#### Advanced Features (NEW in v0.3.0+)
+- ✅ `Suspense` - Async resource loading with fallback UI
+- ✅ `ErrorBoundary` - Error catching and recovery
+- ✅ `Context` API - Dependency injection through component tree
+- ✅ Router with guards and transitions
+- ✅ SSR utilities for server-side rendering
+- ✅ Canvas 2D rendering primitives
+
+#### Testing & Quality (NEW in v0.4.0+)
+- ✅ Comprehensive unit tests (30+ test files)
+- ✅ Integration tests for complex interactions
+- ✅ E2E tests with Playwright
+- ✅ Performance benchmarks (reactivity, renderer, For component)
+
 #### Build System & Tooling
 - ✅ TypeScript configuration with strict mode
 - ✅ tsup for bundling (ESM + CJS)
@@ -61,6 +83,8 @@ This document outlines Flexium's development roadmap, from current status throug
 - ✅ Source maps for debugging
 - ✅ Type declarations (.d.ts)
 - ✅ npm package configuration
+- ✅ Turbo monorepo management
+- ✅ One-command deploy scripts
 
 #### Documentation
 - ✅ Main README with honest status
@@ -68,74 +92,58 @@ This document outlines Flexium's development roadmap, from current status throug
 - ✅ Migration guides (React, Vue, Svelte)
 - ✅ JSX guides (automatic runtime)
 - ✅ Architecture diagrams
-- ✅ Working examples (counter, todo, dashboard, showcase)
+- ✅ Working examples (counter, todo, dashboard, showcase, hackernews)
 - ✅ Contributing guidelines
-- ✅ Project summary
+- ✅ VitePress documentation site
+- ✅ Starter templates (Vite, Vanilla, Todo App)
 
-### Known Limitations (v0.1.0)
+### Known Limitations (v0.4.5)
 
-- Component integration testing incomplete
-- No comprehensive test suite
-- Canvas renderer not implemented
+- No dedicated Vite plugin (works with standard Vite config)
+- No DevTools extension yet
+- Virtual scrolling not implemented
 - React Native renderer not implemented
-- No DevTools extension
-- Limited production testing
 
 ---
 
-## Next Release (v0.2.0)
+## Next Release (v0.5.0)
 
-**Target Date**: January 2026 (8-10 weeks)
+**Target Date**: January 2026
 
-**Focus**: Stability, Testing, Performance
+**Focus**: Developer Experience, Performance, Ecosystem
 
 ### Planned Features
 
+#### Developer Experience
+- 🔲 Better error messages with actionable suggestions
+- 🔲 Development mode warnings
+- 🔲 Hot module replacement (HMR) improvements
+- 🔲 ESLint plugin for best practices
+- 🔲 VS Code extension
+
+#### Performance Optimization
+- 🔲 Virtual scrolling for large lists
+- 🔲 Bundle size reduction (target: < 15KB total)
+- 🔲 Code splitting for primitives
+
 #### Testing & Quality
-- 🔲 Comprehensive integration tests
-- 🔲 Unit tests for all primitives
-- 🔲 E2E tests for example apps
-- 🔲 Performance benchmarks vs React/Vue/Svelte/Solid
+- 🔲 Performance benchmarks vs React/Vue/Svelte/Solid (published)
 - 🔲 Browser compatibility testing (Chrome, Firefox, Safari, Edge)
 - 🔲 Mobile testing (iOS Safari, Chrome Android)
 - 🔲 Accessibility testing (WCAG 2.1 AA)
 
-#### Performance Optimization
-- 🔲 Batch DOM updates (micro-task scheduling)
-- 🔲 Virtual scrolling for large lists
-- 🔲 Memoization for expensive computations
-- 🔲 Bundle size reduction (target: < 20KB total)
-- 🔲 Code splitting for primitives
-
-#### Developer Experience
-- 🔲 Better error messages
-- 🔲 Development mode warnings
-- 🔲 Source map improvements
-- 🔲 Hot module replacement (HMR) support
-- 🔲 Better TypeScript inference
-- 🔲 ESLint plugin for best practices
-
 #### Documentation
 - 🔲 Interactive playground website
 - 🔲 Video tutorials
-- 🔲 More real-world examples
 - 🔲 Performance comparison charts
 - 🔲 Architecture deep-dives
 
-#### Additional Components
-- 🔲 `Portal` - Render outside parent DOM hierarchy
-- 🔲 `Transition` - Enter/exit animations
-- 🔲 `Show` - Conditional rendering helper
-- 🔲 `For` - Optimized list rendering
-- 🔲 `Switch/Match` - Multi-branch conditionals
-
 #### Framework Integration
-- 🔲 Vite plugin for Flexium
+- 🔲 Vite plugin for Flexium (custom HMR)
 - 🔲 esbuild plugin
 - 🔲 Webpack loader
-- 🔲 Starter templates (Vite, TypeScript)
 
-**Target Bundle Size**: < 20KB (everything)
+**Target Bundle Size**: < 15KB (everything)
 
 **Target Performance**: 60fps animations on low-end mobile
 
@@ -426,11 +434,13 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md) for detailed guidelines.
 | Version | Target Date | Focus | Status |
 |---------|-------------|-------|--------|
 | v0.1.0 | Nov 2025 | Core features | ✅ Released |
-| v0.2.0 | Jan 2026 | Testing & stability | 🚧 In Progress |
-| v0.3.0 | Mar 2026 | Performance & DX | 📋 Planned |
+| v0.2.0 | Nov 2025 | Control flow components | ✅ Released |
+| v0.3.0 | Nov 2025 | Advanced features (Suspense, Context, Router) | ✅ Released |
+| v0.4.0 | Dec 2025 | Testing infrastructure | ✅ Released |
+| v0.4.5 | Dec 2025 | Stability & deploy automation | ✅ Released |
+| v0.5.0 | Jan 2026 | DX & Performance | 🚧 In Progress |
 | v1.0.0 | Q2 2026 | Production ready | 📋 Planned |
-| v1.1.0 | Q3 2026 | Canvas renderer | 🔮 Future |
-| v1.2.0 | Q4 2026 | React Native | 🔮 Future |
+| v1.1.0 | Q3 2026 | DevTools & Ecosystem | 🔮 Future |
 | v2.0.0 | 2027 | SSR & advanced features | 🔮 Future |
 
 **Note**: Dates are estimates and may change based on community feedback and contribution velocity.
@@ -460,9 +470,9 @@ Flexium follows [Semantic Versioning](https://semver.org/) (SemVer):
 
 ---
 
-**Last Updated**: November 22, 2025
+**Last Updated**: December 5, 2025
 
-**Next Review**: December 2025
+**Next Review**: January 2026
 
 ---
 

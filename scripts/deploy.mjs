@@ -69,7 +69,7 @@ async function deploy(type) {
     process.exit(1);
   }
 
-  // 4. Build only npm packages (flexium & create-flexium)
+  // 4. Build only npm packages (flexium, create-flexium, eslint-plugin-flexium)
   console.log('\n🔨 Building npm packages...');
   if (!run('npm run build:flexium')) {
     console.error('❌ flexium build failed');
@@ -77,6 +77,10 @@ async function deploy(type) {
   }
   if (!run('npm run build:create-flexium')) {
     console.error('❌ create-flexium build failed');
+    process.exit(1);
+  }
+  if (!run('npm run build:eslint-plugin')) {
+    console.error('❌ eslint-plugin-flexium build failed');
     process.exit(1);
   }
 
@@ -102,6 +106,12 @@ async function deploy(type) {
     process.exit(1);
   }
 
+  console.log('\n  Publishing eslint-plugin-flexium...');
+  if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/eslint-plugin-flexium') })) {
+    console.error('❌ Failed to publish eslint-plugin-flexium');
+    process.exit(1);
+  }
+
   // 7. Git commit and tag
   console.log('\n📝 Creating git commit and tag...');
   run(`git add -A`);
@@ -110,7 +120,10 @@ async function deploy(type) {
   run(`git push && git push --tags`);
 
   console.log(`\n✨ Successfully deployed v${newVersion}!\n`);
-  console.log(`   npm: https://www.npmjs.com/package/flexium`);
+  console.log(`   npm packages:`);
+  console.log(`   - https://www.npmjs.com/package/flexium`);
+  console.log(`   - https://www.npmjs.com/package/create-flexium`);
+  console.log(`   - https://www.npmjs.com/package/eslint-plugin-flexium`);
   console.log(`   GitHub: https://github.com/Wick-Lim/flexium.js/releases/tag/v${newVersion}\n`);
 }
 

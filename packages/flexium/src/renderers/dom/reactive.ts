@@ -17,16 +17,38 @@ import { SuspenseCtx } from '../../core/suspense';
 import { ErrorBoundaryCtx } from '../../core/error-boundary';
 import { isForComponent, mountForComponent, For, ForComponent } from '../../core/flow';
 import type { StateGetter } from '../../core/state';
+import { isVirtualListComponent, mountVirtualListComponent, VirtualListComponent } from '../../primitives/VirtualList';
 
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>();
 
 export function mountReactive(
-  vnode: VNode | string | number | boolean | Signal<any> | Computed<any> | null | undefined | Function | any[] | ForComponent<any>,
+  vnode: VNode | string | number | boolean | Signal<any> | Computed<any> | null | undefined | Function | any[] | ForComponent<any> | VirtualListComponent<any>,
   container?: Node
 ): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
   if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
     return null;
+  }
+
+  // Handle VirtualList component
+  if (isVirtualListComponent(vnode)) {
+    const parent = container || document.createDocumentFragment();
+
+    const virtualListDispose = mountVirtualListComponent(
+      vnode,
+      parent,
+      (childVnode) => mountReactive(childVnode),
+      cleanupReactive
+    );
+
+    // Create a marker for cleanup tracking
+    const marker = document.createTextNode('');
+    if (!REACTIVE_BINDINGS.has(marker)) {
+      REACTIVE_BINDINGS.set(marker, new Set());
+    }
+    REACTIVE_BINDINGS.get(marker)!.add(virtualListDispose);
+
+    return container ? parent.firstChild : parent;
   }
 
   // Handle For component with direct DOM caching (no VNode intermediate)

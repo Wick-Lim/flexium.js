@@ -135,7 +135,7 @@ export default defineConfig({
       { text: 'Examples', link: '/examples/counter' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.4.5',
+        text: 'v0.4.6',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }

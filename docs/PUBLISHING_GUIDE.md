@@ -95,7 +95,7 @@ npm publish --dry-run
 npm publish --access public
 
 # 성공 메시지 확인:
-# + flexium@0.4.2
+# + flexium@0.4.5
 ```
 
 배포가 성공하면:
@@ -117,7 +117,7 @@ npm publish --dry-run
 npm publish --access public
 
 # 성공 메시지 확인:
-# + create-flexium@0.4.2
+# + create-flexium@0.4.5
 ```
 
 배포가 성공하면:
@@ -203,7 +203,7 @@ npm publish --otp=123456
 
 ```bash
 # 특정 버전 삭제
-npm unpublish flexium@0.4.2
+npm unpublish flexium@0.4.5
 
 # ⚠️ 경고: 72시간 동안 같은 버전 재배포 불가
 ```

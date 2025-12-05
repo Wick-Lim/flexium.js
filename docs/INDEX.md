@@ -224,9 +224,9 @@ For deep dives into the architecture:
 
 ## Project Status
 
-**Current Version:** 0.4.2
+**Current Version:** 0.4.5
 
-**Status:** Early development
+**Status:** Beta - Feature-rich
 
 See [PROJECT_SUMMARY.md](../PROJECT_SUMMARY.md) for:
 - What's working
