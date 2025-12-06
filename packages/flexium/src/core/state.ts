@@ -1,4 +1,4 @@
-import { signal, createResource } from './signal'
+import { signal, createResource, SIGNAL_MARKER } from './signal'
 
 /** Internal state object that may be a Signal or Resource */
 interface StateObject {
@@ -23,8 +23,11 @@ interface StateActions {
 const globalStateRegistry = new Map<string, StateObject>()
 
 // Enhanced Getter Type: acts as accessor but carries Resource properties if applicable
+// Also supports .value access for React-like ergonomics
 export type StateGetter<T> = {
   (): T
+  /** React-like value access - can use count.value instead of count() */
+  readonly value: T
   loading: boolean
   error: unknown
   state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'
@@ -40,14 +43,48 @@ export type StateSetter<T> = {
 }
 
 /**
- * Unified State API
+ * Unified State API - React-like state management with fine-grained reactivity
  *
- * Usage:
- * 1. Local Value: const [count, setCount] = state(0);
- * 2. Local Resource: const [data, actions] = state(async () => fetch('/api').then(r => r.json()));
- * 3. Global Value: const [theme, setTheme] = state('light', { key: 'theme' });
- * 4. Global Resource: const [user, actions] = state(fetchUser, { key: 'user' });
- * 5. Computed (Derived): const [double] = state(() => count() * 2);
+ * The returned getter supports multiple access patterns for flexibility:
+ * - `count()` - Function call (original style)
+ * - `count.value` - Property access (React-like)
+ * - `{count}` in JSX - Auto-unwrapped (most convenient)
+ *
+ * @example
+ * ```tsx
+ * // Basic usage - all three access patterns work:
+ * const [count, setCount] = state(0)
+ *
+ * // In JSX - auto-unwrapped, no () or .value needed:
+ * <div>{count}</div>
+ *
+ * // In JS - use either pattern:
+ * console.log(count())      // function call
+ * console.log(count.value)  // property access
+ *
+ * // Update state:
+ * setCount(5)              // direct value
+ * setCount(c => c + 1)     // updater function
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Async resource:
+ * const [user] = state(async () => fetch('/api/user').then(r => r.json()))
+ * <div>{user.loading ? 'Loading...' : user.value?.name}</div>
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Global state (shared across components):
+ * const [theme, setTheme] = state('light', { key: 'theme' })
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Computed/derived state:
+ * const [doubled] = state(() => count.value * 2)
+ * ```
  *
  * @param initialValueOrFetcher - Initial value, or a function to derive/fetch state.
  * @param options - Optional settings (e.g., global key).
@@ -123,9 +160,15 @@ export function state<T>(
   // Getter Wrapper
   const getter = (() => s.value as T) as StateGetter<T>
 
+  // Mark as signal for detection - enables isSignal() and auto-unwrap in JSX
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(getter as any)[SIGNAL_MARKER] = true
+
   // Attach Resource properties to getter (if available)
-  // This allows access like: data.loading, data.error
+  // This allows access like: data.loading, data.error, data.value
   Object.defineProperties(getter, {
+    // React-like .value access for ergonomic state reading
+    value: { get: () => s.value as T, enumerable: true },
     loading: { get: () => s.loading || false },
     error: { get: () => s.error },
     state: { get: () => s.state || 'ready' },

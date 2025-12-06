@@ -552,7 +552,7 @@ export function root<T>(fn: (dispose: () => void) => T): T {
  * Symbol to mark signals for detection
  * @internal
  */
-const SIGNAL_MARKER = Symbol('flexium.signal')
+export const SIGNAL_MARKER = Symbol('flexium.signal')
 
 /**
  * Check if a value is a signal
