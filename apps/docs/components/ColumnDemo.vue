@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const container = ref(null)
 
@@ -86,6 +86,12 @@ onMounted(() => {
       </p>
     </div>
   `
+})
+
+onUnmounted(() => {
+  if (container.value) {
+    container.value.innerHTML = ''
+  }
 })
 </script>
 

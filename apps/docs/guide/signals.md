@@ -1,0 +1,222 @@
+# Signals
+
+Signals are the foundation of Flexium's reactivity system. They provide fine-grained reactive updates, ensuring your UI stays in sync with your data efficiently.
+
+## What is a Signal?
+
+A signal is a reactive container that holds a value. When the value changes, any part of the UI that depends on it automatically updates—no manual DOM manipulation required.
+
+```tsx
+import { signal } from 'flexium/core'
+
+const count = signal(0)
+
+// Read the value
+console.log(count.value) // 0
+
+// Update the value
+count.set(5)
+console.log(count.value) // 5
+```
+
+## Creating Signals
+
+### With `signal()`
+
+The `signal()` function creates a standalone reactive value:
+
+```tsx
+import { signal } from 'flexium/core'
+
+// Primitive values
+const name = signal('Alice')
+const age = signal(25)
+const isActive = signal(true)
+
+// Objects and arrays
+const user = signal({ name: 'Bob', email: 'bob@example.com' })
+const items = signal([1, 2, 3])
+```
+
+### With `state()`
+
+The `state()` function provides a React-like tuple interface:
+
+```tsx
+import { state } from 'flexium/core'
+
+const [count, setCount] = state(0)
+
+// Read
+console.log(count()) // 0
+
+// Update with value
+setCount(5)
+
+// Update with function
+setCount(prev => prev + 1)
+```
+
+## Reading Signal Values
+
+There are multiple ways to read a signal's value:
+
+```tsx
+const count = signal(10)
+
+// 1. Using .value property
+console.log(count.value) // 10
+
+// 2. Calling as a function (signal getter)
+console.log(count()) // 10
+
+// 3. Using .peek() (doesn't track as dependency)
+console.log(count.peek()) // 10
+```
+
+### In JSX
+
+Signals auto-unwrap in JSX:
+
+```tsx
+function Counter() {
+  const [count, setCount] = state(0)
+
+  return (
+    <div>
+      <p>Count: {count}</p>  {/* Auto-unwrapped */}
+      <button onclick={() => setCount(c => c + 1)}>+</button>
+    </div>
+  )
+}
+```
+
+## Updating Signals
+
+### Direct Value
+
+```tsx
+const name = signal('Alice')
+name.set('Bob')
+```
+
+### Function Update
+
+```tsx
+const count = signal(0)
+count.set(prev => prev + 1)
+```
+
+### Object Mutation
+
+For objects, you can spread and update:
+
+```tsx
+const user = signal({ name: 'Alice', age: 25 })
+user.set(prev => ({ ...prev, age: 26 }))
+```
+
+## Computed Values
+
+Computed signals derive their value from other signals:
+
+```tsx
+import { signal, computed } from 'flexium/core'
+
+const price = signal(100)
+const quantity = signal(2)
+
+const total = computed(() => price.value * quantity.value)
+
+console.log(total.value) // 200
+
+price.set(150)
+console.log(total.value) // 300 (auto-updated!)
+```
+
+## Effects
+
+Effects run side effects when signals change:
+
+```tsx
+import { signal, effect } from 'flexium/core'
+
+const count = signal(0)
+
+effect(() => {
+  console.log('Count changed:', count.value)
+})
+
+count.set(1) // logs: "Count changed: 1"
+count.set(2) // logs: "Count changed: 2"
+```
+
+### Cleanup in Effects
+
+Return a cleanup function for proper resource management:
+
+```tsx
+effect(() => {
+  const interval = setInterval(() => {
+    console.log('tick')
+  }, 1000)
+
+  return () => clearInterval(interval) // Cleanup
+})
+```
+
+## Best Practices
+
+### 1. Keep Signals Granular
+
+```tsx
+// Good - fine-grained updates
+const firstName = signal('John')
+const lastName = signal('Doe')
+
+// Avoid - coarse updates
+const user = signal({ firstName: 'John', lastName: 'Doe' })
+```
+
+### 2. Use computed() for Derived Values
+
+```tsx
+// Good
+const fullName = computed(() => `${firstName.value} ${lastName.value}`)
+
+// Avoid - manual calculation everywhere
+function getFullName() {
+  return `${firstName.value} ${lastName.value}`
+}
+```
+
+### 3. Avoid Reading in Loops Without Need
+
+```tsx
+// Good - read once
+const items = list.value
+items.forEach(item => console.log(item))
+
+// Avoid - reading repeatedly
+for (let i = 0; i < list.value.length; i++) {
+  console.log(list.value[i])
+}
+```
+
+### 4. Use peek() When You Don't Want Tracking
+
+```tsx
+effect(() => {
+  // Only track 'trigger', not 'config'
+  if (trigger.value) {
+    console.log(config.peek())
+  }
+})
+```
+
+## See Also
+
+- [state()](/docs/core/state) - State management API
+- [computed()](/docs/core/computed) - Derived values
+- [effect()](/docs/core/effect) - Side effects
+- [batch()](/docs/core/batch) - Batch updates

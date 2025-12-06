@@ -65,6 +65,12 @@ onMounted(() => {
 
   render()
 })
+
+onUnmounted(() => {
+  if (container.value) {
+    container.value.innerHTML = ''
+  }
+})
 </script>
 
 <template>

@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const container = ref(null)
+const timeoutIds = []
 
 onMounted(() => {
   if (!container.value) return
@@ -208,7 +209,7 @@ onMounted(() => {
           item.style.opacity = '0'
           item.style.transform = 'translateY(20px)'
 
-          setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             item.animate([
               { opacity: 0, transform: 'translateY(20px)' },
               { opacity: 1, transform: 'translateY(0)' }
@@ -219,6 +220,7 @@ onMounted(() => {
               fill: 'forwards'
             })
           }, index * 80)
+          timeoutIds.push(timeoutId)
         })
       })
     }
@@ -253,6 +255,14 @@ onMounted(() => {
   }
 
   render()
+})
+
+onUnmounted(() => {
+  timeoutIds.forEach(id => clearTimeout(id))
+  timeoutIds.length = 0
+  if (container.value) {
+    container.value.innerHTML = ''
+  }
 })
 </script>
 

@@ -671,6 +671,6 @@ const MemoizedCard = memo(Card);
 ## Related Components
 
 - [Row](/reference/primitives/row) - Horizontal layout container
-- [Stack](/reference/layout/stack) - Layered layout for overlapping elements
-- [Grid](/reference/layout/grid) - Two-dimensional grid layout
+- [Stack](/reference/primitives/stack) - Layered layout for overlapping elements
+- [Grid](/reference/primitives/grid) - Two-dimensional grid layout
 - [ScrollView](/reference/primitives/scrollview) - Scrollable container

@@ -565,6 +565,6 @@ function Component({ theme }) {
 ## Related Components
 
 - [Column](/reference/primitives/column) - Vertical layout container
-- [Stack](/reference/layout/stack) - Layered layout for overlapping elements
-- [Grid](/reference/layout/grid) - Two-dimensional grid layout
-- [Spacer](/reference/layout/spacer) - Flexible spacing component
+- [Stack](/reference/primitives/stack) - Layered layout for overlapping elements
+- [Grid](/reference/primitives/grid) - Two-dimensional grid layout
+- [Spacer](/reference/primitives/spacer) - Flexible spacing component

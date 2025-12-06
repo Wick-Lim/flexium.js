@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const container = ref(null)
+const timeoutIds = []
 
 // State
 let count = 0
@@ -55,9 +56,10 @@ const asyncError = () => {
     btn.textContent = '⏳ Loading...'
     btn.disabled = true
   }
-  setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     triggerError('Async operation failed!')
   }, 1000)
+  timeoutIds.push(timeoutId)
 }
 
 const render = () => {
@@ -156,6 +158,14 @@ const render = () => {
 }
 
 onMounted(render)
+
+onUnmounted(() => {
+  timeoutIds.forEach(id => clearTimeout(id))
+  timeoutIds.length = 0
+  if (container.value) {
+    container.value.innerHTML = ''
+  }
+})
 </script>
 
 <template>

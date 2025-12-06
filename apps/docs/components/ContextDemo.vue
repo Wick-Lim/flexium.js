@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const container = ref(null)
+const timeoutIds = []
 
 // State
 let user = null
@@ -18,10 +19,11 @@ const addNotification = (msg, type = 'info') => {
   const id = Date.now()
   notifications.push({ id, msg, type })
   render()
-  setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     notifications = notifications.filter(n => n.id !== id)
     render()
   }, 2500)
+  timeoutIds.push(timeoutId)
 }
 
 const login = (name) => {
@@ -205,6 +207,14 @@ const render = () => {
 }
 
 onMounted(render)
+
+onUnmounted(() => {
+  timeoutIds.forEach(id => clearTimeout(id))
+  timeoutIds.length = 0
+  if (container.value) {
+    container.value.innerHTML = ''
+  }
+})
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { state, batch, effect } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
@@ -338,6 +338,12 @@ onMounted(() => {
   if (container.value) {
     const app = BatchExample()
     render(app, container.value)
+  }
+})
+
+onUnmounted(() => {
+  if (container.value) {
+    container.value.innerHTML = ''
   }
 })
 </script>
