@@ -18,6 +18,7 @@ export default defineConfig({
     server: 'src/server/index.ts',
     router: 'src/router/index.ts',
     'test-exports': 'src/test-exports.ts',
+    microfrontend: 'src/microfrontend.ts',
   },
   format: ['esm', 'cjs'],
   dts: true,
