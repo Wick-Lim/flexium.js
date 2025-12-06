@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state, computed } from 'flexium/core'
+import { state } from 'flexium/core'
+import { computed } from 'flexium/advanced'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)

@@ -4,15 +4,14 @@
  * This module provides the main render function for mounting components to the DOM.
  * It includes simple reconciliation logic for mounting and unmounting components.
  *
- * Note: For reactive rendering with automatic signal tracking, use renderReactive
- * or createReactiveRoot from './reactive'.
+ * Note: This module uses reactive rendering internally via mountReactive.
+ * For root-level rendering with cleanup support, use createReactiveRoot.
  */
 
 import type { FNode, FNodeChild } from '../../core/renderer'
-import type { JSX } from '../../jsx-runtime'
 import { domRenderer } from './index'
 import { isFNode } from './h'
-import { renderReactive, createReactiveRoot } from './reactive'
+import { mountReactive, createReactiveRoot } from './reactive'
 
 /**
  * Internal node data stored on DOM nodes
@@ -46,7 +45,7 @@ export function render(
   container: HTMLElement
 ): Node | null {
   // Use reactive rendering for automatic signal tracking
-  return renderReactive(vnode, container)
+  return mountReactive(vnode, container)
 }
 
 /**
@@ -246,22 +245,3 @@ export function createRoot(container: HTMLElement) {
   return createReactiveRoot(container)
 }
 
-/**
- * Mount a component to a DOM container
- *
- * Convenience function with container-first argument order.
- * Equivalent to render(component, container).
- *
- * @param container - DOM element to render into
- * @param component - JSX component or element to render
- * @returns The rendered DOM node
- *
- * @example
- * mount(document.getElementById('app')!, <App />)
- */
-export function mount(
-  container: HTMLElement,
-  component: JSX.Element
-): Node | null {
-  return render(component, container)
-}

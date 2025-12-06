@@ -12,7 +12,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, createRoot, mount, update } from '../render'
+import { render, createRoot, update } from '../render'
 import { f, Fragment } from '../h'
 import { signal } from '../../../core/signal'
 
@@ -675,33 +675,6 @@ describe('DOM Render Module', () => {
 
       root.unmount()
       expect(container.innerHTML).toBe('')
-    })
-  })
-
-  describe('mount() - convenience function', () => {
-    it('should mount with container-first API', () => {
-      mount(container, f('div', { class: 'mounted' }, 'Mounted'))
-
-      const div = container.querySelector('.mounted')
-      expect(div).not.toBeNull()
-      expect(div?.textContent).toBe('Mounted')
-    })
-
-    it('should return rendered node', () => {
-      const result = mount(container, f('div', {}, 'Content'))
-
-      expect(result).not.toBeNull()
-      expect(result?.nodeType).toBeDefined()
-    })
-
-    it('should be equivalent to render()', () => {
-      const container1 = document.createElement('div')
-      const container2 = document.createElement('div')
-
-      render(f('div', {}, 'Test'), container1)
-      mount(container2, f('div', {}, 'Test'))
-
-      expect(container1.innerHTML).toBe(container2.innerHTML)
     })
   })
 

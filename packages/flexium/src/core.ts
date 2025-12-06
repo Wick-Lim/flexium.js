@@ -1,71 +1,23 @@
 /**
- * Flexium Core - Reactive primitives and state management
+ * Flexium Core - Unified state management
  *
- * This module provides the core reactive system including signals,
- * computed values, effects, and state management utilities.
+ * One API for all state: local, global, async, and computed.
  *
  * @example
  * ```tsx
- * import { state, effect, onMount, onCleanup, batch } from 'flexium/core'
- * import { For, Show, Switch, Match } from 'flexium/core'
- * import { createContext, useContext } from 'flexium/core'
- * import { Suspense, ErrorBoundary } from 'flexium/core'
+ * import { state, effect, batch } from 'flexium/core'
  * ```
  */
 
-// Core reactivity primitives
-export {
-  signal,
-  computed,
-  effect,
-  onMount,
-  onCleanup,
-  batch,
-  root,
-  untrack,
-  isSignal,
-  createResource,
-} from './core/signal'
-
-// Types
-export type { Signal, Computed, Resource, DevToolsHooks } from './core/signal'
-
-// State management
-import { state as coreState, clearGlobalState } from './core/state'
-import { StateGetter, StateSetter } from './core/state'
-import { For } from './core/flow'
-
-// Enhanced state function with .map helper
-function state<T>(
-  initialValueOrFetcher: T | ((...args: unknown[]) => T | Promise<T>),
-  options?: { key?: string }
-): [StateGetter<T>, StateSetter<T>] {
-  const [getter, setter] = coreState(initialValueOrFetcher, options)
-
-  // Inject .map for list rendering optimization
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(getter as any).map = (
-    renderFn: (
-      item: T extends (infer U)[] ? U : unknown,
-      index: () => number
-    ) => unknown
-  ) => {
-    return {
-      type: For,
-      props: { each: getter },
-      children: [renderFn],
-      key: null,
-    }
-  }
-
-  return [getter, setter]
-}
-
-export { state, clearGlobalState }
+// State management - THE unified API
+export { state, clearGlobalState } from './core/state'
 export type { StateGetter, StateSetter } from './core/state'
 
-// Control flow components
-export { For, Show, Switch, Match } from './core/flow'
+// Side effects and batching (necessary primitives)
+export { effect, onMount, onCleanup, batch, root, untrack } from './core/signal'
+
+// Control flow - For only (use native JS for conditionals)
+export { For } from './core/flow'
 
 // Context API
 export { createContext, useContext } from './core/context'

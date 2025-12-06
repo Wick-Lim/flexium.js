@@ -29,8 +29,8 @@ export type SizeConfig = FixedSizeConfig | VariableSizeConfig
  * List component props
  */
 export interface ListProps<T> {
-  /** Data source - reactive array or getter function */
-  items: ItemsGetter<T>
+  /** Data source - reactive array or getter function (same as For's each prop) */
+  each: ItemsGetter<T>
 
   /** Render function for each item */
   children: (item: T, index: () => number) => FNode
@@ -83,7 +83,7 @@ export interface ListCacheEntry<T> {
  */
 export interface ListComponent<T> {
   [key: symbol]: true
-  items: ItemsGetter<T>
+  each: ItemsGetter<T>
   renderItem: (item: T, index: () => number) => FNode
   virtual: boolean
   height?: number | string
@@ -97,11 +97,3 @@ export interface ListComponent<T> {
   style?: Record<string, string | number>
 }
 
-/** @deprecated Use ListProps instead */
-export type VirtualListProps<T> = ListProps<T>
-
-/** @deprecated Use ListCacheEntry instead */
-export type VirtualListCacheEntry<T> = ListCacheEntry<T>
-
-/** @deprecated Use ListComponent instead */
-export type VirtualListComponent<T> = ListComponent<T>

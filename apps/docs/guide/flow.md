@@ -1,22 +1,27 @@
 ---
-title: Control Flow - For, Show, Switch Components
-description: Learn Flexium's control flow components for efficient conditional rendering and list handling with fine-grained reactivity.
+title: Control Flow - For Component & Native Conditionals
+description: Learn Flexium's control flow with the For component for lists and native JavaScript for conditionals.
 head:
   - - meta
     - property: og:title
-      content: Control Flow Components - Flexium
+      content: Control Flow - Flexium
   - - meta
     - property: og:description
-      content: Master For, Show, Switch, and Match components for optimized conditional rendering and list iteration.
+      content: Master the For component for list rendering and native JavaScript conditionals for efficient reactive UI.
 ---
 
 # Control Flow
 
-Flexium provides a set of dedicated control flow components (`<For>`, `<Show>`, `<Switch>`, `<Match>`) designed to handle conditional rendering and lists efficiently. Unlike JavaScript's native `.map()` or ternary operators, these components are optimized for fine-grained reactivity, ensuring that only the necessary parts of the DOM are updated when state changes.
+Flexium uses a **minimal, honest approach** to control flow:
+
+- **`<For>`** - For list rendering with efficient DOM caching
+- **Native JavaScript** - For conditionals (ternary `? :` and `&&`)
+
+This approach follows Flexium's philosophy of using JavaScript as the template language rather than inventing new abstractions.
 
 ## `<For>`
 
-The `<For>` component is used for rendering lists. It is much more efficient than `array.map()` because it reuses DOM nodes for items that haven't changed, avoiding full VDOM diffing and re-creation.
+The `<For>` component is used for rendering lists. It efficiently reuses DOM nodes for items that haven't changed, avoiding unnecessary re-creation.
 
 ### Usage
 
@@ -52,88 +57,101 @@ function TodoList() {
 
 ### Keying and Caching
 
-`<For>` automatically handles keying based on the item reference or an `id` property if present. This ensures that when the list order changes, the DOM nodes are moved rather than recreated. The `index` argument is a signal getter, so it updates reactively if the item's position changes.
+`<For>` automatically handles keying based on item reference. When the list order changes, DOM nodes are moved rather than recreated. The `index` argument is a getter function that updates reactively if the item's position changes.
 
 ---
 
-## `<Show>`
+## Conditional Rendering
 
-The `<Show>` component renders its children when the `when` condition is truthy. If the condition is falsy, it renders the `fallback` content (if provided).
+Use native JavaScript for conditional rendering. This is more readable and leverages your existing JS knowledge.
 
-### Usage
+### Ternary Operator
+
+For if/else conditions, use the ternary operator inside a reactive function:
 
 ```tsx
-import { Show, state } from 'flexium/core';
+import { state } from 'flexium/core';
 
-function UserProfile() {
-  const [user, setUser] = state(null);
+function LoginButton() {
   const [isLoggedIn, setIsLoggedIn] = state(false);
 
   return (
     <div>
-      {/* Basic usage */}
-      <Show when={isLoggedIn} fallback={<button>Login</button>}>
-        <button>Logout</button>
-      </Show>
-
-      {/* Accessing the truthy value */}
-      <Show when={user}>
-        {(u) => <div>Welcome, {u.name}!</div>}
-      </Show>
+      {() => isLoggedIn()
+        ? <button onClick={() => setIsLoggedIn(false)}>Logout</button>
+        : <button onClick={() => setIsLoggedIn(true)}>Login</button>
+      }
     </div>
   );
 }
 ```
 
-### Props
+### Logical AND (&&)
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `when` | `StateGetter<T \| undefined \| null \| false>` | The reactive condition to check. |
-| `fallback` | `FNode \| (() => FNode)` | Content to render when the condition is falsy. |
-| `children` | `FNode \| ((item: T) => FNode)` | Content to render when the condition is truthy. Can be a function to access the truthy value. |
-
----
-
-## `<Switch>` and `<Match>`
-
-The `<Switch>` component renders the first `<Match>` child whose `when` condition is truthy. This is useful for mutually exclusive conditions, similar to a `switch` statement or `if-else if-else` chain.
-
-### Usage
+For conditionally showing content when a value is truthy:
 
 ```tsx
-import { Switch, Match, state } from 'flexium/core';
+import { state } from 'flexium/core';
 
-function DataFetcher() {
-  const [status, setStatus] = state('loading'); // 'loading' | 'error' | 'success'
-  const [data, setData] = state(null);
-  const [error, setError] = state(null);
+function UserGreeting() {
+  const [user, setUser] = state(null);
 
   return (
-    <Switch fallback={<div>Unknown state</div>}>
-      <Match when={() => status() === 'loading'}>
-        <p>Loading...</p>
-      </Match>
-      <Match when={() => status() === 'error'}>
-        <p style={{ color: 'red' }}>Error: {error()}</p>
-      </Match>
-      <Match when={() => status() === 'success'}>
-        <DataView data={data()} />
-      </Match>
-    </Switch>
+    <div>
+      {() => user() && <span>Welcome, {user().name}!</span>}
+    </div>
   );
 }
 ```
 
-### Props (`<Switch>`)
+### Multiple Conditions
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `fallback` | `FNode` | Content to render if no `<Match>` condition is met. |
+For multiple mutually exclusive conditions, use nested ternaries or a function:
 
-### Props (`<Match>`)
+```tsx
+function StatusDisplay() {
+  const [status, setStatus] = state('loading');
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `when` | `StateGetter<T \| undefined \| null \| false>` | The condition to check. |
-| `children` | `FNode \| ((item: T) => FNode)` | Content to render if this match is selected. |
+  return (
+    <div>
+      {() => {
+        const s = status();
+        if (s === 'loading') return <p>Loading...</p>;
+        if (s === 'error') return <p style={{ color: 'red' }}>Error!</p>;
+        if (s === 'success') return <p>Success!</p>;
+        return <p>Unknown state</p>;
+      }}
+    </div>
+  );
+}
+```
+
+Or with nested ternaries:
+
+```tsx
+function StatusDisplay() {
+  const [status, setStatus] = state('loading');
+
+  return (
+    <div>
+      {() =>
+        status() === 'loading' ? <p>Loading...</p> :
+        status() === 'error' ? <p style={{ color: 'red' }}>Error!</p> :
+        status() === 'success' ? <p>Success!</p> :
+        <p>Unknown state</p>
+      }
+    </div>
+  );
+}
+```
+
+## Why Native JavaScript?
+
+Flexium deliberately uses native JavaScript for conditionals instead of custom components like `<Show>` or `<Switch>`:
+
+1. **Less to learn** - You already know JavaScript
+2. **More flexible** - Full power of JavaScript expressions
+3. **Honest** - No magic, just functions
+4. **Debuggable** - Standard JS debugging works
+
+The reactive wrapper `{() => ...}` ensures Flexium tracks dependencies and updates the DOM when state changes.

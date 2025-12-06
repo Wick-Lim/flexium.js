@@ -37,6 +37,11 @@ export const FOR_MARKER = Symbol('flexium.for')
  * <For each={items}>
  *   {(item, index) => <div>{item.name}</div>}
  * </For>
+ *
+ * For conditional rendering, use native JS:
+ * @example
+ * {() => isLoggedIn() ? <Dashboard /> : <Login />}
+ * {() => user() && <Profile user={user()} />}
  */
 export function For<T>(props: ForProps<T>): ForComponent<T> {
   const component = {
@@ -173,111 +178,5 @@ export function mountForComponent<T>(
       }
     }
     cache.clear()
-  }
-}
-
-interface ShowProps<T> {
-  when: StateGetter<T | undefined | null | false>
-  fallback?: FNode | (() => FNode)
-  children: FNode[] | ((item: T) => FNode)[]
-}
-
-/**
- * <Show> component for conditional rendering.
- * Renders children when the condition is truthy, otherwise renders fallback.
- *
- * @example
- * <Show when={isLoggedIn} fallback={<div>Login</div>}>
- *   <Dashboard />
- * </Show>
- *
- * // With callback to access truthy value
- * <Show when={user}>
- *   {(u) => <div>Hello {u.name}</div>}
- * </Show>
- */
-export function Show<T>(props: ShowProps<T>) {
-  return () => {
-    const value = props.when()
-    if (value) {
-      const child = props.children[0]
-      return typeof child === 'function' && props.children.length === 1
-        ? (child as (item: T) => FNode)(value)
-        : child
-    }
-    if (props.fallback) {
-      return typeof props.fallback === 'function'
-        ? (props.fallback as () => FNode)()
-        : props.fallback
-    }
-    return null
-  }
-}
-
-interface SwitchProps {
-  fallback?: FNode
-  children: FNode[]
-}
-
-interface MatchProps<T> {
-  when: StateGetter<T | undefined | null | false>
-  children: FNode | ((item: T) => FNode)
-}
-
-/**
- * <Match> component to be used within <Switch>.
- * It does not render anything on its own.
- */
-export function Match<T>(props: MatchProps<T>): FNode {
-  return props as unknown as FNode
-}
-
-/**
- * <Switch> component for mutually exclusive conditional rendering.
- * Renders the first <Match> child whose `when` condition is truthy.
- *
- * @example
- * <Switch fallback={<div>Not Found</div>}>
- *   <Match when={isLoading}>Loading...</Match>
- *   <Match when={error}>Error: {error}</Match>
- *   <Match when={data}>
- *     {(d) => <DataView data={d} />}
- *   </Match>
- * </Switch>
- */
-export function Switch(props: SwitchProps) {
-  return () => {
-    const children = Array.isArray(props.children)
-      ? props.children
-      : [props.children]
-
-    for (const child of children.flat()) {
-      if (
-        child &&
-        typeof child === 'object' &&
-        'type' in child &&
-        child.type === Match
-      ) {
-        const matchNode = child as FNode & {
-          props: { when: StateGetter<unknown> }
-          children?: unknown[]
-        }
-        const when = matchNode.props.when
-        // Check condition (track dependency)
-        const value = typeof when === 'function' ? when() : when
-
-        if (value) {
-          const matchChildren = matchNode.children
-          if (matchChildren && matchChildren.length > 0) {
-            const content = matchChildren[0]
-            return typeof content === 'function'
-              ? (content as (val: unknown) => FNode | null)(value)
-              : (content as FNode | null)
-          }
-          return null
-        }
-      }
-    }
-    return props.fallback || null
   }
 }

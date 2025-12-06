@@ -11,6 +11,7 @@ import { f } from '../h'
 import { mountReactive, cleanupReactive } from '../reactive'
 import { signal } from '../../../core/signal'
 import type { FNode } from '../../../core/renderer'
+import { setNode } from '../node-map'
 
 describe('DOM Reconciliation', () => {
   let container: HTMLElement
@@ -57,7 +58,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of initialFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -80,7 +81,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -113,7 +114,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -149,7 +150,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -186,7 +187,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -219,7 +220,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -257,7 +258,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -296,7 +297,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -330,7 +331,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -368,7 +369,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -407,7 +408,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -448,7 +449,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -478,7 +479,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -510,7 +511,7 @@ describe('DOM Reconciliation', () => {
       // Initial render
       const oldVNode = f('div', { class: 'test' }, 'Old Text')
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       expect(container.textContent).toBe('Old Text')
 
@@ -528,7 +529,7 @@ describe('DOM Reconciliation', () => {
       // Initial render
       const oldVNode = f('div', { class: 'old', id: 'test' }, 'Content')
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       const div = container.querySelector('div')
       expect(div?.className).toBe('old')
@@ -558,7 +559,7 @@ describe('DOM Reconciliation', () => {
         'Content'
       )
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       const div = container.querySelector('div')
       expect(div?.title).toBe('tooltip')
@@ -581,7 +582,7 @@ describe('DOM Reconciliation', () => {
         'Styled'
       )
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       const div = container.querySelector('div') as HTMLElement
       expect(div?.style.color).toBe('red')
@@ -609,7 +610,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -636,16 +637,16 @@ describe('DOM Reconciliation', () => {
       const oldVNode = f('div', {}, spanA, spanB)
 
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(2)
       const oldSpanA = spans[0]
       const oldSpanB = spans[1]
 
-      // Store child _node references
-      spanA._node = oldSpanA as any
-      spanB._node = oldSpanB as any
+      // Store child node references
+      setNode(spanA, oldSpanA)
+      setNode(spanB, oldSpanB)
 
       // Update: swap spans
       const newSpanB = f('span', { key: 'b' }, 'B Updated')
@@ -671,7 +672,7 @@ describe('DOM Reconciliation', () => {
     it('should update text nodes directly', () => {
       const oldVNode = f('div', {}, 'Original Text')
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       const div = container.querySelector('div')
       const textNode = div?.firstChild as Text
@@ -688,7 +689,7 @@ describe('DOM Reconciliation', () => {
     it('should handle number to string updates', () => {
       const oldVNode = f('div', {}, 123)
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       expect(container.textContent).toBe('123')
 
@@ -701,7 +702,7 @@ describe('DOM Reconciliation', () => {
     it('should handle text to element updates', () => {
       const oldVNode = f('div', {}, 'Just text')
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       const div = container.querySelector('div')
       expect(div?.childNodes.length).toBe(1)
@@ -782,7 +783,7 @@ describe('DOM Reconciliation', () => {
         f('span', { key: 'b' }, 'B')
       )
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       const spans = container.querySelectorAll('span')
       expect(spans.length).toBe(2)
@@ -799,7 +800,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -827,7 +828,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -856,7 +857,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -878,7 +879,7 @@ describe('DOM Reconciliation', () => {
 
       const oldVNode = f('button', { onclick: oldClick }, 'Click')
       const node = mountReactive(oldVNode, container)
-      oldVNode._node = node
+      setNode(oldVNode, node!)
 
       const button = container.querySelector('button')
       button?.click()
@@ -904,7 +905,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }
@@ -925,7 +926,7 @@ describe('DOM Reconciliation', () => {
       for (const fnode of oldFNodes) {
         const node = mountReactive(fnode, undefined)
         if (node) {
-          fnode._node = node
+          setNode(fnode, node)
           container.appendChild(node)
         }
       }

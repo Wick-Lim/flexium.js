@@ -11,7 +11,7 @@ export { state } from './core/state'
 // DOM renderer
 export { DOMRenderer, domRenderer } from './renderers/dom'
 export { f, Fragment } from './renderers/dom/h'
-export { render, createRoot, mount } from './renderers/dom/render'
+export { render, createRoot } from './renderers/dom/render'
 export { mountReactive, createReactiveRoot } from './renderers/dom/reactive'
 export { Portal } from './renderers/dom/portal'
 export { hydrate } from './renderers/dom/hydrate'

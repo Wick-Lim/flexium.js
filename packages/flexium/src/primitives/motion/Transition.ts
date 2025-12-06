@@ -2,7 +2,7 @@
  * Transition Component - Coordinated Enter/Exit Animations
  *
  * Provides declarative transitions for elements entering and leaving the DOM.
- * Works seamlessly with Show, For, and conditional rendering.
+ * Works seamlessly with For and conditional rendering (ternary, &&).
  */
 
 import { onCleanup } from '../../core/signal'
@@ -134,11 +134,11 @@ let currentTransitionGroup: TransitionGroupContext | null = null
  * Transition component for animated enter/exit
  *
  * @example
- * <Show when={visible}>
+ * {() => visible() && (
  *   <Transition preset="fade">
  *     <div>Content appears with fade</div>
  *   </Transition>
- * </Show>
+ * )}
  *
  * @example
  * <Transition

@@ -11,6 +11,3 @@ export interface FNode {
   props: Record<string, any>
   children: FNode[]
 }
-
-/** @deprecated Use FNode instead */
-export type VNode = FNode

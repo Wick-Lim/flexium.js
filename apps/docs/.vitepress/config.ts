@@ -135,7 +135,7 @@ export default defineConfig({
       { text: 'Docs', link: '/docs/core/state' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.5.8',
+        text: 'v0.6.0',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -214,8 +214,6 @@ export default defineConfig({
             { text: 'createResource()', link: '/docs/core/resource' },
             { text: 'Lifecycle Hooks', link: '/docs/core/lifecycle' },
             { text: '&lt;For /&gt;', link: '/docs/core/for' },
-            { text: '&lt;Show /&gt;', link: '/docs/core/show' },
-            { text: '&lt;Switch /&gt;', link: '/docs/core/switch' },
             { text: '&lt;Suspense /&gt;', link: '/docs/core/suspense' },
             { text: '&lt;ErrorBoundary /&gt;', link: '/docs/core/error-boundary' },
             { text: 'Context API', link: '/docs/core/context' }

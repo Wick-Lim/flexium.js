@@ -39,7 +39,7 @@ describe('List Component', () => {
       const renderItem = (item: number) => f('div', {}, String(item))
 
       const component = List({
-        items,
+        each: items,
         children: renderItem,
         virtual: true,
         height: 400,
@@ -53,7 +53,7 @@ describe('List Component', () => {
     it('should include LIST_MARKER', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -71,7 +71,7 @@ describe('List Component', () => {
       const getKey = (item: number, index: number) => `item-${index}`
 
       const component = List({
-        items,
+        each: items,
         children: renderItem,
         virtual: true,
         height: 400,
@@ -83,7 +83,7 @@ describe('List Component', () => {
         onVisibleRangeChange,
       })
 
-      expect(component.items).toBe(items)
+      expect(component.each).toBe(items)
       expect(component.renderItem).toBe(renderItem)
       expect(component.height).toBe(400)
       expect(component.width).toBe(600)
@@ -97,7 +97,7 @@ describe('List Component', () => {
     it('should use default overscan of 3', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -110,7 +110,7 @@ describe('List Component', () => {
     it('should handle string height and width', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: '100vh',
@@ -125,7 +125,7 @@ describe('List Component', () => {
     it('should handle fixed size config', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -138,7 +138,7 @@ describe('List Component', () => {
     it('should handle variable size config', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -156,7 +156,7 @@ describe('List Component', () => {
     it('should identify List components', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -187,7 +187,7 @@ describe('List Component', () => {
     it('should create container with correct styles', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -218,7 +218,7 @@ describe('List Component', () => {
     it('should create container with string dimensions', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: '100vh',
@@ -242,7 +242,7 @@ describe('List Component', () => {
     it('should set accessibility attributes on container', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -266,7 +266,7 @@ describe('List Component', () => {
     it('should create inner container with correct styles', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -292,7 +292,7 @@ describe('List Component', () => {
     it('should render visible items on initial mount', () => {
       const items = signal([1, 2, 3, 4, 5])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, `Item ${item}`),
         virtual: true,
         height: 200,
@@ -323,7 +323,7 @@ describe('List Component', () => {
     it('should position items absolutely with translateY', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number, index: () => number) =>
           f('div', {}, `Item ${index()}`),
         height: 200,
@@ -363,7 +363,7 @@ describe('List Component', () => {
     it('should calculate correct total height for fixed items', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -388,7 +388,7 @@ describe('List Component', () => {
     it('should render only visible items with fixed height', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -418,7 +418,7 @@ describe('List Component', () => {
     it('should use fixed size config', () => {
       const items = signal(Array.from({ length: 50 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -445,7 +445,7 @@ describe('List Component', () => {
     it('should use estimated height for variable mode', () => {
       const items = signal(Array.from({ length: 50 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -474,7 +474,7 @@ describe('List Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onVisibleRangeChange = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -501,7 +501,7 @@ describe('List Component', () => {
       const items = signal([1, 2, 3])
       const onVisibleRangeChange = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -532,7 +532,7 @@ describe('List Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onScroll = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -561,7 +561,7 @@ describe('List Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onVisibleRangeChange = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -594,7 +594,7 @@ describe('List Component', () => {
     it('should use passive scroll listener', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -630,7 +630,7 @@ describe('List Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onVisibleRangeChange = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -656,7 +656,7 @@ describe('List Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const onVisibleRangeChange = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -685,7 +685,7 @@ describe('List Component', () => {
       const onVisibleRangeChange2 = vi.fn()
 
       const component1 = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -695,7 +695,7 @@ describe('List Component', () => {
       })
 
       const component2 = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -733,7 +733,7 @@ describe('List Component', () => {
     it('should handle 1000 items efficiently', () => {
       const items = signal(Array.from({ length: 1000 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -760,7 +760,7 @@ describe('List Component', () => {
     it('should handle 10000 items efficiently', () => {
       const items = signal(Array.from({ length: 10000 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -786,7 +786,7 @@ describe('List Component', () => {
     it('should set correct total height for large lists', () => {
       const items = signal(Array.from({ length: 5000 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -814,7 +814,7 @@ describe('List Component', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const cleanupFn = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -843,7 +843,7 @@ describe('List Component', () => {
     it('should update existing item positions when scrolling', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number, index: () => number) =>
           f('div', {}, `Item ${index()}`),
         height: 200,
@@ -897,7 +897,7 @@ describe('List Component', () => {
       const getKey = vi.fn((item: Item) => item.id)
 
       const component = List({
-        items,
+        each: items,
         children: (item: Item) => f('div', {}, item.name),
         virtual: true,
         height: 400,
@@ -921,7 +921,7 @@ describe('List Component', () => {
     it('should use index as key when getKey not provided', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -953,7 +953,7 @@ describe('List Component', () => {
       ])
 
       const component = List({
-        items,
+        each: items,
         children: (item: Item) => f('div', {}, String(item.value)),
         virtual: true,
         height: 400,
@@ -986,7 +986,7 @@ describe('List Component', () => {
       const items = signal([1, 2, 3])
       const onVisibleRangeChange = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1016,7 +1016,7 @@ describe('List Component', () => {
     it('should update total height when items change', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1045,7 +1045,7 @@ describe('List Component', () => {
     it('should update aria-rowcount when items change', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1073,7 +1073,7 @@ describe('List Component', () => {
       const items = signal<number[]>([])
       const onVisibleRangeChange = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1100,7 +1100,7 @@ describe('List Component', () => {
     it('should handle single item list', () => {
       const items = signal([1])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1125,7 +1125,7 @@ describe('List Component', () => {
     it('should handle null items getter returning empty', () => {
       const items = signal<number[] | null>(null)
       const component = List({
-        items: () => items() || [],
+        each: () => items() || [],
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1146,7 +1146,7 @@ describe('List Component', () => {
     it('should handle transition from empty to filled', () => {
       const items = signal<number[]>([])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1176,7 +1176,7 @@ describe('List Component', () => {
       const items = signal([1, 2, 3, 4, 5])
       const cleanupFn = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1209,7 +1209,7 @@ describe('List Component', () => {
     it('should handle very small heights', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 10,
@@ -1231,7 +1231,7 @@ describe('List Component', () => {
     it('should handle very small item sizes', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1255,7 +1255,7 @@ describe('List Component', () => {
     it('should handle very large item sizes', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1279,7 +1279,7 @@ describe('List Component', () => {
     it('should handle zero overscan', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1304,7 +1304,7 @@ describe('List Component', () => {
     it('should remove event listener on dispose', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1338,7 +1338,7 @@ describe('List Component', () => {
       const items = signal([1, 2, 3, 4, 5])
       const cleanupFn = vi.fn()
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1364,7 +1364,7 @@ describe('List Component', () => {
     it('should remove container from parent on dispose', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1388,7 +1388,7 @@ describe('List Component', () => {
     it('should dispose effect on cleanup', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1421,7 +1421,7 @@ describe('List Component', () => {
         throw new Error('Cleanup error')
       })
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1448,7 +1448,7 @@ describe('List Component', () => {
     it('should set role="list" on container', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1470,7 +1470,7 @@ describe('List Component', () => {
     it('should set role="listitem" on items', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1495,7 +1495,7 @@ describe('List Component', () => {
     it('should set aria-rowindex on items', () => {
       const items = signal([1, 2, 3])
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 400,
@@ -1523,7 +1523,7 @@ describe('List Component', () => {
     it('should update aria-rowindex when items are repositioned', () => {
       const items = signal(Array.from({ length: 100 }, (_, i) => i))
       const component = List({
-        items,
+        each: items,
         children: (item: number) => f('div', {}, String(item)),
         virtual: true,
         height: 200,

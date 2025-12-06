@@ -1,13 +1,15 @@
 /**
  * Control Flow Component Tests
  *
- * Tests for For, Show, Switch, and Match components
+ * Tests for For component (the only control flow primitive)
+ * For conditionals, use native JS: ternary or &&
+ *
  * @vitest-environment jsdom
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
 import { signal } from '../signal'
-import { For, Show, Switch, Match, isForComponent, FOR_MARKER } from '../flow'
+import { For, isForComponent, FOR_MARKER } from '../flow'
 import { f } from '../../renderers/dom/h'
 import { mountReactive } from '../../renderers/dom/reactive'
 
@@ -151,242 +153,45 @@ describe('Control Flow Components', () => {
     })
   })
 
-  describe('Show Component', () => {
-    it('should render children when condition is truthy', () => {
+  describe('Native JS Conditionals (recommended pattern)', () => {
+    it('should render with ternary operator', async () => {
       const isVisible = signal(true)
 
-      const showFn = Show({
-        when: isVisible,
-        children: [f('div', {}, ['visible'])],
-      })
+      const Component = () => {
+        return f('div', {}, [
+          () => isVisible() ? f('span', {}, ['visible']) : f('span', {}, ['hidden'])
+        ])
+      }
 
-      const result = showFn()
-      expect(result).not.toBeNull()
-    })
+      mountReactive(f(Component), container)
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
-    it('should not render when condition is falsy', () => {
-      const isVisible = signal(false)
+      expect(container.textContent).toBe('visible')
 
-      const showFn = Show({
-        when: isVisible,
-        children: [f('div', {}, ['visible'])],
-      })
-
-      const result = showFn()
-      expect(result).toBeNull()
-    })
-
-    it('should render fallback when condition is falsy', () => {
-      const isVisible = signal(false)
-      const fallback = f('div', {}, ['fallback'])
-
-      const showFn = Show({
-        when: isVisible,
-        fallback,
-        children: [f('div', {}, ['visible'])],
-      })
-
-      const result = showFn()
-      expect(result).toBe(fallback)
-    })
-
-    it('should pass truthy value to callback child', () => {
-      const user = signal({ name: 'Alice' })
-
-      const showFn = Show({
-        when: user,
-        children: [(u: { name: string }) => f('div', {}, [`Hello ${u.name}`])],
-      })
-
-      const result = showFn() as any
-      expect(result.children[0]).toBe('Hello Alice')
-    })
-
-    it('should update when condition changes', async () => {
-      const isVisible = signal(true)
-
-      // Test the function behavior directly
-      const showFn = Show({
-        when: isVisible,
-        fallback: f('div', {}, ['hidden']),
-        children: [f('div', {}, ['visible'])],
-      })
-
-      // Initial state - visible
-      let result = showFn() as any
-      expect(result.children[0]).toBe('visible')
-
-      // Change to false
       isVisible.value = false
-      result = showFn() as any
-      expect(result.children[0]).toBe('hidden')
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
-      // Change back to true
-      isVisible.value = true
-      result = showFn() as any
-      expect(result.children[0]).toBe('visible')
+      expect(container.textContent).toBe('hidden')
     })
 
-    it('should handle null value', () => {
-      const value = signal<string | null>(null)
+    it('should render with && operator', async () => {
+      const user = signal<{ name: string } | null>({ name: 'Alice' })
 
-      const showFn = Show({
-        when: value,
-        children: [f('div', {}, ['content'])],
-      })
+      const Component = () => {
+        return f('div', {}, [
+          () => user() && f('span', {}, [`Hello ${user()!.name}`])
+        ])
+      }
 
-      const result = showFn()
-      expect(result).toBeNull()
-    })
+      mountReactive(f(Component), container)
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
-    it('should handle undefined value', () => {
-      const value = signal<string | undefined>(undefined)
+      expect(container.textContent).toBe('Hello Alice')
 
-      const showFn = Show({
-        when: value,
-        children: [f('div', {}, ['content'])],
-      })
+      user.value = null
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
-      const result = showFn()
-      expect(result).toBeNull()
-    })
-
-    it('should support fallback function', () => {
-      const isVisible = signal(false)
-      let fallbackCalled = false
-
-      const showFn = Show({
-        when: isVisible,
-        fallback: () => {
-          fallbackCalled = true
-          return f('div', {}, ['fallback'])
-        },
-        children: [f('div', {}, ['visible'])],
-      })
-
-      showFn()
-      expect(fallbackCalled).toBe(true)
-    })
-  })
-
-  describe('Switch and Match Components', () => {
-    it('should render first truthy match', () => {
-      const status = signal('loading')
-
-      const switchFn = Switch({
-        children: [
-          f(Match as any, { when: () => status.value === 'loading' }, [
-            f('div', {}, ['Loading...']),
-          ]),
-          f(Match as any, { when: () => status.value === 'error' }, [
-            f('div', {}, ['Error!']),
-          ]),
-          f(Match as any, { when: () => status.value === 'success' }, [
-            f('div', {}, ['Success!']),
-          ]),
-        ],
-      })
-
-      const result = switchFn() as any
-      expect(result.children[0]).toBe('Loading...')
-    })
-
-    it('should render fallback when no match', () => {
-      const status = signal('unknown')
-      const fallback = f('div', {}, ['Unknown status'])
-
-      const switchFn = Switch({
-        fallback,
-        children: [
-          f(Match as any, { when: () => status.value === 'loading' }, [
-            f('div', {}, ['Loading...']),
-          ]),
-          f(Match as any, { when: () => status.value === 'error' }, [
-            f('div', {}, ['Error!']),
-          ]),
-        ],
-      })
-
-      const result = switchFn()
-      expect(result).toBe(fallback)
-    })
-
-    it('should return null when no match and no fallback', () => {
-      const status = signal('unknown')
-
-      const switchFn = Switch({
-        children: [
-          f(Match as any, { when: () => status.value === 'loading' }, [
-            f('div', {}, ['Loading...']),
-          ]),
-        ],
-      })
-
-      const result = switchFn()
-      expect(result).toBeNull()
-    })
-
-    it('should only render first truthy match', () => {
-      const a = signal(true)
-      const b = signal(true)
-
-      const switchFn = Switch({
-        children: [
-          f(Match as any, { when: a }, [f('div', {}, ['First'])]),
-          f(Match as any, { when: b }, [f('div', {}, ['Second'])]),
-        ],
-      })
-
-      const result = switchFn() as any
-      expect(result.children[0]).toBe('First')
-    })
-
-    it('should update when conditions change', () => {
-      const status = signal<'loading' | 'success' | 'error'>('loading')
-
-      const switchFn = Switch({
-        fallback: f('div', {}, ['Unknown']),
-        children: [
-          f(Match as any, { when: () => status.value === 'loading' }, [
-            f('div', {}, ['Loading...']),
-          ]),
-          f(Match as any, { when: () => status.value === 'success' }, [
-            f('div', {}, ['Success!']),
-          ]),
-          f(Match as any, { when: () => status.value === 'error' }, [
-            f('div', {}, ['Error!']),
-          ]),
-        ],
-      })
-
-      // Initial state - loading
-      let result = switchFn() as any
-      expect(result.children[0]).toBe('Loading...')
-
-      // Change to success
-      status.value = 'success'
-      result = switchFn() as any
-      expect(result.children[0]).toBe('Success!')
-
-      // Change to error
-      status.value = 'error'
-      result = switchFn() as any
-      expect(result.children[0]).toBe('Error!')
-    })
-
-    it('should support callback children for Match', () => {
-      const user = signal({ name: 'Bob' })
-
-      const switchFn = Switch({
-        children: [
-          f(Match as any, { when: user }, [
-            (u: { name: string }) => f('div', {}, [`User: ${u.name}`]),
-          ]),
-        ],
-      })
-
-      const result = switchFn() as any
-      expect(result.children[0]).toBe('User: Bob')
+      expect(container.querySelector('span')).toBeNull()
     })
   })
 

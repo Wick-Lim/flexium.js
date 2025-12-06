@@ -179,11 +179,4 @@ export interface FNode {
   props: Record<string, unknown>
   children: FNodeChild[]
   key?: string | number
-  _node?: RenderNode // Internal reference to the rendered node
 }
-
-// Legacy aliases for backward compatibility (deprecated)
-/** @deprecated Use FNode instead */
-export type VNode = FNode
-/** @deprecated Use FNodeChild instead */
-export type VNodeChild = FNodeChild

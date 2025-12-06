@@ -33,6 +33,7 @@ import {
   mountListComponent,
   ListComponent,
 } from '../../primitives/List'
+import { setNode, getNode } from './node-map'
 
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>()
 
@@ -145,7 +146,7 @@ export function mountReactive(
           for (const child of newFNodes) {
             const childNode = mountReactive(child, fragment)
             if (childNode && typeof child === 'object') {
-              child._node = childNode
+              setNode(child, childNode)
             }
           }
           currentContainer.insertBefore(fragment, startNode.nextSibling)
@@ -158,12 +159,10 @@ export function mountReactive(
 
       if (currentFNodeList.length > 0) {
         for (const childFNode of currentFNodeList) {
-          if (
-            childFNode._node &&
-            childFNode._node.parentNode === currentContainer
-          ) {
+          const childNode = getNode(childFNode)
+          if (childNode && childNode.parentNode === currentContainer) {
             try {
-              currentContainer.removeChild(childFNode._node)
+              currentContainer.removeChild(childNode)
             } catch (e) {}
           }
         }
@@ -413,25 +412,6 @@ export function cleanupReactive(node: Node): void {
   }
 }
 
-export function renderReactive(
-  vnode:
-    | FNode
-    | string
-    | number
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | Signal<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | Computed<any>
-    | null
-    | undefined
-    | Function
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | any[],
-  container: HTMLElement
-): Node | null {
-  return mountReactive(vnode, container)
-}
-
 export function createReactiveRoot(container: HTMLElement) {
   let rootDispose: (() => void) | null = null
   let currentRootNode: Node | null = null
@@ -464,6 +444,9 @@ export function createReactiveRoot(container: HTMLElement) {
   }
 }
 
+/**
+ * Create a reactive text node that updates when the getter returns a new value
+ */
 export function reactiveText(getText: () => string): Text {
   const textNode = document.createTextNode('')
   const dispose = effect(() => {
@@ -472,30 +455,4 @@ export function reactiveText(getText: () => string): Text {
   })
   REACTIVE_BINDINGS.set(textNode, new Set([dispose]))
   return textNode
-}
-
-export function bind<T>(
-  signal: Signal<T> | Computed<T>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  transform?: (value: T) => Record<string, any>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Record<string, Signal<any> | Computed<any>> {
-  if (transform) {
-    return { __signal__: signal }
-  }
-  return { value: signal }
-}
-
-export function ReactiveText(props: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  children?: any[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any
-}): FNode {
-  const { children = [], ...otherProps } = props
-  return {
-    type: 'span',
-    props: otherProps,
-    children: children,
-  }
 }

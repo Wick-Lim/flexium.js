@@ -12,14 +12,7 @@ export { DOMRenderer, domRenderer } from './index'
 export { render, update, createRoot } from './render'
 
 // Reactive rendering
-export {
-  renderReactive,
-  createReactiveRoot,
-  mountReactive,
-  reactiveText,
-  bind,
-  ReactiveText,
-} from './reactive'
+export { createReactiveRoot, mountReactive, reactiveText } from './reactive'
 
 // JSX factory
 export { f, Fragment, isFNode, createTextVNode } from './h'

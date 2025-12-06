@@ -10,9 +10,6 @@ import type {
 /** Marker symbol for List components */
 export const LIST_MARKER = Symbol('flexium.list')
 
-/** @deprecated Use LIST_MARKER instead */
-export const VIRTUALLIST_MARKER = LIST_MARKER
-
 /**
  * Check if a value is a ListComponent
  */
@@ -27,8 +24,6 @@ export function isListComponent<T>(
   )
 }
 
-/** @deprecated Use isListComponent instead */
-export const isVirtualListComponent = isListComponent
 
 /**
  * List - Render lists with optional virtualization
@@ -39,13 +34,13 @@ export const isVirtualListComponent = isListComponent
  * @example
  * ```tsx
  * // Simple list (renders all items)
- * <List items={items}>
+ * <List each={items}>
  *   {(item, index) => <div>{item.name}</div>}
  * </List>
  *
  * // Virtual list (for large datasets)
  * <List
- *   items={items}
+ *   each={items}
  *   virtual
  *   height={400}
  *   itemSize={50}
@@ -56,7 +51,7 @@ export const isVirtualListComponent = isListComponent
  */
 export function List<T>(props: ListProps<T>): ListComponent<T> {
   const {
-    items,
+    each,
     children,
     virtual = false,
     height,
@@ -72,7 +67,7 @@ export function List<T>(props: ListProps<T>): ListComponent<T> {
 
   const component: ListComponent<T> = {
     [LIST_MARKER]: true,
-    items,
+    each,
     renderItem: children,
     virtual,
     height,
@@ -88,9 +83,6 @@ export function List<T>(props: ListProps<T>): ListComponent<T> {
 
   return component
 }
-
-/** @deprecated Use List instead */
-export const VirtualList = List
 
 /**
  * Get item height based on configuration
@@ -149,9 +141,6 @@ export function mountListComponent<T>(
   }
 }
 
-/** @deprecated Use mountListComponent instead */
-export const mountVirtualListComponent = mountListComponent
-
 /**
  * Mount a simple (non-virtual) list
  */
@@ -161,7 +150,7 @@ function mountSimpleList<T>(
   mountFn: (vnode: FNode) => Node | null,
   cleanupFn: (node: Node) => void
 ): () => void {
-  const { items, renderItem, getKey, class: className, style } = comp
+  const { each, renderItem, getKey, class: className, style } = comp
 
   // Create container
   const container = document.createElement('div')
@@ -189,7 +178,7 @@ function mountSimpleList<T>(
 
   // Render effect
   const disposeEffect = effect(() => {
-    const list = items() || []
+    const list = each() || []
     const currentKeys = new Set<string | number>()
 
     // Render items
@@ -255,7 +244,7 @@ function mountVirtualList<T>(
   cleanupFn: (node: Node) => void
 ): () => void {
   const {
-    items,
+    each,
     renderItem,
     height,
     width,
@@ -320,7 +309,7 @@ function mountVirtualList<T>(
 
   // Main render effect
   const disposeEffect = effect(() => {
-    const list = items() || []
+    const list = each() || []
     const currentScrollTop = scrollTopSig()
     const viewportHeight = container.clientHeight || parseFloat(String(height))
     const itemHeight = getItemHeight(itemSize, 0)
