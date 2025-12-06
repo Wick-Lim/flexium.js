@@ -27,22 +27,13 @@ const [count, setCount] = state(0);
 
 ### React-like Value Access
 
-Flexium supports multiple ways to access state values, just like React:
+Flexium works just like React - use state directly in JSX:
 
 ```tsx
 const [count, setCount] = state(0);
 
-// In JSX - just use it directly (React-style) ✨
 <div>{count}</div>
-
-// Or use .value property
-<div>{count.value}</div>
-
-// Or call as function (original style)
-<div>{count()}</div>
 ```
-
-All three patterns work identically and maintain full reactivity.
 
 ### 1. Local State
 
@@ -194,6 +185,5 @@ This uses keyed reconciliation to minimize DOM operations when the array changes
 
 1.  **Use `state()` for everything**: It's the universal primitive.
 2.  **Destructure the tuple**: `const [val, setVal] = state(...)` is the standard pattern.
-3.  **In JSX, use directly**: Just write `{count}` - it auto-unwraps like React.
-4.  **In JS, use `.value` or `()`**: Both `count.value` and `count()` work for reading values.
-5.  **Keep Global Keys Unique**: Use namespaces like `'app/theme'` to avoid collisions.
+3.  **Use directly in JSX**: Just write `{count}` like React.
+4.  **Keep Global Keys Unique**: Use namespaces like `'app/theme'` to avoid collisions.

@@ -40,10 +40,6 @@ type StateSetter<T> = (value: T | ((prev: T) => T)) => void
 ```tsx
 const [count, setCount] = state(0)
 
-// Read value - multiple ways (React-like!)
-console.log(count())      // Function call
-console.log(count.value)  // Property access
-
 // Set value directly
 setCount(5)
 
@@ -111,7 +107,7 @@ A tuple `[accessor, setter]`:
 
 ## Notes
 
-- **React-like access**: Use `{count}` in JSX directly, or `count.value` / `count()` in JS
+- **React-like**: Just use `{count}` in JSX directly
 - State updates are synchronous
 - Reading state inside `effect()` creates a subscription
 - Components only re-render the specific DOM nodes that depend on changed state
