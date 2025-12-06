@@ -61,10 +61,10 @@ import { state, effect } from 'flexium/core';
 
 function Counter() {
   const [count, setCount] = state(0);
-  const [doubled] = state(() => count() * 2);
+  const [doubled] = state(() => count * 2);
 
   effect(() => {
-    document.title = `Count: ${count()}`;
+    document.title = `Count: ${count}`;
   });
 
   return (
@@ -114,14 +114,14 @@ import { state } from 'flexium/core';
 
 function UserProfile() {
   const [userId, setUserId] = state(1);
-  const [doubled] = state(() => userId() * 2);
+  const [doubled] = state(() => userId * 2);
 
   const [user] = state(async () => {
-    const res = await fetch(`/api/users/${userId()}`);
+    const res = await fetch(`/api/users/${userId}`);
     return res.json();
   });
 
-  return <div>{user.loading ? 'Loading...' : user()?.name}</div>;
+  return <div>{user.loading ? 'Loading...' : user?.name}</div>;
 }
 ```
 
@@ -162,10 +162,10 @@ import { state, effect } from 'flexium/core';
 
 function Counter() {
   const [count, setCount] = state(0);
-  const [doubled] = state(() => count() * 2);
+  const [doubled] = state(() => count * 2);
 
   effect(() => {
-    console.log('Count:', count());
+    console.log('Count:', count);
   });
 
   return { count, setCount, doubled };
@@ -208,7 +208,7 @@ import { state } from 'flexium/core';
 
 function Counter() {
   const [count, setCount] = state(0);
-  const [doubled] = state(() => count() * 2);
+  const [doubled] = state(() => count * 2);
 
   return (
     <div>
@@ -267,8 +267,8 @@ import { state } from 'flexium/core';
 // Type is inferred as StateGetter<number>
 const [count, setCount] = state(0);
 
-// TypeScript knows count() returns number
-const doubled: number = count() * 2; // ✓
+// TypeScript knows count is a number proxy
+const doubled: number = count * 2; // ✓
 
 // TypeScript prevents type errors
 setCount('invalid'); // ✗ Type error
@@ -280,7 +280,7 @@ const [user] = state(async () => ({
 }));
 
 // TypeScript knows the shape
-const name = user()?.name; // ✓ string | undefined
+const name = user?.name; // ✓ string | undefined
 ```
 
 ### 4. Cross-Platform Abstraction
@@ -323,7 +323,7 @@ const [count, setCount] = state(0, { key: 'globalCount' });
 const [data, actions] = state(async () => fetchData());
 
 // Need derived value? Return a function
-const [doubled] = state(() => count() * 2);
+const [doubled] = state(() => count * 2);
 ```
 
 The same API grows with your needs.
@@ -346,7 +346,7 @@ function Dashboard() {
 
   // 3. Computed state (auto-updates)
   const [greeting] = state(() =>
-    theme() === 'dark' ? 'Good evening' : 'Good morning'
+    theme === 'dark' ? 'Good evening' : 'Good morning'
   );
 
   // 4. Async state (data fetching)
@@ -357,10 +357,10 @@ function Dashboard() {
 
   // 5. Filtered computed state (depends on multiple signals)
   const [filteredTodos] = state(() => {
-    const items = todos() || [];
-    return filter() === 'all'
+    const items = todos || [];
+    return filter === 'all'
       ? items
-      : items.filter(t => t.status === filter());
+      : items.filter(t => t.status === filter);
   });
 
   return (
@@ -370,9 +370,9 @@ function Dashboard() {
       {todos.loading && <div>Loading todos...</div>}
       {todos.error && <div>Error: {todos.error.message}</div>}
 
-      {filteredTodos() && (
+      {filteredTodos && (
         <ul>
-          {filteredTodos().map(todo => (
+          {filteredTodos.map(todo => (
             <li key={todo.id}>{todo.text}</li>
           ))}
         </ul>
@@ -398,12 +398,12 @@ function Example() {
 
   // This effect only runs when firstName changes
   effect(() => {
-    console.log('First name:', firstName());
+    console.log('First name:', firstName);
   });
 
   // This effect only runs when firstName OR lastName changes
   effect(() => {
-    console.log('Full name:', `${firstName()} ${lastName()}`);
+    console.log('Full name:', `${firstName} ${lastName}`);
   });
 
   return (
@@ -479,7 +479,7 @@ function ProductCard({ product }) {
         </Row>
 
         <Pressable
-          onPress={() => console.log('Add to cart:', quantity())}
+          onPress={() => console.log('Add to cart:', quantity)}
           style={{
             backgroundColor: '#0066cc',
             padding: 12,
@@ -511,8 +511,8 @@ function SearchResults() {
 
   // Automatically re-runs when query OR category changes
   effect(async () => {
-    const q = query();
-    const cat = category();
+    const q = query;
+    const cat = category;
 
     if (!q) {
       setResults([]);
@@ -527,7 +527,7 @@ function SearchResults() {
   return (
     <div>
       <input
-        value={query()}
+        value={query}
         oninput={(e) => setQuery(e.target.value)}
       />
 
@@ -538,7 +538,7 @@ function SearchResults() {
       </select>
 
       <ul>
-        {results().map(item => (
+        {results.map(item => (
           <li key={item.id}>{item.title}</li>
         ))}
       </ul>
@@ -700,7 +700,7 @@ function LargeList() {
     <div>
       <button onclick={updateAll}>Update All</button>
       <ul>
-        {items().map(item => (
+        {items.map(item => (
           <li key={item.id}>Item {item.value}</li>
         ))}
       </ul>

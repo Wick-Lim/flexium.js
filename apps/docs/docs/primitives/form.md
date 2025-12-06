@@ -76,29 +76,29 @@ function LoginForm() {
       <div>
         <input
           type="email"
-          value={email.value()}
+          value={email.value}
           onInput={(e) => form.setFieldValue('email', e.target.value)}
           onBlur={() => form.setFieldTouched('email', true)}
         />
-        <Show when={email.error()}>
-          <span class="error">{email.error()}</span>
+        <Show when={email.error}>
+          <span class="error">{email.error}</span>
         </Show>
       </div>
 
       <div>
         <input
           type="password"
-          value={password.value()}
+          value={password.value}
           onInput={(e) => form.setFieldValue('password', e.target.value)}
           onBlur={() => form.setFieldTouched('password', true)}
         />
-        <Show when={password.error()}>
-          <span class="error">{password.error()}</span>
+        <Show when={password.error}>
+          <span class="error">{password.error}</span>
         </Show>
       </div>
 
-      <button type="submit" disabled={!form.state.isValid() || form.state.isSubmitting()}>
-        {form.state.isSubmitting() ? 'Submitting...' : 'Login'}
+      <button type="submit" disabled={!form.state.isValid || form.state.isSubmitting}>
+        {form.state.isSubmitting ? 'Submitting...' : 'Login'}
       </button>
     </form>
   )
@@ -204,13 +204,13 @@ function RegistrationForm() {
       <label>
         <input
           type="checkbox"
-          checked={form.getField('acceptTerms').value()}
+          checked={form.getField('acceptTerms').value}
           onChange={(e) => form.setFieldValue('acceptTerms', e.target.checked)}
         />
         I accept the terms
       </label>
 
-      <button type="submit" disabled={!form.state.isValid()}>
+      <button type="submit" disabled={!form.state.isValid}>
         Register
       </button>
     </form>
@@ -236,35 +236,35 @@ function DynamicForm() {
   })
 
   const addField = () => {
-    setFields([...fields(), { id: Date.now(), name: '' }])
+    setFields([...fields, { id: Date.now(), name: '' }])
   }
 
   const removeField = (id) => {
-    setFields(fields().filter(f => f.id !== id))
+    setFields(fields.filter(f => f.id !== id))
   }
 
   return (
     <form onSubmit={(e) => {
       e.preventDefault()
       const data = {
-        title: form.getField('title').value(),
-        items: fields()
+        title: form.getField('title').value,
+        items: fields
       }
       console.log(data)
     }}>
       <FormField form={form} name="title" label="Title" />
 
-      <For each={fields()}>
+      <For each={fields}>
         {(field, index) => (
           <div>
             <input
               value={field.name}
               onInput={(e) => {
-                const updated = [...fields()]
-                updated[index()] = { ...field, name: e.target.value }
+                const updated = [...fields]
+                updated[+index] = { ...field, name: e.target.value }
                 setFields(updated)
               }}
-              placeholder={`Item ${index() + 1}`}
+              placeholder={`Item ${+index + 1}`}
             />
             <button type="button" onClick={() => removeField(field.id)}>
               Remove

@@ -31,7 +31,7 @@ function Counter() {
   return (
     <div class="container">
       <h1>Counter</h1>
-      <p>Count: {count}</p> {/* Only this text updates */}
+      <p>Count: {count}</p> {/* Only this text updates - count works directly */}
       <button onclick={() => setCount(c => c + 1)}>Increment</button>
     </div>
   );
@@ -67,9 +67,9 @@ const [a, setA] = state(1);
 const [b, setB] = state(2);
 
 effect(() => {
-  if (a() > 5) {
+  if (a > 5) {  // Both a() and a work in effects
     // Only when a > 5, this effect depends on 'b'
-    console.log('b is', b());
+    console.log('b is', b);
   }
 });
 
@@ -96,9 +96,9 @@ function TodoList() {
 
   return (
     <div>
-      <p>Total: {todos().length}</p>
-      <p>Completed: {todos().filter(t => t.done).length}</p>
-      <p>Active: {todos().filter(t => !t.done).length}</p>
+      <p>Total: {todos.value.length}</p>
+      <p>Completed: {todos.value.filter(t => t.done).length}</p>
+      <p>Active: {todos.value.filter(t => !t.done).length}</p>
     </div>
   );
 }
@@ -106,9 +106,9 @@ function TodoList() {
 // Good - computed values memoize results
 function TodoList() {
   const todos = signal([...]);
-  const total = computed(() => todos().length);
-  const completed = computed(() => todos().filter(t => t.done).length);
-  const active = computed(() => todos().filter(t => !t.done).length);
+  const total = computed(() => todos.value.length);
+  const completed = computed(() => todos.value.filter(t => t.done).length);
+  const active = computed(() => todos.value.filter(t => !t.done).length);
 
   return (
     <div>
@@ -135,11 +135,11 @@ const [lastName, setLastName] = signal('Doe');
 // Bad - uses effect to maintain derived state
 const [fullName, setFullName] = signal('');
 effect(() => {
-  setFullName(`${firstName()} ${lastName()}`);
+  setFullName(`${firstName.value} ${lastName.value}`);
 });
 
 // Good - computed automatically updates
-const fullName = computed(() => `${firstName()} ${lastName()}`);
+const fullName = computed(() => `${firstName.value} ${lastName.value}`);
 ```
 
 Computed is more efficient because it's lazy (only computes when read) and doesn't trigger unnecessary updates.
@@ -189,7 +189,7 @@ const [price, setPrice] = signal(100);
 const [tax, setTax] = signal(0.08);
 
 // Computed - perfect for derived values
-const total = computed(() => price() * (1 + tax()));
+const total = computed(() => price.value * (1 + tax.value));
 
 // Used in UI - only recalculates when price or tax changes
 <div>Total: ${total()}</div>
@@ -209,7 +209,7 @@ const [userId, setUserId] = signal(null);
 
 // Effect - perfect for side effects
 effect(() => {
-  const id = userId();
+  const id = userId.value;  // Both userId() and userId.value work in effects
   if (id) {
     // Side effect: log to analytics
     analytics.track('user_viewed', { userId: id });
@@ -235,22 +235,22 @@ const [count, setCount] = signal(0);
 // Computed - lazy, memoized
 const doubled = computed(() => {
   console.log('Computing doubled');
-  return count() * 2;
+  return count.value * 2;
 });
 
 // Effect - eager, runs on every change
 effect(() => {
   console.log('Effect triggered');
-  const value = count() * 2;
+  const value = count.value * 2;
 });
 
 setCount(1); // Both run
-doubled();   // Returns cached value, no recomputation
-doubled();   // Still cached
+doubled.value;   // Returns cached value, no recomputation
+doubled.value;   // Still cached
 
 setCount(2); // Effect runs immediately, computed marks stale
 // Computed only recalculates when accessed
-doubled();   // Recomputes now
+doubled.value;   // Recomputes now
 ```
 
 ## Batch Updates
@@ -336,7 +336,7 @@ const [count, setCount] = signal(0);
 // Bad - effect never gets cleaned up
 function createWatcher() {
   effect(() => {
-    console.log('Count:', count());
+    console.log('Count:', count.value);
   });
 }
 
@@ -347,7 +347,7 @@ createWatcher(); // Creates another effect - memory leak!
 function createWatcher() {
   return root(dispose => {
     effect(() => {
-      console.log('Count:', count());
+      console.log('Count:', count);
     });
 
     return dispose; // Return cleanup function
@@ -379,7 +379,7 @@ function Timer() {
     return () => clearInterval(interval);
   });
 
-  return <div>Time: {time}</div>;
+  return <div>Time: {time}</div>;  {/* time works directly */}
 }
 ```
 
@@ -395,8 +395,8 @@ const [multiplier, setMultiplier] = signal(2);
 
 // This effect only tracks 'count', not 'multiplier'
 effect(() => {
-  const c = count();
-  const m = untrack(multiplier); // Read without tracking
+  const c = count.value;
+  const m = untrack(() => multiplier.value); // Read without tracking
   console.log('Result:', c * m);
 });
 
@@ -420,7 +420,7 @@ const [count, setCount] = signal(0);
 
 effect(() => {
   // Tracked access
-  const current = count();
+  const current = count.value;
 
   // Untracked access
   const initial = count.peek();
@@ -793,7 +793,7 @@ import { state, computed } from 'flexium/core';
 function DataTable({ rawData }) {
   // Expensive computation - do it once
   const processedData = computed(() => {
-    return rawData()
+    return rawData  // rawData works directly
       .filter(item => item.active)
       .map(item => ({
         ...item,
@@ -851,7 +851,7 @@ function measureEffect(name, fn) {
 
 // Usage
 measureEffect('user-data-sync', () => {
-  const user = userData();
+  const user = userData;  // userData works directly
   syncToLocalStorage(user);
 });
 ```

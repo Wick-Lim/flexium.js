@@ -34,7 +34,7 @@ function effect(fn: () => void | (() => void)): () => void
 const [count, setCount] = state(0)
 
 effect(() => {
-  console.log('Count changed:', count())
+  console.log('Count changed:', count)
 })
 
 setCount(1) // logs: "Count changed: 1"
@@ -47,7 +47,7 @@ setCount(2) // logs: "Count changed: 2"
 const [isActive, setIsActive] = state(false)
 
 effect(() => {
-  if (isActive()) {
+  if (isActive) {
     const interval = setInterval(() => {
       console.log('tick')
     }, 1000)
@@ -64,7 +64,7 @@ effect(() => {
 const [theme, setTheme] = state('light')
 
 effect(() => {
-  document.body.classList.toggle('dark', theme() === 'dark')
+  document.body.classList.toggle('dark', theme === 'dark')
 })
 ```
 
@@ -75,7 +75,7 @@ const [userId, setUserId] = state(1)
 const [user, setUser] = state(null)
 
 effect(() => {
-  const id = userId()
+  const id = userId
 
   fetch(`/api/users/${id}`)
     .then(res => res.json())
@@ -93,7 +93,7 @@ effect(() => {
 const [isListening, setIsListening] = state(true)
 
 effect(() => {
-  if (!isListening()) return
+  if (!isListening) return
 
   const handler = (e) => console.log('Key:', e.key)
   window.addEventListener('keydown', handler)
@@ -110,7 +110,7 @@ const [b, setB] = state(2)
 
 effect(() => {
   // Runs when either a or b changes
-  console.log('Sum:', a() + b())
+  console.log('Sum:', a + b)
 })
 ```
 

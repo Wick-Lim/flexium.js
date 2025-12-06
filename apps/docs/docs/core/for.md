@@ -107,7 +107,7 @@ const [categories, setCategories] = state([
 ```tsx
 const [items, setItems] = state([])
 
-<Show when={() => items().length > 0} fallback={<p>No items</p>}>
+<Show when={() => items.length > 0} fallback={<p>No items</p>}>
   <For each={items}>
     {(item) => <div>{item}</div>}
   </For>

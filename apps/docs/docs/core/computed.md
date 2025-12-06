@@ -32,7 +32,7 @@ type Accessor<T> = () => T
 
 ```tsx
 const [count, setCount] = state(0)
-const doubled = computed(() => count() * 2)
+const doubled = computed(() => count * 2)
 
 console.log(doubled()) // 0
 setCount(5)
@@ -45,7 +45,7 @@ console.log(doubled()) // 10
 const [firstName, setFirstName] = state('John')
 const [lastName, setLastName] = state('Doe')
 
-const fullName = computed(() => `${firstName()} ${lastName()}`)
+const fullName = computed(() => `${firstName} ${lastName}`)
 
 console.log(fullName()) // "John Doe"
 ```
@@ -56,7 +56,7 @@ console.log(fullName()) // "John Doe"
 const [price, setPrice] = state(100)
 const [quantity, setQuantity] = state(2)
 
-const subtotal = computed(() => price() * quantity())
+const subtotal = computed(() => price * quantity)
 const tax = computed(() => subtotal() * 0.1)
 const total = computed(() => subtotal() + tax())
 
@@ -70,14 +70,14 @@ function PriceDisplay() {
   const [price, setPrice] = state(100)
   const [discount, setDiscount] = state(0.1)
 
-  const discountedPrice = computed(() => price() * (1 - discount()))
-  const savings = computed(() => price() - discountedPrice())
+  const discountedPrice = computed(() => price * (1 - discount))
+  const savings = computed(() => price - discountedPrice())
 
   return (
     <div>
       <p>Original: ${price}</p>
-      <p>Discounted: ${discountedPrice}</p>
-      <p>You save: ${savings}</p>
+      <p>Discounted: ${discountedPrice()}</p>
+      <p>You save: ${savings()}</p>
     </div>
   )
 }
@@ -93,11 +93,11 @@ const [items, setItems] = state([
 ])
 
 const pendingItems = computed(() =>
-  items().filter(item => !item.done)
+  items.filter(item => !item.done)
 )
 
 const completedCount = computed(() =>
-  items().filter(item => item.done).length
+  items.filter(item => item.done).length
 )
 ```
 

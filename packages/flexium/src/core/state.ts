@@ -68,15 +68,16 @@ export function getCurrentScope(): { componentId: string | null; hookIndex: numb
 export type StateSetter<T> = (newValue: T | ((prev: T) => T)) => void
 
 /**
- * StateProxy type - a callable proxy that behaves like the value.
- * Can be used as a value (with operators) or called as a function.
+ * StateValue type - a value-like proxy that behaves like T.
+ * Can be used directly in expressions and JSX.
  */
-export type StateProxy<T> = T & (() => T)
+export type StateValue<T> = T & (() => T)
 
 /**
- * Check if a value is a StateProxy
+ * Check if a value is a StateValue
+ * @internal
  */
-export function isStateProxy(value: unknown): boolean {
+export function isStateValue(value: unknown): boolean {
   return (
     (typeof value === 'object' || typeof value === 'function') &&
     value !== null &&
@@ -85,12 +86,13 @@ export function isStateProxy(value: unknown): boolean {
 }
 
 /**
- * Get the underlying signal from a StateProxy
+ * Get the underlying signal from a StateValue
+ * @internal
  */
-export function getStateSignal(proxy: unknown): Signal<unknown> | null {
-  if (isStateProxy(proxy)) {
+export function getStateSignal(stateValue: unknown): Signal<unknown> | null {
+  if (isStateValue(stateValue)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (proxy as any)[STATE_SIGNAL]
+    return (stateValue as any)[STATE_SIGNAL]
   }
   return null
 }
@@ -100,7 +102,7 @@ export function getStateSignal(proxy: unknown): Signal<unknown> | null {
  * The proxy is also callable - calling it returns the current value.
  * This ensures compatibility with code expecting getter functions.
  */
-function createStateProxy<T>(sig: Signal<T>): T {
+function createStateProxy<T>(sig: Signal<T>): StateValue<T> {
   // Use a function as the target so the proxy is callable
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const target = function() { return sig.value } as any
@@ -186,14 +188,14 @@ function createStateProxy<T>(sig: Signal<T>): T {
     },
   })
 
-  return proxy as T
+  return proxy as StateValue<T>
 }
 
 /**
  * Unified State API (React-style)
  *
- * Returns a reactive proxy - use it like a value!
- * Automatically updates when state changes.
+ * Returns a tuple of [value, setter] like React's useState.
+ * The value is a reactive proxy - use it like a regular value!
  *
  * Usage:
  * 1. Simple state: const [count, setCount] = state(0)
@@ -211,17 +213,17 @@ function createStateProxy<T>(sig: Signal<T>): T {
 export function state<T>(
   initialValue: T,
   options?: { key?: string }
-): [StateProxy<T>, StateSetter<T>]
+): [StateValue<T>, StateSetter<T>]
 
 export function state<T>(
   fetcher: () => Promise<T>,
   options?: { key?: string }
-): [StateProxy<T | undefined>, () => void, StateProxy<boolean>, StateProxy<unknown>]
+): [StateValue<T | undefined>, () => void, StateValue<boolean>, StateValue<unknown>]
 
 export function state<T>(
   initialValueOrFetcher: T | (() => T | Promise<T>),
   options?: { key?: string }
-): [StateProxy<T>, StateSetter<T>] | [StateProxy<T | undefined>, () => void, StateProxy<boolean>, StateProxy<unknown>] {
+): [StateValue<T>, StateSetter<T>] | [StateValue<T | undefined>, () => void, StateValue<boolean>, StateValue<unknown>] {
   let s: StateObject
   let actions: StateActions = {}
   let isAsync = false
@@ -271,7 +273,7 @@ export function state<T>(
     }
   }
 
-  // Create reactive proxy
+  // Create reactive proxy (behaves like the value itself)
   const proxy = createStateProxy(s._signal as Signal<T>)
 
   // Setter function
@@ -285,9 +287,9 @@ export function state<T>(
   }
 
   if (isAsync) {
-    // Async state: [proxy, refetch, isLoading, error]
+    // Async state: [value, refetch, isLoading, error]
     const refetch = actions.refetch || (() => {})
-    // These need to be reactive too - create getters
+    // These need to be reactive too - create proxies
     const loadingProxy = createStateProxy(
       { get value() { return s.loading || false }, peek: () => s.loading || false } as Signal<boolean>
     )
@@ -295,10 +297,10 @@ export function state<T>(
       { get value() { return s.error }, peek: () => s.error } as Signal<unknown>
     )
 
-    return [proxy, refetch, loadingProxy, errorProxy] as [StateProxy<T | undefined>, () => void, StateProxy<boolean>, StateProxy<unknown>]
+    return [proxy, refetch, loadingProxy, errorProxy] as [StateValue<T | undefined>, () => void, StateValue<boolean>, StateValue<unknown>]
   }
 
-  return [proxy, setter] as [StateProxy<T>, StateSetter<T>]
+  return [proxy, setter] as [StateValue<T>, StateSetter<T>]
 }
 
 /**

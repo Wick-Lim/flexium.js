@@ -154,8 +154,8 @@ export function Counter() {
   const count = signal(0);
 
   return (
-    <button onClick={() => count.set(count() + 1)}>
-      Count: {count()}
+    <button onClick={() => count.set(count + 1)}>
+      Count: {count}
     </button>
   );
 }
@@ -234,7 +234,7 @@ Alternatively, use pragma comments in individual files:
 
 function App() {
   const count = signal(0);
-  return <button onClick={() => count.set(count() + 1)}>{count()}</button>;
+  return <button onClick={() => count.set(count + 1)}>{count}</button>;
 }
 ```
 

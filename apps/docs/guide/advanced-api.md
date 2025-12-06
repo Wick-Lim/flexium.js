@@ -47,7 +47,8 @@ import { signal } from 'flexium/advanced'
 const count = signal(0)
 
 // Read value (creates dependency)
-console.log(count())  // 0
+console.log(count())  // 0 (backward compatible)
+console.log(count.value)  // 0 (new value-like proxy)
 
 // Read without tracking
 console.log(count.peek())  // 0
@@ -63,7 +64,7 @@ count.set(prev => prev + 1)
 
 | Feature | `state()` | `signal()` |
 |---------|-----------|------------|
-| Return type | `[getter, setter]` tuple | Signal object |
+| Return type | Value-like proxy | Signal object |
 | Global state | Built-in with `key` option | Manual implementation |
 | Async support | Built-in | Manual implementation |
 | Computed | Built-in via function argument | Use `computed()` |
@@ -77,12 +78,12 @@ Creates a derived value that automatically updates when dependencies change.
 import { signal, computed } from 'flexium/advanced'
 
 const count = signal(0)
-const doubled = computed(() => count() * 2)
+const doubled = computed(() => count * 2)
 
-console.log(doubled())  // 0
+console.log(doubled.value)  // 0
 
 count.set(5)
-console.log(doubled())  // 10
+console.log(doubled.value)  // 10
 ```
 
 ### Computed Signals are Read-Only
@@ -99,13 +100,13 @@ doubled.set(10)  // Error! Computed signals are read-only
 const a = signal(1)
 const b = signal(2)
 
-const sum = computed(() => a() + b())
+const sum = computed(() => a + b)
 const doubled = computed(() => sum() * 2)
 
-console.log(doubled())  // 6
+console.log(doubled.value)  // 6
 
 a.set(5)
-console.log(doubled())  // 14
+console.log(doubled.value)  // 14
 ```
 
 ## root()
@@ -119,7 +120,7 @@ const count = signal(0)
 
 const dispose = root((dispose) => {
   effect(() => {
-    console.log('Count:', count())
+    console.log('Count:', count.value)
   })
 
   return dispose
@@ -144,16 +145,16 @@ const multiplier = signal(2)
 
 // Only re-computes when 'count' changes, not 'multiplier'
 const result = computed(() => {
-  return count() * untrack(() => multiplier())
+  return count * untrack(() => multiplier.value)
 })
 
-console.log(result())  // 0
+console.log(result.value)  // 0
 
 count.set(5)
-console.log(result())  // 10
+console.log(result.value)  // 10
 
 multiplier.set(10)
-console.log(result())  // Still 10 (not 50) - multiplier change didn't trigger recompute
+console.log(result.value)  // Still 10 (not 50) - multiplier change didn't trigger recompute
 ```
 
 ## Example: Custom Store
@@ -172,12 +173,12 @@ function createStore<T extends object>(initialState: T) {
 
     // Selector with automatic memoization
     select<R>(selector: (s: T) => R) {
-      return computed(() => selector(state()))
+      return computed(() => selector(state.value))
     },
 
     // Subscribe to changes
     subscribe(callback: (s: T) => void) {
-      return effect(() => callback(state()))
+      return effect(() => callback(state.value))
     }
   }
 }
@@ -186,10 +187,10 @@ function createStore<T extends object>(initialState: T) {
 const store = createStore({ count: 0, name: 'Test' })
 
 const count = store.select(s => s.count)
-console.log(count())  // 0
+console.log(count.value)  // 0
 
 store.set(s => ({ ...s, count: s.count + 1 }))
-console.log(count())  // 1
+console.log(count.value)  // 1
 ```
 
 ## Migration from v0.2.x

@@ -38,9 +38,10 @@ Yes! Flexium is written in TypeScript and provides full type definitions. See th
 const count = signal(0)
 count.value // or count()
 
-// state() - React-like pattern
+// state() - React-like pattern with value-like proxy
 const [count, setCount] = state(0)
-count() // getter function
+count // direct value access (proxy)
+count() // also works
 ```
 
 ### How do I share state between components?
@@ -94,10 +95,10 @@ Common causes:
 3. **Reading outside reactive context** - Use in JSX or effects
    ```tsx
    // Outside component - won't track
-   console.log(count.value)
+   console.log(count)
 
    // Inside effect - will track
-   effect(() => console.log(count.value))
+   effect(() => console.log(count))
    ```
 
 ## Rendering
@@ -107,11 +108,11 @@ Common causes:
 Use the `<Show>` component:
 
 ```tsx
-<Show when={isLoggedIn()}>
+<Show when={isLoggedIn}>
   <Dashboard />
 </Show>
 
-<Show when={isLoggedIn()} fallback={<Login />}>
+<Show when={isLoggedIn} fallback={<Login />}>
   <Dashboard />
 </Show>
 ```
@@ -121,7 +122,7 @@ Use the `<Show>` component:
 Use the `<For>` component:
 
 ```tsx
-<For each={items()}>
+<For each={items}>
   {(item, index) => <ListItem item={item} index={index()} />}
 </For>
 ```
@@ -132,13 +133,13 @@ Use `<Switch>` and `<Match>`:
 
 ```tsx
 <Switch>
-  <Match when={status() === 'loading'}>
+  <Match when={status === 'loading'}>
     <Spinner />
   </Match>
-  <Match when={status() === 'error'}>
+  <Match when={status === 'error'}>
     <Error />
   </Match>
-  <Match when={status() === 'success'}>
+  <Match when={status === 'success'}>
     <Content />
   </Match>
 </Switch>
@@ -182,7 +183,7 @@ Yes, Flexium works with most CSS-in-JS solutions. Just apply classes or styles a
 Use the `virtual` prop on `<List>`:
 
 ```tsx
-<List items={largeArray()} virtual height={400} itemSize={50}>
+<List items={largeArray} virtual height={400} itemSize={50}>
   {(item) => <ListItem item={item} />}
 </List>
 ```
@@ -195,9 +196,9 @@ Use `untrack()` to read without creating dependencies:
 import { untrack } from 'flexium/core'
 
 effect(() => {
-  const value = trigger.value
+  const value = trigger
   // config won't trigger re-run
-  const cfg = untrack(() => config.value)
+  const cfg = untrack(() => config)
 })
 ```
 
@@ -230,7 +231,7 @@ import { useRouter } from 'flexium/router'
 
 function UserProfile() {
   const { params } = useRouter()
-  const userId = params().id
+  const userId = params.id
 
   return <div>User: {userId}</div>
 }
@@ -283,7 +284,7 @@ Usually caused by updating a signal inside an effect that reads it:
 ```tsx
 // Bad - infinite loop
 effect(() => {
-  count.set(count.value + 1)
+  setCount(count + 1)
 })
 
 // Good - use previous value in setter

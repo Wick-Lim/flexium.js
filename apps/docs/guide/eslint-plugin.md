@@ -91,11 +91,11 @@ Disallow reading signal values outside of reactive contexts.
 const count = signal(0);
 
 // ❌ Signal read outside reactive context - won't trigger updates
-if (count.value > 5) {
+if (count > 5) {
   doSomething();
 }
 
-// ❌ Signal call outside reactive context
+// Note: count() also works (backward compatible)
 if (count() > 5) {
   doSomething();
 }
@@ -106,20 +106,20 @@ if (count() > 5) {
 ```javascript
 const count = signal(0);
 
-// ✅ Signal read inside effect
+// ✅ Signal read inside effect (both count and count() work)
 effect(() => {
-  if (count() > 5) {
+  if (count > 5) {
     doSomething();
   }
 });
 
 // ✅ Signal read inside computed
-const shouldDoSomething = computed(() => count() > 5);
+const shouldDoSomething = computed(() => count > 5);
 
 // ✅ Signal read inside JSX
 const App = () => (
   <div>
-    {count() > 5 && <div>Count is greater than 5</div>}
+    {count > 5 && <div>Count is greater than 5</div>}
   </div>
 );
 ```
@@ -165,7 +165,7 @@ effect(() => {
 
 // ✅ Effect without listeners/timers doesn't need cleanup
 effect(() => {
-  console.log('Count changed:', count());
+  console.log('Count changed:', count);
 });
 ```
 
@@ -181,19 +181,19 @@ Disallow side effects in computed functions.
 // ❌ Side effect in computed (console.log)
 const doubled = computed(() => {
   console.log('Computing...');
-  return count.value * 2;
+  return count * 2;
 });
 
 // ❌ Mutation in computed
 const users = signal([]);
 const sortedUsers = computed(() => {
-  return users().sort(); // Mutates original array!
+  return users.sort(); // Mutates original array!
 });
 
 // ❌ DOM manipulation in computed
 const displayText = computed(() => {
-  document.title = count().toString(); // DOM side effect!
-  return `Count: ${count()}`;
+  document.title = count.toString(); // DOM side effect!
+  return `Count: ${count}`;
 });
 ```
 
@@ -201,21 +201,21 @@ const displayText = computed(() => {
 
 ```javascript
 // ✅ Pure computed
-const doubled = computed(() => count.value * 2);
+const doubled = computed(() => count * 2);
 
 // ✅ Side effect in effect
 effect(() => {
-  console.log('Count changed:', count());
+  console.log('Count changed:', count);
 });
 
 // ✅ Non-mutating computed
 const sortedUsers = computed(() => {
-  return [...users()].sort(); // Creates new array
+  return [...users].sort(); // Creates new array
 });
 
 // ✅ DOM manipulation in effect
 effect(() => {
-  document.title = count().toString();
+  document.title = count.toString();
 });
 ```
 
@@ -355,7 +355,7 @@ If you encounter false positives:
 1. Use ESLint disable comments for specific cases:
    ```javascript
    // eslint-disable-next-line flexium/no-signal-outside-reactive
-   const initialValue = count();
+   const initialValue = count;
    ```
 
 2. Report the issue on [GitHub](https://github.com/Wick-Lim/flexium.js/issues)

@@ -13,6 +13,7 @@ const count = signal(0)
 
 // Read the value
 console.log(count.value) // 0
+console.log(+count) // 0 - using unary + operator
 
 // Update the value
 count.set(5)
@@ -47,8 +48,9 @@ import { state } from 'flexium/core'
 
 const [count, setCount] = state(0)
 
-// Read
-console.log(count()) // 0
+// Read (value-like proxy)
+console.log(count) // 0 (works directly in most contexts)
+console.log(count()) // 0 (also works)
 
 // Update with value
 setCount(5)
@@ -59,18 +61,16 @@ setCount(prev => prev + 1)
 
 ## Reading Signal Values
 
-There are multiple ways to read a signal's value:
+State proxies returned by `state()` can be read in multiple ways:
 
 ```tsx
-const count = signal(10)
+const [count, setCount] = state(10)
 
-// 1. Using .value property
-console.log(count.value) // 10
+// 1. Direct value access (proxy behavior)
+console.log(count) // 10
+const doubled = count * 2 // 20
 
-// 2. Calling as a function (signal getter)
-console.log(count()) // 10
-
-// 3. Using .peek() (doesn't track as dependency)
+// 2. Using .peek() (doesn't track as dependency)
 console.log(count.peek()) // 10
 ```
 
@@ -121,17 +121,17 @@ user.set(prev => ({ ...prev, age: 26 }))
 Computed signals derive their value from other signals:
 
 ```tsx
-import { signal, computed } from 'flexium/core'
+import { state } from 'flexium/core'
 
-const price = signal(100)
-const quantity = signal(2)
+const [price, setPrice] = state(100)
+const [quantity, setQuantity] = state(2)
 
-const total = computed(() => price.value * quantity.value)
+const [total] = state(() => price * quantity)
 
-console.log(total.value) // 200
+console.log(total) // 200
 
-price.set(150)
-console.log(total.value) // 300 (auto-updated!)
+setPrice(150)
+console.log(total) // 300 (auto-updated!)
 ```
 
 ## Effects
@@ -139,16 +139,16 @@ console.log(total.value) // 300 (auto-updated!)
 Effects run side effects when signals change:
 
 ```tsx
-import { signal, effect } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 
-const count = signal(0)
+const [count, setCount] = state(0)
 
 effect(() => {
-  console.log('Count changed:', count.value)
+  console.log('Count changed:', count)
 })
 
-count.set(1) // logs: "Count changed: 1"
-count.set(2) // logs: "Count changed: 2"
+setCount(1) // logs: "Count changed: 1"
+setCount(2) // logs: "Count changed: 2"
 ```
 
 ### Cleanup in Effects
@@ -178,15 +178,15 @@ const lastName = signal('Doe')
 const user = signal({ firstName: 'John', lastName: 'Doe' })
 ```
 
-### 2. Use computed() for Derived Values
+### 2. Use Computed State for Derived Values
 
 ```tsx
 // Good
-const fullName = computed(() => `${firstName.value} ${lastName.value}`)
+const [fullName] = state(() => `${firstName} ${lastName}`)
 
 // Avoid - manual calculation everywhere
 function getFullName() {
-  return `${firstName.value} ${lastName.value}`
+  return `${firstName} ${lastName}`
 }
 ```
 
@@ -194,21 +194,25 @@ function getFullName() {
 
 ```tsx
 // Good - read once
-const items = list.value
+const [list, setList] = state([])
+const items = list
 items.forEach(item => console.log(item))
 
-// Avoid - reading repeatedly
-for (let i = 0; i < list.value.length; i++) {
-  console.log(list.value[i])
+// Avoid - reading repeatedly (though with proxy it auto-converts)
+for (let i = 0; i < list.length; i++) {
+  console.log(list[i])
 }
 ```
 
 ### 4. Use peek() When You Don't Want Tracking
 
 ```tsx
+const [trigger, setTrigger] = state(false)
+const [config, setConfig] = state({})
+
 effect(() => {
   // Only track 'trigger', not 'config'
-  if (trigger.value) {
+  if (trigger) {
     console.log(config.peek())
   }
 })

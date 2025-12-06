@@ -31,7 +31,7 @@ Since components run once, you should use Flexium's control flow components inst
 Conditionally render content.
 
 ```tsx
-<Show when={isLoggedIn()} fallback={<button>Login</button>}>
+<Show when={isLoggedIn} fallback={<button>Login</button>}>  {/* isLoggedIn works directly */}
   <UserDashboard />
 </Show>
 ```
@@ -41,9 +41,9 @@ Conditionally render content.
 Efficiently render lists.
 
 ```tsx
-<For each={items()}>
+<For each={items}>  {/* items works directly */}
   {(item, index) => (
-    <li>{index()}: {item.name}</li>
+    <li>{index()}: {item.name}</li>  {/* index() is a function in For callback */}
   )}
 </For>
 ```
@@ -54,9 +54,9 @@ Render one of multiple options.
 
 ```tsx
 <Switch fallback={<p>Not found</p>}>
-  <Match when={status() === 'loading'}>Loading...</Match>
-  <Match when={status() === 'error'}>Error!</Match>
-  <Match when={status() === 'success'}>Data Loaded</Match>
+  <Match when={status === 'loading'}>Loading...</Match>  {/* status works directly */}
+  <Match when={status === 'error'}>Error!</Match>
+  <Match when={status === 'success'}>Data Loaded</Match>
 </Switch>
 ```
 

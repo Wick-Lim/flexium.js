@@ -27,7 +27,7 @@ import {
   For,
   ForComponent,
 } from '../../core/flow'
-import { beginComponentScope, endComponentScope, isStateProxy, getStateSignal } from '../../core/state'
+import { beginComponentScope, endComponentScope, isStateValue, getStateSignal } from '../../core/state'
 import {
   isListComponent,
   mountListComponent,
@@ -106,8 +106,8 @@ export function mountReactive(
     return container ? startMarker : parent
   }
 
-  // Handle StateProxy (from state() API)
-  if (isStateProxy(vnode)) {
+  // Handle StateValue (from state() API)
+  if (isStateValue(vnode)) {
     const sig = getStateSignal(vnode)
     if (sig) {
       const startNode = document.createTextNode('')

@@ -28,7 +28,7 @@ const lastName = signal('Doe')
 const age = signal(30)
 
 effect(() => {
-  console.log(`${firstName()} ${lastName()}, age ${age()}`)
+  console.log(`${firstName} ${lastName}, age ${age}`)
 })
 // Logs: "John Doe, age 30"
 
@@ -49,7 +49,7 @@ const lastName = signal('Doe')
 const age = signal(30)
 
 effect(() => {
-  console.log(`${firstName()} ${lastName()}, age ${age()}`)
+  console.log(`${firstName} ${lastName}, age ${age}`)
 })
 // Logs: "John Doe, age 30"
 
@@ -99,10 +99,10 @@ const [error, setError] = signal(null)
 // This effect would run 4 times without batching
 effect(() => {
   console.log('State updated:', {
-    count: count(),
-    items: items().length,
-    loading: loading(),
-    error: error()
+    count: count,
+    items: items.length,
+    loading: loading,
+    error: error
   })
 })
 
@@ -177,9 +177,9 @@ function UserForm() {
     batch(() => {
       const newErrors = {}
 
-      if (!firstName()) newErrors.firstName = 'Required'
-      if (!lastName()) newErrors.lastName = 'Required'
-      if (!email()) newErrors.email = 'Required'
+      if (!firstName) newErrors.firstName = 'Required'
+      if (!lastName) newErrors.lastName = 'Required'
+      if (!email) newErrors.email = 'Required'
 
       setErrors(newErrors)
     })
@@ -189,27 +189,27 @@ function UserForm() {
     <form onsubmit={handleSubmit}>
       <input
         type="text"
-        value={firstName()}
+        value={firstName}
         oninput={(e) => setFirstName(e.target.value)}
         placeholder="First Name"
       />
-      {errors().firstName && <span>{errors().firstName}</span>}
+      {errors.firstName && <span>{errors.firstName}</span>}
 
       <input
         type="text"
-        value={lastName()}
+        value={lastName}
         oninput={(e) => setLastName(e.target.value)}
         placeholder="Last Name"
       />
-      {errors().lastName && <span>{errors().lastName}</span>}
+      {errors.lastName && <span>{errors.lastName}</span>}
 
       <input
         type="email"
-        value={email()}
+        value={email}
         oninput={(e) => setEmail(e.target.value)}
         placeholder="Email"
       />
-      {errors().email && <span>{errors().email}</span>}
+      {errors.email && <span>{errors.email}</span>}
 
       <button type="submit">Submit</button>
     </form>
@@ -228,7 +228,7 @@ const count = signal(0)
 let runCount = 0
 
 effect(() => {
-  console.log('Count:', count())
+  console.log('Count:', count)
   runCount++
 })
 
@@ -295,15 +295,15 @@ function ProfileEditor() {
   return (
     <div>
       <input
-        value={form().name}
+        value={form.name}
         oninput={(e) => setForm(f => ({ ...f, name: e.target.value }))}
       />
       <input
-        value={form().email}
+        value={form.email}
         oninput={(e) => setForm(f => ({ ...f, email: e.target.value }))}
       />
       <textarea
-        value={form().bio}
+        value={form.bio}
         oninput={(e) => setForm(f => ({ ...f, bio: e.target.value }))}
       />
     </div>
@@ -382,13 +382,13 @@ function DataDashboard() {
 
   return (
     <div>
-      {loading() && <p>Loading...</p>}
-      {error() && <p>Error: {error()}</p>}
-      {stats() && (
+      {loading && <p>Loading...</p>}
+      {error && <p>Error: {error}</p>}
+      {stats && (
         <div>
           <h2>Stats</h2>
-          <p>Total Users: {stats().totalUsers}</p>
-          <p>Active: {stats().activeUsers}</p>
+          <p>Total Users: {stats.totalUsers}</p>
+          <p>Active: {stats.activeUsers}</p>
         </div>
       )}
     </div>
@@ -414,7 +414,7 @@ const animate = () => {
     batch(() => {
       x.set(Math.sin(Date.now() / 1000) * 100)
       y.set(Math.cos(Date.now() / 1000) * 100)
-      rotation.set((rotation.peek() + 1) % 360)
+      rotation.set((+rotation + 1) % 360)
       scale.set(1 + Math.sin(Date.now() / 500) * 0.2)
     })
 
@@ -439,9 +439,9 @@ const enemies = signal([])
 
 const handlePlayerDeath = () => {
   batch(() => {
-    lives.set(lives.peek() - 1)
+    lives.set(+lives - 1)
 
-    if (lives.peek() <= 0) {
+    if (+lives <= 0) {
       // Game over
       score.set(0)
       lives.set(3)
@@ -453,9 +453,9 @@ const handlePlayerDeath = () => {
 
 const completeLevel = () => {
   batch(() => {
-    score.set(score.peek() + 1000)
-    level.set(level.peek() + 1)
-    enemies.set(generateEnemies(level.peek()))
+    score.set(+score + 1000)
+    level.set(+level + 1)
+    enemies.set(generateEnemies(+level))
   })
 }
 ```
@@ -550,7 +550,7 @@ const c = signal(0)
 let runCount = 0
 
 effect(() => {
-  a() + b() + c()
+  +a + +b + +c
   runCount++
 })
 
@@ -599,7 +599,7 @@ function ContactForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    await submitForm({ name: name(), email: email(), message: message() })
+    await submitForm({ name, email, message })
 
     batch(() => {
       resetForm()
@@ -623,10 +623,10 @@ const ball2Y = signal(100)
 
 const moveBalls = (deltaTime) => {
   batch(() => {
-    ball1X.set(ball1X.peek() + deltaTime * 2)
-    ball1Y.set(ball1Y.peek() + deltaTime * 1)
-    ball2X.set(ball2X.peek() - deltaTime * 1.5)
-    ball2Y.set(ball2Y.peek() + deltaTime * 2.5)
+    ball1X.set(+ball1X + deltaTime * 2)
+    ball1Y.set(+ball1Y + deltaTime * 1)
+    ball2X.set(+ball2X - deltaTime * 1.5)
+    ball2Y.set(+ball2Y + deltaTime * 2.5)
   })
 }
 ```
@@ -643,19 +643,19 @@ function ShoppingCart() {
 
   const addItem = (item) => {
     batch(() => {
-      setItems([...items(), item])
-      setTotal(total() + item.price)
-      setItemCount(itemCount() + 1)
+      setItems([...items, item])
+      setTotal(+total + item.price)
+      setItemCount(+itemCount + 1)
     })
   }
 
   const removeItem = (itemId) => {
-    const item = items().find(i => i.id === itemId)
+    const item = items.find(i => i.id === itemId)
 
     batch(() => {
-      setItems(items().filter(i => i.id !== itemId))
-      setTotal(total() - item.price)
-      setItemCount(itemCount() - 1)
+      setItems(items.filter(i => i.id !== itemId))
+      setTotal(+total - item.price)
+      setItemCount(+itemCount - 1)
     })
   }
 
@@ -669,8 +669,8 @@ function ShoppingCart() {
 
   return (
     <div>
-      <h2>Cart ({itemCount()} items)</h2>
-      <p>Total: ${total()}</p>
+      <h2>Cart ({itemCount} items)</h2>
+      <p>Total: ${total}</p>
       <button onclick={clearCart}>Clear Cart</button>
     </div>
   )
@@ -734,9 +734,9 @@ batch(() => {
   count.set(current + 1)
 })
 
-// Also okay - but creates unnecessary dependency tracking
+// Also okay - direct value access
 batch(() => {
-  const current = count()
+  const current = +count
   count.set(current + 1)
 })
 ```
@@ -753,12 +753,12 @@ const soldItems = signal([])
 
 const sellItem = (itemId) => {
   return batch(() => {
-    const item = inventory.peek().find(i => i.id === itemId)
+    const item = inventory.find(i => i.id === itemId)
 
     if (!item) return false
 
-    inventory.set(inventory.peek().filter(i => i.id !== itemId))
-    soldItems.set([...soldItems.peek(), item])
+    inventory.set(inventory.filter(i => i.id !== itemId))
+    soldItems.set([...soldItems, item])
 
     return true
   })
@@ -818,7 +818,7 @@ import { signal, batch, effect } from 'flexium/advanced'
 const count = signal(0)
 
 effect(() => {
-  console.log('Effect running, count:', count())
+  console.log('Effect running, count:', count)
 })
 
 console.log('Before batch')
@@ -851,7 +851,7 @@ import { signal, effect, batch } from 'flexium/advanced'
 const signals = Array.from({ length: 100 }, () => signal(0))
 
 effect(() => {
-  signals.forEach(s => s())
+  signals.forEach(s => +s)
 })
 
 // Without batch

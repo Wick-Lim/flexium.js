@@ -87,7 +87,8 @@ mount(document.getElementById('app')!, <App />)
 
 ```tsx
 const [count, setCount] = state(0);
-// count() -> get value
+// count -> use directly as value (thanks to Symbol.toPrimitive)
+// count() -> also works (backward compatible)
 // setCount(1) or setCount(c => c + 1) -> set value
 ```
 
@@ -108,16 +109,16 @@ const [theme, setTheme] = state(undefined, { key: 'theme' });
 Flexium handles loading and error states for you.
 
 ```tsx
-const [user, actions] = state(async () => {
+const [user, refetch, isLoading, error] = state(async () => {
   const res = await fetch('/api/user');
   return res.json();
 });
 
 return (
   <div>
-    {user.loading && <p>Loading...</p>}
-    {user.error && <p>Error: {user.error.message}</p>}
-    {user() && <p>Welcome, {user().name}</p>}
+    {isLoading && <p>Loading...</p>}
+    {error && <p>Error: {error.message}</p>}
+    {user && <p>Welcome, {user.name}</p>}
   </div>
 );
 ```
@@ -127,8 +128,8 @@ return (
 Pass a function to `state()` to create a value that updates automatically when dependencies change.
 
 ```tsx
-const [count] = state(0);
-const [double] = state(() => count() * 2);
+const [count, setCount] = state(0);
+const [double] = state(() => count * 2);  // Use count directly
 ```
 
 ## Next Steps

@@ -339,13 +339,13 @@ import { state } from 'flexium/core';
 describe('state() API', () => {
   it('should create local state', () => {
     const [count, setCount] = state(0);
-    expect(count()).toBe(0);
+    expect(count).toBe(0);  // count is now a value-like proxy
 
     setCount(5);
-    expect(count()).toBe(5);
+    expect(count).toBe(5);
 
     setCount(c => c + 1);
-    expect(count()).toBe(6);
+    expect(count).toBe(6);
   });
 
   it('should create global state with key', () => {
@@ -353,26 +353,26 @@ describe('state() API', () => {
     const [count2, setCount2] = state(0, { key: 'global-count' });
 
     // Both reference same state
-    expect(count1()).toBe(0);
-    expect(count2()).toBe(0);
+    expect(count1).toBe(0);
+    expect(count2).toBe(0);
 
     setCount1(10);
-    expect(count1()).toBe(10);
-    expect(count2()).toBe(10); // Updated too!
+    expect(count1).toBe(10);
+    expect(count2).toBe(10); // Updated too!
 
     setCount2(20);
-    expect(count1()).toBe(20);
-    expect(count2()).toBe(20);
+    expect(count1).toBe(20);
+    expect(count2).toBe(20);
   });
 
   it('should create computed state', () => {
     const [count, setCount] = state(5);
-    const [doubled] = state(() => count() * 2);
+    const [doubled] = state(() => count * 2);
 
-    expect(doubled()).toBe(10);
+    expect(doubled).toBe(10);
 
     setCount(10);
-    expect(doubled()).toBe(20);
+    expect(doubled).toBe(20);
   });
 
   it('should create async state', async () => {
@@ -383,13 +383,13 @@ describe('state() API', () => {
     });
 
     expect(data.loading).toBe(true);
-    expect(data()).toBeUndefined();
+    expect(data).toBeUndefined();
 
     // Wait for resolution
     await new Promise(resolve => setTimeout(resolve, 20));
 
     expect(data.loading).toBe(false);
-    expect(data()).toEqual({ value: 42 });
+    expect(data).toEqual({ value: 42 });
   });
 });
 ```
@@ -495,8 +495,8 @@ describe('TodoList Component', () => {
     const [input, setInput] = state('');
 
     const addTodo = () => {
-      if (input().trim()) {
-        setTodos([...todos(), input()]);
+      if (input.trim()) {
+        setTodos([...todos, input]);
         setInput('');
       }
     };
@@ -505,7 +505,7 @@ describe('TodoList Component', () => {
       <div>
         <input
           data-testid="todo-input"
-          value={input()}
+          value={input}
           oninput={(e) => setInput(e.target.value)}
           placeholder="Add todo..."
         />
@@ -728,10 +728,10 @@ describe('UserProfile with mocked data', () => {
       <div>
         {user.loading && <div data-testid="loading">Loading...</div>}
         {user.error && <div data-testid="error">Error: {user.error.message}</div>}
-        {user() && (
+        {user && (
           <div data-testid="user-data">
-            <h1>{user().name}</h1>
-            <p>{user().email}</p>
+            <h1>{user.name}</h1>
+            <p>{user.email}</p>
           </div>
         )}
       </div>
@@ -958,8 +958,8 @@ it('should update signal', async () => {
 
   setTimeout(() => setCount(5), 100);
 
-  await waitForSignal(count, 5);
-  expect(count()).toBe(5);
+  await waitForSignal(() => count, 5);
+  expect(count).toBe(5);
 });
 ```
 
@@ -1015,11 +1015,11 @@ it('should show error when email is invalid', async () => {
   expect(screen.getByText('Invalid email')).toBeVisible();
 });
 
-// Bad - tests implementation
+// Bad - tests implementation details
 it('should set error state', () => {
   const [error, setError] = state(null);
   setError('Invalid email');
-  expect(error()).toBe('Invalid email');
+  expect(error).toBe('Invalid email');
 });
 ```
 

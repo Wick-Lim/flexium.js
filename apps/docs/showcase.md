@@ -41,7 +41,7 @@ import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Counter() {
   const [count, setCount] = state(0)
-  const [doubled] = state(() => count() * 2)
+  const doubled = computed(() => count * 2)
 
   return (
     <Column gap={16} padding={24}>
@@ -89,10 +89,10 @@ function TodoApp() {
   const [inputText, setInputText] = state('')
 
   const addTodo = () => {
-    if (!inputText().trim()) return
+    if (!inputText.trim()) return
     setTodos(prev => [...prev, {
       id: Date.now(),
-      text: inputText(),
+      text: inputText,
       done: false
     }])
     setInputText('')
@@ -108,7 +108,7 @@ function TodoApp() {
     <Column gap={16}>
       <Row gap={8}>
         <input
-          value={inputText()}
+          value={inputText}
           oninput={(e) => setInputText(e.target.value)}
           placeholder="Add a new todo..."
         />
@@ -169,7 +169,7 @@ function Stopwatch() {
 
   let intervalId
   const startStop = () => {
-    if (isRunning()) {
+    if (isRunning) {
       clearInterval(intervalId)
       setIsRunning(false)
     } else {
@@ -183,16 +183,16 @@ function Stopwatch() {
   return (
     <Column gap={16}>
       <Text style={{ fontSize: '48px', fontFamily: 'monospace' }}>
-        {() => formatTime(seconds())}
+        {() => formatTime(seconds)}
       </Text>
 
       <Row gap={8}>
         <Pressable onPress={startStop}>
-          <Text style={{ background: isRunning() ? 'red' : 'green' }}>
-            {isRunning() ? 'Stop' : 'Start'}
+          <Text style={{ background: isRunning ? 'red' : 'green' }}>
+            {isRunning ? 'Stop' : 'Start'}
           </Text>
         </Pressable>
-        <Pressable onPress={() => setLaps(prev => [seconds(), ...prev])}>
+        <Pressable onPress={() => setLaps(prev => [seconds, ...prev])}>
           <Text>Lap</Text>
         </Pressable>
         <Pressable onPress={() => { setSeconds(0); setLaps([]) }}>
@@ -243,7 +243,7 @@ function ParticleCanvas() {
 
     setMouseX(x)
     setMouseY(y)
-    setParticles(prev => [...prev.slice(-20), { x, y, hue: hue() }])
+    setParticles(prev => [...prev.slice(-20), { x, y, hue }])
   }
 
   return (
@@ -259,8 +259,8 @@ function ParticleCanvas() {
           <Circle
             x={p.x}
             y={p.y}
-            radius={10 * ((i + 1) / particles().length)}
-            fill={`hsla(${p.hue}, 70%, 60%, ${(i + 1) / particles().length})`}
+            radius={10 * ((i + 1) / particles.length)}
+            fill={`hsla(${p.hue}, 70%, 60%, ${(i + 1) / particles.length})`}
           />
         )}
       </For>
@@ -270,7 +270,7 @@ function ParticleCanvas() {
         x={mouseX}
         y={mouseY}
         radius={20}
-        fill={() => `hsl(${hue()}, 70%, 60%)`}
+        fill={() => `hsl(${hue}, 70%, 60%)`}
       />
     </Canvas>
   )

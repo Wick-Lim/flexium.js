@@ -142,10 +142,10 @@ function PaginatedList() {
       </For>
 
       <div>
-        <button onClick={() => setPage(p => p - 1)} disabled={page() <= 1}>
+        <button onClick={() => setPage(p => p - 1)} disabled={page <= 1}>
           Previous
         </button>
-        <span>Page {page()}</span>
+        <span>Page {page}</span>
         <button onClick={() => setPage(p => p + 1)}>
           Next
         </button>

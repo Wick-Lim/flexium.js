@@ -98,7 +98,7 @@ f('input', {
 ```ts
 function Counter() {
   const [count, setCount] = state(0)
-  const doubled = computed(() => count() * 2)
+  const doubled = computed(() => count * 2)
 
   return f('div', { class: 'counter' },
     f('h1', null, 'Counter'),

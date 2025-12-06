@@ -87,8 +87,9 @@ interface Signal<T> {
 const count = signal(0)
 
 // Read value (tracks dependency)
-console.log(count.value) // 0
-console.log(count()) // 0
+console.log(count) // 0 (new value-like proxy)
+console.log(count.value) // 0 (also works)
+console.log(count()) // 0 (backward compatible)
 
 // Update value
 count.value++
@@ -120,11 +121,11 @@ interface Computed<T> {
 **Usage:**
 ```tsx
 const count = signal(1)
-const doubled = computed(() => count.value * 2)
+const doubled = computed(() => count * 2)
 
-console.log(doubled.value) // 2
+console.log(doubled) // 2
 count.value = 5
-console.log(doubled.value) // 10
+console.log(doubled) // 10
 ```
 
 **Related:** `Signal`, `computed()`
@@ -158,7 +159,7 @@ const [user, { mutate, refetch }] = createResource(userId, fetchUser)
 return () => {
   if (user.loading) return <div>Loading...</div>
   if (user.error) return <div>Error: {user.error.message}</div>
-  return <div>{user.value?.name}</div>
+  return <div>{user?.name}</div>
 }
 ```
 
@@ -282,8 +283,8 @@ interface Location {
 **Usage:**
 ```tsx
 const router = useRouter()
-console.log(router.location.value.pathname) // "/users/123"
-console.log(router.location.value.query) // { page: "1" }
+console.log(router.location.pathname) // "/users/123"
+console.log(router.location.query) // { page: "1" }
 ```
 
 ### RouterContext
@@ -313,7 +314,7 @@ const router = useRouter()
 router.navigate('/users/123')
 
 // Access params
-console.log(router.params.value.id) // "123"
+console.log(router.params.id) // "123"
 ```
 
 ### RouteProps
@@ -1117,7 +1118,7 @@ type StateGetter<T> = () => T
 
 **Usage:**
 ```tsx
-const getItems: StateGetter<Item[]> = () => items.value
+const getItems: StateGetter<Item[]> = () => items
 ```
 
 ## JSX Types
@@ -1184,7 +1185,7 @@ function isSignal(value: any): value is Signal<any> | Computed<any>
 ```tsx
 const value = signal(42)
 if (isSignal(value)) {
-  console.log(value.value) // TypeScript knows this is a Signal
+  console.log(value) // TypeScript knows this is a Signal
 }
 ```
 

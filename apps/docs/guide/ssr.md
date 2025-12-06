@@ -72,7 +72,7 @@ renderToString(<Greeting name="World" />)
 
 // Signals (values are extracted)
 const count = signal(10)
-renderToString(<span>{count}</span>)
+renderToString(<span>{count}</span>)  // {count} works directly in JSX
 // '<span>10</span>'
 
 // Arrays
@@ -167,7 +167,7 @@ function Counter() {
 
   return (
     <div>
-      <p>Count: {count}</p>
+      <p>Count: {count}</p>  {/* count works directly, no need for count() */}
       {/* Event handler attached during hydration */}
       <button onClick={() => setCount(c => c + 1)}>Increment</button>
     </div>
@@ -217,11 +217,11 @@ On the server, `renderToString()` extracts the current value of signals:
 
 ```tsx
 const count = signal(42)
-const doubled = computed(() => count() * 2)
+const doubled = computed(() => count * 2)
 
 renderToString(
   <div>
-    <p>Count: {count}</p>
+    <p>Count: {count}</p>  {/* Works directly in JSX */}
     <p>Doubled: {doubled}</p>
   </div>
 )
@@ -247,7 +247,7 @@ function Timer() {
     return () => clearInterval(interval)
   })
 
-  return <div>Elapsed: {seconds} seconds</div>
+  return <div>Elapsed: {seconds} seconds</div>  {/* seconds works directly */}
 }
 
 // Server: renders '0 seconds'
@@ -455,7 +455,7 @@ function Clock() {
     return () => clearInterval(interval)
   })
 
-  return <div>Current time: {time() || 'Loading...'}</div>
+  return <div>Current time: {time || 'Loading...'}</div>  {/* time works directly */}
 }
 ```
 
@@ -469,7 +469,7 @@ function BrowserOnly({ children }) {
     setIsBrowser(true)
   })
 
-  return isBrowser() ? children : null
+  return isBrowser ? children : null  // isBrowser works directly
 }
 
 // Usage
@@ -524,7 +524,7 @@ function Component() {
       .then(setData)
   })
 
-  return <div>{data() ? data().title : 'Loading...'}</div>
+  return <div>{data ? data.title : 'Loading...'}</div>  {/* data works directly */}
 }
 ```
 
@@ -546,7 +546,7 @@ function Component() {
     }
   })
 
-  return <div>Width: {width()}</div>
+  return <div>Width: {width}</div>  {/* width works directly */}
 }
 ```
 
@@ -593,7 +593,7 @@ function App({ initialData }) {
       : initialData
   )
 
-  return <div>{data().title}</div>
+  return <div>{data.title}</div>  {/* data works directly */}
 }
 ```
 
@@ -640,19 +640,19 @@ function SearchBox() {
   // Server: Renders empty search box
   // Client: Adds autocomplete
   effect(() => {
-    if (query().length > 2) {
-      fetchSuggestions(query()).then(setSuggestions)
+    if (query.length > 2) {  // query works directly in effect (both query() and query work)
+      fetchSuggestions(query).then(setSuggestions)
     }
   })
 
   return (
     <div>
       <input
-        value={query()}
+        value={query}
         onInput={e => setQuery(e.target.value)}
       />
       <ul>
-        {suggestions().map(s => <li>{s}</li>)}
+        {suggestions.map(s => <li>{s}</li>)}
       </ul>
     </div>
   )

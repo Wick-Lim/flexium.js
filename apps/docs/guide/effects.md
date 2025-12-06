@@ -25,7 +25,7 @@ const [count, setCount] = state(0);
 
 effect(() => {
   // Runs immediately, then again when 'count' changes
-  console.log('The count is now', count());
+  console.log('The count is now', count);
 });
 ```
 
@@ -54,10 +54,10 @@ const [a, setA] = state(1);
 const [b, setB] = state(2);
 
 effect(() => {
-  if (a() > 5) {
-    // If a() > 5, we read b(). Now 'b' is a dependency.
-    // If a() <= 5, we don't read b(). 'b' is NOT a dependency.
-    console.log(b());
+  if (a > 5) {
+    // If a > 5, we read b. Now 'b' is a dependency.
+    // If a <= 5, we don't read b. 'b' is NOT a dependency.
+    console.log(b);
   }
 });
 ```
@@ -70,7 +70,7 @@ Effects execute synchronously. If you need to perform async operations, you can 
 
 ```tsx
 effect(async () => {
-  const id = userId(); // Tracked
+  const id = userId; // Tracked
   const data = await fetchUser(id);
   // Code after await runs later, dependencies read here might not track
 });
