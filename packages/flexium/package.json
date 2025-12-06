@@ -89,6 +89,11 @@
       "types": "./dist/test-exports.d.ts",
       "import": "./dist/test-exports.mjs",
       "require": "./dist/test-exports.js"
+    },
+    "./microfrontend": {
+      "types": "./dist/microfrontend.d.ts",
+      "import": "./dist/microfrontend.mjs",
+      "require": "./dist/microfrontend.js"
     }
   },
   "files": [
@@ -142,7 +147,12 @@
     "signal-based",
     "computed",
     "effect",
-    "cross-platform"
+    "cross-platform",
+    "micro-frontend",
+    "microfrontend",
+    "module-federation",
+    "event-bus",
+    "shadow-dom"
   ],
   "author": "Flexium Contributors",
   "license": "MIT",
