@@ -398,8 +398,8 @@ export function toCSSValue(
   return value
 }
 
-// Map justify shorthand to CSS value
-function mapJustifyContent(value: JustifyContent): string {
+/** Map justify shorthand to CSS value */
+export function mapJustifyContent(value: JustifyContent): string {
   const map: Record<string, string> = {
     start: 'flex-start',
     center: 'center',
@@ -408,12 +408,11 @@ function mapJustifyContent(value: JustifyContent): string {
     around: 'space-around',
     evenly: 'space-evenly',
   }
-  // If it's a known shorthand, map it. Otherwise return as is (e.g. 'flex-start')
   return map[value] || value
 }
 
-// Map align shorthand to CSS value
-function mapAlignItems(value: AlignItems): string {
+/** Map align shorthand to CSS value */
+export function mapAlignItems(value: AlignItems): string {
   const map: Record<string, string> = {
     start: 'flex-start',
     center: 'center',

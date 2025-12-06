@@ -30,9 +30,6 @@ export type StateGetter<T> = {
   state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'
   latest: T | undefined
   read: () => T | undefined
-  map: T extends (infer U)[]
-    ? <R>(fn: (item: U, index: () => number) => R) => R[]
-    : never
 }
 
 // Enhanced Setter Type: acts as setter but carries Resource actions

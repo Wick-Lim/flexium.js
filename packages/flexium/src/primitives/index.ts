@@ -60,20 +60,11 @@ export type {
 } from './types'
 
 // List component with optional virtualization
-export {
-  List,
-  VirtualList,
-  isListComponent,
-  isVirtualListComponent,
-  LIST_MARKER,
-  VIRTUALLIST_MARKER,
-} from './List'
+export { List, isListComponent, LIST_MARKER } from './List'
 
 export type {
   ListProps,
   ListComponent,
-  VirtualListProps,
-  VirtualListComponent,
   FixedSizeConfig,
   VariableSizeConfig,
   SizeConfig,

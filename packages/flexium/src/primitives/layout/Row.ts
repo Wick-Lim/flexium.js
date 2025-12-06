@@ -8,6 +8,8 @@ import {
   stylePropsToCSS,
   mergeStyles,
   getBaseValue,
+  mapJustifyContent,
+  mapAlignItems,
 } from './types'
 
 /**
@@ -24,35 +26,6 @@ export interface RowProps extends BaseComponentProps {
   reverse?: boolean
   /** HTML element to render */
   as?: string
-}
-
-/**
- * Map justify shorthand to CSS value
- */
-function mapJustifyContent(value: JustifyContent): string {
-  const map: Record<string, string> = {
-    start: 'flex-start',
-    center: 'center',
-    end: 'flex-end',
-    between: 'space-between',
-    around: 'space-around',
-    evenly: 'space-evenly',
-  }
-  return map[value] || value
-}
-
-/**
- * Map align shorthand to CSS value
- */
-function mapAlignItems(value: AlignItems): string {
-  const map: Record<string, string> = {
-    start: 'flex-start',
-    center: 'center',
-    end: 'flex-end',
-    stretch: 'stretch',
-    baseline: 'baseline',
-  }
-  return map[value] || value
 }
 
 /**

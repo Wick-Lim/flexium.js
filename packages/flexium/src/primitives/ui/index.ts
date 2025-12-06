@@ -1,5 +1,5 @@
 /**
- * UI primitives - Buttons, Text, and other basic UI components
+ * UI primitives - Buttons and other basic UI components
  */
 
 export {
@@ -10,16 +10,3 @@ export {
   type ButtonType,
   type ButtonProps,
 } from './Button'
-
-export {
-  createText,
-  createHeading,
-  createParagraph,
-  createLabel,
-  createCode,
-  type TextVariant,
-  type TextAlign,
-  type TextDecoration,
-  type TextTransform,
-  type TextProps,
-} from './Text'
