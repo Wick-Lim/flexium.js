@@ -21,10 +21,16 @@ import { state } from 'flexium/core'
 ## Signature
 
 ```ts
-function state<T>(initialValue: T): [Accessor<T>, Setter<T>]
+function state<T>(initialValue: T): [StateGetter<T>, StateSetter<T>]
 
-type Accessor<T> = () => T
-type Setter<T> = (value: T | ((prev: T) => T)) => void
+type StateGetter<T> = {
+  (): T                    // Call as function
+  readonly value: T        // Access via .value property
+  loading: boolean         // For async state
+  error: unknown           // For async state
+}
+
+type StateSetter<T> = (value: T | ((prev: T) => T)) => void
 ```
 
 ## Usage
@@ -33,9 +39,6 @@ type Setter<T> = (value: T | ((prev: T) => T)) => void
 
 ```tsx
 const [count, setCount] = state(0)
-
-// Read value
-console.log(count()) // 0
 
 // Set value directly
 setCount(5)
@@ -52,12 +55,15 @@ function Counter() {
 
   return (
     <div>
+      {/* Just use count directly - auto-unwrapped like React! */}
       <span>{count}</span>
       <button onclick={() => setCount(c => c + 1)}>+</button>
     </div>
   )
 }
 ```
+
+In JSX, you can use state directly without calling it - Flexium auto-unwraps the value just like React.
 
 ### With Objects
 
@@ -101,6 +107,7 @@ A tuple `[accessor, setter]`:
 
 ## Notes
 
+- **React-like**: Just use `{count}` in JSX directly
 - State updates are synchronous
 - Reading state inside `effect()` creates a subscription
 - Components only re-render the specific DOM nodes that depend on changed state
