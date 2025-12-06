@@ -11,7 +11,7 @@ import {
   ErrorBoundaryCtx,
 } from '../error-boundary'
 import { signal } from '../signal'
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { mountReactive } from '../../renderers/dom/reactive'
 
 describe('ErrorBoundary', () => {

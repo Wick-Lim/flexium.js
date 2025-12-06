@@ -9,7 +9,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Suspense, SuspenseCtx } from '../suspense'
 import { signal } from '../signal'
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { useContext } from '../context'
 
 describe('Suspense', () => {

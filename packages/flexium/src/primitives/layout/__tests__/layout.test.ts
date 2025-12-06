@@ -225,23 +225,23 @@ describe('Row', () => {
     })
 
     it('should apply event handlers', () => {
-      const onClick = () => {}
+      const onPress = () => {}
       const onMouseEnter = () => {}
-      const fnode = Row({ onClick, onMouseEnter, children: [] })
+      const fnode = Row({ onPress, onMouseEnter, children: [] })
 
-      expect(fnode.props.onClick).toBe(onClick)
+      expect(fnode.props.onclick).toBe(onPress)
       expect(fnode.props.onMouseEnter).toBe(onMouseEnter)
     })
 
-    it('should apply id and className', () => {
+    it('should apply id and class', () => {
       const fnode = Row({
         id: 'main-row',
-        className: 'container',
+        class: 'container',
         children: [],
       })
 
       expect(fnode.props.id).toBe('main-row')
-      expect(fnode.props.className).toBe('container')
+      expect(fnode.props.class).toBe('container')
     })
   })
 })

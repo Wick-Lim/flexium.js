@@ -8,7 +8,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Portal } from '../portal'
 import { mountReactive, cleanupReactive } from '../reactive'
-import { f } from '../h'
+import { f } from '../f'
 import { signal } from '../../../core/signal'
 
 describe('Portal Component', () => {

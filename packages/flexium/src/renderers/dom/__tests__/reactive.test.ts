@@ -11,7 +11,7 @@ import {
   createReactiveRoot,
   reactiveText,
 } from '../reactive'
-import { f, Fragment } from '../h'
+import { f, Fragment } from '../f'
 import { signal } from '../../../core/signal'
 
 describe('DOM Reactive Rendering', () => {

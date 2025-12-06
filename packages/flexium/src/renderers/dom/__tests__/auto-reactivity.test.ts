@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { signal, computed } from '../../../core/signal'
-import { f } from '../h'
+import { f } from '../f'
 import { mountReactive } from '../reactive'
 
 describe('Automatic Reactivity', () => {

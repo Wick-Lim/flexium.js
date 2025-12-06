@@ -23,31 +23,29 @@ export function ScrollView(props: ScrollViewProps): FNode {
     children,
     style,
     horizontal = false,
-    showsHorizontalScrollIndicator = true,
-    showsVerticalScrollIndicator: _showsVerticalScrollIndicator = true,
+    showScrollbarX = true,
+    showScrollbarY = true,
     ...rest
   } = props
 
-  const scrollStyle = {
+  const scrollStyle: Record<string, unknown> = {
     ...style,
     overflowX: horizontal ? 'auto' : 'hidden',
     overflowY: horizontal ? 'hidden' : 'auto',
-    display: 'flex' as const,
-    flexDirection: (horizontal ? 'row' : 'column') as 'row' | 'column',
+    display: 'flex',
+    flexDirection: horizontal ? 'row' : 'column',
   }
 
-  // Hide scrollbars if requested
-  if (!showsHorizontalScrollIndicator) {
-    // Note: This requires CSS usually, setting inline for demo
-    // scrollStyle.scrollbarWidth = 'none'
+  // Hide scrollbars if requested (CSS scrollbar-width for Firefox/modern browsers)
+  if (!showScrollbarX || !showScrollbarY) {
+    scrollStyle.scrollbarWidth = 'none'
   }
 
   return {
     type: 'div',
     props: {
       ...rest,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      style: normalizeStyle(scrollStyle as any),
+      style: normalizeStyle(scrollStyle as Parameters<typeof normalizeStyle>[0]),
     },
     children: Array.isArray(children) ? children : children ? [children] : [],
   }

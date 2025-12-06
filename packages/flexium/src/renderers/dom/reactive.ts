@@ -10,7 +10,7 @@ import type { FNode } from '../../core/renderer'
 import { effect, isSignal, onCleanup } from '../../core/signal'
 import type { Signal, Computed } from '../../core/signal'
 import { domRenderer } from './index'
-import { isFNode } from './h'
+import { isFNode } from './f'
 import {
   pushProvider,
   popProvider,

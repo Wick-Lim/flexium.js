@@ -154,53 +154,51 @@ describe('ScrollView', () => {
     })
   })
 
-  describe('Scrollbar Indicator Props', () => {
-    it('should default showsHorizontalScrollIndicator to true', () => {
-      const fnode = ScrollView({ children: 'Content' })
-
-      // Default behavior doesn't hide scrollbars
-      // Note: overflow properties are set but not normalized
-      expect(fnode.props.style).toBeDefined()
-    })
-
-    it('should default showsVerticalScrollIndicator to true', () => {
+  describe('Scrollbar Props', () => {
+    it('should default showScrollbarX to true', () => {
       const fnode = ScrollView({ children: 'Content' })
 
       // Default behavior doesn't hide scrollbars
       expect(fnode.props.style).toBeDefined()
     })
 
-    it('should accept showsHorizontalScrollIndicator as false', () => {
+    it('should default showScrollbarY to true', () => {
+      const fnode = ScrollView({ children: 'Content' })
+
+      // Default behavior doesn't hide scrollbars
+      expect(fnode.props.style).toBeDefined()
+    })
+
+    it('should accept showScrollbarX as false', () => {
       const fnode = ScrollView({
         horizontal: true,
-        showsHorizontalScrollIndicator: false,
+        showScrollbarX: false,
         children: 'Content',
       })
 
-      // Note: Current implementation doesn't fully apply scrollbar hiding
-      // This test validates the prop is accepted without errors
       expect(fnode.type).toBe('div')
+      // scrollbarWidth is set but filtered by normalizeStyle (CommonStyle only)
     })
 
-    it('should accept showsVerticalScrollIndicator as false', () => {
+    it('should accept showScrollbarY as false', () => {
       const fnode = ScrollView({
-        showsVerticalScrollIndicator: false,
+        showScrollbarY: false,
         children: 'Content',
       })
 
-      // Note: Current implementation doesn't fully apply scrollbar hiding
-      // This test validates the prop is accepted without errors
       expect(fnode.type).toBe('div')
+      // scrollbarWidth is set but filtered by normalizeStyle (CommonStyle only)
     })
 
-    it('should handle both scrollbar indicators set to false', () => {
+    it('should handle both scrollbar props set to false', () => {
       const fnode = ScrollView({
-        showsHorizontalScrollIndicator: false,
-        showsVerticalScrollIndicator: false,
+        showScrollbarX: false,
+        showScrollbarY: false,
         children: 'Content',
       })
 
       expect(fnode.type).toBe('div')
+      // scrollbarWidth is set but filtered by normalizeStyle (CommonStyle only)
     })
   })
 
@@ -339,14 +337,14 @@ describe('ScrollView', () => {
         children: 'Content',
         style: { height: 200 },
         horizontal: true,
-        showsHorizontalScrollIndicator: false,
-        showsVerticalScrollIndicator: false,
+        showScrollbarX: false,
+        showScrollbarY: false,
       })
 
       expect(fnode.props.children).toBeUndefined()
       expect(fnode.props.horizontal).toBeUndefined()
-      expect(fnode.props.showsHorizontalScrollIndicator).toBeUndefined()
-      expect(fnode.props.showsVerticalScrollIndicator).toBeUndefined()
+      expect(fnode.props.showScrollbarX).toBeUndefined()
+      expect(fnode.props.showScrollbarY).toBeUndefined()
     })
   })
 
@@ -391,7 +389,7 @@ describe('ScrollView', () => {
       const fnode = ScrollView({
         horizontal: true,
         style: { height: 200, width: '100%' },
-        showsHorizontalScrollIndicator: false,
+        showScrollbarX: false,
         children: cards,
       })
 
@@ -445,8 +443,8 @@ describe('ScrollView', () => {
 
       const fnode = ScrollView({
         horizontal: false,
-        showsHorizontalScrollIndicator: true,
-        showsVerticalScrollIndicator: true,
+        showScrollbarX: true,
+        showScrollbarY: true,
         style: {
           height: 400,
           width: 600,

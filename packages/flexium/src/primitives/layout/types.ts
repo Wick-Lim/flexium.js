@@ -206,14 +206,16 @@ export interface BaseStyleProps {
 // Base props for all components
 export interface BaseComponentProps extends BaseStyleProps {
   id?: string
-  className?: string
+  /** CSS class name (unified API) */
+  class?: string
   style?: CSSProperties
   'aria-label'?: string
   'aria-labelledby'?: string
   'aria-describedby'?: string
   role?: string
   tabIndex?: number
-  onClick?: (event: MouseEvent) => void
+  /** Press/click handler (unified API for web and mobile) */
+  onPress?: (event: MouseEvent) => void
   onMouseEnter?: (event: MouseEvent) => void
   onMouseLeave?: (event: MouseEvent) => void
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

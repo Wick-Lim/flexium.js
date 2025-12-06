@@ -214,13 +214,6 @@ describe('Text', () => {
   })
 
   describe('Event Handlers', () => {
-    it('should handle onClick event', () => {
-      const onClick = () => {}
-      const fnode = Text({ onClick, children: 'Clickable' })
-
-      expect(fnode.props.onclick).toBe(onClick)
-    })
-
     it('should handle onPress event', () => {
       const onPress = () => {}
       const fnode = Text({ onPress, children: 'Pressable' })
@@ -228,15 +221,7 @@ describe('Text', () => {
       expect(fnode.props.onclick).toBe(onPress)
     })
 
-    it('should prioritize onClick over onPress', () => {
-      const onClick = () => {}
-      const onPress = () => {}
-      const fnode = Text({ onClick, onPress, children: 'Click' })
-
-      expect(fnode.props.onclick).toBe(onClick)
-    })
-
-    it('should handle undefined onClick', () => {
+    it('should handle undefined onPress', () => {
       const fnode = Text({ children: 'Text' })
 
       expect(fnode.props.onclick).toBeUndefined()
@@ -248,22 +233,6 @@ describe('Text', () => {
       const fnode = Text({ class: 'text-primary', children: 'Classed' })
 
       expect(fnode.props.class).toBe('text-primary')
-    })
-
-    it('should apply className prop', () => {
-      const fnode = Text({ className: 'text-secondary', children: 'Classed' })
-
-      expect(fnode.props.class).toBe('text-secondary')
-    })
-
-    it('should prioritize class over className', () => {
-      const fnode = Text({
-        class: 'class-prop',
-        className: 'className-prop',
-        children: 'Text',
-      })
-
-      expect(fnode.props.class).toBe('class-prop')
     })
 
     it('should handle undefined class', () => {
@@ -300,7 +269,7 @@ describe('Text', () => {
       const fnode = Text({
         children: 'Text',
         style: { color: 'blue' },
-        onClick: () => {},
+        onPress: () => {},
         class: 'test',
       })
 
@@ -310,7 +279,7 @@ describe('Text', () => {
 
   describe('Integration Scenarios', () => {
     it('should handle complete Text with all props', () => {
-      const onClick = () => {}
+      const onPress = () => {}
       const fnode = Text({
         children: 'Complete Text',
         style: {
@@ -319,7 +288,7 @@ describe('Text', () => {
           fontWeight: 'bold',
           padding: 10,
         },
-        onClick,
+        onPress,
         class: 'text-class',
         id: 'text-1',
       } as any)
@@ -332,7 +301,7 @@ describe('Text', () => {
         fontWeight: 'bold',
         padding: '10px',
       })
-      expect(fnode.props.onclick).toBe(onClick)
+      expect(fnode.props.onclick).toBe(onPress)
       expect(fnode.props.class).toBe('text-class')
       expect(fnode.props.id).toBe('text-1')
     })

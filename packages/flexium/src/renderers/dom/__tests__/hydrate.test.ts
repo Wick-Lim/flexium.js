@@ -57,7 +57,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { hydrate, type HydrateOptions } from '../hydrate'
-import { f, Fragment } from '../h'
+import { f, Fragment } from '../f'
 import { signal, effect } from '../../../core/signal'
 
 describe('DOM Hydration', () => {

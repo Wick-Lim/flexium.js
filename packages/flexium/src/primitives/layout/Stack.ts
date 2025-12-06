@@ -1,4 +1,4 @@
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { FNode } from '../../core/renderer'
 import {
   BaseComponentProps,
@@ -36,7 +36,7 @@ export function Stack(props: StackProps): FNode {
     align,
     justify,
     as = 'div',
-    className,
+    class: className,
     style: userStyle,
     ...styleProps
   } = props
@@ -89,5 +89,5 @@ export function Stack(props: StackProps): FNode {
   // To enforce stacking, we'd ideally inject style to children.
   // For now, let's just render the container.
 
-  return f(as, { style: finalStyles, className, ...props }, stackedChildren)
+  return f(as, { style: finalStyles, class: className, ...props }, stackedChildren)
 }

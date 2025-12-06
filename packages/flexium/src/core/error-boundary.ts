@@ -1,6 +1,6 @@
 import { createContext, useContext } from './context'
 import { signal } from './signal'
-import { f } from '../renderers/dom/h'
+import { f } from '../renderers/dom/f'
 import type { FNodeChild, FNode } from './renderer'
 import { ErrorCodes, logError } from './errors'
 

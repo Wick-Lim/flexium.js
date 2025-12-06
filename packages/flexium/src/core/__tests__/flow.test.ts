@@ -10,7 +10,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { signal } from '../signal'
 import { For, isForComponent, FOR_MARKER } from '../flow'
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { mountReactive } from '../../renderers/dom/reactive'
 
 describe('Control Flow Components', () => {

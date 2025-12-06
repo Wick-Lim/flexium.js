@@ -13,7 +13,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, createRoot, update } from '../render'
-import { f, Fragment } from '../h'
+import { f, Fragment } from '../f'
 import { signal } from '../../../core/signal'
 
 describe('DOM Render Module', () => {

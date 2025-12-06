@@ -18,23 +18,15 @@ import type { TextProps } from './types'
 import { normalizeStyle } from './utils'
 
 export function Text(props: TextProps): FNode {
-  const {
-    children,
-    style,
-    onClick,
-    onPress,
-    class: className,
-    className: cn,
-    ...rest
-  } = props
+  const { children, style, onPress, class: className, ...rest } = props
 
   return {
     type: 'span',
     props: {
       ...rest,
-      class: className || cn,
+      class: className,
       style: normalizeStyle(style),
-      onclick: onClick || onPress,
+      onclick: onPress,
     },
     children: Array.isArray(children) ? children : children ? [children] : [],
   }

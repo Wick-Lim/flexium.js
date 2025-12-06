@@ -8,7 +8,7 @@
 import { onCleanup } from '../../core/signal'
 import type { AnimatableProps, MotionController } from './Motion'
 import { MotionController as MC } from './Motion'
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 
 /**
  * Preset animation types

@@ -51,8 +51,8 @@ describe('Row', () => {
     expect(result.props.style.display).toBe('flex')
   })
 
-  it('should pass className', () => {
-    const result = Row({ children: [], className: 'my-row' }) as any
-    expect(result.props.className).toBe('my-row')
+  it('should pass class', () => {
+    const result = Row({ children: [], class: 'my-row' }) as any
+    expect(result.props.class).toBe('my-row')
   })
 })

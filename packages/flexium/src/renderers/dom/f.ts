@@ -91,10 +91,3 @@ export function isFNode(value: any): value is FNode {
     'children' in value
   )
 }
-
-/**
- * Create a text node
- */
-export function createTextVNode(text: string | number): string {
-  return String(text)
-}

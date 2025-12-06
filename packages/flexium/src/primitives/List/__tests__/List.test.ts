@@ -13,7 +13,7 @@ import {
   LIST_MARKER,
 } from '../List'
 import { signal } from '../../../core/signal'
-import { f } from '../../../renderers/dom/h'
+import { f } from '../../../renderers/dom/f'
 import type { FNode } from '../../../core/renderer'
 
 describe('List Component', () => {

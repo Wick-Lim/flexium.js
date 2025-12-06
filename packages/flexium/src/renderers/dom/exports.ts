@@ -15,7 +15,7 @@ export { render, update, createRoot } from './render'
 export { createReactiveRoot, mountReactive, reactiveText } from './reactive'
 
 // JSX factory
-export { f, Fragment, isFNode, createTextVNode } from './h'
+export { f, Fragment, isFNode } from './f'
 
 // Types from core
 export type {

@@ -8,7 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Router, Route, Link, Outlet, useRouter } from '../components'
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { mountReactive } from '../../renderers/dom/reactive'
 
 describe('Router Components', () => {

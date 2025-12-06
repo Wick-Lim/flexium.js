@@ -1,4 +1,4 @@
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { FNode } from '../../core/renderer'
 import {
   BaseComponentProps,
@@ -61,7 +61,7 @@ export function Grid(props: GridProps): FNode {
     autoColumns,
     autoRows,
     as = 'div',
-    className,
+    class: className,
     style: userStyle,
     ...styleProps
   } = props
@@ -102,5 +102,5 @@ export function Grid(props: GridProps): FNode {
     userStyle
   )
 
-  return f(as, { style: finalStyles, className, ...props }, children)
+  return f(as, { style: finalStyles, class: className, ...props }, children)
 }

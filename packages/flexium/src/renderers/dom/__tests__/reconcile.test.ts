@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { reconcileArrays } from '../reconcile'
-import { f } from '../h'
+import { f } from '../f'
 import { mountReactive, cleanupReactive } from '../reactive'
 import { signal } from '../../../core/signal'
 import type { FNode } from '../../../core/renderer'

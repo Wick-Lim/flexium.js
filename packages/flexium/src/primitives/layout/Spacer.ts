@@ -1,4 +1,4 @@
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { FNode } from '../../core/renderer'
 import {
   BaseComponentProps,
@@ -45,7 +45,7 @@ export function Spacer(props: SpacerProps): FNode {
     height,
     flex,
     as = 'div',
-    className,
+    class: className,
     style: userStyle,
     ...styleProps
   } = props
@@ -81,5 +81,5 @@ export function Spacer(props: SpacerProps): FNode {
 
   const finalStyles = mergeStyles({ ...styles, ...generatedStyles }, userStyle)
 
-  return f(as, { style: finalStyles, className, ...props }, [])
+  return f(as, { style: finalStyles, class: className, ...props }, [])
 }

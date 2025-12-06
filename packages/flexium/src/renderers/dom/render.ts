@@ -10,7 +10,7 @@
 
 import type { FNode, FNodeChild } from '../../core/renderer'
 import { domRenderer } from './index'
-import { isFNode } from './h'
+import { isFNode } from './f'
 import { mountReactive, createReactiveRoot } from './reactive'
 
 /**

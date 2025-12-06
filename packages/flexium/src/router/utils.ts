@@ -1,16 +1,6 @@
 import { RouteDef, RouteMatch } from './types'
 import type { FNodeChild, FNode } from '../core/renderer'
-
-/** Type guard to check if a value is an FNode */
-function isFNode(value: FNodeChild): value is FNode {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    'type' in value &&
-    'props' in value
-  )
-}
+import { isFNode } from '../renderers/dom/f'
 
 /**
  * Flatten the children of <Router> or <Route> into a route configuration tree.

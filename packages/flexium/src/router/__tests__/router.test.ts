@@ -9,7 +9,7 @@ import { matchPath } from '../core'
 import { matchRoutes, createRoutesFromChildren } from '../utils'
 import type { RouteDef } from '../types'
 import { useRouter, Router, Route, Link, Outlet } from '../components'
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { mountReactive } from '../../renderers/dom/reactive'
 
 describe('Router', () => {

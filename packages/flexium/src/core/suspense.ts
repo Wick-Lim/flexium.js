@@ -1,6 +1,6 @@
 import { createContext } from './context'
 import { signal } from './signal'
-import { f } from '../renderers/dom/h'
+import { f } from '../renderers/dom/f'
 import type { FNodeChild } from './renderer'
 
 export interface SuspenseContextValue {

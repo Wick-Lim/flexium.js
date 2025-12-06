@@ -1,4 +1,4 @@
-import { f } from '../../renderers/dom/h'
+import { f } from '../../renderers/dom/f'
 import { FNode } from '../../core/renderer'
 import {
   BaseComponentProps,
@@ -58,7 +58,7 @@ export function Column(props: ColumnProps): FNode {
     wrap,
     reverse = false,
     as = 'div',
-    className,
+    class: className,
     style: userStyle,
     // Base component props
     id,
@@ -66,7 +66,7 @@ export function Column(props: ColumnProps): FNode {
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ariaDescribedBy,
-    onClick,
+    onPress,
     onMouseEnter,
     onMouseLeave,
     // Extract style props
@@ -114,13 +114,13 @@ export function Column(props: ColumnProps): FNode {
     as,
     {
       style: finalStyles,
-      className,
+      class: className,
       id,
       role,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
       'aria-describedby': ariaDescribedBy,
-      onClick,
+      onclick: onPress,
       onMouseEnter,
       onMouseLeave,
     },

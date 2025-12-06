@@ -115,10 +115,10 @@ export interface TextProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children?: any
   style?: TextStyle
-  onClick?: () => void
+  /** Press/click handler (unified API for web and mobile) */
   onPress?: () => void
+  /** CSS class name */
   class?: string
-  className?: string
 }
 
 /**
@@ -157,8 +157,10 @@ export interface ScrollViewProps {
   children?: any
   style?: CommonStyle
   horizontal?: boolean
-  showsHorizontalScrollIndicator?: boolean
-  showsVerticalScrollIndicator?: boolean
+  /** Show horizontal scrollbar (default: true) */
+  showScrollbarX?: boolean
+  /** Show vertical scrollbar (default: true) */
+  showScrollbarY?: boolean
 }
 
 // ===== Canvas Types =====
