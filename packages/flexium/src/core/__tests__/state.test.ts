@@ -1,17 +1,31 @@
 /**
  * State API Tests
  *
- * Tests for the unified state() API
+ * Tests for the unified state() API with StateProxy
+ *
+ * Note: state() returns a Proxy that behaves like the value.
+ * Use +proxy for numbers, String(proxy) for strings, or proxy == value for comparison.
+ *
  * @vitest-environment jsdom
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { state, clearGlobalState } from '../state'
+import { state, clearGlobalState, STATE_SIGNAL } from '../state'
 import { effect } from '../signal'
 
 // Helper to wait for microtasks
 const tick = () => new Promise(resolve => queueMicrotask(resolve))
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Helper to extract primitive value from StateProxy
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const val = <T>(proxy: T): T => {
+  if (proxy && (typeof proxy === 'object' || typeof proxy === 'function') && STATE_SIGNAL in (proxy as object)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (proxy as any)[STATE_SIGNAL].value
+  }
+  return proxy
+}
 
 describe('State API', () => {
   beforeEach(() => {
@@ -21,7 +35,10 @@ describe('State API', () => {
   describe('Local Value State', () => {
     it('should create state with initial value', () => {
       const [count] = state(0)
-      expect(count).toBe(0)
+      expect(val(count)).toBe(0)
+      // Also verify arithmetic works
+      expect(+count).toBe(0)
+      expect(count + 1).toBe(1)
     })
 
     it('should update state with setter', async () => {
@@ -29,9 +46,9 @@ describe('State API', () => {
 
       effect(() => {
         const [count, setCount] = state(0, { key: 'counter1' })
-        currentCount = count
+        currentCount = +count
 
-        if (count === 0) {
+        if (+count === 0) {
           setCount(5)
         }
       })
@@ -46,9 +63,9 @@ describe('State API', () => {
 
       effect(() => {
         const [count, setCount] = state(10, { key: 'counter2' })
-        currentCount = count
+        currentCount = +count
 
-        if (count === 10) {
+        if (+count === 10) {
           setCount((prev) => prev + 5)
         }
       })
@@ -60,34 +77,40 @@ describe('State API', () => {
 
     it('should handle string values', () => {
       const [name] = state('Alice')
-      expect(name).toBe('Alice')
+      expect(String(name)).toBe('Alice')
+      expect(`Hello ${name}`).toBe('Hello Alice')
     })
 
     it('should handle object values', () => {
       const [user] = state({ name: 'Alice', age: 25 })
-      expect(user).toEqual({ name: 'Alice', age: 25 })
+      expect(val(user)).toEqual({ name: 'Alice', age: 25 })
+      // Proxy allows property access
+      expect(user.name).toBe('Alice')
+      expect(user.age).toBe(25)
     })
 
     it('should handle array values', () => {
       const [items] = state(['a', 'b', 'c'])
-      expect(items).toEqual(['a', 'b', 'c'])
+      expect(val(items)).toEqual(['a', 'b', 'c'])
+      expect(items.length).toBe(3)
+      expect(items[0]).toBe('a')
     })
 
     it('should handle null and undefined', () => {
       const [value] = state<string | null>(null)
-      expect(value).toBeNull()
+      expect(val(value)).toBeNull()
     })
 
     it('should handle boolean values', () => {
       const [flag] = state(false)
-      expect(flag).toBe(false)
+      expect(val(flag)).toBe(false)
     })
   })
 
   describe('Global Keyed State', () => {
     it('should create global state with key', () => {
       const [theme] = state('light', { key: 'theme' })
-      expect(theme).toBe('light')
+      expect(String(theme)).toBe('light')
     })
 
     it('should share state with same key', async () => {
@@ -95,9 +118,9 @@ describe('State API', () => {
 
       effect(() => {
         const [theme1, setTheme1] = state('light', { key: 'shared-theme' })
-        theme1Val = theme1
+        theme1Val = String(theme1)
 
-        if (theme1 === 'light') {
+        if (String(theme1) === 'light') {
           setTheme1('dark')
         }
       })
@@ -109,15 +132,15 @@ describe('State API', () => {
       const [theme2] = state('light', { key: 'shared-theme' })
 
       expect(theme1Val).toBe('dark')
-      expect(theme2).toBe('dark')
+      expect(String(theme2)).toBe('dark')
     })
 
     it('should not share state with different keys', () => {
       const [count1] = state(5, { key: 'count-a' })
       const [count2] = state(10, { key: 'count-b' })
 
-      expect(count1).toBe(5)
-      expect(count2).toBe(10)
+      expect(+count1).toBe(5)
+      expect(+count2).toBe(10)
     })
 
     it('should persist value across multiple accesses', async () => {
@@ -129,7 +152,7 @@ describe('State API', () => {
       await tick()
 
       const [counter2] = state(0, { key: 'persistent-counter' })
-      expect(counter2).toBe(42)
+      expect(+counter2).toBe(42)
     })
 
     it('should clear global state registry', async () => {
@@ -142,7 +165,7 @@ describe('State API', () => {
       clearGlobalState()
 
       const [count2] = state(0, { key: 'clear-test' })
-      expect(count2).toBe(0)
+      expect(+count2).toBe(0)
     })
   })
 
@@ -156,9 +179,9 @@ describe('State API', () => {
       let currentVal = 0
 
       effect(() => {
-        const [val, setVal] = state(0, { key: 'direct-val' })
-        currentVal = val
-        if (val === 0) setVal(42)
+        const [v, setVal] = state(0, { key: 'direct-val' })
+        currentVal = +v
+        if (+v === 0) setVal(42)
       })
 
       await tick()
@@ -170,9 +193,9 @@ describe('State API', () => {
       let currentVal = 0
 
       effect(() => {
-        const [val, setVal] = state(10, { key: 'updater-fn' })
-        currentVal = val
-        if (val === 10) setVal((prev) => prev * 2)
+        const [v, setVal] = state(10, { key: 'updater-fn' })
+        currentVal = +v
+        if (+v === 10) setVal((prev) => prev * 2)
       })
 
       await tick()
@@ -188,7 +211,9 @@ describe('State API', () => {
       })
 
       expect(typeof refetch).toBe('function')
-      expect(typeof isLoading).toBe('boolean')
+      // isLoading is now a callable proxy (function type)
+      expect(typeof isLoading).toBe('function')
+      expect(val(isLoading)).toBe(true) // Initially loading
     })
 
     it('should return refetch function', () => {
@@ -196,18 +221,19 @@ describe('State API', () => {
       expect(typeof refetch).toBe('function')
     })
 
-    it('should return loading state', () => {
+    it('should return loading proxy', () => {
       const [, , isLoading] = state(async () => 'data')
-      expect(typeof isLoading).toBe('boolean')
+      // isLoading is a callable proxy (function type)
+      expect(typeof isLoading).toBe('function')
     })
 
-    it('should return error', () => {
+    it('should return error proxy', () => {
       const [, , , error] = state(async () => 'data')
-      expect(error).toBeUndefined()
+      expect(val(error)).toBeUndefined()
     })
 
     it('should resolve async data', async () => {
-      const [data, refetch, isLoading] = state(async () => {
+      const [data] = state(async () => {
         await sleep(10)
         return 'resolved'
       }, { key: 'async-resolve' })
@@ -215,14 +241,45 @@ describe('State API', () => {
       await sleep(50)
 
       const [data2] = state(async () => 'resolved', { key: 'async-resolve' })
-      expect(data2).toBe('resolved')
+      expect(val(data2)).toBe('resolved')
+    })
+  })
+
+  describe('StateProxy Features', () => {
+    it('should work with arithmetic operations', () => {
+      const [count] = state(5)
+      expect(count + 10).toBe(15)
+      expect(count * 2).toBe(10)
+      expect(count - 3).toBe(2)
+    })
+
+    it('should work with template literals', () => {
+      const [name] = state('World')
+      expect(`Hello, ${name}!`).toBe('Hello, World!')
+    })
+
+    it('should work with loose equality', () => {
+      const [count] = state(5)
+      expect(count == 5).toBe(true)
+      expect(count == '5').toBe(true)
+    })
+
+    it('should update proxy value when signal changes', async () => {
+      const [count, setCount] = state(0, { key: 'update-test' })
+      expect(+count).toBe(0)
+
+      setCount(10)
+      await tick()
+
+      // Same proxy should now return updated value
+      expect(+count).toBe(10)
     })
   })
 
   describe('Edge Cases', () => {
     it('should handle empty key string', () => {
       const [count] = state(5, { key: '' })
-      expect(count).toBe(5)
+      expect(+count).toBe(5)
     })
 
     it('should handle rapid updates in effect', async () => {
@@ -231,11 +288,11 @@ describe('State API', () => {
 
       effect(() => {
         const [count, setCount] = state(0, { key: 'rapid-update' })
-        finalCount = count
+        finalCount = +count
         iterations++
 
-        if (count < 5 && iterations < 10) {
-          setCount(count + 1)
+        if (+count < 5 && iterations < 10) {
+          setCount(+count + 1)
         }
       })
 
@@ -249,9 +306,11 @@ describe('State API', () => {
         user: { name: 'Alice', settings: { theme: 'light' } },
       })
 
-      expect(data).toEqual({
+      expect(val(data)).toEqual({
         user: { name: 'Alice', settings: { theme: 'light' } },
       })
+      expect(data.user.name).toBe('Alice')
+      expect(data.user.settings.theme).toBe('light')
     })
 
     it('should handle array of objects', () => {
@@ -259,8 +318,14 @@ describe('State API', () => {
         { id: 1, text: 'Learn Flexium', done: false },
       ])
 
-      expect(todos).toHaveLength(1)
+      expect(todos.length).toBe(1)
       expect(todos[0].text).toBe('Learn Flexium')
+    })
+
+    it('should support array methods', () => {
+      const [items] = state([1, 2, 3])
+      expect(items.map((x: number) => x * 2)).toEqual([2, 4, 6])
+      expect(items.filter((x: number) => x > 1)).toEqual([2, 3])
     })
   })
 })

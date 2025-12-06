@@ -1,5 +1,5 @@
 import { RouteDef, RouteMatch } from './types'
-import type { FNodeChild, FNode } from '../core/renderer'
+import type { FNodeChild } from '../core/renderer'
 import { isFNode } from '../renderers/dom/f'
 
 /**

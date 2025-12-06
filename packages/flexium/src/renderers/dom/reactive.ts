@@ -27,7 +27,7 @@ import {
   For,
   ForComponent,
 } from '../../core/flow'
-// StateGetter removed - state now returns value directly
+import { beginComponentScope, endComponentScope, isStateProxy, getStateSignal } from '../../core/state'
 import {
   isListComponent,
   mountListComponent,
@@ -104,6 +104,66 @@ export function mountReactive(
     REACTIVE_BINDINGS.get(startMarker)!.add(forDispose)
 
     return container ? startMarker : parent
+  }
+
+  // Handle StateProxy (from state() API)
+  if (isStateProxy(vnode)) {
+    const sig = getStateSignal(vnode)
+    if (sig) {
+      const startNode = document.createTextNode('')
+      const parent = container || document.createDocumentFragment()
+      domRenderer.appendChild(parent, startNode)
+
+      let currentNode: Node | null = startNode
+
+      const dispose = effect(() => {
+        const value = sig.value
+        const currentContainer = startNode.parentNode
+        if (!currentContainer) return
+
+        if (
+          (typeof value === 'string' || typeof value === 'number') &&
+          currentNode &&
+          currentNode.nodeType === Node.TEXT_NODE &&
+          currentNode !== startNode
+        ) {
+          domRenderer.updateTextNode(currentNode as Text, String(value))
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const newNode = mountReactive(value as any)
+          if (newNode) {
+            if (currentNode && currentNode !== startNode) {
+              if (currentNode.parentNode === currentContainer) {
+                currentContainer.replaceChild(newNode, currentNode)
+              } else {
+                currentContainer.insertBefore(newNode, startNode.nextSibling)
+              }
+            } else {
+              currentContainer.insertBefore(newNode, startNode.nextSibling)
+            }
+            currentNode = newNode
+          } else {
+            if (
+              currentNode &&
+              currentNode !== startNode &&
+              currentNode.parentNode === currentContainer
+            ) {
+              try {
+                currentContainer.removeChild(currentNode)
+              } catch (e) {}
+            }
+            currentNode = startNode
+          }
+        }
+      })
+
+      if (!REACTIVE_BINDINGS.has(startNode)) {
+        REACTIVE_BINDINGS.set(startNode, new Set())
+      }
+      REACTIVE_BINDINGS.get(startNode)!.add(dispose)
+
+      return container ? startNode : parent
+    }
   }
 
   // Handle signals and functions (reactive children)
@@ -254,6 +314,10 @@ export function mountReactive(
       const parent = container || document.createDocumentFragment()
       domRenderer.appendChild(parent, startNode)
 
+      // Generate stable component ID ONCE, outside the effect
+      const componentName = component.name || 'Anonymous'
+      const componentId = `${componentName}_${Math.random().toString(36).slice(2)}`
+
       let currentNodes: Node[] = []
       const contextSnapshot = captureContext()
 
@@ -288,7 +352,9 @@ export function mountReactive(
 
           try {
             let result
+
             try {
+              beginComponentScope(componentId)
               result = component({ ...vnode.props, children: vnode.children })
             } catch (err) {
               if (err instanceof Promise) {
@@ -308,6 +374,8 @@ export function mountReactive(
                   throw err
                 }
               }
+            } finally {
+              endComponentScope()
             }
 
             const fragment = document.createDocumentFragment()

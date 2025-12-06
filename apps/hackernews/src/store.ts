@@ -73,7 +73,7 @@ export async function loadStories(type: string) {
 export async function loadItem(id: number) {
     try {
         const [item, setItem] = useItem(id);
-        if (item) return; // Already loaded
+        if (item()) return; // Already loaded
 
         const data = await fetchItem(id);
         if (data) {
