@@ -1,9 +1,11 @@
 import { FNode } from '../core/renderer'
-import { StateGetter } from '../core/state'
 import { signal, effect, Signal } from './signal'
 
+/** Getter type for reactive arrays (signal or function) */
+type ArrayGetter<T> = Signal<T[]> | (() => T[])
+
 interface ForProps<T> {
-  each: StateGetter<T[]>
+  each: ArrayGetter<T>
   children:
     | ((item: T, index: () => number) => FNode)
     | ((item: T, index: () => number) => FNode)[]
@@ -57,7 +59,7 @@ export function For<T>(props: ForProps<T>): ForComponent<T> {
 
 export interface ForComponent<T> {
   [FOR_MARKER]: true
-  each: StateGetter<T[]>
+  each: ArrayGetter<T>
   renderItem: (item: T, index: () => number) => FNode
 }
 

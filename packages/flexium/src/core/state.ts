@@ -1,4 +1,5 @@
 import { signal, createResource } from './signal'
+import type { Signal, Resource } from './signal'
 
 /** Internal state object that may be a Signal or Resource */
 interface StateObject {
@@ -10,6 +11,7 @@ interface StateObject {
   latest?: unknown
   read?: () => unknown
   _stateActions?: StateActions
+  _signal?: Signal<unknown> | Resource<unknown>
 }
 
 /** Actions available for state mutation */
@@ -19,95 +21,82 @@ interface StateActions {
 }
 
 // Global registry for keyed states
-// We store either a Signal, Resource, or Computed
 const globalStateRegistry = new Map<string, StateObject>()
 
-// Enhanced Getter Type: acts as accessor but carries Resource properties if applicable
-export type StateGetter<T> = {
-  (): T
-  loading: boolean
-  error: unknown
-  state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'
-  latest: T | undefined
-  read: () => T | undefined
-}
-
-// Enhanced Setter Type: acts as setter but carries Resource actions
-export type StateSetter<T> = {
-  (newValue: T | ((prev: T) => T)): void
-  mutate: (v: T | undefined) => void
-  refetch: () => void
-}
+/** Setter function type */
+export type StateSetter<T> = (newValue: T | ((prev: T) => T)) => void
 
 /**
- * Unified State API
+ * Unified State API (React-style)
+ *
+ * Returns value directly - no .value needed!
+ * Component will re-render when state changes (if called inside effect/component).
  *
  * Usage:
- * 1. Local Value: const [count, setCount] = state(0);
- * 2. Local Resource: const [data, actions] = state(async () => fetch('/api').then(r => r.json()));
- * 3. Global Value: const [theme, setTheme] = state('light', { key: 'theme' });
- * 4. Global Resource: const [user, actions] = state(fetchUser, { key: 'user' });
- * 5. Computed (Derived): const [double] = state(() => count() * 2);
+ * 1. Simple state: const [count, setCount] = state(0)
+ * 2. Async state: const [data, refetch, isLoading, error] = state(async () => fetch(...))
+ * 3. Global state: const [theme, setTheme] = state('light', { key: 'theme' })
  *
- * @param initialValueOrFetcher - Initial value, or a function to derive/fetch state.
- * @param options - Optional settings (e.g., global key).
+ * @example
+ * ```tsx
+ * function Counter() {
+ *   const [count, setCount] = state(0)
+ *   return <Button onPress={() => setCount(count + 1)}>{count}</Button>
+ * }
+ * ```
  */
+export function state<T>(
+  initialValue: T,
+  options?: { key?: string }
+): [T, StateSetter<T>]
+
+export function state<T>(
+  fetcher: () => Promise<T>,
+  options?: { key?: string }
+): [T | undefined, () => void, boolean, unknown]
+
 export function state<T>(
   initialValueOrFetcher: T | (() => T | Promise<T>),
   options?: { key?: string }
-): [StateGetter<T>, StateSetter<T>] {
+): [T, StateSetter<T>] | [T | undefined, () => void, boolean, unknown] {
   let s: StateObject
   let actions: StateActions = {}
+  let isAsync = false
 
   const key = options?.key
 
   // 1. Check Global Registry
   if (key && typeof key === 'string' && globalStateRegistry.has(key)) {
     const cached = globalStateRegistry.get(key)!
-    // We return the cached signal/resource directly
-    // However, we need to reconstruct the getter/setter wrapper to match the return type
-    // But wait, we need to know if the cached one is a Resource or a Signal to attach correct actions?
-    // Actually, we can store the *result tuple* or the *base signal object* and re-wrap.
-    // Storing the base object (Signal or Resource) is better.
     s = cached
-
-    // Re-derive actions based on whether it's a resource or signal
-    // Ideally, we should store the *actions* too if it's a resource.
-    // Let's simplify: Signal/Resource objects already contain necessary methods.
-    // For Resource: it has internal mechanics. But `createResource` returns [resource, actions].
-    // We need to store the PAIR in the registry if we want to fully restore it.
+    isAsync = 'loading' in cached && cached._stateActions?.refetch !== undefined
   }
 
   // 2. Create New (if not in registry)
   else {
     if (typeof initialValueOrFetcher === 'function') {
-      // It's a function -> Treat as Resource source
-      // Pass the function as 'source' to createResource.
-      // createResource tracks dependencies in 'source' execution.
-      // The fetcher simply receives the result of source() and returns it.
-      // This supports both sync computed values (fn returns value) and async resources (fn returns Promise).
-
       const fn = initialValueOrFetcher as () => T | Promise<T>
 
+      // Check if it's async by looking at return type
+      // We'll treat all functions as potential async for simplicity
       const [res, resActions] = createResource(
         fn,
-        async (val) => val // The value computed by fn is passed here
+        async (val) => val
       )
 
       s = res as unknown as StateObject
+      s._signal = res as unknown as Resource<unknown>
       actions = resActions as StateActions
+      isAsync = true
     } else {
       // It's a value -> Create Signal
-      s = signal<T>(initialValueOrFetcher) as unknown as StateObject
+      const sig = signal<T>(initialValueOrFetcher)
+      s = sig as unknown as StateObject
+      s._signal = sig as unknown as Signal<unknown>
     }
 
     // Save to registry if key provided
     if (key && typeof key === 'string') {
-      // We need to store both signal and actions to restore them later?
-      // For Signal, actions is empty (just set).
-      // For Resource, actions has refetch.
-      // Let's store the object `s` and attach `actions` to it or store a wrapper?
-      // Let's store the object `s` and attach `_actions` property to it for retrieval.
       s._stateActions = actions
       globalStateRegistry.set(key, s)
     }
@@ -118,57 +107,29 @@ export function state<T>(
     actions = s._stateActions
   }
 
-  // 3. Construct Return Tuple
+  // 3. Read current value (this creates subscription if inside effect)
+  const value = s.value as T
 
-  // Getter Wrapper
-  const getter = (() => s.value as T) as StateGetter<T>
+  if (isAsync) {
+    // Async state: [value, refetch, isLoading, error]
+    const refetch = actions.refetch || (() => {})
+    const isLoading = s.loading || false
+    const error = s.error
 
-  // Attach Resource properties to getter (if available)
-  // This allows access like: data.loading, data.error
-  Object.defineProperties(getter, {
-    loading: { get: () => s.loading || false },
-    error: { get: () => s.error },
-    state: { get: () => s.state || 'ready' },
-    latest: { get: () => (s.latest ?? s.peek()) as T | undefined },
-    read: { value: s.read || (() => s.value as T) },
-  })
+    return [value, refetch, isLoading, error] as [T | undefined, () => void, boolean, unknown]
+  }
 
-  // Setter Wrapper
-  const setter = ((newValue: T | ((prev: T) => T)) => {
-    // Use mutate if available (Resource), otherwise set (Signal)
-    if (actions.mutate) {
-      // Resource mutate usually takes value directly.
-      // If function, we need to handle it manually.
-      if (typeof newValue === 'function') {
-        const fn = newValue as (prev: T) => T
-        actions.mutate(fn(s.peek() as T))
-      } else {
-        actions.mutate(newValue)
-      }
+  // Sync state: [value, setter]
+  const setter: StateSetter<T> = (newValue) => {
+    if (typeof newValue === 'function') {
+      const fn = newValue as (prev: T) => T
+      s.value = fn(s.peek() as T)
     } else {
-      // Signal set
-      if (typeof newValue === 'function') {
-        const fn = newValue as (prev: T) => T
-        s.value = fn(s.peek() as T)
-      } else {
-        s.value = newValue
-      }
+      s.value = newValue
     }
-  }) as StateSetter<T>
+  }
 
-  // Attach Actions to setter
-  setter.mutate =
-    (actions.mutate as StateSetter<T>['mutate']) ||
-    ((v: T | undefined) => {
-      if (v !== undefined) s.value = v
-    })
-  setter.refetch =
-    actions.refetch ||
-    (() => {
-      /* no-op for simple state */
-    })
-
-  return [getter, setter]
+  return [value, setter]
 }
 
 /**

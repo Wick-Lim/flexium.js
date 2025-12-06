@@ -27,7 +27,7 @@ import {
   For,
   ForComponent,
 } from '../../core/flow'
-import type { StateGetter } from '../../core/state'
+// StateGetter removed - state now returns value directly
 import {
   isListComponent,
   mountListComponent,
@@ -238,7 +238,7 @@ export function mountReactive(
     // Handle For component specially (direct DOM caching)
     if (vnode.type === For) {
       const forComp = For({
-        each: vnode.props.each as StateGetter<unknown[]>,
+        each: vnode.props.each as (() => unknown[]),
         children: vnode.children as unknown as ((
           item: unknown,
           index: () => number

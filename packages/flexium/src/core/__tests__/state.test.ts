@@ -7,287 +7,260 @@
 
 import { describe, it, expect, beforeEach } from 'vitest'
 import { state, clearGlobalState } from '../state'
+import { effect } from '../signal'
+
+// Helper to wait for microtasks
+const tick = () => new Promise(resolve => queueMicrotask(resolve))
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 describe('State API', () => {
   beforeEach(() => {
-    // Clear global state registry before each test
     clearGlobalState()
   })
 
   describe('Local Value State', () => {
     it('should create state with initial value', () => {
       const [count] = state(0)
-      expect(count()).toBe(0)
+      expect(count).toBe(0)
     })
 
-    it('should update state with setter', () => {
-      const [count, setCount] = state(0)
+    it('should update state with setter', async () => {
+      let currentCount = 0
 
-      setCount(5)
-      expect(count()).toBe(5)
+      effect(() => {
+        const [count, setCount] = state(0, { key: 'counter1' })
+        currentCount = count
+
+        if (count === 0) {
+          setCount(5)
+        }
+      })
+
+      await tick()
+      await tick()
+      expect(currentCount).toBe(5)
     })
 
-    it('should update state with function setter', () => {
-      const [count, setCount] = state(10)
+    it('should update state with function setter', async () => {
+      let currentCount = 0
 
-      setCount((prev) => prev + 5)
-      expect(count()).toBe(15)
+      effect(() => {
+        const [count, setCount] = state(10, { key: 'counter2' })
+        currentCount = count
+
+        if (count === 10) {
+          setCount((prev) => prev + 5)
+        }
+      })
+
+      await tick()
+      await tick()
+      expect(currentCount).toBe(15)
     })
 
     it('should handle string values', () => {
-      const [name, setName] = state('Alice')
-
-      expect(name()).toBe('Alice')
-
-      setName('Bob')
-      expect(name()).toBe('Bob')
+      const [name] = state('Alice')
+      expect(name).toBe('Alice')
     })
 
     it('should handle object values', () => {
-      const [user, setUser] = state({ name: 'Alice', age: 25 })
-
-      expect(user()).toEqual({ name: 'Alice', age: 25 })
-
-      setUser({ name: 'Bob', age: 30 })
-      expect(user()).toEqual({ name: 'Bob', age: 30 })
+      const [user] = state({ name: 'Alice', age: 25 })
+      expect(user).toEqual({ name: 'Alice', age: 25 })
     })
 
     it('should handle array values', () => {
-      const [items, setItems] = state(['a', 'b', 'c'])
-
-      expect(items()).toEqual(['a', 'b', 'c'])
-
-      setItems(['x', 'y'])
-      expect(items()).toEqual(['x', 'y'])
+      const [items] = state(['a', 'b', 'c'])
+      expect(items).toEqual(['a', 'b', 'c'])
     })
 
     it('should handle null and undefined', () => {
-      const [value, setValue] = state<string | null>(null)
-
-      expect(value()).toBeNull()
-
-      setValue('hello')
-      expect(value()).toBe('hello')
-
-      setValue(null)
-      expect(value()).toBeNull()
+      const [value] = state<string | null>(null)
+      expect(value).toBeNull()
     })
 
     it('should handle boolean values', () => {
-      const [flag, setFlag] = state(false)
-
-      expect(flag()).toBe(false)
-
-      setFlag(true)
-      expect(flag()).toBe(true)
-
-      setFlag((prev) => !prev)
-      expect(flag()).toBe(false)
+      const [flag] = state(false)
+      expect(flag).toBe(false)
     })
   })
 
   describe('Global Keyed State', () => {
     it('should create global state with key', () => {
-      const [theme, setTheme] = state('light', { key: 'theme' })
-
-      expect(theme()).toBe('light')
-
-      setTheme('dark')
-      expect(theme()).toBe('dark')
+      const [theme] = state('light', { key: 'theme' })
+      expect(theme).toBe('light')
     })
 
-    it('should share state with same key', () => {
-      const [theme1, setTheme1] = state('light', { key: 'shared-theme' })
+    it('should share state with same key', async () => {
+      let theme1Val = ''
+
+      effect(() => {
+        const [theme1, setTheme1] = state('light', { key: 'shared-theme' })
+        theme1Val = theme1
+
+        if (theme1 === 'light') {
+          setTheme1('dark')
+        }
+      })
+
+      await tick()
+      await tick()
+
+      // Second access should get updated value
       const [theme2] = state('light', { key: 'shared-theme' })
 
-      expect(theme1()).toBe('light')
-      expect(theme2()).toBe('light')
-
-      setTheme1('dark')
-
-      // Both should reflect the update
-      expect(theme1()).toBe('dark')
-      expect(theme2()).toBe('dark')
+      expect(theme1Val).toBe('dark')
+      expect(theme2).toBe('dark')
     })
 
     it('should not share state with different keys', () => {
-      const [count1, setCount1] = state(0, { key: 'count-a' })
-      const [count2, setCount2] = state(0, { key: 'count-b' })
+      const [count1] = state(5, { key: 'count-a' })
+      const [count2] = state(10, { key: 'count-b' })
 
-      setCount1(5)
-      setCount2(10)
-
-      expect(count1()).toBe(5)
-      expect(count2()).toBe(10)
+      expect(count1).toBe(5)
+      expect(count2).toBe(10)
     })
 
-    it('should persist value across multiple accesses', () => {
-      // First access
-      const [counter1, setCounter1] = state(0, { key: 'persistent-counter' })
-      setCounter1(42)
+    it('should persist value across multiple accesses', async () => {
+      effect(() => {
+        const [, setCounter] = state(0, { key: 'persistent-counter' })
+        setCounter(42)
+      })
 
-      // Second access with same key - should get the existing value
+      await tick()
+
       const [counter2] = state(0, { key: 'persistent-counter' })
-      expect(counter2()).toBe(42)
+      expect(counter2).toBe(42)
     })
 
-    it('should clear global state registry', () => {
-      const [count1, setCount1] = state(100, { key: 'clear-test' })
-      expect(count1()).toBe(100)
+    it('should clear global state registry', async () => {
+      effect(() => {
+        const [, setCount] = state(100, { key: 'clear-test' })
+        setCount(100)
+      })
 
-      // Clear registry
+      await tick()
       clearGlobalState()
 
-      // New state with same key should start fresh
       const [count2] = state(0, { key: 'clear-test' })
-      expect(count2()).toBe(0)
+      expect(count2).toBe(0)
     })
   })
 
-  describe('Getter Properties', () => {
-    it('should have loading property (false for local state)', () => {
-      const [count] = state(0)
-      expect(count.loading).toBe(false)
+  describe('Setter Function', () => {
+    it('should return a setter function', () => {
+      const [, setCount] = state(0)
+      expect(typeof setCount).toBe('function')
     })
 
-    it('should have error property (undefined for local state)', () => {
-      const [count] = state(0)
-      expect(count.error).toBeUndefined()
+    it('should accept direct value', async () => {
+      let currentVal = 0
+
+      effect(() => {
+        const [val, setVal] = state(0, { key: 'direct-val' })
+        currentVal = val
+        if (val === 0) setVal(42)
+      })
+
+      await tick()
+      await tick()
+      expect(currentVal).toBe(42)
     })
 
-    it('should have state property (ready for local state)', () => {
-      const [count] = state(0)
-      expect(count.state).toBe('ready')
-    })
+    it('should accept updater function', async () => {
+      let currentVal = 0
 
-    it('should have latest property', () => {
-      const [count, setCount] = state(5)
-      expect(count.latest).toBe(5)
+      effect(() => {
+        const [val, setVal] = state(10, { key: 'updater-fn' })
+        currentVal = val
+        if (val === 10) setVal((prev) => prev * 2)
+      })
 
-      setCount(10)
-      expect(count.latest).toBe(10)
-    })
-
-    it('should have read method', () => {
-      const [count] = state(42)
-      expect(count.read()).toBe(42)
-    })
-  })
-
-  describe('Setter Properties', () => {
-    it('should have mutate method', () => {
-      const [count, setCount] = state(0)
-
-      setCount.mutate(100)
-      expect(count()).toBe(100)
-    })
-
-    it('should have refetch method (no-op for local state)', () => {
-      const [count, setCount] = state(0)
-
-      // Should not throw
-      expect(() => setCount.refetch()).not.toThrow()
+      await tick()
+      await tick()
+      expect(currentVal).toBe(20)
     })
   })
 
   describe('Async Resource State', () => {
     it('should create state with async function', async () => {
-      const [data] = state(async () => {
+      const [, refetch, isLoading] = state(async () => {
         return 'fetched data'
       })
 
-      // Wait for async to resolve
-      await new Promise((resolve) => setTimeout(resolve, 10))
-
-      expect(data()).toBe('fetched data')
+      expect(typeof refetch).toBe('function')
+      expect(typeof isLoading).toBe('boolean')
     })
 
-    it('should handle loading state for async', async () => {
-      const [data] = state(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 50))
-        return 'loaded'
-      })
-
-      // Initially might be loading
-      // Note: Actual behavior depends on resource implementation
-      expect(data.loading).toBeDefined()
+    it('should return refetch function', () => {
+      const [, refetch] = state(async () => 'data')
+      expect(typeof refetch).toBe('function')
     })
 
-    it('should handle async with delay', async () => {
-      const [data] = state(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 20))
-        return { message: 'hello' }
-      })
-
-      await new Promise((resolve) => setTimeout(resolve, 50))
-
-      expect(data()).toEqual({ message: 'hello' })
-    })
-  })
-
-  describe('Computed/Derived State', () => {
-    it('should create computed state from sync function', async () => {
-      const [doubled] = state(() => 5 * 2)
-
-      // Computed uses resource internally, needs async tick
-      await new Promise((resolve) => setTimeout(resolve, 10))
-
-      expect(doubled()).toBe(10)
+    it('should return loading state', () => {
+      const [, , isLoading] = state(async () => 'data')
+      expect(typeof isLoading).toBe('boolean')
     })
 
-    it('should support function returning value', async () => {
-      const baseValue = 7
-      const [computed] = state(() => baseValue * 3)
+    it('should return error', () => {
+      const [, , , error] = state(async () => 'data')
+      expect(error).toBeUndefined()
+    })
 
-      // Wait for resource to resolve
-      await new Promise((resolve) => setTimeout(resolve, 10))
+    it('should resolve async data', async () => {
+      const [data, refetch, isLoading] = state(async () => {
+        await sleep(10)
+        return 'resolved'
+      }, { key: 'async-resolve' })
 
-      expect(computed()).toBe(21)
+      await sleep(50)
+
+      const [data2] = state(async () => 'resolved', { key: 'async-resolve' })
+      expect(data2).toBe('resolved')
     })
   })
 
   describe('Edge Cases', () => {
     it('should handle empty key string', () => {
-      const [count, setCount] = state(0, { key: '' })
-
-      // Empty string key should work like local state (no registry)
-      setCount(5)
-      expect(count()).toBe(5)
+      const [count] = state(5, { key: '' })
+      expect(count).toBe(5)
     })
 
-    it('should handle rapid updates', () => {
-      const [count, setCount] = state(0)
+    it('should handle rapid updates in effect', async () => {
+      let finalCount = 0
+      let iterations = 0
 
-      for (let i = 0; i < 100; i++) {
-        setCount((prev) => prev + 1)
-      }
+      effect(() => {
+        const [count, setCount] = state(0, { key: 'rapid-update' })
+        finalCount = count
+        iterations++
 
-      expect(count()).toBe(100)
+        if (count < 5 && iterations < 10) {
+          setCount(count + 1)
+        }
+      })
+
+      // Wait for multiple iterations
+      await sleep(50)
+      expect(finalCount).toBe(5)
     })
 
-    it('should handle nested object updates', () => {
-      const [data, setData] = state({
+    it('should handle nested object values', () => {
+      const [data] = state({
         user: { name: 'Alice', settings: { theme: 'light' } },
       })
 
-      setData({
-        user: { name: 'Bob', settings: { theme: 'dark' } },
-      })
-
-      expect(data()).toEqual({
-        user: { name: 'Bob', settings: { theme: 'dark' } },
+      expect(data).toEqual({
+        user: { name: 'Alice', settings: { theme: 'light' } },
       })
     })
 
-    it('should handle functional update with complex state', () => {
-      const [todos, setTodos] = state([
+    it('should handle array of objects', () => {
+      const [todos] = state([
         { id: 1, text: 'Learn Flexium', done: false },
       ])
 
-      setTodos((prev) => [...prev, { id: 2, text: 'Build app', done: false }])
-
-      expect(todos()).toHaveLength(2)
-      expect(todos()[1].text).toBe('Build app')
+      expect(todos).toHaveLength(1)
+      expect(todos[0].text).toBe('Learn Flexium')
     })
   })
 })
