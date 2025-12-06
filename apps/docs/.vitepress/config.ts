@@ -135,7 +135,7 @@ export default defineConfig({
       { text: 'Docs', link: '/docs/core/state' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.5.5',
+        text: 'v0.5.6',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -211,6 +211,8 @@ export default defineConfig({
             { text: 'computed()', link: '/docs/core/computed' },
             { text: 'effect()', link: '/docs/core/effect' },
             { text: 'batch()', link: '/docs/core/batch' },
+            { text: 'createResource()', link: '/docs/core/resource' },
+            { text: 'Lifecycle Hooks', link: '/docs/core/lifecycle' },
             { text: '&lt;For /&gt;', link: '/docs/core/for' },
             { text: '&lt;Show /&gt;', link: '/docs/core/show' },
             { text: '&lt;Switch /&gt;', link: '/docs/core/switch' },
@@ -242,7 +244,9 @@ export default defineConfig({
             { text: '&lt;Image /&gt;', link: '/docs/primitives/image' },
             { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
             { text: '&lt;Button /&gt;', link: '/docs/primitives/button' },
-            { text: '&lt;List /&gt;', link: '/docs/primitives/list' }
+            { text: '&lt;List /&gt;', link: '/docs/primitives/list' },
+            { text: 'createForm()', link: '/docs/primitives/form' },
+            { text: 'Motion', link: '/docs/primitives/motion' }
           ]
         },
         {
@@ -264,6 +268,7 @@ export default defineConfig({
           items: [
             { text: '&lt;Router /&gt;', link: '/docs/router/router' },
             { text: '&lt;Route /&gt;', link: '/docs/router/route' },
+            { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
             { text: '&lt;Link /&gt;', link: '/docs/router/link' },
             { text: 'useRouter()', link: '/docs/router/use-router' }
           ]
