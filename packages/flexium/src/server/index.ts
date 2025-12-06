@@ -35,8 +35,19 @@ export function renderToString(vnode: any): string {
     return renderToString(vnode.value)
   }
 
+  // Handle fragments (type === null or type === 'fragment')
+  if (vnode.type === null || vnode.type === 'fragment') {
+    const children = vnode.children || vnode.props?.children
+    if (children) {
+      return Array.isArray(children)
+        ? children.map(renderToString).join('')
+        : renderToString(children)
+    }
+    return ''
+  }
+
   if (typeof vnode.type === 'function') {
-    const result = vnode.type(vnode.props || {})
+    const result = vnode.type({ ...vnode.props, children: vnode.children })
     return renderToString(result)
   }
 

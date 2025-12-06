@@ -330,26 +330,29 @@ describe('renderToString', () => {
   })
 
   describe('Fragments', () => {
-    it('should render fragment with multiple children', () => {
+    it('should render fragment children transparently without wrapper', () => {
       const child1 = createFNode('p', {}, ['First'])
       const child2 = createFNode('p', {}, ['Second'])
       const fragment = createFNode('fragment', {}, [child1, child2])
-      expect(renderToString(fragment)).toBe(
-        '<fragment><p>First</p><p>Second</p></fragment>'
-      )
+      expect(renderToString(fragment)).toBe('<p>First</p><p>Second</p>')
     })
 
-    it('should render empty fragment', () => {
+    it('should render empty fragment as empty string', () => {
       const fragment = createFNode('fragment', {}, [])
-      expect(renderToString(fragment)).toBe('<fragment></fragment>')
+      expect(renderToString(fragment)).toBe('')
     })
 
-    it('should render fragment with mixed content', () => {
+    it('should render fragment with mixed content transparently', () => {
       const span = createFNode('span', {}, ['text'])
       const fragment = createFNode('fragment', {}, ['before', span, 'after'])
-      expect(renderToString(fragment)).toBe(
-        '<fragment>before<span>text</span>after</fragment>'
-      )
+      expect(renderToString(fragment)).toBe('before<span>text</span>after')
+    })
+
+    it('should render null type fragment (JSX fragment) transparently', () => {
+      const child1 = createFNode('span', {}, ['A'])
+      const child2 = createFNode('span', {}, ['B'])
+      const fragment = { type: null, props: {}, children: [child1, child2] }
+      expect(renderToString(fragment)).toBe('<span>A</span><span>B</span>')
     })
   })
 
