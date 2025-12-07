@@ -34,14 +34,13 @@ Yes! Flexium is written in TypeScript and provides full type definitions. See th
 - Use `state()` for React-like tuple syntax `[getter, setter]`
 
 ```tsx
-// signal() - access via .value or ()
+// signal() - access via .value
 const count = signal(0)
-count.value // or count()
+count.value
 
-// state() - React-like pattern with value-like proxy
+// state() - direct value access
 const [count, setCount] = state(0)
-count // direct value access (proxy)
-count() // also works
+count // use directly
 ```
 
 ### How do I share state between components?

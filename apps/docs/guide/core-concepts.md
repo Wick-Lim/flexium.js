@@ -2,21 +2,30 @@
 
 Understanding the fundamental concepts behind Flexium will help you build better applications.
 
-## Signals: The Foundation
+## One API for All State
 
-Everything in Flexium revolves around **signals**—reactive containers that hold values and notify dependents when they change.
+Flexium's philosophy is simple: **one `state()` function for all reactive needs**.
 
 ```tsx
-import { signal } from 'flexium/core'
+import { state } from 'flexium/core'
 
-const count = signal(0)
+// Mutable state
+const [count, setCount] = state(0)
 
-// Signals are reactive
-count.value // Read
-count.set(5) // Write
+// Derived state
+const [doubled] = state(() => count * 2)
+
+// Async state
+const [users, refetch, loading, error] = state(async () => fetch('/api/users'))
 ```
 
-### Why Signals?
+### Why One API?
+
+- **No decision fatigue** - One pattern to learn
+- **Consistent behavior** - Same mental model everywhere
+- **Type-safe** - TypeScript infers the right return type
+
+## Fine-Grained Reactivity
 
 Traditional frameworks re-render entire components when state changes. Flexium's signals enable **fine-grained reactivity**—only the specific DOM nodes that depend on a signal update when it changes.
 
@@ -31,41 +40,26 @@ function Counter() {
 
 ## Reactive Primitives
 
-Flexium provides three core reactive primitives:
-
-### 1. `signal()` / `state()` - Reactive State
-
-Hold values that can change over time:
+### 1. `state()` - All Reactive State
 
 ```tsx
-// Standalone signal
-const name = signal('Alice')
+// Mutable state → [value, setter]
+const [name, setName] = state('Alice')
 
-// React-like tuple
-const [age, setAge] = state(25)
+// Derived state → [value] (no setter)
+const [greeting] = state(() => `Hello, ${name}!`)
+
+// Async state → [value, refetch, loading, error]
+const [data, refetch, loading, error] = state(async () => fetchData())
 ```
 
-### 2. `computed()` - Derived Values
+### 2. `effect()` - Side Effects
 
-Automatically derive values from other signals:
-
-```tsx
-const firstName = signal('John')
-const lastName = signal('Doe')
-
-const fullName = computed(() =>
-  `${firstName.value} ${lastName.value}`
-)
-// fullName updates whenever firstName or lastName changes
-```
-
-### 3. `effect()` - Side Effects
-
-Run code when signals change:
+Run code when state changes:
 
 ```tsx
 effect(() => {
-  document.title = `Count: ${count.value}`
+  document.title = `Count: ${count}`
 })
 ```
 
@@ -100,32 +94,20 @@ This results in:
 
 ## Control Flow
 
-Flexium provides reactive control flow components:
-
 ### Conditional Rendering
 
+Use native JavaScript:
+
 ```tsx
-<Show when={isLoggedIn()}>
-  <Dashboard />
-</Show>
+{isLoggedIn ? <Dashboard /> : <Login />}
 ```
 
 ### List Rendering
 
 ```tsx
-<For each={items()}>
+<For each={items}>
   {(item) => <ListItem item={item} />}
 </For>
-```
-
-### Multiple Conditions
-
-```tsx
-<Switch>
-  <Match when={status() === 'loading'}>Loading...</Match>
-  <Match when={status() === 'error'}>Error!</Match>
-  <Match when={status() === 'success'}>Done!</Match>
-</Switch>
 ```
 
 ## Component Model
@@ -151,7 +133,7 @@ function Parent() {
 }
 
 function Child({ count }) {
-  // count is a signal, updates automatically
+  // count is reactive, updates automatically
   return <span>{count}</span>
 }
 ```
@@ -204,11 +186,9 @@ import { onMount, onCleanup } from 'flexium/core'
 function MyComponent() {
   onMount(() => {
     console.log('Mounted!')
-
     return () => console.log('Unmounting!')
   })
 
-  // Or separately
   onCleanup(() => {
     console.log('Cleaning up!')
   })
@@ -231,43 +211,49 @@ effect(() => {
 })
 ```
 
-## Error Handling
+## Error & Loading Handling
 
-### Error Boundaries
-
-Catch and handle errors in component trees:
+Handle errors and loading states explicitly with `state(async)`:
 
 ```tsx
-<ErrorBoundary fallback={(err) => <ErrorPage error={err} />}>
-  <App />
-</ErrorBoundary>
-```
+const [data, refetch, loading, error] = state(async () => {
+  const res = await fetch('/api/data')
+  if (!res.ok) throw new Error('Failed to fetch')
+  return res.json()
+})
 
-### Suspense
-
-Handle async operations gracefully:
-
-```tsx
-<Suspense fallback={<Spinner />}>
-  <AsyncComponent />
-</Suspense>
+function DataView() {
+  return (
+    <div>
+      {loading ? (
+        <Spinner />
+      ) : error ? (
+        <div>
+          <p>Error: {error.message}</p>
+          <button onclick={refetch}>Retry</button>
+        </div>
+      ) : (
+        <Content data={data} />
+      )}
+    </div>
+  )
+}
 ```
 
 ## Summary
 
 | Concept | Purpose | Example |
 |---------|---------|---------|
-| `signal()` | Reactive state | `signal(0)` |
-| `computed()` | Derived values | `computed(() => a + b)` |
+| `state(value)` | Mutable state | `const [x, setX] = state(0)` |
+| `state(() => T)` | Derived value | `state(() => a + b)` |
+| `state(async)` | Async data | `state(async () => fetch(...))` |
 | `effect()` | Side effects | `effect(() => log(x))` |
-| `<Show>` | Conditional render | `<Show when={x}>` |
 | `<For>` | List render | `<For each={items}>` |
-| `<ErrorBoundary>` | Error handling | Catch component errors |
 | Primitives | UI building blocks | `<Row>`, `<Button>`, etc. |
 
 ## Next Steps
 
 - [Quick Start](/guide/quick-start) - Build your first app
-- [Reactivity Guide](/guide/state) - Deep dive into signals
+- [Reactivity Guide](/guide/state) - Deep dive into state
 - [JSX & Rendering](/guide/jsx) - How rendering works
 - [API Reference](/docs/core/state) - Complete API docs

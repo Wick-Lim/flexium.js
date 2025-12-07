@@ -135,7 +135,7 @@ export default defineConfig({
       { text: 'Docs', link: '/docs/core/state' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.6.7',
+        text: 'v0.6.8',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -167,8 +167,6 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Context API', link: '/guide/context' },
-            { text: 'Error Handling', link: '/guide/error-handling' },
-            { text: 'Suspense', link: '/guide/suspense' },
             { text: 'Routing', link: '/guide/router' },
             { text: 'Styling', link: '/guide/styling' },
             { text: 'Animation', link: '/guide/animation' },
@@ -208,14 +206,10 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'state()', link: '/docs/core/state' },
-            { text: 'computed()', link: '/docs/core/computed' },
             { text: 'effect()', link: '/docs/core/effect' },
             { text: 'batch()', link: '/docs/core/batch' },
-            { text: 'createResource()', link: '/docs/core/resource' },
             { text: 'Lifecycle Hooks', link: '/docs/core/lifecycle' },
             { text: '&lt;For /&gt;', link: '/docs/core/for' },
-            { text: '&lt;Suspense /&gt;', link: '/docs/core/suspense' },
-            { text: '&lt;ErrorBoundary /&gt;', link: '/docs/core/error-boundary' },
             { text: 'Context API', link: '/docs/core/context' }
           ]
         },

@@ -1,9 +1,10 @@
 # state()
 
-Create reactive state with fine-grained updates.
+One API for all reactive state.
 
 <script setup>
 import ShowcaseDemo from '../../components/ShowcaseDemo.vue'
+import ComputedDemo from '../../components/ComputedDemo.vue'
 </script>
 
 ## Live Demo
@@ -18,108 +19,107 @@ import ShowcaseDemo from '../../components/ShowcaseDemo.vue'
 import { state } from 'flexium/core'
 ```
 
-## Signature
-
-```ts
-function state<T>(initialValue: T): [StateProxy<T>, Setter<T>]
-
-type StateProxy<T> = T & (() => T)  // Value-like proxy, also callable
-type Setter<T> = (value: T | ((prev: T) => T)) => void
-```
-
 ## Usage
 
-### Basic Usage
+`state()` always returns an array:
+
+```tsx
+// Basic state
+const [count, setCount] = state(0)
+
+// Derived state (pass a function)
+const [doubled] = state(() => count * 2)
+
+// Async state
+const [users, refetch, loading, error] = state(async () => fetch('/api'))
+```
+
+| Input | Returns |
+|-------|---------|
+| `state(value)` | `[value, setter]` |
+| `state(() => T)` | `[value]` |
+| `state(async () => T)` | `[value, refetch, loading, error]` |
+
+## Basic State
 
 ```tsx
 const [count, setCount] = state(0)
 
-// Read value - use directly like a value!
+// Read
 console.log(count + 1)  // 1
-console.log(`Count: ${count}`)  // "Count: 0"
+console.log(`Count: ${count}`)
 
-// Or call as function (backward compatible)
-console.log(count())  // 0
-
-// Set value directly
+// Write
 setCount(5)
-
-// Set value with updater function
 setCount(prev => prev + 1)
 ```
 
-### In Components
+## Derived State
+
+Pass a function to create values that auto-update when dependencies change:
+
+<ClientOnly>
+  <ComputedDemo />
+</ClientOnly>
+
+```tsx
+const [price, setPrice] = state(100)
+const [quantity, setQuantity] = state(2)
+
+const [subtotal] = state(() => price * quantity)
+const [tax] = state(() => subtotal * 0.1)
+const [total] = state(() => subtotal + tax)
+
+console.log(+total)  // 220
+```
+
+## Async State
+
+```tsx
+const [users, refetch, loading, error] = state(async () => {
+  const res = await fetch('/api/users')
+  return res.json()
+})
+
+function UserList() {
+  return (
+    <div>
+      {loading ? <Spinner /> : null}
+      {error ? <Error message={error.message} /> : null}
+      {users ? <For each={users}>{u => <User user={u} />}</For> : null}
+      <button onclick={refetch}>Refresh</button>
+    </div>
+  )
+}
+```
+
+## Global State
+
+Use the `key` option to share state across components:
+
+```tsx
+// Same state anywhere
+const [theme, setTheme] = state('light', { key: 'app:theme' })
+```
+
+## Example
 
 ```tsx
 function Counter() {
   const [count, setCount] = state(0)
+  const [doubled] = state(() => count * 2)
 
   return (
     <div>
-      <span>{count}</span>
+      <p>Count: {count}</p>
+      <p>Doubled: {doubled}</p>
       <button onclick={() => setCount(c => c + 1)}>+</button>
     </div>
   )
 }
 ```
 
-### With Objects
-
-```tsx
-const [user, setUser] = state({ name: 'Alice', age: 25 })
-
-// Access properties directly
-console.log(user.name)  // 'Alice'
-
-// Update entire object
-setUser({ name: 'Bob', age: 30 })
-
-// Update with spread
-setUser(prev => ({ ...prev, age: prev.age + 1 }))
-```
-
-### With Arrays
-
-```tsx
-const [items, setItems] = state(['a', 'b', 'c'])
-
-// Access array properties
-console.log(items.length)  // 3
-console.log(items[0])  // 'a'
-
-// Add item
-setItems(prev => [...prev, 'd'])
-
-// Remove item
-setItems(prev => prev.filter(item => item !== 'b'))
-
-// Update item
-setItems(prev => prev.map((item, i) => i === 0 ? 'A' : item))
-```
-
-## Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `initialValue` | `T` | The initial value for the state |
-
-## Returns
-
-A tuple `[proxy, setter]`:
-
-- **proxy** `StateProxy<T>` - A reactive value that can be used directly in expressions and JSX. Also callable as `proxy()` for backward compatibility.
-- **setter** `(value | updater) => void` - Function to update the value
-
-## Notes
-
-- State updates are synchronous
-- The proxy uses `Symbol.toPrimitive` for automatic value coercion in expressions
-- Reading state inside `effect()` creates a subscription
-- Components only re-render the specific DOM nodes that depend on changed state
-- Use `batch()` to group multiple state updates
-
 ## See Also
 
-- [computed()](/docs/core/computed)
 - [effect()](/docs/core/effect)
 - [batch()](/docs/core/batch)

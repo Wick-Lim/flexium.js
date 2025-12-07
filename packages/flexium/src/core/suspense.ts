@@ -1,8 +1,12 @@
+/**
+ * @internal Suspense is deprecated - use state(async) which returns loading state explicitly
+ */
 import { createContext } from './context'
 import { signal } from './signal'
 import { f } from '../renderers/dom/f'
 import type { FNodeChild } from './renderer'
 
+/** @internal */
 export interface SuspenseContextValue {
   registerPromise: (promise: Promise<unknown>) => void
 }

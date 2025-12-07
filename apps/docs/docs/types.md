@@ -87,9 +87,8 @@ interface Signal<T> {
 const count = signal(0)
 
 // Read value (tracks dependency)
-console.log(count) // 0 (new value-like proxy)
-console.log(count.value) // 0 (also works)
-console.log(count()) // 0 (backward compatible)
+console.log(count) // 0
+console.log(count + 1) // 1
 
 // Update value
 count.value++

@@ -1,6 +1,6 @@
 ---
 title: Advanced API - Low-Level Primitives
-description: Learn about Flexium's advanced low-level APIs including signal, computed, root, and untrack for fine-grained control over reactivity.
+description: Learn about Flexium's advanced low-level APIs including signal, root, and untrack for fine-grained control over reactivity.
 head:
   - - meta
     - property: og:title
@@ -15,7 +15,7 @@ head:
 Flexium provides low-level reactive primitives through the `flexium/advanced` subpath for users who need fine-grained control over reactivity.
 
 ::: tip When to Use
-Most applications should use the `state()` API from the main `flexium` export. The advanced API is for:
+Most applications should use the `state()` API from `flexium/core`. The advanced API is for:
 - Library authors building on top of Flexium
 - Performance-critical code requiring manual optimization
 - Advanced patterns not covered by `state()`
@@ -24,7 +24,7 @@ Most applications should use the `state()` API from the main `flexium` export. T
 ## Import
 
 ```tsx
-import { signal, computed, batch, root, untrack } from 'flexium/advanced'
+import { signal, root, untrack, onCleanup } from 'flexium/advanced'
 ```
 
 ## API Overview
@@ -32,14 +32,13 @@ import { signal, computed, batch, root, untrack } from 'flexium/advanced'
 | Export | Description |
 |--------|-------------|
 | `signal(value)` | Create a raw reactive signal |
-| `computed(fn)` | Create a derived computed value |
-| `batch(fn)` | Batch multiple updates together ([Learn more](/guide/batch)) |
 | `root(fn)` | Create an isolated reactive scope |
 | `untrack(fn)` | Read values without creating dependencies |
+| `onCleanup(fn)` | Register cleanup function |
 
 ## signal()
 
-Creates a raw reactive signal. Unlike `state()`, this returns a signal object with `.get()`, `.set()`, and `.peek()` methods.
+Creates a raw reactive signal. Unlike `state()`, this returns a signal object with `.value` getter/setter and `.peek()` method.
 
 ```tsx
 import { signal } from 'flexium/advanced'
@@ -47,14 +46,13 @@ import { signal } from 'flexium/advanced'
 const count = signal(0)
 
 // Read value (creates dependency)
-console.log(count())  // 0 (backward compatible)
-console.log(count.value)  // 0 (new value-like proxy)
+console.log(count.value)  // 0
 
 // Read without tracking
 console.log(count.peek())  // 0
 
 // Set value
-count.set(1)
+count.value = 1
 
 // Set with updater function
 count.set(prev => prev + 1)
@@ -64,54 +62,15 @@ count.set(prev => prev + 1)
 
 | Feature | `state()` | `signal()` |
 |---------|-----------|------------|
-| Return type | Value-like proxy | Signal object |
+| Return type | `[StateValue, setter]` | Signal object |
 | Global state | Built-in with `key` option | Manual implementation |
 | Async support | Built-in | Manual implementation |
-| Computed | Built-in via function argument | Use `computed()` |
+| Derived values | Built-in via function argument | Manual implementation |
 | DX | Optimized for ease of use | Low-level control |
-
-## computed()
-
-Creates a derived value that automatically updates when dependencies change.
-
-```tsx
-import { signal, computed } from 'flexium/advanced'
-
-const count = signal(0)
-const doubled = computed(() => count * 2)
-
-console.log(doubled.value)  // 0
-
-count.set(5)
-console.log(doubled.value)  // 10
-```
-
-### Computed Signals are Read-Only
-
-```tsx
-const doubled = computed(() => count() * 2)
-
-doubled.set(10)  // Error! Computed signals are read-only
-```
-
-### Nested Computed Values
-
-```tsx
-const a = signal(1)
-const b = signal(2)
-
-const sum = computed(() => a + b)
-const doubled = computed(() => sum() * 2)
-
-console.log(doubled.value)  // 6
-
-a.set(5)
-console.log(doubled.value)  // 14
-```
 
 ## root()
 
-Creates an isolated reactive scope. Useful for managing cleanup of effects and computed values.
+Creates an isolated reactive scope. Useful for managing cleanup of effects.
 
 ```tsx
 import { signal, effect, root } from 'flexium/advanced'
@@ -126,11 +85,11 @@ const dispose = root((dispose) => {
   return dispose
 })
 
-count.set(1)  // Logs: "Count: 1"
+count.value = 1  // Logs: "Count: 1"
 
 dispose()  // Cleanup - effect stops running
 
-count.set(2)  // No log - effect was disposed
+count.value = 2  // No log - effect was disposed
 ```
 
 ## untrack()
@@ -138,23 +97,19 @@ count.set(2)  // No log - effect was disposed
 Reads reactive values without creating dependencies. Useful when you need to access a value but don't want updates to that value to trigger re-computation.
 
 ```tsx
-import { signal, computed, untrack } from 'flexium/advanced'
+import { signal, effect, untrack } from 'flexium/advanced'
 
 const count = signal(0)
 const multiplier = signal(2)
 
-// Only re-computes when 'count' changes, not 'multiplier'
-const result = computed(() => {
-  return count * untrack(() => multiplier.value)
+// Only re-runs when 'count' changes, not 'multiplier'
+effect(() => {
+  const result = count.value * untrack(() => multiplier.value)
+  console.log('Result:', result)
 })
 
-console.log(result.value)  // 0
-
-count.set(5)
-console.log(result.value)  // 10
-
-multiplier.set(10)
-console.log(result.value)  // Still 10 (not 50) - multiplier change didn't trigger recompute
+count.value = 5      // Logs: "Result: 10"
+multiplier.value = 10  // No log - multiplier is untracked
 ```
 
 ## Example: Custom Store
@@ -162,18 +117,17 @@ console.log(result.value)  // Still 10 (not 50) - multiplier change didn't trigg
 Here's an example of building a custom store using advanced primitives:
 
 ```tsx
-import { signal, computed, effect } from 'flexium/advanced'
+import { signal, effect } from 'flexium/advanced'
 
 function createStore<T extends object>(initialState: T) {
   const state = signal(initialState)
 
   return {
-    get: state,
-    set: state.set,
-
-    // Selector with automatic memoization
-    select<R>(selector: (s: T) => R) {
-      return computed(() => selector(state.value))
+    get: () => state.value,
+    set: (updater: T | ((s: T) => T)) => {
+      state.value = typeof updater === 'function'
+        ? (updater as Function)(state.value)
+        : updater
     },
 
     // Subscribe to changes
@@ -186,26 +140,21 @@ function createStore<T extends object>(initialState: T) {
 // Usage
 const store = createStore({ count: 0, name: 'Test' })
 
-const count = store.select(s => s.count)
-console.log(count.value)  // 0
+console.log(store.get().count)  // 0
 
 store.set(s => ({ ...s, count: s.count + 1 }))
-console.log(count.value)  // 1
+console.log(store.get().count)  // 1
 ```
 
-## Migration from v0.2.x
+## When to Use Advanced API
 
-In v0.3.0, the low-level primitives were moved to `flexium/advanced`:
+### Use `state()` (recommended)
+- Building application components
+- Normal state management needs
+- When you want the simplest API
 
-```tsx
-// Before (v0.2.x)
-import { signal, computed } from 'flexium'
-
-// After (v0.3.0+)
-import { signal, computed } from 'flexium/advanced'
-
-// Current (v0.4.0+)
-import { state } from 'flexium/core'
-```
-
-This change separates the "easy-to-use" API from the "power-user" API, making it clearer which primitives are intended for typical usage.
+### Use `signal()` / advanced
+- Building custom reactive libraries
+- Need direct signal object access
+- Performance-critical manual optimizations
+- Porting code from other signal-based libraries

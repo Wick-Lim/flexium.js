@@ -94,11 +94,6 @@ const count = signal(0);
 if (count > 5) {
   doSomething();
 }
-
-// Note: count() also works (backward compatible)
-if (count() > 5) {
-  doSomething();
-}
 ```
 
 #### Good
@@ -106,7 +101,7 @@ if (count() > 5) {
 ```javascript
 const count = signal(0);
 
-// ✅ Signal read inside effect (both count and count() work)
+// ✅ Signal read inside effect
 effect(() => {
   if (count > 5) {
     doSomething();

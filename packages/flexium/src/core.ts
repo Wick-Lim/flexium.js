@@ -22,7 +22,3 @@ export { For } from './core/flow'
 // Context API
 export { createContext, context } from './core/context'
 export type { Context } from './core/context'
-
-// Async boundaries
-export { Suspense } from './core/suspense'
-export { ErrorBoundary, errorBoundary } from './core/error-boundary'

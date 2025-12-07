@@ -21,7 +21,6 @@ import CanvasDemo from './components/CanvasDemo.vue'
 import TimerDemo from './components/TimerDemo.vue'
 import SnakeGameDemo from './components/SnakeGameDemo.vue'
 import ContextDemo from './components/ContextDemo.vue'
-import ErrorBoundaryDemo from './components/ErrorBoundaryDemo.vue'
 </script>
 
 ---
@@ -36,12 +35,12 @@ A simple counter demonstrating `state()` and `computed()` - the building blocks 
 
 ::: details View Source Code
 ```tsx
-import { state, computed } from 'flexium/core'
+import { state } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Counter() {
   const [count, setCount] = state(0)
-  const doubled = computed(() => count * 2)
+  const [doubled] = state(() => count * 2)  // derived value
 
   return (
     <Column gap={16} padding={24}>
@@ -418,50 +417,6 @@ function Shop() {
 
 ---
 
-## Error Boundary Demo
-
-Graceful error handling with recovery mechanisms.
-
-<ClientOnly>
-  <ErrorBoundaryDemo />
-</ClientOnly>
-
-::: details View Source Code
-```tsx
-import { ErrorBoundary, errorBoundary } from 'flexium'
-
-function BuggyComponent() {
-  const { setError } = errorBoundary()
-
-  const riskyAction = () => {
-    if (Math.random() < 0.5) {
-      setError(new Error('Random error occurred!'))
-    }
-  }
-
-  return <button onclick={riskyAction}>Risky Click</button>
-}
-
-function App() {
-  return (
-    <ErrorBoundary
-      fallback={({ error, reset, retryCount }) => (
-        <div>
-          <h3>Error: {error.message}</h3>
-          <p>Retry attempts: {retryCount}</p>
-          <button onclick={reset}>Try Again</button>
-        </div>
-      )}
-    >
-      <BuggyComponent />
-    </ErrorBoundary>
-  )
-}
-```
-:::
-
----
-
 ## Why These Demos Matter
 
 Unlike React or Vue, Flexium **does not use a Virtual DOM** for updates. When you interact with these demos:
@@ -500,11 +455,11 @@ Each documentation page now includes live demos. Here are some highlights:
   </div>
 </a>
 
-<a href="/docs/core/suspense" class="example-card">
-  <div class="example-icon">⏳</div>
+<a href="/docs/core/state" class="example-card">
+  <div class="example-icon">⚡</div>
   <div class="example-content">
-    <h3>Suspense</h3>
-    <p>Async data loading with loading states and error boundaries</p>
+    <h3>Async State</h3>
+    <p>Data fetching with loading states using state(async)</p>
   </div>
 </a>
 

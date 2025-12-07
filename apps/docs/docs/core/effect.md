@@ -140,5 +140,4 @@ effect(() => {
 ## See Also
 
 - [state()](/docs/core/state)
-- [computed()](/docs/core/computed)
 - [batch()](/docs/core/batch)

@@ -87,8 +87,7 @@ mount(document.getElementById('app')!, <App />)
 
 ```tsx
 const [count, setCount] = state(0);
-// count -> use directly as value (thanks to Symbol.toPrimitive)
-// count() -> also works (backward compatible)
+// count -> use directly as value
 // setCount(1) or setCount(c => c + 1) -> set value
 ```
 

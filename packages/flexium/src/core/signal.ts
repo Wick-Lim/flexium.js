@@ -368,14 +368,7 @@ export function signal<T>(initialValue: T): Signal<T> {
 
 /**
  * Creates a computed signal (derived value)
- *
- * @param fn - Function that computes the derived value
- * @returns A read-only computed signal
- *
- * @example
- * const count = signal(1);
- * const doubled = computed(() => count.value * 2);
- * console.log(doubled.value); // 2
+ * @internal Use `state(() => ...)` instead
  */
 export function computed<T>(fn: () => T): Computed<T> {
   const node = new ComputedNode(fn)
@@ -556,14 +549,7 @@ const SIGNAL_MARKER = Symbol('flexium.signal')
 
 /**
  * Check if a value is a signal
- *
- * @param value - Value to check
- * @returns True if value is a signal or computed
- *
- * @example
- * const count = signal(0);
- * isSignal(count); // true
- * isSignal(5); // false
+ * @internal Use state() which handles all reactive patterns
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isSignal(value: any): value is Signal<any> | Computed<any> {
@@ -601,10 +587,7 @@ export interface Resource<T> extends Signal<T | undefined> {
 
 /**
  * Creates a resource for handling async data
- *
- * @param source - Reactive source (signal or function) that triggers the fetcher
- * @param fetcher - Async function that fetches data based on source
- * @returns [Resource, Actions] tuple
+ * @internal Use state(async () => ...) instead which returns [data, refetch, loading, error]
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createResource<T, S = any>(

@@ -6,12 +6,10 @@
 
 export {
   signal,
-  computed,
   effect,
   untrack,
   batch,
   root,
-  isSignal,
   type Signal,
   type Computed,
 } from './signal'

@@ -116,12 +116,12 @@ function UserProfile() {
   const [userId, setUserId] = state(1);
   const [doubled] = state(() => userId * 2);
 
-  const [user] = state(async () => {
+  const [user, refetch, loading, error] = state(async () => {
     const res = await fetch(`/api/users/${userId}`);
     return res.json();
   });
 
-  return <div>{user.loading ? 'Loading...' : user?.name}</div>;
+  return <div>{loading ? 'Loading...' : user?.name}</div>;
 }
 ```
 
@@ -320,9 +320,9 @@ const [count, setCount] = state(0);
 const [count, setCount] = state(0, { key: 'globalCount' });
 
 // Need async? Make the initializer async
-const [data, actions] = state(async () => fetchData());
+const [data, refetch, loading, error] = state(async () => fetchData());
 
-// Need derived value? Return a function
+// Need derived value? Pass a function
 const [doubled] = state(() => count * 2);
 ```
 
@@ -350,27 +350,27 @@ function Dashboard() {
   );
 
   // 4. Async state (data fetching)
-  const [todos, todoActions] = state(async () => {
+  const [todos, refetch, todosLoading, todosError] = state(async () => {
     const res = await fetch('/api/todos');
     return res.json();
   });
 
   // 5. Filtered computed state (depends on multiple signals)
   const [filteredTodos] = state(() => {
-    const items = todos || [];
+    if (!todos) return [];
     return filter === 'all'
-      ? items
-      : items.filter(t => t.status === filter);
+      ? todos
+      : todos.filter(t => t.status === filter);
   });
 
   return (
     <div>
       <h1>{greeting}</h1>
 
-      {todos.loading && <div>Loading todos...</div>}
-      {todos.error && <div>Error: {todos.error.message}</div>}
+      {todosLoading ? <div>Loading todos...</div> : null}
+      {todosError ? <div>Error: {todosError.message}</div> : null}
 
-      {filteredTodos && (
+      {filteredTodos.length > 0 && (
         <ul>
           {filteredTodos.map(todo => (
             <li key={todo.id}>{todo.text}</li>
@@ -378,7 +378,7 @@ function Dashboard() {
         </ul>
       )}
 
-      <button onclick={() => todoActions.refetch()}>Refresh</button>
+      <button onclick={refetch}>Refresh</button>
     </div>
   );
 }

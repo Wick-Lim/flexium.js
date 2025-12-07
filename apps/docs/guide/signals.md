@@ -48,9 +48,9 @@ import { state } from 'flexium/core'
 
 const [count, setCount] = state(0)
 
-// Read (value-like proxy)
-console.log(count) // 0 (works directly in most contexts)
-console.log(count()) // 0 (also works)
+// Read
+console.log(count) // 0
+console.log(count + 1) // 1
 
 // Update with value
 setCount(5)
@@ -116,9 +116,9 @@ const user = signal({ name: 'Alice', age: 25 })
 user.set(prev => ({ ...prev, age: 26 }))
 ```
 
-## Computed Values
+## Derived Values
 
-Computed signals derive their value from other signals:
+Derived values are computed from other signals:
 
 ```tsx
 import { state } from 'flexium/core'
@@ -126,12 +126,13 @@ import { state } from 'flexium/core'
 const [price, setPrice] = state(100)
 const [quantity, setQuantity] = state(2)
 
+// Derived value - no setter, auto-updates
 const [total] = state(() => price * quantity)
 
-console.log(total) // 200
+console.log(+total) // 200
 
 setPrice(150)
-console.log(total) // 300 (auto-updated!)
+console.log(+total) // 300 (auto-updated!)
 ```
 
 ## Effects
@@ -178,10 +179,10 @@ const lastName = signal('Doe')
 const user = signal({ firstName: 'John', lastName: 'Doe' })
 ```
 
-### 2. Use Computed State for Derived Values
+### 2. Use Derived State for Computed Values
 
 ```tsx
-// Good
+// Good - derived state
 const [fullName] = state(() => `${firstName} ${lastName}`)
 
 // Avoid - manual calculation everywhere
@@ -221,6 +222,5 @@ effect(() => {
 ## See Also
 
 - [state()](/docs/core/state) - State management API
-- [computed()](/docs/core/computed) - Derived values
 - [effect()](/docs/core/effect) - Side effects
 - [batch()](/docs/core/batch) - Batch updates

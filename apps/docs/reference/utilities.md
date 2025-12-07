@@ -1,18 +1,18 @@
 ---
 title: Utilities - API Reference
-description: Complete API reference for Flexium's built-in utility functions. context, router, keyboard, mouse, and errorBoundary for building reactive applications.
+description: Complete API reference for Flexium's built-in utility functions. context, router, keyboard, and mouse for building reactive applications.
 head:
   - - meta
     - property: og:title
       content: Utilities API Reference - Flexium
   - - meta
     - property: og:description
-      content: Comprehensive guide to Flexium utility functions for context, routing, input handling, animation, and error boundaries.
+      content: Comprehensive guide to Flexium utility functions for context, routing, and input handling.
 ---
 
 # Utilities
 
-Complete API reference for Flexium's built-in utility functions for context, routing, input handling, animation, and error boundaries.
+Complete API reference for Flexium's built-in utility functions for context, routing, and input handling.
 
 ## Overview
 
@@ -26,7 +26,6 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 | [`router()`](#router) | `flexium/router` | Access routing state and navigation |
 | [`keyboard()`](#keyboard) | `flexium/interactive` | Track keyboard input state |
 | [`mouse()`](#mouse) | `flexium/interactive` | Track mouse position and button state |
-| [`errorBoundary()`](#errorboundary) | `flexium/core` | Handle errors in components |
 
 ---
 
@@ -186,152 +185,7 @@ function ProfileCard() {
 
 ---
 
-### errorBoundary
-
-Access the nearest ErrorBoundary context to manually trigger error handling or retry failed operations.
-
-#### Signature
-
-```tsx
-function errorBoundary(): ErrorBoundaryContextValue
-```
-
-#### Return Value
-
-Returns an object with error handling methods:
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `setError` | `(error: unknown) => void` | Manually trigger error boundary with an error |
-| `clearError` | `() => void` | Clear the current error state |
-| `retry` | `() => void` | Retry the failed operation (clears error and increments retry count) |
-
-#### Usage
-
-```tsx
-import { errorBoundary } from 'flexium';
-
-function DataFetcher() {
-  const { setError } = errorBoundary();
-
-  const fetchData = async () => {
-    try {
-      const response = await fetch('/api/data');
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      return await response.json();
-    } catch (err) {
-      // Pass error to nearest ErrorBoundary
-      setError(err);
-    }
-  };
-
-  return (
-    <button onclick={fetchData}>
-      Load Data
-    </button>
-  );
-}
-```
-
-#### With ErrorBoundary Component
-
-```tsx
-import { ErrorBoundary, errorBoundary } from 'flexium';
-
-function App() {
-  return (
-    <ErrorBoundary
-      fallback={({ error, reset, retryCount }) => (
-        <div class="error-container">
-          <h1>Something went wrong</h1>
-          <p>{error.message}</p>
-          <p>Retry attempts: {retryCount}</p>
-          <button onclick={reset}>Try Again</button>
-        </div>
-      )}
-      onError={(error, errorInfo) => {
-        console.error('Error caught:', error);
-        console.error('Timestamp:', errorInfo.timestamp);
-      }}
-    >
-      <DataFetcher />
-    </ErrorBoundary>
-  );
-}
-
-function DataFetcher() {
-  const { setError, retry } = errorBoundary();
-  const data = signal(null);
-
-  const loadData = async () => {
-    try {
-      const result = await fetchData();
-      data.value = result;
-    } catch (err) {
-      setError(err);
-    }
-  };
-
-  return (
-    <div>
-      <button onclick={loadData}>Load Data</button>
-      {data.value && <div>{JSON.stringify(data.value)}</div>}
-    </div>
-  );
-}
-```
-
-#### Manual Error Recovery
-
-```tsx
-function FormSubmit() {
-  const { setError, clearError } = errorBoundary();
-  const errors = signal<string[]>([]);
-
-  const handleSubmit = async (formData: FormData) => {
-    errors.value = [];
-    clearError(); // Clear any previous errors
-
-    try {
-      const response = await submitForm(formData);
-
-      if (!response.ok) {
-        throw new Error('Submission failed');
-      }
-
-      // Success
-      alert('Form submitted!');
-    } catch (err) {
-      if (err instanceof ValidationError) {
-        // Handle validation errors locally
-        errors.value = err.messages;
-      } else {
-        // Pass fatal errors to error boundary
-        setError(err);
-      }
-    }
-  };
-
-  return (
-    <form onsubmit={handleSubmit}>
-      {errors.value.map(err => (
-        <div class="error">{err}</div>
-      ))}
-      <button type="submit">Submit</button>
-    </form>
-  );
-}
-```
-
-#### Behavior Outside ErrorBoundary
-
-If `errorBoundary()` is called outside an `<ErrorBoundary>` component, it returns a no-op implementation that logs the error and re-throws it.
-
----
-
-## Router Hooks
+## Router Utilities
 
 ### router
 
@@ -1346,11 +1200,6 @@ function ResponsiveComponent() {
 - **Don't use when**: CSS transitions/animations are sufficient
 - **Example**: Interactive UI animations, game sprites, physics simulations
 
-### errorBoundary
-- **Use when**: Need to handle errors manually or retry operations
-- **Don't use when**: Automatic error catching by `<ErrorBoundary>` is sufficient
-- **Example**: Async operations, API calls, manual error reporting
-
 ---
 
 ## Best Practices
@@ -1392,26 +1241,20 @@ function Component() {
 }
 ```
 
-### 3. Combine Hooks Effectively
+### 3. Combine Utilities Effectively
 
 ```tsx
 function GamePlayer() {
-  const router = router();
-  const keyboard = keyboard();
-  const { setError } = errorBoundary();
-
+  const { navigate } = router();
+  const kb = keyboard();
   const position = signal({ x: 0, y: 0 });
 
   effect(() => {
-    try {
-      // Update position based on keyboard
-      if (keyboard.isPressed(Keys.ArrowUp)) {
-        position.value = { ...position.value, y: position.value.y - 5 };
-      }
-      // ...
-    } catch (err) {
-      setError(err);
+    // Update position based on keyboard
+    if (kb.isPressed(Keys.ArrowUp)) {
+      position.value = { ...position.value, y: position.value.y - 5 };
     }
+    // ...
   });
 
   return <div>Game</div>;
@@ -1424,13 +1267,13 @@ function GamePlayer() {
 function DataDisplay() {
   const { data } = useFetch('/api/data');
 
-  // Use computed for expensive transformations
-  const processedData = computed(() => {
+  // Use derived state for expensive transformations
+  const [processedData] = state(() => {
     if (!data.value) return [];
     return expensiveTransformation(data.value);
   });
 
-  return <div>{JSON.stringify(processedData())}</div>;
+  return <div>{JSON.stringify(processedData)}</div>;
 }
 ```
 

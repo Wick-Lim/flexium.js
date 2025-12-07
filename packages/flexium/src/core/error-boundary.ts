@@ -1,9 +1,13 @@
+/**
+ * @internal ErrorBoundary is deprecated - use state(async) which returns error state explicitly
+ */
 import { createContext, context } from './context'
 import { signal } from './signal'
 import { f } from '../renderers/dom/f'
 import type { FNodeChild, FNode } from './renderer'
 import { ErrorCodes, logError } from './errors'
 
+/** @internal */
 export interface ErrorBoundaryContextValue {
   setError: (error: unknown) => void
   clearError: () => void
