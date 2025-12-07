@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "flexium": "^0.6.10"
+    "flexium": "^0.6.11"
   },
   "devDependencies": {
     "typescript": "^5.2.2",

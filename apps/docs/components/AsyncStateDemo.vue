@@ -73,7 +73,7 @@ function AsyncDemo() {
           width: '12px',
           height: '12px',
           borderRadius: '50%',
-          background: status == 'loading' ? '#f59e0b' : '#10b981',
+          background: status.toString() === 'loading' ? '#f59e0b' : '#10b981',
           transition: 'background 0.2s'
         })
       }),
@@ -82,7 +82,7 @@ function AsyncDemo() {
           fontSize: '14px',
           color: '#374151'
         }
-      }, [() => status == 'loading' ? 'Loading...' : 'Ready']),
+      }, [() => status.toString() === 'loading' ? 'Loading...' : 'Ready']),
       f('button', {
         onclick: refetch,
         style: {
@@ -108,7 +108,7 @@ function AsyncDemo() {
       }
     }, [
       () => {
-        if (status == 'loading') {
+        if (status.toString() === 'loading') {
           return f('div', {
             style: {
               display: 'flex',

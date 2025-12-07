@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "flexium": "^0.6.10"
+    "flexium": "^0.6.11"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.0.0",

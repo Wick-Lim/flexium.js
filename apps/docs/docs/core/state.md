@@ -90,12 +90,11 @@ const [users, refetch, status, error] = state(async () => {
 })
 
 // status: 'idle' | 'loading' | 'success' | 'error'
-// Note: Use == (loose equality) for status comparison
 function UserList() {
   return (
     <div>
-      {status == 'loading' ? <Spinner /> : null}
-      {status == 'error' ? <Error message={error.message} /> : null}
+      {status.toString() === 'loading' ? <Spinner /> : null}
+      {status.toString() === 'error' ? <Error message={error.message} /> : null}
       {users ? <For each={users}>{u => <User user={u} />}</For> : null}
       <button onclick={refetch}>Refresh</button>
     </div>
