@@ -11,7 +11,7 @@
 
 // State management - THE unified API
 export { state, clearGlobalState } from './core/state'
-export type { StateSetter, StateValue } from './core/state'
+export type { StateSetter, StateValue, AsyncStatus } from './core/state'
 
 // Side effects and batching (necessary primitives)
 export { effect, onMount, onCleanup, batch, root, untrack } from './core/signal'

@@ -116,12 +116,12 @@ function UserProfile() {
   const [userId, setUserId] = state(1);
   const [doubled] = state(() => userId * 2);
 
-  const [user, refetch, loading, error] = state(async () => {
+  const [user, refetch, status, error] = state(async () => {
     const res = await fetch(`/api/users/${userId}`);
     return res.json();
   });
 
-  return <div>{loading ? 'Loading...' : user?.name}</div>;
+  return <div>{status === 'loading' ? 'Loading...' : user?.name}</div>;
 }
 ```
 
@@ -320,7 +320,7 @@ const [count, setCount] = state(0);
 const [count, setCount] = state(0, { key: 'globalCount' });
 
 // Need async? Make the initializer async
-const [data, refetch, loading, error] = state(async () => fetchData());
+const [data, refetch, status, error] = state(async () => fetchData());
 
 // Need derived value? Pass a function
 const [doubled] = state(() => count * 2);

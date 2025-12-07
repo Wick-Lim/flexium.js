@@ -16,7 +16,7 @@ const [count, setCount] = state(0)
 const [doubled] = state(() => count * 2)
 
 // Async state
-const [users, refetch, loading, error] = state(async () => fetch('/api/users'))
+const [users, refetch, status, error] = state(async () => fetch('/api/users'))
 ```
 
 ### Why One API?
@@ -49,8 +49,8 @@ const [name, setName] = state('Alice')
 // Derived state → [value] (no setter)
 const [greeting] = state(() => `Hello, ${name}!`)
 
-// Async state → [value, refetch, loading, error]
-const [data, refetch, loading, error] = state(async () => fetchData())
+// Async state → [value, refetch, status, error]
+const [data, refetch, status, error] = state(async () => fetchData())
 ```
 
 ### 2. `effect()` - Side Effects
@@ -216,18 +216,19 @@ effect(() => {
 Handle errors and loading states explicitly with `state(async)`:
 
 ```tsx
-const [data, refetch, loading, error] = state(async () => {
+const [data, refetch, status, error] = state(async () => {
   const res = await fetch('/api/data')
   if (!res.ok) throw new Error('Failed to fetch')
   return res.json()
 })
 
+// status: 'idle' | 'loading' | 'success' | 'error'
 function DataView() {
   return (
     <div>
-      {loading ? (
+      {status === 'loading' ? (
         <Spinner />
-      ) : error ? (
+      ) : status === 'error' ? (
         <div>
           <p>Error: {error.message}</p>
           <button onclick={refetch}>Retry</button>

@@ -156,13 +156,16 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
   return proxy as StateValue<T>
 }
 
+/** Async state status */
+export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error'
+
 /**
  * Unified State API
  *
  * One function for all reactive state needs - always returns an array for consistency:
  * 1. Simple state: const [count, setCount] = state(0)
  * 2. Derived state: const [doubled] = state(() => count * 2)
- * 3. Async state: const [data, refetch, loading, error] = state(async () => fetch(...))
+ * 3. Async state: const [data, refetch, status, error] = state(async () => fetch(...))
  * 4. Global state: const [theme, setTheme] = state('light', { key: 'theme' })
  *
  * @example
@@ -186,16 +189,16 @@ export function state<T>(
   options?: { key?: string }
 ): [StateValue<T>]
 
-// Overload 3: Async function → [StateValue, refetch, loading, error]
+// Overload 3: Async function → [StateValue, refetch, status, error]
 export function state<T>(
   fetcher: () => Promise<T>,
   options?: { key?: string }
-): [StateValue<T | undefined>, () => void, StateValue<boolean>, StateValue<unknown>]
+): [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
 
 export function state<T>(
   initialValueOrFetcher: T | (() => T) | (() => Promise<T>),
   options?: { key?: string }
-): [StateValue<T>] | [StateValue<T>, StateSetter<T>] | [StateValue<T | undefined>, () => void, StateValue<boolean>, StateValue<unknown>] {
+): [StateValue<T>] | [StateValue<T>, StateSetter<T>] | [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>] {
   const key = options?.key
 
   // 1. Check Global Registry for keyed state
@@ -212,13 +215,15 @@ export function state<T>(
 
     if (isAsync) {
       const refetch = cached._stateActions?.refetch || (() => {})
-      const loadingProxy = createStateProxy(
-        { get value() { return cached.loading || false }, peek: () => cached.loading || false } as Signal<boolean>
-      )
-      const errorProxy = createStateProxy(
-        { get value() { return cached.error }, peek: () => cached.error } as Signal<unknown>
-      )
-      return [proxy, refetch, loadingProxy, errorProxy] as [StateValue<T | undefined>, () => void, StateValue<boolean>, StateValue<unknown>]
+      // Use state() for derived values - dogfooding the unified API
+      const [statusValue] = state<AsyncStatus>(() => {
+        if (cached.error) return 'error'
+        if (cached.loading) return 'loading'
+        if (cached.value !== undefined) return 'success'
+        return 'idle'
+      })
+      const [errorValue] = state<unknown>(() => cached.error)
+      return [proxy, refetch, statusValue, errorValue] as [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
     }
 
     const setter: StateSetter<T> = (newValue) => {
@@ -251,14 +256,16 @@ export function state<T>(
       }
 
       const proxy = createStateProxy(s._signal as Signal<T>)
-      const loadingProxy = createStateProxy(
-        { get value() { return s.loading || false }, peek: () => s.loading || false } as Signal<boolean>
-      )
-      const errorProxy = createStateProxy(
-        { get value() { return s.error }, peek: () => s.error } as Signal<unknown>
-      )
+      // Use state() for derived values - dogfooding the unified API
+      const [statusValue] = state<AsyncStatus>(() => {
+        if (s.error) return 'error'
+        if (s.loading) return 'loading'
+        if (s.value !== undefined) return 'success'
+        return 'idle'
+      })
+      const [errorValue] = state<unknown>(() => s.error)
 
-      return [proxy, resActions.refetch, loadingProxy, errorProxy] as [StateValue<T | undefined>, () => void, StateValue<boolean>, StateValue<unknown>]
+      return [proxy, resActions.refetch, statusValue, errorValue] as [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
     }
 
     // Sync function → Computed
@@ -288,14 +295,16 @@ export function state<T>(
       }
 
       const proxy = createStateProxy(s._signal as Signal<T>)
-      const loadingProxy = createStateProxy(
-        { get value() { return s.loading || false }, peek: () => s.loading || false } as Signal<boolean>
-      )
-      const errorProxy = createStateProxy(
-        { get value() { return s.error }, peek: () => s.error } as Signal<unknown>
-      )
+      // Use state() for derived values - dogfooding the unified API
+      const [statusValue] = state<AsyncStatus>(() => {
+        if (s.error) return 'error'
+        if (s.loading) return 'loading'
+        if (s.value !== undefined) return 'success'
+        return 'idle'
+      })
+      const [errorValue] = state<unknown>(() => s.error)
 
-      return [proxy, resActions.refetch, loadingProxy, errorProxy] as [StateValue<T | undefined>, () => void, StateValue<boolean>, StateValue<unknown>]
+      return [proxy, resActions.refetch, statusValue, errorValue] as [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
     }
 
     // Sync function → Computed (memoized derived value)

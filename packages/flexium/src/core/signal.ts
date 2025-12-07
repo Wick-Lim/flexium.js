@@ -587,7 +587,7 @@ export interface Resource<T> extends Signal<T | undefined> {
 
 /**
  * Creates a resource for handling async data
- * @internal Use state(async () => ...) instead which returns [data, refetch, loading, error]
+ * @internal Use state(async () => ...) instead which returns [data, refetch, status, error]
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createResource<T, S = any>(

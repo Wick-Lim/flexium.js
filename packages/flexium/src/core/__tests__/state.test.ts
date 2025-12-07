@@ -206,14 +206,14 @@ describe('State API', () => {
 
   describe('Async Resource State', () => {
     it('should create state with async function', async () => {
-      const [, refetch, isLoading] = state(async () => {
+      const [, refetch, status] = state(async () => {
         return 'fetched data'
       })
 
       expect(typeof refetch).toBe('function')
-      // isLoading is now a callable proxy (function type)
-      expect(typeof isLoading).toBe('function')
-      expect(val(isLoading)).toBe(true) // Initially loading
+      // status is now a callable proxy (function type) returning AsyncStatus
+      expect(typeof status).toBe('function')
+      expect(val(status)).toBe('loading') // Initially loading
     })
 
     it('should return refetch function', () => {
@@ -221,10 +221,12 @@ describe('State API', () => {
       expect(typeof refetch).toBe('function')
     })
 
-    it('should return loading proxy', () => {
-      const [, , isLoading] = state(async () => 'data')
-      // isLoading is a callable proxy (function type)
-      expect(typeof isLoading).toBe('function')
+    it('should return status proxy', () => {
+      const [, , status] = state(async () => 'data')
+      // status is a callable proxy (function type)
+      expect(typeof status).toBe('function')
+      // status should be 'idle' | 'loading' | 'success' | 'error'
+      expect(['idle', 'loading', 'success', 'error']).toContain(val(status))
     })
 
     it('should return error proxy', () => {

@@ -5,6 +5,8 @@ One API for all reactive state.
 <script setup>
 import ShowcaseDemo from '../../components/ShowcaseDemo.vue'
 import ComputedDemo from '../../components/ComputedDemo.vue'
+import AsyncStateDemo from '../../components/AsyncStateDemo.vue'
+import GlobalStateDemo from '../../components/GlobalStateDemo.vue'
 </script>
 
 ## Live Demo
@@ -31,14 +33,14 @@ const [count, setCount] = state(0)
 const [doubled] = state(() => count * 2)
 
 // Async state
-const [users, refetch, loading, error] = state(async () => fetch('/api'))
+const [users, refetch, status, error] = state(async () => fetch('/api'))
 ```
 
 | Input | Returns |
 |-------|---------|
 | `state(value)` | `[value, setter]` |
 | `state(() => T)` | `[value]` |
-| `state(async () => T)` | `[value, refetch, loading, error]` |
+| `state(async () => T)` | `[value, refetch, status, error]` |
 
 ## Basic State
 
@@ -75,17 +77,25 @@ console.log(+total)  // 220
 
 ## Async State
 
+Pass an async function to handle data fetching with built-in status and error states:
+
+<ClientOnly>
+  <AsyncStateDemo />
+</ClientOnly>
+
 ```tsx
-const [users, refetch, loading, error] = state(async () => {
+const [users, refetch, status, error] = state(async () => {
   const res = await fetch('/api/users')
   return res.json()
 })
 
+// status: 'idle' | 'loading' | 'success' | 'error'
+// Note: Use == (loose equality) for status comparison
 function UserList() {
   return (
     <div>
-      {loading ? <Spinner /> : null}
-      {error ? <Error message={error.message} /> : null}
+      {status == 'loading' ? <Spinner /> : null}
+      {status == 'error' ? <Error message={error.message} /> : null}
       {users ? <For each={users}>{u => <User user={u} />}</For> : null}
       <button onclick={refetch}>Refresh</button>
     </div>
@@ -97,9 +107,19 @@ function UserList() {
 
 Use the `key` option to share state across components:
 
+<ClientOnly>
+  <GlobalStateDemo />
+</ClientOnly>
+
 ```tsx
-// Same state anywhere
-const [theme, setTheme] = state('light', { key: 'app:theme' })
+// In Component A
+const [count, setCount] = state(0, { key: 'app:count' })
+
+// In Component B - shares the same state
+const [count, setCount] = state(0, { key: 'app:count' })
+
+// In Component C - read-only access
+const [count] = state(0, { key: 'app:count' })
 ```
 
 ## Example
