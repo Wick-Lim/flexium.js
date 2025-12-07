@@ -1,10 +1,10 @@
 import { state, effect } from 'flexium/core'
-import { useRouter } from 'flexium/router'
+import { router } from 'flexium/router'
 import { loadUser, useUser } from '../store'
 
 export default function User() {
-    const router = useRouter()
-    const id = () => router.params.value.id
+    const r = router()
+    const id = () => r.params.value.id
 
     const [user, setUser] = state<any>(undefined);
 

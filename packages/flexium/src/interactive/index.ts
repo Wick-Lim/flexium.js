@@ -5,15 +5,17 @@
  * - Animation loop with delta time and fixed timestep
  * - Keyboard input handling
  * - Mouse input handling
+ *
+ * Philosophy: No hooks, just factory functions that return signal-based state.
  */
 
 // Core loop
 export { createLoop } from './loop'
 export type { Loop, LoopOptions } from './loop'
 
-// Input hooks
-export { useKeyboard, Keys } from './useKeyboard'
-export type { KeyboardState } from './useKeyboard'
+// Input handlers (factory functions, not hooks)
+export { keyboard, Keys } from './keyboard'
+export type { KeyboardState } from './keyboard'
 
-export { useMouse, MouseButton } from './useMouse'
-export type { MouseState, UseMouseOptions, Vec2 } from './useMouse'
+export { mouse, MouseButton } from './mouse'
+export type { MouseState, MouseOptions, Vec2 } from './mouse'

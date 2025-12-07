@@ -1,7 +1,7 @@
 /**
  * Context API Tests
  *
- * Tests for the Context API including createContext, useContext, Provider,
+ * Tests for the Context API including createContext, context, Provider,
  * stack management, and async context handling
  * @vitest-environment jsdom
  */
@@ -9,7 +9,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import {
   createContext,
-  useContext,
+  context,
   pushProvider,
   popProvider,
   captureContext,
@@ -66,11 +66,11 @@ describe('Context API', () => {
     })
   })
 
-  describe('useContext', () => {
+  describe('context', () => {
     it('should return default value when no provider exists', () => {
       const ThemeContext = createContext('light')
 
-      const value = useContext(ThemeContext)
+      const value = context(ThemeContext)
 
       expect(value).toBe('light')
     })
@@ -78,7 +78,7 @@ describe('Context API', () => {
     it('should return default value for object context', () => {
       const ConfigContext = createContext({ debug: false, version: '1.0' })
 
-      const value = useContext(ConfigContext)
+      const value = context(ConfigContext)
 
       expect(value).toEqual({ debug: false, version: '1.0' })
     })
@@ -90,7 +90,7 @@ describe('Context API', () => {
       pushProvider(CountContext.id, 5)
       popProvider(CountContext.id)
 
-      const value = useContext(CountContext)
+      const value = context(CountContext)
 
       expect(value).toBe(0)
     })
@@ -102,7 +102,7 @@ describe('Context API', () => {
 
       pushProvider(ThemeContext.id, 'dark')
 
-      const value = useContext(ThemeContext)
+      const value = context(ThemeContext)
       expect(value).toBe('dark')
 
       popProvider(ThemeContext.id)
@@ -122,7 +122,7 @@ describe('Context API', () => {
 
       pushProvider(UserContext.id, { name: 'Alice', age: 30 })
 
-      const value = useContext(UserContext)
+      const value = context(UserContext)
       expect(value).toEqual({ name: 'Alice', age: 30 })
 
       popProvider(UserContext.id)
@@ -133,7 +133,7 @@ describe('Context API', () => {
 
       pushProvider(NullableContext.id, null)
 
-      const value = useContext(NullableContext)
+      const value = context(NullableContext)
       expect(value).toBeNull()
 
       popProvider(NullableContext.id)
@@ -146,47 +146,47 @@ describe('Context API', () => {
 
       // Outer provider
       pushProvider(ThemeContext.id, 'dark')
-      expect(useContext(ThemeContext)).toBe('dark')
+      expect(context(ThemeContext)).toBe('dark')
 
       // Inner provider
       pushProvider(ThemeContext.id, 'auto')
-      expect(useContext(ThemeContext)).toBe('auto')
+      expect(context(ThemeContext)).toBe('auto')
 
       // Pop inner provider
       popProvider(ThemeContext.id)
-      expect(useContext(ThemeContext)).toBe('dark')
+      expect(context(ThemeContext)).toBe('dark')
 
       // Pop outer provider
       popProvider(ThemeContext.id)
-      expect(useContext(ThemeContext)).toBe('light')
+      expect(context(ThemeContext)).toBe('light')
     })
 
     it('should handle multiple levels of nesting', () => {
       const ValueContext = createContext(0)
 
       pushProvider(ValueContext.id, 1)
-      expect(useContext(ValueContext)).toBe(1)
+      expect(context(ValueContext)).toBe(1)
 
       pushProvider(ValueContext.id, 2)
-      expect(useContext(ValueContext)).toBe(2)
+      expect(context(ValueContext)).toBe(2)
 
       pushProvider(ValueContext.id, 3)
-      expect(useContext(ValueContext)).toBe(3)
+      expect(context(ValueContext)).toBe(3)
 
       pushProvider(ValueContext.id, 4)
-      expect(useContext(ValueContext)).toBe(4)
+      expect(context(ValueContext)).toBe(4)
 
       popProvider(ValueContext.id)
-      expect(useContext(ValueContext)).toBe(3)
+      expect(context(ValueContext)).toBe(3)
 
       popProvider(ValueContext.id)
-      expect(useContext(ValueContext)).toBe(2)
+      expect(context(ValueContext)).toBe(2)
 
       popProvider(ValueContext.id)
-      expect(useContext(ValueContext)).toBe(1)
+      expect(context(ValueContext)).toBe(1)
 
       popProvider(ValueContext.id)
-      expect(useContext(ValueContext)).toBe(0)
+      expect(context(ValueContext)).toBe(0)
     })
 
     it('should isolate different contexts', () => {
@@ -196,15 +196,15 @@ describe('Context API', () => {
       pushProvider(ThemeContext.id, 'dark')
       pushProvider(LanguageContext.id, 'fr')
 
-      expect(useContext(ThemeContext)).toBe('dark')
-      expect(useContext(LanguageContext)).toBe('fr')
+      expect(context(ThemeContext)).toBe('dark')
+      expect(context(LanguageContext)).toBe('fr')
 
       popProvider(ThemeContext.id)
-      expect(useContext(ThemeContext)).toBe('light')
-      expect(useContext(LanguageContext)).toBe('fr')
+      expect(context(ThemeContext)).toBe('light')
+      expect(context(LanguageContext)).toBe('fr')
 
       popProvider(LanguageContext.id)
-      expect(useContext(LanguageContext)).toBe('en')
+      expect(context(LanguageContext)).toBe('en')
     })
   })
 
@@ -213,16 +213,16 @@ describe('Context API', () => {
       const CountContext = createContext(0)
 
       pushProvider(CountContext.id, 10)
-      expect(useContext(CountContext)).toBe(10)
+      expect(context(CountContext)).toBe(10)
 
       pushProvider(CountContext.id, 20)
-      expect(useContext(CountContext)).toBe(20)
+      expect(context(CountContext)).toBe(20)
 
       popProvider(CountContext.id)
-      expect(useContext(CountContext)).toBe(10)
+      expect(context(CountContext)).toBe(10)
 
       popProvider(CountContext.id)
-      expect(useContext(CountContext)).toBe(0)
+      expect(context(CountContext)).toBe(0)
     })
 
     it('should handle popping from empty stack gracefully', () => {
@@ -231,7 +231,7 @@ describe('Context API', () => {
       // Should not throw
       expect(() => popProvider(TestContext.id)).not.toThrow()
 
-      const value = useContext(TestContext)
+      const value = context(TestContext)
       expect(value).toBe('default')
     })
 
@@ -251,21 +251,21 @@ describe('Context API', () => {
       pushProvider(Context1.id, 'a2')
       pushProvider(Context2.id, 'b2')
 
-      expect(useContext(Context1)).toBe('a2')
-      expect(useContext(Context2)).toBe('b2')
+      expect(context(Context1)).toBe('a2')
+      expect(context(Context2)).toBe('b2')
 
       popProvider(Context1.id)
-      expect(useContext(Context1)).toBe('a1')
-      expect(useContext(Context2)).toBe('b2')
+      expect(context(Context1)).toBe('a1')
+      expect(context(Context2)).toBe('b2')
 
       popProvider(Context2.id)
-      expect(useContext(Context1)).toBe('a1')
-      expect(useContext(Context2)).toBe('b1')
+      expect(context(Context1)).toBe('a1')
+      expect(context(Context2)).toBe('b1')
 
       popProvider(Context1.id)
       popProvider(Context2.id)
-      expect(useContext(Context1)).toBe('a')
-      expect(useContext(Context2)).toBe('b')
+      expect(context(Context1)).toBe('a')
+      expect(context(Context2)).toBe('b')
     })
   })
 
@@ -355,17 +355,17 @@ describe('Context API', () => {
       popProvider(ThemeContext.id)
 
       // Context is now back to default
-      expect(useContext(ThemeContext)).toBe('light')
+      expect(context(ThemeContext)).toBe('light')
 
       // Run with captured context
       const result = runWithContext(snapshot, () => {
-        return useContext(ThemeContext)
+        return context(ThemeContext)
       })
 
       expect(result).toBe('dark')
 
       // After running, context should be restored
-      expect(useContext(ThemeContext)).toBe('light')
+      expect(context(ThemeContext)).toBe('light')
     })
 
     it('should handle multiple contexts in snapshot', () => {
@@ -380,14 +380,14 @@ describe('Context API', () => {
 
       const result = runWithContext(snapshot, () => {
         return {
-          theme: useContext(ThemeContext),
-          language: useContext(LanguageContext),
+          theme: context(ThemeContext),
+          language: context(LanguageContext),
         }
       })
 
       expect(result).toEqual({ theme: 'dark', language: 'fr' })
-      expect(useContext(ThemeContext)).toBe('light')
-      expect(useContext(LanguageContext)).toBe('en')
+      expect(context(ThemeContext)).toBe('light')
+      expect(context(LanguageContext)).toBe('en')
     })
 
     it('should return function result', () => {
@@ -398,7 +398,7 @@ describe('Context API', () => {
       popProvider(ValueContext.id)
 
       const result = runWithContext(snapshot, () => {
-        const value = useContext(ValueContext)
+        const value = context(ValueContext)
         return value * 2
       })
 
@@ -419,7 +419,7 @@ describe('Context API', () => {
       }).toThrow('Test error')
 
       // Context should still be cleaned up
-      expect(useContext(ErrorContext)).toBe('safe')
+      expect(context(ErrorContext)).toBe('safe')
     })
 
     it('should cleanup context even if function throws', () => {
@@ -431,7 +431,7 @@ describe('Context API', () => {
 
       try {
         runWithContext(snapshot, () => {
-          expect(useContext(CleanupContext)).toBe(100)
+          expect(context(CleanupContext)).toBe(100)
           throw new Error('Intentional error')
         })
       } catch (e) {
@@ -439,7 +439,7 @@ describe('Context API', () => {
       }
 
       // Should be cleaned up and back to default
-      expect(useContext(CleanupContext)).toBe(0)
+      expect(context(CleanupContext)).toBe(0)
     })
 
     it('should work with empty snapshot', () => {
@@ -463,7 +463,7 @@ describe('Context API', () => {
       const promise = new Promise<string>((resolve) => {
         setTimeout(() => {
           runWithContext(snapshot, () => {
-            const value = useContext(AsyncContext)
+            const value = context(AsyncContext)
             resolve(value)
           })
         }, 10)
@@ -471,7 +471,7 @@ describe('Context API', () => {
 
       const result = await promise
       expect(result).toBe('async-value')
-      expect(useContext(AsyncContext)).toBe('initial')
+      expect(context(AsyncContext)).toBe('initial')
     })
 
     it('should handle nested runWithContext calls', () => {
@@ -485,17 +485,17 @@ describe('Context API', () => {
       popProvider(LevelContext.id)
 
       const result = runWithContext(snapshot1, () => {
-        const level1 = useContext(LevelContext)
+        const level1 = context(LevelContext)
 
         const inner = runWithContext(snapshot2, () => {
-          return useContext(LevelContext)
+          return context(LevelContext)
         })
 
         return { level1, inner }
       })
 
       expect(result).toEqual({ level1: 1, inner: 2 })
-      expect(useContext(LevelContext)).toBe(0)
+      expect(context(LevelContext)).toBe(0)
     })
   })
 
@@ -507,13 +507,13 @@ describe('Context API', () => {
         pushProvider(RapidContext.id, i)
       }
 
-      expect(useContext(RapidContext)).toBe(99)
+      expect(context(RapidContext)).toBe(99)
 
       for (let i = 0; i < 100; i++) {
         popProvider(RapidContext.id)
       }
 
-      expect(useContext(RapidContext)).toBe(0)
+      expect(context(RapidContext)).toBe(0)
     })
 
     it('should handle array values in context', () => {
@@ -521,7 +521,7 @@ describe('Context API', () => {
 
       pushProvider(ArrayContext.id, [1, 2, 3])
 
-      const value = useContext(ArrayContext)
+      const value = context(ArrayContext)
       expect(value).toEqual([1, 2, 3])
 
       popProvider(ArrayContext.id)
@@ -543,7 +543,7 @@ describe('Context API', () => {
 
       pushProvider(ComplexContext.id, complexValue)
 
-      const value = useContext(ComplexContext)
+      const value = context(ComplexContext)
       expect(value).toEqual(complexValue)
 
       popProvider(ComplexContext.id)
@@ -555,7 +555,7 @@ describe('Context API', () => {
       const customFn = () => 'custom'
       pushProvider(FunctionContext.id, customFn)
 
-      const value = useContext(FunctionContext)
+      const value = context(FunctionContext)
       expect(value).toBe(customFn)
       expect(value()).toBe('custom')
 
@@ -569,11 +569,11 @@ describe('Context API', () => {
 
       pushProvider(SymbolContext.id, sym2)
 
-      const value = useContext(SymbolContext)
+      const value = context(SymbolContext)
       expect(value).toBe(sym2)
 
       popProvider(SymbolContext.id)
-      expect(useContext(SymbolContext)).toBe(sym1)
+      expect(context(SymbolContext)).toBe(sym1)
     })
 
     it('should maintain type safety with generic contexts', () => {
@@ -587,7 +587,7 @@ describe('Context API', () => {
       const user: User = { id: 1, name: 'Alice' }
       pushProvider(UserContext.id, user)
 
-      const value = useContext(UserContext)
+      const value = context(UserContext)
       expect(value).toEqual(user)
 
       // TypeScript should enforce type
@@ -606,24 +606,24 @@ describe('Context API', () => {
       const ThemeContext = createContext<Theme>('light')
 
       // Initial app state
-      expect(useContext(ThemeContext)).toBe('light')
+      expect(context(ThemeContext)).toBe('light')
 
       // User opens settings and changes to dark
       pushProvider(ThemeContext.id, 'dark')
-      expect(useContext(ThemeContext)).toBe('dark')
+      expect(context(ThemeContext)).toBe('dark')
 
       // User opens a modal that forces light theme
       pushProvider(ThemeContext.id, 'light')
-      expect(useContext(ThemeContext)).toBe('light')
+      expect(context(ThemeContext)).toBe('light')
 
       // User closes modal, back to dark theme
       popProvider(ThemeContext.id)
-      expect(useContext(ThemeContext)).toBe('dark')
+      expect(context(ThemeContext)).toBe('dark')
 
       // User resets to system preference
       popProvider(ThemeContext.id)
       pushProvider(ThemeContext.id, 'auto')
-      expect(useContext(ThemeContext)).toBe('auto')
+      expect(context(ThemeContext)).toBe('auto')
 
       popProvider(ThemeContext.id)
     })
@@ -640,7 +640,7 @@ describe('Context API', () => {
       })
 
       // Anonymous user
-      expect(useContext(AuthContext).isAuthenticated).toBe(false)
+      expect(context(AuthContext).isAuthenticated).toBe(false)
 
       // User logs in
       pushProvider(AuthContext.id, {
@@ -648,7 +648,7 @@ describe('Context API', () => {
         user: { id: '123', name: 'Alice' },
       })
 
-      const authState = useContext(AuthContext)
+      const authState = context(AuthContext)
       expect(authState.isAuthenticated).toBe(true)
       expect(authState.user?.name).toBe('Alice')
 
@@ -657,11 +657,11 @@ describe('Context API', () => {
 
       // User logs out
       popProvider(AuthContext.id)
-      expect(useContext(AuthContext).isAuthenticated).toBe(false)
+      expect(context(AuthContext).isAuthenticated).toBe(false)
 
       // Async operation uses captured auth state
       runWithContext(snapshot, () => {
-        const state = useContext(AuthContext)
+        const state = context(AuthContext)
         expect(state.isAuthenticated).toBe(true)
         expect(state.user?.name).toBe('Alice')
       })
@@ -684,7 +684,7 @@ describe('Context API', () => {
         translations: { hello: 'Bonjour' },
       })
 
-      expect(useContext(I18nContext).translations.hello).toBe('Bonjour')
+      expect(context(I18nContext).translations.hello).toBe('Bonjour')
 
       // Capture for later use
       const frenchSnapshot = captureContext()
@@ -696,11 +696,11 @@ describe('Context API', () => {
         translations: { hello: 'Hola' },
       })
 
-      expect(useContext(I18nContext).translations.hello).toBe('Hola')
+      expect(context(I18nContext).translations.hello).toBe('Hola')
 
       // Run something with French context
       runWithContext(frenchSnapshot, () => {
-        expect(useContext(I18nContext).translations.hello).toBe('Bonjour')
+        expect(context(I18nContext).translations.hello).toBe('Bonjour')
       })
 
       popProvider(I18nContext.id)

@@ -20,9 +20,9 @@ export { effect, onMount, onCleanup, batch, root, untrack } from './core/signal'
 export { For } from './core/flow'
 
 // Context API
-export { createContext, useContext } from './core/context'
+export { createContext, context } from './core/context'
 export type { Context } from './core/context'
 
 // Async boundaries
 export { Suspense } from './core/suspense'
-export { ErrorBoundary, useErrorBoundary } from './core/error-boundary'
+export { ErrorBoundary, errorBoundary } from './core/error-boundary'

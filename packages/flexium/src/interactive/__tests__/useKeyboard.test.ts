@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { useKeyboard, Keys } from '../useKeyboard'
+import { keyboard, Keys } from '../keyboard'
 
-describe('useKeyboard', () => {
+describe('keyboard', () => {
   let target: EventTarget
 
   beforeEach(() => {
@@ -13,117 +13,117 @@ describe('useKeyboard', () => {
   })
 
   it('should create keyboard state with all methods', () => {
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
-    expect(keyboard).toBeDefined()
-    expect(typeof keyboard.isPressed).toBe('function')
-    expect(typeof keyboard.isJustPressed).toBe('function')
-    expect(typeof keyboard.isJustReleased).toBe('function')
-    expect(typeof keyboard.getPressedKeys).toBe('function')
-    expect(typeof keyboard.clearFrameState).toBe('function')
-    expect(typeof keyboard.dispose).toBe('function')
-    expect(keyboard.keys).toBeDefined()
+    expect(kb).toBeDefined()
+    expect(typeof kb.isPressed).toBe('function')
+    expect(typeof kb.isJustPressed).toBe('function')
+    expect(typeof kb.isJustReleased).toBe('function')
+    expect(typeof kb.getPressedKeys).toBe('function')
+    expect(typeof kb.clearFrameState).toBe('function')
+    expect(typeof kb.dispose).toBe('function')
+    expect(kb.keys).toBeDefined()
 
-    keyboard.dispose()
+    kb.dispose()
   })
 
   it('should detect key press', () => {
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
-    expect(keyboard.isPressed('KeyA')).toBe(false)
+    expect(kb.isPressed('KeyA')).toBe(false)
 
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyA' }))
 
-    expect(keyboard.isPressed('KeyA')).toBe(true)
-    expect(keyboard.isPressed('keya')).toBe(true) // Case insensitive
+    expect(kb.isPressed('KeyA')).toBe(true)
+    expect(kb.isPressed('keya')).toBe(true) // Case insensitive
 
-    keyboard.dispose()
+    kb.dispose()
   })
 
   it('should detect key release', () => {
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyA' }))
-    expect(keyboard.isPressed('KeyA')).toBe(true)
+    expect(kb.isPressed('KeyA')).toBe(true)
 
     target.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyA' }))
-    expect(keyboard.isPressed('KeyA')).toBe(false)
+    expect(kb.isPressed('KeyA')).toBe(false)
 
-    keyboard.dispose()
+    kb.dispose()
   })
 
   it('should track just pressed state', () => {
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
-    expect(keyboard.isJustPressed('KeyA')).toBe(false)
+    expect(kb.isJustPressed('KeyA')).toBe(false)
 
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyA' }))
 
-    expect(keyboard.isJustPressed('KeyA')).toBe(true)
+    expect(kb.isJustPressed('KeyA')).toBe(true)
 
     // After clearing frame state, just pressed should be false
-    keyboard.clearFrameState()
-    expect(keyboard.isJustPressed('KeyA')).toBe(false)
+    kb.clearFrameState()
+    expect(kb.isJustPressed('KeyA')).toBe(false)
 
-    keyboard.dispose()
+    kb.dispose()
   })
 
   it('should track just released state', () => {
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyA' }))
     target.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyA' }))
 
-    expect(keyboard.isJustReleased('KeyA')).toBe(true)
+    expect(kb.isJustReleased('KeyA')).toBe(true)
 
-    keyboard.clearFrameState()
-    expect(keyboard.isJustReleased('KeyA')).toBe(false)
+    kb.clearFrameState()
+    expect(kb.isJustReleased('KeyA')).toBe(false)
 
-    keyboard.dispose()
+    kb.dispose()
   })
 
   it('should get all pressed keys', () => {
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyA' }))
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB' }))
 
-    const pressed = keyboard.getPressedKeys()
+    const pressed = kb.getPressedKeys()
     expect(pressed).toContain('keya')
     expect(pressed).toContain('keyb')
     expect(pressed.length).toBe(2)
 
-    keyboard.dispose()
+    kb.dispose()
   })
 
   it('should update keys signal on key events', () => {
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
-    expect(keyboard.keys().size).toBe(0)
+    expect(kb.keys().size).toBe(0)
 
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }))
 
-    expect(keyboard.keys().has('space')).toBe(true)
+    expect(kb.keys().has('space')).toBe(true)
 
-    keyboard.dispose()
+    kb.dispose()
   })
 
   it('should not register same key twice', () => {
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyA' }))
     target.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyA' }))
 
-    expect(keyboard.getPressedKeys().length).toBe(1)
+    expect(kb.getPressedKeys().length).toBe(1)
 
-    keyboard.dispose()
+    kb.dispose()
   })
 
   it('should cleanup event listeners on dispose', () => {
     const removeEventListenerSpy = vi.spyOn(target, 'removeEventListener')
-    const keyboard = useKeyboard(target)
+    const kb = keyboard(target)
 
-    keyboard.dispose()
+    kb.dispose()
 
     expect(removeEventListenerSpy).toHaveBeenCalledWith(
       'keydown',

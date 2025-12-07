@@ -1,5 +1,8 @@
 /**
- * useKeyboard - Reactive keyboard input hook
+ * keyboard - Reactive keyboard input handler
+ *
+ * Creates a keyboard input handler with reactive signals.
+ * Philosophy: No hooks, just factory functions that return signal-based state.
  */
 
 import { signal, type Signal } from '../core/signal'
@@ -23,8 +26,19 @@ export interface KeyboardState {
 
 /**
  * Create a keyboard input handler with reactive state
+ *
+ * @example
+ * ```tsx
+ * const kb = keyboard()
+ *
+ * effect(() => {
+ *   if (kb.isPressed(Keys.ArrowUp)) {
+ *     player.y -= speed
+ *   }
+ * })
+ * ```
  */
-export function useKeyboard(target: EventTarget = window): KeyboardState {
+export function keyboard(target: EventTarget = window): KeyboardState {
   const keys = signal<Set<string>>(new Set())
   const justPressed = new Set<string>()
   const justReleased = new Set<string>()

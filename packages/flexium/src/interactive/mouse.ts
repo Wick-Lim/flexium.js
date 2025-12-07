@@ -1,5 +1,8 @@
 /**
- * useMouse - Reactive mouse input hook
+ * mouse - Reactive mouse input handler
+ *
+ * Creates a mouse input handler with reactive signals.
+ * Philosophy: No hooks, just factory functions that return signal-based state.
  */
 
 import { signal, type Signal } from '../core/signal'
@@ -30,7 +33,7 @@ export interface MouseState {
   dispose(): void
 }
 
-export interface UseMouseOptions {
+export interface MouseOptions {
   /** Element to track mouse relative to (default: window) */
   target?: EventTarget
   /** Canvas element for coordinate calculation (if different from target) */
@@ -39,8 +42,20 @@ export interface UseMouseOptions {
 
 /**
  * Create a mouse input handler with reactive state
+ *
+ * @example
+ * ```tsx
+ * const m = mouse()
+ *
+ * effect(() => {
+ *   console.log('Mouse at:', m.position.value)
+ *   if (m.isLeftPressed()) {
+ *     draw(m.position.value)
+ *   }
+ * })
+ * ```
  */
-export function useMouse(options: UseMouseOptions = {}): MouseState {
+export function mouse(options: MouseOptions = {}): MouseState {
   const { target = window, canvas } = options
 
   const position = signal<Vec2>({ x: 0, y: 0 })

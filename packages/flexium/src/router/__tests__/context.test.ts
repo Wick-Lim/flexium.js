@@ -10,7 +10,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { RouterCtx, RouteDepthCtx } from '../context'
-import { useContext, createContext } from '../../core/context'
+import { context, createContext } from '../../core/context'
 
 describe('Router Context', () => {
   describe('RouterCtx', () => {
@@ -134,7 +134,7 @@ describe('Router Context', () => {
 
     describe('Default Value Access', () => {
       it('should return null when accessed outside provider', () => {
-        const value = useContext(RouterCtx)
+        const value = context(RouterCtx)
         expect(value).toBeNull()
       })
 
@@ -235,7 +235,7 @@ describe('Router Context', () => {
 
     describe('Default Value Access', () => {
       it('should return 0 when accessed outside provider', () => {
-        const depth = useContext(RouteDepthCtx)
+        const depth = context(RouteDepthCtx)
         expect(depth).toBe(0)
       })
 
@@ -308,17 +308,17 @@ describe('Router Context', () => {
   })
 
   describe('Context API Compatibility', () => {
-    it('should work with useContext function', () => {
-      const routerValue = useContext(RouterCtx)
-      const depthValue = useContext(RouteDepthCtx)
+    it('should work with context function', () => {
+      const routerValue = context(RouterCtx)
+      const depthValue = context(RouteDepthCtx)
 
       expect(routerValue).toBe(RouterCtx.defaultValue)
       expect(depthValue).toBe(RouteDepthCtx.defaultValue)
     })
 
     it('should return default value when no provider is active', () => {
-      expect(useContext(RouterCtx)).toBeNull()
-      expect(useContext(RouteDepthCtx)).toBe(0)
+      expect(context(RouterCtx)).toBeNull()
+      expect(context(RouteDepthCtx)).toBe(0)
     })
 
     it('should have Provider that accepts value and children props', () => {

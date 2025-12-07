@@ -13,7 +13,7 @@ import { createContext, useContext } from 'flexium/core'
 const ThemeContext = createContext('light')
 ```
 
-The default value is used when a component calls `useContext()` without a matching `Provider` above it.
+The default value is used when a component calls `context()` without a matching `Provider` above it.
 
 ## Providing Context
 
@@ -35,7 +35,7 @@ function App() {
 
 ## Consuming Context
 
-Use `useContext()` to read the current context value:
+Use `context()` to read the current context value:
 
 ```tsx
 function ThemedButton() {
@@ -266,7 +266,7 @@ Returns the current context value, or the default value if no Provider is found 
    const value = useMemo(() => ({ user, login, logout }), [user])
    ```
 
-3. **Create custom hooks**: Wrap `useContext()` in a custom hook for better DX:
+3. **Create custom hooks**: Wrap `context()` in a custom hook for better DX:
 
    ```tsx
    function useAuth() {

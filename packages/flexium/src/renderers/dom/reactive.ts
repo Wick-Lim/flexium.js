@@ -14,7 +14,7 @@ import { isFNode } from './f'
 import {
   pushProvider,
   popProvider,
-  useContext,
+  context,
   captureContext,
   runWithContext,
 } from '../../core/context'
@@ -27,7 +27,7 @@ import {
   For,
   ForComponent,
 } from '../../core/flow'
-import { beginComponentScope, endComponentScope, isStateValue, getStateSignal } from '../../core/state'
+import { isStateValue, getStateSignal } from '../../core/state'
 import {
   isListComponent,
   mountListComponent,
@@ -314,10 +314,6 @@ export function mountReactive(
       const parent = container || document.createDocumentFragment()
       domRenderer.appendChild(parent, startNode)
 
-      // Generate stable component ID ONCE, outside the effect
-      const componentName = component.name || 'Anonymous'
-      const componentId = `${componentName}_${Math.random().toString(36).slice(2)}`
-
       let currentNodes: Node[] = []
       const contextSnapshot = captureContext()
 
@@ -354,11 +350,10 @@ export function mountReactive(
             let result
 
             try {
-              beginComponentScope(componentId)
               result = component({ ...vnode.props, children: vnode.children })
             } catch (err) {
               if (err instanceof Promise) {
-                const suspense = useContext(SuspenseCtx)
+                const suspense = context(SuspenseCtx)
                 if (suspense) {
                   suspense.registerPromise(err)
                   result = null
@@ -366,16 +361,14 @@ export function mountReactive(
                   throw err
                 }
               } else {
-                const errorBoundary = useContext(ErrorBoundaryCtx)
-                if (errorBoundary) {
-                  errorBoundary.setError(err)
+                const errorBoundaryCtx = context(ErrorBoundaryCtx)
+                if (errorBoundaryCtx) {
+                  errorBoundaryCtx.setError(err)
                   result = null
                 } else {
                   throw err
                 }
               }
-            } finally {
-              endComponentScope()
             }
 
             const fragment = document.createDocumentFragment()

@@ -1,46 +1,49 @@
 ---
-title: Hooks - API Reference
-description: Complete API reference for Flexium's built-in hooks. useContext, useRouter, useKeyboard, useMouse, useMotion, and useErrorBoundary for building reactive applications.
+title: Utilities - API Reference
+description: Complete API reference for Flexium's built-in utility functions. context, router, keyboard, mouse, and errorBoundary for building reactive applications.
 head:
   - - meta
     - property: og:title
-      content: Hooks API Reference - Flexium
+      content: Utilities API Reference - Flexium
   - - meta
     - property: og:description
-      content: Comprehensive guide to Flexium hooks for context, routing, input handling, animation, and error boundaries.
+      content: Comprehensive guide to Flexium utility functions for context, routing, input handling, animation, and error boundaries.
 ---
 
-# Hooks
+# Utilities
 
-Complete API reference for Flexium's built-in hooks for context, routing, input handling, animation, and error boundaries.
+Complete API reference for Flexium's built-in utility functions for context, routing, input handling, animation, and error boundaries.
 
 ## Overview
 
-Flexium provides a set of composable hooks that integrate seamlessly with the signals-based reactivity system. Unlike React hooks, Flexium hooks don't have special rules about where they can be called - they work anywhere in your component.
+Flexium provides a set of composable utility functions that integrate seamlessly with the signals-based reactivity system. These are factory functions that return signal-based state - not hooks. They work anywhere in your code without special rules.
 
-### Available Hooks
+### Available Utilities
 
-| Hook | Package | Description |
+| Function | Package | Description |
 | --- | --- | --- |
-| [`useContext()`](#usecontext) | `flexium/core` | Access values from a context provider |
-| [`useRouter()`](#userouter) | `flexium/router` | Access routing state and navigation |
-| [`useKeyboard()`](#usekeyboard) | `flexium/interactive` | Track keyboard input state |
-| [`useMouse()`](#usemouse) | `flexium/interactive` | Track mouse position and button state |
-| [`useMotion()`](#usemotion) | `flexium/primitives/motion` | Create signal-driven animations |
-| [`useErrorBoundary()`](#useerrorboundary) | `flexium/core` | Handle errors in components |
+| [`context()`](#context) | `flexium/core` | Access values from a context provider |
+| [`router()`](#router) | `flexium/router` | Access routing state and navigation |
+| [`keyboard()`](#keyboard) | `flexium/interactive` | Track keyboard input state |
+| [`mouse()`](#mouse) | `flexium/interactive` | Track mouse position and button state |
+| [`errorBoundary()`](#errorboundary) | `flexium/core` | Handle errors in components |
+
+::: info Deprecation Notice
+The `useXxx()` variants (e.g., `useContext`, `useRouter`) are deprecated and will be removed in the next major version. Please migrate to the new function names.
+:::
 
 ---
 
-## Core Hooks
+## Core Utilities
 
-### useContext
+### context
 
 Access values from a Context provider. Works with contexts created by `createContext()`.
 
 #### Signature
 
 ```tsx
-function useContext<T>(context: Context<T>): T
+function context<T>(ctx: Context<T>): T
 ```
 
 #### Parameters
@@ -56,7 +59,7 @@ Returns the current value of the context. If no provider is found in the compone
 #### Usage
 
 ```tsx
-import { createContext, useContext } from 'flexium';
+import { createContext, context } from 'flexium';
 
 // Create a context with a default value
 const ThemeContext = createContext<'light' | 'dark'>('light');
@@ -70,7 +73,7 @@ function App() {
 }
 
 function ThemedButton() {
-  const theme = useContext(ThemeContext);
+  const theme = context(ThemeContext);
 
   return (
     <button class={`btn-${theme}`}>

@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { Router, Route, Link, Outlet, useRouter } from '../components'
+import { Router, Route, Link, Outlet, router } from '../components'
 import { f } from '../../renderers/dom/f'
 import { mountReactive } from '../../renderers/dom/reactive'
 
@@ -83,7 +83,7 @@ describe('Router Components', () => {
         let routerContext: any = null
 
         const TestComponent = () => {
-          routerContext = useRouter()
+          routerContext = router()
           return f('div', {}, 'Test')
         }
 
@@ -300,8 +300,8 @@ describe('Router Components', () => {
         let contextParams: any = null
 
         const TestComponent = () => {
-          const router = useRouter()
-          contextParams = router.params()
+          const r = router()
+          contextParams = r.params()
           return f('div', {}, 'Test')
         }
 
@@ -902,8 +902,8 @@ describe('Router Components', () => {
       let navigateFn: ((path: string) => void) | null = null
 
       const TestComponent = () => {
-        const router = useRouter()
-        navigateFn = router.navigate
+        const r = router()
+        navigateFn = r.navigate
         return f('div', { id: 'test' }, 'Test')
       }
 
@@ -924,10 +924,10 @@ describe('Router Components', () => {
     })
 
     it('should update location after programmatic navigation', () => {
-      let router: any = null
+      let routerCtx: any = null
 
       const TestComponent = () => {
-        router = useRouter()
+        routerCtx = router()
         return f('div', {}, 'Test')
       }
 
@@ -937,21 +937,21 @@ describe('Router Components', () => {
 
       mountReactive(RouterApp, container)
 
-      const initialPath = router.location().pathname
-      router.navigate('/updated-path')
-      const updatedPath = router.location().pathname
+      const initialPath = routerCtx.location().pathname
+      routerCtx.navigate('/updated-path')
+      const updatedPath = routerCtx.location().pathname
 
       expect(initialPath).toBe('/')
       expect(updatedPath).toBe('/updated-path')
     })
 
     it('should trigger route re-matching on navigate', () => {
-      let router: any = null
+      let routerCtx: any = null
       const Home = () => f('div', { id: 'home' }, 'Home')
       const About = () => f('div', { id: 'about' }, 'About')
 
       const TestComponent = () => {
-        router = useRouter()
+        routerCtx = router()
         return f('div', {}, [f(Outlet, {})])
       }
 
@@ -968,7 +968,7 @@ describe('Router Components', () => {
 
       expect(container.querySelector('#home')).not.toBeNull()
 
-      router.navigate('/about')
+      routerCtx.navigate('/about')
 
       // Note: In a real reactive system, this would trigger re-render
       // For this test, we're just verifying navigate was called

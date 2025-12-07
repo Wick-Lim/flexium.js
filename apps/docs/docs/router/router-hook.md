@@ -1,17 +1,17 @@
-# useRouter()
+# router()
 
 Access router state and navigation functions.
 
 ## Import
 
 ```tsx
-import { useRouter } from 'flexium/router'
+import { router } from 'flexium/router'
 ```
 
 ## Signature
 
 ```ts
-function useRouter(): RouterContext
+function router(): RouterContext
 
 interface RouterContext {
   path: Accessor<string>
@@ -40,7 +40,7 @@ interface RouterContext {
 
 ```tsx
 function Breadcrumb() {
-  const { path } = useRouter()
+  const { path } = router()
 
   return <span>Current: {path()}</span>
 }
@@ -51,7 +51,7 @@ function Breadcrumb() {
 ```tsx
 // Route: /users/:id
 function UserProfile() {
-  const { params } = useRouter()
+  const { params } = router()
 
   return <div>User ID: {params().id}</div>
 }
@@ -62,7 +62,7 @@ function UserProfile() {
 ```tsx
 // URL: /search?q=hello&sort=date
 function SearchPage() {
-  const { query } = useRouter()
+  const { query } = router()
 
   return (
     <div>
@@ -77,7 +77,7 @@ function SearchPage() {
 
 ```tsx
 function LoginForm() {
-  const { navigate } = useRouter()
+  const { navigate } = router()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -92,7 +92,7 @@ function LoginForm() {
 ### Navigate with Options
 
 ```tsx
-const { navigate } = useRouter()
+const { navigate } = router()
 
 // Replace current history entry
 navigate('/login', { replace: true })
@@ -105,7 +105,7 @@ navigate('/checkout', { state: { cartId: '123' } })
 
 ```tsx
 function NavigationControls() {
-  const { back, forward } = useRouter()
+  const { back, forward } = router()
 
   return (
     <div>
@@ -120,7 +120,7 @@ function NavigationControls() {
 
 ```tsx
 function ProtectedPage() {
-  const { navigate } = useRouter()
+  const { navigate } = router()
   const { user } = useContext(AuthContext)
 
   effect(() => {
@@ -137,7 +137,7 @@ function ProtectedPage() {
 
 ```tsx
 function Pagination() {
-  const { query, navigate, path } = useRouter()
+  const { query, navigate, path } = router()
 
   const goToPage = (page) => {
     navigate(`${path()}?page=${page}`)

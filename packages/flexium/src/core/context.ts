@@ -23,12 +23,20 @@ export function createContext<T>(defaultValue: T): Context<T> {
   }
 }
 
-export function useContext<T>(context: Context<T>): T {
-  const stack = contextStack.get(context.id)
+/**
+ * Get the current value from a context.
+ *
+ * @example
+ * ```tsx
+ * const theme = context(ThemeContext)
+ * ```
+ */
+export function context<T>(ctx: Context<T>): T {
+  const stack = contextStack.get(ctx.id)
   if (stack && stack.length > 0) {
     return stack[stack.length - 1] as T
   }
-  return context.defaultValue
+  return ctx.defaultValue
 }
 
 export function pushProvider(id: symbol, value: unknown): void {

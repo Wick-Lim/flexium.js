@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { matchPath } from '../core'
 import { matchRoutes, createRoutesFromChildren } from '../utils'
 import type { RouteDef } from '../types'
-import { useRouter, Router, Route, Link, Outlet } from '../components'
+import { router, Router, Route, Link, Outlet } from '../components'
 import { f } from '../../renderers/dom/f'
 import { mountReactive } from '../../renderers/dom/reactive'
 
@@ -262,15 +262,15 @@ describe('Router', () => {
     })
   })
 
-  describe('useRouter hook', () => {
+  describe('router function', () => {
     afterEach(() => {
       document.body.innerHTML = ''
     })
 
     it('should throw error when used outside Router', () => {
       const TestComponent = () => {
-        expect(() => useRouter()).toThrow(
-          'useRouter must be used within a <Router> component'
+        expect(() => router()).toThrow(
+          'router() must be called within a <Router> component'
         )
         return f('div', {}, 'test')
       }
@@ -285,7 +285,7 @@ describe('Router', () => {
       let routerContext: any = null
 
       const TestComponent = () => {
-        routerContext = useRouter()
+        routerContext = router()
         return f('div', { id: 'test' }, 'Test')
       }
 
@@ -311,8 +311,8 @@ describe('Router', () => {
       let currentLocation: any = null
 
       const TestComponent = () => {
-        const router = useRouter()
-        currentLocation = router.location()
+        const r = router()
+        currentLocation = r.location()
         return f('div', { id: 'test' }, 'Test')
       }
 
@@ -335,8 +335,8 @@ describe('Router', () => {
       let routeParams: any = null
 
       const TestComponent = () => {
-        const router = useRouter()
-        routeParams = router.params()
+        const r = router()
+        routeParams = r.params()
         return f('div', { id: 'test' }, `User: ${routeParams?.id || 'unknown'}`)
       }
 

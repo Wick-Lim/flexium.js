@@ -28,7 +28,7 @@ Flexium handles all of this for you with a clean, reactive API.
 ## Quick Example
 
 ```tsx
-import { createLoop, useKeyboard, Keys } from 'flexium/interactive'
+import { createLoop, keyboard, Keys } from 'flexium/interactive'
 import { Canvas, Circle } from 'flexium/canvas'
 
 function SimpleGame() {
@@ -36,7 +36,7 @@ function SimpleGame() {
   let y = 200
   const speed = 200 // pixels per second
 
-  const keyboard = useKeyboard()
+  const keyboard = keyboard()
 
   const loop = createLoop({
     onUpdate: (delta) => {
@@ -159,14 +159,14 @@ const loop = createLoop({
 
 ## Keyboard Input
 
-`useKeyboard()` provides reactive keyboard state tracking with support for key press, hold, and release detection.
+`keyboard()` provides reactive keyboard state tracking with support for key press, hold, and release detection.
 
 ### Basic Usage
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium/interactive'
+import { keyboard, Keys } from 'flexium/interactive'
 
-const keyboard = useKeyboard()
+const keyboard = keyboard()
 
 // Check if key is currently pressed
 if (keyboard.isPressed(Keys.Space)) {
@@ -219,13 +219,13 @@ By default, keyboard events are tracked on `window`. You can specify a different
 
 ```tsx
 const canvasElement = document.querySelector('canvas')
-const keyboard = useKeyboard(canvasElement)
+const kb = keyboard(canvasElement)
 ```
 
 ### Movement Example
 
 ```tsx
-const keyboard = useKeyboard()
+const keyboard = keyboard()
 const speed = 200
 
 createLoop({
@@ -265,7 +265,7 @@ createLoop({
 Access the reactive signal for advanced use cases:
 
 ```tsx
-const keyboard = useKeyboard()
+const keyboard = keyboard()
 
 // Watch for any key state changes
 effect(() => {
@@ -311,7 +311,7 @@ onUpdate: (delta) => {
 Call `clearFrameState()` at the end of each frame to reset just-pressed/just-released states:
 
 ```tsx
-const keyboard = useKeyboard()
+const keyboard = keyboard()
 
 createLoop({
   onUpdate: (delta) => {
@@ -337,14 +337,14 @@ onCleanup(() => {
 
 ## Mouse Input
 
-`useMouse()` provides reactive mouse state tracking with position, buttons, and wheel delta.
+`mouse()` provides reactive mouse state tracking with position, buttons, and wheel delta.
 
 ### Basic Usage
 
 ```tsx
-import { useMouse, MouseButton } from 'flexium/interactive'
+import { mouse, MouseButton } from 'flexium/interactive'
 
-const mouse = useMouse()
+const mouse = mouse()
 
 // Get current mouse position
 const pos = mouse.position.value
@@ -374,7 +374,7 @@ if (mouse.isPressed(MouseButton.Left)) {
 The position is relative to the target element (or canvas if specified):
 
 ```tsx
-const mouse = useMouse({ canvas: myCanvas })
+const m = mouse({ canvas: myCanvas })
 
 // Position is in canvas coordinates
 effect(() => {
@@ -388,7 +388,7 @@ effect(() => {
 Track mouse movement since last frame:
 
 ```tsx
-const mouse = useMouse()
+const mouse = mouse()
 
 onUpdate: (delta) => {
   const delta = mouse.delta.value
@@ -404,7 +404,7 @@ onUpdate: (delta) => {
 Detect scroll wheel input:
 
 ```tsx
-const mouse = useMouse()
+const mouse = mouse()
 
 onUpdate: () => {
   const wheel = mouse.wheelDelta.value
@@ -423,7 +423,7 @@ When using with canvas, provide the canvas element for proper coordinate calcula
 function Game() {
   let canvasRef: HTMLCanvasElement | undefined
 
-  const mouse = useMouse({
+  const m = mouse({
     canvas: () => canvasRef // Pass as getter or direct reference
   })
 
@@ -459,7 +459,7 @@ MouseButton.Right  // 2
 Clear frame state and dispose when done:
 
 ```tsx
-const mouse = useMouse()
+const mouse = mouse()
 
 createLoop({
   onRender: () => {
@@ -478,7 +478,7 @@ onCleanup(() => {
 Here's a complete game combining all the systems:
 
 ```tsx
-import { createLoop, useKeyboard, useMouse, Keys } from 'flexium/interactive'
+import { createLoop, keyboard, mouse, Keys } from 'flexium/interactive'
 import { Canvas, Circle, Rect, CanvasText } from 'flexium/canvas'
 import { state } from 'flexium/core'
 
@@ -490,8 +490,8 @@ function TopDownShooter() {
   const enemies: Array<{ x: number; y: number; radius: 15 }> = []
 
   // Input
-  const keyboard = useKeyboard()
-  const mouse = useMouse()
+  const keyboard = keyboard()
+  const mouse = mouse()
 
   // Spawn enemies
   let spawnTimer = 0
@@ -835,8 +835,8 @@ const game: Loop = createLoop({
   }
 })
 
-const keyboard: KeyboardState = useKeyboard()
-const mouse: MouseState = useMouse()
+const keyboard: KeyboardState = keyboard()
+const mouse: MouseState = mouse()
 ```
 
 ## Next Steps

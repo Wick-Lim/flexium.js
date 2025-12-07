@@ -10,7 +10,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Suspense, SuspenseCtx } from '../suspense'
 import { signal } from '../signal'
 import { f } from '../../renderers/dom/f'
-import { useContext } from '../context'
+import { context } from '../context'
 
 describe('Suspense', () => {
   let container: HTMLElement
@@ -570,7 +570,7 @@ describe('Suspense', () => {
       })
 
       const InnerComponent = () => {
-        const ctx = useContext(SuspenseCtx)
+        const ctx = context(SuspenseCtx)
         if (ctx) {
           ctx.registerPromise(innerPromise)
         }
@@ -637,7 +637,7 @@ describe('Suspense', () => {
       let capturedContext: any = null
 
       const ChildComponent = () => {
-        capturedContext = useContext(SuspenseCtx)
+        capturedContext = context(SuspenseCtx)
         return f('div', {}, 'Child')
       }
 
@@ -655,7 +655,7 @@ describe('Suspense', () => {
     })
 
     it('should return null when accessing context outside Suspense', () => {
-      const value = useContext(SuspenseCtx)
+      const value = context(SuspenseCtx)
       expect(value).toBeNull()
     })
 
@@ -832,7 +832,7 @@ describe('Suspense', () => {
       })
 
       const DataComponent = () => {
-        const ctx = useContext(SuspenseCtx)
+        const ctx = context(SuspenseCtx)
         if (ctx) {
           ctx.registerPromise(fetchData)
         }

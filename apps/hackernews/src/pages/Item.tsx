@@ -1,5 +1,5 @@
 import { state, effect, For } from 'flexium/core'
-import { useRouter, Link } from 'flexium/router'
+import { router, Link } from 'flexium/router'
 import { loadItem, useItem } from '../store'
 
 function Comment(props: { id: number }) {
@@ -37,8 +37,8 @@ function Comment(props: { id: number }) {
 }
 
 export default function Item() {
-    const router = useRouter()
-    const id = () => parseInt(router.params.value.id)
+    const r = router()
+    const id = () => parseInt(r.params.value.id)
 
     // Local state to track item
     const [item, setItem] = state<any>(undefined);

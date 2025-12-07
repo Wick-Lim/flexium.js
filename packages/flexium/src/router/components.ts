@@ -4,14 +4,23 @@ import { createRoutesFromChildren, matchRoutes } from './utils'
 import { LinkProps, RouteProps, RouterContext } from './types'
 import { f } from '../renderers/dom/f'
 import { RouterCtx, RouteDepthCtx } from './context'
-import { useContext } from '../core/context'
+import { context } from '../core/context'
 import type { FNodeChild } from '../core/renderer'
 
-// Helper to use Router Context
-export function useRouter(): RouterContext {
-  const ctx = useContext(RouterCtx)
+/**
+ * Get the current router context.
+ * Must be called within a <Router> component.
+ *
+ * @example
+ * ```tsx
+ * const r = router()
+ * r.navigate('/dashboard')
+ * ```
+ */
+export function router(): RouterContext {
+  const ctx = context(RouterCtx)
   if (!ctx) {
-    throw new Error('useRouter must be used within a <Router> component')
+    throw new Error('router() must be called within a <Router> component')
   }
   return ctx
 }
@@ -96,8 +105,8 @@ export function Route(_props: RouteProps) {
  * Renders the child route content.
  */
 export function Outlet() {
-  const router = useContext(RouterCtx)
-  const depth = useContext(RouteDepthCtx) // Default 0
+  const router = context(RouterCtx)
+  const depth = context(RouteDepthCtx) // Default 0
 
   // Safety check
   if (!router) return null
@@ -126,11 +135,11 @@ export function Outlet() {
 }
 
 export function Link(props: LinkProps) {
-  const router = useRouter()
+  const r = router()
 
   const handleClick = (e: Event) => {
     e.preventDefault()
-    router.navigate(props.to)
+    r.navigate(props.to)
   }
 
   return f(

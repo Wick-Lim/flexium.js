@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   ErrorBoundary,
-  useErrorBoundary,
+  errorBoundary,
   ErrorBoundaryCtx,
 } from '../error-boundary'
 import { signal } from '../signal'
@@ -152,9 +152,9 @@ describe('ErrorBoundary', () => {
     })
   })
 
-  describe('useErrorBoundary hook', () => {
+  describe('errorBoundary function', () => {
     it('should return no-op implementation outside boundary', () => {
-      const ctx = useErrorBoundary()
+      const ctx = errorBoundary()
 
       expect(ctx).toBeDefined()
       expect(typeof ctx.setError).toBe('function')
@@ -163,7 +163,7 @@ describe('ErrorBoundary', () => {
     })
 
     it('should throw when setError called outside boundary', () => {
-      const ctx = useErrorBoundary()
+      const ctx = errorBoundary()
 
       expect(() => {
         ctx.setError(new Error('Test'))
@@ -171,7 +171,7 @@ describe('ErrorBoundary', () => {
     })
 
     it('should not throw on clearError outside boundary', () => {
-      const ctx = useErrorBoundary()
+      const ctx = errorBoundary()
 
       expect(() => {
         ctx.clearError()
@@ -179,7 +179,7 @@ describe('ErrorBoundary', () => {
     })
 
     it('should not throw on retry outside boundary', () => {
-      const ctx = useErrorBoundary()
+      const ctx = errorBoundary()
 
       expect(() => {
         ctx.retry()

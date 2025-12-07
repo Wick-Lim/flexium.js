@@ -1,17 +1,17 @@
-# useKeyboard()
+# keyboard()
 
 Track keyboard input for games and interactive applications.
 
 ## Import
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium/interactive'
+import { keyboard, Keys } from 'flexium/interactive'
 ```
 
 ## Signature
 
 ```ts
-function useKeyboard(): KeyboardState
+function keyboard(): KeyboardState
 
 interface KeyboardState {
   isPressed: (key: string) => boolean
@@ -54,7 +54,7 @@ Keys.Alt
 
 ```tsx
 function Game() {
-  const keyboard = useKeyboard()
+  const keyboard = keyboard()
 
   const loop = createLoop({
     onUpdate: () => {
@@ -75,7 +75,7 @@ function Game() {
 
 ```tsx
 function PlayerController() {
-  const keyboard = useKeyboard()
+  const keyboard = keyboard()
 
   effect(() => {
     if (keyboard.isPressed('w') || keyboard.isPressed('W')) {
@@ -97,7 +97,7 @@ function PlayerController() {
 ### Jump Detection
 
 ```tsx
-const keyboard = useKeyboard()
+const keyboard = keyboard()
 
 const loop = createLoop({
   onUpdate: () => {
@@ -113,7 +113,7 @@ const loop = createLoop({
 
 ```tsx
 const [paused, setPaused] = state(false)
-const keyboard = useKeyboard()
+const keyboard = keyboard()
 
 effect(() => {
   if (keyboard.isJustPressed(Keys.Escape)) {
@@ -125,7 +125,7 @@ effect(() => {
 ### Multiple Keys
 
 ```tsx
-const keyboard = useKeyboard()
+const keyboard = keyboard()
 
 // Sprint while holding shift
 const speed = keyboard.isPressed(Keys.Shift) ? 10 : 5
@@ -140,7 +140,7 @@ if (keyboard.isPressed(Keys.Control) && keyboard.isJustPressed('s')) {
 
 ```tsx
 function DebugOverlay() {
-  const keyboard = useKeyboard()
+  const keyboard = keyboard()
 
   return (
     <div class="debug">

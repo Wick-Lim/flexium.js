@@ -28,42 +28,6 @@ interface StateActions {
 // Global registry for keyed states
 const globalStateRegistry = new Map<string, StateObject>()
 
-// ============================================
-// Component Scope Tracking (React-like hooks)
-// ============================================
-let currentComponentId: string | null = null
-let currentHookIndex = 0
-let componentIdCounter = 0
-
-/**
- * Begin a component render scope.
- * Called by the renderer before executing a component function.
- * @internal
- */
-export function beginComponentScope(id?: string): string {
-  currentComponentId = id || `__comp_${++componentIdCounter}`
-  currentHookIndex = 0
-  return currentComponentId
-}
-
-/**
- * End a component render scope.
- * Called by the renderer after executing a component function.
- * @internal
- */
-export function endComponentScope(): void {
-  currentComponentId = null
-  currentHookIndex = 0
-}
-
-/**
- * Get current component scope info (for debugging)
- * @internal
- */
-export function getCurrentScope(): { componentId: string | null; hookIndex: number } {
-  return { componentId: currentComponentId, hookIndex: currentHookIndex }
-}
-
 /** Setter function type */
 export type StateSetter<T> = (newValue: T | ((prev: T) => T)) => void
 
@@ -228,11 +192,8 @@ export function state<T>(
   let actions: StateActions = {}
   let isAsync = false
 
-  // Determine the key: explicit key OR auto-generated from component scope
-  let key = options?.key
-  if (!key && currentComponentId) {
-    key = `${currentComponentId}:${currentHookIndex++}`
-  }
+  // Use explicit key only (no auto-generated scope tracking)
+  const key = options?.key
 
   // 1. Check Global Registry
   if (key && globalStateRegistry.has(key)) {
@@ -308,5 +269,4 @@ export function state<T>(
  */
 export function clearGlobalState() {
   globalStateRegistry.clear()
-  componentIdCounter = 0
 }

@@ -1,4 +1,4 @@
-# useMouse()
+# mouse()
 
 Track mouse position and button states.
 
@@ -46,7 +46,7 @@ interface MouseState {
 
 ```tsx
 function Game() {
-  const mouse = useMouse()
+  const mouse = mouse()
 
   return (
     <div>
@@ -61,7 +61,7 @@ function Game() {
 ```tsx
 function DrawingApp() {
   const canvasRef = ref(null)
-  const mouse = useMouse()
+  const mouse = mouse()
   const [isDrawing, setIsDrawing] = state(false)
 
   effect(() => {
@@ -79,7 +79,7 @@ function DrawingApp() {
 ### Click Detection
 
 ```tsx
-const mouse = useMouse()
+const mouse = mouse()
 
 const loop = createLoop({
   onUpdate: () => {
@@ -94,7 +94,7 @@ const loop = createLoop({
 
 ```tsx
 function Cursor() {
-  const mouse = useMouse()
+  const mouse = mouse()
 
   return (
     <div
@@ -113,7 +113,7 @@ function Cursor() {
 function CanvasGame() {
   let canvasRef
 
-  const mouse = useMouse()
+  const mouse = mouse()
 
   const getCanvasPosition = () => {
     if (!canvasRef) return { x: 0, y: 0 }
@@ -140,7 +140,7 @@ function CanvasGame() {
 
 ```tsx
 function Draggable(props) {
-  const mouse = useMouse()
+  const mouse = mouse()
   const [isDragging, setIsDragging] = state(false)
   const [offset, setOffset] = state({ x: 0, y: 0 })
 
@@ -177,7 +177,7 @@ function Draggable(props) {
 
 ```tsx
 function ContextMenuArea() {
-  const mouse = useMouse()
+  const mouse = mouse()
   const [menuPos, setMenuPos] = state(null)
 
   effect(() => {

@@ -1,4 +1,4 @@
-import { createContext, useContext } from './context'
+import { createContext, context } from './context'
 import { signal } from './signal'
 import { f } from '../renderers/dom/f'
 import type { FNodeChild, FNode } from './renderer'
@@ -151,12 +151,12 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
 }
 
 /**
- * Hook to access the nearest ErrorBoundary context
+ * Access the nearest ErrorBoundary context
  *
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { setError } = useErrorBoundary();
+ *   const { setError } = errorBoundary();
  *
  *   const handleClick = async () => {
  *     try {
@@ -170,8 +170,8 @@ export function ErrorBoundary(props: ErrorBoundaryProps) {
  * }
  * ```
  */
-export function useErrorBoundary(): ErrorBoundaryContextValue {
-  const ctx = useContext(ErrorBoundaryCtx)
+export function errorBoundary(): ErrorBoundaryContextValue {
+  const ctx = context(ErrorBoundaryCtx)
   if (!ctx) {
     // Return a no-op implementation if not within an ErrorBoundary
     return {
@@ -185,3 +185,4 @@ export function useErrorBoundary(): ErrorBoundaryContextValue {
   }
   return ctx
 }
+
