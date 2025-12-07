@@ -252,12 +252,12 @@ function App() {
 }
 
 function ThemedComponent() {
-  const theme = useContext(ThemeContext)
+  const theme = context(ThemeContext)
   return <div>Current theme: {theme}</div>
 }
 ```
 
-**Related:** `createContext()`, `useContext()`
+**Related:** `createContext()`, `context()`
 
 ## Router Types
 
@@ -282,9 +282,9 @@ interface Location {
 
 **Usage:**
 ```tsx
-const router = useRouter()
-console.log(router.location.pathname) // "/users/123"
-console.log(router.location.query) // { page: "1" }
+const r = router()
+console.log(r.location().pathname) // "/users/123"
+console.log(r.location().query) // { page: "1" }
 ```
 
 ### RouterContext
@@ -308,13 +308,13 @@ interface RouterContext {
 
 **Usage:**
 ```tsx
-const router = useRouter()
+const r = router()
 
 // Navigate
-router.navigate('/users/123')
+r.navigate('/users/123')
 
 // Access params
-console.log(router.params.id) // "123"
+console.log(r.params().id) // "123"
 ```
 
 ### RouteProps

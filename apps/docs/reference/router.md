@@ -231,38 +231,38 @@ function DashboardLayout() {
 
 ---
 
-## Hooks
+## Functions
 
-### useRouter
+### router
 
 Returns the complete router context, providing access to location, params, navigation, and route matches.
 
 #### Usage
 
 ```tsx
-import { useRouter } from 'flexium/router';
+import { router } from 'flexium/router';
 
 function UserProfile() {
-  const router = useRouter();
+  const r = router();
 
   // Access current location
-  const location = router.location();
+  const location = r.location();
   console.log(location.pathname); // "/users/123"
   console.log(location.search);   // "?tab=posts"
   console.log(location.hash);     // "#comments"
   console.log(location.query);    // { tab: "posts" }
 
   // Access route parameters
-  const params = router.params();
+  const params = r.params();
   console.log(params.id); // "123"
 
   // Navigate programmatically
   const handleClick = () => {
-    router.navigate('/dashboard');
+    r.navigate('/dashboard');
   };
 
   // Access route matches
-  const matches = router.matches();
+  const matches = r.matches();
   console.log(matches.length); // Number of matched routes
 
   return (
@@ -315,7 +315,7 @@ interface RouteMatch {
 Throws an error if used outside of a `<Router>` component:
 
 ```
-Error: useRouter must be used within a <Router> component
+Error: router() must be called within a <Router> component
 ```
 
 ---
@@ -525,19 +525,19 @@ Routes can be nested to any depth:
 
 ### Programmatic Navigation
 
-Navigate using the `navigate` function from `useRouter()`:
+Navigate using the `navigate` function from `router()`:
 
 ```tsx
-import { useRouter } from 'flexium/router';
+import { router } from 'flexium/router';
 
 function LoginForm() {
-  const router = useRouter();
+  const r = router();
 
   const handleSubmit = async (credentials) => {
     const success = await login(credentials);
     if (success) {
       // Navigate to dashboard after login
-      router.navigate('/dashboard');
+      r.navigate('/dashboard');
     }
   };
 
@@ -555,7 +555,7 @@ Pass data through query parameters:
 
 ```tsx
 function SearchForm() {
-  const router = useRouter();
+  const r = router();
 
   const handleSearch = (query: string, filters: object) => {
     const params = new URLSearchParams({
@@ -563,7 +563,7 @@ function SearchForm() {
       category: filters.category,
       sort: filters.sort
     });
-    router.navigate(`/search?${params.toString()}`);
+    r.navigate(`/search?${params.toString()}`);
   };
 
   return <form onsubmit={handleSearch}>{/* form */}</form>;
@@ -576,17 +576,17 @@ Navigate based on conditions:
 
 ```tsx
 function FormSubmit() {
-  const router = useRouter();
+  const r = router();
 
   const handleSubmit = async (data) => {
     const result = await submitData(data);
 
     if (result.success) {
-      router.navigate(`/success?id=${result.id}`);
+      r.navigate(`/success?id=${result.id}`);
     } else if (result.requiresAuth) {
-      router.navigate('/login?redirect=' + encodeURIComponent(window.location.pathname));
+      r.navigate('/login?redirect=' + encodeURIComponent(window.location.pathname));
     } else {
-      router.navigate('/error');
+      r.navigate('/error');
     }
   };
 
@@ -739,14 +739,14 @@ Combine multiple checks in a single guard:
 
 ### Accessing Route Parameters
 
-Access dynamic route parameters using `useRouter()`:
+Access dynamic route parameters using `router()`:
 
 ```tsx
-import { useRouter } from 'flexium/router';
+import { router } from 'flexium/router';
 
 function UserProfile() {
-  const router = useRouter();
-  const params = router.params();
+  const r = router();
+  const params = r.params();
 
   // If route is /users/:id, params.id contains the value
   const userId = params.id;
@@ -769,11 +769,11 @@ Access and manipulate URL query parameters using the location object.
 #### Reading Query Parameters
 
 ```tsx
-import { useRouter } from 'flexium/router';
+import { router } from 'flexium/router';
 
 function SearchResults() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   // If URL is /search?q=flexium&sort=date&page=2
   const searchQuery = location.query.q;     // "flexium"
@@ -795,8 +795,8 @@ Query parameters are reactive and will trigger component re-renders:
 
 ```tsx
 function ProductList() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   // This will re-run whenever query params change
   const category = location.query.category || 'all';
@@ -826,12 +826,12 @@ Update query parameters via navigation:
 
 ```tsx
 function FilterBar() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   const updateFilters = (filters: Record<string, string>) => {
     const params = new URLSearchParams(filters);
-    router.navigate(`${location.pathname}?${params.toString()}`);
+    r.navigate(`${location.pathname}?${params.toString()}`);
   };
 
   const applyFilter = () => {
@@ -853,14 +853,14 @@ Merge new params with existing ones:
 
 ```tsx
 function Pagination() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   const goToPage = (page: number) => {
     // Preserve existing query params
     const params = new URLSearchParams(location.search);
     params.set('page', page.toString());
-    router.navigate(`${location.pathname}?${params.toString()}`);
+    r.navigate(`${location.pathname}?${params.toString()}`);
   };
 
   return (
@@ -879,8 +879,8 @@ Validate and provide defaults for query parameters:
 
 ```tsx
 function DataTable() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   const getValidatedParams = () => {
     const query = location.query;
@@ -929,8 +929,8 @@ function App() {
 }
 
 function NotFound() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   return (
     <div>
@@ -948,8 +948,8 @@ Provide helpful links when a page isn't found:
 
 ```tsx
 function NotFound() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   const suggestions = [
     { path: '/', label: 'Home', icon: '🏠' },
@@ -1026,8 +1026,8 @@ Suggest similar pages based on the requested URL:
 
 ```tsx
 function SmartNotFound() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   const availablePages = [
     '/products',
@@ -1073,12 +1073,12 @@ Create smooth animations when navigating between routes.
 #### Basic Fade Transition
 
 ```tsx
-import { signal, useEffect } from 'flexium';
-import { useRouter } from 'flexium/router';
+import { signal, effect } from 'flexium';
+import { router } from 'flexium/router';
 
 function TransitionWrapper({ children }) {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
   const isTransitioning = signal(false);
 
   useEffect(() => {
@@ -1122,8 +1122,8 @@ function App() {
 
 ```tsx
 function SlideTransition({ children }) {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
   const isAnimating = signal(false);
   const direction = signal<'left' | 'right'>('right');
 
@@ -1156,8 +1156,8 @@ function SlideTransition({ children }) {
 
 ```tsx
 function PageTransition({ children }) {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
   const isLoading = signal(true);
 
   useEffect(() => {
@@ -1200,8 +1200,8 @@ Apply different transitions based on routes:
 
 ```tsx
 function RouteTransition({ children }) {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
   const previousPath = signal('');
 
   const getTransitionType = () => {
@@ -1440,7 +1440,7 @@ function App() {
 ### Blog with Dynamic Routes
 
 ```tsx
-import { Router, Route, Link, useRouter } from 'flexium/router';
+import { Router, Route, Link, router } from 'flexium/router';
 
 function App() {
   return (
@@ -1455,8 +1455,8 @@ function App() {
 }
 
 function PostDetail() {
-  const router = useRouter();
-  const params = router.params();
+  const r = router();
+  const params = r.params();
 
   return <h1>Post: {params.slug}</h1>;
 }
@@ -1588,8 +1588,8 @@ Create breadcrumb navigation using route matches:
 
 ```tsx
 function Breadcrumbs() {
-  const router = useRouter();
-  const matches = router.matches();
+  const r = router();
+  const matches = r.matches();
 
   const breadcrumbs = matches.map((match, index) => ({
     path: match.pathname,
@@ -1620,7 +1620,7 @@ Prefetch data on link hover:
 
 ```tsx
 function PrefetchLink({ to, children }) {
-  const router = useRouter();
+  const r = router();
 
   const handleMouseEnter = () => {
     // Prefetch data for the target route
@@ -1641,8 +1641,8 @@ Style active links based on current route:
 
 ```tsx
 function NavLink({ to, children }) {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   const isActive = () => location.pathname === to;
 
@@ -1663,8 +1663,8 @@ Restore scroll position on navigation:
 
 ```tsx
 function ScrollManager() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   useEffect(() => {
     // Scroll to top on route change
@@ -1705,8 +1705,8 @@ const routeConfig = [
 ];
 
 function DocumentTitle() {
-  const router = useRouter();
-  const location = router.location();
+  const r = router();
+  const location = r.location();
 
   useEffect(() => {
     const route = findRouteByPath(location.pathname);

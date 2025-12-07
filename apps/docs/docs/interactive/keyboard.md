@@ -54,14 +54,14 @@ Keys.Alt
 
 ```tsx
 function Game() {
-  const keyboard = keyboard()
+  const kb = keyboard()
 
   const loop = createLoop({
     onUpdate: () => {
-      if (keyboard.isPressed(Keys.ArrowUp)) {
+      if (kb.isPressed(Keys.ArrowUp)) {
         moveUp()
       }
-      if (keyboard.isPressed(Keys.ArrowDown)) {
+      if (kb.isPressed(Keys.ArrowDown)) {
         moveDown()
       }
     }
@@ -75,19 +75,19 @@ function Game() {
 
 ```tsx
 function PlayerController() {
-  const keyboard = keyboard()
+  const kb = keyboard()
 
   effect(() => {
-    if (keyboard.isPressed('w') || keyboard.isPressed('W')) {
+    if (kb.isPressed('w') || kb.isPressed('W')) {
       player.y -= speed
     }
-    if (keyboard.isPressed('s') || keyboard.isPressed('S')) {
+    if (kb.isPressed('s') || kb.isPressed('S')) {
       player.y += speed
     }
-    if (keyboard.isPressed('a') || keyboard.isPressed('A')) {
+    if (kb.isPressed('a') || kb.isPressed('A')) {
       player.x -= speed
     }
-    if (keyboard.isPressed('d') || keyboard.isPressed('D')) {
+    if (kb.isPressed('d') || kb.isPressed('D')) {
       player.x += speed
     }
   })
@@ -97,12 +97,12 @@ function PlayerController() {
 ### Jump Detection
 
 ```tsx
-const keyboard = keyboard()
+const kb = keyboard()
 
 const loop = createLoop({
   onUpdate: () => {
     // Only jump on initial press, not while held
-    if (keyboard.isJustPressed(Keys.Space)) {
+    if (kb.isJustPressed(Keys.Space)) {
       player.jump()
     }
   }
@@ -113,10 +113,10 @@ const loop = createLoop({
 
 ```tsx
 const [paused, setPaused] = state(false)
-const keyboard = keyboard()
+const kb = keyboard()
 
 effect(() => {
-  if (keyboard.isJustPressed(Keys.Escape)) {
+  if (kb.isJustPressed(Keys.Escape)) {
     setPaused(p => !p)
   }
 })
@@ -125,13 +125,13 @@ effect(() => {
 ### Multiple Keys
 
 ```tsx
-const keyboard = keyboard()
+const kb = keyboard()
 
 // Sprint while holding shift
-const speed = keyboard.isPressed(Keys.Shift) ? 10 : 5
+const speed = kb.isPressed(Keys.Shift) ? 10 : 5
 
 // Combo detection
-if (keyboard.isPressed(Keys.Control) && keyboard.isJustPressed('s')) {
+if (kb.isPressed(Keys.Control) && kb.isJustPressed('s')) {
   save()
 }
 ```
@@ -140,11 +140,11 @@ if (keyboard.isPressed(Keys.Control) && keyboard.isJustPressed('s')) {
 
 ```tsx
 function DebugOverlay() {
-  const keyboard = keyboard()
+  const kb = keyboard()
 
   return (
     <div class="debug">
-      Pressed keys: {() => Array.from(keyboard.keys()).join(', ')}
+      Pressed keys: {() => Array.from(kb.keys()).join(', ')}
     </div>
   )
 }
@@ -174,5 +174,5 @@ import UseKeyboardDemo from '../../components/UseKeyboardDemo.vue'
 
 ## See Also
 
-- [useMouse()](/docs/interactive/use-mouse)
+- [mouse()](/docs/interactive/mouse)
 - [createLoop()](/docs/interactive/loop)

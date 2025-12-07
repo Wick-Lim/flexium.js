@@ -19,7 +19,7 @@ import ErrorBoundaryDemo from '../../components/ErrorBoundaryDemo.vue'
 ## Import
 
 ```tsx
-import { ErrorBoundary, useErrorBoundary } from 'flexium/core'
+import { ErrorBoundary, errorBoundary } from 'flexium/core'
 ```
 
 ## Signature
@@ -79,13 +79,13 @@ import { ErrorBoundary, useErrorBoundary } from 'flexium/core'
 </ErrorBoundary>
 ```
 
-### useErrorBoundary Hook
+### errorBoundary Function
 
 Programmatically trigger errors from async operations:
 
 ```tsx
 function AsyncComponent() {
-  const { setError } = useErrorBoundary()
+  const { setError } = errorBoundary()
 
   const fetchData = async () => {
     try {
@@ -154,11 +154,11 @@ function ErrorFallback({ error, reset, retryCount }) {
 ## Notes
 
 - Place at strategic points in your component tree
-- Use `useErrorBoundary` for async error handling
+- Use `errorBoundary()` for async error handling
 - Combine with Suspense for complete async handling
 - Log errors to monitoring services in production
 
 ## See Also
 
 - [&lt;Suspense /&gt;](/docs/core/suspense)
-- [useErrorBoundary()](/docs/core/error-boundary#useerrorboundary-hook)
+- [errorBoundary()](/docs/core/error-boundary#errorboundary-function)

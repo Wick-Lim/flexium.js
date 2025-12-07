@@ -674,7 +674,7 @@ import { Router, Route, Link } from 'flexium/router';
 import { Canvas } from 'flexium/canvas';
 
 // Interactive utilities
-import { useKeyboard, useMouse, createLoop } from 'flexium/interactive';
+import { keyboard, mouse, createLoop } from 'flexium/interactive';
 ```
 
 ### Analyze Bundle Size

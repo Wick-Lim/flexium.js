@@ -66,12 +66,12 @@ import { Route } from 'flexium/router'
 ### Accessing Parameters
 
 ```tsx
-import { useRouter } from 'flexium/router'
+import { router } from 'flexium/router'
 
 function UserProfile() {
-  const { params } = useRouter()
+  const r = router()
 
-  return <div>User ID: {params().id}</div>
+  return <div>User ID: {r.params().id}</div>
 }
 
 // Route definition
@@ -92,7 +92,7 @@ function UserProfile() {
 
 ```tsx
 function ProtectedRoute(props) {
-  const { user } = useContext(AuthContext)
+  const { user } = context(AuthContext)
 
   return (
     <Show when={() => user() !== null} fallback={<Navigate to="/login" />}>
@@ -112,12 +112,12 @@ function ProtectedRoute(props) {
 
 ```tsx
 function SearchPage() {
-  const { query } = useRouter()
+  const r = router()
 
   return (
     <div>
-      Search: {query().q}
-      Page: {query().page || 1}
+      Search: {r.query().q}
+      Page: {r.query().page || 1}
     </div>
   )
 }
@@ -131,7 +131,7 @@ function SearchPage() {
 - Routes are matched **in order**
 - First matching route **wins**
 - Supports **exact** and **prefix** matching
-- Parameters are **extracted** and available via `useRouter`
+- Parameters are **extracted** and available via `router()`
 
 ## Notes
 
@@ -151,4 +151,4 @@ import RouteDemo from '../../components/RouteDemo.vue'
 
 - [&lt;Router /&gt;](/docs/router/router)
 - [&lt;Link /&gt;](/docs/router/link)
-- [useRouter()](/docs/router/use-router)
+- [router()](/docs/router/router-hook)

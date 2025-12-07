@@ -127,4 +127,4 @@ import RouterDemo from '../../components/RouterDemo.vue'
 
 - [&lt;Route /&gt;](/docs/router/route)
 - [&lt;Link /&gt;](/docs/router/link)
-- [useRouter()](/docs/router/use-router)
+- [router()](/docs/router/router-hook)

@@ -89,10 +89,10 @@ function SettingsLayout() {
 ```tsx
 function ProtectedLayout() {
   const { isAuthenticated } = useAuth()
-  const router = useRouter()
+  const r = router()
 
   if (!isAuthenticated()) {
-    router.navigate('/login')
+    r.navigate('/login')
     return null
   }
 
@@ -188,21 +188,21 @@ function SidebarLayout() {
 
 ```tsx
 function TabLayout() {
-  const router = useRouter()
-  const currentPath = router.location().pathname
+  const r = router()
+  const currentPath = r.location().pathname
 
   return (
     <Column gap={16}>
       <Row gap={8} class="tabs">
         <button
           class={currentPath === '/settings' ? 'active' : ''}
-          onClick={() => router.navigate('/settings')}
+          onClick={() => r.navigate('/settings')}
         >
           General
         </button>
         <button
           class={currentPath === '/settings/profile' ? 'active' : ''}
-          onClick={() => router.navigate('/settings/profile')}
+          onClick={() => r.navigate('/settings/profile')}
         >
           Profile
         </button>
@@ -217,12 +217,12 @@ function TabLayout() {
 
 ```tsx
 function LoadingLayout() {
-  const router = useRouter()
+  const r = router()
   const [isLoading, setIsLoading] = state(false)
 
   // Track route changes
   effect(() => {
-    const path = router.location().pathname
+    const path = r.location().pathname
     setIsLoading(true)
     // Simulate loading
     setTimeout(() => setIsLoading(false), 500)
@@ -243,11 +243,11 @@ function LoadingLayout() {
 
 - Must be used inside a component rendered by `<Route>`
 - Each layout level needs its own `<Outlet>`
-- No props are passed - child components receive route params via `useRouter()`
+- No props are passed - child components receive route params via `router()`
 
 ## See Also
 
 - [&lt;Router /&gt;](/docs/router/router) - Root routing component
 - [&lt;Route /&gt;](/docs/router/route) - Route definitions
 - [&lt;Link /&gt;](/docs/router/link) - Navigation links
-- [useRouter()](/docs/router/use-router) - Access router context
+- [router()](/docs/router/router-hook) - Access router context

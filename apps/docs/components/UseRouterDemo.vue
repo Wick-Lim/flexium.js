@@ -5,15 +5,15 @@ import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
-// useRouter Hook Demo
-function UseRouterDemo() {
+// router() Function Demo
+function RouterDemo() {
   const [path, setPath] = state('/')
   const [params, setParams] = state({})
   const [query, setQuery] = state({})
   const [history, setHistory] = state(['/'])
 
-  // Simulated useRouter hook
-  const useRouter = () => {
+  // Simulated router() function
+  const createRouter = () => {
     const navigate = (newPath, options = {}) => {
       if (!options.replace) {
         setHistory(h => [...h, newPath])
@@ -67,7 +67,7 @@ function UseRouterDemo() {
     }
   }
 
-  const router = useRouter()
+  const r = createRouter()
 
   return f('div', {
     style: {
@@ -86,7 +86,7 @@ function UseRouterDemo() {
           color: '#111827',
           fontWeight: '600'
         }
-      }, 'useRouter() Hook Demo'),
+      }, 'router() Function Demo'),
       f('p', {
         style: {
           margin: 0,
@@ -121,7 +121,7 @@ function UseRouterDemo() {
         }
       }, [
         f('button', {
-          onclick: () => router.navigate('/'),
+          onclick: () => r.navigate('/'),
           style: {
             padding: '8px 16px',
             borderRadius: '6px',
@@ -135,7 +135,7 @@ function UseRouterDemo() {
           }
         }, 'Home'),
         f('button', {
-          onclick: () => router.navigate('/users/123'),
+          onclick: () => r.navigate('/users/123'),
           style: {
             padding: '8px 16px',
             borderRadius: '6px',
@@ -149,7 +149,7 @@ function UseRouterDemo() {
           }
         }, 'User Profile'),
         f('button', {
-          onclick: () => router.navigate('/search?q=flexium&page=1'),
+          onclick: () => r.navigate('/search?q=flexium&page=1'),
           style: {
             padding: '8px 16px',
             borderRadius: '6px',
@@ -163,7 +163,7 @@ function UseRouterDemo() {
           }
         }, 'Search Page'),
         f('button', {
-          onclick: () => router.navigate('/about'),
+          onclick: () => r.navigate('/about'),
           style: {
             padding: '8px 16px',
             borderRadius: '6px',
@@ -203,7 +203,7 @@ function UseRouterDemo() {
         }
       }, [
         f('button', {
-          onclick: () => router.back(),
+          onclick: () => r.back(),
           disabled: () => history().length <= 1,
           style: {
             padding: '8px 16px',
@@ -218,7 +218,7 @@ function UseRouterDemo() {
           }
         }, '← Back'),
         f('button', {
-          onclick: () => router.forward(),
+          onclick: () => r.forward(),
           disabled: true,
           style: {
             padding: '8px 16px',
@@ -345,7 +345,7 @@ function UseRouterDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(UseRouterDemo(), container.value)
+    render(RouterDemo(), container.value)
   }
 })
 

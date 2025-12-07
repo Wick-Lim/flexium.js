@@ -134,7 +134,7 @@ const loop = createLoop({
 ```tsx
 function PausableGame() {
   const [paused, setPaused] = state(false)
-  const keyboard = useKeyboard()
+  const kb = keyboard()
 
   const loop = createLoop({
     onUpdate: (delta) => {
@@ -144,7 +144,7 @@ function PausableGame() {
   })
 
   effect(() => {
-    if (keyboard.isJustPressed(Keys.Escape)) {
+    if (kb.isJustPressed(Keys.Escape)) {
       setPaused(p => !p)
     }
   })
@@ -231,6 +231,6 @@ const loop = createLoop({
 
 ## See Also
 
-- [useKeyboard()](/docs/interactive/use-keyboard)
-- [useMouse()](/docs/interactive/use-mouse)
+- [keyboard()](/docs/interactive/keyboard)
+- [mouse()](/docs/interactive/mouse)
 - [&lt;Canvas /&gt;](/docs/canvas/canvas)

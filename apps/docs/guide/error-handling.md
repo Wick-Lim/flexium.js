@@ -42,7 +42,7 @@ All Flexium errors follow the format `[Flexium FLXxxx]`:
 | FLX103 | | Signal updated during render |
 | **FLX2xx** | Context | |
 | FLX201 | | Context used outside Provider |
-| FLX202 | | useRouter outside Router |
+| FLX202 | | router() outside Router |
 | **FLX3xx** | Form | |
 | FLX301 | | Form validation failed |
 | FLX302 | | Form submission failed |
@@ -141,15 +141,15 @@ When using a function fallback, you receive:
 | `reset` | `() => void` | Function to clear error and retry |
 | `retryCount` | `number` | How many times reset has been called |
 
-### useErrorBoundary Hook
+### errorBoundary Function
 
-For programmatic error handling, use the `useErrorBoundary` hook:
+For programmatic error handling, use the `errorBoundary` function:
 
 ```jsx
-import { useErrorBoundary } from 'flexium/core';
+import { errorBoundary } from 'flexium/core';
 
 function MyComponent() {
-  const { setError, clearError, retry } = useErrorBoundary();
+  const { setError, clearError, retry } = errorBoundary();
 
   const handleClick = async () => {
     try {
@@ -164,7 +164,7 @@ function MyComponent() {
 ```
 
 ::: warning
-If `useErrorBoundary` is called outside of an `ErrorBoundary`, the error will be thrown and logged with error code `FLX701`.
+If `errorBoundary()` is called outside of an `<ErrorBoundary>`, the error will be thrown and logged with error code `FLX701`.
 :::
 
 ## Difference from Suspense

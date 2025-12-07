@@ -293,7 +293,7 @@ A complete game built with Flexium's game module. Use arrow keys or WASD to cont
 import { signal, effect } from 'flexium/core'
 import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
-import { useKeyboard, createLoop, Keys } from 'flexium/interactive'
+import { keyboard, createLoop, Keys } from 'flexium/interactive'
 
 const snake = signal([{ x: 7, y: 7 }])
 const direction = signal('RIGHT')
@@ -301,7 +301,7 @@ const food = signal({ x: 12, y: 7 })
 const score = signal(0)
 
 function SnakeGame() {
-  const keyboard = useKeyboard()
+  const kb = keyboard()
 
   const loop = createLoop({
     onUpdate: (delta) => {
@@ -344,7 +344,7 @@ Authentication, shopping cart, and notifications with multiple providers working
 
 ::: details View Source Code
 ```tsx
-import { createContext, useContext, signal, For } from 'flexium/core'
+import { createContext, context, signal, For } from 'flexium/core'
 
 const AuthContext = createContext({
   user: signal(null),
@@ -378,9 +378,9 @@ function App() {
 }
 
 function Shop() {
-  const { user, login, logout } = useContext(AuthContext)
-  const { items, addItem, total } = useContext(CartContext)
-  const { notify } = useContext(NotificationContext)
+  const { user, login, logout } = context(AuthContext)
+  const { items, addItem, total } = context(CartContext)
+  const { notify } = context(NotificationContext)
 
   const products = [
     { id: 1, name: 'Flexium Pro', price: 99 },
@@ -428,10 +428,10 @@ Graceful error handling with recovery mechanisms.
 
 ::: details View Source Code
 ```tsx
-import { ErrorBoundary, useErrorBoundary } from 'flexium'
+import { ErrorBoundary, errorBoundary } from 'flexium'
 
 function BuggyComponent() {
-  const { setError } = useErrorBoundary()
+  const { setError } = errorBoundary()
 
   const riskyAction = () => {
     if (Math.random() < 0.5) {

@@ -15,7 +15,7 @@ import ContextDemo from '../../components/ContextDemo.vue'
 ## Import
 
 ```tsx
-import { createContext, useContext } from 'flexium/core'
+import { createContext, context } from 'flexium/core'
 ```
 
 ## Functions
@@ -26,10 +26,10 @@ import { createContext, useContext } from 'flexium/core'
 function createContext<T>(defaultValue: T): Context<T>
 ```
 
-### useContext
+### context
 
 ```ts
-function useContext<T>(context: Context<T>): T
+function context<T>(ctx: Context<T>): T
 ```
 
 ## Usage
@@ -70,7 +70,7 @@ function ThemeProvider(props: { children: any }) {
 
 ```tsx
 function ThemeToggle() {
-  const { theme, toggleTheme } = useContext(ThemeContext)
+  const { theme, toggleTheme } = context(ThemeContext)
 
   return (
     <button onclick={toggleTheme}>
@@ -122,7 +122,7 @@ function App() {
 }
 
 function Header() {
-  const { user, logout } = useContext(AuthContext)
+  const { user, logout } = context(AuthContext)
 
   return (
     <header>
@@ -151,9 +151,9 @@ function App() {
 }
 
 function Dashboard() {
-  const { theme } = useContext(ThemeContext)
-  const { user } = useContext(AuthContext)
-  const { notify } = useContext(NotificationContext)
+  const { theme } = context(ThemeContext)
+  const { user } = context(AuthContext)
+  const { notify } = context(NotificationContext)
 
   // Use all contexts
 }
@@ -171,13 +171,13 @@ function Dashboard() {
 1. **Keep contexts focused** - One context per concern
 2. **Use signals** in context values for reactivity
 3. **Provide sensible defaults** for development
-4. **Create custom hooks** for complex contexts:
+4. **Create helper functions** for complex contexts:
 
 ```tsx
-function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth must be used within AuthProvider')
-  return context
+function getAuth() {
+  const ctx = context(AuthContext)
+  if (!ctx) throw new Error('getAuth must be used within AuthProvider')
+  return ctx
 }
 ```
 

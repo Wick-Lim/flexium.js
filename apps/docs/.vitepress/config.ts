@@ -268,15 +268,15 @@ export default defineConfig({
             { text: '&lt;Route /&gt;', link: '/docs/router/route' },
             { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
             { text: '&lt;Link /&gt;', link: '/docs/router/link' },
-            { text: 'useRouter()', link: '/docs/router/use-router' }
+            { text: 'router()', link: '/docs/router/router-hook' }
           ]
         },
         {
           text: 'flexium/interactive',
           collapsed: false,
           items: [
-            { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },
-            { text: 'useMouse()', link: '/docs/interactive/use-mouse' },
+            { text: 'keyboard()', link: '/docs/interactive/keyboard' },
+            { text: 'mouse()', link: '/docs/interactive/mouse' },
             { text: 'createLoop()', link: '/docs/interactive/loop' }
           ]
         },

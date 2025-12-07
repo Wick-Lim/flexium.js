@@ -121,7 +121,7 @@ function NavigationControls() {
 ```tsx
 function ProtectedPage() {
   const { navigate } = router()
-  const { user } = useContext(AuthContext)
+  const { user } = context(AuthContext)
 
   effect(() => {
     if (!user()) {

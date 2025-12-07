@@ -7,7 +7,7 @@ The Context API allows you to share data across components without prop drilling
 Use `createContext()` to create a context with a default value:
 
 ```tsx
-import { createContext, useContext } from 'flexium/core'
+import { createContext, context } from 'flexium/core'
 
 // Create a context with a default value
 const ThemeContext = createContext('light')
@@ -39,7 +39,7 @@ Use `context()` to read the current context value:
 
 ```tsx
 function ThemedButton() {
-  const theme = useContext(ThemeContext)
+  const theme = context(ThemeContext)
 
   return (
     <button
@@ -59,7 +59,7 @@ function ThemedButton() {
 Here's a complete theme switching example:
 
 ```tsx
-import { state, createContext, useContext } from 'flexium/core'
+import { state, createContext, context } from 'flexium/core'
 import { render } from 'flexium/dom'
 import { Row, Column, Text, Pressable } from 'flexium/primitives'
 
@@ -68,7 +68,7 @@ const ThemeContext = createContext<'light' | 'dark'>('light')
 
 // 2. Create a hook for easier access
 function useTheme() {
-  return useContext(ThemeContext)
+  return context(ThemeContext)
 }
 
 // 3. Theme-aware components
@@ -186,7 +186,7 @@ function AuthProvider(props: { children: any }) {
 
 // Usage
 function UserMenu() {
-  const { user, logout } = useContext(AuthContext)
+  const { user, logout } = context(AuthContext)
 
   return (
     <Show when={() => user !== null} fallback={<LoginButton />}>
@@ -226,7 +226,7 @@ function LocaleProvider(props: { children: any }) {
 
 // Usage
 function Greeting() {
-  const { t } = useContext(LocaleContext)
+  const { t } = context(LocaleContext)
   return <Text>{t('welcome_message')}</Text>
 }
 ```
@@ -246,7 +246,7 @@ Returns a `Context<T>` object with:
 - `id`: Internal symbol for identification
 - `defaultValue`: The default value
 
-### `useContext<T>(context: Context<T>): T`
+### `context<T>(ctx: Context<T>): T`
 
 Reads the current value from a context.
 
@@ -270,7 +270,7 @@ Returns the current context value, or the default value if no Provider is found 
 
    ```tsx
    function useAuth() {
-     return useContext(AuthContext)
+     return context(AuthContext)
    }
    ```
 
@@ -278,11 +278,11 @@ Returns the current context value, or the default value if no Provider is found 
 
    ```tsx
    function useAuth() {
-     const context = useContext(AuthContext)
-     if (context === null) {
+     const auth = context(AuthContext)
+     if (auth === null) {
        throw new Error('useAuth must be used within an AuthProvider')
      }
-     return context
+     return auth
    }
    ```
 

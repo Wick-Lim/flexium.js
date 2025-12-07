@@ -28,10 +28,6 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 | [`mouse()`](#mouse) | `flexium/interactive` | Track mouse position and button state |
 | [`errorBoundary()`](#errorboundary) | `flexium/core` | Handle errors in components |
 
-::: info Deprecation Notice
-The `useXxx()` variants (e.g., `useContext`, `useRouter`) are deprecated and will be removed in the next major version. Please migrate to the new function names.
-:::
-
 ---
 
 ## Core Utilities
@@ -86,7 +82,7 @@ function ThemedButton() {
 #### Complex Context Example
 
 ```tsx
-import { createContext, useContext, signal } from 'flexium';
+import { createContext, context, signal } from 'flexium';
 
 interface User {
   id: string;
@@ -138,7 +134,7 @@ function AuthProvider({ children }) {
 }
 
 function UserProfile() {
-  const auth = useContext(AuthContext);
+  const auth = context(AuthContext);
 
   if (!auth) {
     throw new Error('UserProfile must be used within AuthProvider');
@@ -168,9 +164,9 @@ const LanguageContext = createContext('en');
 const UserContext = createContext(null);
 
 function ProfileCard() {
-  const theme = useContext(ThemeContext);
-  const lang = useContext(LanguageContext);
-  const user = useContext(UserContext);
+  const theme = context(ThemeContext);
+  const lang = context(LanguageContext);
+  const user = context(UserContext);
 
   return (
     <div class={`card-${theme}`}>
@@ -190,14 +186,14 @@ function ProfileCard() {
 
 ---
 
-### useErrorBoundary
+### errorBoundary
 
 Access the nearest ErrorBoundary context to manually trigger error handling or retry failed operations.
 
 #### Signature
 
 ```tsx
-function useErrorBoundary(): ErrorBoundaryContextValue
+function errorBoundary(): ErrorBoundaryContextValue
 ```
 
 #### Return Value
@@ -213,10 +209,10 @@ Returns an object with error handling methods:
 #### Usage
 
 ```tsx
-import { useErrorBoundary } from 'flexium';
+import { errorBoundary } from 'flexium';
 
 function DataFetcher() {
-  const { setError } = useErrorBoundary();
+  const { setError } = errorBoundary();
 
   const fetchData = async () => {
     try {
@@ -242,7 +238,7 @@ function DataFetcher() {
 #### With ErrorBoundary Component
 
 ```tsx
-import { ErrorBoundary, useErrorBoundary } from 'flexium';
+import { ErrorBoundary, errorBoundary } from 'flexium';
 
 function App() {
   return (
@@ -266,7 +262,7 @@ function App() {
 }
 
 function DataFetcher() {
-  const { setError, retry } = useErrorBoundary();
+  const { setError, retry } = errorBoundary();
   const data = signal(null);
 
   const loadData = async () => {
@@ -291,7 +287,7 @@ function DataFetcher() {
 
 ```tsx
 function FormSubmit() {
-  const { setError, clearError } = useErrorBoundary();
+  const { setError, clearError } = errorBoundary();
   const errors = signal<string[]>([]);
 
   const handleSubmit = async (formData: FormData) => {
@@ -331,20 +327,20 @@ function FormSubmit() {
 
 #### Behavior Outside ErrorBoundary
 
-If `useErrorBoundary()` is called outside an `<ErrorBoundary>` component, it returns a no-op implementation that logs the error and re-throws it.
+If `errorBoundary()` is called outside an `<ErrorBoundary>` component, it returns a no-op implementation that logs the error and re-throws it.
 
 ---
 
 ## Router Hooks
 
-### useRouter
+### router
 
 Access the complete router context including location, params, navigation, and route matches.
 
 #### Signature
 
 ```tsx
-function useRouter(): RouterContext
+function router(): RouterContext
 ```
 
 #### Return Value
@@ -361,10 +357,10 @@ Returns a `RouterContext` object:
 #### Usage
 
 ```tsx
-import { useRouter } from 'flexium/router';
+import { router } from 'flexium/router';
 
 function UserProfile() {
-  const router = useRouter();
+  const router = router();
 
   // Access current location
   const location = router.location();
@@ -395,7 +391,7 @@ function UserProfile() {
 
 ```tsx
 function SearchBar() {
-  const router = useRouter();
+  const router = router();
   const query = signal('');
 
   const handleSearch = () => {
@@ -421,7 +417,7 @@ function SearchBar() {
 
 ```tsx
 function ProtectedAction() {
-  const router = useRouter();
+  const router = router();
 
   const handleAction = async () => {
     const isAuthorized = await checkPermissions();
@@ -447,7 +443,7 @@ function ProtectedAction() {
 Throws an error if used outside a `<Router>` component:
 
 ```
-Error: useRouter must be used within a <Router> component
+Error: router() must be called within a <Router> component
 ```
 
 For complete routing documentation, see the [Router API Reference](/reference/router).
@@ -456,14 +452,14 @@ For complete routing documentation, see the [Router API Reference](/reference/ro
 
 ## Interactive Hooks
 
-### useKeyboard
+### keyboard
 
 Create a reactive keyboard input handler that tracks key states, just-pressed, and just-released events.
 
 #### Signature
 
 ```tsx
-function useKeyboard(target?: EventTarget): KeyboardState
+function keyboard(target?: EventTarget): KeyboardState
 ```
 
 #### Parameters
@@ -489,11 +485,11 @@ Returns a `KeyboardState` object:
 #### Usage
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium/interactive';
+import { keyboard, Keys } from 'flexium/interactive';
 import { effect } from 'flexium';
 
 function PlayerController() {
-  const keyboard = useKeyboard();
+  const keyboard = keyboard();
   const position = signal({ x: 0, y: 0 });
 
   // React to keyboard input
@@ -530,10 +526,10 @@ function PlayerController() {
 #### Game Loop Integration
 
 ```tsx
-import { useKeyboard, Keys, createLoop } from 'flexium/interactive';
+import { keyboard, Keys, createLoop } from 'flexium/interactive';
 
 function Game() {
-  const keyboard = useKeyboard();
+  const keyboard = keyboard();
   const player = signal({ x: 100, y: 100, jumping: false });
 
   createLoop((dt) => {
@@ -600,7 +596,7 @@ Keys.Digit0, Keys.Digit1, Keys.Digit2, ...
 ```tsx
 function CanvasInput() {
   const canvasRef = signal<HTMLCanvasElement | null>(null);
-  const keyboard = useKeyboard(canvasRef.value || window);
+  const kb = keyboard(canvasRef.value || window);
 
   return (
     <canvas
@@ -618,7 +614,7 @@ function CanvasInput() {
 
 ```tsx
 function GameComponent() {
-  const keyboard = useKeyboard();
+  const keyboard = keyboard();
 
   onCleanup(() => {
     keyboard.dispose();
@@ -637,14 +633,14 @@ function GameComponent() {
 
 ---
 
-### useMouse
+### mouse
 
 Create a reactive mouse input handler that tracks position, button states, and wheel events.
 
 #### Signature
 
 ```tsx
-function useMouse(options?: UseMouseOptions): MouseState
+function mouse(options?: MouseOptions): MouseState
 ```
 
 #### Parameters
@@ -673,10 +669,10 @@ Returns a `MouseState` object:
 #### Basic Usage
 
 ```tsx
-import { useMouse } from 'flexium/interactive';
+import { mouse } from 'flexium/interactive';
 
 function MouseTracker() {
-  const mouse = useMouse();
+  const mouse = mouse();
 
   return (
     <div>
@@ -692,12 +688,12 @@ function MouseTracker() {
 #### Canvas Drawing
 
 ```tsx
-import { useMouse } from 'flexium/interactive';
+import { mouse } from 'flexium/interactive';
 import { signal, effect } from 'flexium';
 
 function DrawingCanvas() {
   const canvasRef = signal<HTMLCanvasElement | null>(null);
-  const mouse = useMouse({
+  const mouse = mouse({
     target: window,
     canvas: canvasRef.value || undefined
   });
@@ -730,10 +726,10 @@ function DrawingCanvas() {
 #### Game Loop Integration
 
 ```tsx
-import { useMouse, createLoop } from 'flexium/interactive';
+import { mouse, createLoop } from 'flexium/interactive';
 
 function ShootingGame() {
-  const mouse = useMouse();
+  const mouse = mouse();
   const crosshair = signal({ x: 0, y: 0 });
   const projectiles = signal<Array<{ x: number, y: number }>>([]);
 
@@ -789,7 +785,7 @@ function ShootingGame() {
 
 ```tsx
 function ZoomableView() {
-  const mouse = useMouse();
+  const mouse = mouse();
   const zoom = signal(1);
 
   effect(() => {
@@ -826,7 +822,7 @@ MouseButton.Right   // 2
 
 ```tsx
 function GameComponent() {
-  const mouse = useMouse();
+  const mouse = mouse();
 
   onCleanup(() => {
     mouse.dispose();
@@ -1325,22 +1321,22 @@ function ResponsiveComponent() {
 
 ## When to Use Which Hook
 
-### useContext
+### context
 - **Use when**: Sharing state across multiple nested components
 - **Don't use when**: Data is only needed by one or two components (use props instead)
 - **Example**: Theme, authentication, language settings
 
-### useRouter
+### router
 - **Use when**: Need access to URL, params, or navigation in any component
 - **Don't use when**: Simple links suffice (use `<Link>` component)
 - **Example**: Programmatic navigation, reading query params, route guards
 
-### useKeyboard
+### keyboard
 - **Use when**: Building games, interactive applications, keyboard shortcuts
 - **Don't use when**: Standard form inputs suffice
 - **Example**: Game controls, canvas editors, keyboard navigation
 
-### useMouse
+### mouse
 - **Use when**: Building games, drawing apps, custom interactions
 - **Don't use when**: Standard click handlers suffice
 - **Example**: Drawing tools, drag-and-drop, game targeting
@@ -1350,7 +1346,7 @@ function ResponsiveComponent() {
 - **Don't use when**: CSS transitions/animations are sufficient
 - **Example**: Interactive UI animations, game sprites, physics simulations
 
-### useErrorBoundary
+### errorBoundary
 - **Use when**: Need to handle errors manually or retry operations
 - **Don't use when**: Automatic error catching by `<ErrorBoundary>` is sufficient
 - **Example**: Async operations, API calls, manual error reporting
@@ -1363,8 +1359,8 @@ function ResponsiveComponent() {
 
 ```tsx
 function GameComponent() {
-  const keyboard = useKeyboard();
-  const mouse = useMouse();
+  const keyboard = keyboard();
+  const mouse = mouse();
 
   onCleanup(() => {
     keyboard.dispose();
@@ -1378,7 +1374,7 @@ function GameComponent() {
 ### 2. Type Safety with TypeScript
 
 ```tsx
-import { useContext, createContext } from 'flexium';
+import { context, createContext } from 'flexium';
 
 interface AppState {
   user: User | null;
@@ -1391,7 +1387,7 @@ const AppContext = createContext<AppState>({
 });
 
 function Component() {
-  const state: AppState = useContext(AppContext);
+  const state: AppState = context(AppContext);
   // TypeScript ensures correct usage
 }
 ```
@@ -1400,9 +1396,9 @@ function Component() {
 
 ```tsx
 function GamePlayer() {
-  const router = useRouter();
-  const keyboard = useKeyboard();
-  const { setError } = useErrorBoundary();
+  const router = router();
+  const keyboard = keyboard();
+  const { setError } = errorBoundary();
 
   const position = signal({ x: 0, y: 0 });
 
@@ -1453,8 +1449,8 @@ function useAuth() {
 function useEverything() {
   const user = signal(null);
   const theme = signal('light');
-  const keyboard = useKeyboard();
-  const router = useRouter();
+  const keyboard = keyboard();
+  const router = router();
   // Too much!
 }
 ```

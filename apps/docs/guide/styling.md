@@ -530,7 +530,7 @@ function App() {
 Use context to provide theme throughout your app:
 
 ```tsx
-import { createContext, useContext, state } from 'flexium/core'
+import { createContext, context, state } from 'flexium/core'
 
 const ThemeContext = createContext<{
   theme: () => 'light' | 'dark'
@@ -566,7 +566,7 @@ function ThemeProvider(props) {
 }
 
 function ThemedButton() {
-  const { colors } = useContext(ThemeContext)!
+  const { colors } = context(ThemeContext)!
 
   return (
     <button style={() => ({

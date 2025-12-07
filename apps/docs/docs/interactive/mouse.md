@@ -5,20 +5,24 @@ Track mouse position and button states.
 ## Import
 
 ```tsx
-import { useMouse } from 'flexium/interactive'
+import { mouse } from 'flexium/interactive'
 ```
 
 ## Signature
 
 ```ts
-function useMouse(target?: HTMLElement): MouseState
+function mouse(options?: { target?: HTMLElement }): MouseState
 
 interface MouseState {
-  x: Accessor<number>
-  y: Accessor<number>
-  isPressed: (button?: number) => boolean
-  isJustPressed: (button?: number) => boolean
-  isJustReleased: (button?: number) => boolean
+  position: Accessor<{ x: number, y: number }>
+  delta: Accessor<{ x: number, y: number }>
+  wheelDelta: Accessor<number>
+  isPressed: (button: number) => boolean
+  isLeftPressed: () => boolean
+  isRightPressed: () => boolean
+  isMiddlePressed: () => boolean
+  clearFrameState: () => void
+  dispose: () => void
 }
 ```
 
@@ -26,11 +30,15 @@ interface MouseState {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `x` | `Accessor<number>` | Current X position |
-| `y` | `Accessor<number>` | Current Y position |
-| `isPressed` | `(button?) => boolean` | Check if button is held |
-| `isJustPressed` | `(button?) => boolean` | Check if button just pressed |
-| `isJustReleased` | `(button?) => boolean` | Check if button just released |
+| `position` | `Accessor<{ x, y }>` | Current mouse position |
+| `delta` | `Accessor<{ x, y }>` | Movement since last frame |
+| `wheelDelta` | `Accessor<number>` | Scroll wheel delta |
+| `isPressed` | `(button) => boolean` | Check if button is held |
+| `isLeftPressed` | `() => boolean` | Check if left button is held |
+| `isRightPressed` | `() => boolean` | Check if right button is held |
+| `isMiddlePressed` | `() => boolean` | Check if middle button is held |
+| `clearFrameState` | `() => void` | Reset per-frame state |
+| `dispose` | `() => void` | Clean up event listeners |
 
 ## Mouse Buttons
 
@@ -46,11 +54,11 @@ interface MouseState {
 
 ```tsx
 function Game() {
-  const mouse = mouse()
+  const m = mouse()
 
   return (
     <div>
-      Position: {mouse.x()}, {mouse.y()}
+      Position: {m.position().x}, {m.position().y}
     </div>
   )
 }
@@ -61,13 +69,13 @@ function Game() {
 ```tsx
 function DrawingApp() {
   const canvasRef = ref(null)
-  const mouse = mouse()
+  const m = mouse()
   const [isDrawing, setIsDrawing] = state(false)
 
   effect(() => {
-    if (mouse.isPressed(0)) {
+    if (m.isLeftPressed()) {
       const ctx = canvasRef.current.getContext('2d')
-      ctx.lineTo(mouse.x(), mouse.y())
+      ctx.lineTo(m.position().x, m.position().y)
       ctx.stroke()
     }
   })
@@ -79,12 +87,12 @@ function DrawingApp() {
 ### Click Detection
 
 ```tsx
-const mouse = mouse()
+const m = mouse()
 
 const loop = createLoop({
   onUpdate: () => {
-    if (mouse.isJustPressed(0)) {
-      handleClick(mouse.x(), mouse.y())
+    if (m.isLeftPressed()) {
+      handleClick(m.position().x, m.position().y)
     }
   }
 })
@@ -94,13 +102,13 @@ const loop = createLoop({
 
 ```tsx
 function Cursor() {
-  const mouse = mouse()
+  const m = mouse()
 
   return (
     <div
       class="custom-cursor"
       style={{
-        transform: `translate(${mouse.x()}px, ${mouse.y()}px)`
+        transform: `translate(${m.position().x}px, ${m.position().y}px)`
       }}
     />
   )
@@ -113,14 +121,14 @@ function Cursor() {
 function CanvasGame() {
   let canvasRef
 
-  const mouse = mouse()
+  const m = mouse()
 
   const getCanvasPosition = () => {
     if (!canvasRef) return { x: 0, y: 0 }
     const rect = canvasRef.getBoundingClientRect()
     return {
-      x: mouse.x() - rect.left,
-      y: mouse.y() - rect.top
+      x: m.position().x - rect.left,
+      y: m.position().y - rect.top
     }
   }
 
@@ -140,12 +148,12 @@ function CanvasGame() {
 
 ```tsx
 function Draggable(props) {
-  const mouse = mouse()
+  const m = mouse()
   const [isDragging, setIsDragging] = state(false)
   const [offset, setOffset] = state({ x: 0, y: 0 })
 
   effect(() => {
-    if (mouse.isJustReleased(0)) {
+    if (!m.isLeftPressed()) {
       setIsDragging(false)
     }
   })
@@ -162,8 +170,8 @@ function Draggable(props) {
     <div
       style={{
         position: 'absolute',
-        left: isDragging() ? mouse.x() - offset().x : props.x,
-        top: isDragging() ? mouse.y() - offset().y : props.y
+        left: isDragging() ? m.position().x - offset().x : props.x,
+        top: isDragging() ? m.position().y - offset().y : props.y
       }}
       onmousedown={handleMouseDown}
     >
@@ -177,14 +185,14 @@ function Draggable(props) {
 
 ```tsx
 function ContextMenuArea() {
-  const mouse = mouse()
+  const m = mouse()
   const [menuPos, setMenuPos] = state(null)
 
   effect(() => {
-    if (mouse.isJustPressed(2)) {
-      setMenuPos({ x: mouse.x(), y: mouse.y() })
+    if (m.isRightPressed()) {
+      setMenuPos({ x: m.position().x, y: m.position().y })
     }
-    if (mouse.isJustPressed(0) && menuPos()) {
+    if (m.isLeftPressed() && menuPos()) {
       setMenuPos(null)
     }
   })
@@ -222,5 +230,5 @@ import UseMouseDemo from '../../components/UseMouseDemo.vue'
 
 ## See Also
 
-- [useKeyboard()](/docs/interactive/use-keyboard)
+- [keyboard()](/docs/interactive/keyboard)
 - [createLoop()](/docs/interactive/loop)

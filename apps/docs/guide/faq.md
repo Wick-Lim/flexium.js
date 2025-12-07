@@ -227,10 +227,10 @@ function App() {
 ### How do I access route params?
 
 ```tsx
-import { useRouter } from 'flexium/router'
+import { router } from 'flexium/router'
 
 function UserProfile() {
-  const { params } = useRouter()
+  const { params } = router()
   const userId = params.id
 
   return <div>User: {userId}</div>
