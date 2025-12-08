@@ -10,7 +10,7 @@
  */
 
 import { signal, effect } from 'flexium/core'
-import { mount } from 'flexium/dom'
+import { render } from 'flexium/dom'
 import { Canvas, DrawRect, DrawText } from 'flexium/canvas'
 import { useKeyboard, useMouse, createLoop, Keys } from 'flexium/interactive'
 
@@ -373,4 +373,4 @@ function SnakeGame() {
 }
 
 // Mount app
-mount(SnakeGame, document.getElementById('app')!)
+render(SnakeGame(), document.getElementById('app')!)

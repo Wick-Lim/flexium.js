@@ -260,40 +260,53 @@ function updateStyles(
   }
 
   // 3. Handle Flexium specific style props - only check props that exist
-  // Optimized: avoid creating intermediate arrays with Object.keys()
-  const propsToCheck = new Set<string>()
-  for (const k in oldProps) {
-    if (k in STYLE_PROPS_CONFIG) propsToCheck.add(k)
-  }
-  for (const k in newProps) {
-    if (k in STYLE_PROPS_CONFIG) propsToCheck.add(k)
-  }
+  // Optimized: iterate directly without creating intermediate Set
 
-  for (const propName of propsToCheck) {
-    const oldValue = oldProps[propName]
-    const newValue = newProps[propName]
+  // Check oldProps for removed style props
+  for (const propName in oldProps) {
+    if (propName in STYLE_PROPS_CONFIG && !(propName in newProps)) {
+      const config = STYLE_PROPS_CONFIG[propName]
+      const cssProp = config.cssProp as keyof CSSStyleDeclaration
 
-    if (oldValue === newValue) continue
-
-    const config = STYLE_PROPS_CONFIG[propName]
-    const transformedValue = transformValue(newValue, config.transform)
-    const cssProp = config.cssProp as keyof CSSStyleDeclaration
-
-    // Update the style property
-    if (transformedValue === undefined) {
       if (style[cssProp] !== '') {
         ;(style as unknown as Record<string, string>)[cssProp as string] = ''
       }
-    } else {
-      if (style[cssProp] !== transformedValue) {
-        ;(style as unknown as Record<string, string>)[cssProp as string] =
-          transformedValue
+
+      // Apply any side effects
+      if (config.sideEffect) {
+        config.sideEffect(style, undefined)
       }
     }
+  }
 
-    // Apply any side effects
-    if (config.sideEffect) {
-      config.sideEffect(style, transformedValue)
+  // Check newProps for added/updated style props
+  for (const propName in newProps) {
+    if (propName in STYLE_PROPS_CONFIG) {
+      const oldValue = oldProps[propName]
+      const newValue = newProps[propName]
+
+      if (oldValue === newValue) continue
+
+      const config = STYLE_PROPS_CONFIG[propName]
+      const transformedValue = transformValue(newValue, config.transform)
+      const cssProp = config.cssProp as keyof CSSStyleDeclaration
+
+      // Update the style property
+      if (transformedValue === undefined) {
+        if (style[cssProp] !== '') {
+          ;(style as unknown as Record<string, string>)[cssProp as string] = ''
+        }
+      } else {
+        if (style[cssProp] !== transformedValue) {
+          ;(style as unknown as Record<string, string>)[cssProp as string] =
+            transformedValue
+        }
+      }
+
+      // Apply any side effects
+      if (config.sideEffect) {
+        config.sideEffect(style, transformedValue)
+      }
     }
   }
 }

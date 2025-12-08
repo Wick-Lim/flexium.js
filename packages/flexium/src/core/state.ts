@@ -30,9 +30,50 @@ interface StateActions {
   refetch?: () => void
 }
 
-// Global registry for keyed states with size limit to prevent memory leaks
-const MAX_GLOBAL_STATE_SIZE = 10000
+/**
+ * Type-safe helper to wrap Resource as StateObject.
+ * Consolidates unsafe type assertions in one place.
+ * @internal
+ */
+function toStateObject<T>(
+  res: Resource<T>,
+  actions: { mutate: (v: T | undefined) => void; refetch: () => void }
+): StateObject {
+  const s = res as unknown as StateObject
+  s._signal = res as Resource<unknown>
+  s._stateActions = actions as StateActions
+  return s
+}
+
+/**
+ * Type-safe helper to create a computed StateObject.
+ * @internal
+ */
+function toComputedStateObject<T>(comp: Computed<T>): StateObject {
+  return {
+    value: undefined,
+    peek: comp.peek,
+    _signal: comp as Computed<unknown>,
+    _isComputed: true,
+  }
+}
+
+/**
+ * Type-safe helper to wrap Signal as StateObject.
+ * @internal
+ */
+function toSignalStateObject<T>(sig: Signal<T>): StateObject {
+  const s = sig as unknown as StateObject
+  s._signal = sig as Signal<unknown>
+  return s
+}
+
+// Global registry for keyed states
 const globalStateRegistry = new Map<string, StateObject>()
+
+// Dev mode warning thresholds
+const DEV_WARNING_THRESHOLD = 10000
+let hasWarnedAboutSize = false
 
 // ============================================================================
 // Component Hook System - enables state() inside components
@@ -118,21 +159,21 @@ function serializeKey(key: StateKey): string {
 }
 
 /**
- * Ensure the global state registry doesn't exceed the maximum size.
- * Uses LRU-like eviction by removing the oldest entries.
+ * Check global state registry size and warn in development mode.
+ * Does not enforce hard limits - use state.delete() or state.clear() for cleanup.
  * @internal
  */
-function ensureRegistrySize(): void {
-  if (globalStateRegistry.size >= MAX_GLOBAL_STATE_SIZE) {
-    // Remove oldest 10% of entries to make room
-    const entriesToRemove = Math.ceil(MAX_GLOBAL_STATE_SIZE * 0.1)
-    const keys = Array.from(globalStateRegistry.keys())
-    for (let i = 0; i < entriesToRemove && i < keys.length; i++) {
-      globalStateRegistry.delete(keys[i])
-    }
+function checkRegistrySize(): void {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    !hasWarnedAboutSize &&
+    globalStateRegistry.size >= DEV_WARNING_THRESHOLD
+  ) {
+    hasWarnedAboutSize = true
     console.warn(
-      `[Flexium] Global state registry exceeded ${MAX_GLOBAL_STATE_SIZE} entries. ` +
-      `Removed ${entriesToRemove} oldest entries. Consider using clearGlobalState() or deleteGlobalState() to clean up unused states.`
+      `[Flexium] Global state registry has ${globalStateRegistry.size} entries. ` +
+      `Consider using state.delete(key) to clean up unused states, ` +
+      `or state.clear() to reset all global states.`
     )
   }
 }
@@ -347,37 +388,56 @@ export interface StateOptions<P = unknown> {
  * }
  * ```
  */
+// Static methods interface for the state function
+interface StateFunction {
+  // Overloads
+  <T>(initialValue: T, options?: StateOptions): [StateValue<T>, StateAction<T>]
+  <T, P>(computeFn: (params: P) => T, options: StateOptions<P> & { params: P }): [StateValue<T>]
+  <T>(computeFn: () => T, options?: StateOptions): [StateValue<T>]
+  <T, P>(fetcher: (params: P) => Promise<T>, options: StateOptions<P> & { params: P }): [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
+  <T>(fetcher: () => Promise<T>, options?: StateOptions): [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
+
+  /** Delete a specific global state by key */
+  delete: (key: StateKey) => boolean
+  /** Clear all global states */
+  clear: () => void
+  /** Check if a global state exists */
+  has: (key: StateKey) => boolean
+  /** Current number of global states */
+  readonly size: number
+}
+
 // Overload 1: Value → [StateValue, Setter]
-export function state<T>(
+function state<T>(
   initialValue: T,
   options?: StateOptions
 ): [StateValue<T>, StateAction<T>]
 
 // Overload 2: Sync function with params → [StateValue] (derived, no setter)
-export function state<T, P>(
+function state<T, P>(
   computeFn: (params: P) => T,
   options: StateOptions<P> & { params: P }
 ): [StateValue<T>]
 
 // Overload 3: Sync function without params → [StateValue] (derived, no setter)
-export function state<T>(
+function state<T>(
   computeFn: () => T,
   options?: StateOptions
 ): [StateValue<T>]
 
 // Overload 4: Async function with params → [StateValue, refetch, status, error]
-export function state<T, P>(
+function state<T, P>(
   fetcher: (params: P) => Promise<T>,
   options: StateOptions<P> & { params: P }
 ): [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
 
 // Overload 5: Async function without params → [StateValue, refetch, status, error]
-export function state<T>(
+function state<T>(
   fetcher: () => Promise<T>,
   options?: StateOptions
 ): [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
 
-export function state<T, P = unknown>(
+function state<T, P = unknown>(
   initialValueOrFetcher: T | ((params?: P) => T) | ((params?: P) => Promise<T>),
   options?: StateOptions<P>
 ): [StateValue<T>] | [StateValue<T>, StateAction<T>] | [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>] {
@@ -458,13 +518,11 @@ export function state<T, P = unknown>(
     if (isAsyncFn) {
       // Async function → Resource
       const [res, resActions] = createResource(fn, async (val) => val)
-      const s = res as unknown as StateObject
-      s._signal = res as unknown as Resource<unknown>
-      s._stateActions = resActions as StateActions
+      const s = toStateObject(res, resActions)
 
       if (key) {
-        ensureRegistrySize()
         globalStateRegistry.set(key, s)
+        checkRegistrySize()
       }
 
       const proxy = createStateProxy(s._signal as Signal<T>)
@@ -488,10 +546,10 @@ export function state<T, P = unknown>(
     } catch {
       // If it throws during initial call, treat as computed (will throw on access)
       const comp = createComputed(fn as () => T)
-      const s = { _signal: comp, _isComputed: true } as unknown as StateObject
+      const s = toComputedStateObject(comp)
       if (key) {
-        ensureRegistrySize()
         globalStateRegistry.set(key, s)
+        checkRegistrySize()
       }
       return [createStateProxy(comp)] as [StateValue<T>]
     }
@@ -499,13 +557,11 @@ export function state<T, P = unknown>(
     if (testResult instanceof Promise) {
       // It's a Promise-returning function → Resource
       const [res, resActions] = createResource(fn, async (val) => val)
-      const s = res as unknown as StateObject
-      s._signal = res as unknown as Resource<unknown>
-      s._stateActions = resActions as StateActions
+      const s = toStateObject(res, resActions)
 
       if (key) {
-        ensureRegistrySize()
         globalStateRegistry.set(key, s)
+        checkRegistrySize()
       }
 
       const proxy = createStateProxy(s._signal as Signal<T>)
@@ -523,22 +579,21 @@ export function state<T, P = unknown>(
 
     // Sync function → Computed (memoized derived value)
     const comp = createComputed(fn as () => T)
-    const s = { _signal: comp, _isComputed: true } as unknown as StateObject
+    const s = toComputedStateObject(comp)
     if (key) {
-      ensureRegistrySize()
       globalStateRegistry.set(key, s)
+      checkRegistrySize()
     }
     return [createStateProxy(comp)] as [StateValue<T>]
   }
 
   // 3. Plain value → Signal with setter
   const sig = signal<T>(initialValueOrFetcher)
-  const s = sig as unknown as StateObject
-  s._signal = sig as unknown as Signal<unknown>
+  const s = toSignalStateObject(sig)
 
   if (key) {
-    ensureRegistrySize()
     globalStateRegistry.set(key, s)
+    checkRegistrySize()
   }
 
   const proxy = createStateProxy(sig)
@@ -554,36 +609,57 @@ export function state<T, P = unknown>(
 }
 
 /**
- * Clear all global states (useful for testing or resetting app)
- */
-export function clearGlobalState(): void {
-  globalStateRegistry.clear()
-}
-
-/**
  * Delete a specific global state by key
  * @param key - The key of the state to delete
  * @returns true if the state was deleted, false if it didn't exist
+ *
+ * @example
+ * ```ts
+ * state.delete('theme')
+ * state.delete(['user', 'profile', userId])
+ * ```
  */
-export function deleteGlobalState(key: StateKey): boolean {
+state.delete = function(key: StateKey): boolean {
   const serializedKey = serializeKey(key)
   return globalStateRegistry.delete(serializedKey)
+}
+
+/**
+ * Clear all global states (useful for testing or resetting app)
+ *
+ * @example
+ * ```ts
+ * state.clear()
+ * ```
+ */
+state.clear = function(): void {
+  globalStateRegistry.clear()
+  hasWarnedAboutSize = false
 }
 
 /**
  * Check if a global state exists
  * @param key - The key to check
  * @returns true if the state exists
+ *
+ * @example
+ * ```ts
+ * if (state.has('theme')) { ... }
+ * ```
  */
-export function hasGlobalState(key: StateKey): boolean {
+state.has = function(key: StateKey): boolean {
   const serializedKey = serializeKey(key)
   return globalStateRegistry.has(serializedKey)
 }
 
 /**
  * Get the current number of global states
- * @returns The number of global states in the registry
  */
-export function getGlobalStateCount(): number {
-  return globalStateRegistry.size
-}
+Object.defineProperty(state, 'size', {
+  get: () => globalStateRegistry.size,
+  enumerable: true,
+})
+
+// Export with proper typing (cast to include static methods)
+const _state = state as StateFunction
+export { _state as state }

@@ -14,13 +14,10 @@ import { isFNode } from './f'
 import {
   pushProvider,
   popProvider,
-  context,
   captureContext,
   runWithContext,
 } from '../../core/context'
 import { reconcileArrays } from './reconcile'
-import { SuspenseCtx } from '../../core/suspense'
-import { ErrorBoundaryCtx } from '../../core/error-boundary'
 import {
   isStateValue,
   getStateSignal,
@@ -175,14 +172,28 @@ export function mountReactive(
           if (newNode) {
             if (currentNode && currentNode !== startNode) {
               if (currentNode.parentNode === currentContainer) {
-                currentContainer.replaceChild(newNode, currentNode)
+                // Optimize: if both old and new are text nodes, just update content
+                if (
+                  currentNode.nodeType === Node.TEXT_NODE &&
+                  newNode.nodeType === Node.TEXT_NODE
+                ) {
+                  domRenderer.updateTextNode(
+                    currentNode as Text,
+                    newNode.textContent || ''
+                  )
+                  // Don't update currentNode reference since we reused it
+                } else {
+                  currentContainer.replaceChild(newNode, currentNode)
+                  currentNode = newNode
+                }
               } else {
                 currentContainer.insertBefore(newNode, startNode.nextSibling)
+                currentNode = newNode
               }
             } else {
               currentContainer.insertBefore(newNode, startNode.nextSibling)
+              currentNode = newNode
             }
-            currentNode = newNode
           } else {
             if (
               currentNode &&
@@ -286,14 +297,28 @@ export function mountReactive(
           if (newNode) {
             if (currentNode && currentNode !== startNode) {
               if (currentNode.parentNode === currentContainer) {
-                currentContainer.replaceChild(newNode, currentNode)
+                // Optimize: if both old and new are text nodes, just update content
+                if (
+                  currentNode.nodeType === Node.TEXT_NODE &&
+                  newNode.nodeType === Node.TEXT_NODE
+                ) {
+                  domRenderer.updateTextNode(
+                    currentNode as Text,
+                    newNode.textContent || ''
+                  )
+                  // Don't update currentNode reference since we reused it
+                } else {
+                  currentContainer.replaceChild(newNode, currentNode)
+                  currentNode = newNode
+                }
               } else {
                 currentContainer.insertBefore(newNode, startNode.nextSibling)
+                currentNode = newNode
               }
             } else {
               currentContainer.insertBefore(newNode, startNode.nextSibling)
+              currentNode = newNode
             }
-            currentNode = newNode
           } else {
             if (
               currentNode &&
@@ -392,24 +417,6 @@ export function mountReactive(
               // Set current component for hook tracking
               setCurrentComponent(componentInstance)
               result = component({ ...vnode.props, children: vnode.children })
-            } catch (err) {
-              if (err instanceof Promise) {
-                const suspense = context(SuspenseCtx)
-                if (suspense) {
-                  suspense.registerPromise(err)
-                  result = null
-                } else {
-                  throw err
-                }
-              } else {
-                const errorBoundaryCtx = context(ErrorBoundaryCtx)
-                if (errorBoundaryCtx) {
-                  errorBoundaryCtx.setError(err)
-                  result = null
-                } else {
-                  throw err
-                }
-              }
             } finally {
               // Clear current component
               setCurrentComponent(null)

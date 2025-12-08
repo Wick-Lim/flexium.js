@@ -258,12 +258,3 @@ export interface DrawArcProps {
   strokeWidth?: number | Signal<number>
   opacity?: number | Signal<number>
 }
-
-/**
- * Canvas drawing context
- */
-export interface CanvasDrawingContext {
-  ctx: CanvasRenderingContext2D
-  width: number
-  height: number
-}

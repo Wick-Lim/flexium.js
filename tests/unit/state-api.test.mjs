@@ -1,7 +1,7 @@
 // State API Tests
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { state, clearGlobalState, effect } from '../../packages/flexium/dist/index.mjs';
+import { state, effect } from '../../packages/flexium/dist/index.mjs';
 
 test('local state works like useState', () => {
   const [count, setCount] = state(0);
@@ -34,7 +34,7 @@ test('local state is reactive', () => {
 });
 
 test('global state is shared by key', () => {
-  clearGlobalState();
+  state.clear();
   
   // Component A creates global state
   const [themeA, setThemeA] = state('light', { key: 'theme' });
@@ -53,7 +53,7 @@ test('global state is shared by key', () => {
 });
 
 test('global state reactivity works across consumers', () => {
-  clearGlobalState();
+  state.clear();
   
   const [user, setUser] = state('Alice', { key: 'user' });
   let observedUser = '';
@@ -74,7 +74,7 @@ test('global state reactivity works across consumers', () => {
 });
 
 test('global state independent keys', () => {
-  clearGlobalState();
+  state.clear();
   
   const [a, setA] = state(1, { key: 'keyA' });
   const [b, setB] = state(2, { key: 'keyB' });
@@ -108,7 +108,7 @@ test('async state (resource) works', async () => {
 });
 
 test('global async state sharing', async () => {
-  clearGlobalState();
+  state.clear();
   
   let fetchCount = 0;
   const fetcher = async () => {

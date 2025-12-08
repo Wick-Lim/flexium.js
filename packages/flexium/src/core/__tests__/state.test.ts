@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { state, clearGlobalState, deleteGlobalState, hasGlobalState, getGlobalStateCount, STATE_SIGNAL } from '../state'
+import { state, STATE_SIGNAL } from '../state'
 import { effect } from '../signal'
 
 // Helper to wait for microtasks
@@ -29,7 +29,7 @@ const val = <T>(proxy: T): T => {
 
 describe('State API', () => {
   beforeEach(() => {
-    clearGlobalState()
+    state.clear()
   })
 
   describe('Local Value State', () => {
@@ -162,7 +162,7 @@ describe('State API', () => {
       })
 
       await tick()
-      clearGlobalState()
+      state.clear()
 
       const [count2] = state(0, { key: 'clear-test' })
       expect(+count2).toBe(0)
@@ -408,48 +408,48 @@ describe('State API', () => {
     })
   })
 
-  describe('deleteGlobalState', () => {
+  describe('state.delete', () => {
     it('should return true when state exists', () => {
       state(42, { key: 'test-delete' })
 
-      const result = deleteGlobalState('test-delete')
+      const result = state.delete('test-delete')
       expect(result).toBe(true)
     })
 
     it('should return false when state does not exist', () => {
-      const result = deleteGlobalState('non-existent-key')
+      const result = state.delete('non-existent-key')
       expect(result).toBe(false)
     })
 
     it('should actually remove state from registry', () => {
       state(42, { key: 'test-removal' })
 
-      expect(hasGlobalState('test-removal')).toBe(true)
-      deleteGlobalState('test-removal')
-      expect(hasGlobalState('test-removal')).toBe(false)
+      expect(state.has('test-removal')).toBe(true)
+      state.delete('test-removal')
+      expect(state.has('test-removal')).toBe(false)
     })
 
     it('should work with string keys', () => {
       state('value', { key: 'string-key' })
 
-      expect(deleteGlobalState('string-key')).toBe(true)
-      expect(hasGlobalState('string-key')).toBe(false)
+      expect(state.delete('string-key')).toBe(true)
+      expect(state.has('string-key')).toBe(false)
     })
 
     it('should work with array keys', () => {
       const arrayKey = ['user', 'profile', 123]
       state({ name: 'Alice' }, { key: arrayKey })
 
-      expect(deleteGlobalState(arrayKey)).toBe(true)
-      expect(hasGlobalState(arrayKey)).toBe(false)
+      expect(state.delete(arrayKey)).toBe(true)
+      expect(state.has(arrayKey)).toBe(false)
     })
 
     it('should work with array keys containing various types', () => {
       const complexKey = ['app', 42, true, null, undefined]
       state('data', { key: complexKey })
 
-      expect(deleteGlobalState(complexKey)).toBe(true)
-      expect(hasGlobalState(complexKey)).toBe(false)
+      expect(state.delete(complexKey)).toBe(true)
+      expect(state.has(complexKey)).toBe(false)
     })
 
     it('should not affect other states when deleting', () => {
@@ -457,173 +457,173 @@ describe('State API', () => {
       state(2, { key: 'state-2' })
       state(3, { key: 'state-3' })
 
-      deleteGlobalState('state-2')
+      state.delete('state-2')
 
-      expect(hasGlobalState('state-1')).toBe(true)
-      expect(hasGlobalState('state-2')).toBe(false)
-      expect(hasGlobalState('state-3')).toBe(true)
+      expect(state.has('state-1')).toBe(true)
+      expect(state.has('state-2')).toBe(false)
+      expect(state.has('state-3')).toBe(true)
     })
   })
 
-  describe('hasGlobalState', () => {
+  describe('state.has', () => {
     it('should return true for existing states', () => {
       state('value', { key: 'existing-state' })
 
-      expect(hasGlobalState('existing-state')).toBe(true)
+      expect(state.has('existing-state')).toBe(true)
     })
 
     it('should return false for non-existent states', () => {
-      expect(hasGlobalState('non-existent')).toBe(false)
+      expect(state.has('non-existent')).toBe(false)
     })
 
     it('should work with string keys', () => {
       state(123, { key: 'numeric-state' })
 
-      expect(hasGlobalState('numeric-state')).toBe(true)
-      expect(hasGlobalState('other-state')).toBe(false)
+      expect(state.has('numeric-state')).toBe(true)
+      expect(state.has('other-state')).toBe(false)
     })
 
     it('should work with array keys', () => {
       const arrayKey = ['user', 'settings', 456]
       state({ theme: 'dark' }, { key: arrayKey })
 
-      expect(hasGlobalState(arrayKey)).toBe(true)
+      expect(state.has(arrayKey)).toBe(true)
     })
 
     it('should work with array keys containing various types', () => {
       const complexKey = ['app', 'data', 99, false, null]
       state('test', { key: complexKey })
 
-      expect(hasGlobalState(complexKey)).toBe(true)
+      expect(state.has(complexKey)).toBe(true)
     })
 
     it('should return false after state is deleted', () => {
       state('temp', { key: 'temporary' })
 
-      expect(hasGlobalState('temporary')).toBe(true)
-      deleteGlobalState('temporary')
-      expect(hasGlobalState('temporary')).toBe(false)
+      expect(state.has('temporary')).toBe(true)
+      state.delete('temporary')
+      expect(state.has('temporary')).toBe(false)
     })
 
-    it('should return false after clearGlobalState', () => {
+    it('should return false after state.clear', () => {
       state('value1', { key: 'key1' })
       state('value2', { key: 'key2' })
 
-      expect(hasGlobalState('key1')).toBe(true)
-      expect(hasGlobalState('key2')).toBe(true)
+      expect(state.has('key1')).toBe(true)
+      expect(state.has('key2')).toBe(true)
 
-      clearGlobalState()
+      state.clear()
 
-      expect(hasGlobalState('key1')).toBe(false)
-      expect(hasGlobalState('key2')).toBe(false)
+      expect(state.has('key1')).toBe(false)
+      expect(state.has('key2')).toBe(false)
     })
   })
 
-  describe('getGlobalStateCount', () => {
-    it('should return 0 initially after clearGlobalState', () => {
-      clearGlobalState()
+  describe('state.size', () => {
+    it('should return 0 initially after state.clear', () => {
+      state.clear()
 
-      expect(getGlobalStateCount()).toBe(0)
+      expect(state.size).toBe(0)
     })
 
     it('should return 0 when no keyed states exist', () => {
-      clearGlobalState()
+      state.clear()
 
       // Create state without key (should not be in global registry)
       state(42)
 
-      expect(getGlobalStateCount()).toBe(0)
+      expect(state.size).toBe(0)
     })
 
     it('should increment when adding keyed states', () => {
-      clearGlobalState()
+      state.clear()
 
-      expect(getGlobalStateCount()).toBe(0)
+      expect(state.size).toBe(0)
 
       state('value1', { key: 'key1' })
-      expect(getGlobalStateCount()).toBe(1)
+      expect(state.size).toBe(1)
 
       state('value2', { key: 'key2' })
-      expect(getGlobalStateCount()).toBe(2)
+      expect(state.size).toBe(2)
 
       state('value3', { key: 'key3' })
-      expect(getGlobalStateCount()).toBe(3)
+      expect(state.size).toBe(3)
     })
 
     it('should not increment when accessing existing keyed state', () => {
-      clearGlobalState()
+      state.clear()
 
       state('initial', { key: 'shared-key' })
-      expect(getGlobalStateCount()).toBe(1)
+      expect(state.size).toBe(1)
 
       // Access same key again - should not increment
       state('initial', { key: 'shared-key' })
-      expect(getGlobalStateCount()).toBe(1)
+      expect(state.size).toBe(1)
     })
 
-    it('should decrement after deleteGlobalState', () => {
-      clearGlobalState()
+    it('should decrement after state.delete', () => {
+      state.clear()
 
       state('value1', { key: 'key1' })
       state('value2', { key: 'key2' })
       state('value3', { key: 'key3' })
-      expect(getGlobalStateCount()).toBe(3)
+      expect(state.size).toBe(3)
 
-      deleteGlobalState('key2')
-      expect(getGlobalStateCount()).toBe(2)
+      state.delete('key2')
+      expect(state.size).toBe(2)
 
-      deleteGlobalState('key1')
-      expect(getGlobalStateCount()).toBe(1)
+      state.delete('key1')
+      expect(state.size).toBe(1)
 
-      deleteGlobalState('key3')
-      expect(getGlobalStateCount()).toBe(0)
+      state.delete('key3')
+      expect(state.size).toBe(0)
     })
 
-    it('should reset to 0 after clearGlobalState', () => {
+    it('should reset to 0 after state.clear', () => {
       state('value1', { key: 'key1' })
       state('value2', { key: 'key2' })
       state('value3', { key: 'key3' })
-      expect(getGlobalStateCount()).toBe(3)
+      expect(state.size).toBe(3)
 
-      clearGlobalState()
-      expect(getGlobalStateCount()).toBe(0)
+      state.clear()
+      expect(state.size).toBe(0)
     })
 
     it('should count states with array keys', () => {
-      clearGlobalState()
+      state.clear()
 
       state('value1', { key: ['user', 1] })
-      expect(getGlobalStateCount()).toBe(1)
+      expect(state.size).toBe(1)
 
       state('value2', { key: ['user', 2] })
-      expect(getGlobalStateCount()).toBe(2)
+      expect(state.size).toBe(2)
 
       state('value3', { key: ['post', 1] })
-      expect(getGlobalStateCount()).toBe(3)
+      expect(state.size).toBe(3)
     })
 
     it('should handle mixed string and array keys', () => {
-      clearGlobalState()
+      state.clear()
 
       state('string-key-value', { key: 'simple' })
       state('array-key-value', { key: ['complex', 'nested'] })
 
-      expect(getGlobalStateCount()).toBe(2)
+      expect(state.size).toBe(2)
     })
 
     it('should not count local unkeyed states', () => {
-      clearGlobalState()
+      state.clear()
 
       // Create multiple unkeyed states
       state(1)
       state(2)
       state(3)
 
-      expect(getGlobalStateCount()).toBe(0)
+      expect(state.size).toBe(0)
 
       // Add one keyed state
       state(4, { key: 'keyed' })
-      expect(getGlobalStateCount()).toBe(1)
+      expect(state.size).toBe(1)
     })
   })
 })

@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
 import { state } from 'flexium/core'
-import { clearGlobalState } from 'flexium/test-exports'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
@@ -185,7 +184,7 @@ function DisplayC() {
 
 function GlobalDemo() {
   // Reset global state on mount
-  clearGlobalState()
+  state.clear()
 
   const containerNode = f('div', {
     style: {
@@ -257,7 +256,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (container.value) {
     container.value.innerHTML = ''
-    clearGlobalState()
+    state.clear()
   }
 })
 </script>

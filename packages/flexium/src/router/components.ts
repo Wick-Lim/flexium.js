@@ -75,7 +75,6 @@ export function Router(props: { children: FNodeChild }) {
 
   return () => {
     const ms = matches()
-    // console.log('Router render, matches:', ms.length);
 
     // No match? Render nothing or 404?
     // Ideally user provides a "*" route.

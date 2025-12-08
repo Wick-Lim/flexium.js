@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { state, clearGlobalState, STATE_SIGNAL } from '../state'
+import { state, STATE_SIGNAL } from '../state'
 import {
   isReactiveArrayResult,
   REACTIVE_ARRAY_MARKER,
@@ -33,7 +33,7 @@ const val = <T>(proxy: T): T => {
 
 describe('Reactive Array', () => {
   beforeEach(() => {
-    clearGlobalState()
+    state.clear()
   })
 
   describe('ReactiveArrayResult Creation', () => {

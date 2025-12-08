@@ -19,13 +19,7 @@ export {
   batch,
 } from './core/signal'
 
-export {
-  state,
-  clearGlobalState,
-  deleteGlobalState,
-  hasGlobalState,
-  getGlobalStateCount,
-} from './core/state'
+export { state } from './core/state'
 
 // Context
 export { createContext, context } from './core/context'
@@ -37,10 +31,6 @@ export { createLocation, matchPath } from './router/core'
 export { Router, Route, Outlet, Link, router } from './router/components'
 
 export { createReactiveRoot } from './renderers/dom/reactive'
-
-// Suspense & Error Boundary
-export { Suspense } from './core/suspense'
-export { ErrorBoundary } from './core/error-boundary' // New export
 
 // State
 

@@ -556,7 +556,7 @@ const SIGNAL_MARKER = Symbol('flexium.signal')
  * @internal Use state() which handles all reactive patterns
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isSignal(value: any): value is Signal<any> | Computed<any> {
+export function isSignal(value: unknown): value is Signal<any> | Computed<any> {
   return value !== null && typeof value === 'function' && SIGNAL_MARKER in value
 }
 

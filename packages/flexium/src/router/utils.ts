@@ -10,7 +10,6 @@ export function createRoutesFromChildren(children: FNodeChild): RouteDef[] {
   const routes: RouteDef[] = []
 
   const childArray = Array.isArray(children) ? children : [children]
-  // console.log('Parsing children:', childArray.length);
 
   for (const child of childArray) {
     if (!isFNode(child)) {
@@ -57,7 +56,6 @@ export function matchRoutes(
   routes: RouteDef[],
   location: string
 ): RouteMatch[] | null {
-  // console.log('Matching routes:', routes.length, 'against', location);
   for (const route of routes) {
     const result = matchRouteBranch(route, location, '')
     if (result) return result
@@ -79,8 +77,6 @@ function matchRouteBranch(
   const isLeaf = route.children.length === 0
   const matcher = compilePath(fullPath, !isLeaf)
   const match = location.match(matcher)
-
-  // console.log('Checking branch:', fullPath, 'leaf:', isLeaf, 'match:', !!match, 'regex:', matcher);
 
   if (match) {
     const [matchedPath, ...paramValues] = match
@@ -129,12 +125,7 @@ function matchRouteBranch(
 }
 
 function compilePath(path: string, prefix: boolean): RegExp {
-  // Simple regex conversion
-  const paramNames: string[] = []
-  const regexPath = path.replace(/:([^/]+)/g, (_, paramName) => {
-    paramNames.push(paramName)
-    return '([^/]+)'
-  })
+  const regexPath = path.replace(/:([^/]+)/g, () => '([^/]+)')
 
   // If path is exactly "/", and we want prefix matching, it should match everything
   if (regexPath === '/' && prefix) {

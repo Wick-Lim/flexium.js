@@ -116,14 +116,19 @@ export function sanitizeQueryValue(value: string): string {
  * @param search - URL search string (e.g., "?foo=bar&baz=qux")
  * @returns Object with query parameters
  */
+// Dangerous keys that could lead to prototype pollution
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
 function parseQuery(search: string): Record<string, string> {
   const params = new URLSearchParams(search)
-  const query: Record<string, string> = {}
+  // Use Object.create(null) to prevent prototype pollution
+  const query: Record<string, string> = Object.create(null)
   params.forEach((value, key) => {
     // Sanitize both key and value to prevent XSS
     const sanitizedKey = sanitizeQueryValue(key)
     const sanitizedValue = sanitizeQueryValue(value)
-    if (sanitizedKey) {
+    // Block dangerous keys to prevent prototype pollution
+    if (sanitizedKey && !DANGEROUS_KEYS.has(sanitizedKey)) {
       query[sanitizedKey] = sanitizedValue
     }
   })

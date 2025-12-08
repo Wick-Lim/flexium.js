@@ -3,14 +3,14 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach } from 'vitest'
-import { state, clearGlobalState } from '../../../core/state'
+import { state } from '../../../core/state'
 import { effect } from '../../../core/signal'
 import { f } from '../f'
 import { mountReactive } from '../reactive'
 
 describe('StateProxy DOM Reactivity', () => {
   beforeEach(() => {
-    clearGlobalState()
+    state.clear()
   })
 
   it('should render StateProxy initial value', () => {
