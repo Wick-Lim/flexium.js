@@ -407,7 +407,8 @@ export function mountReactive(
         // Component returns static VNode - mount directly without effect wrapper
         // The VNode itself may contain reactive parts that will be handled by mountReactive
         const fragment = document.createDocumentFragment()
-        mountReactive(componentResult, fragment)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mountReactive(componentResult as any, fragment)
 
         const currentParent = startNode.parentNode || parent
         if (currentParent) {

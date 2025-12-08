@@ -1,13 +1,13 @@
 import { state, effect } from 'flexium/core'
 import './App.css'
 
-export function App() {
-  // State using unified state() API
-  const [count, setCount] = state(0)
-  const [isOnline, setIsOnline] = state(navigator.onLine)
-  const [installStatus, setInstallStatus] = state('not-installed')
+// State declared outside component
+const [count, setCount] = state(0)
+const [isOnline, setIsOnline] = state(typeof navigator !== 'undefined' ? navigator.onLine : true)
+const [installStatus, setInstallStatus] = state<string>('not-installed')
 
-  // Check if app is installed
+// Check if app is installed
+if (typeof window !== 'undefined') {
   if ('standalone' in window.navigator && (window.navigator as any).standalone) {
     setInstallStatus('installed')
   } else if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -18,37 +18,40 @@ export function App() {
   window.addEventListener('online', () => setIsOnline(true))
   window.addEventListener('offline', () => setIsOnline(false))
 
-  // Event handlers
-  const increment = () => setCount(c => c + 1)
-  const decrement = () => setCount(c => c - 1)
-  const reset = () => setCount(0)
-
-  // Request notification permission
-  const requestNotifications = async () => {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission()
-      if (permission === 'granted') {
-        new Notification('Notifications enabled!', {
-          body: 'You will now receive notifications from this app.',
-          icon: '/icons/icon-192x192.png',
-        })
-      }
-    }
-  }
-
-  // Effect for count changes
-  effect(() => {
-    console.log('Count changed:', +count)
-    // Store count in localStorage for persistence
-    localStorage.setItem('count', String(+count))
-  })
-
   // Load saved count
   const savedCount = localStorage.getItem('count')
   if (savedCount) {
     setCount(parseInt(savedCount, 10))
   }
+}
 
+// Effect for count changes
+effect(() => {
+  console.log('Count changed:', +count)
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('count', String(+count))
+  }
+})
+
+// Event handlers
+const increment = () => setCount(c => c + 1)
+const decrement = () => setCount(c => c - 1)
+const reset = () => setCount(0)
+
+// Request notification permission
+const requestNotifications = async () => {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    const permission = await Notification.requestPermission()
+    if (permission === 'granted') {
+      new Notification('Notifications enabled!', {
+        body: 'You will now receive notifications from this app.',
+        icon: '/icons/icon-192x192.png',
+      })
+    }
+  }
+}
+
+export function App() {
   return (
     <div class="container">
       <div class="card">

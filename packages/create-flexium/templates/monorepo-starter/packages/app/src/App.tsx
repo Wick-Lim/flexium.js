@@ -3,14 +3,16 @@ import { Counter } from '@monorepo/components'
 import { formatNumber } from '@monorepo/utils'
 import './App.css'
 
+// State declared outside component
+const [count, setCount] = state(0)
+const [message] = state('Welcome to Flexium Monorepo!')
+
+// Event handlers
+const increment = () => setCount(c => c + 1)
+const decrement = () => setCount(c => c - 1)
+const reset = () => setCount(0)
+
 export function App() {
-  const [count, setCount] = state(0)
-  const [message] = state('Welcome to Flexium Monorepo!')
-
-  const increment = () => setCount(c => c + 1)
-  const decrement = () => setCount(c => c - 1)
-  const reset = () => setCount(0)
-
   return (
     <div class="container">
       <div class="card">

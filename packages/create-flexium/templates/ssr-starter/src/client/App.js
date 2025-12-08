@@ -1,25 +1,22 @@
 import { state, effect } from 'flexium/core'
 import { f } from 'flexium/dom'
 
+// State declared outside component
+const [count, setCount] = state(0)
+const [message] = state('Hello from SSR!')
+const [doubleCount] = state(() => count * 2)
+
+// Effects
+effect(() => {
+  console.log('Count changed:', +count)
+})
+
+// Event handlers
+const increment = () => setCount(c => c + 1)
+const decrement = () => setCount(c => c - 1)
+const reset = () => setCount(0)
+
 export function App() {
-  // State using unified state() API
-  const [count, setCount] = state(0)
-  const [message] = state('Hello from SSR!')
-
-  // Derived state
-  const [doubleCount] = state(() => count * 2)
-
-  // Effects
-  effect(() => {
-    console.log('Count changed:', +count)
-  })
-
-  // Event handlers
-  const increment = () => setCount(c => c + 1)
-  const decrement = () => setCount(c => c - 1)
-  const reset = () => setCount(0)
-
-  // Component
   return f('div', { class: 'container' }, [
     f('div', { class: 'card' }, [
       f('h1', { class: 'title' }, message),

@@ -1,21 +1,21 @@
-import { signal, computed, effect } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 import { render } from 'flexium/dom'
 import './style.css'
 
-// State must be declared outside component to persist across renders
-const count = signal(0)
-const doubled = computed(() => count.value * 2)
-const tripled = computed(() => count.value * 3)
+// State declared outside component to persist across renders
+const [count, setCount] = state(0)
+const [doubled] = state(() => count * 2)
+const [tripled] = state(() => count * 3)
 
 // Effect for logging
 effect(() => {
-  console.log('Count changed:', count.value)
+  console.log('Count changed:', +count)
 })
 
 // Event handlers
-const increment = () => count.value++
-const decrement = () => count.value--
-const reset = () => (count.value = 0)
+const increment = () => setCount(c => c + 1)
+const decrement = () => setCount(c => c - 1)
+const reset = () => setCount(0)
 
 function App() {
   return (
@@ -24,7 +24,7 @@ function App() {
         <h1>Flexium</h1>
         <p class="subtitle">Fine-grained Reactivity Framework</p>
         <div class="tags">
-          <span class="tag">Signals</span>
+          <span class="tag">State</span>
           <span class="tag">Computed</span>
           <span class="tag">Effects</span>
           <span class="tag">Zero Dependencies</span>
@@ -33,14 +33,14 @@ function App() {
 
       <div class="card">
         <h2>Interactive Counter</h2>
-        <div class="display">{count.value}</div>
+        <div class="display">{count}</div>
         <div class="stats">
           <div class="stat-card">
-            <div class="stat-value">{doubled.value}</div>
+            <div class="stat-value">{doubled}</div>
             <div class="stat-label">Double</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value">{tripled.value}</div>
+            <div class="stat-value">{tripled}</div>
             <div class="stat-label">Triple</div>
           </div>
         </div>
@@ -61,7 +61,7 @@ function App() {
         <h2>Features</h2>
         <ul class="features">
           <li>
-            <strong>Signals</strong> - Reactive primitives for state management
+            <strong>State</strong> - Reactive primitives for state management
           </li>
           <li>
             <strong>Computed</strong> - Automatically derived values
