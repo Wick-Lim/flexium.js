@@ -141,21 +141,37 @@ function springToTiming(spring: SpringConfig): {
  * Cached at module level for performance
  */
 let prefersReducedMotion: boolean | null = null
+let mediaQueryCleanup: (() => void) | null = null
 
 function checkReducedMotion(): boolean {
   if (prefersReducedMotion === null) {
     if (typeof window !== 'undefined' && window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
       prefersReducedMotion = mediaQuery.matches
-      // Listen for changes
-      mediaQuery.addEventListener('change', (e) => {
+      // Listen for changes with proper cleanup support
+      const handler = (e: MediaQueryListEvent) => {
         prefersReducedMotion = e.matches
-      })
+      }
+      mediaQuery.addEventListener('change', handler)
+      mediaQueryCleanup = () => {
+        mediaQuery.removeEventListener('change', handler)
+        prefersReducedMotion = null
+        mediaQueryCleanup = null
+      }
     } else {
       prefersReducedMotion = false
     }
   }
   return prefersReducedMotion
+}
+
+/**
+ * Cleanup motion module state (useful for testing and SSR)
+ */
+export function cleanupMotionState(): void {
+  if (mediaQueryCleanup) {
+    mediaQueryCleanup()
+  }
 }
 
 /**

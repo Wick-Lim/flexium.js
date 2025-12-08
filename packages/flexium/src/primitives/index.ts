@@ -4,14 +4,50 @@
  * All primitive components for building UIs
  */
 
-// Motion components
-export * from './motion'
+// Motion components (explicit exports for better tree-shaking)
+export {
+  createMotion,
+  useMotion,
+  MotionController,
+  type AnimatableProps,
+  type SpringConfig,
+  type MotionProps,
+  Transition,
+  TransitionGroup,
+  createTransition,
+  transitions,
+  type TransitionPreset,
+  type TransitionTiming,
+  type TransitionProps,
+  type TransitionGroupProps,
+} from './motion'
 
-// Form components
-export * from './form'
+// Form components (explicit exports for better tree-shaking)
+export {
+  createForm,
+  validators,
+  type FieldValue,
+  type ValidationRule,
+  type FieldValidation,
+  type FormData,
+  type FieldState,
+  type FormState,
+  type FormConfig,
+  createInput,
+  createInputField,
+  type InputType,
+  type InputProps,
+} from './form'
 
-// UI components
-export * from './ui'
+// UI components (explicit exports for better tree-shaking)
+export {
+  createButton,
+  createIconButton,
+  type ButtonVariant,
+  type ButtonSize,
+  type ButtonType,
+  type ButtonProps,
+} from './ui'
 
 // Layout components
 export { Row, Column, Spacer, Grid, Stack } from './layout'
@@ -60,11 +96,10 @@ export type {
 } from './types'
 
 // List component with optional virtualization
-export { List, isListComponent, LIST_MARKER } from './List'
+export { List } from './List'
 
 export type {
   ListProps,
-  ListComponent,
   FixedSizeConfig,
   VariableSizeConfig,
   SizeConfig,

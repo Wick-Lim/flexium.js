@@ -206,6 +206,7 @@ f('input', {
           type: 'text',
           value: inputValue,
           oninput: (e) => setInputValue(e.target.value),
+          onkeydown: (e) => e.stopPropagation(),
           style: {
             width: '100%',
             padding: '10px',

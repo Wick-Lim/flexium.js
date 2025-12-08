@@ -19,7 +19,13 @@ export {
   batch,
 } from './core/signal'
 
-export { state } from './core/state'
+export {
+  state,
+  clearGlobalState,
+  deleteGlobalState,
+  hasGlobalState,
+  getGlobalStateCount,
+} from './core/state'
 
 // Context
 export { createContext, context } from './core/context'
@@ -42,3 +48,7 @@ export { ErrorBoundary } from './core/error-boundary' // New export
 export { f, render } from './renderers/dom/exports'
 export { domRenderer } from './renderers/dom/index'
 export { Portal } from './renderers/dom/portal'
+
+// Internal utilities for testing
+export { cleanupMotionState } from './primitives/motion'
+export { isListComponent, LIST_MARKER } from './primitives/List'

@@ -338,7 +338,7 @@ export class DOMRenderer implements Renderer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createNode(type: string, props: Record<string, any>): HTMLElement {
     // Map component type to HTML element
-    const tagName = ELEMENT_MAPPING[type] || type
+    const tagName = ELEMENT_MAPPING[type] ?? type
     const element = document.createElement(tagName)
 
     // Store original type for reference

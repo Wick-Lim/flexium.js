@@ -168,7 +168,7 @@ export function jsxs(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Fragment(props: { children?: any[] }): FNode {
-  return createFNode('fragment', {}, props.children || [])
+  return createFNode('fragment', {}, props.children ?? [])
 }
 
 /**

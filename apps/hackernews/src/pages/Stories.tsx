@@ -1,4 +1,4 @@
-import { state, effect, For } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 import { Link } from 'flexium/router'
 import { loadStories, useList, useItem } from '../store'
 
@@ -36,7 +36,7 @@ function StoryItem(props: { id: number; index: number }) {
 export default function Stories(props: { type: string }) {
     // Local state for loading status
     const [loading, setLoading] = state(true);
-    
+
     // We need to react to prop changes (type change)
     effect(() => {
         setLoading(true);
@@ -48,7 +48,7 @@ export default function Stories(props: { type: string }) {
     // However, we need a way to get the list reactively based on prop.
     // Ideally: const list = computed(() => useList(props.type)[0]())
     // But useList creates signals.
-    
+
     // Let's use a local signal that updates when type changes
     const [ids, setIds] = state<number[]>([]);
 
@@ -57,7 +57,7 @@ export default function Stories(props: { type: string }) {
         // We need to track the list value.
         // If useList returns a stable signal for a key, we can read it.
         // But here we want to bind local ids to the global list.
-        
+
         // Simple polling/subscription pattern inside effect:
         setIds(list());
     });
@@ -72,9 +72,7 @@ export default function Stories(props: { type: string }) {
             </div>
 
             <ul class="news-list">
-                <For each={ids}>
-                    {(id: number, index: () => number) => <StoryItem id={id} index={index() + 1} />}
-                </For>
+                {ids().map((id: number, index: number) => <StoryItem id={id} index={index + 1} />)}
             </ul>
         </div>
     )

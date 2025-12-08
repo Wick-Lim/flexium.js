@@ -6,6 +6,7 @@ export {
   createMotion,
   useMotion,
   MotionController,
+  cleanupMotionState,
   type AnimatableProps,
   type SpringConfig,
   type MotionProps,

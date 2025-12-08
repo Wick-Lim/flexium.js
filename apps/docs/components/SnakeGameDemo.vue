@@ -81,6 +81,12 @@ const moveSnake = () => {
 }
 
 const handleKeydown = (e) => {
+  // Ignore if typing in an input or textarea
+  const tag = e.target.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) {
+    return
+  }
+
   const keyMap = {
     ArrowUp: 'UP', w: 'UP', W: 'UP',
     ArrowDown: 'DOWN', s: 'DOWN', S: 'DOWN',

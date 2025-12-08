@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { state, clearGlobalState } from 'flexium/core'
+import { state } from 'flexium/core'
+import { clearGlobalState } from 'flexium/test-exports'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)

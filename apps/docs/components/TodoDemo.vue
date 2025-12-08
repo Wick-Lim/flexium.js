@@ -49,7 +49,10 @@ function TodoDemo() {
         placeholder: 'Add a new todo...',
         value: inputValue,
         oninput: (e) => setInputValue(e.target.value),
-        onkeydown: (e) => e.key === 'Enter' && addTodo(),
+        onkeydown: (e) => {
+          e.stopPropagation()
+          if (e.key === 'Enter') addTodo()
+        },
         style: {
           flex: 1,
           padding: '10px 12px',

@@ -154,6 +154,7 @@ function RouteDemo() {
         type: 'text',
         value: testPath,
         oninput: (e) => setTestPath(e.target.value),
+        onkeydown: (e) => e.stopPropagation(),
         style: {
           width: '100%',
           padding: '10px 12px',

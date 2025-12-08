@@ -1,4 +1,4 @@
-import { state, effect, For } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 import { router, Link } from 'flexium/router'
 import { loadItem, useItem } from '../store'
 
@@ -24,11 +24,9 @@ function Comment(props: { id: number }) {
                     <span class="time"> {new Date(c.time * 1000).toLocaleString()}</span>
                 </div>
                 <div class="comment-text" innerHTML={c.text} />
-{c.kids && c.kids.length > 0 && (
+                {c.kids && c.kids.length > 0 && (
                     <ul class="comment-children" style={{ paddingLeft: '20px' }}>
-                        <For each={(() => c.kids || []) as any}>
-                            {(kidId: number) => <Comment id={kidId} />}
-                        </For>
+                        {(c.kids || []).map((kidId: number) => <Comment id={kidId} />)}
                     </ul>
                 )}
             </li>
@@ -74,11 +72,7 @@ export default function Item() {
                                 {data.descendants} comments
                             </p>
                             <ul class="comment-children">
-                                {data.kids && (
-                                    <For each={(() => data.kids || []) as any}>
-                                        {(kidId: number) => <Comment id={kidId} />}
-                                    </For>
-                                )}
+                                {data.kids && data.kids.map((kidId: number) => <Comment id={kidId} />)}
                             </ul>
                         </div>
                     </div>
