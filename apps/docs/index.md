@@ -39,7 +39,7 @@ features:
     details: Updates only what changed without Virtual DOM overhead. Optimized for performance.
   - icon: 🎨
     title: Cross-Platform
-    details: Write once, run everywhere. Universal primitives for Web and Canvas.
+    details: Universal primitives for Web and Canvas. Native support coming soon.
   - icon: 📦
     title: Lightweight
     details: Minimal bundle size (~3KB) with tree-shakeable exports.

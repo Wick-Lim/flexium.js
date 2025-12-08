@@ -22,7 +22,7 @@ Flexium stands out from other frameworks through several key innovations:
 
 - **Unified State**: One function (`state()`) handles local, global, and async state, eliminating the need for multiple APIs.
 - **Fine-Grained Reactivity**: No Virtual DOM overhead. Updates are surgical and precise, updating only what changed.
-- **Cross-Platform (Flexium Native)**: Write once using universal primitives (`Row`, `Column`, `Text`) and run on Web, Native (future), and Canvas.
+- **Cross-Platform**: Write once using universal primitives (`Row`, `Column`, `Text`) and run on Web and Canvas. Native support coming soon.
 - **Type Safety**: Built with TypeScript for a superior developer experience with full type inference.
 - **Tiny Bundle Size**: Core package is ~10-15kb gzipped, 70% smaller than React.
 - **Zero Configuration**: Works out of the box with Vite, no complex setup required.
@@ -134,7 +134,7 @@ function UserProfile() {
 | Global State | Context or stores | `state()` with key option |
 | List Rendering | Must use `<For>`, `.map()` doesn't work | `items.map()` works with auto-optimization |
 | Bundle Size | ~7kb gzipped | ~10-15kb gzipped |
-| Cross-Platform | Web-focused | Web + Canvas + Native (future) |
+| Cross-Platform | Web-focused | Web + Canvas (Native: coming soon) |
 | Primitives | HTML tags | Universal primitives (Row, Column, Text) |
 
 > **Unique to Flexium**: `items.map()` syntax works reactively with automatic optimization (O(1) append, DOM caching). In SolidJS, you must use `<For>` component.
@@ -288,12 +288,16 @@ const name = user?.name; // ✓ string | undefined
 
 ### 4. Cross-Platform Abstraction
 
-Flexium Native is an architectural approach similar to React Native, but simpler. By using universal primitives instead of platform-specific tags, your code can run anywhere:
+::: tip 🚧 Native Support Coming Soon
+Currently Flexium runs on **Web** and **Canvas**. Native (iOS/Android) support is under development.
+:::
+
+Flexium's architecture is similar to React Native, but simpler. By using universal primitives instead of platform-specific tags, your code can run anywhere:
 
 ```tsx
 import { Column, Row, Text, Pressable } from 'flexium/primitives';
 
-// This code works on Web, Canvas, and Native (future)
+// This code works on Web and Canvas today
 function Card() {
   return (
     <Column padding={20} gap={10}>
@@ -309,7 +313,7 @@ function Card() {
 }
 ```
 
-On the web, this renders to DOM. In the future, the same code will run on iOS/Android using native components.
+On the web, this renders to DOM. Native iOS/Android support is planned for a future release.
 
 ### 5. Progressive Enhancement
 
@@ -620,8 +624,8 @@ Flexium's architecture is designed for simplicity and performance:
 ┌─────────────────────────────────────────────────────────┐
 │                    Renderer Layer                        │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │
-│  │  DOM        │  │  Canvas     │  │  Native (Soon)  │ │
-│  │  Renderer   │  │  Renderer   │  │    Renderer     │ │
+│  │  DOM        │  │  Canvas     │  │  Native         │ │
+│  │  Renderer   │  │  Renderer   │  │  (Coming Soon)  │ │
 │  └─────────────┘  └─────────────┘  └─────────────────┘ │
 └────────────────────┬────────────────────────────────────┘
                      │
@@ -828,24 +832,29 @@ While newer than React or Vue, Flexium's ecosystem is growing:
 
 ## Flexium Native Philosophy
 
+::: info 🚧 Native Support Status
+**Currently available**: Web (DOM) and Canvas renderers
+**Coming soon**: Native iOS/Android renderer
+:::
+
 Flexium adopts a "Flexium Native" approach, similar to React Native but simpler. We avoid HTML-specific tags like `div`, `span`, or `h1` in favor of universal components:
 
 - **Layout**: Use `Row` and `Column` for 99% of your layout needs. They map to Flexbox containers.
 - **Text**: Use `Text` for all text rendering.
 - **Interaction**: Use `Pressable` for touch and click handling.
 
-This abstraction allows your Flexium code to run on the Web (rendering to DOM) today, and on Native platforms (iOS, Android) in the future without changing your component code.
+This abstraction allows your Flexium code to run on the Web (rendering to DOM) and Canvas today. Native platform support is under development.
 
 ### Benefits of Universal Primitives
 
-1. **Write Once, Run Anywhere**: Same code works on web and (future) native
+1. **Write Once, Run Anywhere**: Same code works on web, canvas, and native (when released)
 2. **Consistent API**: No platform-specific quirks to remember
 3. **Better Abstraction**: Focus on UI logic, not platform details
 4. **Easier Testing**: Test once, works everywhere
 5. **Future-Proof**: New platforms just need new renderers
 
 ```tsx
-// This exact code will work on web AND native
+// This code works on web and canvas today (native coming soon)
 import { Column, Row, Text, Pressable } from 'flexium/primitives';
 
 function UniversalButton({ onPress, children }) {
