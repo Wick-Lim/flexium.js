@@ -58,7 +58,7 @@ function Game() {
 
   return (
     <div>
-      Position: {m.position().x}, {m.position().y}
+      Position: {m.position.x}, {m.position.y}
     </div>
   )
 }
@@ -75,7 +75,7 @@ function DrawingApp() {
   effect(() => {
     if (m.isLeftPressed()) {
       const ctx = canvasRef.current.getContext('2d')
-      ctx.lineTo(m.position().x, m.position().y)
+      ctx.lineTo(m.position.x, m.position.y)
       ctx.stroke()
     }
   })
@@ -92,7 +92,7 @@ const m = mouse()
 const loop = createLoop({
   onUpdate: () => {
     if (m.isLeftPressed()) {
-      handleClick(m.position().x, m.position().y)
+      handleClick(m.position.x, m.position.y)
     }
   }
 })
@@ -108,7 +108,7 @@ function Cursor() {
     <div
       class="custom-cursor"
       style={{
-        transform: `translate(${m.position().x}px, ${m.position().y}px)`
+        transform: `translate(${m.position.x}px, ${m.position.y}px)`
       }}
     />
   )
@@ -127,8 +127,8 @@ function CanvasGame() {
     if (!canvasRef) return { x: 0, y: 0 }
     const rect = canvasRef.getBoundingClientRect()
     return {
-      x: m.position().x - rect.left,
-      y: m.position().y - rect.top
+      x: m.position.x - rect.left,
+      y: m.position.y - rect.top
     }
   }
 
@@ -170,8 +170,8 @@ function Draggable(props) {
     <div
       style={{
         position: 'absolute',
-        left: isDragging() ? m.position().x - offset().x : props.x,
-        top: isDragging() ? m.position().y - offset().y : props.y
+        left: isDragging ? m.position.x - offset.x : props.x,
+        top: isDragging ? m.position.y - offset.y : props.y
       }}
       onmousedown={handleMouseDown}
     >
@@ -190,7 +190,7 @@ function ContextMenuArea() {
 
   effect(() => {
     if (m.isRightPressed()) {
-      setMenuPos({ x: m.position().x, y: m.position().y })
+      setMenuPos({ x: m.position.x, y: m.position.y })
     }
     if (m.isLeftPressed() && menuPos()) {
       setMenuPos(null)

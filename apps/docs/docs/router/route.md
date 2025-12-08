@@ -71,7 +71,7 @@ import { router } from 'flexium/router'
 function UserProfile() {
   const r = router()
 
-  return <div>User ID: {r.params().id}</div>
+  return <div>User ID: {r.params.id}</div>
 }
 
 // Route definition
@@ -94,11 +94,7 @@ function UserProfile() {
 function ProtectedRoute(props) {
   const { user } = context(AuthContext)
 
-  return (
-    <Show when={() => user() !== null} fallback={<Navigate to="/login" />}>
-      {props.children}
-    </Show>
-  )
+  return user ? props.children : <Navigate to="/login" />
 }
 
 <Route path="/admin" component={() => (
@@ -116,8 +112,8 @@ function SearchPage() {
 
   return (
     <div>
-      Search: {r.query().q}
-      Page: {r.query().page || 1}
+      Search: {r.query.q}
+      Page: {r.query.page || 1}
     </div>
   )
 }

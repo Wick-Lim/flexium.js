@@ -67,9 +67,9 @@ function UserProfile(props) {
     setUser(await response.json())
   })
 
-  return <Show when={user()}>
-    <div>{user().name}</div>
-  </Show>
+  return {user && (
+    <div>{user.name}</div>
+  )}
 }
 ```
 
@@ -133,7 +133,7 @@ function WebSocketComponent() {
     onCleanup(() => ws.close())
   })
 
-  return <For each={messages()}>
+  return <For each={messages}>
     {(msg) => <div>{msg}</div>}
   </For>
 }
@@ -157,7 +157,7 @@ function SearchResults(props) {
     onCleanup(() => controller.abort())
   })
 
-  return <For each={results()}>
+  return <For each={results}>
     {(item) => <div>{item.title}</div>}
   </For>
 }
@@ -170,7 +170,7 @@ function Countdown(props) {
   const [time, setTime] = state(props.seconds)
 
   effect(() => {
-    if (time() <= 0) return
+    if (time <= 0) return
 
     const timeout = setTimeout(() => {
       setTime(t => t - 1)
@@ -179,7 +179,7 @@ function Countdown(props) {
     onCleanup(() => clearTimeout(timeout))
   })
 
-  return <div>{time()} seconds remaining</div>
+  return <div>{time} seconds remaining</div>
 }
 ```
 

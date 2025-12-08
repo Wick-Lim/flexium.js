@@ -61,7 +61,7 @@ function App() {
 
 function UserProfile() {
   const r = router()
-  const params = r.params()
+  const params = r.params
 
   return <h1>User ID: {params.id}</h1>
 }
@@ -81,7 +81,7 @@ Use the `:paramName` syntax to create dynamic route segments:
 // Access parameters in your component
 function PostDetail() {
   const r = router()
-  const params = r.params()
+  const params = r.params
 
   return (
     <div>
@@ -283,7 +283,7 @@ import { router } from 'flexium/router'
 
 function SearchResults() {
   const r = router()
-  const location = r.location()
+  const location = r.location
 
   // URL: /search?q=flexium&sort=date&filter=js
   const searchQuery = location.query.q      // "flexium"
@@ -331,7 +331,7 @@ function FilteredList() {
   const r = router()
 
   // This will re-run when query params change
-  const location = r.location()
+  const location = r.location
   const category = location.query.category || 'all'
 
   return (
@@ -437,7 +437,7 @@ import { router } from 'flexium/router'
 
 function OrderStatus() {
   const r = router()
-  const params = r.params()
+  const params = r.params
   const orderId = params.id
 
   useEffect(() => {
@@ -471,7 +471,7 @@ import { router } from 'flexium/router'
 
 function TransitionWrapper({ children }) {
   const r = router()
-  const location = r.location()
+  const location = r.location
   const isTransitioning = signal(false)
 
   useEffect(() => {
@@ -502,7 +502,7 @@ function TransitionWrapper({ children }) {
 ```tsx
 function PageTransition({ children }) {
   const r = router()
-  const location = r.location()
+  const location = r.location
   const currentPath = signal('')
   const isAnimating = signal(false)
 
@@ -556,7 +556,7 @@ function App() {
 
 function NotFound() {
   const r = router()
-  const location = r.location()
+  const location = r.location
 
   return (
     <div class="not-found">
@@ -573,7 +573,7 @@ function NotFound() {
 ```tsx
 function NotFound() {
   const r = router()
-  const location = r.location()
+  const location = r.location
 
   const suggestions = [
     { path: '/', label: 'Home' },
@@ -705,12 +705,12 @@ Returns the router context, including `location`, `params`, `navigate`, and `mat
 const r = router()
 
 // Access location
-const location = r.location()
+const location = r.location
 console.log(location.pathname)  // "/users/123"
 console.log(location.query)     // { tab: "posts" }
 
 // Access params
-const params = r.params()
+const params = r.params
 console.log(params.id)  // "123"
 
 // Navigate

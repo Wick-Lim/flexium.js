@@ -104,26 +104,22 @@ Common causes:
 
 ### How do I conditionally render content?
 
-Use the `<Show>` component:
+Use native JavaScript - just like React:
 
 ```tsx
-<Show when={isLoggedIn}>
-  <Dashboard />
-</Show>
+{isLoggedIn && <Dashboard />}
 
-<Show when={isLoggedIn} fallback={<Login />}>
-  <Dashboard />
-</Show>
+{isLoggedIn ? <Dashboard /> : <Login />}
 ```
 
 ### How do I render lists?
 
-Use the `<For>` component:
+Use `.map()` - just like React:
 
 ```tsx
-<For each={items}>
-  {(item, index) => <ListItem item={item} index={index()} />}
-</For>
+{items.map((item, index) => (
+  <ListItem key={item.id} item={item} index={index} />
+))}
 ```
 
 ### How do I handle multiple conditions?

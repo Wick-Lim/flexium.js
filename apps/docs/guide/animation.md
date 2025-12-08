@@ -39,7 +39,7 @@ const [isExpanded, setIsExpanded] = state(false)
 
 const { controller, dispose } = useMotion(element, {
   value: {
-    animate: isExpanded()
+    animate: isExpanded
       ? { height: 'auto', opacity: 1 }
       : { height: 0, opacity: 0 }
   }
@@ -90,13 +90,13 @@ function App() {
     <div>
       <button onClick={() => setVisible(v => !v)}>Toggle</button>
 
-      <Show when={visible}>
+      {visible && (
         <Transition preset="fade">
           <div class="content">
             This content fades in and out
           </div>
         </Transition>
-      </Show>
+      )}
     </div>
   )
 }
@@ -207,13 +207,11 @@ function NotificationList() {
 
   return (
     <TransitionGroup stagger={50}>
-      <For each={notifications}>
-        {(notification) => (
-          <Transition preset="slide-right">
-            <NotificationCard data={notification} />
-          </Transition>
-        )}
-      </For>
+      {notifications.map(notification => (
+        <Transition key={notification.id} preset="slide-right">
+          <NotificationCard data={notification} />
+        </Transition>
+      ))}
     </TransitionGroup>
   )
 }
@@ -310,26 +308,24 @@ controller.disableLayoutAnimation()
 ```tsx
 import { Transition, transitions } from 'flexium/primitives'
 import { Portal } from 'flexium/dom'
-import { Show, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
 function Modal({ isOpen, onClose, children }) {
-  return (
-    <Show when={() => isOpen}>
-      <Portal>
-        {/* Backdrop */}
-        <Transition preset="fade">
-          <div class="backdrop" onClick={onClose} />
-        </Transition>
+  return isOpen ? (
+    <Portal>
+      {/* Backdrop */}
+      <Transition preset="fade">
+        <div class="backdrop" onClick={onClose} />
+      </Transition>
 
-        {/* Dialog */}
-        <Transition {...transitions.modal}>
-          <div class="modal" role="dialog">
-            {children}
-          </div>
-        </Transition>
-      </Portal>
-    </Show>
-  )
+      {/* Dialog */}
+      <Transition {...transitions.modal}>
+        <div class="modal" role="dialog">
+          {children}
+        </div>
+      </Transition>
+    </Portal>
+  ) : null
 }
 ```
 
@@ -355,16 +351,14 @@ function TodoList() {
 
   return (
     <TransitionGroup stagger={30}>
-      <For each={todos}>
-        {(todo) => (
-          <Transition preset="slide-up">
-            <div class="todo-item">
-              {todo.text}
-              <button onClick={() => removeTodo(todo.id)}>×</button>
-            </div>
-          </Transition>
-        )}
-      </For>
+      {todos.map(todo => (
+        <Transition key={todo.id} preset="slide-up">
+          <div class="todo-item">
+            {todo.text}
+            <button onClick={() => removeTodo(todo.id)}>×</button>
+          </div>
+        </Transition>
+      ))}
     </TransitionGroup>
   )
 }

@@ -189,7 +189,7 @@ function SidebarLayout() {
 ```tsx
 function TabLayout() {
   const r = router()
-  const currentPath = r.location().pathname
+  const currentPath = r.location.pathname
 
   return (
     <Column gap={16}>
@@ -222,7 +222,7 @@ function LoadingLayout() {
 
   // Track route changes
   effect(() => {
-    const path = r.location().pathname
+    const path = r.location.pathname
     setIsLoading(true)
     // Simulate loading
     setTimeout(() => setIsLoading(false), 500)
@@ -231,9 +231,7 @@ function LoadingLayout() {
   return (
     <div class="layout">
       <Header />
-      <Show when={isLoading()} fallback={<Outlet />}>
-        <Spinner />
-      </Show>
+      {isLoading() ? <Spinner /> : <Outlet />}
     </div>
   )
 }

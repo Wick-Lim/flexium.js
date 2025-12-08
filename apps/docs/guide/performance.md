@@ -155,7 +155,7 @@ const [items, setItems] = signal([...]);
 
 // Bad - creates dependency on every item property
 effect(() => {
-  const list = items();
+  const list = items;
   list.forEach(item => {
     console.log(item.name, item.value);
   });
@@ -163,12 +163,12 @@ effect(() => {
 
 // Good - depend only on the array itself
 effect(() => {
-  const list = items();
+  const list = items;
   console.log('Items changed:', list.length);
 });
 
 // Or use granular signals for each item
-const itemSignals = items().map(item => signal(item));
+const itemSignals = items.map(item => signal(item));
 ```
 
 ## Computed vs Effect Usage
@@ -209,7 +209,7 @@ const [userId, setUserId] = signal(null);
 
 // Effect - perfect for side effects
 effect(() => {
-  const id = userId.value;  // Both userId() and userId.value work in effects
+  const id = userId.value;  // userId.value works in effects
   if (id) {
     // Side effect: log to analytics
     analytics.track('user_viewed', { userId: id });
@@ -457,7 +457,7 @@ function BigList() {
     >
       {(item, index) => (
         <div style={{ padding: '10px' }}>
-          {index()}: {item.name}
+          {index}: {item.name}
         </div>
       )}
     </List>
@@ -488,7 +488,7 @@ function OptimizedList() {
   // Memoize the item renderer
   const renderItem = memo((item, index) => (
     <div class="item">
-      <span>{index()}</span>
+      <span>{index}</span>
       <span>{item.name}</span>
     </div>
   ));
@@ -534,15 +534,9 @@ function App() {
       </nav>
 
       <Suspense fallback={<div>Loading...</div>}>
-        <Show when={() => route() === 'dashboard'}>
-          <Dashboard />
-        </Show>
-        <Show when={() => route() === 'settings'}>
-          <Settings />
-        </Show>
-        <Show when={() => route() === 'profile'}>
-          <Profile />
-        </Show>
+        {route === 'dashboard' && <Dashboard />}
+        {route === 'settings' && <Settings />}
+        {route === 'profile' && <Profile />}
       </Suspense>
     </div>
   );
@@ -585,7 +579,7 @@ function UserProfile({ userId }) {
   // Only fetch when expanded
   const [details, { refetch }] = state(
     async () => {
-      if (!expanded()) return null;
+      if (!expanded) return null;
       const res = await fetch(`/api/users/${userId}/details`);
       return res.json();
     },
@@ -596,14 +590,16 @@ function UserProfile({ userId }) {
     <div>
       <h2>User {userId}</h2>
       <button onclick={() => setExpanded(e => !e)}>
-        {expanded() ? 'Hide' : 'Show'} Details
+        {expanded ? 'Hide' : 'Show'} Details
       </button>
 
-      <Show when={expanded}>
-        <Show when={() => !details.loading} fallback={<div>Loading...</div>}>
-          <div>{details()?.bio}</div>
-        </Show>
-      </Show>
+      {expanded && (
+        !details.loading ? (
+          <div>{details?.bio}</div>
+        ) : (
+          <div>Loading...</div>
+        )
+      )}
     </div>
   );
 }
@@ -619,17 +615,16 @@ import { Image } from 'flexium/primitives';
 function Gallery({ images }) {
   return (
     <div class="gallery">
-      <For each={images}>
-        {(img) => (
-          <Image
-            src={img.url}
-            alt={img.title}
-            loading="lazy"
-            width={300}
-            height={200}
-          />
-        )}
-      </For>
+      {images.map((img) => (
+        <Image
+          key={img.url}
+          src={img.url}
+          alt={img.title}
+          loading="lazy"
+          width={300}
+          height={200}
+        />
+      ))}
     </div>
   );
 }
@@ -709,7 +704,7 @@ function ChartComponent({ data }) {
 
   // Load chart library only when needed
   effect(() => {
-    if (data().length > 0 && !Chart()) {
+    if (data.length > 0 && !Chart) {
       import('chart.js').then(module => {
         setChart(module.default);
       });
@@ -718,8 +713,8 @@ function ChartComponent({ data }) {
 
   return (
     <div>
-      {Chart() ? (
-        <ChartRenderer Chart={Chart()} data={data} />
+      {Chart ? (
+        <ChartRenderer Chart={Chart} data={data} />
       ) : (
         <div>Loading chart...</div>
       )}
@@ -804,9 +799,7 @@ function DataTable({ rawData }) {
 
   return (
     <table>
-      <For each={processedData}>
-        {(row) => <TableRow data={row} />}
-      </For>
+      {processedData.map((row) => <TableRow key={row.id} data={row} />)}
     </table>
   );
 }

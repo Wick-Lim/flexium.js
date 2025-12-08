@@ -155,7 +155,6 @@ describe('Signal System', () => {
   it('should create a signal with initial value', () => {
     const count = signal(0);
     expect(count.value).toBe(0);
-    expect(count()).toBe(0);
   });
 
   it('should update signal value', () => {
@@ -164,7 +163,7 @@ describe('Signal System', () => {
     expect(count.value).toBe(5);
 
     count.set(10);
-    expect(count()).toBe(10);
+    expect(count.value).toBe(10);
   });
 
   it('should notify subscribers on change', () => {
@@ -513,9 +512,7 @@ describe('TodoList Component', () => {
           Add
         </button>
         <ul data-testid="todo-list">
-          <For each={todos}>
-            {(todo) => <li>{todo}</li>}
-          </For>
+          {todos.map((todo, i) => <li key={i}>{todo}</li>)}
         </ul>
       </div>
     );
@@ -1032,7 +1029,7 @@ Don't test that Flexium works - test that your app works:
 it('should update signal', () => {
   const [count, setCount] = state(0);
   setCount(1);
-  expect(count()).toBe(1);
+  expect(count).toBe(1);
 });
 
 // Good - testing your component

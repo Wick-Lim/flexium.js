@@ -123,16 +123,12 @@ function ProductCard({ product }) {
 function Breadcrumbs({ items }) {
   return (
     <nav class="breadcrumbs">
-      <For each={items}>
-        {(item, index) => (
-          <>
-            <Link href={item.href}>{item.label}</Link>
-            <Show when={() => index < items.length - 1}>
-              <span>/</span>
-            </Show>
-          </>
-        )}
-      </For>
+      {items.map((item, index) => (
+        <span key={item.href}>
+          <Link href={item.href}>{item.label}</Link>
+          {index < items.length - 1 && <span>/</span>}
+        </span>
+      ))}
     </nav>
   )
 }

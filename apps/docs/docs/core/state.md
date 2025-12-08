@@ -93,9 +93,9 @@ const [users, refetch, status, error] = state(async () => {
 function UserList() {
   return (
     <div>
-      {status.toString() === 'loading' ? <Spinner /> : null}
-      {status.toString() === 'error' ? <Error message={error.message} /> : null}
-      {users ? <For each={users}>{u => <User user={u} />}</For> : null}
+      {status.toString() === 'loading' && <Spinner />}
+      {status.toString() === 'error' && <Error message={error.message} />}
+      {users && users.map(u => <User key={u.id} user={u} />)}
       <button onclick={refetch}>Refresh</button>
     </div>
   )

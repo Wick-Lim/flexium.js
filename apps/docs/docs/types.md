@@ -282,8 +282,8 @@ interface Location {
 **Usage:**
 ```tsx
 const r = router()
-console.log(r.location().pathname) // "/users/123"
-console.log(r.location().query) // { page: "1" }
+console.log(r.location.pathname) // "/users/123"
+console.log(r.location.query) // { page: "1" }
 ```
 
 ### RouterContext
@@ -313,7 +313,7 @@ const r = router()
 r.navigate('/users/123')
 
 // Access params
-console.log(r.params().id) // "123"
+console.log(r.params.id) // "123"
 ```
 
 ### RouteProps

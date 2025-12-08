@@ -213,18 +213,18 @@ const scaleSpring = createMotion({
 ```tsx
 function StaggeredList(props) {
   return (
-    <For each={props.items}>
-      {(item, index) => {
+    <>
+      {props.items.map((item, index) => {
         const motion = createMotion({
           initial: { opacity: 0, x: -20 },
           animate: { opacity: 1, x: 0 },
           duration: 300,
-          delay: index() * 50 // Stagger
+          delay: index * 50 // Stagger
         })
 
-        return <div ref={motion.element}>{item.name}</div>
-      }}
-    </For>
+        return <div key={item.id} ref={motion.element}>{item.name}</div>
+      })}
+    </>
   )
 }
 ```

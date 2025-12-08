@@ -165,7 +165,7 @@ The `class` attribute can also accept a function for reactive class names:
 ```tsx
 const [status, setStatus] = state<'idle' | 'loading' | 'success' | 'error'>('idle')
 
-<div class={() => `status-badge ${status()}`}>
+<div class={() => `status-badge ${status}`}>
   {status}
 </div>
 ```
@@ -272,7 +272,7 @@ function App() {
 
   effect(() => {
     const root = document.documentElement
-    if (theme() === 'dark') {
+    if (theme === 'dark') {
       root.style.setProperty('--background', '#1a1a1a')
       root.style.setProperty('--text-color', '#f5f5f5')
       root.style.setProperty('--primary-color', '#64b5f6')
@@ -315,7 +315,7 @@ function StatusIndicator() {
 
   return (
     <div style={() => ({
-      ...statusStyles[status()],
+      ...statusStyles[status],
       padding: '8px 16px',
       borderRadius: '20px',
       display: 'inline-block'
@@ -502,14 +502,14 @@ function App() {
 
   return (
     <div style={() => ({
-      background: themes[theme()].background,
-      color: themes[theme()].text,
+      background: themes[theme].background,
+      color: themes[theme].text,
       minHeight: '100vh',
       padding: '24px'
     })}>
       <button
         style={() => ({
-          background: themes[theme()].primary,
+          background: themes[theme].primary,
           color: '#fff',
           border: 'none',
           padding: '8px 16px',
@@ -555,7 +555,7 @@ function ThemeProvider(props) {
     secondary: '#2a2a2a'
   }
 
-  const colors = () => theme() === 'light' ? lightColors : darkColors
+  const colors = () => theme === 'light' ? lightColors : darkColors
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
   return (
@@ -570,7 +570,7 @@ function ThemedButton() {
 
   return (
     <button style={() => ({
-      background: colors().primary,
+      background: colors.primary,
       color: '#fff',
       padding: '8px 16px',
       border: 'none',
@@ -990,23 +990,19 @@ For lists with many items, use CSS classes instead of inline styles:
 
 ```tsx
 // Less efficient for large lists
-<For each={items}>
-  {(item) => (
-    <div style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-      {item.name}
-    </div>
-  )}
-</For>
+{items.map(item => (
+  <div key={item.id} style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+    {item.name}
+  </div>
+))}
 
 // More efficient
 // styles.css: .list-item { padding: 8px; border-bottom: 1px solid #ddd; }
-<For each={items}>
-  {(item) => (
-    <div class="list-item">
-      {item.name}
-    </div>
-  )}
-</For>
+{items.map(item => (
+  <div key={item.id} class="list-item">
+    {item.name}
+  </div>
+))}
 ```
 
 ## Best Practices

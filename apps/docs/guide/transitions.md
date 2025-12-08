@@ -20,7 +20,7 @@ The simplest way to add animations is using built-in presets:
 
 ```tsx
 import { Transition } from 'flexium/primitives'
-import { Show, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
 function App() {
   const [visible, setVisible] = state(false)
@@ -29,13 +29,13 @@ function App() {
     <div>
       <button onclick={() => setVisible(v => !v)}>Toggle</button>
 
-      <Show when={visible}>
+      {visible && (
         <Transition preset="fade">
           <div class="content">
             This content fades in and out
           </div>
         </Transition>
-      </Show>
+      )}
     </div>
   )
 }
@@ -252,17 +252,17 @@ import { transitions } from 'flexium/primitives'
 
 ```tsx
 // Modal dialog
-<Show when={isModalOpen}>
+{isModalOpen && (
   <Transition {...transitions.modal}>
     <div class="modal">
       <h2>Confirm Action</h2>
       <p>Are you sure?</p>
     </div>
   </Transition>
-</Show>
+)}
 
 // Dropdown menu
-<Show when={isMenuOpen}>
+{isMenuOpen && (
   <Transition {...transitions.dropdown}>
     <ul class="menu">
       <li>Profile</li>
@@ -270,14 +270,14 @@ import { transitions } from 'flexium/primitives'
       <li>Logout</li>
     </ul>
   </Transition>
-</Show>
+)}
 
 // Toast notification
-<Show when={showToast}>
+{showToast && (
   <Transition {...transitions.notification}>
     <div class="toast">Changes saved!</div>
   </Transition>
-</Show>
+)}
 ```
 
 ## TransitionGroup
@@ -286,7 +286,7 @@ Use `<TransitionGroup>` to create staggered animations for lists:
 
 ```tsx
 import { TransitionGroup, Transition } from 'flexium/primitives'
-import { For, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
 function NotificationList() {
   const [notifications, setNotifications] = state([
@@ -297,13 +297,11 @@ function NotificationList() {
 
   return (
     <TransitionGroup stagger={50}>
-      <For each={notifications}>
-        {(notification) => (
-          <Transition preset="slide-right">
-            <div class="notification">{notification.text}</div>
-          </Transition>
-        )}
-      </For>
+      {notifications.map((notification) => (
+        <Transition key={notification.id} preset="slide-right">
+          <div class="notification">{notification.text}</div>
+        </Transition>
+      ))}
     </TransitionGroup>
   )
 }
@@ -328,18 +326,17 @@ function AnimatedList() {
 
   return (
     <TransitionGroup stagger={100}>
-      <For each={items}>
-        {(item, index) => (
-          <Transition
-            preset="slide-up"
-            enterTiming={{ duration: 400, easing: 'ease-out' }}
-          >
-            <div class="list-item">
-              Item {item}
-            </div>
-          </Transition>
-        )}
-      </For>
+      {items.map((item, index) => (
+        <Transition
+          key={index}
+          preset="slide-up"
+          enterTiming={{ duration: 400, easing: 'ease-out' }}
+        >
+          <div class="list-item">
+            Item {item}
+          </div>
+        </Transition>
+      ))}
     </TransitionGroup>
   )
 }
@@ -378,18 +375,20 @@ function ModalWithCallback() {
   const [hasExited, setHasExited] = state(false)
 
   return (
-    <Show when={isOpen}>
-      <Transition
-        {...transitions.modal}
-        onEnterStart={() => document.body.style.overflow = 'hidden'}
-        onExitComplete={() => {
-          document.body.style.overflow = 'auto'
-          setHasExited(true)
-        }}
-      >
-        <div class="modal">Modal content</div>
-      </Transition>
-    </Show>
+    <>
+      {isOpen && (
+        <Transition
+          {...transitions.modal}
+          onEnterStart={() => document.body.style.overflow = 'hidden'}
+          onExitComplete={() => {
+            document.body.style.overflow = 'auto'
+            setHasExited(true)
+          }}
+        >
+          <div class="modal">Modal content</div>
+        </Transition>
+      )}
+    </>
   )
 }
 ```
@@ -410,11 +409,11 @@ function ConditionalContent() {
     <div>
       <button onclick={() => setVisible(v => !v)}>Toggle</button>
 
-      <Show when={visible}>
+      {visible && (
         <Transition preset="slide-up">
           <div class="content">Slides up when visible</div>
         </Transition>
-      </Show>
+      )}
     </div>
   )
 }
@@ -442,16 +441,14 @@ function TodoList() {
   return (
     <div>
       <TransitionGroup stagger={30}>
-        <For each={todos}>
-          {(todo) => (
-            <Transition preset="slide-up">
-              <div class="todo-item">
-                <span>{todo.text}</span>
-                <button onclick={() => removeTodo(todo.id)}>Remove</button>
-              </div>
-            </Transition>
-          )}
-        </For>
+        {todos.map((todo) => (
+          <Transition key={todo.id} preset="slide-up">
+            <div class="todo-item">
+              <span>{todo.text}</span>
+              <button onclick={() => removeTodo(todo.id)}>Remove</button>
+            </div>
+          </Transition>
+        ))}
       </TransitionGroup>
 
       <button onclick={() => addTodo('New todo')}>Add Todo</button>
@@ -470,17 +467,17 @@ function LoadingState() {
 
   return (
     <Switch>
-      <Match when={() => status() === 'loading'}>
+      <Match when={() => status === 'loading'}>
         <Transition preset="fade">
           <div class="spinner">Loading...</div>
         </Transition>
       </Match>
-      <Match when={() => status() === 'success'}>
+      <Match when={() => status === 'success'}>
         <Transition preset="slide-up">
           <div class="success">Success!</div>
         </Transition>
       </Match>
-      <Match when={() => status() === 'error'}>
+      <Match when={() => status === 'error'}>
         <Transition preset="scale-fade">
           <div class="error">Error occurred</div>
         </Transition>
@@ -496,47 +493,51 @@ function LoadingState() {
 
 ```tsx
 import { Transition, transitions } from 'flexium/primitives'
-import { Show, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
 function Modal({ isOpen, onClose, children }) {
   return (
-    <Show when={isOpen}>
-      {/* Backdrop */}
-      <Transition
-        preset="fade"
-        enterTiming={{ duration: 200 }}
-        exitTiming={{ duration: 150 }}
-      >
-        <div
-          class="backdrop"
-          onclick={onClose}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
-          }}
-        />
-      </Transition>
+    <>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <Transition
+            preset="fade"
+            enterTiming={{ duration: 200 }}
+            exitTiming={{ duration: 150 }}
+          >
+            <div
+              class="backdrop"
+              onclick={onClose}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)'
+              }}
+            />
+          </Transition>
 
-      {/* Dialog */}
-      <Transition {...transitions.modal}>
-        <div
-          class="modal"
-          role="dialog"
-          style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'white',
-            padding: '2rem',
-            borderRadius: '8px'
-          }}
-        >
-          {children}
-        </div>
-      </Transition>
-    </Show>
+          {/* Dialog */}
+          <Transition {...transitions.modal}>
+            <div
+              class="modal"
+              role="dialog"
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                backgroundColor: 'white',
+                padding: '2rem',
+                borderRadius: '8px'
+              }}
+            >
+              {children}
+            </div>
+          </Transition>
+        </>
+      )}
+    </>
   )
 }
 
@@ -569,36 +570,35 @@ function Tabs() {
   return (
     <div>
       <div class="tab-buttons">
-        <For each={tabs}>
-          {(tab) => (
-            <button
-              onclick={() => setActiveTab(tab)}
-              class={activeTab() === tab ? 'active' : ''}
-            >
-              {tab}
-            </button>
-          )}
-        </For>
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            onclick={() => setActiveTab(tab)}
+            class={activeTab === tab ? 'active' : ''}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       <div class="tab-content">
-        <Show when={() => activeTab() === 'home'}>
+        {activeTab === 'home' && (
           <Transition preset="fade">
             <div>Home content</div>
           </Transition>
-        </Show>
+        )}
 
-        <Show when={() => activeTab() === 'profile'}>
+        {activeTab === 'profile' && (
           <Transition preset="fade">
             <div>Profile content</div>
           </Transition>
-        </Show>
+        )}
 
-        <Show when={() => activeTab() === 'settings'}>
+        {activeTab === 'settings' && (
           <Transition preset="fade">
             <div>Settings content</div>
           </Transition>
-        </Show>
+        )}
       </div>
     </div>
   )
@@ -621,23 +621,22 @@ function ImageGrid() {
   return (
     <div class="grid">
       <TransitionGroup stagger={75}>
-        <For each={images}>
-          {(image) => (
-            <Transition
-              enter={{ opacity: 0, scale: 0.8, y: 20 }}
-              enterTo={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              enterTiming={{
-                duration: 500,
-                easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
-              }}
-            >
-              <div class="grid-item">
-                <img src={image.url} alt="" />
-              </div>
-            </Transition>
-          )}
-        </For>
+        {images.map((image) => (
+          <Transition
+            key={image.id}
+            enter={{ opacity: 0, scale: 0.8, y: 20 }}
+            enterTo={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            enterTiming={{
+              duration: 500,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+          >
+            <div class="grid-item">
+              <img src={image.url} alt="" />
+            </div>
+          </Transition>
+        ))}
       </TransitionGroup>
     </div>
   )
@@ -668,24 +667,22 @@ function NotificationStack() {
 
       <div class="notification-stack">
         <TransitionGroup stagger={100}>
-          <For each={notifications}>
-            {(notification) => (
-              <Transition {...transitions.notification}>
-                <div class="notification">
-                  {notification.message}
-                  <button
-                    onclick={() =>
-                      setNotifications(prev =>
-                        prev.filter(n => n.id !== notification.id)
-                      )
-                    }
-                  >
-                    ×
-                  </button>
-                </div>
-              </Transition>
-            )}
-          </For>
+          {notifications.map((notification) => (
+            <Transition key={notification.id} {...transitions.notification}>
+              <div class="notification">
+                {notification.message}
+                <button
+                  onclick={() =>
+                    setNotifications(prev =>
+                      prev.filter(n => n.id !== notification.id)
+                    )
+                  }
+                >
+                  ×
+                </button>
+              </div>
+            </Transition>
+          ))}
         </TransitionGroup>
       </div>
     </div>

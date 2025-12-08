@@ -246,14 +246,14 @@ function UserProfile() {
   const r = router();
 
   // Access current location
-  const location = r.location();
+  const location = r.location;
   console.log(location.pathname); // "/users/123"
   console.log(location.search);   // "?tab=posts"
   console.log(location.hash);     // "#comments"
   console.log(location.query);    // { tab: "posts" }
 
   // Access route parameters
-  const params = r.params();
+  const params = r.params;
   console.log(params.id); // "123"
 
   // Navigate programmatically
@@ -746,7 +746,7 @@ import { router } from 'flexium/router';
 
 function UserProfile() {
   const r = router();
-  const params = r.params();
+  const params = r.params;
 
   // If route is /users/:id, params.id contains the value
   const userId = params.id;
@@ -773,7 +773,7 @@ import { router } from 'flexium/router';
 
 function SearchResults() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   // If URL is /search?q=flexium&sort=date&page=2
   const searchQuery = location.query.q;     // "flexium"
@@ -796,7 +796,7 @@ Query parameters are reactive and will trigger component re-renders:
 ```tsx
 function ProductList() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   // This will re-run whenever query params change
   const category = location.query.category || 'all';
@@ -827,7 +827,7 @@ Update query parameters via navigation:
 ```tsx
 function FilterBar() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   const updateFilters = (filters: Record<string, string>) => {
     const params = new URLSearchParams(filters);
@@ -854,7 +854,7 @@ Merge new params with existing ones:
 ```tsx
 function Pagination() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   const goToPage = (page: number) => {
     // Preserve existing query params
@@ -880,7 +880,7 @@ Validate and provide defaults for query parameters:
 ```tsx
 function DataTable() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   const getValidatedParams = () => {
     const query = location.query;
@@ -930,7 +930,7 @@ function App() {
 
 function NotFound() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   return (
     <div>
@@ -949,7 +949,7 @@ Provide helpful links when a page isn't found:
 ```tsx
 function NotFound() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   const suggestions = [
     { path: '/', label: 'Home', icon: '🏠' },
@@ -1027,7 +1027,7 @@ Suggest similar pages based on the requested URL:
 ```tsx
 function SmartNotFound() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   const availablePages = [
     '/products',
@@ -1078,7 +1078,7 @@ import { router } from 'flexium/router';
 
 function TransitionWrapper({ children }) {
   const r = router();
-  const location = r.location();
+  const location = r.location;
   const isTransitioning = signal(false);
 
   useEffect(() => {
@@ -1123,7 +1123,7 @@ function App() {
 ```tsx
 function SlideTransition({ children }) {
   const r = router();
-  const location = r.location();
+  const location = r.location;
   const isAnimating = signal(false);
   const direction = signal<'left' | 'right'>('right');
 
@@ -1157,7 +1157,7 @@ function SlideTransition({ children }) {
 ```tsx
 function PageTransition({ children }) {
   const r = router();
-  const location = r.location();
+  const location = r.location;
   const isLoading = signal(true);
 
   useEffect(() => {
@@ -1201,7 +1201,7 @@ Apply different transitions based on routes:
 ```tsx
 function RouteTransition({ children }) {
   const r = router();
-  const location = r.location();
+  const location = r.location;
   const previousPath = signal('');
 
   const getTransitionType = () => {
@@ -1456,7 +1456,7 @@ function App() {
 
 function PostDetail() {
   const r = router();
-  const params = r.params();
+  const params = r.params;
 
   return <h1>Post: {params.slug}</h1>;
 }
@@ -1642,7 +1642,7 @@ Style active links based on current route:
 ```tsx
 function NavLink({ to, children }) {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   const isActive = () => location.pathname === to;
 
@@ -1664,7 +1664,7 @@ Restore scroll position on navigation:
 ```tsx
 function ScrollManager() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   useEffect(() => {
     // Scroll to top on route change
@@ -1706,7 +1706,7 @@ const routeConfig = [
 
 function DocumentTitle() {
   const r = router();
-  const location = r.location();
+  const location = r.location;
 
   useEffect(() => {
     const route = findRouteByPath(location.pathname);

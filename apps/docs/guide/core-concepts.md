@@ -105,9 +105,7 @@ Use native JavaScript:
 ### List Rendering
 
 ```tsx
-<For each={items}>
-  {(item) => <ListItem item={item} />}
-</For>
+{items.map(item => <ListItem key={item.id} item={item} />)}
 ```
 
 ## Component Model

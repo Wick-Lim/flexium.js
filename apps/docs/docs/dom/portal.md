@@ -55,7 +55,7 @@ function Modal(props) {
     <>
       <button onclick={() => setIsOpen(true)}>Open Modal</button>
 
-      <Show when={isOpen}>
+      {isOpen && (
         <Portal mount={document.body}>
           <div class="modal-overlay" onclick={() => setIsOpen(false)}>
             <div class="modal-content" onclick={(e) => e.stopPropagation()}>
@@ -64,7 +64,7 @@ function Modal(props) {
             </div>
           </div>
         </Portal>
-      </Show>
+      )}
     </>
   )
 }
@@ -86,20 +86,20 @@ function Tooltip(props) {
     <div onmouseenter={showTooltip} onmouseleave={() => setVisible(false)}>
       {props.children}
 
-      <Show when={visible}>
+      {visible && (
         <Portal mount={document.body}>
           <div
             class="tooltip"
             style={{
               position: 'fixed',
-              left: `${position().x}px`,
-              top: `${position().y}px`
+              left: `${position.x}px`,
+              top: `${position.y}px`
             }}
           >
             {props.content}
           </div>
         </Portal>
-      </Show>
+      )}
     </div>
   )
 }
@@ -135,7 +135,7 @@ function Dropdown(props) {
         {props.label}
       </button>
 
-      <Show when={open}>
+      {open && (
         <Portal mount={document.body}>
           <div
             class="dropdown-menu"
@@ -147,7 +147,7 @@ function Dropdown(props) {
             {props.children}
           </div>
         </Portal>
-      </Show>
+      )}
     </div>
   )
 }

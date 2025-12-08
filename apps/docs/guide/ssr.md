@@ -217,12 +217,12 @@ On the server, `renderToString()` extracts the current value of signals:
 
 ```tsx
 const count = signal(42)
-const doubled = computed(() => count * 2)
+const doubled = computed(() => count.value * 2)
 
 renderToString(
   <div>
-    <p>Count: {count}</p>  {/* Works directly in JSX */}
-    <p>Doubled: {doubled}</p>
+    <p>Count: {count.value}</p>
+    <p>Doubled: {doubled.value}</p>
   </div>
 )
 // '<div><p>Count: 42</p><p>Doubled: 84</p></div>'

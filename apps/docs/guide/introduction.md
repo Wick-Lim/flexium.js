@@ -106,7 +106,7 @@ function UserProfile() {
     return res.json();
   });
 
-  return <div>{user.loading ? 'Loading...' : user()?.name}</div>;
+  return <div>{user.loading ? 'Loading...' : user?.name}</div>;
 }
 
 // Flexium - One unified primitive

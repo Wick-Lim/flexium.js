@@ -119,7 +119,7 @@ Give effects a name for easier debugging:
 ```typescript
 effect(
   () => {
-    console.log('Count changed:', count);  // Both count() and count work in effects
+    console.log('Count changed:', count);  // count works directly in effects
   },
   { name: 'countLogger' }  // This name appears in DevTools
 );

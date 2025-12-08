@@ -139,7 +139,7 @@ function UserProfile() {
     throw new Error('UserProfile must be used within AuthProvider');
   }
 
-  const currentUser = auth.user();
+  const currentUser = auth.user.value;
 
   if (!currentUser) {
     return <div>Please log in</div>;
@@ -214,22 +214,22 @@ Returns a `RouterContext` object:
 import { router } from 'flexium/router';
 
 function UserProfile() {
-  const router = router();
+  const r = router();
 
   // Access current location
-  const location = router.location();
+  const location = r.location;
   console.log(location.pathname); // "/users/123"
   console.log(location.search);   // "?tab=posts"
   console.log(location.hash);     // "#comments"
   console.log(location.query);    // { tab: "posts" }
 
   // Access route parameters
-  const params = router.params();
+  const params = r.params;
   console.log(params.id); // "123"
 
   // Navigate programmatically
   const goToDashboard = () => {
-    router.navigate('/dashboard');
+    r.navigate('/dashboard');
   };
 
   return (
@@ -245,12 +245,12 @@ function UserProfile() {
 
 ```tsx
 function SearchBar() {
-  const router = router();
+  const r = router();
   const query = signal('');
 
   const handleSearch = () => {
     const searchQuery = query.value;
-    router.navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    r.navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
   return (
@@ -271,21 +271,21 @@ function SearchBar() {
 
 ```tsx
 function ProtectedAction() {
-  const router = router();
+  const r = router();
 
   const handleAction = async () => {
     const isAuthorized = await checkPermissions();
 
     if (!isAuthorized) {
       // Redirect to login with return URL
-      const returnUrl = router.location().pathname;
-      router.navigate(`/login?return=${encodeURIComponent(returnUrl)}`);
+      const returnUrl = r.location.pathname;
+      r.navigate(`/login?return=${encodeURIComponent(returnUrl)}`);
       return;
     }
 
     // Perform action
     await performAction();
-    router.navigate('/success');
+    r.navigate('/success');
   };
 
   return <button onclick={handleAction}>Perform Action</button>;
@@ -530,7 +530,7 @@ function MouseTracker() {
 
   return (
     <div>
-      <p>Position: {mouse.position().x}, {mouse.position().y}</p>
+      <p>Position: {mouse.position.x}, {mouse.position.y}</p>
       <p>Delta: {mouse.delta().x}, {mouse.delta().y}</p>
       <p>Left Button: {mouse.isLeftPressed() ? 'Pressed' : 'Released'}</p>
       <p>Wheel: {mouse.wheelDelta()}</p>
@@ -559,8 +559,8 @@ function DrawingCanvas() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    if (mouse.isLeftPressed()) {
-      const pos = mouse.position();
+    if (mouse.isLeftPressed) {
+      const pos = mouse.position;
       ctx.fillStyle = 'blue';
       ctx.fillRect(pos.x - 5, pos.y - 5, 10, 10);
     }
@@ -589,11 +589,11 @@ function ShootingGame() {
 
   createLoop((dt) => {
     // Update crosshair position
-    const pos = mouse.position();
+    const pos = mouse.position;
     crosshair.value = { x: pos.x, y: pos.y };
 
     // Shoot on left click
-    if (mouse.isLeftPressed()) {
+    if (mouse.isLeftPressed) {
       const newProjectiles = [...projectiles.value];
       newProjectiles.push({ x: pos.x, y: pos.y });
       projectiles.value = newProjectiles;

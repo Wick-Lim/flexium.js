@@ -19,7 +19,7 @@ function App() {
         Open Modal
       </button>
 
-      <Show when={showModal}>
+      {showModal && (
         <Portal mount={document.body}>
           <div class="modal-overlay">
             <div class="modal">
@@ -31,7 +31,7 @@ function App() {
             </div>
           </div>
         </Portal>
-      </Show>
+      )}
     </div>
   )
 }
@@ -124,22 +124,21 @@ function Modal(props: ModalProps) {
     }
   })
 
-  return (
-    <Show when={() => props.isOpen}>
-      <Portal mount={document.body}>
-        {/* Backdrop */}
-        <div
-          onClick={props.onClose}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-        >
+  return props.isOpen ? (
+    <Portal mount={document.body}>
+      {/* Backdrop */}
+      <div
+        onClick={props.onClose}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}
+      >
           {/* Modal content - stop propagation to prevent closing */}
           <Column
             onClick={(e) => e.stopPropagation()}
@@ -165,8 +164,7 @@ function Modal(props: ModalProps) {
           </Column>
         </div>
       </Portal>
-    </Show>
-  )
+  ) : null
 }
 
 // Usage
@@ -180,7 +178,7 @@ function App() {
       </Pressable>
 
       <Modal
-        isOpen={showModal()}
+        isOpen={showModal}
         onClose={() => setShowModal(false)}
         title="Welcome"
       >
@@ -219,13 +217,13 @@ function Tooltip(props: { content: string; children: any }) {
     >
       {props.children}
 
-      <Show when={show}>
+      {show && (
         <Portal>
           <div
             style={{
               position: 'fixed',
-              left: `${position().x}px`,
-              top: `${position().y}px`,
+              left: `${position.x}px`,
+              top: `${position.y}px`,
               transform: 'translate(-50%, -100%)',
               background: '#333',
               color: 'white',
@@ -239,7 +237,7 @@ function Tooltip(props: { content: string; children: any }) {
             {props.content}
           </div>
         </Portal>
-      </Show>
+      )}
     </span>
   )
 }
@@ -279,7 +277,7 @@ function Dropdown(props: { trigger: any; children: any }) {
 
   // Close on outside click
   effect(() => {
-    if (open()) {
+    if (open) {
       const handleClick = (e: MouseEvent) => {
         if (!triggerRef?.contains(e.target as Node)) {
           setOpen(false)
@@ -302,13 +300,13 @@ function Dropdown(props: { trigger: any; children: any }) {
         {props.trigger}
       </span>
 
-      <Show when={open}>
+      {open && (
         <Portal>
           <div
             style={{
               position: 'fixed',
-              left: `${position().x}px`,
-              top: `${position().y}px`,
+              left: `${position.x}px`,
+              top: `${position.y}px`,
               background: 'white',
               border: '1px solid #ddd',
               borderRadius: '4px',
@@ -319,7 +317,7 @@ function Dropdown(props: { trigger: any; children: any }) {
             {props.children}
           </div>
         </Portal>
-      </Show>
+      )}
     </>
   )
 }

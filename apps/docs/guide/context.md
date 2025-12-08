@@ -24,7 +24,7 @@ function App() {
   const [theme, setTheme] = state('dark')
 
   return (
-    <ThemeContext.Provider value={theme()}>
+    <ThemeContext.Provider value={theme}>
       <Header />
       <Content />
       <Footer />
@@ -112,7 +112,7 @@ function App() {
   const [theme, setTheme] = state<'light' | 'dark'>('light')
 
   return (
-    <ThemeContext.Provider value={theme()}>
+    <ThemeContext.Provider value={theme}>
       <Column style={{ gap: '16px', padding: '24px' }}>
         <ThemedCard title="Welcome">
           <Text>This card follows the current theme.</Text>
@@ -178,7 +178,7 @@ function AuthProvider(props: { children: any }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user: user(), login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {props.children}
     </AuthContext.Provider>
   )
@@ -188,17 +188,15 @@ function AuthProvider(props: { children: any }) {
 function UserMenu() {
   const { user, logout } = context(AuthContext)
 
-  return (
-    <Show when={() => user !== null} fallback={<LoginButton />}>
-      {() => (
-        <Row>
-          <Text>Hello, {user!.name}</Text>
-          <Pressable onPress={logout}>
-            <Text>Logout</Text>
-          </Pressable>
-        </Row>
-      )}
-    </Show>
+  return user ? (
+    <Row>
+      <Text>Hello, {user.name}</Text>
+      <Pressable onPress={logout}>
+        <Text>Logout</Text>
+      </Pressable>
+    </Row>
+  ) : (
+    <LoginButton />
   )
 }
 ```
@@ -213,12 +211,12 @@ const LocaleContext = createContext({
 
 function LocaleProvider(props: { children: any }) {
   const [locale, setLocale] = state('en')
-  const translations = getTranslations(locale())
+  const translations = getTranslations(locale)
 
   const t = (key: string) => translations[key] || key
 
   return (
-    <LocaleContext.Provider value={{ locale: locale(), t }}>
+    <LocaleContext.Provider value={{ locale, t }}>
       {props.children}
     </LocaleContext.Provider>
   )

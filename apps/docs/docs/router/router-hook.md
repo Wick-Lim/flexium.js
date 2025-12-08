@@ -124,12 +124,12 @@ function ProtectedPage() {
   const { user } = context(AuthContext)
 
   effect(() => {
-    if (!user()) {
+    if (!user) {
       navigate('/login', { replace: true })
     }
   })
 
-  return <Show when={user}><Dashboard /></Show>
+  return user ? <Dashboard /> : null
 }
 ```
 

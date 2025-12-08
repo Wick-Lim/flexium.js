@@ -24,28 +24,26 @@ const element = <div class="container">Hello</div>
 
 ## Control Flow
 
-Since components run once, you should use Flexium's control flow components instead of `map` or `if` statements for dynamic content that depends on state.
+Flexium uses native JavaScript for control flow - just like React, but with signal performance.
 
-### `<Show>`
+### Conditionals
 
-Conditionally render content.
+Use ternary operators and `&&` - exactly like React:
 
 ```tsx
-<Show when={isLoggedIn} fallback={<button>Login</button>}>  {/* isLoggedIn works directly */}
-  <UserDashboard />
-</Show>
+{isLoggedIn ? <UserDashboard /> : <button>Login</button>}
+
+{isLoggedIn && <UserDashboard />}
 ```
 
-### `<For>`
+### Lists
 
-Efficiently render lists.
+Use `.map()` - exactly like React, but automatically optimized:
 
 ```tsx
-<For each={items}>  {/* items works directly */}
-  {(item, index) => (
-    <li>{index()}: {item.name}</li>  {/* index() is a function in For callback */}
-  )}
-</For>
+{items.map((item, index) => (
+  <li key={item.id}>{index}: {item.name}</li>
+))}
 ```
 
 ### `<Switch>` & `<Match>`

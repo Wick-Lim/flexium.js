@@ -116,22 +116,20 @@ function TodoApp() {
         </Pressable>
       </Row>
 
-      <For each={todos}>
-        {(todo) => (
-          <Row gap={8} style={{ alignItems: 'center' }}>
-            <input
-              type="checkbox"
-              checked={todo.done}
-              onchange={() => toggleTodo(todo.id)}
-            />
-            <Text style={{
-              textDecoration: todo.done ? 'line-through' : 'none'
-            }}>
-              {todo.text}
-            </Text>
-          </Row>
-        )}
-      </For>
+      {todos.map(todo => (
+        <Row key={todo.id} gap={8} style={{ alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            checked={todo.done}
+            onchange={() => toggleTodo(todo.id)}
+          />
+          <Text style={{
+            textDecoration: todo.done ? 'line-through' : 'none'
+          }}>
+            {todo.text}
+          </Text>
+        </Row>
+      ))}
     </Column>
   )
 }
@@ -199,9 +197,9 @@ function Stopwatch() {
         </Pressable>
       </Row>
 
-      <For each={laps}>
-        {(lap, i) => <Text>Lap {i + 1}: {formatTime(lap)}</Text>}
-      </For>
+      {laps.map((lap, i) => (
+        <Text key={i}>Lap {i + 1}: {formatTime(lap)}</Text>
+      ))}
     </Column>
   )
 }
@@ -253,16 +251,15 @@ function ParticleCanvas() {
       style={{ background: '#1a1a2e', cursor: 'crosshair' }}
     >
       {/* Particle trail */}
-      <For each={particles}>
-        {(p, i) => (
-          <Circle
-            x={p.x}
-            y={p.y}
-            radius={10 * ((i + 1) / particles.length)}
-            fill={`hsla(${p.hue}, 70%, 60%, ${(i + 1) / particles.length})`}
-          />
-        )}
-      </For>
+      {particles.map((p, i) => (
+        <Circle
+          key={i}
+          x={p.x}
+          y={p.y}
+          radius={10 * ((i + 1) / particles.length)}
+          fill={`hsla(${p.hue}, 70%, 60%, ${(i + 1) / particles.length})`}
+        />
+      ))}
 
       {/* Main cursor circle */}
       <Circle
@@ -394,19 +391,18 @@ function Shop() {
         <button onclick={() => login('Alice')}>Login</button>
       )}
 
-      <For each={products}>
-        {(product) => (
-          <button
-            onclick={() => {
-              addItem(product)
-              notify(`Added ${product.name}`, 'success')
-            }}
-            disabled={!user.value}
-          >
-            Add {product.name} - ${product.price}
-          </button>
-        )}
-      </For>
+      {products.map(product => (
+        <button
+          key={product.id}
+          onclick={() => {
+            addItem(product)
+            notify(`Added ${product.name}`, 'success')
+          }}
+          disabled={!user.value}
+        >
+          Add {product.name} - ${product.price}
+        </button>
+      ))}
 
       <div>Cart Total: ${total.value}</div>
     </div>
