@@ -1,6 +1,6 @@
 {
   "name": "flexium",
-  "version": "0.7.10",
+  "version": "0.7.12",
   "description": "A lightweight, signals-based UI framework with cross-platform renderers",
   "publishConfig": {
     "access": "public"
