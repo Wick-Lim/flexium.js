@@ -56,6 +56,34 @@ function registerReactiveBinding(node: Node, dispose: () => void): void {
   bindings.add(dispose)
 }
 
+/**
+ * Mount a virtual node reactively to the DOM.
+ *
+ * This is the core rendering function that handles all node types:
+ * - FNodes (both built-in elements and function components)
+ * - Strings and numbers (text nodes)
+ * - Signals and computed values (reactive children)
+ * - StateValues from the state() API
+ * - ListComponents and ReactiveArrayResults
+ * - Arrays and fragments
+ *
+ * Reactive values are automatically tracked and DOM updates occur
+ * only when the specific values change (fine-grained reactivity).
+ *
+ * @param vnode - The virtual node to mount
+ * @param container - Optional parent node to append to
+ * @returns The created DOM node, or null for empty/boolean values
+ *
+ * @example
+ * ```tsx
+ * // Mount a simple element
+ * const node = mountReactive(<div>Hello</div>, document.body)
+ *
+ * // Mount a reactive signal
+ * const count = signal(0)
+ * mountReactive(() => <span>{count.value}</span>, container)
+ * ```
+ */
 export function mountReactive(
   vnode:
     | FNode

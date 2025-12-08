@@ -147,8 +147,18 @@ export type StateAction<T> = (newValue: T | ((prev: T) => T)) => void
 export type StateValue<T> = T & (() => T)
 
 /**
- * Check if a value is a StateValue
+ * Check if a value is a StateValue (created by the state() API).
+ * Useful for type guards and runtime detection of reactive state.
  * @internal
+ * @param value - The value to check
+ * @returns true if the value is a StateValue proxy, false otherwise
+ *
+ * @example
+ * ```tsx
+ * const count = state(0)
+ * isStateValue(count) // true
+ * isStateValue(5) // false
+ * ```
  */
 export function isStateValue(value: unknown): boolean {
   return (
@@ -159,8 +169,17 @@ export function isStateValue(value: unknown): boolean {
 }
 
 /**
- * Get the underlying signal from a StateValue
+ * Get the underlying signal from a StateValue proxy.
+ * Used internally for reactive binding detection and DOM updates.
  * @internal
+ * @param stateValue - The StateValue proxy to extract the signal from
+ * @returns The underlying Signal if stateValue is a StateValue, null otherwise
+ *
+ * @example
+ * ```tsx
+ * const count = state(0)
+ * const signal = getStateSignal(count) // Returns the internal Signal<number>
+ * ```
  */
 export function getStateSignal(stateValue: unknown): Signal<unknown> | null {
   if (isStateValue(stateValue)) {

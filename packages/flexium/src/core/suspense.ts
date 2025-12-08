@@ -5,6 +5,7 @@ import { createContext } from './context'
 import { signal } from './signal'
 import { f } from '../renderers/dom/f'
 import type { FNodeChild } from './renderer'
+import { logError, ErrorCodes } from './errors'
 
 /** @internal */
 export interface SuspenseContextValue {
@@ -25,8 +26,9 @@ export function Suspense(props: {
       () => {
         pendingCount.value--
       },
-      () => {
+      (error) => {
         pendingCount.value--
+        logError(ErrorCodes.UNCAUGHT_RENDER_ERROR, { context: 'suspense' }, error)
       }
     )
   }

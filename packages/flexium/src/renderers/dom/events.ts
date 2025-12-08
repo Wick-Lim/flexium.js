@@ -54,11 +54,28 @@ function dispatchEvent(event: Event) {
  * Register a global event listener for delegation
  */
 function ensureGlobalListener(eventName: string) {
+  // SSR guard
+  if (typeof document === 'undefined') return
+
   if (!globalListeners.has(eventName)) {
     const capture = NON_BUBBLING_EVENTS.has(eventName)
     document.addEventListener(eventName, dispatchEvent, { capture })
     globalListeners.add(eventName)
   }
+}
+
+/**
+ * Clear all global event listeners (useful for SSR cleanup and testing)
+ */
+export function clearGlobalListeners(): void {
+  // SSR guard
+  if (typeof document === 'undefined') return
+
+  for (const eventName of globalListeners) {
+    const capture = NON_BUBBLING_EVENTS.has(eventName)
+    document.removeEventListener(eventName, dispatchEvent, { capture })
+  }
+  globalListeners.clear()
 }
 
 /**

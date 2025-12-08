@@ -34,59 +34,66 @@ export function Canvas(props: CanvasProps): FNode {
       ref: (canvas: HTMLCanvasElement | null) => {
         if (!canvas) return
 
+        // SSR guard: skip canvas rendering on server
+        if (typeof requestAnimationFrame === 'undefined') return
+
         const ctx = canvas.getContext('2d')
         if (!ctx) return
 
         // Render canvas children with effect for reactivity
         // Import effect and onCleanup dynamically to avoid circular deps
-        import('../../core/signal').then(({ effect, onCleanup, isSignal }) => {
-          let rafId: number | undefined
+        import('../../core/signal')
+          .then(({ effect, onCleanup, isSignal }) => {
+            let rafId: number | undefined
 
-          const scheduleRender = () => {
-            if (rafId !== undefined) {
-              cancelAnimationFrame(rafId)
+            const scheduleRender = () => {
+              if (rafId !== undefined) {
+                cancelAnimationFrame(rafId)
+              }
+
+              rafId = requestAnimationFrame(() => {
+                // Clear canvas
+                ctx.clearRect(0, 0, width, height)
+
+                // Render all children
+                renderCanvasChildren(ctx, children, width, height)
+
+                rafId = undefined
+              })
             }
 
-            rafId = requestAnimationFrame(() => {
-              // Clear canvas
-              ctx.clearRect(0, 0, width, height)
-
-              // Render all children
-              renderCanvasChildren(ctx, children, width, height)
-
-              rafId = undefined
-            })
-          }
-
-          effect(() => {
-            // To track signal dependencies, we need to access them in the effect
-            // Walk through children and touch any signals to track dependencies
-            const childArray = Array.isArray(children) ? children : [children]
-            for (const child of childArray) {
-              if (child && child.props) {
-                // Touch each prop to track signal dependencies
-                for (const key in child.props) {
-                  const value = child.props[key]
-                  // If it's a signal, access its value to track it
-                  if (isSignal(value)) {
-                    void value.value // Touch the signal to track dependency
+            effect(() => {
+              // To track signal dependencies, we need to access them in the effect
+              // Walk through children and touch any signals to track dependencies
+              const childArray = Array.isArray(children) ? children : [children]
+              for (const child of childArray) {
+                if (child && child.props) {
+                  // Touch each prop to track signal dependencies
+                  for (const key in child.props) {
+                    const value = child.props[key]
+                    // If it's a signal, access its value to track it
+                    if (isSignal(value)) {
+                      void value.value // Touch the signal to track dependency
+                    }
                   }
                 }
               }
-            }
 
-            // Now schedule the actual render
-            scheduleRender()
+              // Now schedule the actual render
+              scheduleRender()
 
-            // Cleanup RAF when effect is disposed
-            onCleanup(() => {
-              if (rafId !== undefined) {
-                cancelAnimationFrame(rafId)
-                rafId = undefined
-              }
+              // Cleanup RAF when effect is disposed
+              onCleanup(() => {
+                if (rafId !== undefined) {
+                  cancelAnimationFrame(rafId)
+                  rafId = undefined
+                }
+              })
             })
           })
-        })
+          .catch((err) => {
+            console.error('[Flexium Canvas] Failed to load signal module:', err)
+          })
       },
     },
     children: [],

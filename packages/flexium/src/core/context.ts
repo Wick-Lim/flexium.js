@@ -39,6 +39,12 @@ export function context<T>(ctx: Context<T>): T {
   return ctx.defaultValue
 }
 
+/**
+ * Push a value onto the context stack for a given context ID.
+ * @internal Used by the renderer during component mounting.
+ * @param id - The context symbol identifier
+ * @param value - The value to push onto the context stack
+ */
 export function pushProvider(id: symbol, value: unknown): void {
   if (!contextStack.has(id)) {
     contextStack.set(id, [])
@@ -46,7 +52,12 @@ export function pushProvider(id: symbol, value: unknown): void {
   contextStack.get(id)!.push(value)
 }
 
-export function popProvider(id: symbol) {
+/**
+ * Pop a value from the context stack for a given context ID.
+ * @internal Used by the renderer during component unmounting.
+ * @param id - The context symbol identifier
+ */
+export function popProvider(id: symbol): void {
   const stack = contextStack.get(id)
   if (stack) {
     stack.pop()

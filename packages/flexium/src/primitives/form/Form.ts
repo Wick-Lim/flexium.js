@@ -314,9 +314,14 @@ export function createForm(config: FormConfig = {}): {
 
     // Validate on change if enabled
     if (validateOnChange && field.touched.value) {
-      validateField(name).then((error) => {
-        setFieldError(name, error)
-      })
+      validateField(name)
+        .then((error) => {
+          setFieldError(name, error)
+        })
+        .catch((err) => {
+          logError(ErrorCodes.FORM_VALIDATION_FAILED, { field: name }, err)
+          setFieldError(name, 'Validation error')
+        })
     }
   }
 
@@ -346,9 +351,14 @@ export function createForm(config: FormConfig = {}): {
 
     // Validate on blur if enabled
     if (touched && validateOnBlur) {
-      validateField(name).then((error) => {
-        setFieldError(name, error)
-      })
+      validateField(name)
+        .then((error) => {
+          setFieldError(name, error)
+        })
+        .catch((err) => {
+          logError(ErrorCodes.FORM_VALIDATION_FAILED, { field: name }, err)
+          setFieldError(name, 'Validation error')
+        })
     }
   }
 

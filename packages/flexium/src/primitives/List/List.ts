@@ -126,7 +126,26 @@ function calculateVisibleRangeFixed(
 }
 
 /**
- * Mount a List component to the DOM
+ * Mount a List component to the DOM with efficient rendering.
+ *
+ * Handles both simple and virtual lists:
+ * - Simple lists render all items immediately with key-based caching
+ * - Virtual lists only render visible items for optimal performance with large datasets
+ *
+ * @internal Used by the reactive renderer
+ * @param comp - The ListComponent to mount
+ * @param parent - Parent DOM node to mount into
+ * @param mountFn - Function to mount an FNode to the DOM
+ * @param cleanupFn - Function to cleanup a DOM node and its bindings
+ * @returns Dispose function to cleanup all list items and effects
+ *
+ * @example
+ * ```tsx
+ * // This is called automatically by mountReactive when it encounters a List:
+ * <List each={items} virtual height={400} itemSize={50}>
+ *   {(item, index) => <Row>{index()}: {item.name}</Row>}
+ * </List>
+ * ```
  */
 export function mountListComponent<T>(
   comp: ListComponent<T>,

@@ -43,7 +43,28 @@ export function isReactiveArrayResult(
 }
 
 /**
- * Create a ReactiveArrayResult from a signal and map function
+ * Create a ReactiveArrayResult from a signal and map function.
+ * This is used internally when .map() is called on a StateValue<T[]>.
+ *
+ * @param source - The signal or computed containing the array
+ * @param mapFn - Function to map each item to a renderable element
+ * @param keyFn - Optional function to extract a unique key from each item
+ * @returns A ReactiveArrayResult that the renderer can detect and handle
+ *
+ * @example
+ * ```tsx
+ * // This is typically called automatically via items.map() syntax:
+ * const items = state([{ id: 1, name: 'Item 1' }])
+ *
+ * // In JSX, this becomes a ReactiveArrayResult:
+ * <Column>
+ *   {items.map((item, index) => (
+ *     <Row key={item.id}>
+ *       <Text>{index()}: {item.name}</Text>
+ *     </Row>
+ *   ))}
+ * </Column>
+ * ```
  */
 export function createReactiveArrayResult<T, R>(
   source: Signal<T[]> | Computed<T[]>,

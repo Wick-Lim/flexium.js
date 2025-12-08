@@ -17,6 +17,11 @@ interface PortalProps {
  * </Portal>
  */
 export function Portal(props: PortalProps) {
+  // SSR guard: return null placeholder on server
+  if (typeof document === 'undefined') {
+    return null
+  }
+
   const container = props.mount || document.body
 
   // Placeholder to keep position in the VDOM tree

@@ -15,28 +15,46 @@ import { Location } from './types'
  * - navigate() is called
  * - Browser back/forward buttons are used (popstate event)
  *
- * @returns Tuple of [location signal, navigate function]
+ * @returns Tuple of [location signal, navigate function, cleanup function]
  *
  * @example
  * ```tsx
- * const [location, navigate] = createLocation();
+ * const [location, navigate, cleanup] = createLocation();
  * // Access current path
  * console.log(location().pathname);
  * // Navigate to new path
  * navigate('/users/123');
+ * // Cleanup when done (removes popstate listener)
+ * cleanup();
  * ```
  */
-export function createLocation(): [Signal<Location>, (path: string) => void] {
-  const getLoc = (): Location => ({
-    pathname: window.location.pathname,
-    search: window.location.search,
-    hash: window.location.hash,
-    query: parseQuery(window.location.search),
+export function createLocation(): [Signal<Location>, (path: string) => void, () => void] {
+  // SSR guard: return safe defaults on server
+  const getDefaultLoc = (): Location => ({
+    pathname: '/',
+    search: '',
+    hash: '',
+    query: {},
   })
+
+  const getLoc = (): Location => {
+    if (typeof window === 'undefined') {
+      return getDefaultLoc()
+    }
+    return {
+      pathname: window.location.pathname,
+      search: window.location.search,
+      hash: window.location.hash,
+      query: parseQuery(window.location.search),
+    }
+  }
 
   const loc = signal(getLoc())
 
   const navigate = (path: string) => {
+    // SSR guard
+    if (typeof window === 'undefined') return
+
     // Security: Validate path to prevent javascript: and other dangerous protocols
     if (isUnsafePath(path)) {
       console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
@@ -46,11 +64,27 @@ export function createLocation(): [Signal<Location>, (path: string) => void] {
     loc.value = getLoc()
   }
 
-  window.addEventListener('popstate', () => {
-    loc.value = getLoc()
-  })
+  // SSR guard for popstate listener
+  const handlePopState = () => {
+    try {
+      loc.value = getLoc()
+    } catch (error) {
+      console.error('[Flexium Router] Error handling popstate:', error)
+    }
+  }
 
-  return [loc, navigate]
+  if (typeof window !== 'undefined') {
+    window.addEventListener('popstate', handlePopState)
+  }
+
+  // Cleanup function to remove listener
+  const cleanup = () => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }
+
+  return [loc, navigate, cleanup]
 }
 
 /**
