@@ -208,8 +208,13 @@ export default defineConfig({
           items: [
             { text: 'state()', link: '/docs/core/state' },
             { text: 'effect()', link: '/docs/core/effect' },
-            { text: 'batch()', link: '/docs/core/batch' },
-            { text: 'Lifecycle Hooks', link: '/docs/core/lifecycle' },
+            { text: 'batch()', link: '/docs/core/batch' }
+          ]
+        },
+        {
+          text: 'Advanced',
+          collapsed: true,
+          items: [
             { text: 'List Rendering', link: '/docs/core/for' },
             { text: 'Context API', link: '/docs/core/context' }
           ]

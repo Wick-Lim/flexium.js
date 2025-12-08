@@ -131,6 +131,29 @@ effect(() => {
 - **Cleanup functions** run before re-execution and on disposal
 - Dependencies are **automatically tracked**
 
+## Lifecycle Patterns
+
+`effect()` handles all lifecycle needs - no separate hooks required:
+
+```tsx
+// Mount + Cleanup (like useEffect with empty deps)
+effect(() => {
+  console.log('mounted')
+  return () => console.log('cleanup')
+})
+
+// React to changes + cleanup
+effect(() => {
+  const ws = new WebSocket(`wss://api.com/${userId}`)
+  ws.onmessage = (e) => setMessages(m => [...m, e.data])
+  return () => ws.close()  // cleanup before re-run or unmount
+})
+```
+
+::: tip
+Flexium also exports `onMount` and `onCleanup` for compatibility, but `effect()` is the recommended approach.
+:::
+
 ## Notes
 
 - Avoid creating infinite loops by updating tracked state inside effects
