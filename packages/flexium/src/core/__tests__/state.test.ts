@@ -332,4 +332,74 @@ describe('State API', () => {
       expect(items.filter((x: number) => x > 1)).toEqual([2, 3])
     })
   })
+
+  describe('Array Keys', () => {
+    it('should support array key', () => {
+      const [user] = state({ name: 'Alice' }, { key: ['user', 'profile', 123] })
+      expect(user.name).toBe('Alice')
+    })
+
+    it('should share state with same array key', async () => {
+      const [, setUser] = state({ name: 'Alice' }, { key: ['user', 'profile', 123] })
+      setUser({ name: 'Bob' })
+      await tick()
+
+      const [user2] = state({ name: 'Default' }, { key: ['user', 'profile', 123] })
+      expect(user2.name).toBe('Bob')
+    })
+
+    it('should not share state with different array keys', () => {
+      const [user1] = state({ name: 'Alice' }, { key: ['user', 123] })
+      const [user2] = state({ name: 'Bob' }, { key: ['user', 456] })
+
+      expect(user1.name).toBe('Alice')
+      expect(user2.name).toBe('Bob')
+    })
+
+    it('should handle array key with various types', () => {
+      const [data] = state('value', { key: ['app', 'user', 42, true, null] })
+      expect(String(data)).toBe('value')
+    })
+  })
+
+  describe('Params Option', () => {
+    it('should pass params to sync function', () => {
+      const [doubled] = state(
+        (p: { value: number }) => p.value * 2,
+        { params: { value: 5 } }
+      )
+      expect(+doubled).toBe(10)
+    })
+
+    it('should pass params to async function', async () => {
+      // First call triggers fetch
+      state(
+        async (p: { id: number }) => {
+          await sleep(10)
+          return { id: p.id, name: `User ${p.id}` }
+        },
+        { key: ['user', 999], params: { id: 999 } }
+      )
+
+      await sleep(50)
+
+      // Re-fetch from cache
+      const [user2] = state(
+        async (p: { id: number }) => ({ id: p.id, name: `User ${p.id}` }),
+        { key: ['user', 999], params: { id: 999 } }
+      )
+
+      expect(user2.name).toBe('User 999')
+    })
+
+    it('should work with params and array key together', () => {
+      const userId = 42
+      const [user] = state(
+        (p: { id: number }) => ({ id: p.id, name: `User ${p.id}` }),
+        { key: ['user', userId], params: { id: userId } }
+      )
+
+      expect(user.name).toBe('User 42')
+    })
+  })
 })

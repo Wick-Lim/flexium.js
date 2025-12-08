@@ -33,8 +33,22 @@ interface StateActions {
 // Global registry for keyed states
 const globalStateRegistry = new Map<string, StateObject>()
 
-/** Setter function type */
-export type StateSetter<T> = (newValue: T | ((prev: T) => T)) => void
+/** Key type - string or array of serializable values */
+export type StateKey = string | readonly (string | number | boolean | null | undefined | object)[]
+
+/**
+ * Serialize a key to a string for registry lookup.
+ * Arrays are JSON-stringified for consistent comparison.
+ */
+function serializeKey(key: StateKey): string {
+  if (typeof key === 'string') {
+    return key
+  }
+  return JSON.stringify(key)
+}
+
+/** Action function type for state mutation */
+export type StateAction<T> = (newValue: T | ((prev: T) => T)) => void
 
 /**
  * StateValue type - a value-like proxy that behaves like T.
@@ -183,6 +197,28 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
 /** Async state status */
 export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error'
 
+/** Options for state() */
+export interface StateOptions<P = unknown> {
+  /**
+   * Key for global state sharing. Can be a string or array.
+   * Array keys are useful for hierarchical namespacing.
+   * @example
+   * state('light', { key: 'theme' })
+   * state(null, { key: ['user', 'profile', userId] })
+   */
+  key?: StateKey
+  /**
+   * Parameters to pass to the function (for computed/async state).
+   * Improves DX by making dependencies explicit.
+   * @example
+   * state(
+   *   async ({ userId }) => fetch(`/api/users/${userId}`),
+   *   { key: ['user', userId], params: { userId } }
+   * )
+   */
+  params?: P
+}
+
 /**
  * Unified State API
  *
@@ -191,6 +227,7 @@ export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error'
  * 2. Derived state: const [doubled] = state(() => count * 2)
  * 3. Async state: const [data, refetch, status, error] = state(async () => fetch(...))
  * 4. Global state: const [theme, setTheme] = state('light', { key: 'theme' })
+ * 5. With params: const [user] = state(async (p) => fetch(`/api/${p.id}`), { params: { id } })
  *
  * @example
  * ```tsx
@@ -204,26 +241,39 @@ export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error'
 // Overload 1: Value → [StateValue, Setter]
 export function state<T>(
   initialValue: T,
-  options?: { key?: string }
-): [StateValue<T>, StateSetter<T>]
+  options?: StateOptions
+): [StateValue<T>, StateAction<T>]
 
-// Overload 2: Sync function → [StateValue] (derived, no setter)
-export function state<T>(
-  computeFn: () => T,
-  options?: { key?: string }
+// Overload 2: Sync function with params → [StateValue] (derived, no setter)
+export function state<T, P>(
+  computeFn: (params: P) => T,
+  options: StateOptions<P> & { params: P }
 ): [StateValue<T>]
 
-// Overload 3: Async function → [StateValue, refetch, status, error]
+// Overload 3: Sync function without params → [StateValue] (derived, no setter)
 export function state<T>(
-  fetcher: () => Promise<T>,
-  options?: { key?: string }
+  computeFn: () => T,
+  options?: StateOptions
+): [StateValue<T>]
+
+// Overload 4: Async function with params → [StateValue, refetch, status, error]
+export function state<T, P>(
+  fetcher: (params: P) => Promise<T>,
+  options: StateOptions<P> & { params: P }
 ): [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
 
+// Overload 5: Async function without params → [StateValue, refetch, status, error]
 export function state<T>(
-  initialValueOrFetcher: T | (() => T) | (() => Promise<T>),
-  options?: { key?: string }
-): [StateValue<T>] | [StateValue<T>, StateSetter<T>] | [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>] {
-  const key = options?.key
+  fetcher: () => Promise<T>,
+  options?: StateOptions
+): [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
+
+export function state<T, P = unknown>(
+  initialValueOrFetcher: T | ((params?: P) => T) | ((params?: P) => Promise<T>),
+  options?: StateOptions<P>
+): [StateValue<T>] | [StateValue<T>, StateAction<T>] | [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>] {
+  const key = options?.key ? serializeKey(options.key) : undefined
+  const params = options?.params
 
   // 1. Check Global Registry for keyed state
   if (key && globalStateRegistry.has(key)) {
@@ -250,23 +300,27 @@ export function state<T>(
       return [proxy, refetch, statusValue, errorValue] as [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
     }
 
-    const setter: StateSetter<T> = (newValue) => {
+    const setter: StateAction<T> = (newValue) => {
       if (typeof newValue === 'function') {
         cached.value = (newValue as (prev: T) => T)(cached.peek() as T)
       } else {
         cached.value = newValue
       }
     }
-    return [proxy, setter] as [StateValue<T>, StateSetter<T>]
+    return [proxy, setter] as [StateValue<T>, StateAction<T>]
   }
 
   // 2. Handle function input (computed or async)
   if (typeof initialValueOrFetcher === 'function') {
-    const fn = initialValueOrFetcher as () => T | Promise<T>
+    const originalFn = initialValueOrFetcher as (params?: P) => T | Promise<T>
+    // Wrap function to inject params if provided
+    const fn = params !== undefined
+      ? () => originalFn(params)
+      : originalFn as () => T | Promise<T>
 
     // Try to detect if it's async by checking constructor name
     // This handles `async () => ...` functions
-    const isAsyncFn = fn.constructor.name === 'AsyncFunction'
+    const isAsyncFn = originalFn.constructor.name === 'AsyncFunction'
 
     if (isAsyncFn) {
       // Async function → Resource
@@ -350,7 +404,7 @@ export function state<T>(
   }
 
   const proxy = createStateProxy(sig)
-  const setter: StateSetter<T> = (newValue) => {
+  const setter: StateAction<T> = (newValue) => {
     if (typeof newValue === 'function') {
       sig.value = (newValue as (prev: T) => T)(sig.peek())
     } else {
@@ -358,7 +412,7 @@ export function state<T>(
     }
   }
 
-  return [proxy, setter] as [StateValue<T>, StateSetter<T>]
+  return [proxy, setter] as [StateValue<T>, StateAction<T>]
 }
 
 /**
