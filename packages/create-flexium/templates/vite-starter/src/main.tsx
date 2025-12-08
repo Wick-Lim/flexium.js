@@ -57,9 +57,9 @@ function App() {
           <h3>Features demonstrated:</h3>
           <ul>
             <li>Local state: <code>const [count, setCount] = state(0)</code></li>
-            <li>Derived state: <code>const [doubled] = state(() => count * 2)</code></li>
+            <li>Derived state: <code>const [doubled] = state(() ={'>'} count * 2)</code></li>
             <li>Global state: <code>state('light', {'{'} key: ['app', 'theme'] {'}'})</code></li>
-            <li>Effects: <code>effect(() => console.log(count))</code></li>
+            <li>Effects: <code>effect(() ={'>'} console.log(count))</code></li>
           </ul>
         </div>
       </div>
