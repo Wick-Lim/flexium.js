@@ -7,12 +7,12 @@ head:
       content: Transitions - Flexium Animation
   - - meta
     - property: og:description
-      content: Declarative enter/exit animations with built-in presets, custom keyframes, staggering, and seamless integration with Show and For components.
+      content: Declarative enter/exit animations with built-in presets, custom keyframes, staggering, and seamless integration with conditional rendering.
 ---
 
 # Transitions
 
-Flexium's Transition system provides declarative enter and exit animations for elements appearing and disappearing from the DOM. Built on the Web Animations API, transitions work seamlessly with Flexium's control flow components like `<Show>` and `<For>`.
+Flexium's Transition system provides declarative enter and exit animations for elements appearing and disappearing from the DOM. Built on the Web Animations API, transitions work seamlessly with Flexium's control flow like conditionals and `items.map()`.
 
 ## Basic Usage
 
@@ -419,7 +419,7 @@ function ConditionalContent() {
 }
 ```
 
-### With For
+### With Lists
 
 Animate list items as they're added or removed:
 
@@ -774,14 +774,14 @@ Transitions are built on top of Flexium's Motion API. Here's when to use each:
 | Feature | Transition | Motion |
 |---------|------------|--------|
 | Enter/Exit animations | Yes | Manual |
-| Integration with Show/For | Automatic | Manual |
+| Integration with conditionals | Automatic | Manual |
 | Declarative API | Yes | Imperative |
 | Stagger support | Yes (TransitionGroup) | Manual |
 | Fine-grained control | Limited | Full |
 | Use case | UI components | Complex animations |
 
 Use **Transitions** when:
-- Animating elements that appear/disappear with `<Show>` or `<For>`
+- Animating elements that appear/disappear with conditionals or lists
 - You need enter/exit animations with minimal code
 - Working with lists that need staggered animations
 - Building common UI patterns (modals, dropdowns, notifications)

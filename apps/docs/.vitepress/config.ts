@@ -210,7 +210,7 @@ export default defineConfig({
             { text: 'effect()', link: '/docs/core/effect' },
             { text: 'batch()', link: '/docs/core/batch' },
             { text: 'Lifecycle Hooks', link: '/docs/core/lifecycle' },
-            { text: '&lt;For /&gt;', link: '/docs/core/for' },
+            { text: 'List Rendering', link: '/docs/core/for' },
             { text: 'Context API', link: '/docs/core/context' }
           ]
         },

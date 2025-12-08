@@ -152,9 +152,7 @@ function PausableGame() {
   return (
     <div>
       <Canvas />
-      <Show when={paused}>
-        <PauseMenu onResume={() => setPaused(false)} />
-      </Show>
+      {paused && <PauseMenu onResume={() => setPaused(false)} />}
     </div>
   )
 }

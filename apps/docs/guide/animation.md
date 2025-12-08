@@ -200,7 +200,7 @@ Stagger animations for lists:
 
 ```tsx
 import { TransitionGroup, Transition } from 'flexium/primitives'
-import { For, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
 function NotificationList() {
   const [notifications] = state([...])
@@ -333,7 +333,7 @@ function Modal({ isOpen, onClose, children }) {
 
 ```tsx
 import { TransitionGroup, Transition } from 'flexium/primitives'
-import { For, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
 function TodoList() {
   const [todos, setTodos] = state([

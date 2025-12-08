@@ -77,7 +77,7 @@ A fully functional todo list with add, toggle, and delete operations. Shows how 
 
 ::: details View Source Code
 ```tsx
-import { state, For } from 'flexium/core'
+import { state } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function TodoApp() {
@@ -148,7 +148,7 @@ A precise stopwatch with lap recording. Demonstrates timer-based state updates a
 
 ::: details View Source Code
 ```tsx
-import { state, effect, For } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Stopwatch() {
@@ -218,7 +218,7 @@ Interactive canvas with particle trail effects. Move your mouse to see smooth, r
 
 ::: details View Source Code
 ```tsx
-import { state, effect, For } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 import { Canvas, Circle } from 'flexium/canvas'
 
 function ParticleCanvas() {
@@ -340,7 +340,7 @@ Authentication, shopping cart, and notifications with multiple providers working
 
 ::: details View Source Code
 ```tsx
-import { createContext, context, signal, For } from 'flexium/core'
+import { createContext, context, signal } from 'flexium/core'
 
 const AuthContext = createContext({
   user: signal(null),

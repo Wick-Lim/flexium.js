@@ -247,7 +247,7 @@ function DataView() {
 | `state(() => T)` | Derived value | `state(() => a + b)` |
 | `state(async)` | Async data | `state(async () => fetch(...))` |
 | `effect()` | Side effects | `effect(() => log(x))` |
-| `<For>` | List render | `<For each={items}>` |
+| `items.map()` | List render | `items.map(item => <div>{item}</div>)` |
 | Primitives | UI building blocks | `<Row>`, `<Button>`, etc. |
 
 ## Next Steps

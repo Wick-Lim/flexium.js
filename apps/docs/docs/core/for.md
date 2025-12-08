@@ -4,7 +4,7 @@ title: List Rendering
 
 # List Rendering
 
-Flexium offers two ways to render lists, both with the same performance optimizations.
+Flexium uses the familiar React-style `items.map()` syntax with automatic optimizations.
 
 <script setup>
 import TodoDemo from '../../components/TodoDemo.vue'
@@ -16,9 +16,7 @@ import TodoDemo from '../../components/TodoDemo.vue'
   <TodoDemo />
 </ClientOnly>
 
-## Option 1: `items.map()` (Recommended)
-
-Use familiar React-style syntax with automatic optimizations:
+## Basic Usage
 
 ```tsx
 import { state } from 'flexium/core'
@@ -29,41 +27,30 @@ const [items] = state(['Apple', 'Banana', 'Cherry'])
 {items.map(item => <li>{item}</li>)}
 ```
 
-This is the recommended approach for most use cases.
+## Why This is Special
 
-## Option 2: `<For>` Component
+In most frameworks, `items.map()` either:
+- **React**: Works but re-renders entire list on any change
+- **SolidJS**: Doesn't work reactively (need `<For>` component)
 
-An alternative explicit syntax:
+**Flexium**: `items.map()` is automatically optimized with:
+- ✅ O(1) append/prepend operations
+- ✅ DOM node caching by item reference
+- ✅ Minimal DOM moves on reorder
+- ✅ No wrapper function needed
 
-```tsx
-import { For } from 'flexium/core'
-```
-
-### Signature
-
-```tsx
-<For each={items}>
-  {(item, index) => <Component />}
-</For>
-```
-
-## Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `each` | `T[] \| Accessor<T[]>` | Array or signal containing array to iterate |
-| `children` | `(item: T, index: number) => JSX.Element` | Render function for each item |
-
-## Usage
+## Examples
 
 ### Basic List
 
 ```tsx
 const [items, setItems] = state(['Apple', 'Banana', 'Cherry'])
 
-<For each={items}>
-  {(item, index) => <li>{item}</li>}
-</For>
+<ul>
+  {items.map((item, index) => (
+    <li>{index + 1}. {item}</li>
+  ))}
+</ul>
 ```
 
 ### Object Array
@@ -75,26 +62,14 @@ const [users, setUsers] = state([
   { id: 3, name: 'Charlie' }
 ])
 
-<For each={users}>
-  {(user) => (
+<div>
+  {users.map(user => (
     <div>
       <span>{user.name}</span>
       <button onclick={() => deleteUser(user.id)}>Delete</button>
     </div>
-  )}
-</For>
-```
-
-### With Index
-
-```tsx
-<For each={items}>
-  {(item, index) => (
-    <div>
-      <span>#{index + 1}: {item}</span>
-    </div>
-  )}
-</For>
+  ))}
+</div>
 ```
 
 ### Nested Lists
@@ -105,18 +80,16 @@ const [categories, setCategories] = state([
   { name: 'Vegetables', items: ['Carrot', 'Broccoli'] }
 ])
 
-<For each={categories}>
-  {(category) => (
+<div>
+  {categories.map(category => (
     <div>
       <h3>{category.name}</h3>
       <ul>
-        <For each={category.items}>
-          {(item) => <li>{item}</li>}
-        </For>
+        {category.items.map(item => <li>{item}</li>)}
       </ul>
     </div>
-  )}
-</For>
+  ))}
+</div>
 ```
 
 ### Empty State
@@ -124,11 +97,21 @@ const [categories, setCategories] = state([
 ```tsx
 const [items, setItems] = state([])
 
-<Show when={() => items.length > 0} fallback={<p>No items</p>}>
-  <For each={items}>
-    {(item) => <div>{item}</div>}
-  </For>
-</Show>
+{items.length > 0
+  ? items.map(item => <div>{item}</div>)
+  : <p>No items</p>
+}
+```
+
+### Updating Lists
+
+```tsx
+// All updates are reactive and optimized - use setter with callback
+setItems(prev => [...prev, 'New item'])                    // Append
+setItems(prev => prev.filter(item => item !== 'Apple'))    // Remove
+setItems(prev => prev.map(item =>
+  item === 'Apple' ? 'Green Apple' : item                  // Update
+))
 ```
 
 ## Behavior
@@ -140,21 +123,10 @@ const [items, setItems] = state([])
 
 ## Notes
 
-- Both `items.map()` and `<For>` have identical performance (O(1) append, DOM caching)
-- `items.map()` is recommended for familiarity; `<For>` is available if you prefer explicit syntax
 - Avoid using index as the sole identifier for mutable lists
 - The callback runs once per item and updates reactively
-
-## Comparison
-
-| Feature | `items.map()` | `<For>` |
-|---------|---------------|---------|
-| Syntax | React-like | Explicit component |
-| Performance | ✅ Optimized | ✅ Optimized |
-| Index access | `index` (number) | `index()` (getter) |
-| Import needed | No | Yes |
+- Performance is O(1) for append operations
 
 ## See Also
 
-- [&lt;Show /&gt;](/docs/core/show)
-- [&lt;Switch /&gt;](/docs/core/switch)
+- [Control Flow](/guide/flow)

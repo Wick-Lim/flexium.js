@@ -15,14 +15,13 @@ head:
 Flexium uses a **minimal, honest approach** to control flow:
 
 - **`items.map()`** - React-style syntax with automatic optimizations
-- **`<For>`** - Alternative explicit component for list rendering
 - **Native JavaScript** - For conditionals (ternary `? :` and `&&`)
 
 This approach follows Flexium's philosophy of using JavaScript as the template language rather than inventing new abstractions.
 
 ## List Rendering with `items.map()`
 
-Flexium supports the familiar React-style `.map()` syntax with **automatic optimizations**. When you call `.map()` on a reactive array, Flexium detects it and applies the same optimizations as the `<For>` component.
+Flexium supports the familiar React-style `.map()` syntax with **automatic optimizations**. When you call `.map()` on a reactive array, Flexium detects it and applies fine-grained updates.
 
 ### Basic Usage
 
@@ -83,58 +82,6 @@ setTodos(prev => [...prev, { id: 3, text: 'New todo' }])  // Append
 setTodos(prev => prev.filter(t => t.id !== 1))             // Remove
 setTodos(prev => prev.map(t => t.id === 1 ? {...t, done: true} : t))  // Update
 ```
-
----
-
-## `<For>` Component (Alternative)
-
-The `<For>` component is an alternative explicit syntax for list rendering. It provides the same optimizations as `items.map()`.
-
-### Usage
-
-```tsx
-import { For, state } from 'flexium/core'
-
-function TodoList() {
-  const [todos, setTodos] = state([
-    { id: 1, text: 'Buy milk' },
-    { id: 2, text: 'Walk the dog' }
-  ])
-
-  return (
-    <ul>
-      <For each={todos}>
-        {(item, index) => (
-          <li>
-            {index() + 1}. {item.text}
-          </li>
-        )}
-      </For>
-    </ul>
-  )
-}
-```
-
-### Props
-
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `each` | `StateGetter<T[]>` | The reactive array to iterate over. |
-| `children` | `(item: T, index: () => number) => FNode` | A render function that receives the item and a reactive index getter. |
-
-### When to Use `<For>` vs `items.map()`
-
-| Feature | `items.map()` | `<For>` |
-| :--- | :--- | :--- |
-| Familiar syntax | ✅ React-like | ❌ New syntax |
-| Reactive index | `index` (number) | `index()` (getter) |
-| Performance | ✅ Same | ✅ Same |
-
-Use whichever you prefer—both have identical performance characteristics.
-
-### Keying and Caching
-
-Both `<For>` and `items.map()` automatically handle keying based on item reference. When the list order changes, DOM nodes are moved rather than recreated.
 
 ---
 

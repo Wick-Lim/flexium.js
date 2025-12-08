@@ -80,9 +80,7 @@ function LoginForm() {
           onInput={(e) => form.setFieldValue('email', e.target.value)}
           onBlur={() => form.setFieldTouched('email', true)}
         />
-        <Show when={email.error}>
-          <span class="error">{email.error}</span>
-        </Show>
+        {email.error && <span class="error">{email.error}</span>}
       </div>
 
       <div>
@@ -92,9 +90,7 @@ function LoginForm() {
           onInput={(e) => form.setFieldValue('password', e.target.value)}
           onBlur={() => form.setFieldTouched('password', true)}
         />
-        <Show when={password.error}>
-          <span class="error">{password.error}</span>
-        </Show>
+        {password.error && <span class="error">{password.error}</span>}
       </div>
 
       <button type="submit" disabled={!form.state.isValid || form.state.isSubmitting}>
@@ -254,24 +250,22 @@ function DynamicForm() {
     }}>
       <FormField form={form} name="title" label="Title" />
 
-      <For each={fields}>
-        {(field, index) => (
-          <div>
-            <input
-              value={field.name}
-              onInput={(e) => {
-                const updated = [...fields]
-                updated[+index] = { ...field, name: e.target.value }
-                setFields(updated)
-              }}
-              placeholder={`Item ${+index + 1}`}
-            />
-            <button type="button" onClick={() => removeField(field.id)}>
-              Remove
-            </button>
-          </div>
-        )}
-      </For>
+      {fields.map((field, index) => (
+        <div key={field.id}>
+          <input
+            value={field.name}
+            onInput={(e) => {
+              const updated = [...fields]
+              updated[index] = { ...field, name: e.target.value }
+              setFields(updated)
+            }}
+            placeholder={`Item ${index + 1}`}
+          />
+          <button type="button" onClick={() => removeField(field.id)}>
+            Remove
+          </button>
+        </div>
+      ))}
 
       <button type="button" onClick={addField}>Add Item</button>
       <button type="submit">Submit</button>

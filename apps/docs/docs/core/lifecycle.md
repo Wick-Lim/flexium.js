@@ -133,9 +133,7 @@ function WebSocketComponent() {
     onCleanup(() => ws.close())
   })
 
-  return <For each={messages}>
-    {(msg) => <div>{msg}</div>}
-  </For>
+  return <div>{messages.map(msg => <div>{msg}</div>)}</div>
 }
 ```
 
@@ -157,9 +155,7 @@ function SearchResults(props) {
     onCleanup(() => controller.abort())
   })
 
-  return <For each={results}>
-    {(item) => <div>{item.title}</div>}
-  </For>
+  return <div>{results.map(item => <div>{item.title}</div>)}</div>
 }
 ```
 

@@ -199,9 +199,7 @@ function ContextMenuArea() {
 
   return (
     <div oncontextmenu={(e) => e.preventDefault()}>
-      <Show when={menuPos}>
-        <ContextMenu x={menuPos().x} y={menuPos().y} />
-      </Show>
+      {menuPos && <ContextMenu x={menuPos.x} y={menuPos.y} />}
     </div>
   )
 }
