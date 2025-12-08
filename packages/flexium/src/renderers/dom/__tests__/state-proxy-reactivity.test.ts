@@ -125,34 +125,6 @@ describe('StateProxy DOM Reactivity', () => {
     expect(node.textContent).toBe('15')
   })
 
-  it('should work with For component and StateProxy array', async () => {
-    const { For } = await import('../../../core/flow')
-
-    const [items, setItems] = state<number[]>([1, 2, 3], { key: 'for-test' })
-
-    // Create For component
-    const forComp = For({
-      each: items, // StateProxy as each
-      children: [(item: number) => f('span', {}, [String(item)])],
-    })
-
-    const container = document.createElement('div')
-    mountReactive(forComp, container)
-
-    await new Promise(resolve => setTimeout(resolve, 10))
-
-    console.log('For initial:', container.textContent)
-    expect(container.textContent).toBe('123')
-
-    // Update the array
-    setItems([4, 5, 6, 7])
-
-    await new Promise(resolve => setTimeout(resolve, 10))
-
-    console.log('For after update:', container.textContent)
-    expect(container.textContent).toBe('4567')
-  })
-
   it('should update same proxy after setter call', async () => {
     const [count, setCount] = state(0, { key: 'same-proxy-test' })
 

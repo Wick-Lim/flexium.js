@@ -32,8 +32,7 @@ export { Router, Route, Outlet, Link, router } from './router/components'
 
 export { createReactiveRoot } from './renderers/dom/reactive'
 
-// Flow
-export { For } from './core/flow'
+// Suspense & Error Boundary
 export { Suspense } from './core/suspense'
 export { ErrorBoundary } from './core/error-boundary' // New export
 

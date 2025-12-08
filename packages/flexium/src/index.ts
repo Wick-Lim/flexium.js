@@ -6,7 +6,7 @@
  * @example
  * ```tsx
  * // Core reactivity
- * import { state, effect, For } from 'flexium/core'
+ * import { state, effect, batch } from 'flexium/core'
  *
  * // DOM rendering
  * import { render, createRoot, Portal } from 'flexium/dom'
@@ -22,7 +22,7 @@
  * ```
  */
 
-export const VERSION = '0.7.1'
+export const VERSION = '0.7.2'
 
 // Intentionally empty - use explicit submodule imports
 // flexium/core, flexium/dom, flexium/canvas, flexium/primitives, flexium/router

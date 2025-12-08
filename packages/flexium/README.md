@@ -119,25 +119,23 @@ flexium
 
 ## Control Flow
 
+Use native JavaScript for control flow - no special components needed:
+
 ```tsx
-import { For, Show, Switch, Match } from 'flexium/core';
-
 // Conditional rendering
-<Show when={isLoggedIn} fallback={<Login />}>
-  <Dashboard />
-</Show>
+{isLoggedIn ? <Dashboard /> : <Login />}
 
-// List rendering with keyed reconciliation
-<For each={items}>
-  {(item) => <Item data={item} />}
-</For>
+// Short-circuit for simple conditions
+{isAdmin && <AdminPanel />}
 
-// Pattern matching
-<Switch fallback={<Default />}>
-  <Match when={status === 'loading'}><Loading /></Match>
-  <Match when={status === 'error'}><Error /></Match>
-  <Match when={status === 'success'}><Success /></Match>
-</Switch>
+// List rendering with optimized reconciliation
+{items.map(item => <Item key={item.id} data={item} />)}
+
+// Pattern matching with ternary chains
+{status === 'loading' ? <Loading /> :
+ status === 'error' ? <Error /> :
+ status === 'success' ? <Success /> :
+ <Default />}
 ```
 
 ## Canvas Rendering

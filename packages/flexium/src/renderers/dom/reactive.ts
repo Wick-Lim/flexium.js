@@ -21,12 +21,6 @@ import {
 import { reconcileArrays } from './reconcile'
 import { SuspenseCtx } from '../../core/suspense'
 import { ErrorBoundaryCtx } from '../../core/error-boundary'
-import {
-  isForComponent,
-  mountForComponent,
-  For,
-  ForComponent,
-} from '../../core/flow'
 import { isStateValue, getStateSignal } from '../../core/state'
 import {
   isListComponent,
@@ -58,8 +52,6 @@ export function mountReactive(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any[]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | ForComponent<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | ListComponent<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | ReactiveArrayResult<any, any>,
@@ -89,28 +81,6 @@ export function mountReactive(
     REACTIVE_BINDINGS.get(marker)!.add(listDispose)
 
     return container ? parent.firstChild : parent
-  }
-
-  // Handle For component with direct DOM caching (no FNode intermediate)
-  if (isForComponent(vnode)) {
-    const startMarker = document.createTextNode('')
-    const parent = container || document.createDocumentFragment()
-    domRenderer.appendChild(parent, startMarker)
-
-    const forDispose = mountForComponent(
-      vnode,
-      parent,
-      startMarker,
-      (childVnode) => mountReactive(childVnode),
-      cleanupReactive
-    )
-
-    if (!REACTIVE_BINDINGS.has(startMarker)) {
-      REACTIVE_BINDINGS.set(startMarker, new Set())
-    }
-    REACTIVE_BINDINGS.get(startMarker)!.add(forDispose)
-
-    return container ? startMarker : parent
   }
 
   // Handle ReactiveArrayResult from items.map() syntax
@@ -324,18 +294,6 @@ export function mountReactive(
 
   // Handle FNodes
   if (isFNode(vnode)) {
-    // Handle For component specially (direct DOM caching)
-    if (vnode.type === For) {
-      const forComp = For({
-        each: vnode.props.each as (() => unknown[]),
-        children: vnode.children as unknown as ((
-          item: unknown,
-          index: () => number
-        ) => FNode)[],
-      })
-      return mountReactive(forComp, container)
-    }
-
     // Handle function components
     if (typeof vnode.type === 'function') {
       const component = vnode.type

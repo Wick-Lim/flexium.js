@@ -16,9 +16,6 @@ export type { StateSetter, StateValue, AsyncStatus } from './core/state'
 // Side effects and batching (necessary primitives)
 export { effect, onMount, onCleanup, batch, root, untrack } from './core/signal'
 
-// Control flow - For only (use native JS for conditionals)
-export { For } from './core/flow'
-
 // Context API
 export { createContext, context } from './core/context'
 export type { Context } from './core/context'
