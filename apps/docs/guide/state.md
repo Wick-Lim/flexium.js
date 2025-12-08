@@ -184,9 +184,46 @@ return (
 
 Flexium automatically optimizes list rendering with O(1) append/prepend and DOM node caching.
 
+### 5. Array Keys
+
+Keys can be arrays for hierarchical namespacing - similar to TanStack Query:
+
+```tsx
+// String key
+const [user] = state(null, { key: 'user' })
+
+// Array key - great for dynamic keys
+const [user] = state(null, { key: ['user', 'profile', userId] })
+const [posts] = state([], { key: ['user', 'posts', userId] })
+```
+
+### 6. Params Option
+
+Pass explicit parameters to functions for better DX:
+
+```tsx
+// Implicit dependencies (closure)
+const [user] = state(async () => fetch(`/api/users/${userId}`))
+
+// Explicit dependencies (params) - recommended for complex cases
+const [user] = state(
+  async ({ userId, postId }) => fetch(`/api/users/${userId}/posts/${postId}`),
+  {
+    key: ['user', 'posts', userId, postId],
+    params: { userId, postId }
+  }
+)
+```
+
+**Benefits:**
+- Self-documenting code
+- Better DevTools visibility
+- Improved TypeScript inference
+
 ## Best Practices
 
 1.  **Use `state()` for everything**: It's the universal primitive.
 2.  **Destructure the tuple**: `const [val, setVal] = state(...)` is the standard pattern.
 3.  **Use values directly**: `count + 1` works automatically thanks to Symbol.toPrimitive.
-4.  **Keep Global Keys Unique**: Use namespaces like `'app/theme'` to avoid collisions.
+4.  **Use array keys for dynamic data**: `['user', userId]` instead of `'user-' + userId`.
+5.  **Use params for explicit dependencies**: Makes code self-documenting.

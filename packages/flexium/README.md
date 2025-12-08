@@ -103,6 +103,22 @@ const [count, setCount] = state(1);
 const [double] = state(() => count * 2);
 ```
 
+### Array Keys & Params
+
+```tsx
+// Array keys for dynamic caching (like TanStack Query)
+const [user] = state(fetchUser, { key: ['user', userId] });
+
+// Explicit params for better DX
+const [data] = state(
+  async ({ userId, postId }) => fetchPost(userId, postId),
+  {
+    key: ['posts', userId, postId],
+    params: { userId, postId }
+  }
+);
+```
+
 ## Package Structure
 
 ```

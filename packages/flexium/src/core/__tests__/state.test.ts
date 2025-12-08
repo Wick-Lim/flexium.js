@@ -206,9 +206,11 @@ describe('State API', () => {
 
   describe('Async Resource State', () => {
     it('should create state with async function', async () => {
-      const [, refetch, status] = state(async () => {
+      const result = state(async () => {
         return 'fetched data'
       })
+      // Runtime returns 4 elements for async, but TS can't infer this
+      const [, refetch, status] = result as unknown as [unknown, () => void, unknown, unknown]
 
       expect(typeof refetch).toBe('function')
       // status is now a callable proxy (function type) returning AsyncStatus
@@ -217,12 +219,14 @@ describe('State API', () => {
     })
 
     it('should return refetch function', () => {
-      const [, refetch] = state(async () => 'data')
+      const result = state(async () => 'data')
+      const [, refetch] = result as unknown as [unknown, () => void, unknown, unknown]
       expect(typeof refetch).toBe('function')
     })
 
     it('should return status proxy', () => {
-      const [, , status] = state(async () => 'data')
+      const result = state(async () => 'data')
+      const [, , status] = result as unknown as [unknown, unknown, unknown, unknown]
       // status is a callable proxy (function type)
       expect(typeof status).toBe('function')
       // status should be 'idle' | 'loading' | 'success' | 'error'
@@ -230,7 +234,8 @@ describe('State API', () => {
     })
 
     it('should return error proxy', () => {
-      const [, , , error] = state(async () => 'data')
+      const result = state(async () => 'data')
+      const [, , , error] = result as unknown as [unknown, unknown, unknown, unknown]
       expect(val(error)).toBeUndefined()
     })
 

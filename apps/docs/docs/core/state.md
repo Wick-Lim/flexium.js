@@ -134,6 +134,48 @@ const [count, setCount] = state(0, { key: 'app:count' })
 const [count] = state(0, { key: 'app:count' })
 ```
 
+### Array Keys
+
+Keys can be arrays for hierarchical namespacing:
+
+```tsx
+// Array key - great for dynamic keys with IDs
+const [user] = state(null, { key: ['user', 'profile', userId] })
+const [posts] = state([], { key: ['user', 'posts', userId] })
+
+// Useful for cache key patterns similar to TanStack Query
+const [data] = state(async () => fetchUser(id), {
+  key: ['users', id]
+})
+```
+
+## Params Option
+
+Pass explicit parameters to functions for better DX:
+
+```tsx
+// Without params - dependencies are implicit in closure
+const [user] = state(async () => {
+  return fetch(`/api/users/${userId}/posts/${postId}`)
+})
+
+// With params - dependencies are explicit
+const [user] = state(
+  async ({ userId, postId }) => {
+    return fetch(`/api/users/${userId}/posts/${postId}`)
+  },
+  {
+    key: ['user', 'posts', userId, postId],
+    params: { userId, postId }
+  }
+)
+```
+
+Benefits of explicit params:
+- **Self-documenting** - Clear what the function depends on
+- **DevTools visibility** - See params in debugging tools
+- **Type inference** - Better TypeScript support
+
 ## Example
 
 ```tsx
