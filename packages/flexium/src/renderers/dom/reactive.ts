@@ -33,6 +33,7 @@ import {
   mountListComponent,
   ListComponent,
 } from '../../primitives/List'
+import { logError, ErrorCodes } from '../../core/errors'
 import {
   isReactiveArrayResult,
   mountReactiveArray,
@@ -41,6 +42,19 @@ import {
 import { setNode, getNode } from './node-map'
 
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>()
+
+/**
+ * Register a dispose function for a node's reactive bindings.
+ * Ensures the bindings set exists and adds the dispose function to it.
+ */
+function registerReactiveBinding(node: Node, dispose: () => void): void {
+  let bindings = REACTIVE_BINDINGS.get(node)
+  if (!bindings) {
+    bindings = new Set()
+    REACTIVE_BINDINGS.set(node, bindings)
+  }
+  bindings.add(dispose)
+}
 
 export function mountReactive(
   vnode:
@@ -81,10 +95,7 @@ export function mountReactive(
 
     // Create a marker for cleanup tracking
     const marker = document.createTextNode('')
-    if (!REACTIVE_BINDINGS.has(marker)) {
-      REACTIVE_BINDINGS.set(marker, new Set())
-    }
-    REACTIVE_BINDINGS.get(marker)!.add(listDispose)
+    registerReactiveBinding(marker, listDispose)
 
     return container ? parent.firstChild : parent
   }
@@ -103,10 +114,7 @@ export function mountReactive(
       cleanupReactive
     )
 
-    if (!REACTIVE_BINDINGS.has(startMarker)) {
-      REACTIVE_BINDINGS.set(startMarker, new Set())
-    }
-    REACTIVE_BINDINGS.get(startMarker)!.add(arrayDispose)
+    registerReactiveBinding(startMarker, arrayDispose)
 
     return container ? startMarker : parent
   }
@@ -155,17 +163,16 @@ export function mountReactive(
             ) {
               try {
                 currentContainer.removeChild(currentNode)
-              } catch (e) {}
+              } catch (e) {
+                logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
+              }
             }
             currentNode = startNode
           }
         }
       })
 
-      if (!REACTIVE_BINDINGS.has(startNode)) {
-        REACTIVE_BINDINGS.set(startNode, new Set())
-      }
-      REACTIVE_BINDINGS.get(startNode)!.add(dispose)
+      registerReactiveBinding(startNode, dispose)
 
       return container ? startNode : parent
     }
@@ -205,7 +212,9 @@ export function mountReactive(
           if (currentNode && currentNode !== startNode) {
             try {
               currentContainer.removeChild(currentNode)
-            } catch (e) {}
+            } catch (e) {
+              logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
+            }
           }
           const fragment = document.createDocumentFragment()
           for (const child of newFNodes) {
@@ -228,7 +237,9 @@ export function mountReactive(
           if (childNode && childNode.parentNode === currentContainer) {
             try {
               currentContainer.removeChild(childNode)
-            } catch (e) {}
+            } catch (e) {
+              logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
+            }
           }
         }
         currentFNodeList = []
@@ -263,7 +274,9 @@ export function mountReactive(
             ) {
               try {
                 currentContainer.removeChild(currentNode)
-              } catch (e) {}
+              } catch (e) {
+                logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
+              }
             }
             currentNode = startNode
           }
@@ -272,10 +285,7 @@ export function mountReactive(
       }
     })
 
-    if (!REACTIVE_BINDINGS.has(startNode)) {
-      REACTIVE_BINDINGS.set(startNode, new Set())
-    }
-    REACTIVE_BINDINGS.get(startNode)!.add(dispose)
+    registerReactiveBinding(startNode, dispose)
 
     return container ? startNode : parent
   }
@@ -334,7 +344,9 @@ export function mountReactive(
                   cleanupReactive(nodeToRemove)
                   try {
                     currentParent.removeChild(nodeToRemove)
-                  } catch (e) {}
+                  } catch (e) {
+                    logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
+                  }
                   nodeToRemove = next
                 }
               }
@@ -391,10 +403,7 @@ export function mountReactive(
         })
       })
 
-      if (!REACTIVE_BINDINGS.has(startNode)) {
-        REACTIVE_BINDINGS.set(startNode, new Set())
-      }
-      REACTIVE_BINDINGS.get(startNode)!.add(dispose)
+      registerReactiveBinding(startNode, dispose)
 
       return container ? startNode : parent
     }
@@ -481,7 +490,9 @@ function setupReactiveProps(
             )
             prevValue = newValue
           }
-        } catch (e) {}
+        } catch (e) {
+          logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'updateNode', prop: key }, e)
+        }
       })
       disposers.push(dispose)
     }
@@ -541,6 +552,6 @@ export function reactiveText(getText: () => string): Text {
     const text = getText()
     domRenderer.updateTextNode(textNode, text)
   })
-  REACTIVE_BINDINGS.set(textNode, new Set([dispose]))
+  registerReactiveBinding(textNode, dispose)
   return textNode
 }

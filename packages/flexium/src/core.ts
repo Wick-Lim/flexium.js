@@ -10,7 +10,7 @@
  */
 
 // State management - THE unified API
-export { state, clearGlobalState } from './core/state'
+export { state, clearGlobalState, deleteGlobalState, hasGlobalState, getGlobalStateCount } from './core/state'
 export type { StateAction, StateValue, AsyncStatus, StateKey, StateOptions } from './core/state'
 
 // Side effects and batching (necessary primitives)
