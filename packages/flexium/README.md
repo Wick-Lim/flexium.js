@@ -79,22 +79,20 @@ Pass an async function to handle data fetching automatically.
 
 ```tsx
 function UserProfile({ id }) {
-  const [user, actions] = state(async () => {
+  const [user, refetch, isLoading, error] = state(async () => {
     const res = await fetch(`/api/users/${id}`);
     return res.json();
   });
 
-  return () => {
-    if (user.loading) return <div>Loading...</div>;
-    if (user.error) return <div>Error!</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error!</div>;
 
-    return (
-      <div>
-        <h1>{user().name}</h1>
-        <button onclick={() => actions.refetch()}>Reload</button>
-      </div>
-    );
-  };
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <button onclick={() => refetch()}>Reload</button>
+    </div>
+  );
 }
 ```
 
@@ -102,14 +100,14 @@ function UserProfile({ id }) {
 
 ```tsx
 const [count, setCount] = state(1);
-const [double] = state(() => count() * 2);
+const [double] = state(() => count * 2);
 ```
 
 ## Package Structure
 
 ```
 flexium
-├── /core       # Core reactivity: state(), effect(), For, Show, Switch
+├── /core       # Core reactivity: state(), effect(), batch()
 ├── /dom        # DOM renderer: render(), Portal
 ├── /canvas     # Canvas renderer: Canvas, Rect, Circle, Text
 ├── /primitives # Cross-platform components: Row, Column, Stack
