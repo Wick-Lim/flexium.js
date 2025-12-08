@@ -56,14 +56,14 @@ render(<Counter />, document.getElementById('app'));
 
 ### Global State
 
-Just add a `key` to share state across components.
+Just add a `key` to share state across components. Keys can be strings or arrays.
 
 ```tsx
-// Define global state
-const [theme, setTheme] = state('light', { key: 'theme' });
+// Define global state with array key
+const [theme, setTheme] = state('light', { key: ['app', 'theme'] });
 
 function ThemeToggle() {
-  const [theme, setTheme] = state(undefined, { key: 'theme' });
+  const [theme, setTheme] = state(undefined, { key: ['app', 'theme'] });
 
   return (
     <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>

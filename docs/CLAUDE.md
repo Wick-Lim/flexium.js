@@ -23,11 +23,17 @@ The JavaScript ecosystem suffers from API fragmentation:
 // Local state
 const [count, setCount] = state(0)
 
-// Global state (add key)
-const [theme, setTheme] = state('light', { key: 'theme' })
+// Global state (add key - string or array)
+const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
 
 // Async resource (pass async function)
 const [user] = state(async () => fetch('/api/user').then(r => r.json()))
+
+// Async with explicit params
+const [posts] = state(
+  async ({ userId }) => fetch(`/api/users/${userId}/posts`),
+  { key: ['user', 'posts', userId], params: { userId } }
+)
 
 // Derived/computed (pass sync function)
 const [doubled] = state(() => count * 2)

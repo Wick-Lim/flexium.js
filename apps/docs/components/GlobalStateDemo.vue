@@ -7,7 +7,7 @@ const container = ref(null)
 
 // Component A - can read and write global state
 function CounterA() {
-  const [count, setCount] = state(0, { key: 'global:count' })
+  const [count, setCount] = state(0, { key: ['app', 'count'] })
 
   return f('div', {
     style: {
@@ -75,7 +75,7 @@ function CounterA() {
 
 // Component B - shares the same global state
 function CounterB() {
-  const [count, setCount] = state(0, { key: 'global:count' })
+  const [count, setCount] = state(0, { key: ['app', 'count'] })
   const [doubled] = state(() => count * 2)
 
   return f('div', {
@@ -151,7 +151,7 @@ function CounterB() {
 
 // Component C - displays the shared state
 function DisplayC() {
-  const [count] = state(0, { key: 'global:count' })
+  const [count] = state(0, { key: ['app', 'count'] })
 
   return f('div', {
     style: {
@@ -240,7 +240,7 @@ function GlobalDemo() {
         color: '#e5e7eb',
         overflowX: 'auto'
       }
-    }, ["const [count, setCount] = state(0, { key: 'global:count' })"])
+    }, ["const [count, setCount] = state(0, { key: ['app', 'count'] })"])
   ])
 
   return containerNode

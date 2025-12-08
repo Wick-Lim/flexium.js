@@ -219,8 +219,17 @@ setCount(count() + 1)
 // Computed state
 const [doubled] = state(() => count() * 2)
 
-// Global state
-const [theme, setTheme] = state('light', { key: 'app-theme' })
+// Global state with array key
+const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
+
+// Dynamic keys for caching
+const [user] = state(async () => fetchUser(id), { key: ['users', id] })
+
+// Explicit params for better DX
+const [data] = state(
+  async ({ userId, postId }) => fetchPost(userId, postId),
+  { key: ['posts', userId, postId], params: { userId, postId } }
+)
 ```
 
 ## Performance Tips

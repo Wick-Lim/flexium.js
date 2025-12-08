@@ -31,7 +31,11 @@ const [count, setCount] = state(0)
 
 ### Global State
 ```javascript
+// String key for simple cases
 const [theme, setTheme] = state('dark', { key: 'theme' })
+
+// Array key for hierarchical namespacing
+const [user] = state(null, { key: ['app', 'user', userId] })
 ```
 
 ### Async Data

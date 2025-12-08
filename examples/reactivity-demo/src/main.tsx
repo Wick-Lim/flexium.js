@@ -654,8 +654,8 @@ function StateAPIDemo() {
   // Derived state (like computed)
   const [doubled] = state(() => count() * 2)
 
-  // Global state with key
-  const [theme, setTheme] = state('light', { key: 'app-theme' })
+  // Global state with array key
+  const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
 
   return (
     <div class="demo-section">
@@ -704,23 +704,27 @@ setCount(c => c + 1);     // Updater function`}</pre>
         </div>
         <div class="success-box">
           <strong>Current Theme:</strong> <span class="highlight">{theme()}</span>
-          <br/><em>This state is shared globally via the key 'app-theme'</em>
+          <br/><em>This state is shared globally via the key ['app', 'theme']</em>
         </div>
 
-        <pre>{`// Global state with key
-const [theme, setTheme] = state('light', { key: 'app-theme' });
+        <pre>{`// Global state with array key
+const [theme, setTheme] = state('light', { key: ['app', 'theme'] });
 
 // Accessing the same state elsewhere with the same key
-// will return the same state instance`}</pre>
+// will return the same state instance
+
+// Array keys are great for dynamic IDs:
+// const [user] = state(null, { key: ['users', userId] })`}</pre>
       </div>
 
       <div class="api-ref">
         <h4>API Reference: state()</h4>
         <div class="api-signature">
-          function state&lt;T&gt;(value: T | (() =&gt; T), options?: {'{'}key?: string{'}'}): [getter, setter]
+          function state&lt;T&gt;(value: T | (() =&gt; T), options?: {'{'}key?: StateKey, params?: P{'}'}): [getter, setter]
         </div>
         <p>
           Unified API for creating local signals, computed values, or global state.
+          Keys can be strings or arrays for hierarchical namespacing (e.g., ['app', 'theme']).
           Returns a tuple similar to React's useState.
         </p>
       </div>
