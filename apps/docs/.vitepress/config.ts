@@ -169,8 +169,6 @@ export default defineConfig({
           items: [
             { text: 'Context API', link: '/guide/context' },
             { text: 'Routing', link: '/guide/router' },
-            { text: 'Styling', link: '/guide/styling' },
-            { text: 'Animation', link: '/guide/animation' },
             { text: 'Forms', link: '/guide/forms' },
             { text: 'Canvas', link: '/guide/canvas' },
             { text: 'Interactive Apps', link: '/guide/interactive' }
@@ -183,13 +181,7 @@ export default defineConfig({
             { text: 'Effects', link: '/guide/effects' },
             { text: 'Batch API', link: '/guide/batch' },
             { text: 'Portal', link: '/guide/portal' },
-            { text: 'Motion', link: '/guide/motion' },
-            { text: 'Transitions', link: '/guide/transitions' },
-            { text: 'Performance', link: '/guide/performance' },
-            { text: 'TypeScript', link: '/guide/typescript' },
-            { text: 'Testing', link: '/guide/testing' },
-            { text: 'SSR', link: '/guide/ssr' },
-            { text: 'DevTools', link: '/guide/devtools' }
+            { text: 'Motion', link: '/guide/motion' }
           ]
         },
         {
@@ -209,14 +201,6 @@ export default defineConfig({
             { text: 'state()', link: '/docs/core/state' },
             { text: 'effect()', link: '/docs/core/effect' },
             { text: 'batch()', link: '/docs/core/batch' }
-          ]
-        },
-        {
-          text: 'Advanced',
-          collapsed: true,
-          items: [
-            { text: 'List Rendering', link: '/docs/core/for' },
-            { text: 'Context API', link: '/docs/core/context' }
           ]
         },
         {
@@ -278,6 +262,14 @@ export default defineConfig({
             { text: 'keyboard()', link: '/docs/interactive/keyboard' },
             { text: 'mouse()', link: '/docs/interactive/mouse' },
             { text: 'createLoop()', link: '/docs/interactive/loop' }
+          ]
+        },
+        {
+          text: 'Advanced',
+          collapsed: true,
+          items: [
+            { text: 'List Rendering', link: '/docs/core/for' },
+            { text: 'Context API', link: '/docs/core/context' }
           ]
         },
         {
