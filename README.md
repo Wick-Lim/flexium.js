@@ -7,6 +7,7 @@ Flexium is a next-generation UI framework that unifies state management, async d
 
 - **Unified State API**: No more `useState`, `useRecoil`, `useQuery` separation. Just `state()`.
 - **Fine-Grained Reactivity**: Updates only what changed. No Virtual DOM overhead.
+- **React-Style `.map()` with Optimization**: `items.map()` works reactively with automatic DOM caching.
 - **High Performance**: Optimized Monomorphic VNodes & Keyed Reconciliation.
 - **Event Delegation**: Automatic memory optimization for event listeners.
 - **Zero-Config JSX**: Works out of the box with standard tooling.
@@ -91,8 +92,31 @@ Pass a synchronous function to create a value that updates automatically.
 ```javascript
 const [count, setCount] = state(1);
 // 'double' updates whenever 'count' changes
-const [double] = state(() => count() * 2); 
+const [double] = state(() => count() * 2);
 ```
+
+### 5. List Rendering
+
+Use familiar `.map()` syntax with automatic optimization:
+
+```javascript
+function TodoList() {
+  const [todos, setTodos] = state([
+    { id: 1, text: 'Learn Flexium' },
+    { id: 2, text: 'Build something awesome' }
+  ]);
+
+  return (
+    <ul>
+      {todos.map(todo => (
+        <li key={todo.id}>{todo.text}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+Unlike other signal-based frameworks, Flexium's `.map()` is automatically reactive and optimized (O(1) append, DOM caching, minimal moves).
 
 ## Reactivity System
 

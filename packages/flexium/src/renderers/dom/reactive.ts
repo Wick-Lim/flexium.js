@@ -33,6 +33,11 @@ import {
   mountListComponent,
   ListComponent,
 } from '../../primitives/List'
+import {
+  isReactiveArrayResult,
+  mountReactiveArray,
+  ReactiveArrayResult,
+} from '../../core/reactive-array'
 import { setNode, getNode } from './node-map'
 
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>()
@@ -55,7 +60,9 @@ export function mountReactive(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | ForComponent<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | ListComponent<any>,
+    | ListComponent<any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | ReactiveArrayResult<any, any>,
   container?: Node
 ): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
@@ -102,6 +109,28 @@ export function mountReactive(
       REACTIVE_BINDINGS.set(startMarker, new Set())
     }
     REACTIVE_BINDINGS.get(startMarker)!.add(forDispose)
+
+    return container ? startMarker : parent
+  }
+
+  // Handle ReactiveArrayResult from items.map() syntax
+  if (isReactiveArrayResult(vnode)) {
+    const startMarker = document.createTextNode('')
+    const parent = container || document.createDocumentFragment()
+    domRenderer.appendChild(parent, startMarker)
+
+    const arrayDispose = mountReactiveArray(
+      vnode,
+      parent,
+      startMarker,
+      (childVnode) => mountReactive(childVnode),
+      cleanupReactive
+    )
+
+    if (!REACTIVE_BINDINGS.has(startMarker)) {
+      REACTIVE_BINDINGS.set(startMarker, new Set())
+    }
+    REACTIVE_BINDINGS.get(startMarker)!.add(arrayDispose)
 
     return container ? startMarker : parent
   }

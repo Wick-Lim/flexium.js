@@ -46,6 +46,7 @@ const [doubled] = state(() => count() * 2)
 - Automatic dependency tracking
 - No unnecessary re-renders
 - Event delegation for memory efficiency
+- **Reactive `.map()`**: `items.map()` is automatically reactive and optimized (unlike SolidJS where you need `<For>`)
 
 ## Architecture Principles
 

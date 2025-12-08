@@ -1,10 +1,10 @@
 ---
-title: For - List Rendering
+title: List Rendering
 ---
 
-# &lt;For /&gt;
+# List Rendering
 
-Efficiently render lists with automatic keying and updates.
+Flexium offers two ways to render lists, both with the same performance optimizations.
 
 <script setup>
 import TodoDemo from '../../components/TodoDemo.vue'
@@ -16,13 +16,30 @@ import TodoDemo from '../../components/TodoDemo.vue'
   <TodoDemo />
 </ClientOnly>
 
-## Import
+## Option 1: `items.map()` (Recommended)
+
+Use familiar React-style syntax with automatic optimizations:
+
+```tsx
+import { state } from 'flexium/core'
+
+const [items] = state(['Apple', 'Banana', 'Cherry'])
+
+// Just like React, but with automatic optimization!
+{items.map(item => <li>{item}</li>)}
+```
+
+This is the recommended approach for most use cases.
+
+## Option 2: `<For>` Component
+
+An alternative explicit syntax:
 
 ```tsx
 import { For } from 'flexium/core'
 ```
 
-## Signature
+### Signature
 
 ```tsx
 <For each={items}>
@@ -123,9 +140,19 @@ const [items, setItems] = state([])
 
 ## Notes
 
-- Use `For` instead of `.map()` for better performance
+- Both `items.map()` and `<For>` have identical performance (O(1) append, DOM caching)
+- `items.map()` is recommended for familiarity; `<For>` is available if you prefer explicit syntax
 - Avoid using index as the sole identifier for mutable lists
 - The callback runs once per item and updates reactively
+
+## Comparison
+
+| Feature | `items.map()` | `<For>` |
+|---------|---------------|---------|
+| Syntax | React-like | Explicit component |
+| Performance | ✅ Optimized | ✅ Optimized |
+| Index access | `index` (number) | `index()` (getter) |
+| Import needed | No | Yes |
 
 ## See Also
 

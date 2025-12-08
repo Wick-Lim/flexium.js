@@ -132,9 +132,12 @@ function UserProfile() {
 | Signal API | createSignal, createMemo, createResource | Unified `state()` |
 | Async Data | createResource (separate) | Built into `state()` |
 | Global State | Context or stores | `state()` with key option |
+| List Rendering | Must use `<For>`, `.map()` doesn't work | `items.map()` works with auto-optimization |
 | Bundle Size | ~7kb gzipped | ~10-15kb gzipped |
 | Cross-Platform | Web-focused | Web + Canvas + Native (future) |
 | Primitives | HTML tags | Universal primitives (Row, Column, Text) |
+
+> **Unique to Flexium**: `items.map()` syntax works reactively with automatic optimization (O(1) append, DOM caching). In SolidJS, you must use `<For>` component.
 
 ### Flexium vs Vue 3
 

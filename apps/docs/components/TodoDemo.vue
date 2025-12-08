@@ -72,9 +72,9 @@ function TodoDemo() {
       }, ['Add'])
     ]),
 
-    // Todo list - render function for reactivity
+    // Todo list - items.map() is automatically reactive and optimized!
     f('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } },
-      () => todos().map(todo =>
+      todos.map(todo =>
         f('div', {
           key: todo.id,
           style: {

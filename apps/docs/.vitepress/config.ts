@@ -135,7 +135,7 @@ export default defineConfig({
       { text: 'Docs', link: '/docs/core/state' },
       { text: 'Showcase', link: '/showcase' },
       {
-        text: 'v0.6.11',
+        text: 'v0.7.0',
         items: [
           { text: 'Changelog', link: 'https://github.com/Wick-Lim/flexium.js/blob/main/CHANGELOG.md' },
           { text: 'Contributing', link: '/guide/contributing' }
@@ -150,7 +150,8 @@ export default defineConfig({
           items: [
             { text: 'Introduction', link: '/guide/introduction' },
             { text: 'Quick Start', link: '/guide/quick-start' },
-            { text: 'Installation', link: '/guide/installation' }
+            { text: 'Installation', link: '/guide/installation' },
+            { text: 'Comparison', link: '/guide/comparison' }
           ]
         },
         {

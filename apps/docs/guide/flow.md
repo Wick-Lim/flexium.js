@@ -1,38 +1,105 @@
 ---
-title: Control Flow - For Component & Native Conditionals
-description: Learn Flexium's control flow with the For component for lists and native JavaScript for conditionals.
+title: Control Flow - Lists & Conditionals
+description: Learn Flexium's control flow with reactive arrays and native JavaScript for conditionals.
 head:
   - - meta
     - property: og:title
       content: Control Flow - Flexium
   - - meta
     - property: og:description
-      content: Master the For component for list rendering and native JavaScript conditionals for efficient reactive UI.
+      content: Master list rendering with items.map() syntax and native JavaScript conditionals for efficient reactive UI.
 ---
 
 # Control Flow
 
 Flexium uses a **minimal, honest approach** to control flow:
 
-- **`<For>`** - For list rendering with efficient DOM caching
+- **`items.map()`** - React-style syntax with automatic optimizations
+- **`<For>`** - Alternative explicit component for list rendering
 - **Native JavaScript** - For conditionals (ternary `? :` and `&&`)
 
 This approach follows Flexium's philosophy of using JavaScript as the template language rather than inventing new abstractions.
 
-## `<For>`
+## List Rendering with `items.map()`
 
-The `<For>` component is used for rendering lists. It efficiently reuses DOM nodes for items that haven't changed, avoiding unnecessary re-creation.
+Flexium supports the familiar React-style `.map()` syntax with **automatic optimizations**. When you call `.map()` on a reactive array, Flexium detects it and applies the same optimizations as the `<For>` component.
 
-### Usage
+### Basic Usage
 
 ```tsx
-import { For, state } from 'flexium/core';
+import { state } from 'flexium/core'
 
 function TodoList() {
   const [todos, setTodos] = state([
     { id: 1, text: 'Buy milk' },
     { id: 2, text: 'Walk the dog' }
-  ]);
+  ])
+
+  return (
+    <ul>
+      {todos.map((item, index) => (
+        <li>{index + 1}. {item.text}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+### Why This is Special
+
+In most frameworks, `items.map()` either:
+- **React**: Works but re-renders entire list on any change
+- **SolidJS**: Doesn't work reactively (need `<For>` component)
+
+**Flexium**: `items.map()` is automatically optimized with:
+- ✅ O(1) append/prepend operations
+- ✅ DOM node caching by item reference
+- ✅ Minimal DOM moves on reorder
+- ✅ No wrapper function needed
+
+### With Objects
+
+```tsx
+const [users, setUsers] = state([
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' }
+])
+
+<div>
+  {users.map(user => (
+    <div key={user.id}>
+      <span>{user.name}</span>
+      <button onClick={() => deleteUser(user.id)}>Delete</button>
+    </div>
+  ))}
+</div>
+```
+
+### Updating Lists
+
+```tsx
+// All updates are reactive and optimized
+setTodos([...todos(), { id: 3, text: 'New todo' }])  // Append
+setTodos(todos().filter(t => t.id !== 1))            // Remove
+setTodos(todos().map(t => t.id === 1 ? {...t, done: true} : t))  // Update
+```
+
+---
+
+## `<For>` Component (Alternative)
+
+The `<For>` component is an alternative explicit syntax for list rendering. It provides the same optimizations as `items.map()`.
+
+### Usage
+
+```tsx
+import { For, state } from 'flexium/core'
+
+function TodoList() {
+  const [todos, setTodos] = state([
+    { id: 1, text: 'Buy milk' },
+    { id: 2, text: 'Walk the dog' }
+  ])
 
   return (
     <ul>
@@ -44,7 +111,7 @@ function TodoList() {
         )}
       </For>
     </ul>
-  );
+  )
 }
 ```
 
@@ -55,9 +122,19 @@ function TodoList() {
 | `each` | `StateGetter<T[]>` | The reactive array to iterate over. |
 | `children` | `(item: T, index: () => number) => FNode` | A render function that receives the item and a reactive index getter. |
 
+### When to Use `<For>` vs `items.map()`
+
+| Feature | `items.map()` | `<For>` |
+| :--- | :--- | :--- |
+| Familiar syntax | ✅ React-like | ❌ New syntax |
+| Reactive index | `index` (number) | `index()` (getter) |
+| Performance | ✅ Same | ✅ Same |
+
+Use whichever you prefer—both have identical performance characteristics.
+
 ### Keying and Caching
 
-`<For>` automatically handles keying based on item reference. When the list order changes, DOM nodes are moved rather than recreated. The `index` argument is a getter function that updates reactively if the item's position changes.
+Both `<For>` and `items.map()` automatically handle keying based on item reference. When the list order changes, DOM nodes are moved rather than recreated.
 
 ---
 
