@@ -15,6 +15,19 @@ head:
 `state()` is the single, unified API for all state management in Flexium.
 It handles local state, shared global state, async data fetching, and derived values.
 
+::: danger Important: Proxy Comparison
+State values are **Proxy objects**. When comparing with `===`, you **must cast to primitive** first:
+```tsx
+// ❌ WRONG - Proxy comparison always fails
+if (count === 5) { ... }
+
+// ✅ CORRECT - Cast to primitive
+if (+count === 5) { ... }        // number (use +)
+if (`${name}` === 'Alice') { }   // string (use template)
+if (user.id === 1) { ... }       // compare properties directly
+```
+:::
+
 ## The `state()` API
 
 The `state` function returns a tuple of `[value, setter]`, similar to React's `useState`, but with supercharged capabilities. The value is a reactive proxy that can be used directly like a regular value.

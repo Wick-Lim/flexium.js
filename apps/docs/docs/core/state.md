@@ -2,6 +2,19 @@
 
 One API for all reactive state.
 
+::: danger Important: Proxy Comparison
+State values are **Proxy objects**. When comparing with `===`, you **must cast to primitive** first:
+```tsx
+// ❌ WRONG - Proxy comparison always fails
+if (count === 5) { ... }
+
+// ✅ CORRECT - Cast to primitive
+if (+count === 5) { ... }        // number (use +)
+if (`${name}` === 'Alice') { }   // string (use template)
+if (user.id === 1) { ... }       // compare properties directly
+```
+:::
+
 <script setup>
 import ShowcaseDemo from '../../components/ShowcaseDemo.vue'
 import ComputedDemo from '../../components/ComputedDemo.vue'
