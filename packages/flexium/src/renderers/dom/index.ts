@@ -152,10 +152,22 @@ function px(value: number | string): string {
 }
 
 /**
+ * Cache for camelCase to kebab-case conversions
+ * Avoids repeated regex operations for common CSS properties
+ */
+const kebabCache = new Map<string, string>()
+
+/**
  * Convert camelCase to kebab-case for CSS property names
+ * Uses memoization for performance
  */
 function toKebabCase(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
+  let result = kebabCache.get(str)
+  if (result === undefined) {
+    result = str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
+    kebabCache.set(str, result)
+  }
+  return result
 }
 
 /**
@@ -248,10 +260,14 @@ function updateStyles(
   }
 
   // 3. Handle Flexium specific style props - only check props that exist
-  const propsToCheck = new Set([
-    ...Object.keys(oldProps).filter((k) => k in STYLE_PROPS_CONFIG),
-    ...Object.keys(newProps).filter((k) => k in STYLE_PROPS_CONFIG),
-  ])
+  // Optimized: avoid creating intermediate arrays with Object.keys()
+  const propsToCheck = new Set<string>()
+  for (const k in oldProps) {
+    if (k in STYLE_PROPS_CONFIG) propsToCheck.add(k)
+  }
+  for (const k in newProps) {
+    if (k in STYLE_PROPS_CONFIG) propsToCheck.add(k)
+  }
 
   for (const propName of propsToCheck) {
     const oldValue = oldProps[propName]
@@ -284,17 +300,33 @@ function updateStyles(
 
 /**
  * Normalize className prop (supports string, array, object)
+ * Optimized single-pass implementation without recursion overhead
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeClass(value: any): string {
   if (typeof value === 'string') return value
   if (Array.isArray(value)) {
-    return value.map(normalizeClass).filter(Boolean).join(' ')
+    // Single-pass iteration without intermediate arrays
+    let result = ''
+    for (let i = 0; i < value.length; i++) {
+      const item = value[i]
+      if (!item) continue
+      const normalized = typeof item === 'string' ? item : normalizeClass(item)
+      if (normalized) {
+        result = result ? `${result} ${normalized}` : normalized
+      }
+    }
+    return result
   }
   if (typeof value === 'object' && value !== null) {
-    return Object.keys(value)
-      .filter((k) => value[k])
-      .join(' ')
+    // Single-pass iteration without intermediate arrays
+    let result = ''
+    for (const k in value) {
+      if (value[k]) {
+        result = result ? `${result} ${k}` : k
+      }
+    }
+    return result
   }
   return ''
 }

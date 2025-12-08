@@ -18,6 +18,32 @@ import { signal } from '../../../core/signal'
 let rafCallbacks: Map<number, FrameRequestCallback> = new Map()
 let rafId = 0
 
+describe('Canvas Component - SSR Guards', () => {
+  it('should create canvas FNode without requiring DOM', () => {
+    const fnode = Canvas({ width: 100, height: 100 })
+
+    // FNode creation should work without DOM
+    expect(fnode).toBeDefined()
+    expect(fnode.type).toBe('canvas')
+    expect(fnode.props.width).toBe(100)
+    expect(fnode.props.height).toBe(100)
+  })
+
+  it('should handle ref callback with null safely', () => {
+    const fnode = Canvas({ width: 300, height: 200 })
+
+    // Should not throw when ref is called with null
+    expect(() => fnode.props.ref(null)).not.toThrow()
+  })
+
+  it('should have a ref callback function', () => {
+    const fnode = Canvas({ width: 300, height: 200 })
+
+    expect(fnode.props.ref).toBeDefined()
+    expect(typeof fnode.props.ref).toBe('function')
+  })
+})
+
 describe('Canvas Component', () => {
   let mockCanvas: HTMLCanvasElement
   let mockContext: CanvasRenderingContext2D

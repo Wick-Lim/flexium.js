@@ -6,7 +6,25 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { eventDelegator } from '../events'
+import { eventDelegator, clearGlobalListeners } from '../events'
+
+describe('Event Delegation System - SSR Guards', () => {
+  it('should export clearGlobalListeners function', () => {
+    expect(typeof clearGlobalListeners).toBe('function')
+  })
+
+  it('should not throw when clearing global listeners', () => {
+    expect(() => clearGlobalListeners()).not.toThrow()
+  })
+
+  it('should be safe to call clearGlobalListeners multiple times', () => {
+    expect(() => {
+      clearGlobalListeners()
+      clearGlobalListeners()
+      clearGlobalListeners()
+    }).not.toThrow()
+  })
+})
 
 describe('Event Delegation System', () => {
   let container: HTMLElement

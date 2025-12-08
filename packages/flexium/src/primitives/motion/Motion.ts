@@ -137,8 +137,31 @@ function springToTiming(spring: SpringConfig): {
 }
 
 /**
+ * Check if user prefers reduced motion
+ * Cached at module level for performance
+ */
+let prefersReducedMotion: boolean | null = null
+
+function checkReducedMotion(): boolean {
+  if (prefersReducedMotion === null) {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      prefersReducedMotion = mediaQuery.matches
+      // Listen for changes
+      mediaQuery.addEventListener('change', (e) => {
+        prefersReducedMotion = e.matches
+      })
+    } else {
+      prefersReducedMotion = false
+    }
+  }
+  return prefersReducedMotion
+}
+
+/**
  * Motion controller class
  * Manages animations for a single element using Web Animations API
+ * Respects prefers-reduced-motion accessibility setting
  */
 export class MotionController {
   private element: HTMLElement
@@ -152,6 +175,7 @@ export class MotionController {
 
   /**
    * Animate from initial to animate props
+   * Respects prefers-reduced-motion: applies end state instantly if enabled
    */
   animate(props: MotionProps): void {
     const {
@@ -167,6 +191,20 @@ export class MotionController {
 
     // Cancel any running animation
     this.cancel()
+
+    // Respect prefers-reduced-motion: skip animation and apply final state instantly
+    if (checkReducedMotion()) {
+      const finalKeyframe = propsToKeyframe(animate)
+      Object.assign(this.element.style, {
+        transform: finalKeyframe.transform || '',
+        opacity: finalKeyframe.opacity || '',
+        width: finalKeyframe.width || '',
+        height: finalKeyframe.height || '',
+      })
+      if (props.onAnimationStart) props.onAnimationStart()
+      if (props.onAnimationComplete) props.onAnimationComplete()
+      return
+    }
 
     // Apply initial state immediately if provided
     if (initial) {
@@ -215,6 +253,7 @@ export class MotionController {
 
   /**
    * Animate exit (used when element is being removed)
+   * Respects prefers-reduced-motion: applies end state instantly if enabled
    */
   async animateExit(
     exitProps: AnimatableProps,
@@ -222,6 +261,18 @@ export class MotionController {
     easing = 'ease-in'
   ): Promise<void> {
     this.cancel()
+
+    // Respect prefers-reduced-motion: skip animation
+    if (checkReducedMotion()) {
+      const finalKeyframe = propsToKeyframe(exitProps)
+      Object.assign(this.element.style, {
+        transform: finalKeyframe.transform || '',
+        opacity: finalKeyframe.opacity || '',
+        width: finalKeyframe.width || '',
+        height: finalKeyframe.height || '',
+      })
+      return
+    }
 
     const to = propsToKeyframe(exitProps)
 

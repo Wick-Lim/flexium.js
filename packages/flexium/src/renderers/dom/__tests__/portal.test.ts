@@ -11,6 +11,38 @@ import { mountReactive, cleanupReactive } from '../reactive'
 import { f } from '../f'
 import { signal } from '../../../core/signal'
 
+describe('Portal Component - SSR Guards', () => {
+  it('should return placeholder comment in browser environment', () => {
+    // The Portal has an SSR guard that checks for document
+    // In browser, it should return a Comment node (placeholder)
+    const portalTarget = document.createElement('div')
+    document.body.appendChild(portalTarget)
+
+    const result = Portal({ mount: portalTarget, children: null })
+    // In browser, it should return a Comment node (placeholder)
+    expect(result instanceof Comment).toBe(true)
+
+    portalTarget.remove()
+  })
+
+  it('should handle null children gracefully', () => {
+    const portalTarget = document.createElement('div')
+    document.body.appendChild(portalTarget)
+
+    expect(() => {
+      Portal({ mount: portalTarget, children: null })
+    }).not.toThrow()
+
+    portalTarget.remove()
+  })
+
+  it('should handle undefined mount with fallback to document.body', () => {
+    const result = Portal({ children: 'test' })
+    // Should create placeholder comment
+    expect(result instanceof Comment).toBe(true)
+  })
+})
+
 describe('Portal Component', () => {
   let container: HTMLElement
   let portalTarget: HTMLElement

@@ -221,9 +221,12 @@ class SignalNode<T> implements IObservable {
       // Queue subscribers for batched execution
       this.subscribers.forEach((sub) => batchQueue.add(sub))
     } else {
-      // Copy subscribers to avoid infinite loops when effects unsubscribe/resubscribe during execution
-      const subscribersToNotify = new Set(this.subscribers)
-      subscribersToNotify.forEach((sub) => sub.execute())
+      // Use array spread instead of new Set() for better performance
+      // This still creates a snapshot to avoid issues when effects unsubscribe/resubscribe
+      const subscribersToNotify = [...this.subscribers]
+      for (let i = 0; i < subscribersToNotify.length; i++) {
+        subscribersToNotify[i].execute()
+      }
     }
   }
 }
@@ -301,10 +304,11 @@ class ComputedNode<T> implements ISubscriber, IObservable {
       // Queue subscribers for batched execution
       this.subscribers.forEach((sub) => batchQueue.add(sub))
     } else {
-      // Run effects immediately - copy subscribers to avoid modification during iteration
-      const subscribersToNotify = new Set(this.subscribers)
-      for (const subscriber of subscribersToNotify) {
-        subscriber.execute()
+      // Use array spread instead of new Set() for better performance
+      // This still creates a snapshot to avoid issues when effects unsubscribe/resubscribe
+      const subscribersToNotify = [...this.subscribers]
+      for (let i = 0; i < subscribersToNotify.length; i++) {
+        subscribersToNotify[i].execute()
       }
     }
   }

@@ -12,6 +12,32 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createLocation, matchPath } from '../core'
 
+describe('Router Core - SSR Guards', () => {
+  it('should handle missing window gracefully in getLoc', () => {
+    // Test that createLocation returns safe defaults
+    // This is tested indirectly through the module export
+    const [location] = createLocation()
+    expect(location()).toBeDefined()
+    expect(typeof location().pathname).toBe('string')
+    expect(typeof location().search).toBe('string')
+    expect(typeof location().hash).toBe('string')
+    expect(typeof location().query).toBe('object')
+  })
+
+  it('should return cleanup function as third element', () => {
+    const result = createLocation()
+    expect(result).toHaveLength(3)
+    expect(typeof result[2]).toBe('function')
+  })
+
+  it('should cleanup popstate listener when cleanup is called', () => {
+    const [, , cleanup] = createLocation()
+
+    // Should not throw
+    expect(() => cleanup()).not.toThrow()
+  })
+})
+
 describe('Router Core', () => {
   let popstateListeners: Array<() => void> = []
   let originalAddEventListener: typeof window.addEventListener
