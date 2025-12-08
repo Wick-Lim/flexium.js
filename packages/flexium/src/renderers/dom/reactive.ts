@@ -304,80 +304,117 @@ export function mountReactive(
       let currentNodes: Node[] = []
       const contextSnapshot = captureContext()
 
-      const dispose = effect(() => {
-        runWithContext(contextSnapshot, () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const contextId = (component as any)._contextId
-          if (contextId) {
-            pushProvider(contextId, vnode.props.value)
-          }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const contextId = (component as any)._contextId
 
-          onCleanup(() => {
-            const currentParent = startNode.parentNode
-            if (currentParent) {
-              let nodeToRemove = startNode.nextSibling
-              for (let i = 0; i < currentNodes.length; i++) {
-                if (nodeToRemove) {
-                  const next = nodeToRemove.nextSibling
-                  cleanupReactive(nodeToRemove)
-                  try {
-                    currentParent.removeChild(nodeToRemove)
-                  } catch (e) {}
-                  nodeToRemove = next
-                }
-              }
+      // Call component function ONCE outside of effect (setup phase)
+      // This ensures state() calls create stable signals
+      let componentResult: unknown
+      let componentError: unknown = null
+
+      runWithContext(contextSnapshot, () => {
+        if (contextId) {
+          pushProvider(contextId, vnode.props.value)
+        }
+        try {
+          componentResult = component({ ...vnode.props, children: vnode.children })
+        } catch (err) {
+          if (err instanceof Promise) {
+            const suspense = context(SuspenseCtx)
+            if (suspense) {
+              suspense.registerPromise(err)
+              componentResult = null
             } else {
-              // If startNode is detached, just cleanup reactions
-              currentNodes.forEach(cleanupReactive)
+              componentError = err
             }
-            currentNodes = []
-          })
-
-          try {
-            let result
-
-            try {
-              result = component({ ...vnode.props, children: vnode.children })
-            } catch (err) {
-              if (err instanceof Promise) {
-                const suspense = context(SuspenseCtx)
-                if (suspense) {
-                  suspense.registerPromise(err)
-                  result = null
-                } else {
-                  throw err
-                }
-              } else {
-                const errorBoundaryCtx = context(ErrorBoundaryCtx)
-                if (errorBoundaryCtx) {
-                  errorBoundaryCtx.setError(err)
-                  result = null
-                } else {
-                  throw err
-                }
-              }
-            }
-
-            const fragment = document.createDocumentFragment()
-            mountReactive(result, fragment)
-
-            const currentParent = startNode.parentNode
-            if (currentParent) {
-              currentNodes = Array.from(fragment.childNodes)
-              currentParent.insertBefore(fragment, startNode.nextSibling)
-            }
-          } finally {
-            if (contextId) {
-              popProvider(contextId)
+          } else {
+            const errorBoundaryCtx = context(ErrorBoundaryCtx)
+            if (errorBoundaryCtx) {
+              errorBoundaryCtx.setError(err)
+              componentResult = null
+            } else {
+              componentError = err
             }
           }
-        })
+        } finally {
+          if (contextId) {
+            popProvider(contextId)
+          }
+        }
       })
 
-      if (!REACTIVE_BINDINGS.has(startNode)) {
-        REACTIVE_BINDINGS.set(startNode, new Set())
+      if (componentError) {
+        throw componentError
       }
-      REACTIVE_BINDINGS.get(startNode)!.add(dispose)
+
+      // If component returns a function (render function pattern),
+      // wrap it in an effect for reactive updates
+      if (typeof componentResult === 'function') {
+        const renderFn = componentResult as () => unknown
+
+        const dispose = effect(() => {
+          runWithContext(contextSnapshot, () => {
+            if (contextId) {
+              pushProvider(contextId, vnode.props.value)
+            }
+
+            onCleanup(() => {
+              const currentParent = startNode.parentNode
+              if (currentParent) {
+                let nodeToRemove = startNode.nextSibling
+                for (let i = 0; i < currentNodes.length; i++) {
+                  if (nodeToRemove) {
+                    const next = nodeToRemove.nextSibling
+                    cleanupReactive(nodeToRemove)
+                    try {
+                      currentParent.removeChild(nodeToRemove)
+                    } catch (e) {}
+                    nodeToRemove = next
+                  }
+                }
+              } else {
+                currentNodes.forEach(cleanupReactive)
+              }
+              currentNodes = []
+            })
+
+            try {
+              // Only call the render function, not the whole component
+              const result = renderFn()
+
+              const fragment = document.createDocumentFragment()
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              mountReactive(result as any, fragment)
+
+              const currentParent = startNode.parentNode
+              if (currentParent) {
+                currentNodes = Array.from(fragment.childNodes)
+                currentParent.insertBefore(fragment, startNode.nextSibling)
+              }
+            } finally {
+              if (contextId) {
+                popProvider(contextId)
+              }
+            }
+          })
+        })
+
+        if (!REACTIVE_BINDINGS.has(startNode)) {
+          REACTIVE_BINDINGS.set(startNode, new Set())
+        }
+        REACTIVE_BINDINGS.get(startNode)!.add(dispose)
+      } else {
+        // Component returns static VNode - mount directly without effect wrapper
+        // The VNode itself may contain reactive parts that will be handled by mountReactive
+        const fragment = document.createDocumentFragment()
+        mountReactive(componentResult, fragment)
+
+        const currentParent = startNode.parentNode || parent
+        if (currentParent) {
+          currentNodes = Array.from(fragment.childNodes)
+          currentParent.insertBefore(fragment, startNode.nextSibling)
+        }
+      }
 
       return container ? startNode : parent
     }
