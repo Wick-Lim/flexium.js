@@ -46,7 +46,8 @@ const [doubled] = state(() => count * 2)
 - Automatic dependency tracking
 - No unnecessary re-renders
 - Event delegation for memory efficiency
-- **Reactive `.map()`**: `items.map()` is automatically reactive and optimized (unlike SolidJS where you need `<For>`)
+- **Reactive `.map()`**: `items.map()` is automatically reactive and optimized (no `<For>` component needed)
+- **React-like syntax**: Use `{condition && <X />}` and `{items.map(...)}` directly - no special components
 
 ## Architecture Principles
 
@@ -147,6 +148,17 @@ effect(() => {
 4. **Don't break the API consistency**
    - `state()` is the unified API - keep it unified
    - Avoid adding new top-level APIs unless absolutely necessary
+
+5. **Use React-like syntax for control flow**
+   ```javascript
+   // Good: Native JS
+   {isLoggedIn && <Dashboard />}
+   {items.map(item => <Item key={item.id} />)}
+
+   // Bad: Don't use Show/For components (removed)
+   <Show when={isLoggedIn}><Dashboard /></Show>
+   <For each={items}>{item => <Item />}</For>
+   ```
 
 ## Testing Standards
 

@@ -41,7 +41,7 @@ const [user] = state(async () => fetchUser(id))
 
 ### Computed Values
 ```javascript
-const [doubled] = state(() => count() * 2)
+const [doubled] = state(() => count * 2)
 ```
 
 Same function. Same mental model. Different capabilities based on what you pass.
@@ -178,12 +178,12 @@ import { render, Row, Column, Button, Text } from 'flexium/dom'
 
 function App() {
   const [count, setCount] = state(0)
-  const [doubled] = state(() => count() * 2)
+  const [doubled] = state(() => count * 2)
 
   return (
     <Column gap={16}>
-      <Text>Count: {count()}</Text>
-      <Text>Doubled: {doubled()}</Text>
+      <Text>Count: {count}</Text>
+      <Text>Doubled: {doubled}</Text>
       <Row gap={8}>
         <Button onClick={() => setCount(c => c - 1)}>-</Button>
         <Button onClick={() => setCount(c => c + 1)}>+</Button>
