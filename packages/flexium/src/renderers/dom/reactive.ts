@@ -312,6 +312,10 @@ export function mountReactive(
       let componentResult: unknown
       let componentError: unknown = null
 
+      // For Provider components, we need to keep context during children mount
+      // So we don't pop the context in setup phase for Providers
+      const isProvider = !!contextId
+
       runWithContext(contextSnapshot, () => {
         if (contextId) {
           pushProvider(contextId, vnode.props.value)
@@ -337,13 +341,18 @@ export function mountReactive(
             }
           }
         } finally {
-          if (contextId) {
+          // Don't pop context for Providers yet - we need it during children mount
+          if (contextId && !isProvider) {
             popProvider(contextId)
           }
         }
       })
 
       if (componentError) {
+        // Pop context if we had an error and it's a Provider
+        if (isProvider && contextId) {
+          popProvider(contextId)
+        }
         throw componentError
       }
 
@@ -351,6 +360,11 @@ export function mountReactive(
       // wrap it in an effect for reactive updates
       if (typeof componentResult === 'function') {
         const renderFn = componentResult as () => unknown
+
+        // Pop Provider context now since render function will handle its own context
+        if (isProvider && contextId) {
+          popProvider(contextId)
+        }
 
         const dispose = effect(() => {
           runWithContext(contextSnapshot, () => {
@@ -406,9 +420,15 @@ export function mountReactive(
       } else {
         // Component returns static VNode - mount directly without effect wrapper
         // The VNode itself may contain reactive parts that will be handled by mountReactive
+        // For Providers, context is still active during this mount
         const fragment = document.createDocumentFragment()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mountReactive(componentResult as any, fragment)
+
+        // Pop Provider context after children are mounted
+        if (isProvider && contextId) {
+          popProvider(contextId)
+        }
 
         const currentParent = startNode.parentNode || parent
         if (currentParent) {

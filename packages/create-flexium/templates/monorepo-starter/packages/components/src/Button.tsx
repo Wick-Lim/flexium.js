@@ -1,5 +1,3 @@
-import { h } from 'flexium'
-
 interface ButtonProps {
   children: any
   onClick?: () => void

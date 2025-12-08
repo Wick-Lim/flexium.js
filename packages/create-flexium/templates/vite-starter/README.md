@@ -85,15 +85,16 @@ Create new components in the `src/` directory:
 
 ```tsx
 // src/MyComponent.tsx
-import { signal } from 'flexium/core'
+import { state } from 'flexium/core'
+
+// State must be declared outside component
+const [count, setCount] = state(0)
 
 export function MyComponent() {
-  const count = signal(0)
-
   return (
     <div>
-      <p>Count: {count.value}</p>
-      <button onclick={() => count.value++}>
+      <p>Count: {count}</p>
+      <button onclick={() => setCount(c => c + 1)}>
         Increment
       </button>
     </div>
@@ -115,28 +116,29 @@ function App() {
 }
 ```
 
-### Using Signals
+### Using State
 
-Signals are the core of Flexium's reactivity:
+State is the core of Flexium's reactivity:
 
 ```tsx
-import { signal, computed, effect } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 
-// Create a signal
-const count = signal(0)
+// Create state (must be outside component)
+const [count, setCount] = state(0)
 
-// Read signal value
-console.log(count.value) // 0
+// Read state value
+console.log(+count) // 0
 
-// Update signal value
-count.value++ // Triggers reactive updates
+// Update state value
+setCount(1) // Set directly
+setCount(c => c + 1) // With updater function
 
-// Create computed (derived) values
-const doubled = computed(() => count.value * 2)
+// Create derived (computed) values
+const [doubled] = state(() => count * 2)
 
 // Run side effects
 effect(() => {
-  console.log('Count changed:', count.value)
+  console.log('Count changed:', +count)
 })
 ```
 

@@ -1,4 +1,3 @@
-import { h } from 'flexium'
 import { App } from '../client/App.js'
 
 export function render(url) {
