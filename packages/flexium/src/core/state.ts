@@ -33,6 +33,55 @@ interface StateActions {
 // Global registry for keyed states
 const globalStateRegistry = new Map<string, StateObject>()
 
+// ============================================================================
+// Component Hook System - enables state() inside components
+// ============================================================================
+
+interface ComponentInstance {
+  id: symbol
+  hookIndex: number
+  hooks: unknown[]
+}
+
+let currentComponent: ComponentInstance | null = null
+
+/**
+ * Set the current component context for hook tracking.
+ * Called by the renderer before executing a component function.
+ * @internal
+ */
+export function setCurrentComponent(instance: ComponentInstance | null): void {
+  currentComponent = instance
+}
+
+/**
+ * Get the current component context.
+ * @internal
+ */
+export function getCurrentComponent(): ComponentInstance | null {
+  return currentComponent
+}
+
+/**
+ * Create a new component instance for hook tracking.
+ * @internal
+ */
+export function createComponentInstance(): ComponentInstance {
+  return {
+    id: Symbol('component'),
+    hookIndex: 0,
+    hooks: [],
+  }
+}
+
+/**
+ * Reset hook index for re-renders.
+ * @internal
+ */
+export function resetHookIndex(instance: ComponentInstance): void {
+  instance.hookIndex = 0
+}
+
 /** Key type - string or array of serializable values */
 export type StateKey = string | readonly (string | number | boolean | null | undefined | object)[]
 
@@ -274,6 +323,30 @@ export function state<T, P = unknown>(
 ): [StateValue<T>] | [StateValue<T>, StateAction<T>] | [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>] {
   const key = options?.key ? serializeKey(options.key) : undefined
   const params = options?.params
+
+  // 0. Hook System - reuse state from previous render if inside a component
+  if (currentComponent && !key) {
+    const comp = currentComponent
+    const hookIndex = comp.hookIndex++
+
+    // Return existing hook if available
+    if (hookIndex < comp.hooks.length) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return comp.hooks[hookIndex] as any
+    }
+
+    // Create new state and store in hooks array
+    // Temporarily clear currentComponent to avoid infinite recursion
+    const savedComponent = currentComponent
+    currentComponent = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = state(initialValueOrFetcher as any, options as any)
+    currentComponent = savedComponent
+
+    comp.hooks.push(result)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return result as any
+  }
 
   // 1. Check Global Registry for keyed state
   if (key && globalStateRegistry.has(key)) {

@@ -2,22 +2,22 @@ import { state, effect } from 'flexium/core'
 import { render } from 'flexium/dom'
 import './style.css'
 
-// State declared outside component to persist across renders
-const [count, setCount] = state(0)
-const [doubled] = state(() => count * 2)
-const [tripled] = state(() => count * 3)
-
-// Effect for logging
-effect(() => {
-  console.log('Count changed:', +count)
-})
-
-// Event handlers
-const increment = () => setCount(c => c + 1)
-const decrement = () => setCount(c => c - 1)
-const reset = () => setCount(0)
-
 function App() {
+  // State inside component - now works with hook system!
+  const [count, setCount] = state(0)
+  const [doubled] = state(() => count * 2)
+  const [tripled] = state(() => count * 3)
+
+  // Effect for logging
+  effect(() => {
+    console.log('Count changed:', +count)
+  })
+
+  // Event handlers
+  const increment = () => setCount(c => c + 1)
+  const decrement = () => setCount(c => c - 1)
+  const reset = () => setCount(0)
+
   return (
     <div class="container">
       <div class="hero">

@@ -21,7 +21,13 @@ import {
 import { reconcileArrays } from './reconcile'
 import { SuspenseCtx } from '../../core/suspense'
 import { ErrorBoundaryCtx } from '../../core/error-boundary'
-import { isStateValue, getStateSignal } from '../../core/state'
+import {
+  isStateValue,
+  getStateSignal,
+  setCurrentComponent,
+  createComponentInstance,
+  resetHookIndex,
+} from '../../core/state'
 import {
   isListComponent,
   mountListComponent,
@@ -304,138 +310,91 @@ export function mountReactive(
       let currentNodes: Node[] = []
       const contextSnapshot = captureContext()
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const contextId = (component as any)._contextId
+      // Create component instance for hook tracking
+      const componentInstance = createComponentInstance()
 
-      // Call component function ONCE outside of effect (setup phase)
-      // This ensures state() calls create stable signals
-      let componentResult: unknown
-      let componentError: unknown = null
+      const dispose = effect(() => {
+        // Reset hook index for each render
+        resetHookIndex(componentInstance)
 
-      // For Provider components, we need to keep context during children mount
-      // So we don't pop the context in setup phase for Providers
-      const isProvider = !!contextId
-
-      runWithContext(contextSnapshot, () => {
-        if (contextId) {
-          pushProvider(contextId, vnode.props.value)
-        }
-        try {
-          componentResult = component({ ...vnode.props, children: vnode.children })
-        } catch (err) {
-          if (err instanceof Promise) {
-            const suspense = context(SuspenseCtx)
-            if (suspense) {
-              suspense.registerPromise(err)
-              componentResult = null
-            } else {
-              componentError = err
-            }
-          } else {
-            const errorBoundaryCtx = context(ErrorBoundaryCtx)
-            if (errorBoundaryCtx) {
-              errorBoundaryCtx.setError(err)
-              componentResult = null
-            } else {
-              componentError = err
-            }
+        runWithContext(contextSnapshot, () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const contextId = (component as any)._contextId
+          if (contextId) {
+            pushProvider(contextId, vnode.props.value)
           }
-        } finally {
-          // Don't pop context for Providers yet - we need it during children mount
-          if (contextId && !isProvider) {
-            popProvider(contextId)
-          }
-        }
-      })
 
-      if (componentError) {
-        // Pop context if we had an error and it's a Provider
-        if (isProvider && contextId) {
-          popProvider(contextId)
-        }
-        throw componentError
-      }
-
-      // If component returns a function (render function pattern),
-      // wrap it in an effect for reactive updates
-      if (typeof componentResult === 'function') {
-        const renderFn = componentResult as () => unknown
-
-        // Pop Provider context now since render function will handle its own context
-        if (isProvider && contextId) {
-          popProvider(contextId)
-        }
-
-        const dispose = effect(() => {
-          runWithContext(contextSnapshot, () => {
-            if (contextId) {
-              pushProvider(contextId, vnode.props.value)
-            }
-
-            onCleanup(() => {
-              const currentParent = startNode.parentNode
-              if (currentParent) {
-                let nodeToRemove = startNode.nextSibling
-                for (let i = 0; i < currentNodes.length; i++) {
-                  if (nodeToRemove) {
-                    const next = nodeToRemove.nextSibling
-                    cleanupReactive(nodeToRemove)
-                    try {
-                      currentParent.removeChild(nodeToRemove)
-                    } catch (e) {}
-                    nodeToRemove = next
-                  }
+          onCleanup(() => {
+            const currentParent = startNode.parentNode
+            if (currentParent) {
+              let nodeToRemove = startNode.nextSibling
+              for (let i = 0; i < currentNodes.length; i++) {
+                if (nodeToRemove) {
+                  const next = nodeToRemove.nextSibling
+                  cleanupReactive(nodeToRemove)
+                  try {
+                    currentParent.removeChild(nodeToRemove)
+                  } catch (e) {}
+                  nodeToRemove = next
                 }
-              } else {
-                currentNodes.forEach(cleanupReactive)
               }
-              currentNodes = []
-            })
+            } else {
+              // If startNode is detached, just cleanup reactions
+              currentNodes.forEach(cleanupReactive)
+            }
+            currentNodes = []
+          })
+
+          try {
+            let result
 
             try {
-              // Only call the render function, not the whole component
-              const result = renderFn()
-
-              const fragment = document.createDocumentFragment()
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              mountReactive(result as any, fragment)
-
-              const currentParent = startNode.parentNode
-              if (currentParent) {
-                currentNodes = Array.from(fragment.childNodes)
-                currentParent.insertBefore(fragment, startNode.nextSibling)
+              // Set current component for hook tracking
+              setCurrentComponent(componentInstance)
+              result = component({ ...vnode.props, children: vnode.children })
+            } catch (err) {
+              if (err instanceof Promise) {
+                const suspense = context(SuspenseCtx)
+                if (suspense) {
+                  suspense.registerPromise(err)
+                  result = null
+                } else {
+                  throw err
+                }
+              } else {
+                const errorBoundaryCtx = context(ErrorBoundaryCtx)
+                if (errorBoundaryCtx) {
+                  errorBoundaryCtx.setError(err)
+                  result = null
+                } else {
+                  throw err
+                }
               }
             } finally {
-              if (contextId) {
-                popProvider(contextId)
-              }
+              // Clear current component
+              setCurrentComponent(null)
             }
-          })
+
+            const fragment = document.createDocumentFragment()
+            mountReactive(result, fragment)
+
+            const currentParent = startNode.parentNode
+            if (currentParent) {
+              currentNodes = Array.from(fragment.childNodes)
+              currentParent.insertBefore(fragment, startNode.nextSibling)
+            }
+          } finally {
+            if (contextId) {
+              popProvider(contextId)
+            }
+          }
         })
+      })
 
-        if (!REACTIVE_BINDINGS.has(startNode)) {
-          REACTIVE_BINDINGS.set(startNode, new Set())
-        }
-        REACTIVE_BINDINGS.get(startNode)!.add(dispose)
-      } else {
-        // Component returns static VNode - mount directly without effect wrapper
-        // The VNode itself may contain reactive parts that will be handled by mountReactive
-        // For Providers, context is still active during this mount
-        const fragment = document.createDocumentFragment()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        mountReactive(componentResult as any, fragment)
-
-        // Pop Provider context after children are mounted
-        if (isProvider && contextId) {
-          popProvider(contextId)
-        }
-
-        const currentParent = startNode.parentNode || parent
-        if (currentParent) {
-          currentNodes = Array.from(fragment.childNodes)
-          currentParent.insertBefore(fragment, startNode.nextSibling)
-        }
+      if (!REACTIVE_BINDINGS.has(startNode)) {
+        REACTIVE_BINDINGS.set(startNode, new Set())
       }
+      REACTIVE_BINDINGS.get(startNode)!.add(dispose)
 
       return container ? startNode : parent
     }
