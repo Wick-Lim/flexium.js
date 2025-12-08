@@ -1,6 +1,6 @@
 # eslint-plugin-flexium
 
-ESLint plugin for [Flexium](https://github.com/Wick-Lim/flexium.js) with rules for best practices.
+ESLint plugin for [Flexium](https://flexium.junhyuk.im) with rules for best practices.
 
 ## Installation
 

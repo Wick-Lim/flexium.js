@@ -208,10 +208,8 @@ node_modules    # reserved name
 
 ## Learn More
 
-- [Flexium Documentation](https://github.com/Wick-Lim/flexium.js)
-- [Quick Start Guide](https://github.com/Wick-Lim/flexium.js/blob/main/QUICK_START.md)
-- [Examples](https://github.com/Wick-Lim/flexium.js/blob/main/EXAMPLES.md)
-- [API Reference](https://github.com/Wick-Lim/flexium.js/blob/main/docs/API.md)
+- [Flexium Documentation](https://flexium.junhyuk.im)
+- [GitHub Repository](https://github.com/Wick-Lim/flexium.js)
 
 ## License
 

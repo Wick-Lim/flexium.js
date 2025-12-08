@@ -1,6 +1,6 @@
 # vite-plugin-flexium
 
-Official Vite plugin for Flexium - a fine-grained reactive UI framework.
+Official Vite plugin for [Flexium](https://flexium.junhyuk.im) - a fine-grained reactive UI framework.
 
 ## Features
 

@@ -197,7 +197,7 @@ function App() {
 
 ## Documentation
 
-Full documentation available at [https://flexium.dev](https://flexium.dev)
+Full documentation available at [https://flexium.junhyuk.im](https://flexium.junhyuk.im)
 
 ## License
 
