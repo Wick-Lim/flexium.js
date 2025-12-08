@@ -30,7 +30,8 @@ interface StateActions {
   refetch?: () => void
 }
 
-// Global registry for keyed states
+// Global registry for keyed states with size limit to prevent memory leaks
+const MAX_GLOBAL_STATE_SIZE = 10000
 const globalStateRegistry = new Map<string, StateObject>()
 
 // ============================================================================
@@ -93,7 +94,33 @@ function serializeKey(key: StateKey): string {
   if (typeof key === 'string') {
     return key
   }
-  return JSON.stringify(key)
+  try {
+    return JSON.stringify(key)
+  } catch (error) {
+    // Handle circular references or other serialization errors
+    console.warn('[Flexium] Failed to serialize state key, using fallback:', error)
+    return String(key)
+  }
+}
+
+/**
+ * Ensure the global state registry doesn't exceed the maximum size.
+ * Uses LRU-like eviction by removing the oldest entries.
+ * @internal
+ */
+function ensureRegistrySize(): void {
+  if (globalStateRegistry.size >= MAX_GLOBAL_STATE_SIZE) {
+    // Remove oldest 10% of entries to make room
+    const entriesToRemove = Math.ceil(MAX_GLOBAL_STATE_SIZE * 0.1)
+    const keys = Array.from(globalStateRegistry.keys())
+    for (let i = 0; i < entriesToRemove && i < keys.length; i++) {
+      globalStateRegistry.delete(keys[i])
+    }
+    console.warn(
+      `[Flexium] Global state registry exceeded ${MAX_GLOBAL_STATE_SIZE} entries. ` +
+      `Removed ${entriesToRemove} oldest entries. Consider using clearGlobalState() or deleteGlobalState() to clean up unused states.`
+    )
+  }
 }
 
 /** Action function type for state mutation */
@@ -403,6 +430,7 @@ export function state<T, P = unknown>(
       s._stateActions = resActions as StateActions
 
       if (key) {
+        ensureRegistrySize()
         globalStateRegistry.set(key, s)
       }
 
@@ -429,6 +457,7 @@ export function state<T, P = unknown>(
       const comp = createComputed(fn as () => T)
       const s = { _signal: comp, _isComputed: true } as unknown as StateObject
       if (key) {
+        ensureRegistrySize()
         globalStateRegistry.set(key, s)
       }
       return [createStateProxy(comp)] as [StateValue<T>]
@@ -442,6 +471,7 @@ export function state<T, P = unknown>(
       s._stateActions = resActions as StateActions
 
       if (key) {
+        ensureRegistrySize()
         globalStateRegistry.set(key, s)
       }
 
@@ -462,6 +492,7 @@ export function state<T, P = unknown>(
     const comp = createComputed(fn as () => T)
     const s = { _signal: comp, _isComputed: true } as unknown as StateObject
     if (key) {
+      ensureRegistrySize()
       globalStateRegistry.set(key, s)
     }
     return [createStateProxy(comp)] as [StateValue<T>]
@@ -473,6 +504,7 @@ export function state<T, P = unknown>(
   s._signal = sig as unknown as Signal<unknown>
 
   if (key) {
+    ensureRegistrySize()
     globalStateRegistry.set(key, s)
   }
 
@@ -491,6 +523,34 @@ export function state<T, P = unknown>(
 /**
  * Clear all global states (useful for testing or resetting app)
  */
-export function clearGlobalState() {
+export function clearGlobalState(): void {
   globalStateRegistry.clear()
+}
+
+/**
+ * Delete a specific global state by key
+ * @param key - The key of the state to delete
+ * @returns true if the state was deleted, false if it didn't exist
+ */
+export function deleteGlobalState(key: StateKey): boolean {
+  const serializedKey = serializeKey(key)
+  return globalStateRegistry.delete(serializedKey)
+}
+
+/**
+ * Check if a global state exists
+ * @param key - The key to check
+ * @returns true if the state exists
+ */
+export function hasGlobalState(key: StateKey): boolean {
+  const serializedKey = serializeKey(key)
+  return globalStateRegistry.has(serializedKey)
+}
+
+/**
+ * Get the current number of global states
+ * @returns The number of global states in the registry
+ */
+export function getGlobalStateCount(): number {
+  return globalStateRegistry.size
 }

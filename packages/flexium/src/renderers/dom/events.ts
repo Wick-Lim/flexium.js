@@ -1,4 +1,5 @@
 import type { EventHandler } from '../../core/renderer'
+import { logError, ErrorCodes } from '../../core/errors'
 
 // Map of event names to global listener status
 const globalListeners = new Set<string>()
@@ -32,7 +33,11 @@ function dispatchEvent(event: Event) {
     if (handlers && handlers.has(eventType)) {
       const handler = handlers.get(eventType)
       if (handler) {
-        handler(event)
+        try {
+          handler(event)
+        } catch (error) {
+          logError(ErrorCodes.EVENT_HANDLER_FAILED, { eventType }, error)
+        }
         if (event.cancelBubble) {
           break
         }

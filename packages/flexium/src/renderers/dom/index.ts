@@ -159,6 +159,20 @@ function toKebabCase(str: string): string {
 }
 
 /**
+ * Escape special characters in HTML attribute values to prevent XSS
+ * @param value - Attribute value to escape
+ * @returns Escaped value safe for HTML attributes
+ */
+function escapeAttrValue(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+/**
  * Transform a value based on the config type
  */
 function transformValue(
@@ -358,7 +372,8 @@ export class DOMRenderer implements Renderer {
         } else if (newVal === true) {
           node.setAttribute(strKey, '')
         } else {
-          node.setAttribute(strKey, String(newVal))
+          // Escape attribute value to prevent XSS attacks
+          node.setAttribute(strKey, escapeAttrValue(String(newVal)))
         }
       }
     }

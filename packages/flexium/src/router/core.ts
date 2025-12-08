@@ -37,6 +37,11 @@ export function createLocation(): [Signal<Location>, (path: string) => void] {
   const loc = signal(getLoc())
 
   const navigate = (path: string) => {
+    // Security: Validate path to prevent javascript: and other dangerous protocols
+    if (isUnsafePath(path)) {
+      console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
+      return
+    }
     window.history.pushState({}, '', path)
     loc.value = getLoc()
   }
@@ -49,6 +54,30 @@ export function createLocation(): [Signal<Location>, (path: string) => void] {
 }
 
 /**
+ * Check if a path contains unsafe protocols (XSS prevention)
+ * @param path - Path to validate
+ * @returns true if path is unsafe
+ */
+function isUnsafePath(path: string): boolean {
+  const normalizedPath = path.trim().toLowerCase()
+  const unsafeProtocols = ['javascript:', 'data:', 'vbscript:', 'file:']
+  return unsafeProtocols.some(protocol => normalizedPath.startsWith(protocol))
+}
+
+/**
+ * Sanitize query parameter value to prevent XSS
+ * @param value - Query parameter value
+ * @returns Sanitized value
+ */
+function sanitizeQueryValue(value: string): string {
+  // Remove potential script tags and event handlers
+  return value
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers like onclick=
+}
+
+/**
  * Parses URL search string into key-value object
  * @param search - URL search string (e.g., "?foo=bar&baz=qux")
  * @returns Object with query parameters
@@ -57,7 +86,12 @@ function parseQuery(search: string): Record<string, string> {
   const params = new URLSearchParams(search)
   const query: Record<string, string> = {}
   params.forEach((value, key) => {
-    query[key] = value
+    // Sanitize both key and value to prevent XSS
+    const sanitizedKey = sanitizeQueryValue(key)
+    const sanitizedValue = sanitizeQueryValue(value)
+    if (sanitizedKey) {
+      query[sanitizedKey] = sanitizedValue
+    }
   })
   return query
 }

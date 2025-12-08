@@ -432,6 +432,9 @@ export function mountReactive(
   return null
 }
 
+// Sentinel value to detect first run
+const UNINITIALIZED = Symbol('uninitialized')
+
 function setupReactiveProps(
   node: HTMLElement,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -443,21 +446,41 @@ function setupReactiveProps(
     if (key.startsWith('on')) continue
 
     if (isSignal(value)) {
+      // Track previous value to avoid unnecessary DOM updates
+      // Use sentinel for first run to ensure initial value is set
+      let prevValue: unknown = UNINITIALIZED
       const dispose = effect(() => {
-        domRenderer.updateNode(
-          node,
-          { [key]: undefined },
-          { [key]: value.value }
-        )
+        const newValue = value.value
+        // Only update DOM if value actually changed (always update on first run)
+        if (newValue !== prevValue) {
+          domRenderer.updateNode(
+            node,
+            { [key]: prevValue === UNINITIALIZED ? undefined : prevValue },
+            { [key]: newValue }
+          )
+          prevValue = newValue
+        }
       })
       disposers.push(dispose)
       continue
     }
 
     if (typeof value === 'function') {
+      // Track previous value to avoid unnecessary DOM updates
+      // Use sentinel for first run to ensure initial value is set
+      let prevValue: unknown = UNINITIALIZED
       const dispose = effect(() => {
         try {
-          domRenderer.updateNode(node, { [key]: undefined }, { [key]: value() })
+          const newValue = value()
+          // Only update DOM if value actually changed (always update on first run)
+          if (newValue !== prevValue) {
+            domRenderer.updateNode(
+              node,
+              { [key]: prevValue === UNINITIALIZED ? undefined : prevValue },
+              { [key]: newValue }
+            )
+            prevValue = newValue
+          }
         } catch (e) {}
       })
       disposers.push(dispose)
