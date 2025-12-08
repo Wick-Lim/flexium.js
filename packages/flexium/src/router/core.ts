@@ -58,7 +58,7 @@ export function createLocation(): [Signal<Location>, (path: string) => void] {
  * @param path - Path to validate
  * @returns true if path is unsafe
  */
-function isUnsafePath(path: string): boolean {
+export function isUnsafePath(path: string): boolean {
   const normalizedPath = path.trim().toLowerCase()
   const unsafeProtocols = ['javascript:', 'data:', 'vbscript:', 'file:']
   return unsafeProtocols.some(protocol => normalizedPath.startsWith(protocol))
@@ -69,7 +69,7 @@ function isUnsafePath(path: string): boolean {
  * @param value - Query parameter value
  * @returns Sanitized value
  */
-function sanitizeQueryValue(value: string): string {
+export function sanitizeQueryValue(value: string): string {
   // Remove potential script tags and event handlers
   return value
     .replace(/<[^>]*>/g, '') // Remove HTML tags

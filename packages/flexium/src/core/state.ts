@@ -86,20 +86,34 @@ export function resetHookIndex(instance: ComponentInstance): void {
 /** Key type - string or array of serializable values */
 export type StateKey = string | readonly (string | number | boolean | null | undefined | object)[]
 
+// Cache for array key serialization to avoid repeated JSON.stringify calls
+const keyCache = new WeakMap<readonly unknown[], string>()
+
 /**
  * Serialize a key to a string for registry lookup.
  * Arrays are JSON-stringified for consistent comparison.
+ * Uses WeakMap cache to avoid repeated serialization of array keys.
  */
 function serializeKey(key: StateKey): string {
   if (typeof key === 'string') {
     return key
   }
+
+  // Check cache first for array keys
+  const cached = keyCache.get(key)
+  if (cached !== undefined) {
+    return cached
+  }
+
   try {
-    return JSON.stringify(key)
+    const serialized = JSON.stringify(key)
+    keyCache.set(key, serialized)
+    return serialized
   } catch (error) {
     // Handle circular references or other serialization errors
     console.warn('[Flexium] Failed to serialize state key, using fallback:', error)
-    return String(key)
+    const fallback = String(key)
+    return fallback
   }
 }
 

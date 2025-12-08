@@ -163,7 +163,7 @@ function toKebabCase(str: string): string {
  * @param value - Attribute value to escape
  * @returns Escaped value safe for HTML attributes
  */
-function escapeAttrValue(value: string): string {
+export function escapeAttrValue(value: string): string {
   return value
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
@@ -247,8 +247,13 @@ function updateStyles(
       style.flexDirection = 'column'
   }
 
-  // 3. Handle Flexium specific style props using data-driven config
-  for (const propName in STYLE_PROPS_CONFIG) {
+  // 3. Handle Flexium specific style props - only check props that exist
+  const propsToCheck = new Set([
+    ...Object.keys(oldProps).filter((k) => k in STYLE_PROPS_CONFIG),
+    ...Object.keys(newProps).filter((k) => k in STYLE_PROPS_CONFIG),
+  ])
+
+  for (const propName of propsToCheck) {
     const oldValue = oldProps[propName]
     const newValue = newProps[propName]
 

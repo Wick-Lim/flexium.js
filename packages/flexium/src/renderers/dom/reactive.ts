@@ -506,8 +506,11 @@ export function cleanupReactive(node: Node): void {
     bindings.forEach((dispose) => dispose())
     REACTIVE_BINDINGS.delete(node)
   }
-  if (node.childNodes) {
-    node.childNodes.forEach((child) => cleanupReactive(child))
+  if (node.childNodes && node.childNodes.length > 0) {
+    const children = Array.from(node.childNodes)
+    for (const child of children) {
+      cleanupReactive(child)
+    }
   }
 }
 

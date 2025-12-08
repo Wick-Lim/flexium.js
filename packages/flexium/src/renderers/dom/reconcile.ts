@@ -72,9 +72,11 @@ export function reconcileArrays(
     seen.add(key)
 
     const oldFNode = keyToOldFNode.get(key)
+    // Cache the current child at position i to avoid multiple live NodeList accesses
+    const currentChild = parent.childNodes[i]
     const refNode = nextSibling
-      ? (i < parent.childNodes.length ? parent.childNodes[i] : nextSibling)
-      : parent.childNodes[i] || null
+      ? (currentChild || nextSibling)
+      : currentChild || null
 
     if (!oldFNode || oldFNode.type !== newFNode.type) {
       // New node or type changed: create and insert
@@ -89,7 +91,8 @@ export function reconcileArrays(
       patchNode(oldFNode, newFNode)
 
       const node = getNode(newFNode)
-      if (node && parent.childNodes[i] !== node) {
+      // Use cached currentChild to avoid redundant live NodeList access
+      if (node && currentChild !== node) {
         // Position wrong: move to correct position
         parent.insertBefore(node, refNode)
       }
