@@ -1,79 +1,38 @@
 # Framework Comparison
 
-This guide compares Flexium with React and SolidJS to help you understand the differences and make informed decisions.
+How does Flexium compare to React and SolidJS? This guide helps you understand the key differences.
 
-## Overview
+## At a Glance
 
-| Feature | React | SolidJS | Flexium |
-|---------|-------|---------|---------|
-| **Reactivity** | Virtual DOM | Signals | Signals |
-| **API Philosophy** | Hooks (multiple) | Primitives (multiple) | Unified (`state()`) |
-| **Re-rendering** | Component tree | Fine-grained | Fine-grained |
-| **Bundle Size** | ~42KB | ~7KB | ~8KB |
-| **Learning Curve** | Moderate | Moderate | Low |
-| **Ecosystem** | Massive | Growing | New |
+| Feature | Flexium | React | SolidJS |
+|---------|---------|-------|---------|
+| **Reactivity** | Signals | Virtual DOM | Signals |
+| **API Philosophy** | Unified (`state()`) | Hooks (multiple) | Primitives (multiple) |
+| **Re-rendering** | Fine-grained | Component tree | Fine-grained |
+| **List Rendering** | `items.map()` works | `items.map()` works | Need `<For>` |
+| **Bundle Size** | ~8KB | ~42KB | ~7KB |
+| **Learning Curve** | Low | Moderate | Moderate |
 
-## Architecture Comparison
+## The Flexium Difference
 
-### React: Virtual DOM
-
-React uses a Virtual DOM to batch and optimize DOM updates:
-
-```
-State Change → Re-render Component → Diff Virtual DOM → Patch Real DOM
-```
-
-**Pros:**
-- Battle-tested, massive ecosystem
-- Familiar to most developers
-- Extensive tooling and libraries
-
-**Cons:**
-- Overhead from diffing algorithm
-- Requires optimization (memo, useMemo, useCallback)
-- Stale closure issues with hooks
-
-### SolidJS: Fine-Grained Signals
-
-SolidJS uses signals for fine-grained reactivity:
-
-```
-Signal Change → Update Only Dependent DOM Nodes
-```
-
-**Pros:**
-- Excellent performance
-- No Virtual DOM overhead
-- React-like JSX syntax
-
-**Cons:**
-- Multiple APIs to learn
-- Smaller ecosystem
-- Different mental model from React
-
-### Flexium: Unified Signals
-
-Flexium combines SolidJS-style reactivity with a unified API:
-
-```
-state() Change → Update Only Dependent DOM Nodes
-```
-
-**Pros:**
-- Single `state()` API for everything
-- Fine-grained reactivity
-- Minimal learning curve
-- StateProxy for natural value usage
-
-**Cons:**
-- New framework, smaller ecosystem
-- Fewer third-party integrations
-
-## API Comparison
-
-### State Management
+### One API vs Many
 
 ::: code-group
+
+```jsx [Flexium ✨]
+import { state } from 'flexium'
+
+function Component() {
+  // All state needs - one function
+  const [count, setCount] = state(0)                    // local
+  const [doubled] = state(() => count * 2)              // derived
+  const [user] = state(async () => fetchUser())         // async
+  const [theme, setTheme] = state('dark', { key: 'theme' }) // global
+
+  // Use values directly - just like React!
+  return <div>{count} × 2 = {doubled}</div>
+}
+```
 
 ```jsx [React]
 import { useState, useMemo, useCallback } from 'react'
@@ -81,58 +40,93 @@ import { useQuery } from '@tanstack/react-query'
 import { useRecoilState } from 'recoil'
 
 function Component() {
-  // Local state
-  const [count, setCount] = useState(0)
+  // Different APIs for different needs
+  const [count, setCount] = useState(0)                 // local
+  const doubled = useMemo(() => count * 2, [count])     // derived (manual deps!)
+  const { data: user } = useQuery(['user'], fetchUser)  // async (separate lib!)
+  const [theme, setTheme] = useRecoilState(themeAtom)   // global (separate lib!)
 
-  // Derived state
-  const doubled = useMemo(() => count * 2, [count])
-
-  // Memoized callback
-  const increment = useCallback(() => setCount(c => c + 1), [])
-
-  // Async data (requires React Query)
-  const { data: user } = useQuery(['user'], fetchUser)
-
-  // Global state (requires Recoil)
-  const [theme, setTheme] = useRecoilState(themeAtom)
+  return <div>{count} × 2 = {doubled}</div>
 }
 ```
 
 ```jsx [SolidJS]
 import { createSignal, createMemo, createResource } from 'solid-js'
-import { createStore } from 'solid-js/store'
 
 function Component() {
-  // Local state
-  const [count, setCount] = createSignal(0)
+  // Different primitives for different needs
+  const [count, setCount] = createSignal(0)             // local
+  const doubled = createMemo(() => count() * 2)         // derived
+  const [user] = createResource(fetchUser)              // async
+  // global state requires Context or module-level setup
 
-  // Derived state
-  const doubled = createMemo(() => count() * 2)
-
-  // Async data
-  const [user] = createResource(fetchUser)
-
-  // Global state (module-level or context)
-  // Requires additional setup
+  // Must call as functions - count() not count
+  return <div>{count()} × 2 = {doubled()}</div>
 }
 ```
 
-```jsx [Flexium]
-import { state } from 'flexium'
+:::
 
-function Component() {
-  // Local state
-  const [count, setCount] = state(0)
+### List Rendering
 
-  // Derived state (auto-detected)
-  const [doubled] = state(() => count() * 2)
+This is where Flexium really shines:
 
-  // Async data (auto-detected)
-  const [user, refetch, status, error] = state(async () => fetchUser())
+::: code-group
 
-  // Global state (built-in)
-  const [theme, setTheme] = state('dark', { key: 'theme' })
+```jsx [Flexium ✨]
+// React syntax + SolidJS performance = Best of both worlds
+function TodoList() {
+  const [todos, setTodos] = state([...])
+
+  return (
+    <ul>
+      {todos.map(todo => (
+        <li key={todo.id}>{todo.text}</li>
+      ))}
+    </ul>
+  )
 }
+// ✅ Familiar React syntax
+// ✅ Auto-optimized (O(1) append, DOM caching)
+// ✅ No special component needed
+```
+
+```jsx [React]
+// Same syntax, but different behavior
+function TodoList() {
+  const [todos, setTodos] = useState([...])
+
+  return (
+    <ul>
+      {todos.map(todo => (
+        <li key={todo.id}>{todo.text}</li>
+      ))}
+    </ul>
+  )
+}
+// ✅ Familiar syntax
+// ❌ Re-renders ENTIRE list on any change
+// ❌ Needs memo() for optimization
+```
+
+```jsx [SolidJS]
+// Must use <For> component
+import { For } from 'solid-js'
+
+function TodoList() {
+  const [todos, setTodos] = createSignal([...])
+
+  return (
+    <ul>
+      <For each={todos()}>
+        {(todo) => <li>{todo.text}</li>}
+      </For>
+    </ul>
+  )
+}
+// ❌ Different syntax to learn
+// ✅ Optimized
+// ❌ items().map() doesn't work reactively!
 ```
 
 :::
@@ -141,30 +135,98 @@ function Component() {
 
 ::: code-group
 
+```jsx [Flexium ✨]
+const [count] = state(5)
+
+// Use it exactly like React!
+count               // 5
+count + 10          // 15
+`Value: ${count}`   // "Value: 5"
+
+// Same syntax as React, but with signal performance
+```
+
 ```jsx [React]
-// Direct value access
-count           // 5
-count + 10      // 15
-`Value: ${count}` // "Value: 5"
+const [count] = useState(5)
+
+// Direct access
+count               // 5
+count + 10          // 15
+`Value: ${count}`   // "Value: 5"
+
+// Familiar, but re-renders entire component
 ```
 
 ```jsx [SolidJS]
-// Must call as function
-count()         // 5
-count() + 10    // 15
+const [count] = createSignal(5)
+
+// Must always call as function
+count()             // 5
+count() + 10        // 15
 `Value: ${count()}` // "Value: 5"
 
-// Without () - doesn't work
-count + 10      // "[Function] + 10" ❌
+// Forget the ()? Bug!
+count + 10          // "[Function] + 10" ❌
 ```
 
-```jsx [Flexium]
-// Both work thanks to StateProxy
-count()         // 5 (function call)
-count + 10      // 15 (Symbol.toPrimitive)
-`Value: ${count}` // "Value: 5" (toString)
+:::
 
-// Proxy transparently handles all operations
+### Conditional Rendering
+
+::: code-group
+
+```jsx [Flexium ✨]
+// Native JavaScript - just like React!
+function Component() {
+  const [show] = state(true)
+
+  return (
+    <div>
+      {show && <Child />}
+      {show ? <A /> : <B />}
+    </div>
+  )
+}
+// ✅ Same syntax as React
+// ✅ Fine-grained updates (unlike React)
+```
+
+```jsx [React]
+// Native JavaScript works
+function Component() {
+  const [show] = useState(true)
+
+  return (
+    <div>
+      {show && <Child />}
+      {show ? <A /> : <B />}
+    </div>
+  )
+}
+// ✅ Just JavaScript
+// ❌ Re-renders entire component
+```
+
+```jsx [SolidJS]
+// Must use Show component for optimization
+import { Show } from 'solid-js'
+
+function Component() {
+  const [show] = createSignal(true)
+
+  return (
+    <div>
+      <Show when={show()}>
+        <Child />
+      </Show>
+      <Show when={show()} fallback={<B />}>
+        <A />
+      </Show>
+    </div>
+  )
+}
+// ❌ Different syntax from React
+// ✅ Fine-grained updates
 ```
 
 :::
@@ -173,238 +235,133 @@ count + 10      // 15 (Symbol.toPrimitive)
 
 ::: code-group
 
+```jsx [Flexium ✨]
+import { effect } from 'flexium'
+
+// Auto-tracking - no dependency array!
+effect(() => {
+  console.log('Count:', count)
+  console.log('Name:', name)
+})
+// ✅ Looks like React
+// ✅ Auto dependency tracking (unlike React)
+// ✅ No stale closures
+```
+
 ```jsx [React]
-import { useEffect, useLayoutEffect } from 'react'
+import { useEffect } from 'react'
 
-function Component() {
-  // Side effect with dependency array
-  useEffect(() => {
-    console.log('Count changed:', count)
-  }, [count]) // Must specify dependencies
+// Manual dependency array - error prone!
+useEffect(() => {
+  console.log('Count:', count)
+  console.log('Name:', name)
+}, [count, name]) // Must list all deps manually!
 
-  // Cleanup
-  useEffect(() => {
-    const timer = setInterval(() => {}, 1000)
-    return () => clearInterval(timer)
-  }, [])
-}
+// Common bugs:
+useEffect(() => {
+  console.log(count) // Always 0! Stale closure
+}, []) // Forgot to add count!
 ```
 
 ```jsx [SolidJS]
-import { createEffect, onCleanup } from 'solid-js'
+import { createEffect } from 'solid-js'
 
-function Component() {
-  // Auto-tracking dependencies
-  createEffect(() => {
-    console.log('Count changed:', count())
-  })
-
-  // Cleanup
-  createEffect(() => {
-    const timer = setInterval(() => {}, 1000)
-    onCleanup(() => clearInterval(timer))
-  })
-}
-```
-
-```jsx [Flexium]
-import { effect, onCleanup } from 'flexium'
-
-function Component() {
-  // Auto-tracking dependencies
-  effect(() => {
-    console.log('Count changed:', count())
-  })
-
-  // Cleanup
-  effect(() => {
-    const timer = setInterval(() => {}, 1000)
-    onCleanup(() => clearInterval(timer))
-  })
-}
+// Auto-tracking but different syntax
+createEffect(() => {
+  console.log('Count:', count())
+  console.log('Name:', name())
+})
+// ✅ Automatic dependency tracking
+// ❌ Must use count() not count
 ```
 
 :::
-
-### Control Flow
-
-::: code-group
-
-```jsx [React]
-function Component() {
-  return (
-    <div>
-      {/* Conditional */}
-      {show && <Child />}
-      {show ? <A /> : <B />}
-
-      {/* List - re-renders entire list on change */}
-      {items.map(item => (
-        <Item key={item.id} item={item} />
-      ))}
-    </div>
-  )
-}
-```
-
-```jsx [SolidJS]
-import { Show, For } from 'solid-js'
-
-function Component() {
-  return (
-    <div>
-      {/* Conditional - needs Show component */}
-      <Show when={show()}>
-        <Child />
-      </Show>
-
-      {/* List - MUST use For, items().map() doesn't work reactively */}
-      <For each={items()}>
-        {(item) => <Item item={item} />}
-      </For>
-    </div>
-  )
-}
-```
-
-```jsx [Flexium]
-function Component() {
-  return (
-    <div>
-      {/* Conditional - native JS works */}
-      {() => show() && <Child />}
-      {() => show() ? <A /> : <B />}
-
-      {/* List - React syntax with automatic optimization! */}
-      {items.map(item => (
-        <Item key={item.id} item={item} />
-      ))}
-    </div>
-  )
-}
-```
-
-:::
-
-> **Flexium Unique Feature**: `items.map()` works like React but with SolidJS-level performance optimizations (O(1) append, DOM caching, minimal moves).
 
 ## Performance Comparison
 
-Based on benchmarks (ops/sec, higher is better):
+| Operation | Flexium | React | SolidJS |
+|-----------|---------|-------|---------|
+| State Creation | 1.5M ops/s | 450K ops/s | 1.8M ops/s |
+| State Update | 1.2M ops/s | 180K ops/s | 1.5M ops/s |
+| Computed Read | 1.0M ops/s | 350K ops/s | 1.2M ops/s |
+| List Update | O(1) append | O(n) diff | O(1) append |
 
-| Operation | React | SolidJS | Flexium |
-|-----------|-------|---------|---------|
-| State Creation | 450K | 1.8M | 1.5M |
-| State Update | 180K | 1.5M | 1.2M |
-| Computed Read | 350K | 1.2M | 1.0M |
-| Effect Creation | 120K | 800K | 650K |
-| Batch Update (10) | 45K | 450K | 380K |
-| Deep Chain (10) | 25K | 280K | 220K |
-
-> SolidJS leads in raw performance, but both SolidJS and Flexium are **3-10x faster** than React for most operations.
+**Key insight**: Flexium and SolidJS are **3-10x faster** than React. SolidJS is ~20% faster than Flexium, but Flexium offers simpler APIs.
 
 ### Why the Performance Difference?
 
-**React:**
-- Virtual DOM diffing on every update
-- Component re-renders propagate down the tree
-- Requires memoization for optimization
+| Aspect | Flexium / SolidJS | React |
+|--------|-------------------|-------|
+| Update Strategy | Direct DOM updates | Virtual DOM diffing |
+| Granularity | Only affected nodes | Entire component tree |
+| Optimization | Fast by default | Needs memo, useMemo, useCallback |
 
-**SolidJS / Flexium:**
-- Direct DOM updates, no diffing
-- Only affected nodes update
-- Fast by default, no optimization needed
+## Learning Curve
 
-## Developer Experience
-
-### Learning Curve
-
-| Framework | APIs to Learn | Concepts |
-|-----------|---------------|----------|
-| React | useState, useMemo, useCallback, useEffect, useContext, useReducer + external libs | Hooks rules, dependency arrays, memoization |
-| SolidJS | createSignal, createMemo, createEffect, createResource, createStore, createContext | Signals, fine-grained reactivity |
-| Flexium | state, effect | Signals (unified through state) |
-
-### Common Pitfalls
-
-**React:**
-```jsx
-// Stale closure - common bug
-const [count, setCount] = useState(0)
-useEffect(() => {
-  setInterval(() => {
-    console.log(count) // Always 0! Stale closure
-  }, 1000)
-}, []) // Missing dependency
-```
-
-**SolidJS / Flexium:**
-```jsx
-// No stale closures - signals always current
-const [count, setCount] = state(0)
-effect(() => {
-  setInterval(() => {
-    console.log(count()) // Always current value
-  }, 1000)
-})
-```
+| Framework | APIs to Learn | Time to Productive |
+|-----------|---------------|-------------------|
+| **Flexium** | `state()`, `effect()` | Hours |
+| React | useState, useMemo, useCallback, useEffect, useContext, useReducer, + external libs | Days to weeks |
+| SolidJS | createSignal, createMemo, createEffect, createResource, For, Show, Switch | Days |
 
 ## Migration Guide
 
 ### From React to Flexium
 
-| React | Flexium |
-|-------|---------|
-| `useState(value)` | `state(value)` |
-| `useMemo(() => x, [deps])` | `state(() => x)` |
-| `useCallback(fn, [deps])` | Just use `fn` (no wrapper needed) |
-| `useEffect(() => {}, [deps])` | `effect(() => {})` |
-| `useContext` + `Provider` | `state(value, { key })` for globals |
-| React Query | `state(async () => fetch())` |
+| React | Flexium | Notes |
+|-------|---------|-------|
+| `useState(x)` | `state(x)` | Same pattern |
+| `useMemo(() => x, [deps])` | `state(() => x)` | No deps needed! |
+| `useCallback(fn, [deps])` | Just use `fn` | No wrapper needed |
+| `useEffect(() => {}, [deps])` | `effect(() => {})` | Auto-tracks deps |
+| React Query | `state(async () => ...)` | Built-in |
+| Recoil/Jotai | `state(x, { key })` | Built-in |
+| `items.map()` | `items.map()` | Same! But optimized |
 
 ### From SolidJS to Flexium
 
-| SolidJS | Flexium |
-|---------|---------|
-| `createSignal(value)` | `state(value)` |
-| `createMemo(() => x)` | `state(() => x)` |
-| `createResource(fetcher)` | `state(async () => fetcher())` |
-| `createStore({})` | `state({})` |
-| `createEffect(() => {})` | `effect(() => {})` |
+| SolidJS | Flexium | Notes |
+|---------|---------|-------|
+| `createSignal(x)` | `state(x)` | |
+| `createMemo(() => x)` | `state(() => x)` | Auto-detected |
+| `createResource(fn)` | `state(async () => fn())` | Auto-detected |
+| `createStore({})` | `state({})` | |
+| `<For each={items}>` | `items.map()` | React syntax! |
+| `<Show when={x}>` | `{() => x && ...}` | Native JS |
 
 ## When to Choose What
 
+### Choose Flexium When:
+- You want **one API** for all state needs
+- **Fast onboarding** and low learning curve matter
+- You want **React-like syntax** with Signal performance
+- Built-in **global state and async** handling are important
+- You prefer **native JavaScript** over special components
+
 ### Choose React When:
-- You need the largest ecosystem and community
-- Your team is already experienced with React
-- You need extensive third-party library support
-- Long-term stability is critical
+- You need the **largest ecosystem** and community
+- Your team is **already experienced** with React
+- You need **extensive third-party libraries**
+- **Long-term stability** is critical
 
 ### Choose SolidJS When:
-- Maximum performance is the priority
-- You want React-like syntax with better performance
-- You need fine-grained control over primitives
-- You're building performance-critical applications
-
-### Choose Flexium When:
-- You want the simplest possible API
-- Learning curve and onboarding speed matter
-- You prefer a unified mental model
-- You want fine-grained reactivity without multiple APIs
-- Built-in global state and async handling are important
+- **Maximum performance** is the absolute priority
+- You want **fine-grained control** over primitives
+- You don't mind learning **new component patterns** (`<For>`, `<Show>`)
 
 ## Summary
 
-| Aspect | Winner | Notes |
-|--------|--------|-------|
-| **Ecosystem** | React | Unmatched library support |
-| **Raw Performance** | SolidJS | ~20% faster than Flexium |
-| **API Simplicity** | Flexium | One function for everything |
-| **Learning Curve** | Flexium | Minimal concepts to learn |
-| **Bundle Size** | SolidJS | Slightly smaller |
+| Aspect | Winner | Why |
+|--------|--------|-----|
+| **API Simplicity** | Flexium | One `state()` for everything |
+| **Learning Curve** | Flexium | 2 APIs vs 6-10+ |
+| **List Rendering DX** | Flexium | React syntax with optimization |
+| **Raw Performance** | SolidJS | ~20% faster |
+| **Ecosystem** | React | Massive library support |
 | **TypeScript DX** | Flexium | Unified type inference |
-| **Global State** | Flexium | Built-in, no setup |
-| **Async Data** | Flexium | Built-in, unified API |
-| **List Rendering** | Flexium | React syntax (`items.map()`) with SolidJS optimization |
+| **Global State** | Flexium | Built-in, zero setup |
+| **Bundle Size** | SolidJS | Slightly smaller |
 
-The right choice depends on your priorities. All three frameworks are excellent tools for building modern web applications.
+---
+
+**Bottom line**: Flexium lets you write **exactly like React** (`count`, `items.map()`, `{show && ...}`) but get **SolidJS-level performance** with **one simple API**.

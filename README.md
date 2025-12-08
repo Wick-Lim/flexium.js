@@ -92,7 +92,9 @@ Pass a synchronous function to create a value that updates automatically.
 ```javascript
 const [count, setCount] = state(1);
 // 'double' updates whenever 'count' changes
-const [double] = state(() => count() * 2);
+const [double] = state(() => count * 2);
+
+console.log(double); // 2 - use values directly, just like React!
 ```
 
 ### 5. List Rendering
@@ -127,9 +129,9 @@ import { state, effect } from 'flexium/core';
 
 const [count, setCount] = state(0);
 
-// Side effects
+// Side effects - auto-tracks dependencies, no dependency array needed!
 effect(() => {
-  console.log('Count changed to:', count());
+  console.log('Count changed to:', count);
 });
 ```
 

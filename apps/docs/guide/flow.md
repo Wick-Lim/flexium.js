@@ -78,10 +78,10 @@ const [users, setUsers] = state([
 ### Updating Lists
 
 ```tsx
-// All updates are reactive and optimized
-setTodos([...todos(), { id: 3, text: 'New todo' }])  // Append
-setTodos(todos().filter(t => t.id !== 1))            // Remove
-setTodos(todos().map(t => t.id === 1 ? {...t, done: true} : t))  // Update
+// All updates are reactive and optimized - use setter with callback
+setTodos(prev => [...prev, { id: 3, text: 'New todo' }])  // Append
+setTodos(prev => prev.filter(t => t.id !== 1))             // Remove
+setTodos(prev => prev.map(t => t.id === 1 ? {...t, done: true} : t))  // Update
 ```
 
 ---
@@ -144,7 +144,7 @@ Use native JavaScript for conditional rendering. This is more readable and lever
 
 ### Ternary Operator
 
-For if/else conditions, use the ternary operator inside a reactive function:
+For if/else conditions, use the ternary operator - just like React:
 
 ```tsx
 import { state } from 'flexium/core';
@@ -154,7 +154,7 @@ function LoginButton() {
 
   return (
     <div>
-      {() => isLoggedIn()
+      {isLoggedIn
         ? <button onClick={() => setIsLoggedIn(false)}>Logout</button>
         : <button onClick={() => setIsLoggedIn(true)}>Login</button>
       }
@@ -175,7 +175,7 @@ function UserGreeting() {
 
   return (
     <div>
-      {() => user() && <span>Welcome, {user().name}!</span>}
+      {user && <span>Welcome, {user.name}!</span>}
     </div>
   );
 }
@@ -189,17 +189,14 @@ For multiple mutually exclusive conditions, use nested ternaries or a function:
 function StatusDisplay() {
   const [status, setStatus] = state('loading');
 
-  return (
-    <div>
-      {() => {
-        const s = status();
-        if (s === 'loading') return <p>Loading...</p>;
-        if (s === 'error') return <p style={{ color: 'red' }}>Error!</p>;
-        if (s === 'success') return <p>Success!</p>;
-        return <p>Unknown state</p>;
-      }}
-    </div>
-  );
+  const renderStatus = () => {
+    if (status === 'loading') return <p>Loading...</p>;
+    if (status === 'error') return <p style={{ color: 'red' }}>Error!</p>;
+    if (status === 'success') return <p>Success!</p>;
+    return <p>Unknown state</p>;
+  };
+
+  return <div>{renderStatus()}</div>;
 }
 ```
 
@@ -211,12 +208,10 @@ function StatusDisplay() {
 
   return (
     <div>
-      {() =>
-        status() === 'loading' ? <p>Loading...</p> :
-        status() === 'error' ? <p style={{ color: 'red' }}>Error!</p> :
-        status() === 'success' ? <p>Success!</p> :
-        <p>Unknown state</p>
-      }
+      {status === 'loading' ? <p>Loading...</p> :
+       status === 'error' ? <p style={{ color: 'red' }}>Error!</p> :
+       status === 'success' ? <p>Success!</p> :
+       <p>Unknown state</p>}
     </div>
   );
 }
@@ -231,4 +226,4 @@ Flexium deliberately uses native JavaScript for conditionals instead of custom c
 3. **Honest** - No magic, just functions
 4. **Debuggable** - Standard JS debugging works
 
-The reactive wrapper `{() => ...}` ensures Flexium tracks dependencies and updates the DOM when state changes.
+Flexium's StateProxy automatically tracks dependencies and updates the DOM when state changes - no wrapper functions needed.

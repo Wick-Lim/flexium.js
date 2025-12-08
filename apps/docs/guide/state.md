@@ -102,18 +102,17 @@ function UserProfile({ id }) {
     return response.json();
   });
 
-  return () => {
-    if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error.message}</div>;
+  // Render based on loading/error state
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
-    // Data is available
-    return (
-      <div>
-        <h1>{user.name}</h1>
-        <button onclick={() => refetch()}>Reload</button>
-      </div>
-    );
-  };
+  // Data is available - use values directly
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <button onclick={() => refetch()}>Reload</button>
+    </div>
+  );
 }
 ```
 
@@ -156,21 +155,21 @@ For detailed usage, automatic tracking, and cleanup, see the **[Effects](/guide/
 
 ## List Rendering
 
-For rendering lists efficiently, use the `<For>` component or the `.map()` helper on array states.
+For rendering lists efficiently, use familiar `.map()` syntax - just like React:
 
 ```tsx
 const [todos, setTodos] = state([{ id: 1, text: 'Buy milk' }]);
 
 return (
   <ul>
-    <For each={todos}>
-      {(todo, index) => <li>{index()}: {todo.text}</li>}
-    </For>
+    {todos.map((todo, index) => (
+      <li key={todo.id}>{index + 1}: {todo.text}</li>
+    ))}
   </ul>
 );
 ```
 
-This uses keyed reconciliation to minimize DOM operations when the array changes.
+Flexium automatically optimizes list rendering with O(1) append/prepend and DOM node caching.
 
 ## Best Practices
 

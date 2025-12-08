@@ -30,7 +30,7 @@ const [theme, setTheme] = state('light', { key: 'theme' })
 const [user] = state(async () => fetch('/api/user').then(r => r.json()))
 
 // Derived/computed (pass sync function)
-const [doubled] = state(() => count() * 2)
+const [doubled] = state(() => count * 2)
 ```
 
 ### 2. Simplicity Over Complexity

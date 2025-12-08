@@ -74,7 +74,7 @@ function ThemeToggle() {
 
   return (
     <button onclick={toggleTheme}>
-      Current: {theme()}
+      Current: {theme}
     </button>
   )
 }
@@ -126,10 +126,14 @@ function Header() {
 
   return (
     <header>
-      <Show when={() => user() !== null} fallback={<LoginButton />}>
-        <span>Welcome, {user()?.name}</span>
-        <button onclick={logout}>Logout</button>
-      </Show>
+      {user ? (
+        <>
+          <span>Welcome, {user.name}</span>
+          <button onclick={logout}>Logout</button>
+        </>
+      ) : (
+        <LoginButton />
+      )}
     </header>
   )
 }
