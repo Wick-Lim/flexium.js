@@ -1,6 +1,6 @@
-import { signal, computed } from 'flexium/core'
+import { state } from 'flexium/core'
 import { render } from 'flexium/dom'
-import { Router, Route, Link, useRouter } from 'flexium/router'
+import { Router, Route, Link, router } from 'flexium/router'
 
 function Home() {
   return (
@@ -16,11 +16,11 @@ function About() {
 }
 
 function User() {
-  const router = useRouter()
+  const r = router()
   return (
     <div>
       <h1>User Page</h1>
-      <p>User ID: {() => router.params.value.id}</p>
+      <p>User ID: {() => r.params().id}</p>
     </div>
   )
 }

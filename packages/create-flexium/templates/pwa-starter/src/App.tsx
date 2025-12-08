@@ -1,27 +1,27 @@
-import { signal, effect } from 'flexium'
+import { state, effect } from 'flexium/core'
 import './App.css'
 
 export function App() {
-  // State
-  const count = signal(0)
-  const isOnline = signal(navigator.onLine)
-  const installStatus = signal('not-installed')
+  // State using unified state() API
+  const [count, setCount] = state(0)
+  const [isOnline, setIsOnline] = state(navigator.onLine)
+  const [installStatus, setInstallStatus] = state('not-installed')
 
   // Check if app is installed
   if ('standalone' in window.navigator && (window.navigator as any).standalone) {
-    installStatus('installed')
+    setInstallStatus('installed')
   } else if (window.matchMedia('(display-mode: standalone)').matches) {
-    installStatus('installed')
+    setInstallStatus('installed')
   }
 
   // Online/Offline detection
-  window.addEventListener('online', () => isOnline(true))
-  window.addEventListener('offline', () => isOnline(false))
+  window.addEventListener('online', () => setIsOnline(true))
+  window.addEventListener('offline', () => setIsOnline(false))
 
   // Event handlers
-  const increment = () => count(count() + 1)
-  const decrement = () => count(count() - 1)
-  const reset = () => count(0)
+  const increment = () => setCount(c => c + 1)
+  const decrement = () => setCount(c => c - 1)
+  const reset = () => setCount(0)
 
   // Request notification permission
   const requestNotifications = async () => {
@@ -38,15 +38,15 @@ export function App() {
 
   // Effect for count changes
   effect(() => {
-    console.log('Count changed:', count())
+    console.log('Count changed:', +count)
     // Store count in localStorage for persistence
-    localStorage.setItem('count', String(count()))
+    localStorage.setItem('count', String(+count))
   })
 
   // Load saved count
   const savedCount = localStorage.getItem('count')
   if (savedCount) {
-    count(parseInt(savedCount, 10))
+    setCount(parseInt(savedCount, 10))
   }
 
   return (
@@ -57,18 +57,18 @@ export function App() {
           <p class="subtitle">Progressive Web App with Offline Support</p>
 
           <div class="status-bar">
-            <div class={`status ${isOnline() ? 'online' : 'offline'}`}>
-              {isOnline() ? '🟢 Online' : '🔴 Offline'}
+            <div class={`status ${isOnline ? 'online' : 'offline'}`}>
+              {isOnline ? '🟢 Online' : '🔴 Offline'}
             </div>
-            <div class={`status ${installStatus() === 'installed' ? 'installed' : ''}`}>
-              {installStatus() === 'installed' ? '📱 Installed' : '🌐 Browser'}
+            <div class={`status ${String(installStatus) === 'installed' ? 'installed' : ''}`}>
+              {String(installStatus) === 'installed' ? '📱 Installed' : '🌐 Browser'}
             </div>
           </div>
         </div>
 
         <div class="counter">
           <div class="count-display">
-            <div class="count">{count()}</div>
+            <div class="count">{count}</div>
             <div class="label">Counter</div>
           </div>
         </div>

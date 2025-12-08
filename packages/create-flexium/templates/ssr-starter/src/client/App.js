@@ -1,42 +1,43 @@
-import { signal, effect, h } from 'flexium'
+import { state, effect } from 'flexium/core'
+import { f } from 'flexium/dom'
 
 export function App() {
-  // State
-  const count = signal(0)
-  const message = signal('Hello from SSR!')
+  // State using unified state() API
+  const [count, setCount] = state(0)
+  const [message] = state('Hello from SSR!')
 
   // Derived state
-  const doubleCount = signal(() => count() * 2)
+  const [doubleCount] = state(() => count * 2)
 
   // Effects
   effect(() => {
-    console.log('Count changed:', count())
+    console.log('Count changed:', +count)
   })
 
   // Event handlers
-  const increment = () => count(count() + 1)
-  const decrement = () => count(count() - 1)
-  const reset = () => count(0)
+  const increment = () => setCount(c => c + 1)
+  const decrement = () => setCount(c => c - 1)
+  const reset = () => setCount(0)
 
   // Component
-  return h('div', { class: 'container' }, [
-    h('div', { class: 'card' }, [
-      h('h1', { class: 'title' }, message()),
-      h('p', { class: 'subtitle' }, 'Server-Side Rendered with Flexium'),
+  return f('div', { class: 'container' }, [
+    f('div', { class: 'card' }, [
+      f('h1', { class: 'title' }, message),
+      f('p', { class: 'subtitle' }, 'Server-Side Rendered with Flexium'),
 
-      h('div', { class: 'counter' }, [
-        h('div', { class: 'count-display' }, [
-          h('div', { class: 'count' }, count()),
-          h('div', { class: 'label' }, 'Count'),
+      f('div', { class: 'counter' }, [
+        f('div', { class: 'count-display' }, [
+          f('div', { class: 'count' }, count),
+          f('div', { class: 'label' }, 'Count'),
         ]),
-        h('div', { class: 'count-display' }, [
-          h('div', { class: 'count secondary' }, doubleCount()),
-          h('div', { class: 'label' }, 'Double'),
+        f('div', { class: 'count-display' }, [
+          f('div', { class: 'count secondary' }, doubleCount),
+          f('div', { class: 'label' }, 'Double'),
         ]),
       ]),
 
-      h('div', { class: 'buttons' }, [
-        h(
+      f('div', { class: 'buttons' }, [
+        f(
           'button',
           {
             class: 'btn btn-primary',
@@ -44,7 +45,7 @@ export function App() {
           },
           '+ Increment'
         ),
-        h(
+        f(
           'button',
           {
             class: 'btn btn-secondary',
@@ -52,7 +53,7 @@ export function App() {
           },
           '- Decrement'
         ),
-        h(
+        f(
           'button',
           {
             class: 'btn btn-reset',
@@ -62,8 +63,8 @@ export function App() {
         ),
       ]),
 
-      h('div', { class: 'info' }, [
-        h('p', {}, [
+      f('div', { class: 'info' }, [
+        f('p', {}, [
           'This app is rendered on the server and hydrated on the client for optimal performance.',
         ]),
       ]),

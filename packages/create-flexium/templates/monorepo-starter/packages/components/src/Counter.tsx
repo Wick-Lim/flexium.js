@@ -1,4 +1,3 @@
-import { h } from 'flexium'
 import './Counter.css'
 
 interface CounterProps {

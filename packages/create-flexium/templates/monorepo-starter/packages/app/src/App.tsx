@@ -1,21 +1,21 @@
-import { signal } from 'flexium'
+import { state } from 'flexium/core'
 import { Counter } from '@monorepo/components'
 import { formatNumber } from '@monorepo/utils'
 import './App.css'
 
 export function App() {
-  const count = signal(0)
-  const message = signal('Welcome to Flexium Monorepo!')
+  const [count, setCount] = state(0)
+  const [message] = state('Welcome to Flexium Monorepo!')
 
-  const increment = () => count(count() + 1)
-  const decrement = () => count(count() - 1)
-  const reset = () => count(0)
+  const increment = () => setCount(c => c + 1)
+  const decrement = () => setCount(c => c - 1)
+  const reset = () => setCount(0)
 
   return (
     <div class="container">
       <div class="card">
         <h1 class="title">Flexium Monorepo</h1>
-        <p class="subtitle">{message()}</p>
+        <p class="subtitle">{message}</p>
 
         <div class="info-boxes">
           <div class="info-box">
@@ -41,7 +41,7 @@ export function App() {
             This counter uses the shared Counter component from @monorepo/components
           </p>
           <Counter
-            value={count()}
+            value={+count}
             onIncrement={increment}
             onDecrement={decrement}
             onReset={reset}
@@ -51,7 +51,7 @@ export function App() {
         <div class="demo-section">
           <h2>Shared Utils Demo</h2>
           <p class="demo-description">
-            Format utility from @monorepo/utils: <strong>{formatNumber(count())}</strong>
+            Format utility from @monorepo/utils: <strong>{formatNumber(+count)}</strong>
           </p>
         </div>
 
