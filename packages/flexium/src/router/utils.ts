@@ -20,17 +20,25 @@ export function createRoutesFromChildren(children: FNodeChild): RouteDef[] {
     const { path, index, component, beforeEnter } = child.props as {
       path?: string
       index?: boolean
-      component: Function
+      component?: Function
       beforeEnter?: (
         params: Record<string, string>
       ) => boolean | Promise<boolean>
     }
     const nestedChildren = child.children
 
+    // Skip routes without a component (unless they have children as layout routes)
+    if (!component && !nestedChildren) {
+      console.warn(
+        `[Flexium Router] Route "${path || '(index)'}" has no component and no children. Skipping.`
+      )
+      continue
+    }
+
     const route: RouteDef = {
       path: path || '',
       index: !!index,
-      component,
+      component: component || (() => null),
       children: nestedChildren ? createRoutesFromChildren(nestedChildren) : [],
       beforeEnter,
     }

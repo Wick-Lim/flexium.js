@@ -10,7 +10,7 @@
  * - Route tree traversal
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { createRoutesFromChildren, matchRoutes } from '../utils'
 import type { RouteDef, FNode } from '../types'
 
@@ -305,6 +305,91 @@ describe('Router Utils', () => {
         const routes = createRoutesFromChildren(fnode)
 
         expect(routes[0].beforeEnter).toBeUndefined()
+      })
+    })
+
+    describe('Missing Component Handling', () => {
+      it('should skip route without component and without children', () => {
+        const consoleSpy = vi
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {})
+
+        const fnode = createFNode(MockRoute, {
+          path: '/no-component',
+        })
+
+        const routes = createRoutesFromChildren(fnode)
+
+        expect(routes).toHaveLength(0)
+        expect(consoleSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Route "/no-component" has no component')
+        )
+
+        consoleSpy.mockRestore()
+      })
+
+      it('should provide fallback component for layout routes with children but no component', () => {
+        const childVNode = createFNode(MockRoute, {
+          path: 'child',
+          component: () => null,
+        })
+
+        const fnode = createFNode(
+          MockRoute,
+          {
+            path: '/layout',
+            // No component provided
+          },
+          [childVNode]
+        )
+
+        const routes = createRoutesFromChildren(fnode)
+
+        expect(routes).toHaveLength(1)
+        expect(routes[0].path).toBe('/layout')
+        expect(typeof routes[0].component).toBe('function')
+        expect(routes[0].component()).toBe(null)
+        expect(routes[0].children).toHaveLength(1)
+      })
+
+      it('should not render undefined as component', () => {
+        const childVNode = createFNode(MockRoute, {
+          path: 'valid',
+          component: () => 'valid content',
+        })
+
+        const fnode = createFNode(
+          MockRoute,
+          {
+            path: '/',
+          },
+          [childVNode]
+        )
+
+        const routes = createRoutesFromChildren(fnode)
+
+        expect(routes[0].component).not.toBeUndefined()
+        expect(routes[0].component()).toBe(null) // fallback returns null
+      })
+
+      it('should warn for index route without component', () => {
+        const consoleSpy = vi
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {})
+
+        const fnode = createFNode(MockRoute, {
+          index: true,
+          // No component
+        })
+
+        const routes = createRoutesFromChildren(fnode)
+
+        expect(routes).toHaveLength(0)
+        expect(consoleSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Route "(index)" has no component')
+        )
+
+        consoleSpy.mockRestore()
       })
     })
 
