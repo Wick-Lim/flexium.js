@@ -4,9 +4,9 @@
  * Run with: node tests/performance/benchmark.mjs
  *
  * Benchmarks:
- * 1. Signal creation
- * 2. Signal read/write
- * 3. Computed value creation and access
+ * 1. State creation
+ * 2. State read/write
+ * 3. Computed state creation and access
  * 4. Effect execution
  * 5. Batch updates
  * 6. Large list rendering simulation
@@ -14,8 +14,8 @@
 
 import { performance } from 'perf_hooks';
 
-// Import from dist
-import { signal, computed, effect, batch, root } from '../../packages/flexium/dist/index.mjs';
+// Import from dist/core.mjs which exports state, effect, batch, root
+import { state, effect, batch, root } from '../../packages/flexium/dist/core.mjs';
 
 const ITERATIONS = 10000;
 const WARMUP = 1000;
@@ -68,130 +68,110 @@ const results = [];
 
 console.log('🚀 Running Flexium Performance Benchmarks...\n');
 
-// 1. Signal Creation
-results.push(benchmark('Signal creation', () => {
-    signal(0);
+// 1. State Creation
+results.push(benchmark('State creation', () => {
+    state(0);
 }));
 
-// 2. Signal read
-const readSignal = signal(42);
-results.push(benchmark('Signal read (value property)', () => {
-    const _ = readSignal.value;
+// 2. State read
+const [readState] = state(42);
+results.push(benchmark('State read (function call)', () => {
+    const _ = readState();
 }));
 
-results.push(benchmark('Signal read (function call)', () => {
-    const _ = readSignal();
-}));
-
-// 3. Signal write
-const writeSignal = signal(0);
+// 3. State write
+const [writeState, setWriteState] = state(0);
 let writeCounter = 0;
-results.push(benchmark('Signal write', () => {
-    writeSignal.value = writeCounter++;
+results.push(benchmark('State write', () => {
+    setWriteState(writeCounter++);
 }));
 
-// 4. Signal peek (no tracking)
-const peekSignal = signal(100);
-results.push(benchmark('Signal peek', () => {
-    const _ = peekSignal.peek();
-}));
-
-// 5. Computed creation
+// 4. Computed creation
 results.push(benchmark('Computed creation', () => {
-    const base = signal(1);
-    computed(() => base.value * 2);
+    const [base] = state(1);
+    state(() => base() * 2);
 }));
 
-// 6. Computed read (cached)
-const computedBase = signal(5);
-const computedValue = computed(() => computedBase.value * 2);
+// 5. Computed read (cached)
+const [computedBase, setComputedBase] = state(5);
+const [computedValue] = state(() => computedBase() * 2);
 results.push(benchmark('Computed read (cached)', () => {
-    const _ = computedValue.value;
+    const _ = computedValue();
 }));
 
-// 7. Computed with dependency change
-const changingBase = signal(0);
-const changingComputed = computed(() => changingBase.value + 1);
+// 6. Computed with dependency change
+const [changingBase, setChangingBase] = state(0);
+const [changingComputed] = state(() => changingBase() + 1);
 let changeCounter = 0;
 results.push(benchmark('Computed with dep change', () => {
-    changingBase.value = changeCounter++;
-    const _ = changingComputed.value;
+    setChangingBase(changeCounter++);
+    const _ = changingComputed();
 }, 5000));
 
-// 8. Effect creation (in root scope)
+// 7. Effect creation (in root scope)
 results.push(benchmark('Effect creation', () => {
     root((dispose) => {
-        const s = signal(0);
-        effect(() => { const _ = s.value; });
+        const [s] = state(0);
+        effect(() => { const _ = s(); });
         dispose();
     });
 }, 1000));
 
-// 9. Effect trigger
-let effectTriggerSignal;
+// 8. Effect trigger
+let setEffectTrigger;
 let effectRunCount = 0;
 root(() => {
-    effectTriggerSignal = signal(0);
+    const [trigger, setTrigger] = state(0);
+    setEffectTrigger = setTrigger;
     effect(() => {
-        const _ = effectTriggerSignal.value;
+        const _ = trigger();
         effectRunCount++;
     });
 });
 results.push(benchmark('Effect trigger', () => {
-    effectTriggerSignal.value++;
+    setEffectTrigger(c => c + 1);
 }, 5000));
 
-// 10. Batch updates
-const batchSignals = Array.from({ length: 10 }, () => signal(0));
+// 9. Batch updates
+const batchStates = Array.from({ length: 10 }, () => state(0));
 let batchCounter = 0;
-results.push(benchmark('Batch update (10 signals)', () => {
+results.push(benchmark('Batch update (10 states)', () => {
     batch(() => {
-        for (const s of batchSignals) {
-            s.value = batchCounter;
+        for (const [_, set] of batchStates) {
+            set(batchCounter);
         }
         batchCounter++;
     });
 }, 1000));
 
-// 11. Deep computed chain
-const chainBase = signal(1);
-let chainEnd = chainBase;
+// 10. Deep computed chain
+const [chainBase] = state(1);
+let [chainEnd] = [chainBase];
 for (let i = 0; i < 10; i++) {
     const prev = chainEnd;
-    chainEnd = computed(() => prev.value + 1);
+    [chainEnd] = state(() => prev() + 1);
 }
 results.push(benchmark('Deep computed chain (10 levels) read', () => {
-    const _ = chainEnd.value;
+    const _ = chainEnd();
 }));
 
-// 12. Many signals update
-const manySignals = Array.from({ length: 100 }, () => signal(0));
+// 11. Many states update
+const manyStates = Array.from({ length: 100 }, () => state(0));
 let manyCounter = 0;
-results.push(benchmark('Update 100 signals', () => {
-    for (const s of manySignals) {
-        s.value = manyCounter;
+results.push(benchmark('Update 100 states', () => {
+    for (const [_, set] of manyStates) {
+        set(manyCounter);
     }
     manyCounter++;
 }, 1000));
-
-// 13. Diamond dependency pattern
-const diamondRoot = signal(1);
-const diamondLeft = computed(() => diamondRoot.value * 2);
-const diamondRight = computed(() => diamondRoot.value * 3);
-const diamondBottom = computed(() => diamondLeft.value + diamondRight.value);
-let diamondCounter = 0;
-results.push(benchmark('Diamond dependency update', () => {
-    diamondRoot.value = diamondCounter++;
-    const _ = diamondBottom.value;
-}, 5000));
 
 // Print results
 printResults(results);
 
 // Summary
 console.log('📈 Performance Summary:');
-console.log(`   - Signal creation: ${results[0].opsPerSec.toLocaleString()} ops/sec`);
-console.log(`   - Signal read: ${results[1].opsPerSec.toLocaleString()} ops/sec`);
-console.log(`   - Signal write: ${results[3].opsPerSec.toLocaleString()} ops/sec`);
-console.log(`   - Computed read: ${results[6].opsPerSec.toLocaleString()} ops/sec`);
+console.log(`   - State creation: ${results[0].opsPerSec.toLocaleString()} ops/sec`);
+console.log(`   - State read: ${results[1].opsPerSec.toLocaleString()} ops/sec`);
+console.log(`   - State write: ${results[2].opsPerSec.toLocaleString()} ops/sec`);
+console.log(`   - Computed read: ${results[4].opsPerSec.toLocaleString()} ops/sec`);
 console.log('');

@@ -281,9 +281,9 @@ createEffect(() => {
 
 | Operation | Flexium | React | SolidJS |
 |-----------|---------|-------|---------|
-| State Creation | 1.5M ops/s | 450K ops/s | 1.8M ops/s |
-| State Update | 1.2M ops/s | 180K ops/s | 1.5M ops/s |
-| Computed Read | 1.0M ops/s | 350K ops/s | 1.2M ops/s |
+| State Creation | 640K ops/s | 450K ops/s | 1.8M ops/s |
+| State Update | 1.3M ops/s | 180K ops/s | 1.5M ops/s |
+| Computed Read | 14M ops/s | 350K ops/s | 1.2M ops/s |
 | List Update | O(1) append | O(n) diff | O(1) append |
 
 **Key insight**: Flexium and SolidJS are **3-10x faster** than React. SolidJS is ~20% faster than Flexium, but Flexium offers simpler APIs.
