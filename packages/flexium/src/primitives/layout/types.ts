@@ -8,12 +8,12 @@
 export type ResponsiveValue<T> =
   | T
   | {
-      base?: T
-      sm?: T
-      md?: T
-      lg?: T
-      xl?: T
-    }
+    base?: T
+    sm?: T
+    md?: T
+    lg?: T
+    xl?: T
+  }
 
 /**
  * CSS Properties type
@@ -222,142 +222,95 @@ export interface BaseComponentProps extends BaseStyleProps {
   children?: any
 }
 
+// Configuration for style properties
+const styleConfig: Record<string, (val: any) => any> = {}
+
+// 1. Standard properties (direct mapping)
+const standardProps = [
+  'display',
+  'flex',
+  'flexGrow',
+  'flexShrink',
+  'flexBasis',
+  'flexDirection',
+  'flexWrap',
+  'backgroundColor',
+  'background',
+  'borderColor',
+  'borderStyle',
+  'border',
+  'opacity',
+  'overflow',
+  'boxShadow',
+  'position',
+  'zIndex',
+  'color',
+  'fontWeight',
+  'fontFamily',
+  'fontStyle',
+  'textAlign',
+  'textTransform',
+  'textDecoration',
+  'whiteSpace',
+  'textOverflow',
+  'wordBreak',
+  'verticalAlign',
+  'cursor',
+  'visibility',
+  'boxSizing',
+  'pointerEvents',
+]
+standardProps.forEach((prop) => (styleConfig[prop] = (v) => v))
+
+// 2. Pixel properties (convert number to px)
+const pixelProps = [
+  'gap',
+  'padding',
+  'paddingTop',
+  'paddingRight',
+  'paddingBottom',
+  'paddingLeft',
+  'margin',
+  'marginTop',
+  'marginRight',
+  'marginBottom',
+  'marginLeft',
+  'width',
+  'height',
+  'minWidth',
+  'maxWidth',
+  'minHeight',
+  'maxHeight',
+  'borderRadius',
+  'borderWidth',
+  'top',
+  'right',
+  'bottom',
+  'left',
+  'fontSize',
+  'lineHeight',
+  'letterSpacing',
+]
+pixelProps.forEach((prop) => (styleConfig[prop] = toCSSValue))
+
+// 3. Special mappings
+styleConfig.justifyContent = (v) => mapJustifyContent(v)
+styleConfig.alignItems = (v) => mapAlignItems(v)
+styleConfig.alignSelf = (v) => mapAlignItems(v)
+
 // Helper to convert style props to CSSProperties
 export function stylePropsToCSS(props: BaseStyleProps): CSSProperties {
   const styles: CSSProperties = {}
 
-  // Layout
-  if (props.display !== undefined) styles.display = getBaseValue(props.display)
-  if (props.flex !== undefined) styles.flex = getBaseValue(props.flex)
-  if (props.flexGrow !== undefined)
-    styles.flexGrow = getBaseValue(props.flexGrow)
-  if (props.flexShrink !== undefined)
-    styles.flexShrink = getBaseValue(props.flexShrink)
-  if (props.flexBasis !== undefined)
-    styles.flexBasis = getBaseValue(props.flexBasis)
-  if (props.flexDirection !== undefined)
-    styles.flexDirection = getBaseValue(props.flexDirection)
-  if (props.justifyContent !== undefined)
-    styles.justifyContent = mapJustifyContent(
-      getBaseValue(props.justifyContent) as JustifyContent
-    )
-  if (props.alignItems !== undefined)
-    styles.alignItems = mapAlignItems(
-      getBaseValue(props.alignItems) as AlignItems
-    )
-  if (props.alignSelf !== undefined)
-    styles.alignSelf = mapAlignItems(
-      getBaseValue(props.alignSelf) as AlignItems
-    )
-  if (props.gap !== undefined) styles.gap = toCSSValue(getBaseValue(props.gap))
-  if (props.flexWrap !== undefined)
-    styles.flexWrap = getBaseValue(props.flexWrap)
-
-  // Spacing
-  if (props.padding !== undefined)
-    styles.padding = toCSSValue(getBaseValue(props.padding))
-  if (props.paddingTop !== undefined)
-    styles.paddingTop = toCSSValue(getBaseValue(props.paddingTop))
-  if (props.paddingRight !== undefined)
-    styles.paddingRight = toCSSValue(getBaseValue(props.paddingRight))
-  if (props.paddingBottom !== undefined)
-    styles.paddingBottom = toCSSValue(getBaseValue(props.paddingBottom))
-  if (props.paddingLeft !== undefined)
-    styles.paddingLeft = toCSSValue(getBaseValue(props.paddingLeft))
-  if (props.margin !== undefined)
-    styles.margin = toCSSValue(getBaseValue(props.margin))
-  if (props.marginTop !== undefined)
-    styles.marginTop = toCSSValue(getBaseValue(props.marginTop))
-  if (props.marginRight !== undefined)
-    styles.marginRight = toCSSValue(getBaseValue(props.marginRight))
-  if (props.marginBottom !== undefined)
-    styles.marginBottom = toCSSValue(getBaseValue(props.marginBottom))
-  if (props.marginLeft !== undefined)
-    styles.marginLeft = toCSSValue(getBaseValue(props.marginLeft))
-
-  // Sizing
-  if (props.width !== undefined)
-    styles.width = toCSSValue(getBaseValue(props.width))
-  if (props.height !== undefined)
-    styles.height = toCSSValue(getBaseValue(props.height))
-  if (props.minWidth !== undefined)
-    styles.minWidth = toCSSValue(getBaseValue(props.minWidth))
-  if (props.maxWidth !== undefined)
-    styles.maxWidth = toCSSValue(getBaseValue(props.maxWidth))
-  if (props.minHeight !== undefined)
-    styles.minHeight = toCSSValue(getBaseValue(props.minHeight))
-  if (props.maxHeight !== undefined)
-    styles.maxHeight = toCSSValue(getBaseValue(props.maxHeight))
-
-  // Visual
-  if (props.backgroundColor !== undefined)
-    styles.backgroundColor = getBaseValue(props.backgroundColor)
-  if (props.background !== undefined)
-    styles.background = getBaseValue(props.background)
-  if (props.borderRadius !== undefined)
-    styles.borderRadius = toCSSValue(getBaseValue(props.borderRadius))
-  if (props.borderWidth !== undefined)
-    styles.borderWidth = toCSSValue(getBaseValue(props.borderWidth))
-  if (props.borderColor !== undefined)
-    styles.borderColor = getBaseValue(props.borderColor)
-  if (props.borderStyle !== undefined)
-    styles.borderStyle = getBaseValue(props.borderStyle)
-  if (props.border !== undefined) styles.border = getBaseValue(props.border)
-  if (props.opacity !== undefined) styles.opacity = getBaseValue(props.opacity)
-  if (props.overflow !== undefined)
-    styles.overflow = getBaseValue(props.overflow)
-  if (props.boxShadow !== undefined)
-    styles.boxShadow = getBaseValue(props.boxShadow)
-
-  // Positioning
-  if (props.position !== undefined)
-    styles.position = getBaseValue(props.position)
-  if (props.top !== undefined) styles.top = toCSSValue(getBaseValue(props.top))
-  if (props.right !== undefined)
-    styles.right = toCSSValue(getBaseValue(props.right))
-  if (props.bottom !== undefined)
-    styles.bottom = toCSSValue(getBaseValue(props.bottom))
-  if (props.left !== undefined)
-    styles.left = toCSSValue(getBaseValue(props.left))
-  if (props.zIndex !== undefined) styles.zIndex = getBaseValue(props.zIndex)
-
-  // Text
-  if (props.color !== undefined) styles.color = getBaseValue(props.color)
-  if (props.fontSize !== undefined)
-    styles.fontSize = toCSSValue(getBaseValue(props.fontSize))
-  if (props.fontWeight !== undefined)
-    styles.fontWeight = getBaseValue(props.fontWeight)
-  if (props.fontFamily !== undefined)
-    styles.fontFamily = getBaseValue(props.fontFamily)
-  if (props.fontStyle !== undefined)
-    styles.fontStyle = getBaseValue(props.fontStyle)
-  if (props.textAlign !== undefined)
-    styles.textAlign = getBaseValue(props.textAlign)
-  if (props.lineHeight !== undefined)
-    styles.lineHeight = toCSSValue(getBaseValue(props.lineHeight))
-  if (props.letterSpacing !== undefined)
-    styles.letterSpacing = toCSSValue(getBaseValue(props.letterSpacing))
-  if (props.textTransform !== undefined)
-    styles.textTransform = getBaseValue(props.textTransform)
-  if (props.textDecoration !== undefined)
-    styles.textDecoration = getBaseValue(props.textDecoration)
-  if (props.whiteSpace !== undefined)
-    styles.whiteSpace = getBaseValue(props.whiteSpace)
-  if (props.textOverflow !== undefined)
-    styles.textOverflow = getBaseValue(props.textOverflow)
-  if (props.wordBreak !== undefined)
-    styles.wordBreak = getBaseValue(props.wordBreak)
-  if (props.verticalAlign !== undefined)
-    styles.verticalAlign = getBaseValue(props.verticalAlign)
-
-  // Other
-  if (props.cursor !== undefined) styles.cursor = getBaseValue(props.cursor)
-  if (props.visibility !== undefined)
-    styles.visibility = getBaseValue(props.visibility)
-  if (props.boxSizing !== undefined)
-    styles.boxSizing = getBaseValue(props.boxSizing)
-  if (props.pointerEvents !== undefined)
-    styles.pointerEvents = getBaseValue(props.pointerEvents)
+  for (const key in props) {
+    const transform = styleConfig[key]
+    if (transform) {
+      const value = getBaseValue(props[key as keyof BaseStyleProps])
+      if (value !== undefined) {
+        styles[key] = transform(value)
+      }
+    }
+  }
 
   return styles
 }

@@ -28,52 +28,37 @@ function dispatchEvent(event: Event) {
   const bubbles = !NON_BUBBLING_EVENTS.has(eventType)
 
   // Use composedPath if available (handles Shadow DOM and is faster)
-  if (event.composedPath) {
-    const path = event.composedPath()
-    for (const node of path) {
-      const targetNode = node as Node
-      // Stop at document or if we hit the end
-      if (targetNode === document || !targetNode) break
+  // Fallback to parentNode traversal for older browsers
+  const path = event.composedPath?.() || []
+  let current: Node | null = event.target as Node
 
-      const handlers = nodeHandlers.get(targetNode)
-      if (handlers && handlers.has(eventType)) {
-        const handler = handlers.get(eventType)
-        if (handler) {
-          try {
-            handler(event)
-          } catch (error) {
-            logError(ErrorCodes.EVENT_HANDLER_FAILED, { eventType }, error)
-          }
-          if (event.cancelBubble) {
-            return
-          }
-        }
-      }
-
-      if (!bubbles) break
+  if (path.length === 0 && current) {
+    // Build path manually if composedPath not available
+    while (current) {
+      path.push(current)
+      current = current.parentNode
     }
-  } else {
-    // Fallback: Bubble up from target to document
-    while (target && target !== document) {
-      const handlers = nodeHandlers.get(target)
-      if (handlers && handlers.has(eventType)) {
-        const handler = handlers.get(eventType)
-        if (handler) {
-          try {
-            handler(event)
-          } catch (error) {
-            logError(ErrorCodes.EVENT_HANDLER_FAILED, { eventType }, error)
-          }
-          if (event.cancelBubble) {
-            break
-          }
+  }
+
+  for (const node of path) {
+    const targetNode = node as Node
+    // Stop at document or if we hit the end
+    if (targetNode === document || !targetNode) break
+
+    const handlers = nodeHandlers.get(targetNode)
+    if (handlers?.has(eventType)) {
+      const handler = handlers.get(eventType)
+      if (handler) {
+        try {
+          handler(event)
+        } catch (error) {
+          logError(ErrorCodes.EVENT_HANDLER_FAILED, { eventType }, error)
         }
+        if (event.cancelBubble) return
       }
-
-      if (!bubbles) break // Stop if event doesn't bubble
-
-      target = target.parentNode
     }
+
+    if (!bubbles) break
   }
 }
 
