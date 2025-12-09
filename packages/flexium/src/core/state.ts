@@ -14,7 +14,7 @@ interface StateObject {
   error?: unknown
   state?: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'
   latest?: unknown
-  read?: () => unknown
+
   _stateActions?: StateActions
   _signal?: Signal<unknown> | Computed<unknown> | Resource<unknown>
   _isComputed?: boolean

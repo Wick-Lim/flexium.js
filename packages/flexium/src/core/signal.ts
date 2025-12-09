@@ -672,11 +672,6 @@ export interface Resource<T> extends Signal<T | undefined> {
   error: any
   state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'
   latest: T | undefined
-  /**
-   * Read value, throwing Promise if pending or Error if failed.
-   * Used by Suspense.
-   */
-  read: () => T | undefined
 }
 
 /**
@@ -700,8 +695,6 @@ export function createResource<T, S = any>(
     'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'
   >('unresolved')
 
-  let lastPromise: Promise<T> | null = null
-
   const load = async (currentSource: S, refetching = false) => {
     if (refetching) {
       state.value = 'refreshing'
@@ -712,24 +705,37 @@ export function createResource<T, S = any>(
     }
     error.value = undefined
 
-    const promise = fetcher(currentSource, { value: value.peek(), refetching })
-    lastPromise = promise
+    // Track the current promise to avoid race conditions
+    // We use a local variable instead of a shared 'lastPromise'
+    // because we only care about the latest execution within this closure scope
+    // if we needed to support cancellation, we'd need more.
+    // Actually, for race conditions we DO need to track the active promise ID or similar.
+    // Let's use a simpler counter approach or just compare promise references if we kept track.
+    // But since we are removing 'lastPromise' which was used for throwing, 
+    // we still need to handle race conditions (late resolve).
+
+    // Re-introducing a local tracking mechanism just for race conditions
+    const currentPromise = fetcher(currentSource, { value: value.peek(), refetching })
+    // We need to store this on the closure to compare
+    latestPromise = currentPromise
 
     try {
-      const result = await promise
-      if (lastPromise === promise) {
+      const result = await currentPromise
+      if (latestPromise === currentPromise) {
         value.value = result
         state.value = 'ready'
         loading.value = false
       }
     } catch (err) {
-      if (lastPromise === promise) {
+      if (latestPromise === currentPromise) {
         error.value = err
         state.value = 'errored'
         loading.value = false
       }
     }
   }
+
+  let latestPromise: Promise<T> | null = null
 
   const getSource = () => {
     if (typeof source === 'function') {
@@ -759,17 +765,6 @@ export function createResource<T, S = any>(
     latest: { get: () => value.peek() },
     peek: { value: () => value.peek() },
     set: { value: (v: T) => value.set(v) },
-    read: {
-      value: () => {
-        if (state.value === 'pending' || state.value === 'refreshing') {
-          throw lastPromise
-        }
-        if (state.value === 'errored') {
-          throw error.value
-        }
-        return value.value
-      },
-    },
   })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ; (resource as any)[SIGNAL_MARKER] = true
