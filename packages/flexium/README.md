@@ -11,7 +11,8 @@ Flexium is a next-generation UI framework that unifies state management, async d
 ## Key Features
 
 - **Unified State API** - No more `useState`, `useRecoil`, `useQuery` separation. Just `state()`.
-- **Fine-Grained Reactivity** - Updates only what changed. No Virtual DOM overhead.
+- **No Virtual DOM** - Direct DOM updates for maximum performance and minimal memory usage.
+- **Tiny Bundle** - ~8KB (min+gzip) including Router and Motion.
 - **Cross-Platform** - DOM, Canvas, and SSR renderers included.
 - **TypeScript First** - Full type inference out of the box.
 - **Zero-Config JSX** - Works with standard tooling.

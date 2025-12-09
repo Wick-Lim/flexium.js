@@ -75,7 +75,7 @@ import flexium from 'vite-plugin-flexium';
 export default defineConfig({
   plugins: [
     flexium({
-      autoImport: true, // Auto-import signal, effect, computed, etc.
+      autoImport: true, // Auto-import state, effect, computed, etc.
     }),
   ],
 });
@@ -100,8 +100,8 @@ Or use pragma comments:
 /** @jsxImportSource flexium */
 
 function App() {
-  const count = signal(0);
-  return <button onClick={() => count.set(count() + 1)}>{count()}</button>;
+  const [count, setCount] = state(0);
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
 }
 ```
 
