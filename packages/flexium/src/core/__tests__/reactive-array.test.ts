@@ -1,24 +1,21 @@
 /**
  * Reactive Array Tests
  *
- * Tests for the reactive array .map() syntax that enables
- * {items.map(item => <div>{item}</div>)} with For-like optimizations
+ * Tests for array state behavior with the state() API.
+ * Array reconciliation happens at the render layer (reconcile.ts),
+ * so these tests focus on StateValue array behavior.
  *
  * @vitest-environment jsdom
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
 import { state, STATE_SIGNAL } from '../state'
-import {
-  isReactiveArrayResult,
-  REACTIVE_ARRAY_MARKER,
-} from '../reactive-array'
+import { effect } from '../signal'
 
 // Helper to wait for microtasks
 const tick = () => new Promise((resolve) => queueMicrotask(resolve))
 
 // Helper to extract primitive value from StateProxy
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const val = <T>(proxy: T): T => {
   if (
     proxy &&
@@ -31,114 +28,215 @@ const val = <T>(proxy: T): T => {
   return proxy
 }
 
-describe('Reactive Array', () => {
+describe('Array State', () => {
   beforeEach(() => {
     state.clear()
   })
 
-  describe('ReactiveArrayResult Creation', () => {
-    it('should return ReactiveArrayResult when calling .map() on array state', () => {
+  describe('Basic array operations', () => {
+    it('should create array state', () => {
       const [items] = state(['a', 'b', 'c'])
 
-      const result = items.map((item: string) => `<div>${item}</div>`)
-
-      expect(isReactiveArrayResult(result)).toBe(true)
-      expect(result[REACTIVE_ARRAY_MARKER]).toBe(true)
+      expect(val(items)).toEqual(['a', 'b', 'c'])
     })
 
-    it('should have source signal in ReactiveArrayResult', () => {
-      const [items] = state(['x', 'y', 'z'])
+    it('should access array length', () => {
+      const [items] = state([1, 2, 3, 4, 5])
+
+      expect(items.length).toBe(5)
+    })
+
+    it('should access array elements by index', () => {
+      const [items] = state(['first', 'second', 'third'])
+
+      expect(items[0]).toBe('first')
+      expect(items[1]).toBe('second')
+      expect(items[2]).toBe('third')
+    })
+
+    it('should update array state', () => {
+      const [items, setItems] = state(['a', 'b'])
+
+      setItems(['x', 'y', 'z'])
+
+      expect(val(items)).toEqual(['x', 'y', 'z'])
+    })
+
+    it('should update array with setter function', () => {
+      const [items, setItems] = state([1, 2, 3])
+
+      setItems(prev => [...prev, 4])
+
+      expect(val(items)).toEqual([1, 2, 3, 4])
+    })
+  })
+
+  describe('Array methods on StateValue', () => {
+    it('should support .map() returning regular array', () => {
+      const [items] = state(['a', 'b', 'c'])
 
       const result = items.map((item: string) => item.toUpperCase())
 
-      expect(result.source).toBeDefined()
-      expect(result.source.value).toEqual(['x', 'y', 'z'])
+      // .map() returns a regular array, not ReactiveArrayResult
+      expect(Array.isArray(result)).toBe(true)
+      expect(result).toEqual(['A', 'B', 'C'])
     })
 
-    it('should have mapFn in ReactiveArrayResult', () => {
-      const [items] = state([1, 2, 3])
+    it('should support .filter()', () => {
+      const [items] = state([1, 2, 3, 4, 5])
 
-      const result = items.map((item: number) => item * 2)
+      const result = items.filter((n: number) => n > 2)
 
-      expect(typeof result.mapFn).toBe('function')
+      expect(result).toEqual([3, 4, 5])
     })
 
-    it('should work with index parameter', () => {
-      const [items] = state(['a', 'b', 'c'])
-
-      const result = items.map((item: string, index: number) => `${index}:${item}`)
-
-      expect(isReactiveArrayResult(result)).toBe(true)
-      expect(result.mapFn).toBeDefined()
-    })
-  })
-
-  describe('Non-array states should not create ReactiveArrayResult', () => {
-    it('should not affect number state', () => {
-      const [count] = state(5)
-
-      // Number doesn't have .map(), this should be undefined or throw
-      expect((count as unknown as { map?: unknown }).map).toBeUndefined()
-    })
-
-    it('should not affect string state', () => {
-      const [text] = state('hello')
-
-      // String doesn't have reactive .map() like arrays
-      // (it has native .map() but it's not reactive)
-      expect(typeof (text as unknown as { map?: unknown }).map).toBe('undefined')
-    })
-
-    it('should not affect object state', () => {
-      const [obj] = state({ a: 1, b: 2 })
-
-      expect((obj as unknown as { map?: unknown }).map).toBeUndefined()
-    })
-  })
-
-  describe('Array mutation and reactivity', () => {
-    it('should update source signal when state changes', async () => {
-      const [items, setItems] = state(['initial'])
-
-      const result = items.map((item: string) => `<li>${item}</li>`)
-
-      expect(result.source.value).toEqual(['initial'])
-
-      setItems(['updated', 'items'])
-      await tick()
-
-      // The source signal should reflect the update
-      expect(result.source.value).toEqual(['updated', 'items'])
-    })
-
-    it('should work with array of objects', () => {
-      const [todos] = state([
-        { id: 1, text: 'Learn Flexium' },
-        { id: 2, text: 'Build an app' },
+    it('should support .find()', () => {
+      const [items] = state([
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
       ])
 
-      const result = todos.map((todo: { id: number; text: string }) => ({
-        key: todo.id,
-        label: todo.text,
-      }))
+      const result = items.find((item: { id: number }) => item.id === 2)
 
-      expect(isReactiveArrayResult(result)).toBe(true)
+      expect(result).toEqual({ id: 2, name: 'Bob' })
     })
 
-    it('should preserve reactive link after multiple maps', async () => {
-      const [items, setItems] = state([1, 2, 3])
+    it('should support .reduce()', () => {
+      const [items] = state([1, 2, 3, 4])
 
-      // First map creates ReactiveArrayResult
-      const result1 = items.map((x: number) => x * 2)
+      const sum = items.reduce((acc: number, n: number) => acc + n, 0)
 
-      expect(isReactiveArrayResult(result1)).toBe(true)
+      expect(sum).toBe(10)
+    })
 
-      // Update original items
-      setItems([10, 20, 30])
+    it('should support .some() and .every()', () => {
+      const [items] = state([2, 4, 6, 8])
+
+      expect(items.some((n: number) => n > 5)).toBe(true)
+      expect(items.every((n: number) => n % 2 === 0)).toBe(true)
+    })
+
+    it('should support .includes()', () => {
+      const [items] = state(['apple', 'banana', 'cherry'])
+
+      expect(items.includes('banana')).toBe(true)
+      expect(items.includes('grape')).toBe(false)
+    })
+
+    it('should support .indexOf()', () => {
+      const [items] = state(['a', 'b', 'c', 'b'])
+
+      expect(items.indexOf('b')).toBe(1)
+      expect(items.indexOf('x')).toBe(-1)
+    })
+
+    it('should support .slice()', () => {
+      const [items] = state([1, 2, 3, 4, 5])
+
+      expect(items.slice(1, 3)).toEqual([2, 3])
+    })
+
+    it('should support .concat()', () => {
+      const [items] = state([1, 2])
+
+      const result = items.concat([3, 4])
+
+      expect(result).toEqual([1, 2, 3, 4])
+    })
+
+    it('should support .join()', () => {
+      const [items] = state(['a', 'b', 'c'])
+
+      expect(items.join('-')).toBe('a-b-c')
+    })
+  })
+
+  describe('Reactivity with effects', () => {
+    it('should trigger effect when array changes', async () => {
+      const [items, setItems] = state(['initial'])
+      let effectCount = 0
+      let lastLength = 0
+
+      effect(() => {
+        effectCount++
+        lastLength = items.length
+      })
+
+      expect(effectCount).toBe(1)
+      expect(lastLength).toBe(1)
+
+      setItems(['a', 'b', 'c'])
       await tick()
 
-      // Source should be updated
-      expect(result1.source.value).toEqual([10, 20, 30])
+      expect(effectCount).toBe(2)
+      expect(lastLength).toBe(3)
+    })
+
+    it('should track array access in computed state', () => {
+      const [items, setItems] = state([1, 2, 3])
+      const [sum] = state(() => items.reduce((a: number, b: number) => a + b, 0))
+
+      expect(+sum).toBe(6)
+
+      setItems([10, 20, 30])
+
+      expect(+sum).toBe(60)
+    })
+
+    it('should track array length in computed state', () => {
+      const [items, setItems] = state(['a', 'b'])
+      const [count] = state(() => items.length)
+
+      expect(+count).toBe(2)
+
+      setItems(['x', 'y', 'z', 'w'])
+
+      expect(+count).toBe(4)
+    })
+  })
+
+  describe('Array of objects', () => {
+    interface Todo {
+      id: number
+      text: string
+      done: boolean
+    }
+
+    it('should work with array of objects', () => {
+      const [todos] = state<Todo[]>([
+        { id: 1, text: 'Learn Flexium', done: false },
+        { id: 2, text: 'Build app', done: true },
+      ])
+
+      const names = todos.map((t: Todo) => t.text)
+
+      expect(names).toEqual(['Learn Flexium', 'Build app'])
+    })
+
+    it('should update array of objects', () => {
+      const [todos, setTodos] = state<Todo[]>([
+        { id: 1, text: 'Task 1', done: false },
+      ])
+
+      setTodos(prev => [
+        ...prev,
+        { id: 2, text: 'Task 2', done: false },
+      ])
+
+      expect(val(todos).length).toBe(2)
+      expect(val(todos)[1].text).toBe('Task 2')
+    })
+
+    it('should filter objects', () => {
+      const [todos] = state<Todo[]>([
+        { id: 1, text: 'Done task', done: true },
+        { id: 2, text: 'Pending task', done: false },
+      ])
+
+      const pending = todos.filter((t: Todo) => !t.done)
+
+      expect(pending.length).toBe(1)
+      expect(pending[0].text).toBe('Pending task')
     })
   })
 
@@ -146,44 +244,58 @@ describe('Reactive Array', () => {
     it('should handle empty array', () => {
       const [items] = state<string[]>([])
 
-      const result = items.map((item: string) => item)
-
-      expect(isReactiveArrayResult(result)).toBe(true)
-      expect(result.source.value).toEqual([])
+      expect(items.length).toBe(0)
+      expect(items.map((x: string) => x)).toEqual([])
     })
 
     it('should handle array with null/undefined items', () => {
       const [items] = state<(string | null | undefined)[]>(['a', null, undefined, 'b'])
 
-      const result = items.map((item) => item ?? 'default')
+      const result = items.filter((x) => x != null)
 
-      expect(isReactiveArrayResult(result)).toBe(true)
+      expect(result).toEqual(['a', 'b'])
     })
 
     it('should handle nested arrays', () => {
-      const [matrix] = state([[1, 2], [3, 4]])
+      const [matrix] = state([[1, 2], [3, 4], [5, 6]])
 
-      const result = matrix.map((row: number[]) => row.reduce((a, b) => a + b, 0))
+      const sums = matrix.map((row: number[]) => row.reduce((a, b) => a + b, 0))
 
-      expect(isReactiveArrayResult(result)).toBe(true)
+      expect(sums).toEqual([3, 7, 11])
+    })
+
+    it('should handle array spread', () => {
+      const [items] = state([1, 2, 3])
+
+      const spread = [...items]
+
+      expect(spread).toEqual([1, 2, 3])
+    })
+
+    it('should work with for...of loop', () => {
+      const [items] = state(['x', 'y', 'z'])
+
+      const collected: string[] = []
+      for (const item of items) {
+        collected.push(item)
+      }
+
+      expect(collected).toEqual(['x', 'y', 'z'])
     })
   })
 
-  describe('Type preservation', () => {
-    it('should work with typed arrays', () => {
-      interface User {
-        id: number
-        name: string
-      }
+  describe('Global array state', () => {
+    it('should share array state by key', () => {
+      const [itemsA, setItemsA] = state(['a'], { key: 'shared-array' })
+      const [itemsB] = state<string[]>([], { key: 'shared-array' })
 
-      const [users] = state<User[]>([
-        { id: 1, name: 'Alice' },
-        { id: 2, name: 'Bob' },
-      ])
+      expect(val(itemsA)).toEqual(['a'])
+      expect(val(itemsB)).toEqual(['a'])
 
-      const result = users.map((user: User) => user.name)
+      setItemsA(['x', 'y'])
 
-      expect(isReactiveArrayResult(result)).toBe(true)
+      expect(val(itemsA)).toEqual(['x', 'y'])
+      expect(val(itemsB)).toEqual(['x', 'y'])
     })
   })
 })
