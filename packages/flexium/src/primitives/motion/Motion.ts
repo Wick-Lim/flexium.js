@@ -5,8 +5,6 @@
  * Supports transforms, opacity, spring physics, and layout animations
  */
 
-import { effect, type Signal } from '../../core/signal'
-
 /**
  * Animation properties that can be animated
  */
@@ -387,72 +385,4 @@ export class MotionController {
   }
 }
 
-/**
- * Create a motion-enabled element
- *
- * @example
- * const motionDiv = createMotion({
- *   initial: { opacity: 0, y: 20 },
- *   animate: { opacity: 1, y: 0 },
- *   duration: 300,
- * });
- * document.body.appendChild(motionDiv.element);
- */
-export function createMotion(props: MotionProps & { tagName?: string }): {
-  element: HTMLElement
-  controller: MotionController
-  update: (newProps: MotionProps) => void
-  dispose: () => void
-} {
-  const element =
-    props.element || document.createElement(props.tagName || 'div')
-  const controller = new MotionController(element)
 
-  // Initial animation
-  controller.animate(props)
-
-  return {
-    element,
-    controller,
-    update: (newProps: MotionProps) => {
-      controller.animate(newProps)
-    },
-    dispose: () => {
-      controller.dispose()
-    },
-  }
-}
-
-/**
- * Hook-like function to use motion with signals
- *
- * @example
- * const visible = signal(false);
- * const motion = useMotion(element, {
- *   initial: { opacity: 0 },
- *   animate: visible.value ? { opacity: 1 } : { opacity: 0 },
- * });
- */
-export function useMotion(
-  element: HTMLElement,
-  propsSignal: Signal<MotionProps>
-): {
-  controller: MotionController
-  dispose: () => void
-} {
-  const controller = new MotionController(element)
-
-  // Watch for prop changes
-  const dispose = effect(() => {
-    const props = propsSignal.value
-    controller.animate(props)
-  })
-
-  return {
-    controller,
-    dispose: () => {
-      dispose()
-      controller.dispose()
-    },
-  }
-}

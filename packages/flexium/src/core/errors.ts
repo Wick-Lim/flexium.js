@@ -79,7 +79,7 @@ const errorDefinitions: Record<ErrorCode, ErrorDefinition> = {
       'Wrap your component tree with the appropriate Context.Provider.',
   },
   [ErrorCodes.ROUTER_OUTSIDE_PROVIDER]: {
-    message: 'useRouter must be used within a <Router> component',
+    message: 'router() must be used within a <Router> component',
     suggestion: 'Ensure your component is a descendant of <Router>.',
   },
   [ErrorCodes.FORM_VALIDATION_FAILED]: {

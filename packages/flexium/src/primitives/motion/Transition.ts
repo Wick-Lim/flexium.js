@@ -276,75 +276,55 @@ export function TransitionGroup(props: TransitionGroupProps) {
 }
 
 /**
- * Create a reusable transition configuration
- *
- * @example
- * const fadeTransition = createTransition({
- *   preset: 'fade',
- *   enterTiming: { duration: 200 }
- * })
- *
- * // Use in component
- * <Transition {...fadeTransition}>
- *   <Content />
- * </Transition>
- */
-export function createTransition(
-  config: Omit<TransitionProps, 'children'>
-): Omit<TransitionProps, 'children'> {
-  return config
-}
-
-/**
  * Preset transition configurations
  */
 export const transitions = {
-  fade: createTransition({ preset: 'fade' }),
-  slideUp: createTransition({ preset: 'slide-up' }),
-  slideDown: createTransition({ preset: 'slide-down' }),
-  slideLeft: createTransition({ preset: 'slide-left' }),
-  slideRight: createTransition({ preset: 'slide-right' }),
-  scale: createTransition({ preset: 'scale' }),
-  scaleFade: createTransition({ preset: 'scale-fade' }),
+  fade: { preset: 'fade' },
+  slideUp: { preset: 'slide-up' },
+  slideDown: { preset: 'slide-down' },
+  slideLeft: { preset: 'slide-left' },
+  slideRight: { preset: 'slide-right' },
+  scale: { preset: 'scale' },
+  scaleFade: { preset: 'scale-fade' },
 
   // Common UI patterns
-  modal: createTransition({
+  modal: {
     enter: { opacity: 0, scale: 0.95, y: -10 },
     enterTo: { opacity: 1, scale: 1, y: 0 },
     exit: { opacity: 0, scale: 0.95, y: 10 },
     enterTiming: { duration: 200, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
     exitTiming: { duration: 150, easing: 'ease-in' },
-  }),
+  },
 
-  dropdown: createTransition({
+  dropdown: {
     enter: { opacity: 0, y: -8, scale: 0.95 },
     enterTo: { opacity: 1, y: 0, scale: 1 },
     exit: { opacity: 0, y: -8, scale: 0.95 },
     enterTiming: { duration: 150, easing: 'ease-out' },
     exitTiming: { duration: 100, easing: 'ease-in' },
-  }),
+  },
 
-  tooltip: createTransition({
+  tooltip: {
     enter: { opacity: 0, scale: 0.9 },
     enterTo: { opacity: 1, scale: 1 },
     exit: { opacity: 0, scale: 0.9 },
     enterTiming: { duration: 100, easing: 'ease-out' },
     exitTiming: { duration: 75, easing: 'ease-in' },
-  }),
+  },
 
-  notification: createTransition({
+  notification: {
     enter: { opacity: 0, x: 100 },
     enterTo: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: 100 },
     enterTiming: { duration: 300, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
     exitTiming: { duration: 200, easing: 'ease-in' },
-  }),
+  },
 
-  page: createTransition({
+  page: {
     enter: { opacity: 0 },
     enterTo: { opacity: 1 },
     exit: { opacity: 0 },
     enterTiming: { duration: 200, easing: 'ease-out' },
     exitTiming: { duration: 150, easing: 'ease-in' },
-  }),
-} as const
+  },
+} satisfies Record<string, Omit<TransitionProps, 'children'>>

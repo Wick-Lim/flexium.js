@@ -8,7 +8,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   Transition,
   TransitionGroup,
-  createTransition,
   transitions,
   type TransitionProps,
   type TransitionPreset,
@@ -631,59 +630,6 @@ describe('Transition Component', () => {
 
       const [, options] = (mockElement.animate as any).mock.calls[0]
       expect(options.delay).toBe(0)
-    })
-  })
-
-  describe('createTransition Factory', () => {
-    it('should create transition configuration', () => {
-      const config = createTransition({
-        preset: 'fade',
-        enterTiming: { duration: 200 },
-      })
-
-      expect(config).toEqual({
-        preset: 'fade',
-        enterTiming: { duration: 200 },
-      })
-    })
-
-    it('should create reusable configuration without children', () => {
-      const config = createTransition({
-        enter: { opacity: 0 },
-        enterTo: { opacity: 1 },
-        exit: { opacity: 0 },
-      })
-
-      expect(config.enter).toEqual({ opacity: 0 })
-      expect(config.enterTo).toEqual({ opacity: 1 })
-      expect(config.exit).toEqual({ opacity: 0 })
-      expect(config).not.toHaveProperty('children')
-    })
-
-    it('should work with spread operator', async () => {
-      const fadeConfig = createTransition({
-        preset: 'fade',
-        enterTiming: { duration: 150 },
-      })
-
-      const result = Transition({
-        ...fadeConfig,
-        children: 'Test',
-      }) as any
-
-      const refCallback = result.props.ref
-      const mockElement = document.createElement('div')
-      mockElement.animate = vi.fn((keyframes: any, options: any) => {
-        const animation = new MockAnimation(keyframes, options)
-        mockAnimations.push(animation)
-        return animation as unknown as Animation
-      }) as any
-
-      refCallback(mockElement)
-      await new Promise((resolve) => queueMicrotask(resolve))
-
-      const [, options] = (mockElement.animate as any).mock.calls[0]
-      expect(options.duration).toBe(150)
     })
   })
 

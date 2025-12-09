@@ -7,280 +7,34 @@ head:
       content: Motion API Reference - Flexium
   - - meta
     - property: og:description
-      content: createMotion, useMotion, and MotionController for building performant animations in Flexium using the Web Animations API.
+      content: MotionController for building performant animations in Flexium using the Web Animations API.
 ---
 
 # Motion
 
-Complete API reference for Flexium's declarative animation primitives using the Web Animations API.
+Complete API reference for Flexium's animation primitives using the Web Animations API.
 
 ## Import
 
 ```tsx
-import {
-  createMotion,
-  useMotion,
-  MotionController
-} from 'flexium/primitives/motion';
+import { MotionController } from 'flexium/primitives/motion';
 ```
 
 ---
 
-## Functions
+## Overview
 
-### createMotion
+`MotionController` is a class for managing animations on DOM elements. It provides direct access to the Web Animations API with additional features like spring physics and layout animations.
 
-Creates a motion-enabled element with declarative animations. Provides a high-level API for animating elements with initial, animate, and exit states.
+Use `MotionController` to:
+- Animate element properties (position, scale, rotation, opacity)
+- Apply spring physics for natural motion
+- Automatically animate layout changes (width/height)
+- Control animation lifecycle (play, pause, cancel)
 
-#### Usage
+## MotionController
 
-```tsx
-import { createMotion } from 'flexium/primitives/motion';
-
-const motion = createMotion({
-  tagName: 'div',
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  duration: 300,
-  spring: { tension: 170, friction: 26 },
-  onAnimationComplete: () => console.log('Animation done!'),
-});
-
-motion.element.textContent = 'Hello World';
-document.body.appendChild(motion.element);
-```
-
-#### Parameters
-
-The function accepts a `MotionProps` object with optional additional properties:
-
-| Property | Type | Default | Description |
-| --- | --- | --- | --- |
-| `element` | `HTMLElement \| null` | - | Existing element to animate (if not provided, creates new element). |
-| `tagName` | `string` | `'div'` | HTML tag name for the element (only used if `element` not provided). |
-| `initial` | `AnimatableProps` | - | Initial animation state (applied immediately). |
-| `animate` | `AnimatableProps` | - | Target animation state to animate towards. |
-| `exit` | `AnimatableProps` | - | Exit animation state (for removal animations). |
-| `duration` | `number` | `300` | Animation duration in milliseconds. |
-| `spring` | `SpringConfig` | - | Spring physics configuration (overrides `duration` and `easing`). |
-| `easing` | `string` | `'ease-out'` | CSS easing function (e.g., 'ease-in', 'ease-out', 'linear'). |
-| `delay` | `number` | `0` | Animation delay in milliseconds. |
-| `onAnimationStart` | `() => void` | - | Callback fired when animation starts. |
-| `onAnimationComplete` | `() => void` | - | Callback fired when animation completes. |
-
-#### Return Value
-
-Returns an object with:
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `element` | `HTMLElement` | The animated DOM element. |
-| `controller` | `MotionController` | Controller instance for advanced control. |
-| `update` | `(newProps: MotionProps) => void` | Update animation properties and replay. |
-| `dispose` | `() => void` | Clean up animations and observers. |
-
-#### Example: Fade In Animation
-
-```tsx
-const fadeIn = createMotion({
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  duration: 500,
-  easing: 'ease-in-out',
-});
-
-fadeIn.element.textContent = 'Fading in...';
-document.body.appendChild(fadeIn.element);
-```
-
-#### Example: Slide Up Animation
-
-```tsx
-const slideUp = createMotion({
-  initial: { opacity: 0, y: 50 },
-  animate: { opacity: 1, y: 0 },
-  duration: 400,
-  easing: 'ease-out',
-});
-
-slideUp.element.innerHTML = '<h1>Welcome!</h1>';
-document.body.appendChild(slideUp.element);
-```
-
-#### Example: Spring Animation
-
-```tsx
-const bounceIn = createMotion({
-  initial: { scale: 0 },
-  animate: { scale: 1 },
-  spring: {
-    tension: 300,  // Higher = faster
-    friction: 10,  // Lower = more bouncy
-    mass: 1,
-  },
-  onAnimationComplete: () => console.log('Bounced in!'),
-});
-
-document.body.appendChild(bounceIn.element);
-```
-
-#### Example: Update Animation
-
-```tsx
-const box = createMotion({
-  initial: { x: 0 },
-  animate: { x: 100 },
-  duration: 500,
-});
-
-document.body.appendChild(box.element);
-
-// Later, update to new animation
-setTimeout(() => {
-  box.update({
-    animate: { x: 200, y: 100 },
-    duration: 300,
-  });
-}, 1000);
-```
-
-#### Example: Animate Existing Element
-
-```tsx
-const existingDiv = document.querySelector('.my-element');
-
-const motion = createMotion({
-  element: existingDiv,
-  initial: { opacity: 0, scale: 0.8 },
-  animate: { opacity: 1, scale: 1 },
-  duration: 400,
-});
-```
-
----
-
-### useMotion
-
-Hook-like function for reactive animations that respond to signal changes. Perfect for animations that depend on application state.
-
-#### Usage
-
-```tsx
-import { useMotion, signal } from 'flexium';
-
-const isVisible = signal(false);
-
-const element = document.createElement('div');
-element.textContent = 'Toggle me!';
-
-const motion = useMotion(element, signal({
-  initial: { opacity: 0, y: -20 },
-  animate: isVisible.value
-    ? { opacity: 1, y: 0 }
-    : { opacity: 0, y: -20 },
-  duration: 300,
-}));
-
-document.body.appendChild(element);
-
-// Later, toggle visibility
-isVisible.set(true); // Animates in
-```
-
-#### Parameters
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `element` | `HTMLElement` | **Required.** The element to animate. |
-| `propsSignal` | `Signal<MotionProps>` | **Required.** Signal containing motion properties. |
-
-#### Return Value
-
-Returns an object with:
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `controller` | `MotionController` | Controller instance for advanced control. |
-| `dispose` | `() => void` | Clean up effects, animations, and observers. |
-
-#### Example: Reactive Animation
-
-```tsx
-import { useMotion, signal, computed } from 'flexium';
-
-const count = signal(0);
-
-const element = document.createElement('div');
-element.textContent = 'Click to count';
-
-// Animate based on count
-const motionProps = computed(() => ({
-  animate: {
-    scale: 1 + (count.value * 0.1),
-    rotate: count.value * 10,
-  },
-  duration: 200,
-  easing: 'ease-out',
-}));
-
-const motion = useMotion(element, motionProps);
-
-element.onclick = () => count.set(count.value + 1);
-document.body.appendChild(element);
-```
-
-#### Example: Show/Hide Animation
-
-```tsx
-const isOpen = signal(false);
-const menu = document.querySelector('.menu');
-
-const motionProps = computed(() => ({
-  initial: { opacity: 0, x: -100 },
-  animate: isOpen.value
-    ? { opacity: 1, x: 0 }
-    : { opacity: 0, x: -100 },
-  duration: 250,
-  easing: 'ease-in-out',
-}));
-
-const motion = useMotion(menu, motionProps);
-
-// Toggle menu
-toggleButton.onclick = () => isOpen.set(!isOpen.value);
-```
-
-#### Example: State-Based Animation
-
-```tsx
-const status = signal<'idle' | 'loading' | 'success' | 'error'>('idle');
-
-const statusAnimations = computed(() => {
-  switch (status.value) {
-    case 'loading':
-      return { animate: { rotate: 360 }, duration: 1000 };
-    case 'success':
-      return { animate: { scale: 1.2, opacity: 1 }, duration: 300 };
-    case 'error':
-      return { animate: { x: [-10, 10, -10, 10, 0] }, duration: 400 };
-    default:
-      return { animate: { scale: 1, opacity: 1 }, duration: 200 };
-  }
-});
-
-const indicator = document.querySelector('.status-indicator');
-const motion = useMotion(indicator, statusAnimations);
-```
-
----
-
-## Classes
-
-### MotionController
-
-Low-level controller class for managing animations on a single element. Provides direct access to the Web Animations API with additional features like spring physics and layout animations.
-
-#### Constructor
+### Constructor
 
 ```tsx
 new MotionController(element: HTMLElement)
@@ -288,18 +42,39 @@ new MotionController(element: HTMLElement)
 
 Creates a new controller for the specified element.
 
-#### Example
+**Parameters:**
+- `element` (HTMLElement) - The DOM element to animate
+
+**Example:**
 
 ```tsx
 import { MotionController } from 'flexium/primitives/motion';
 
-const element = document.querySelector('.box');
-const controller = new MotionController(element);
+function AnimatedBox() {
+  const boxRef = signal<HTMLElement | null>(null);
+
+  effect(() => {
+    if (!boxRef.value) return;
+
+    const controller = new MotionController(boxRef.value);
+
+    // Animate on mount
+    controller.animate({
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      duration: 300
+    });
+
+    return () => controller.dispose();
+  });
+
+  return <div ref={boxRef}>Animated Content</div>;
+}
 ```
 
 ---
 
-#### Methods
+## Methods
 
 ### animate
 

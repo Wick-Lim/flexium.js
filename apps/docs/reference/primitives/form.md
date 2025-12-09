@@ -1,896 +1,579 @@
 ---
-title: Form - API Reference
-description: Complete API reference for Flexium's Form primitives. Signal-based forms with built-in validation and reactive state management.
+title: Form - Building Forms with state()
+description: Guide to building reactive forms in Flexium using the state() API. Create forms with validation and reactive state management.
 head:
   - - meta
     - property: og:title
-      content: Form API Reference - Flexium
+      content: Form Guide - Flexium
   - - meta
     - property: og:description
-      content: createForm, createInput, createInputField, and validators for building reactive forms with validation in Flexium.
+      content: Build reactive forms with validation in Flexium using the state() API.
 ---
 
-# Form
+# Building Forms with state()
 
-Complete API reference for Flexium's signal-based form primitives with built-in validation.
+Learn how to build reactive forms in Flexium using the `state()` API for form state management and validation.
 
-## Import
+## Basic Form Example
 
-```tsx
-import {
-  createForm,
-  createInput,
-  createInputField,
-  validators
-} from 'flexium/primitives/form';
-```
-
----
-
-## Functions
-
-### createForm
-
-Creates a form with reactive state management and validation. Returns form state, field management functions, and submission handlers.
-
-#### Usage
+Use `state()` to manage form values and validation state:
 
 ```tsx
-import { createForm, validators } from 'flexium/primitives/form';
+import { state } from 'flexium';
 
-const form = createForm({
-  initialValues: {
+function LoginForm() {
+  const [formData, setFormData] = state({
     email: '',
-    password: '',
-  },
-  validation: {
-    email: [validators.required(), validators.email()],
-    password: [validators.required(), validators.minLength(8)],
-  },
-  onSubmit: async (data) => {
-    await api.login(data);
-  },
-});
-
-// Get field state
-const emailField = form.getField('email');
-
-// Update field value
-form.setFieldValue('email', 'user@example.com');
-
-// Submit form
-form.handleSubmit();
-```
-
-#### Parameters
-
-The function accepts a `FormConfig` object:
-
-| Property | Type | Default | Description |
-| --- | --- | --- | --- |
-| `initialValues` | `FormData` | `{}` | Initial form field values. |
-| `validation` | `FieldValidation` | `{}` | Validation rules for each field. |
-| `validateOnChange` | `boolean` | `true` | Whether to validate fields when they change. |
-| `validateOnBlur` | `boolean` | `true` | Whether to validate fields when they lose focus. |
-| `onSubmit` | `(data: FormData) => void \| Promise<void>` | - | Form submission handler. |
-
-#### Return Value
-
-Returns an object with the following properties and methods:
-
-| Property/Method | Type | Description |
-| --- | --- | --- |
-| `state` | `FormState` | Reactive form state containing data, errors, and status flags. |
-| `fields` | `Map<string, FieldState>` | Map of all field states. |
-| `getField<T>(name)` | `(name: string) => FieldState<T>` | Get or create a field state. |
-| `setFieldValue(name, value)` | `(name: string, value: FieldValue) => void` | Update a field's value. |
-| `setFieldError(name, error)` | `(name: string, error: string \| null) => void` | Set a field's error state. |
-| `setFieldTouched(name, touched)` | `(name: string, touched: boolean) => void` | Mark a field as touched or untouched. |
-| `validateField(name)` | `(name: string) => Promise<string \| null>` | Validate a single field and return error message. |
-| `validateForm()` | `() => Promise<boolean>` | Validate entire form and return whether valid. |
-| `handleSubmit(e?)` | `(e?: Event) => Promise<void>` | Handle form submission with validation. |
-| `reset(values?)` | `(values?: FormData) => void` | Reset form to initial or provided values. |
-| `dispose()` | `() => void` | Clean up form resources. |
-
-#### FormState Object
-
-The `state` property contains:
-
-```tsx
-interface FormState {
-  data: Signal<FormData>;                         // Current form data
-  errors: Computed<{ [key: string]: string | null }>; // Field error messages
-  isValid: Computed<boolean>;                     // Whether form is valid
-  isSubmitting: Signal<boolean>;                  // Whether form is submitting
-  isDirty: Computed<boolean>;                     // Whether any field changed
-  touchedFields: Signal<Set<string>>;             // Set of touched fields
-  dirtyFields: Signal<Set<string>>;               // Set of modified fields
-}
-```
-
-#### FieldState Object
-
-Each field returned by `getField()` contains:
-
-```tsx
-interface FieldState<T = FieldValue> {
-  value: Signal<T>;              // Field value signal
-  error: Computed<string | null>; // Field error message
-  touched: Signal<boolean>;      // Whether field was touched
-  dirty: Signal<boolean>;        // Whether field was modified
-  validating: Signal<boolean>;   // Whether field is validating
-}
-```
-
-#### Example: Complete Form
-
-```tsx
-const form = createForm({
-  initialValues: {
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  },
-  validation: {
-    username: [
-      validators.required('Username is required'),
-      validators.minLength(3, 'Username must be at least 3 characters'),
-    ],
-    email: [
-      validators.required(),
-      validators.email(),
-    ],
-    password: [
-      validators.required(),
-      validators.minLength(8),
-    ],
-    confirmPassword: [
-      validators.custom((value, formData) => {
-        return value === formData.password || 'Passwords must match';
-      }),
-    ],
-  },
-  onSubmit: async (data) => {
-    console.log('Form submitted:', data);
-  },
-});
-
-// Access form state
-console.log(form.state.isValid.value); // false (initially)
-console.log(form.state.isDirty.value); // false (initially)
-
-// Update field
-form.setFieldValue('email', 'user@example.com');
-
-// Get field state
-const emailField = form.getField('email');
-console.log(emailField.value.value); // 'user@example.com'
-console.log(emailField.error.value); // null (if valid)
-```
-
----
-
-### createInput
-
-Creates a controlled input element with signal binding, validation state, and accessibility features.
-
-#### Usage
-
-```tsx
-import { createInput, signal } from 'flexium';
-
-const value = signal('');
-const error = signal<string | null>(null);
-const touched = signal(false);
-
-const input = createInput({
-  type: 'email',
-  name: 'email',
-  value,
-  error,
-  touched,
-  placeholder: 'Enter your email',
-  onInput: (val) => console.log('Input:', val),
-});
-
-document.body.appendChild(input.element);
-```
-
-#### Parameters
-
-The function accepts an `InputProps` object:
-
-| Property | Type | Default | Description |
-| --- | --- | --- | --- |
-| `type` | `InputType` | `'text'` | Input type (text, email, password, etc.). |
-| `name` | `string` | - | Input name attribute. |
-| `value` | `Signal<string \| number>` | - | Reactive value signal for two-way binding. |
-| `placeholder` | `string` | - | Placeholder text. |
-| `disabled` | `boolean` | `false` | Whether input is disabled. |
-| `required` | `boolean` | `false` | Whether input is required. |
-| `readonly` | `boolean` | `false` | Whether input is read-only. |
-| `autoComplete` | `string` | - | Browser autocomplete hint. |
-| `autoFocus` | `boolean` | `false` | Whether to auto-focus on mount. |
-| `maxLength` | `number` | - | Maximum character length. |
-| `minLength` | `number` | - | Minimum character length. |
-| `min` | `number \| string` | - | Minimum value (for number/date types). |
-| `max` | `number \| string` | - | Maximum value (for number/date types). |
-| `step` | `number \| string` | - | Step increment (for number types). |
-| `pattern` | `string` | - | Validation pattern (regex). |
-| `multiple` | `boolean` | `false` | Allow multiple values (for file inputs). |
-| `accept` | `string` | - | Accepted file types (for file inputs). |
-| `error` | `Signal<string \| null>` | - | Error message signal. |
-| `touched` | `Signal<boolean>` | - | Touched state signal. |
-| `className` | `string` | - | CSS class name. |
-| `style` | `Partial<CSSStyleDeclaration>` | - | Inline styles object. |
-| `id` | `string` | - | Element ID. |
-| `ariaLabel` | `string` | - | ARIA label for accessibility. |
-| `ariaDescribedby` | `string` | - | ARIA described-by attribute. |
-| `ariaInvalid` | `boolean` | - | ARIA invalid state. |
-| `onInput` | `(value: string, event: Event) => void` | - | Input event handler. |
-| `onChange` | `(value: string, event: Event) => void` | - | Change event handler. |
-| `onBlur` | `(event: FocusEvent) => void` | - | Blur event handler. |
-| `onFocus` | `(event: FocusEvent) => void` | - | Focus event handler. |
-| `onKeyDown` | `(event: KeyboardEvent) => void` | - | Key down event handler. |
-| `onKeyUp` | `(event: KeyboardEvent) => void` | - | Key up event handler. |
-
-#### InputType Values
-
-```tsx
-type InputType =
-  | 'text' | 'email' | 'password' | 'number'
-  | 'tel' | 'url' | 'search'
-  | 'date' | 'time' | 'datetime-local'
-  | 'month' | 'week' | 'color' | 'file'
-```
-
-#### Return Value
-
-Returns an object with:
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `element` | `HTMLInputElement` | The input DOM element. |
-| `update` | `(newProps: Partial<InputProps>) => void` | Update input properties. |
-| `dispose` | `() => void` | Clean up event listeners and effects. |
-
-#### Example: Integration with createForm
-
-```tsx
-const form = createForm({
-  initialValues: { email: '', password: '' },
-  validation: {
-    email: validators.email(),
-    password: validators.minLength(8),
-  },
-});
-
-const emailField = form.getField('email');
-const emailInput = createInput({
-  type: 'email',
-  name: 'email',
-  value: emailField.value,
-  error: emailField.error,
-  touched: emailField.touched,
-  placeholder: 'Enter email',
-});
-
-const passwordField = form.getField('password');
-const passwordInput = createInput({
-  type: 'password',
-  name: 'password',
-  value: passwordField.value,
-  error: passwordField.error,
-  touched: passwordField.touched,
-  placeholder: 'Enter password',
-});
-```
-
----
-
-### createInputField
-
-Creates a complete input field with label, helper text, and error message display. A higher-level component that wraps `createInput`.
-
-#### Usage
-
-```tsx
-import { createInputField, signal } from 'flexium';
-
-const value = signal('');
-const error = signal<string | null>(null);
-const touched = signal(false);
-
-const field = createInputField({
-  type: 'email',
-  name: 'email',
-  label: 'Email Address',
-  helperText: 'We will never share your email',
-  value,
-  error,
-  touched,
-  placeholder: 'you@example.com',
-});
-
-document.body.appendChild(field.element);
-```
-
-#### Parameters
-
-Accepts all `InputProps` plus additional properties:
-
-| Property | Type | Default | Description |
-| --- | --- | --- | --- |
-| `label` | `string` | - | Label text for the input. |
-| `helperText` | `string` | - | Helper text displayed below input. |
-| `showError` | `boolean` | `true` | Whether to display error messages. |
-| ...(all InputProps) | - | - | All properties from `createInput`. |
-
-#### Return Value
-
-Returns an object with:
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `element` | `HTMLDivElement` | The wrapper element containing label, input, and messages. |
-| `input` | `HTMLInputElement` | Direct reference to the input element. |
-| `dispose` | `() => void` | Clean up resources. |
-
-#### Structure
-
-The generated HTML structure:
-
-```html
-<div class="input-field">
-  <label class="input-label" for="input-id">Label Text</label>
-  <input id="input-id" ... />
-  <div class="input-helper" id="input-id-helper">Helper text</div>
-  <div class="input-error-message" id="input-id-error" role="alert">Error message</div>
-</div>
-```
-
-#### Example: Complete Form with createInputField
-
-```tsx
-const form = createForm({
-  initialValues: {
-    name: '',
-    email: '',
-  },
-  validation: {
-    name: validators.required('Name is required'),
-    email: [validators.required(), validators.email()],
-  },
-});
-
-const nameField = form.getField('name');
-const nameInput = createInputField({
-  label: 'Full Name',
-  type: 'text',
-  name: 'name',
-  value: nameField.value,
-  error: nameField.error,
-  touched: nameField.touched,
-  placeholder: 'John Doe',
-});
-
-const emailField = form.getField('email');
-const emailInput = createInputField({
-  label: 'Email Address',
-  type: 'email',
-  name: 'email',
-  value: emailField.value,
-  error: emailField.error,
-  touched: emailField.touched,
-  helperText: 'We will never share your email',
-  placeholder: 'john@example.com',
-});
-
-const submitButton = document.createElement('button');
-submitButton.textContent = 'Submit';
-submitButton.onclick = (e) => form.handleSubmit(e);
-
-const formElement = document.createElement('form');
-formElement.appendChild(nameInput.element);
-formElement.appendChild(emailInput.element);
-formElement.appendChild(submitButton);
-```
-
----
-
-## Validators
-
-The `validators` object provides built-in validation functions for common use cases.
-
-### validators.required
-
-Validates that a field has a value.
-
-#### Usage
-
-```tsx
-validators.required(message?: string): ValidationRule
-```
-
-#### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `message` | `string` | `'This field is required'` | Custom error message. |
-
-#### Example
-
-```tsx
-validation: {
-  username: validators.required('Username is required'),
-}
-```
-
----
-
-### validators.email
-
-Validates email address format.
-
-#### Usage
-
-```tsx
-validators.email(message?: string): ValidationRule
-```
-
-#### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `message` | `string` | `'Invalid email address'` | Custom error message. |
-
-#### Example
-
-```tsx
-validation: {
-  email: validators.email('Please enter a valid email'),
-}
-```
-
----
-
-### validators.minLength
-
-Validates minimum string length.
-
-#### Usage
-
-```tsx
-validators.minLength(min: number, message?: string): ValidationRule
-```
-
-#### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `min` | `number` | - | **Required.** Minimum length. |
-| `message` | `string` | `'Must be at least {min} characters'` | Custom error message. |
-
-#### Example
-
-```tsx
-validation: {
-  password: validators.minLength(8, 'Password too short'),
-}
-```
-
----
-
-### validators.maxLength
-
-Validates maximum string length.
-
-#### Usage
-
-```tsx
-validators.maxLength(max: number, message?: string): ValidationRule
-```
-
-#### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `max` | `number` | - | **Required.** Maximum length. |
-| `message` | `string` | `'Must be at most {max} characters'` | Custom error message. |
-
-#### Example
-
-```tsx
-validation: {
-  bio: validators.maxLength(500, 'Bio is too long'),
-}
-```
-
----
-
-### validators.pattern
-
-Validates against a regular expression pattern.
-
-#### Usage
-
-```tsx
-validators.pattern(pattern: RegExp, message?: string): ValidationRule
-```
-
-#### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `pattern` | `RegExp` | - | **Required.** Regular expression to match. |
-| `message` | `string` | `'Invalid format'` | Custom error message. |
-
-#### Example
-
-```tsx
-validation: {
-  phone: validators.pattern(/^\d{3}-\d{3}-\d{4}$/, 'Use format: 123-456-7890'),
-}
-```
-
----
-
-### validators.min
-
-Validates minimum numeric value.
-
-#### Usage
-
-```tsx
-validators.min(min: number, message?: string): ValidationRule
-```
-
-#### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `min` | `number` | - | **Required.** Minimum value. |
-| `message` | `string` | `'Must be at least {min}'` | Custom error message. |
-
-#### Example
-
-```tsx
-validation: {
-  age: validators.min(18, 'Must be 18 or older'),
-}
-```
-
----
-
-### validators.max
-
-Validates maximum numeric value.
-
-#### Usage
-
-```tsx
-validators.max(max: number, message?: string): ValidationRule
-```
-
-#### Parameters
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `max` | `number` | - | **Required.** Maximum value. |
-| `message` | `string` | `'Must be at most {max}'` | Custom error message. |
-
-#### Example
-
-```tsx
-validation: {
-  quantity: validators.max(100, 'Maximum quantity is 100'),
-}
-```
-
----
-
-### validators.custom
-
-Creates a custom validation function.
-
-#### Usage
-
-```tsx
-validators.custom(fn: ValidationRule): ValidationRule
-```
-
-#### Parameters
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `fn` | `ValidationRule` | Custom validation function. |
-
-#### ValidationRule Type
-
-```tsx
-type ValidationRule<T = FieldValue> = (
-  value: T,
-  formData: FormData
-) => string | boolean | undefined | Promise<string | boolean | undefined>
-```
-
-- Return `true` or `undefined` for valid
-- Return `false` or error message string for invalid
-- Can be async for async validation
-
-#### Example: Synchronous Custom Validation
-
-```tsx
-validation: {
-  confirmPassword: validators.custom((value, formData) => {
-    return value === formData.password || 'Passwords must match';
-  }),
-}
-```
-
-#### Example: Asynchronous Custom Validation
-
-```tsx
-validation: {
-  username: validators.custom(async (value) => {
-    const exists = await api.checkUsername(value);
-    return !exists || 'Username already taken';
-  }),
-}
-```
-
-#### Example: Complex Custom Validation
-
-```tsx
-validation: {
-  couponCode: validators.custom(async (value, formData) => {
-    if (!value) return true; // Optional field
-
-    const response = await api.validateCoupon(value, formData.total);
-
-    if (!response.valid) {
-      return response.message || 'Invalid coupon code';
+    password: ''
+  });
+
+  const [errors, setErrors] = state({
+    email: null as string | null,
+    password: null as string | null
+  });
+
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    // Reset errors
+    setErrors({ email: null, password: null });
+
+    // Validate
+    const newErrors: any = {};
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
     }
 
-    return true;
-  }),
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Submit form
+    console.log('Submitting:', formData);
+    await submitLogin(formData);
+  };
+
+  return (
+    <form onsubmit={handleSubmit}>
+      <div>
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={formData.email}
+          oninput={(e) => setFormData({ ...formData, email: e.target.value })}
+        />
+        {errors.email && <div class="error">{errors.email}</div>}
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={formData.password}
+          oninput={(e) => setFormData({ ...formData, password: e.target.value })}
+        />
+        {errors.password && <div class="error">{errors.password}</div>}
+      </div>
+
+      <button type="submit">Login</button>
+    </form>
+  );
 }
 ```
 
----
+## Form with Real-time Validation
 
-## Type Definitions
-
-### FieldValue
+Add validation as users type:
 
 ```tsx
-type FieldValue =
-  | string
-  | number
-  | boolean
-  | File
-  | null
-  | undefined
-  | FieldValue[]
-  | { [key: string]: FieldValue }
-```
+import { state, effect } from 'flexium';
 
-### FormData
-
-```tsx
-interface FormData {
-  [fieldName: string]: FieldValue
-}
-```
-
-### ValidationRule
-
-```tsx
-type ValidationRule<T = FieldValue> = (
-  value: T,
-  formData: FormData
-) => string | boolean | undefined | Promise<string | boolean | undefined>
-```
-
-### FieldValidation
-
-```tsx
-interface FieldValidation {
-  [fieldName: string]: ValidationRule | ValidationRule[]
-}
-```
-
-### FormConfig
-
-```tsx
-interface FormConfig {
-  initialValues?: FormData
-  validation?: FieldValidation
-  validateOnChange?: boolean
-  validateOnBlur?: boolean
-  onSubmit?: (data: FormData) => void | Promise<void>
-}
-```
-
-### FormState
-
-```tsx
-interface FormState {
-  data: Signal<FormData>
-  errors: Computed<{ [key: string]: string | null }>
-  isValid: Computed<boolean>
-  isSubmitting: Signal<boolean>
-  isDirty: Computed<boolean>
-  touchedFields: Signal<Set<string>>
-  dirtyFields: Signal<Set<string>>
-}
-```
-
-### FieldState
-
-```tsx
-interface FieldState<T = FieldValue> {
-  value: Signal<T>
-  error: Computed<string | null>
-  touched: Signal<boolean>
-  dirty: Signal<boolean>
-  validating: Signal<boolean>
-}
-```
-
----
-
-## Complete Example
-
-Here's a complete registration form example:
-
-```tsx
-import { createForm, createInputField, validators } from 'flexium/primitives/form';
-
-// Create form with validation
-const form = createForm({
-  initialValues: {
+function RegistrationForm() {
+  const [formData, setFormData] = state({
     username: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    age: 0,
-    terms: false,
-  },
-  validation: {
-    username: [
-      validators.required('Username is required'),
-      validators.minLength(3),
-      validators.maxLength(20),
-      validators.pattern(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores'),
-    ],
-    email: [
-      validators.required(),
-      validators.email(),
-      validators.custom(async (value) => {
-        const exists = await checkEmailExists(value);
-        return !exists || 'Email already registered';
-      }),
-    ],
-    password: [
-      validators.required(),
-      validators.minLength(8, 'Password must be at least 8 characters'),
-      validators.pattern(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        'Must contain uppercase, lowercase, and number'
-      ),
-    ],
-    confirmPassword: [
-      validators.required('Please confirm your password'),
-      validators.custom((value, data) => {
-        return value === data.password || 'Passwords do not match';
-      }),
-    ],
-    age: [
-      validators.required(),
-      validators.min(18, 'Must be 18 or older'),
-      validators.max(120, 'Please enter a valid age'),
-    ],
-    terms: validators.custom((value) => {
-      return value === true || 'You must accept the terms';
-    }),
-  },
-  onSubmit: async (data) => {
-    console.log('Submitting:', data);
-    await api.register(data);
-    alert('Registration successful!');
-  },
-});
+    confirmPassword: ''
+  });
 
-// Create input fields
-const usernameField = form.getField('username');
-const usernameInput = createInputField({
-  label: 'Username',
-  type: 'text',
-  name: 'username',
-  value: usernameField.value,
-  error: usernameField.error,
-  touched: usernameField.touched,
-  placeholder: 'johndoe',
-  autoComplete: 'username',
-});
+  const [errors, setErrors] = state({
+    username: null as string | null,
+    email: null as string | null,
+    password: null as string | null,
+    confirmPassword: null as string | null
+  });
 
-const emailField = form.getField('email');
-const emailInput = createInputField({
-  label: 'Email',
-  type: 'email',
-  name: 'email',
-  value: emailField.value,
-  error: emailField.error,
-  touched: emailField.touched,
-  placeholder: 'you@example.com',
-  autoComplete: 'email',
-});
+  const [touched, setTouched] = state({
+    username: false,
+    email: false,
+    password: false,
+    confirmPassword: false
+  });
 
-const passwordField = form.getField('password');
-const passwordInput = createInputField({
-  label: 'Password',
-  type: 'password',
-  name: 'password',
-  value: passwordField.value,
-  error: passwordField.error,
-  touched: passwordField.touched,
-  autoComplete: 'new-password',
-});
+  // Validate on change
+  effect(() => {
+    const newErrors: any = {};
 
-const confirmPasswordField = form.getField('confirmPassword');
-const confirmPasswordInput = createInputField({
-  label: 'Confirm Password',
-  type: 'password',
-  name: 'confirmPassword',
-  value: confirmPasswordField.value,
-  error: confirmPasswordField.error,
-  touched: confirmPasswordField.touched,
-  autoComplete: 'new-password',
-});
+    if (touched.username && !formData.username) {
+      newErrors.username = 'Username is required';
+    } else if (touched.username && formData.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    }
 
-const ageField = form.getField('age');
-const ageInput = createInputField({
-  label: 'Age',
-  type: 'number',
-  name: 'age',
-  value: ageField.value,
-  error: ageField.error,
-  touched: ageField.touched,
-  min: 0,
-  max: 120,
-});
+    if (touched.email && !formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (touched.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
 
-// Create submit button
-const submitButton = document.createElement('button');
-submitButton.textContent = 'Register';
-submitButton.type = 'submit';
-submitButton.disabled = !form.state.isValid.value;
+    if (touched.password && !formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (touched.password && formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
 
-// Update button state reactively
-effect(() => {
-  submitButton.disabled = !form.state.isValid.value || form.state.isSubmitting.value;
-  submitButton.textContent = form.state.isSubmitting.value ? 'Registering...' : 'Register';
-});
+    if (touched.confirmPassword && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
 
-// Assemble form
-const formElement = document.createElement('form');
-formElement.onsubmit = (e) => form.handleSubmit(e);
-formElement.appendChild(usernameInput.element);
-formElement.appendChild(emailInput.element);
-formElement.appendChild(passwordInput.element);
-formElement.appendChild(confirmPasswordInput.element);
-formElement.appendChild(ageInput.element);
-formElement.appendChild(submitButton);
+    setErrors(newErrors);
+  });
 
-document.body.appendChild(formElement);
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    // Mark all as touched
+    setTouched({
+      username: true,
+      email: true,
+      password: true,
+      confirmPassword: true
+    });
+
+    // Check if there are any errors
+    if (Object.values(errors).some(error => error !== null)) {
+      return;
+    }
+
+    // Submit form
+    console.log('Submitting:', formData);
+    await submitRegistration(formData);
+  };
+
+  return (
+    <form onsubmit={handleSubmit}>
+      <div>
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          value={formData.username}
+          oninput={(e) => setFormData({ ...formData, username: e.target.value })}
+          onblur={() => setTouched({ ...touched, username: true })}
+        />
+        {touched.username && errors.username && (
+          <div class="error">{errors.username}</div>
+        )}
+      </div>
+
+      <div>
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={formData.email}
+          oninput={(e) => setFormData({ ...formData, email: e.target.value })}
+          onblur={() => setTouched({ ...touched, email: true })}
+        />
+        {touched.email && errors.email && (
+          <div class="error">{errors.email}</div>
+        )}
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={formData.password}
+          oninput={(e) => setFormData({ ...formData, password: e.target.value })}
+          onblur={() => setTouched({ ...touched, password: true })}
+        />
+        {touched.password && errors.password && (
+          <div class="error">{errors.password}</div>
+        )}
+      </div>
+
+      <div>
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          value={formData.confirmPassword}
+          oninput={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+          onblur={() => setTouched({ ...touched, confirmPassword: true })}
+        />
+        {touched.confirmPassword && errors.confirmPassword && (
+          <div class="error">{errors.confirmPassword}</div>
+        )}
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+  );
+}
 ```
 
----
+## Custom Form Hook
+
+Create a reusable form hook pattern:
+
+```tsx
+import { state, effect } from 'flexium';
+
+interface ValidationRule<T> {
+  validate: (value: T, allValues: any) => string | null;
+  message?: string;
+}
+
+interface FieldConfig<T = any> {
+  initial: T;
+  rules?: ValidationRule<T>[];
+}
+
+interface FormConfig {
+  [key: string]: FieldConfig;
+}
+
+function useForm<T extends FormConfig>(config: T) {
+  // Initialize form data
+  const initialValues = Object.keys(config).reduce((acc, key) => {
+    acc[key] = config[key].initial;
+    return acc;
+  }, {} as any);
+
+  const [formData, setFormData] = state(initialValues);
+  const [errors, setErrors] = state<Record<string, string | null>>({});
+  const [touched, setTouched] = state<Record<string, boolean>>({});
+
+  // Validate a single field
+  const validateField = (fieldName: string) => {
+    const field = config[fieldName];
+    if (!field || !field.rules) return null;
+
+    for (const rule of field.rules) {
+      const error = rule.validate(formData[fieldName], formData);
+      if (error) return error;
+    }
+
+    return null;
+  };
+
+  // Validate all fields
+  const validateForm = () => {
+    const newErrors: Record<string, string | null> = {};
+    let isValid = true;
+
+    for (const fieldName of Object.keys(config)) {
+      const error = validateField(fieldName);
+      newErrors[fieldName] = error;
+      if (error) isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  // Validate on change for touched fields
+  effect(() => {
+    const newErrors: Record<string, string | null> = {};
+
+    for (const fieldName of Object.keys(config)) {
+      if (touched[fieldName]) {
+        newErrors[fieldName] = validateField(fieldName);
+      }
+    }
+
+    setErrors(newErrors);
+  });
+
+  const setFieldValue = (fieldName: string, value: any) => {
+    setFormData({ ...formData, [fieldName]: value });
+  };
+
+  const setFieldTouched = (fieldName: string) => {
+    setTouched({ ...touched, [fieldName]: true });
+  };
+
+  const reset = () => {
+    setFormData(initialValues);
+    setErrors({});
+    setTouched({});
+  };
+
+  return {
+    formData,
+    errors,
+    touched,
+    setFieldValue,
+    setFieldTouched,
+    validateForm,
+    reset
+  };
+}
+
+// Usage
+function UserForm() {
+  const form = useForm({
+    email: {
+      initial: '',
+      rules: [
+        {
+          validate: (value) => value ? null : 'Email is required'
+        },
+        {
+          validate: (value) => /\S+@\S+\.\S+/.test(value) ? null : 'Invalid email'
+        }
+      ]
+    },
+    age: {
+      initial: 0,
+      rules: [
+        {
+          validate: (value) => value >= 18 ? null : 'Must be 18 or older'
+        }
+      ]
+    }
+  });
+
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    if (form.validateForm()) {
+      console.log('Valid form:', form.formData);
+      await submitForm(form.formData);
+      form.reset();
+    }
+  };
+
+  return (
+    <form onsubmit={handleSubmit}>
+      <div>
+        <label>Email</label>
+        <input
+          type="email"
+          value={form.formData.email}
+          oninput={(e) => form.setFieldValue('email', e.target.value)}
+          onblur={() => form.setFieldTouched('email')}
+        />
+        {form.touched.email && form.errors.email && (
+          <div class="error">{form.errors.email}</div>
+        )}
+      </div>
+
+      <div>
+        <label>Age</label>
+        <input
+          type="number"
+          value={form.formData.age}
+          oninput={(e) => form.setFieldValue('age', parseInt(e.target.value))}
+          onblur={() => form.setFieldTouched('age')}
+        />
+        {form.touched.age && form.errors.age && (
+          <div class="error">{form.errors.age}</div>
+        )}
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+## Async Validation
+
+Handle async validation like checking if an email already exists:
+
+```tsx
+import { state } from 'flexium';
+
+function SignupForm() {
+  const [formData, setFormData] = state({
+    email: ''
+  });
+
+  const [errors, setErrors] = state({
+    email: null as string | null
+  });
+
+  const [validating, setValidating] = state({
+    email: false
+  });
+
+  const validateEmail = async (email: string) => {
+    if (!email) {
+      setErrors({ ...errors, email: 'Email is required' });
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setErrors({ ...errors, email: 'Invalid email format' });
+      return;
+    }
+
+    setValidating({ ...validating, email: true });
+
+    try {
+      const response = await fetch(`/api/check-email?email=${email}`);
+      const data = await response.json();
+
+      if (data.exists) {
+        setErrors({ ...errors, email: 'Email already registered' });
+      } else {
+        setErrors({ ...errors, email: null });
+      }
+    } catch (error) {
+      setErrors({ ...errors, email: 'Failed to validate email' });
+    } finally {
+      setValidating({ ...validating, email: false });
+    }
+  };
+
+  const handleEmailBlur = () => {
+    validateEmail(formData.email);
+  };
+
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    await validateEmail(formData.email);
+
+    if (!errors.email) {
+      console.log('Submitting:', formData);
+      await submitSignup(formData);
+    }
+  };
+
+  return (
+    <form onsubmit={handleSubmit}>
+      <div>
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={formData.email}
+          oninput={(e) => setFormData({ ...formData, email: e.target.value })}
+          onblur={handleEmailBlur}
+        />
+        {validating.email && <div class="validating">Checking email...</div>}
+        {errors.email && <div class="error">{errors.email}</div>}
+      </div>
+
+      <button type="submit" disabled={validating.email}>
+        Sign Up
+      </button>
+    </form>
+  );
+}
+```
+
+## Form with Loading State
+
+Show loading state during form submission:
+
+```tsx
+import { state } from 'flexium';
+
+function ContactForm() {
+  const [formData, setFormData] = state({
+    name: '',
+    email: '',
+    message: ''
+  });
+
+  const [submitting, setSubmitting] = state(false);
+  const [submitted, setSubmitted] = state(false);
+
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    setSubmitting(true);
+
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      setSubmitted(true);
+      setFormData({ name: '', email: '', message: '' });
+    } catch (error) {
+      console.error('Failed to submit form:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return <div class="success">Thank you! Your message has been sent.</div>;
+  }
+
+  return (
+    <form onsubmit={handleSubmit}>
+      <div>
+        <label for="name">Name</label>
+        <input
+          id="name"
+          type="text"
+          value={formData.name}
+          oninput={(e) => setFormData({ ...formData, name: e.target.value })}
+          disabled={submitting}
+        />
+      </div>
+
+      <div>
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={formData.email}
+          oninput={(e) => setFormData({ ...formData, email: e.target.value })}
+          disabled={submitting}
+        />
+      </div>
+
+      <div>
+        <label for="message">Message</label>
+        <textarea
+          id="message"
+          value={formData.message}
+          oninput={(e) => setFormData({ ...formData, message: e.target.value })}
+          disabled={submitting}
+        />
+      </div>
+
+      <button type="submit" disabled={submitting}>
+        {submitting ? 'Sending...' : 'Send Message'}
+      </button>
+    </form>
+  );
+}
+```
 
 ## See Also
 
-- [Signals](/guide/signals) - Understanding Flexium's reactive primitives
-- [Effects](/guide/effects) - Reactive side effects
-- [State Management](/guide/state) - Managing application state
+- [State Management](/guide/state) - Understanding the state() API
+- [Effects](/guide/effects) - Reactive side effects for validation
+- [Button Component](/reference/primitives/button) - Accessible form buttons

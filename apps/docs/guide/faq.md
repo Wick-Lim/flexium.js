@@ -225,8 +225,8 @@ function App() {
 import { router } from 'flexium/router'
 
 function UserProfile() {
-  const { params } = router()
-  const userId = params.id
+  const route = router()
+  const userId = route.params.id
 
   return <div>User: {userId}</div>
 }
@@ -238,21 +238,53 @@ function UserProfile() {
 
 ### How do I handle forms?
 
-Use `createForm()`:
+Use `state()` for form handling:
 
 ```tsx
-import { createForm, validators } from 'flexium/primitives'
+import { state } from 'flexium/core'
 
-const form = createForm({
-  initialValues: { email: '', password: '' },
-  validation: {
-    email: validators.email(),
-    password: validators.minLength(8)
-  },
-  onSubmit: async (data) => {
-    await login(data)
+function LoginForm() {
+  const [formData, setFormData] = state({ email: '', password: '' })
+  const [errors, setErrors] = state({})
+
+  const validate = () => {
+    const newErrors = {}
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email'
+    }
+    if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters'
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
-})
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (validate()) {
+      await login(formData)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={formData.email}
+        onInput={(e) => setFormData({ ...formData, email: e.target.value })}
+      />
+      {errors.email && <span>{errors.email}</span>}
+
+      <input
+        type="password"
+        value={formData.password}
+        onInput={(e) => setFormData({ ...formData, password: e.target.value })}
+      />
+      {errors.password && <span>{errors.password}</span>}
+
+      <button type="submit">Login</button>
+    </form>
+  )
+}
 ```
 
 ## Debugging

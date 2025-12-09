@@ -17,10 +17,14 @@ Flexium provides declarative animation primitives using the Web Animations API f
 ## Basic Usage
 
 ```tsx
-import { createMotion } from 'flexium/primitives/motion'
+import { MotionController } from 'flexium/primitives'
 
-// Create animated element
-const { element, controller } = createMotion({
+// Create element and controller
+const element = document.createElement('div')
+const controller = new MotionController(element)
+
+// Animate
+controller.animate({
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   duration: 300,
@@ -50,7 +54,9 @@ interface AnimatableProps {
 ### Transform Example
 
 ```tsx
-createMotion({
+const controller = new MotionController(element)
+
+controller.animate({
   initial: {
     x: -100,
     scale: 0.5,
@@ -67,16 +73,23 @@ createMotion({
 })
 ```
 
-## createMotion API
+## MotionController API
 
-Creates a motion-enabled element with animation configuration.
+The `MotionController` class provides programmatic control over animations.
 
-### Parameters
+### Constructor
 
 ```tsx
-interface MotionProps {
-  element?: HTMLElement | null    // Existing element (optional)
-  tagName?: string                // Tag name if creating new element
+import { MotionController } from 'flexium/primitives'
+
+const element = document.createElement('div')
+const controller = new MotionController(element)
+```
+
+### animate() Method
+
+```tsx
+interface AnimateOptions {
   initial?: AnimatableProps       // Starting state
   animate?: AnimatableProps       // Target state
   exit?: AnimatableProps          // Exit animation state
@@ -87,30 +100,18 @@ interface MotionProps {
   onAnimationStart?: () => void
   onAnimationComplete?: () => void
 }
+
+controller.animate(options: AnimateOptions): void
 ```
 
-### Return Value
-
-```tsx
-{
-  element: HTMLElement           // The animated element
-  controller: MotionController   // Controller for programmatic control
-  update: (newProps: MotionProps) => void
-  dispose: () => void
-}
-```
-
-## Motion Controller
-
-The `MotionController` class provides programmatic control over animations.
-
-### Methods
+### Controller Methods
 
 ```tsx
 class MotionController {
-  animate(props: MotionProps): void
-  animateExit(exitProps: AnimatableProps, duration?, easing?): Promise<void>
-  enableLayoutAnimation(duration?, easing?): void
+  constructor(element: HTMLElement)
+  animate(options: AnimateOptions): void
+  animateExit(exitProps: AnimatableProps, duration?: number, easing?: string): Promise<void>
+  enableLayoutAnimation(duration?: number, easing?: string): void
   disableLayoutAnimation(): void
   cancel(): void
   dispose(): void
@@ -120,7 +121,11 @@ class MotionController {
 ### Example
 
 ```tsx
-const { controller } = createMotion({
+const element = document.createElement('div')
+const controller = new MotionController(element)
+
+// Initial animation
+controller.animate({
   initial: { opacity: 0 },
   animate: { opacity: 1 },
 })
@@ -133,6 +138,9 @@ controller.animate({
 
 // Cancel animation
 controller.cancel()
+
+// Cleanup
+controller.dispose()
 ```
 
 ## Transitions
@@ -142,7 +150,7 @@ Control animation timing with duration and easing.
 ### Duration
 
 ```tsx
-createMotion({
+controller.animate({
   animate: { x: 100 },
   duration: 1000,  // 1 second
 })
@@ -153,13 +161,13 @@ createMotion({
 Use CSS easing functions:
 
 ```tsx
-createMotion({
+controller.animate({
   animate: { x: 100 },
   easing: 'ease-in-out',  // CSS easing
 })
 
 // Or cubic-bezier
-createMotion({
+controller.animate({
   animate: { x: 100 },
   easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
 })
@@ -176,7 +184,7 @@ Common easing values:
 ### Delay
 
 ```tsx
-createMotion({
+controller.animate({
   animate: { opacity: 1 },
   delay: 500,  // Wait 500ms before animating
 })
@@ -197,7 +205,7 @@ interface SpringConfig {
 ### Example
 
 ```tsx
-createMotion({
+controller.animate({
   animate: { y: 100 },
   spring: {
     tension: 170,
@@ -238,7 +246,7 @@ const slow = {
 ```
 
 ```tsx
-createMotion({
+controller.animate({
   animate: { scale: 1.2 },
   spring: wobbly,
 })
@@ -249,10 +257,8 @@ createMotion({
 Automatically animate size changes with layout animations.
 
 ```tsx
-const { controller, element } = createMotion({
-  initial: { opacity: 1 },
-  animate: { opacity: 1 },
-})
+const element = document.createElement('div')
+const controller = new MotionController(element)
 
 // Enable layout animations
 controller.enableLayoutAnimation(300, 'ease-out')
@@ -272,7 +278,10 @@ Layout animations use ResizeObserver to detect size changes.
 Animate elements when removing them from the DOM.
 
 ```tsx
-const { controller, element } = createMotion({
+const element = document.createElement('div')
+const controller = new MotionController(element)
+
+controller.animate({
   animate: { opacity: 1 },
 })
 
@@ -287,37 +296,44 @@ async function remove() {
 }
 ```
 
-Or use the `exit` prop:
+Or use the `exit` option in animate:
 
 ```tsx
-createMotion({
+controller.animate({
   animate: { opacity: 1 },
   exit: { opacity: 0, scale: 0.8 },
 })
 ```
 
-## Signal Integration
+## State Integration
 
-Use motion with signals for reactive animations.
+Use motion with Flexium's state for reactive animations.
 
 ```tsx
-import { signal } from 'flexium/core/signal'
-import { useMotion } from 'flexium/primitives/motion'
+import { state } from 'flexium/core'
+import { MotionController } from 'flexium/primitives'
 
-const isVisible = signal(false)
-
-const propsSignal = signal({
-  animate: isVisible.value
-    ? { opacity: 1, y: 0 }
-    : { opacity: 0, y: 20 },
-  duration: 300,
-})
+const [isVisible, setIsVisible] = state(false)
 
 const element = document.createElement('div')
-const { controller, dispose } = useMotion(element, propsSignal)
+const controller = new MotionController(element)
 
-// Update signal to trigger animation
-isVisible.set(true)
+// Watch state and animate on changes
+const unwatch = state.watch(() => {
+  controller.animate({
+    animate: isVisible
+      ? { opacity: 1, y: 0 }
+      : { opacity: 0, y: 20 },
+    duration: 300,
+  })
+})
+
+// Update state to trigger animation
+setIsVisible(true)
+
+// Cleanup
+unwatch()
+controller.dispose()
 ```
 
 ## Animation Callbacks
@@ -325,7 +341,7 @@ isVisible.set(true)
 Track animation lifecycle with callbacks.
 
 ```tsx
-createMotion({
+controller.animate({
   animate: { x: 100 },
   onAnimationStart: () => {
     console.log('Animation started')
@@ -341,7 +357,9 @@ createMotion({
 Chain animations using callbacks:
 
 ```tsx
-const { controller } = createMotion({
+const controller = new MotionController(element)
+
+controller.animate({
   animate: { x: 100 },
   duration: 300,
   onAnimationComplete: () => {
@@ -358,7 +376,9 @@ Or use async/await with exit animations:
 
 ```tsx
 async function sequence() {
-  const { controller } = createMotion({
+  const controller = new MotionController(element)
+
+  controller.animate({
     animate: { x: 100 },
   })
 
@@ -378,7 +398,10 @@ Animate multiple elements with delays:
 const items = [1, 2, 3, 4, 5]
 
 items.forEach((item, index) => {
-  createMotion({
+  const element = document.createElement('div')
+  const controller = new MotionController(element)
+
+  controller.animate({
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     duration: 300,
@@ -393,9 +416,9 @@ Animate existing DOM elements:
 
 ```tsx
 const existingDiv = document.getElementById('my-div')
+const controller = new MotionController(existingDiv)
 
-createMotion({
-  element: existingDiv,
+controller.animate({
   animate: { opacity: 1, scale: 1.1 },
   duration: 500,
 })
@@ -404,11 +427,11 @@ createMotion({
 ## Complete Example
 
 ```tsx
-import { createMotion } from 'flexium/primitives/motion'
-import { signal, effect } from 'flexium/core/signal'
+import { MotionController } from 'flexium/primitives'
+import { state } from 'flexium/core'
 
 function AnimatedCard() {
-  const isExpanded = signal(false)
+  const [isExpanded, setIsExpanded] = state(false)
 
   const card = document.createElement('div')
   card.style.padding = '20px'
@@ -416,8 +439,10 @@ function AnimatedCard() {
   card.style.borderRadius = '8px'
   card.style.cursor = 'pointer'
 
-  const { controller } = createMotion({
-    element: card,
+  const controller = new MotionController(card)
+
+  // Initial animation
+  controller.animate({
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     spring: {
@@ -430,11 +455,12 @@ function AnimatedCard() {
   controller.enableLayoutAnimation(300, 'ease-out')
 
   card.addEventListener('click', () => {
-    isExpanded.set(!isExpanded.value)
+    setIsExpanded(!isExpanded)
   })
 
-  effect(() => {
-    if (isExpanded.value) {
+  // Watch state changes
+  const unwatch = state.watch(() => {
+    if (isExpanded) {
       card.style.width = '400px'
       card.style.height = '300px'
     } else {
@@ -455,8 +481,10 @@ Animate list items on add/remove:
 const list = document.getElementById('list')
 
 function addItem(text: string) {
-  const { element } = createMotion({
-    tagName: 'li',
+  const element = document.createElement('li')
+  const controller = new MotionController(element)
+
+  controller.animate({
     initial: { opacity: 0, x: -20 },
     animate: { opacity: 1, x: 0 },
     duration: 300,
@@ -467,7 +495,7 @@ function addItem(text: string) {
 }
 
 async function removeItem(item: HTMLElement) {
-  const { controller } = createMotion({ element: item })
+  const controller = new MotionController(item)
 
   await controller.animateExit(
     { opacity: 0, x: 20 },
@@ -500,12 +528,14 @@ Motion uses the Web Animations API which:
 Always dispose of motion controllers when done:
 
 ```tsx
-const { dispose } = createMotion({
+const controller = new MotionController(element)
+
+controller.animate({
   animate: { x: 100 },
 })
 
 // When removing from DOM
-dispose()
+controller.dispose()
 ```
 
 This cancels animations and cleans up observers.
@@ -554,15 +584,18 @@ Use CSS animations when:
 Motion is fully typed:
 
 ```tsx
-import { createMotion, type MotionProps, type AnimatableProps } from 'flexium/primitives/motion'
+import { MotionController, type AnimatableProps, type AnimateOptions } from 'flexium/primitives'
 
-const config: MotionProps = {
+const element = document.createElement('div')
+const controller = new MotionController(element)
+
+const animateOptions: AnimateOptions = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
   duration: 300,
 }
 
-const { element, controller } = createMotion(config)
+controller.animate(animateOptions)
 
 // TypeScript knows all methods
 controller.animate({ animate: { x: 100 } })

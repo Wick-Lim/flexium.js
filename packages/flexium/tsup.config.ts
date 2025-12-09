@@ -10,7 +10,6 @@ export default defineConfig({
     interactive: 'src/interactive.ts',
     primitives: 'src/primitives.ts',
     'primitives/motion': 'src/primitives/motion/index.ts',
-    'primitives/form': 'src/primitives/form/index.ts',
     'primitives/ui': 'src/primitives/ui/index.ts',
     'primitives/layout': 'src/primitives/layout/index.ts',
     'jsx-runtime': 'src/jsx-runtime.ts',

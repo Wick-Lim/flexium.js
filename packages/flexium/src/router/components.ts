@@ -25,18 +25,6 @@ export function router(): RouterContext {
   return ctx
 }
 
-/**
- * Alias for router() - Get the current router context.
- * Must be called within a <Router> component.
- *
- * @example
- * ```tsx
- * const router = useRouter()
- * router.navigate('/dashboard')
- * ```
- */
-export const useRouter = router
-
 export function Router(props: { children: FNodeChild }) {
   const [location, navigate] = createLocation()
 

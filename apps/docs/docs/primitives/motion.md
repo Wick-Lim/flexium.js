@@ -15,42 +15,12 @@ import MotionDemo from '../../components/MotionDemo.vue'
 ## Import
 
 ```ts
-import { createMotion, useMotion, MotionController } from 'flexium/primitives'
-```
-
-## createMotion()
-
-Create an animated element with initial and target states.
-
-### Signature
-
-```ts
-function createMotion(props: MotionProps & { tagName?: string }): {
-  element: HTMLElement
-  controller: MotionController
-  update: (newProps: MotionProps) => void
-  dispose: () => void
-}
-```
-
-### Usage
-
-```tsx
-import { createMotion } from 'flexium/primitives'
-
-// Create a motion-enabled div
-const motion = createMotion({
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  duration: 300
-})
-
-document.body.appendChild(motion.element)
+import { MotionController } from 'flexium/primitives'
 ```
 
 ## MotionController
 
-Lower-level API for animating existing elements.
+API for animating elements with the Web Animations API.
 
 ### Signature
 
@@ -66,59 +36,65 @@ class MotionController {
 }
 ```
 
-### Usage
+### Basic Usage
 
 ```tsx
-const element = document.querySelector('.my-element')
-const controller = new MotionController(element)
+import { MotionController } from 'flexium/primitives'
 
-// Animate
-controller.animate({
-  initial: { scale: 0.8, opacity: 0 },
-  animate: { scale: 1, opacity: 1 },
-  duration: 400,
-  spring: { tension: 200, friction: 20 }
-})
+function MyComponent() {
+  let element
 
-// Exit animation
-await controller.animateExit({ opacity: 0, y: -20 })
-element.remove()
-```
+  onMount(() => {
+    const controller = new MotionController(element)
 
-## useMotion()
+    controller.animate({
+      initial: { scale: 0.8, opacity: 0 },
+      animate: { scale: 1, opacity: 1 },
+      duration: 400,
+      spring: { tension: 200, friction: 20 }
+    })
 
-Hook for reactive motion with signals.
+    onCleanup(() => controller.dispose())
+  })
 
-### Signature
-
-```ts
-function useMotion(
-  element: HTMLElement,
-  propsSignal: Signal<MotionProps>
-): {
-  controller: MotionController
-  dispose: () => void
+  return <div ref={element}>Animated content</div>
 }
 ```
 
-### Usage
+### Reactive Animations
 
 ```tsx
-import { signal } from 'flexium/core'
-import { useMotion } from 'flexium/primitives'
+import { state } from 'flexium/core'
+import { effect } from 'flexium/core'
+import { MotionController } from 'flexium/primitives'
 
-const isVisible = signal(false)
+function AnimatedBox() {
+  const [isVisible, setIsVisible] = state(false)
+  let element
+  let controller
 
-const element = document.getElementById('box')
-const { dispose } = useMotion(element, signal({
-  animate: isVisible()
-    ? { opacity: 1, scale: 1 }
-    : { opacity: 0, scale: 0.8 }
-}))
+  onMount(() => {
+    controller = new MotionController(element)
 
-// Toggle visibility
-isVisible.set(true)  // Animates in
-isVisible.set(false) // Animates out
+    effect(() => {
+      controller.animate({
+        animate: isVisible
+          ? { opacity: 1, scale: 1 }
+          : { opacity: 0, scale: 0.8 },
+        duration: 300
+      })
+    })
+
+    onCleanup(() => controller.dispose())
+  })
+
+  return (
+    <div>
+      <div ref={element}>Box</div>
+      <button onClick={() => setIsVisible(!isVisible)}>Toggle</button>
+    </div>
+  )
+}
 ```
 
 ## Animatable Properties
@@ -180,32 +156,59 @@ interface SpringConfig {
 ### Fade In
 
 ```tsx
-const fadeIn = createMotion({
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  duration: 500
+let element
+
+onMount(() => {
+  const controller = new MotionController(element)
+  controller.animate({
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    duration: 500
+  })
+
+  onCleanup(() => controller.dispose())
 })
+
+return <div ref={element}>Content</div>
 ```
 
 ### Slide Up
 
 ```tsx
-const slideUp = createMotion({
-  initial: { opacity: 0, y: 40 },
-  animate: { opacity: 1, y: 0 },
-  duration: 400,
-  easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+let element
+
+onMount(() => {
+  const controller = new MotionController(element)
+  controller.animate({
+    initial: { opacity: 0, y: 40 },
+    animate: { opacity: 1, y: 0 },
+    duration: 400,
+    easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+  })
+
+  onCleanup(() => controller.dispose())
 })
+
+return <div ref={element}>Content</div>
 ```
 
 ### Scale with Spring
 
 ```tsx
-const scaleSpring = createMotion({
-  initial: { scale: 0 },
-  animate: { scale: 1 },
-  spring: { tension: 200, friction: 15 }
+let element
+
+onMount(() => {
+  const controller = new MotionController(element)
+  controller.animate({
+    initial: { scale: 0 },
+    animate: { scale: 1 },
+    spring: { tension: 200, friction: 15 }
+  })
+
+  onCleanup(() => controller.dispose())
 })
+
+return <div ref={element}>Content</div>
 ```
 
 ### Staggered List
@@ -215,14 +218,21 @@ function StaggeredList(props) {
   return (
     <>
       {props.items.map((item, index) => {
-        const motion = createMotion({
-          initial: { opacity: 0, x: -20 },
-          animate: { opacity: 1, x: 0 },
-          duration: 300,
-          delay: index * 50 // Stagger
+        let element
+
+        onMount(() => {
+          const controller = new MotionController(element)
+          controller.animate({
+            initial: { opacity: 0, x: -20 },
+            animate: { opacity: 1, x: 0 },
+            duration: 300,
+            delay: index * 50 // Stagger
+          })
+
+          onCleanup(() => controller.dispose())
         })
 
-        return <div key={item.id} ref={motion.element}>{item.name}</div>
+        return <div key={item.id} ref={element}>{item.name}</div>
       })}
     </>
   )

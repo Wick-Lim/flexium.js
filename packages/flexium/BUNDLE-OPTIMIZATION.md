@@ -32,7 +32,7 @@ import {
   Row, Column,
   createMotion, useMotion,
   createForm, createInput,
-  createButton, createText
+  Button
 } from 'flexium/primitives'
 ```
 
@@ -48,7 +48,7 @@ import { createMotion, useMotion } from 'flexium/primitives/motion'
 import { createForm, createInput } from 'flexium/primitives/form'
 
 // UI components (optional, +7.2KB)
-import { createButton, createText } from 'flexium/primitives/ui'
+import { Button, IconButton } from 'flexium/primitives/ui'
 
 // Layout components (alternative import)
 import { Row, Column } from 'flexium/primitives/layout'
@@ -82,7 +82,7 @@ import { Row, Column } from 'flexium/primitives/layout'
 
 ### `flexium/primitives/ui` (7.2KB)
 **UI Components:**
-- `createButton`, `createIconButton`
+- `Button`, `IconButton`
 - `createText`, `createHeading`, `createParagraph`, `createLabel`, `createCode`
 - Types: `ButtonProps`, `TextProps`, `ButtonVariant`, etc.
 

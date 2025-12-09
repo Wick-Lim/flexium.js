@@ -6,15 +6,12 @@
 
 // Motion components (explicit exports for better tree-shaking)
 export {
-  createMotion,
-  useMotion,
   MotionController,
   type AnimatableProps,
   type SpringConfig,
   type MotionProps,
   Transition,
   TransitionGroup,
-  createTransition,
   transitions,
   type TransitionPreset,
   type TransitionTiming,
@@ -22,27 +19,10 @@ export {
   type TransitionGroupProps,
 } from './motion'
 
-// Form components (explicit exports for better tree-shaking)
-export {
-  createForm,
-  validators,
-  type FieldValue,
-  type ValidationRule,
-  type FieldValidation,
-  type FormData,
-  type FieldState,
-  type FormState,
-  type FormConfig,
-  createInput,
-  createInputField,
-  type InputType,
-  type InputProps,
-} from './form'
-
 // UI components (explicit exports for better tree-shaking)
 export {
-  createButton,
-  createIconButton,
+  Button,
+  IconButton,
   type ButtonVariant,
   type ButtonSize,
   type ButtonType,

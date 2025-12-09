@@ -16,9 +16,9 @@ import ButtonDemo from '../../components/ButtonDemo.vue'
 
 # Button
 
-Accessible button components with unified touch/click handlers and full ARIA support.
+Accessible button component with unified touch/click handlers and full ARIA support.
 
-The Button UI primitives provide `createButton` and `createIconButton` functions for creating interactive button elements that work consistently across mouse, touch, and keyboard interactions. These primitives include built-in loading states, disabled states, and comprehensive accessibility features.
+The Button component provides a `<Button>` element for creating interactive buttons that work consistently across mouse, touch, and keyboard interactions. It includes built-in loading states, disabled states, and comprehensive accessibility features.
 
 ## Live Demo
 
@@ -28,211 +28,121 @@ The Button UI primitives provide `createButton` and `createIconButton` functions
 
 ## Import
 
-```typescript
-import { createButton, createIconButton } from 'flexium/primitives/ui';
+```tsx
+import { Button } from 'flexium/primitives'
 ```
 
-## createButton
+## Usage
 
-Creates an accessible button element with unified press handling.
+### Basic Button
 
-### Function Signature
+```tsx
+import { Button } from 'flexium/primitives'
 
-```typescript
-function createButton(props: ButtonProps): {
-  element: HTMLButtonElement;
-  update: (newProps: Partial<ButtonProps>) => void;
-  dispose: () => void;
+function MyComponent() {
+  return (
+    <Button
+      variant="primary"
+      onClick={() => console.log('Clicked')}
+    >
+      Click Me
+    </Button>
+  )
 }
-```
-
-### Usage
-
-```typescript
-import { createButton } from 'flexium/primitives/ui';
-
-// Basic button
-const button = createButton({
-  children: 'Click Me',
-  variant: 'primary',
-  onPress: () => console.log('Pressed'),
-});
-
-document.body.appendChild(button.element);
 ```
 
 ### With Loading State
 
-```typescript
-import { signal } from 'flexium/core';
-import { createButton } from 'flexium/primitives/ui';
+```tsx
+import { state } from 'flexium/core'
+import { Button } from 'flexium/primitives'
 
-const isLoading = signal(false);
+function SubmitButton() {
+  const [isLoading, setIsLoading] = state(false)
 
-const button = createButton({
-  children: 'Submit',
-  loading: isLoading,
-  loadingText: 'Submitting...',
-  onPress: async () => {
-    isLoading.set(true);
-    await submitForm();
-    isLoading.set(false);
-  },
-});
+  const handleSubmit = async () => {
+    setIsLoading(true)
+    await submitForm()
+    setIsLoading(false)
+  }
+
+  return (
+    <Button
+      loading={isLoading}
+      onClick={handleSubmit}
+    >
+      Submit
+    </Button>
+  )
+}
 ```
 
 ### With Icons
 
-```typescript
-import { createButton } from 'flexium/primitives/ui';
+```tsx
+import { Button } from 'flexium/primitives'
 
-const icon = document.createElement('span');
-icon.textContent = '→';
-
-const button = createButton({
-  children: 'Next',
-  rightIcon: icon,
-  variant: 'secondary',
-  onPress: () => goToNext(),
-});
-```
-
-### Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | Button type attribute. |
-| `variant` | `'primary' \| 'secondary' \| 'outline' \| 'ghost' \| 'danger'` | `'primary'` | Visual style variant. |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Button size. |
-| `disabled` | `Signal<boolean> \| boolean` | `false` | Whether the button is disabled. |
-| `loading` | `Signal<boolean> \| boolean` | `false` | Whether the button is in loading state. |
-| `fullWidth` | `boolean` | `false` | Whether the button spans full width. |
-| `children` | `string \| HTMLElement \| HTMLElement[]` | - | Button content. |
-| `leftIcon` | `HTMLElement` | - | Icon element to display on the left. |
-| `rightIcon` | `HTMLElement` | - | Icon element to display on the right. |
-| `loadingText` | `string` | `'Loading...'` | Text to display when loading. |
-| `className` | `string` | - | Additional CSS class names. |
-| `style` | `Partial<CSSStyleDeclaration>` | - | Inline styles. |
-| `id` | `string` | - | Element ID. |
-| `role` | `string` | - | ARIA role attribute. |
-| `ariaLabel` | `string` | - | Accessible label for screen readers. |
-| `ariaDescribedby` | `string` | - | ID of element that describes the button. |
-| `ariaExpanded` | `boolean` | - | Indicates if controlled element is expanded. |
-| `ariaPressed` | `boolean` | - | Indicates pressed state for toggle buttons. |
-| `ariaControls` | `string` | - | ID of element controlled by the button. |
-| `onPress` | `(event: Event) => void \| Promise<void>` | - | Called on click/tap/keyboard activation. |
-| `onPressStart` | `(event: PointerEvent) => void` | - | Called when press begins. |
-| `onPressEnd` | `(event: PointerEvent) => void` | - | Called when press ends. |
-| `onFocus` | `(event: FocusEvent) => void` | - | Called when button receives focus. |
-| `onBlur` | `(event: FocusEvent) => void` | - | Called when button loses focus. |
-| `onKeyDown` | `(event: KeyboardEvent) => void` | - | Called on keyboard key down. |
-
-### Return Value
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `element` | `HTMLButtonElement` | The button DOM element. |
-| `update` | `(newProps: Partial<ButtonProps>) => void` | Function to update button props. |
-| `dispose` | `() => void` | Cleanup function to remove event listeners. |
-
-### CSS Classes Applied
-
-- `button` - Base button class
-- `button-{variant}` - Variant-specific class (e.g., `button-primary`)
-- `button-{size}` - Size-specific class (e.g., `button-md`)
-- `button-full-width` - Applied when `fullWidth` is true
-- `button-pressed` - Applied during press interaction
-- `button-content` - Wrapper for button content
-- `button-icon` - Applied to icon elements
-- `button-icon-left` - Applied to left icon
-- `button-icon-right` - Applied to right icon
-- `button-text` - Applied to text content
-- `button-spinner` - Applied to loading spinner
-
-## createIconButton
-
-Creates an icon-only button (button with only an icon).
-
-### Function Signature
-
-```typescript
-function createIconButton(props: ButtonProps & { icon: HTMLElement }): {
-  element: HTMLButtonElement;
-  dispose: () => void;
+function NextButton() {
+  return (
+    <Button
+      variant="secondary"
+      onClick={() => goToNext()}
+    >
+      Next →
+    </Button>
+  )
 }
 ```
 
-### Usage
+## Props
 
-```typescript
-import { createIconButton } from 'flexium/primitives/ui';
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | Button type attribute |
+| `variant` | `'primary' \| 'secondary' \| 'outline' \| 'ghost' \| 'danger'` | `'primary'` | Visual style variant |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Button size |
+| `disabled` | `boolean` | `false` | Whether the button is disabled |
+| `loading` | `boolean` | `false` | Whether the button is in loading state |
+| `fullWidth` | `boolean` | `false` | Whether the button spans full width |
+| `class` | `string` | - | Additional CSS class names |
+| `onClick` | `(event: MouseEvent) => void` | - | Click handler |
+| `children` | `JSX.Element` | - | Button content |
 
-const closeIcon = document.createElement('span');
-closeIcon.textContent = '×';
+## Examples
 
-const button = createIconButton({
-  icon: closeIcon,
-  ariaLabel: 'Close',
-  variant: 'ghost',
-  size: 'sm',
-  onPress: () => closeDialog(),
-});
+### Button Variants
 
-document.body.appendChild(button.element);
+```tsx
+<Button variant="primary">Primary</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="danger">Danger</Button>
 ```
 
-### Props
+### Button Sizes
 
-All props from `createButton` are supported, plus:
+```tsx
+<Button size="sm">Small</Button>
+<Button size="md">Medium</Button>
+<Button size="lg">Large</Button>
+```
 
-| Prop | Type | Required | Description |
-| --- | --- | --- | --- |
-| `icon` | `HTMLElement` | Yes | Icon element to display. |
-| `ariaLabel` | `string` | Recommended | Accessible label (warning if omitted). |
+### Disabled Button
 
-### Return Value
+```tsx
+<Button disabled>Disabled</Button>
+```
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `element` | `HTMLButtonElement` | The button DOM element. |
-| `dispose` | `() => void` | Cleanup function to remove event listeners. |
+### Full Width Button
 
-### CSS Classes Applied
-
-All classes from `createButton`, plus:
-
-- `icon-button` - Applied to icon-only buttons
-
-## Unified Press Handling
-
-The button primitives provide a unified press handler (`onPress`) that works consistently across:
-
-- **Mouse clicks** - Standard click events
-- **Touch interactions** - Touch start/end events
-- **Keyboard activation** - Enter and Space key presses
-
-This unified approach ensures consistent behavior across all input methods and platforms.
-
-### Press States
-
-The button automatically manages press states:
-
-1. **Press Start** - `button-pressed` class applied, `onPressStart` called
-2. **Press Active** - Button shows pressed state
-3. **Press End** - `button-pressed` class removed, `onPressEnd` called
-4. **Press Complete** - `onPress` handler called
-
-### Press Cancellation
-
-Press interactions are automatically cancelled if:
-
-- Pointer leaves the button area
-- Touch is interrupted
-- Button becomes disabled during interaction
+```tsx
+<Button fullWidth>Full Width</Button>
+```
 
 ## Accessibility
 
-The Button primitives include comprehensive accessibility features:
+The Button component includes comprehensive accessibility features:
 
 ### Keyboard Support
 
@@ -243,87 +153,30 @@ The Button primitives include comprehensive accessibility features:
 ### Screen Reader Support
 
 - Proper semantic HTML (`<button>` element)
-- Full ARIA attribute support
-- Disabled state announced via `aria-disabled`
-- Loading state announced via `aria-busy`
-- Press state support via `aria-pressed` for toggle buttons
-- Expansion state support via `aria-expanded` for disclosure buttons
+- Disabled state announced automatically
+- Loading state can be announced with ARIA attributes
 
-### Loading State Accessibility
+### Loading State
 
 When in loading state:
 
 - Button is automatically disabled
-- `aria-busy="true"` attribute is set
-- Loading text is announced to screen readers
-- Visual spinner is hidden from screen readers with `aria-hidden="true"`
+- Click handlers are prevented from executing
 
-### Icon Button Accessibility
+## Styling
 
-Icon buttons should always include an `ariaLabel`:
+The Button component applies CSS classes based on props:
 
-```typescript
-// Good - includes label
-createIconButton({
-  icon: closeIcon,
-  ariaLabel: 'Close dialog',
-  onPress: closeDialog,
-});
-
-// Bad - missing label (warning logged)
-createIconButton({
-  icon: closeIcon,
-  onPress: closeDialog,
-});
-```
-
-## Reactive State with Signals
-
-Button props can accept signals for reactive state management:
-
-```typescript
-import { signal } from 'flexium/core';
-import { createButton } from 'flexium/primitives/ui';
-
-const isDisabled = signal(false);
-const isLoading = signal(false);
-
-const button = createButton({
-  children: 'Submit',
-  disabled: isDisabled,
-  loading: isLoading,
-  onPress: async () => {
-    isLoading.set(true);
-    await submitForm();
-    isLoading.set(false);
-  },
-});
-
-// Later, enable/disable the button
-isDisabled.set(true);
-```
-
-## Cleanup
-
-Always call the `dispose` function when removing buttons from the DOM to prevent memory leaks:
-
-```typescript
-const button = createButton({
-  children: 'Click Me',
-  onPress: () => console.log('Pressed'),
-});
-
-document.body.appendChild(button.element);
-
-// Later, when removing the button
-document.body.removeChild(button.element);
-button.dispose(); // Clean up event listeners and effects
-```
+- `button` - Base button class
+- `button-{variant}` - Variant-specific class (e.g., `button-primary`)
+- `button-{size}` - Size-specific class (e.g., `button-md`)
+- `button-loading` - Applied when loading is true
+- `button-disabled` - Applied when disabled is true
+- `button-full-width` - Applied when fullWidth is true
 
 ## Notes
 
-- The `onPress` handler supports async functions for handling asynchronous operations
-- Error handling is built-in - errors in `onPress` are caught and logged
+- The `onClick` handler supports async functions
 - Loading state automatically disables the button to prevent duplicate submissions
 - Button variants and sizes apply CSS classes that should be styled in your CSS
-- The button preserves all native `<button>` element behaviors and attributes
+- Use `state()` for reactive button states

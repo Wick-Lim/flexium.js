@@ -5,8 +5,10 @@
  * Includes full ARIA support and style props
  */
 
-import { signal, effect, type Signal } from '../../core/signal'
+import { signal, effect, onCleanup, type Signal } from '../../core/signal'
 import { ErrorCodes, logError, logWarning } from '../../core/errors'
+import { f } from '../../renderers/dom/f'
+import type { FNode } from '../../core/renderer'
 
 /**
  * Button variants
@@ -40,9 +42,9 @@ export interface ButtonProps {
   fullWidth?: boolean
 
   // Content
-  children?: string | HTMLElement | HTMLElement[]
-  leftIcon?: HTMLElement
-  rightIcon?: HTMLElement
+  children?: any
+  leftIcon?: any
+  rightIcon?: any
   loadingText?: string
 
   // Styling
@@ -68,13 +70,21 @@ export interface ButtonProps {
 }
 
 /**
- * Create a button element with unified press handling
+ * Button component - Accessible button with unified touch/click handler
+ *
+ * @example
+ * ```tsx
+ * <Button variant="primary" onPress={() => console.log('clicked')}>
+ *   Click me
+ * </Button>
+ *
+ * const loading = signal(false)
+ * <Button loading={loading} loadingText="Saving...">
+ *   Save
+ * </Button>
+ * ```
  */
-export function createButton(props: ButtonProps): {
-  element: HTMLButtonElement
-  update: (newProps: Partial<ButtonProps>) => void
-  dispose: () => void
-} {
+export function Button(props: ButtonProps): FNode {
   const {
     type = 'button',
     variant = 'primary',
@@ -103,306 +113,241 @@ export function createButton(props: ButtonProps): {
     onKeyDown,
   } = props
 
-  // Create button element
-  const button = document.createElement('button')
-  button.type = type
-
-  // Set ID
-  if (id) button.id = id
-
-  // Set role (default is 'button')
-  if (role) button.setAttribute('role', role)
-
-  // Apply base classes
+  // Build class names
   const classes = ['button', `button-${variant}`, `button-${size}`]
   if (fullWidth) classes.push('button-full-width')
   if (className) classes.push(className)
-  button.className = classes.join(' ')
 
-  // Apply inline styles
-  if (style) {
-    Object.assign(button.style, style)
+  // Build props for the button element
+  const buttonProps: Record<string, any> = {
+    type,
+    class: classes.join(' '),
+    style,
   }
 
-  // Accessibility attributes
-  if (ariaLabel) button.setAttribute('aria-label', ariaLabel)
-  if (ariaDescribedby) button.setAttribute('aria-describedby', ariaDescribedby)
-  if (ariaExpanded !== undefined)
-    button.setAttribute('aria-expanded', String(ariaExpanded))
-  if (ariaPressed !== undefined)
-    button.setAttribute('aria-pressed', String(ariaPressed))
-  if (ariaControls) button.setAttribute('aria-controls', ariaControls)
+  if (id) buttonProps.id = id
+  if (role) buttonProps.role = role
+  if (ariaLabel) buttonProps['aria-label'] = ariaLabel
+  if (ariaDescribedby) buttonProps['aria-describedby'] = ariaDescribedby
+  if (ariaExpanded !== undefined) buttonProps['aria-expanded'] = ariaExpanded
+  if (ariaPressed !== undefined) buttonProps['aria-pressed'] = ariaPressed
+  if (ariaControls) buttonProps['aria-controls'] = ariaControls
 
-  // Track effects for cleanup
-  const disposers: (() => void)[] = []
+  // Add ref callback to set up reactive behavior
+  buttonProps.ref = (button: HTMLButtonElement | null) => {
+    if (!button) return
 
-  // Content wrapper for managing icons and text
-  const contentWrapper = document.createElement('span')
-  contentWrapper.className = 'button-content'
+    // Convert disabled/loading to signals if needed
+    const disabledSignal =
+      typeof disabled === 'boolean' ? signal(disabled) : disabled
+    const loadingSignal = typeof loading === 'boolean' ? signal(loading) : loading
 
-  // Loading spinner
-  const loadingSpinner = document.createElement('span')
-  loadingSpinner.className = 'button-spinner'
-  loadingSpinner.setAttribute('aria-hidden', 'true')
-  loadingSpinner.style.display = 'none'
+    // Find content elements after mount
+    const contentWrapper = button.querySelector('.button-content') as HTMLElement
+    const loadingSpinner = button.querySelector('.button-spinner') as HTMLElement
+    const textContent = button.querySelector('.button-text') as HTMLElement
 
-  // Assemble button content
-  button.appendChild(loadingSpinner)
-
-  if (leftIcon) {
-    leftIcon.className = 'button-icon button-icon-left'
-    contentWrapper.appendChild(leftIcon)
-  }
-
-  const textContent = document.createElement('span')
-  textContent.className = 'button-text'
-  if (typeof children === 'string') {
-    textContent.textContent = children
-  } else if (children instanceof HTMLElement) {
-    textContent.appendChild(children)
-  } else if (Array.isArray(children)) {
-    children.forEach((child) => textContent.appendChild(child))
-  }
-  contentWrapper.appendChild(textContent)
-
-  if (rightIcon) {
-    rightIcon.className = 'button-icon button-icon-right'
-    contentWrapper.appendChild(rightIcon)
-  }
-
-  button.appendChild(contentWrapper)
-
-  // Handle disabled state
-  const disabledSignal =
-    typeof disabled === 'boolean' ? signal(disabled) : disabled
-  const disabledEffect = effect(() => {
-    button.disabled = disabledSignal.value
-    if (disabledSignal.value) {
-      button.setAttribute('aria-disabled', 'true')
-    } else {
-      button.removeAttribute('aria-disabled')
-    }
-  })
-  disposers.push(disabledEffect)
-
-  // Handle loading state
-  const loadingSignal = typeof loading === 'boolean' ? signal(loading) : loading
-  const loadingEffect = effect(() => {
-    const isLoading = loadingSignal.value
-
-    if (isLoading) {
-      // Show spinner
-      loadingSpinner.style.display = 'inline-block'
-      contentWrapper.style.visibility = 'hidden'
-
-      // Update text for screen readers
-      if (loadingText) {
-        textContent.textContent = loadingText
+    // Handle disabled state
+    effect(() => {
+      button.disabled = disabledSignal.value
+      if (disabledSignal.value) {
+        button.setAttribute('aria-disabled', 'true')
+      } else {
+        button.removeAttribute('aria-disabled')
       }
+    })
 
-      // Disable button during loading
-      button.disabled = true
-      button.setAttribute('aria-busy', 'true')
-    } else {
-      // Hide spinner
-      loadingSpinner.style.display = 'none'
-      contentWrapper.style.visibility = 'visible'
+    // Handle loading state
+    effect(() => {
+      const isLoading = loadingSignal.value
 
-      // Restore original text
-      if (typeof children === 'string') {
-        textContent.textContent = children
+      if (isLoading) {
+        // Show spinner
+        if (loadingSpinner) loadingSpinner.style.display = 'inline-block'
+        if (contentWrapper) contentWrapper.style.visibility = 'hidden'
+
+        // Update text for screen readers
+        if (loadingText && textContent) {
+          textContent.textContent = loadingText
+        }
+
+        // Disable button during loading
+        button.disabled = true
+        button.setAttribute('aria-busy', 'true')
+      } else {
+        // Hide spinner
+        if (loadingSpinner) loadingSpinner.style.display = 'none'
+        if (contentWrapper) contentWrapper.style.visibility = 'visible'
+
+        // Restore original text
+        if (typeof children === 'string' && textContent) {
+          textContent.textContent = children
+        }
+
+        button.removeAttribute('aria-busy')
       }
+    })
 
-      button.removeAttribute('aria-busy')
-    }
-  })
-  disposers.push(loadingEffect)
+    // Unified press handler (works for mouse, touch, and keyboard)
+    if (onPress) {
+      let isPressing = false
 
-  // Unified press handler (works for mouse, touch, and keyboard)
-  if (onPress) {
-    let isPressing = false
+      // Pointer down (mouse/touch start)
+      const handlePointerDown = (e: PointerEvent) => {
+        if (button.disabled) return
 
-    // Pointer down (mouse/touch start)
-    const handlePointerDown = (e: PointerEvent) => {
-      if (button.disabled) return
-
-      isPressing = true
-      button.classList.add('button-pressed')
-
-      if (onPressStart) {
-        onPressStart(e)
-      }
-    }
-
-    // Pointer up (mouse/touch end)
-    const handlePointerUp = (e: PointerEvent) => {
-      if (!isPressing) return
-
-      isPressing = false
-      button.classList.remove('button-pressed')
-
-      if (onPressEnd) {
-        onPressEnd(e)
-      }
-    }
-
-    // Click (fires after pointer up)
-    const handleClick = async (e: Event) => {
-      if (button.disabled) {
-        e.preventDefault()
-        return
-      }
-
-      try {
-        await onPress(e)
-      } catch (error) {
-        logError(ErrorCodes.BUTTON_HANDLER_FAILED, undefined, error)
-      }
-    }
-
-    // Keyboard (Enter/Space)
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (button.disabled) return
-
-      // Enter or Space triggers press
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
         isPressing = true
         button.classList.add('button-pressed')
 
         if (onPressStart) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onPressStart(e as any)
+          onPressStart(e)
         }
       }
 
-      // Custom keydown handler
-      if (onKeyDown) {
-        onKeyDown(e)
-      }
-    }
+      // Pointer up (mouse/touch end)
+      const handlePointerUp = (e: PointerEvent) => {
+        if (!isPressing) return
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (button.disabled) return
-
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
         isPressing = false
         button.classList.remove('button-pressed')
 
         if (onPressEnd) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onPressEnd(e as any)
+          onPressEnd(e)
+        }
+      }
+
+      // Click (fires after pointer up)
+      const handleClick = async (e: Event) => {
+        if (button.disabled) {
+          e.preventDefault()
+          return
         }
 
-        // Trigger press
-        handleClick(e)
+        try {
+          await onPress(e)
+        } catch (error) {
+          logError(ErrorCodes.BUTTON_HANDLER_FAILED, undefined, error)
+        }
       }
+
+      // Keyboard (Enter/Space)
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (button.disabled) return
+
+        // Enter or Space triggers press
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          isPressing = true
+          button.classList.add('button-pressed')
+
+          if (onPressStart) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onPressStart(e as any)
+          }
+        }
+
+        // Custom keydown handler
+        if (onKeyDown) {
+          onKeyDown(e)
+        }
+      }
+
+      const handleKeyUp = (e: KeyboardEvent) => {
+        if (button.disabled) return
+
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          isPressing = false
+          button.classList.remove('button-pressed')
+
+          if (onPressEnd) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onPressEnd(e as any)
+          }
+
+          // Trigger press
+          handleClick(e)
+        }
+      }
+
+      // Pointer cancel (touch interrupted)
+      const handlePointerCancel = () => {
+        isPressing = false
+        button.classList.remove('button-pressed')
+      }
+
+      button.addEventListener('pointerdown', handlePointerDown)
+      button.addEventListener('pointerup', handlePointerUp)
+      button.addEventListener('click', handleClick)
+      button.addEventListener('keydown', handleKeyDown)
+      button.addEventListener('keyup', handleKeyUp)
+      button.addEventListener('pointercancel', handlePointerCancel)
+
+      onCleanup(() => {
+        button.removeEventListener('pointerdown', handlePointerDown)
+        button.removeEventListener('pointerup', handlePointerUp)
+        button.removeEventListener('click', handleClick)
+        button.removeEventListener('keydown', handleKeyDown)
+        button.removeEventListener('keyup', handleKeyUp)
+        button.removeEventListener('pointercancel', handlePointerCancel)
+      })
     }
 
-    // Pointer cancel (touch interrupted)
-    const handlePointerCancel = () => {
-      isPressing = false
-      button.classList.remove('button-pressed')
+    // Focus/blur handlers
+    if (onFocus) {
+      button.addEventListener('focus', onFocus)
+      onCleanup(() => button.removeEventListener('focus', onFocus))
     }
 
-    button.addEventListener('pointerdown', handlePointerDown)
-    button.addEventListener('pointerup', handlePointerUp)
-    button.addEventListener('click', handleClick)
-    button.addEventListener('keydown', handleKeyDown)
-    button.addEventListener('keyup', handleKeyUp)
-    button.addEventListener('pointercancel', handlePointerCancel)
-
-    disposers.push(() => {
-      button.removeEventListener('pointerdown', handlePointerDown)
-      button.removeEventListener('pointerup', handlePointerUp)
-      button.removeEventListener('click', handleClick)
-      button.removeEventListener('keydown', handleKeyDown)
-      button.removeEventListener('keyup', handleKeyUp)
-      button.removeEventListener('pointercancel', handlePointerCancel)
-    })
+    if (onBlur) {
+      button.addEventListener('blur', onBlur)
+      onCleanup(() => button.removeEventListener('blur', onBlur))
+    }
   }
 
-  // Focus/blur handlers
-  if (onFocus) {
-    button.addEventListener('focus', onFocus)
-    disposers.push(() => button.removeEventListener('focus', onFocus))
-  }
+  // Build button content structure
+  const buttonChildren = [
+    // Loading spinner
+    f('span', {
+      class: 'button-spinner',
+      'aria-hidden': 'true',
+      style: { display: 'none' },
+    }),
+    // Content wrapper with icons and text
+    f(
+      'span',
+      { class: 'button-content' },
+      [
+        leftIcon && f('span', { class: 'button-icon button-icon-left' }, leftIcon),
+        f('span', { class: 'button-text' }, children),
+        rightIcon &&
+          f('span', { class: 'button-icon button-icon-right' }, rightIcon),
+      ].filter(Boolean)
+    ),
+  ]
 
-  if (onBlur) {
-    button.addEventListener('blur', onBlur)
-    disposers.push(() => button.removeEventListener('blur', onBlur))
-  }
-
-  // Update function
-  function update(newProps: Partial<ButtonProps>): void {
-    if (newProps.type !== undefined) button.type = newProps.type
-    if (newProps.className !== undefined) {
-      const classes = ['button', `button-${variant}`, `button-${size}`]
-      if (fullWidth) classes.push('button-full-width')
-      if (newProps.className) classes.push(newProps.className)
-      button.className = classes.join(' ')
-    }
-
-    if (newProps.style) {
-      Object.assign(button.style, newProps.style)
-    }
-
-    if (newProps.ariaLabel !== undefined) {
-      button.setAttribute('aria-label', newProps.ariaLabel)
-    }
-
-    if (newProps.disabled !== undefined) {
-      const newDisabled =
-        typeof newProps.disabled === 'boolean'
-          ? signal(newProps.disabled)
-          : newProps.disabled
-      disabledSignal.set(newDisabled.value)
-    }
-
-    if (newProps.loading !== undefined) {
-      const newLoading =
-        typeof newProps.loading === 'boolean'
-          ? signal(newProps.loading)
-          : newProps.loading
-      loadingSignal.set(newLoading.value)
-    }
-  }
-
-  // Cleanup function
-  function dispose(): void {
-    disposers.forEach((d) => d())
-  }
-
-  return {
-    element: button,
-    update,
-    dispose,
-  }
+  return f('button', buttonProps, buttonChildren)
 }
 
 /**
- * Create an icon button (button with only an icon)
+ * IconButton component - Button with only an icon
+ *
+ * @example
+ * ```tsx
+ * <IconButton icon={<i class="icon-close" />} ariaLabel="Close" onPress={handleClose} />
+ * ```
  */
-export function createIconButton(props: ButtonProps & { icon: HTMLElement }): {
-  element: HTMLButtonElement
-  dispose: () => void
-} {
-  const { icon, ariaLabel, ...buttonProps } = props
+export function IconButton(props: ButtonProps & { icon: any }): FNode {
+  const { icon, ariaLabel, className, ...buttonProps } = props
 
   if (!ariaLabel) {
     logWarning(ErrorCodes.BUTTON_MISSING_ARIA_LABEL)
   }
 
-  const { element, dispose } = createButton({
+  return Button({
     ...buttonProps,
     children: icon,
     ariaLabel,
-    className: `icon-button ${buttonProps.className || ''}`,
+    className: `icon-button ${className || ''}`,
   })
-
-  return {
-    element,
-    dispose,
-  }
 }

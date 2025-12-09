@@ -3,8 +3,6 @@
  */
 
 export {
-  createMotion,
-  useMotion,
   MotionController,
   cleanupMotionState,
   type AnimatableProps,
@@ -15,7 +13,6 @@ export {
 export {
   Transition,
   TransitionGroup,
-  createTransition,
   transitions,
   type TransitionPreset,
   type TransitionTiming,

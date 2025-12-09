@@ -6,15 +6,18 @@ Flexium provides a powerful animation system built on the Web Animations API. Cr
 
 The Motion API provides low-level control over element animations.
 
-### createMotion
+### MotionController
 
-Create an animated element with initial and target states:
+Direct control over animations using the MotionController class:
 
 ```tsx
-import { createMotion } from 'flexium/primitives'
+import { MotionController } from 'flexium/primitives'
 
-const { element, controller, dispose } = createMotion({
-  tagName: 'div',
+const element = document.createElement('div')
+const controller = new MotionController(element)
+
+// Animate in
+controller.animate({
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   duration: 300,
@@ -24,53 +27,79 @@ const { element, controller, dispose } = createMotion({
 document.body.appendChild(element)
 
 // Later: cleanup
-dispose()
+controller.dispose()
 ```
 
-### useMotion
+### Animation with Spring Physics
 
-Use motion with reactive signals:
-
-```tsx
-import { useMotion } from 'flexium/primitives'
-import { state } from 'flexium/core'
-
-const [isExpanded, setIsExpanded] = state(false)
-
-const { controller, dispose } = useMotion(element, {
-  value: {
-    animate: isExpanded
-      ? { height: 'auto', opacity: 1 }
-      : { height: 0, opacity: 0 }
-  }
-})
-
-// Toggle animation
-setIsExpanded(true)
-```
-
-### MotionController
-
-Direct control over animations:
+Use spring physics for natural-feeling animations:
 
 ```tsx
 import { MotionController } from 'flexium/primitives'
 
 const controller = new MotionController(element)
 
-// Animate in
+// Animate with spring physics
 controller.animate({
   initial: { scale: 0 },
   animate: { scale: 1 },
   spring: { tension: 200, friction: 20 },
   onAnimationComplete: () => console.log('Done!')
 })
+```
+
+### Reactive Animations with State
+
+Use motion with reactive state:
+
+```tsx
+import { MotionController } from 'flexium/primitives'
+import { state } from 'flexium/core'
+
+const [isExpanded, setIsExpanded] = state(false)
+const controller = new MotionController(element)
+
+// Watch state and animate
+const unwatch = state.watch(() => {
+  controller.animate({
+    animate: isExpanded
+      ? { height: 'auto', opacity: 1 }
+      : { height: 0, opacity: 0 }
+  })
+})
+
+// Toggle animation
+setIsExpanded(true)
+
+// Cleanup
+unwatch()
+controller.dispose()
+```
+
+### Exit Animations
+
+Animate elements when removing them:
+
+```tsx
+const controller = new MotionController(element)
 
 // Animate out
 await controller.animateExit({ opacity: 0, y: -20 })
+element.remove()
+```
+
+### Layout Animations
+
+Enable automatic size animations:
+
+```tsx
+const controller = new MotionController(element)
 
 // Enable layout animations
 controller.enableLayoutAnimation(300, 'ease-out')
+
+// Now size changes animate automatically
+element.style.height = '200px' // Animates!
 ```
 
 ## Transition Component

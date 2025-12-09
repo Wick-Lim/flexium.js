@@ -7,13 +7,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   MotionController,
-  createMotion,
-  useMotion,
   type MotionProps,
   type AnimatableProps,
   type SpringConfig,
 } from '../Motion'
-import { signal } from '../../../core/signal'
 
 // Mock Web Animations API
 class MockAnimation implements Animation {
@@ -837,180 +834,6 @@ describe('Motion Component', () => {
     })
   })
 
-  describe('createMotion() - Factory Function', () => {
-    beforeEach(() => {
-      // Mock document.createElement to return elements with animate method
-      const originalCreateElement = document.createElement.bind(document)
-      vi.spyOn(document, 'createElement').mockImplementation(
-        (tagName: string) => {
-          const element = originalCreateElement(tagName)
-          element.animate = vi.fn((keyframes: any, options: any) => {
-            const animation = new MockAnimation(keyframes, options)
-            mockAnimations.push(animation)
-            return animation as unknown as Animation
-          }) as any
-          element.getBoundingClientRect = vi.fn(() => ({
-            width: 100,
-            height: 100,
-            x: 0,
-            y: 0,
-            top: 0,
-            right: 100,
-            bottom: 100,
-            left: 0,
-            toJSON: () => ({}),
-          }))
-          return element
-        }
-      )
-    })
-
-    it('should create motion with element and controller', () => {
-      const motion = createMotion({
-        animate: { opacity: 1 },
-      })
-
-      expect(motion.element).toBeDefined()
-      expect(motion.controller).toBeInstanceOf(MotionController)
-      expect(motion.update).toBeInstanceOf(Function)
-      expect(motion.dispose).toBeInstanceOf(Function)
-    })
-
-    it('should create element with default tagName', () => {
-      const motion = createMotion({
-        animate: { opacity: 1 },
-      })
-
-      expect(motion.element.tagName).toBe('DIV')
-    })
-
-    it('should create element with custom tagName', () => {
-      const motion = createMotion({
-        tagName: 'span',
-        animate: { opacity: 1 },
-      })
-
-      expect(motion.element.tagName).toBe('SPAN')
-    })
-
-    it('should use provided element', () => {
-      const customElement = document.createElement('section')
-      customElement.animate = mockElement.animate
-
-      const motion = createMotion({
-        element: customElement,
-        animate: { opacity: 1 },
-      })
-
-      expect(motion.element).toBe(customElement)
-    })
-
-    it('should start initial animation', () => {
-      const element = document.createElement('div')
-      element.animate = vi.fn(mockElement.animate)
-
-      const motion = createMotion({
-        element,
-        animate: { opacity: 1 },
-      })
-
-      expect(element.animate).toHaveBeenCalled()
-    })
-
-    it('should update animation with update method', () => {
-      const element = document.createElement('div')
-      element.animate = vi.fn(mockElement.animate)
-
-      const motion = createMotion({
-        element,
-        animate: { opacity: 0.5 },
-      })
-
-      motion.update({ animate: { opacity: 1 } })
-
-      expect(element.animate).toHaveBeenCalledTimes(2)
-    })
-
-    it('should dispose controller and animations', () => {
-      const element = document.createElement('div')
-      const animations: MockAnimation[] = []
-      element.animate = vi.fn((keyframes: any, options: any) => {
-        const animation = new MockAnimation(keyframes, options)
-        animations.push(animation)
-        return animation as unknown as Animation
-      }) as any
-
-      const motion = createMotion({
-        element,
-        animate: { opacity: 1 },
-      })
-
-      motion.dispose()
-
-      expect(animations[0].playState).toBe('idle')
-    })
-  })
-
-  describe('useMotion() - Hook Behavior', () => {
-    it('should create controller and watch signal changes', () => {
-      const propsSignal = signal<MotionProps>({
-        animate: { opacity: 0.5 },
-      })
-
-      const motion = useMotion(mockElement, propsSignal)
-
-      expect(motion.controller).toBeInstanceOf(MotionController)
-      expect(motion.dispose).toBeInstanceOf(Function)
-    })
-
-    it('should trigger animation on signal change', () => {
-      const propsSignal = signal<MotionProps>({
-        animate: { opacity: 0.5 },
-      })
-
-      useMotion(mockElement, propsSignal)
-
-      // Initial animation
-      expect(mockElement.animate).toHaveBeenCalledTimes(1)
-
-      // Change signal
-      propsSignal.value = { animate: { opacity: 1 } }
-
-      // Should trigger new animation
-      expect(mockElement.animate).toHaveBeenCalledTimes(2)
-    })
-
-    it('should dispose effect and controller', () => {
-      const propsSignal = signal<MotionProps>({
-        animate: { opacity: 0.5 },
-      })
-
-      const motion = useMotion(mockElement, propsSignal)
-      const animation = mockAnimations[0]
-
-      motion.dispose()
-
-      // Should cancel animation
-      expect(animation.playState).toBe('idle')
-
-      // Should stop watching signal
-      propsSignal.value = { animate: { opacity: 1 } }
-      expect(mockElement.animate).toHaveBeenCalledTimes(1) // No new animation
-    })
-
-    it('should react to multiple signal updates', () => {
-      const propsSignal = signal<MotionProps>({
-        animate: { opacity: 0 },
-      })
-
-      useMotion(mockElement, propsSignal)
-
-      propsSignal.value = { animate: { opacity: 0.5 } }
-      propsSignal.value = { animate: { opacity: 1 } }
-
-      expect(mockElement.animate).toHaveBeenCalledTimes(3)
-    })
-  })
 
   describe('Edge Cases', () => {
     it('should handle zero values correctly', () => {
@@ -1121,39 +944,5 @@ describe('Motion Component', () => {
       }).not.toThrow()
     })
 
-    it('should handle undefined element in createMotion', () => {
-      // Mock document.createElement for this specific test
-      const originalCreateElement = document.createElement.bind(document)
-      vi.spyOn(document, 'createElement').mockImplementation(
-        (tagName: string) => {
-          const element = originalCreateElement(tagName)
-          element.animate = vi.fn((keyframes: any, options: any) => {
-            const animation = new MockAnimation(keyframes, options)
-            mockAnimations.push(animation)
-            return animation as unknown as Animation
-          }) as any
-          element.getBoundingClientRect = vi.fn(() => ({
-            width: 100,
-            height: 100,
-            x: 0,
-            y: 0,
-            top: 0,
-            right: 100,
-            bottom: 100,
-            left: 0,
-            toJSON: () => ({}),
-          }))
-          return element
-        }
-      )
-
-      const motion = createMotion({
-        element: null as any,
-        animate: { opacity: 1 },
-      })
-
-      expect(motion.element).toBeDefined()
-      expect(motion.element.tagName).toBe('DIV')
-    })
   })
 })

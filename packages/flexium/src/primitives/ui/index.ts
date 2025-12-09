@@ -3,8 +3,8 @@
  */
 
 export {
-  createButton,
-  createIconButton,
+  Button,
+  IconButton,
   type ButtonVariant,
   type ButtonSize,
   type ButtonType,

@@ -3,9 +3,9 @@
  *
  * Lightweight core primitives for cross-platform development.
  * For Motion, Form, and UI components, import from separate entry points:
- * - import { createMotion, useMotion } from 'flexium/primitives/motion'
+ * - import { MotionController } from 'flexium/primitives/motion'
  * - import { createForm, createInput } from 'flexium/primitives/form'
- * - import { createButton, createText } from 'flexium/primitives/ui'
+ * - import { Button } from 'flexium/primitives/ui'
  */
 
 // Re-export core reactivity

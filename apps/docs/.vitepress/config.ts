@@ -227,7 +227,7 @@ export default defineConfig({
             { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
             { text: '&lt;Button /&gt;', link: '/docs/primitives/button' },
             { text: '&lt;List /&gt;', link: '/docs/primitives/list' },
-            { text: 'createForm()', link: '/docs/primitives/form' },
+            { text: 'Forms (state)', link: '/docs/primitives/form' },
             { text: 'Motion', link: '/docs/primitives/motion' }
           ]
         },
@@ -306,10 +306,10 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Form Primitives',
+          text: 'Form Patterns',
           collapsed: false,
           items: [
-            { text: 'Form', link: '/reference/primitives/form' }
+            { text: 'Forms with state()', link: '/reference/primitives/form' }
           ]
         },
         {

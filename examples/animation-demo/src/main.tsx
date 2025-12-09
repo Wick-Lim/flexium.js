@@ -15,7 +15,6 @@ import { signal, computed, effect, onMount } from 'flexium'
 import { render } from 'flexium/dom'
 import { Show, For } from 'flexium'
 import {
-  createMotion,
   Transition,
   TransitionGroup,
   transitions,
@@ -757,10 +756,12 @@ function App() {
 
       <div style="margin-top: 40px; padding: 20px; background: linear-gradient(135deg, #e0e7ff 0%, #f0e7ff 100%); border-radius: 12px;">
         <h3 style="color: #667eea; margin-bottom: 10px;">Getting Started</h3>
-        <pre>{`import { createMotion, Transition, TransitionGroup } from 'flexium'
+        <pre>{`import { MotionController, Transition, TransitionGroup } from 'flexium'
 
-// Basic motion
-const motion = createMotion({
+// Basic motion with MotionController
+const element = document.createElement('div')
+const controller = new MotionController(element)
+controller.animate({
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   duration: 300

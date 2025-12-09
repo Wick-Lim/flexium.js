@@ -203,12 +203,10 @@ Common easing values:
 
 ## Reusable Transitions
 
-Create reusable transition configurations with `createTransition`:
+Create reusable transition configurations as objects:
 
 ```tsx
-import { createTransition } from 'flexium/primitives'
-
-const bounceIn = createTransition({
+const bounceIn = {
   enter: { opacity: 0, scale: 0.3 },
   enterTo: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.3 },
@@ -220,7 +218,7 @@ const bounceIn = createTransition({
     duration: 300,
     easing: 'ease-in'
   }
-})
+}
 
 // Use anywhere
 function Notification() {
@@ -739,7 +737,6 @@ Transitions are fully typed:
 import {
   Transition,
   TransitionGroup,
-  createTransition,
   transitions,
   type TransitionProps,
   type TransitionGroupProps,
