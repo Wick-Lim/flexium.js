@@ -4,14 +4,14 @@ How does Flexium compare to React and SolidJS? This guide helps you understand t
 
 ## At a Glance
 
-| Feature | Flexium | React | SolidJS |
-|---------|---------|-------|---------|
-| **Reactivity** | Signals | Virtual DOM | Signals |
-| **API Philosophy** | Unified (`state()`) | Hooks (multiple) | Primitives (multiple) |
-| **Re-rendering** | Fine-grained | Component tree | Fine-grained |
-| **List Rendering** | `items.map()` works | `items.map()` works | Need `<For>` |
-| **Bundle Size** | ~8KB | ~42KB | ~7KB |
-| **Learning Curve** | Low | Moderate | Moderate |
+| Feature | Flexium | React | SolidJS | Svelte |
+|---------|---------|-------|---------|--------|
+| **Reactivity** | Signals (Proxy) | Virtual DOM | Signals | Compiler |
+| **API Philosophy** | Unified (`state()`) | Hooks (multiple) | Primitives (multiple) | Syntax (`let`, `$`) |
+| **Re-rendering** | Fine-grained | Component tree | Fine-grained | Fine-grained |
+| **List Rendering** | `items.map()` works | `items.map()` works | Need `<For>` | `{#each}` block |
+| **Bundle Size** | ~8KB | ~42KB | ~7KB | ~2KB (runtime) |
+| **Learning Curve** | Low | Moderate | Moderate | Low |
 
 ## The Flexium Difference
 
@@ -63,6 +63,19 @@ function Component() {
   // Must call as functions - count() not count
   return <div>{count()} × 2 = {doubled()}</div>
 }
+```
+
+```html [Svelte]
+<script>
+  // Compiler magic - specific syntax
+  let count = $state(0);                // local
+  let doubled = $derived(count * 2);    // derived
+  // async requires #await block or custom stores
+  
+  // Global state needs separate store files
+</script>
+
+<div>{count} × 2 = {doubled}</div>
 ```
 
 :::
@@ -127,6 +140,21 @@ function TodoList() {
 // ❌ Different syntax to learn
 // ✅ Optimized
 // ❌ items().map() doesn't work reactively!
+```
+
+```html [Svelte]
+<!-- Must use template syntax -->
+<script>
+  let todos = $state([...]);
+</script>
+
+<ul>
+  {#each todos as todo (todo.id)}
+    <li>{todo.text}</li>
+  {/each}
+</ul>
+<!-- ❌ New template syntax to learn -->
+<!-- ✅ Optimized -->
 ```
 
 :::
@@ -345,14 +373,14 @@ createEffect(() => {
 | Aspect | Winner | Why |
 |--------|--------|-----|
 | **API Simplicity** | Flexium | One `state()` for everything |
-| **Learning Curve** | Flexium | 2 APIs vs 6-10+ |
+| **Learning Curve** | Flexium/Svelte | Very low barrier to entry |
 | **List Rendering DX** | Flexium | React syntax with optimization |
-| **Raw Performance** | SolidJS | ~20% faster |
+| **Raw Performance** | SolidJS/Svelte | Compiler/Fine-grained optimized |
 | **Ecosystem** | React | Massive library support |
-| **TypeScript DX** | Flexium | Unified type inference |
+| **TypeScript DX** | Flexium/React | Just TypeScript, no custom file formats |
 | **Global State** | Flexium | Built-in, zero setup |
-| **Bundle Size** | SolidJS | Slightly smaller |
+| **Bundle Size** | Svelte | Tiny runtime (compiler does heavy lifting) |
 
 ---
 
-**Bottom line**: Flexium lets you write **exactly like React** (`count`, `items.map()`, `{show && ...}`) but get **SolidJS-level performance** with **one simple API**.
+**Bottom line**: Flexium combines **React's usability** with **No-VDOM performance**.
