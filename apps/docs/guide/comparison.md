@@ -54,15 +54,24 @@ function Component() {
 
 ```html [Svelte]
 <script>
-  // Compiler magic - specific syntax
-  let count = $state(0);                // local
-  let doubled = $derived(count * 2);    // derived
-  // async requires #await block or custom stores
+  import { theme } from './stores.js'; // Global state needs separate file
+
+  let count = $state(0);
+  let doubled = $derived(count * 2);
   
-  // Global state needs separate store files
+  // Async state usually handled in template
+  let userPromise = fetchUser();
 </script>
 
-<div>{count} × 2 = {doubled}</div>
+<div>
+  {count} × 2 = {doubled}
+  
+  {#await userPromise}
+    <p>Loading...</p>
+  {:then user}
+    <p>{user.name}</p>
+  {/await}
+</div>
 ```
 
 :::
@@ -154,7 +163,18 @@ count + 10          // 15
 // Familiar, but re-renders entire component
 ```
 
+```html [Svelte]
+<script>
+  let count = $state(5);
+  
+  // Script: Direct access (Svelte 5)
+  console.log(count);     // 5
+  console.log(count + 10); // 15
+</script>
 
+<!-- Template: Direct access -->
+<p>Value: {count}</p>
+```
 
 :::
 
@@ -194,7 +214,25 @@ function Component() {
 // ❌ Re-renders entire component
 ```
 
+```html [Svelte]
+<script>
+  let show = $state(true);
+</script>
 
+<div>
+  {#if show}
+    <Child />
+  {/if}
+  
+  {#if show}
+    <A />
+  {:else}
+    <B />
+  {/if}
+</div>
+<!-- ❌ Custom template syntax -->
+<!-- ✅ Fine-grained updates -->
+```
 
 :::
 
@@ -230,7 +268,16 @@ useEffect(() => {
 }, []) // Forgot to add count!
 ```
 
-
+```html [Svelte]
+<script>
+  $effect(() => {
+    console.log('Count:', count);
+    console.log('Name:', name);
+  });
+  // ✅ Automatic dependency tracking
+  // ❌ $effect rune syntax
+</script>
+```
 
 :::
 
