@@ -1192,8 +1192,8 @@ if (isSignal(value)) {
 
 The following types are deprecated but maintained for backward compatibility:
 
-- `VNode` - Use `FNode` instead
-- `VNodeChild` - Use `FNodeChild` instead
+- `FNode` - Flexium Node
+- `FNodeChild` - Child of a Flexium Node
 
 ## See Also
 

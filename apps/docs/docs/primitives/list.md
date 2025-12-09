@@ -201,7 +201,7 @@ function App() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `items` | `() => T[]` | - | **Required.** Reactive array or getter function returning the items to render. |
-| `children` | `(item: T, index: () => number) => VNode` | - | **Required.** Render function for each item. Receives the item and a reactive index getter. |
+| `children` | `(item: T, index: () => number) => FNode` | - | **Required.** Render function for each item. Receives the item and a reactive index getter. |
 | `virtual` | `boolean` | `false` | Enable virtualization for large lists. |
 | `height` | `number \| string` | - | Container height. **Required when `virtual` is true.** |
 | `itemSize` | `number \| SizeConfig` | - | Height of each item. **Required when `virtual` is true.** |
@@ -252,7 +252,7 @@ itemSize={{
 The `children` prop is a render function that receives two parameters:
 
 ```tsx
-(item: T, index: () => number) => VNode
+(item: T, index: () => number) => FNode
 ```
 
 - **item**: The data item to render

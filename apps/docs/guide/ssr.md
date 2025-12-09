@@ -188,7 +188,7 @@ You can customize hydration behavior with options:
 ```tsx
 interface HydrateOptions {
   /** Called when hydration encounters a mismatch */
-  onMismatch?: (message: string, domNode: Node | null, vnode: any) => void
+  onMismatch?: (message: string, domNode: Node | null, node: any) => void
   /** Whether to recover from mismatches by re-rendering */
   recoverMismatch?: boolean
 }
@@ -198,7 +198,7 @@ Example with custom error handling:
 
 ```tsx
 hydrate(<App />, document.getElementById('app')!, {
-  onMismatch: (message, domNode, vnode) => {
+  onMismatch: (message, domNode, node) => {
     console.error('Hydration mismatch:', message)
     // Send to error tracking service
     trackError({ type: 'hydration-mismatch', message })
@@ -745,7 +745,7 @@ vite build --ssr src/server.tsx --outDir dist/server
 
 **Fix**: Verify that server and client render the same components in the same order.
 
-### "No DOM node found for vnode"
+### "No DOM node found for node"
 
 **Cause**: Client expects more nodes than exist in the DOM.
 

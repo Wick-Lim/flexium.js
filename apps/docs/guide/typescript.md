@@ -49,7 +49,7 @@ import type { FNodeChild, FNode } from 'flexium/core';
 type FNodeChild = FNode | string | number | boolean | null | undefined | FNodeChild[];
 ```
 
-::: tip FNode vs VNode
+::: tip FNode (Flexium Node)
 FNode is not a Virtual DOM node. It's a lightweight descriptor that immediately converts to real DOM with fine-grained reactivity. The "F" stands for Flexium.
 :::
 

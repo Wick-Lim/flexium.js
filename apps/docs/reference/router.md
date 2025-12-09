@@ -39,7 +39,7 @@ function App() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `children` | `VNodeChild` | - | Route definitions and other content. |
+| `children` | `FNodeChild` | - | Route definitions and other content. |
 
 #### Behavior
 
@@ -96,7 +96,7 @@ function App() {
 | `path` | `string` | `''` | Path pattern to match. Supports dynamic segments with `:param` syntax. |
 | `component` | `Function` | - | **Required.** Component to render when route matches. |
 | `index` | `boolean` | `false` | Whether this is an index route (renders at parent's exact path). |
-| `children` | `VNodeChild` | - | Nested route definitions for creating route hierarchies. |
+| `children` | `FNodeChild` | - | Nested route definitions for creating route hierarchies. |
 | `beforeEnter` | `(params: Record<string, string>) => boolean \| Promise<boolean>` | - | Navigation guard. Return `false` to prevent route from rendering. |
 
 #### Path Patterns
@@ -169,7 +169,7 @@ function Navigation() {
 | --- | --- | --- | --- |
 | `to` | `string` | - | **Required.** Target path to navigate to. |
 | `class` | `string` | - | CSS class name for the link. |
-| `children` | `VNodeChild` | - | Link content. |
+| `children` | `FNodeChild` | - | Link content. |
 
 #### Behavior
 
@@ -365,7 +365,7 @@ Returns `RouteMatch[] | null`:
 
 ### createRoutesFromChildren
 
-Parses VNode children into a route configuration tree. Used internally by the `<Router>` component.
+Parses FNode children into a route configuration tree. Used internally by the `<Router>` component.
 
 #### Usage
 
@@ -379,11 +379,11 @@ const routes = createRoutesFromChildren(children);
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| `children` | `VNodeChild` | VNode children representing `<Route>` components. |
+| `children` | `FNodeChild` | FNode children representing `<Route>` components. |
 
 #### Return Value
 
-Returns `RouteDef[]` - an array of route definitions extracted from the VNode tree.
+Returns `RouteDef[]` - an array of route definitions extracted from the FNode tree.
 
 ---
 
@@ -1374,7 +1374,7 @@ interface RouteProps {
   path?: string;
   index?: boolean;
   component: Function;
-  children?: VNodeChild;
+  children?: FNodeChild;
   beforeEnter?: (params: Record<string, string>) => boolean | Promise<boolean>;
 }
 ```
@@ -1385,7 +1385,7 @@ interface RouteProps {
 interface LinkProps {
   to: string;
   class?: string;
-  children?: VNodeChild;
+  children?: FNodeChild;
 }
 ```
 
