@@ -7,7 +7,7 @@
  */
 
 import type { FNode } from '../../core/renderer'
-import { effect, isSignal, onCleanup } from '../../core/signal'
+import { effect, isSignal, onCleanup, root } from '../../core/signal'
 import type { Signal, Computed } from '../../core/signal'
 import { domRenderer } from './index'
 import { isFNode } from './f'
@@ -31,11 +31,6 @@ import {
   ListComponent,
 } from '../../primitives/List'
 import { logError, ErrorCodes } from '../../core/errors'
-import {
-  isReactiveArrayResult,
-  mountReactiveArray,
-  ReactiveArrayResult,
-} from '../../core/reactive-array'
 import { setNode, getNode } from './node-map'
 
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>()
@@ -61,7 +56,7 @@ function registerReactiveBinding(node: Node, dispose: () => void): void {
  * - Strings and numbers (text nodes)
  * - Signals and computed values (reactive children)
  * - StateValues from the state() API
- * - ListComponents and ReactiveArrayResults
+ * - ListComponents
  * - Arrays and fragments
  *
  * Reactive values are automatically tracked and DOM updates occur
@@ -97,9 +92,7 @@ export function mountReactive(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any[]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | ListComponent<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | ReactiveArrayResult<any, any>,
+    | ListComponent<any>,
   container?: Node
 ): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
@@ -123,25 +116,6 @@ export function mountReactive(
     registerReactiveBinding(marker, listDispose)
 
     return container ? parent.firstChild : parent
-  }
-
-  // Handle ReactiveArrayResult from items.map() syntax
-  if (isReactiveArrayResult(vnode)) {
-    const startMarker = document.createTextNode('')
-    const parent = container || document.createDocumentFragment()
-    domRenderer.appendChild(parent, startMarker)
-
-    const arrayDispose = mountReactiveArray(
-      vnode,
-      parent,
-      startMarker,
-      (childVnode) => mountReactive(childVnode),
-      cleanupReactive
-    )
-
-    registerReactiveBinding(startMarker, arrayDispose)
-
-    return container ? startMarker : parent
   }
 
   // Handle StateValue (from state() API)
@@ -223,119 +197,116 @@ export function mountReactive(
     const parent = container || document.createDocumentFragment()
     domRenderer.appendChild(parent, startNode)
 
-    let currentNode: Node | null = startNode
+    let currentNodes: Node[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let currentFNode: any = null
     let currentFNodeList: FNode[] = []
 
+    // Capture context at mount time for reactive functions
+    const contextSnapshot = captureContext()
+
     const dispose = effect(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const value = isSignal(vnode) ? (vnode as Signal<any>).value : vnode()
-      const currentContainer = startNode.parentNode
+      // Run entire effect body with captured context to ensure child components
+      // have access to parent contexts (like Router context)
+      runWithContext(contextSnapshot, () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const value = isSignal(vnode) ? (vnode as Signal<any>).value : (vnode as () => unknown)()
+        const currentContainer = startNode.parentNode
 
-      // Safety check: if node is detached, we can't update siblings
-      if (!currentContainer) return
+        // Safety check: if node is detached, we can't update siblings
+        if (!currentContainer) return
 
-      if (Array.isArray(value)) {
-        const newFNodes = value.filter((c) => c != null)
-        if (currentFNodeList.length > 0) {
-          const nextSibling = startNode.nextSibling
-          // Note: reconcileArrays expects parent, oldFNodes, newFNodes, nextSibling
-          reconcileArrays(
-            currentContainer,
-            currentFNodeList,
-            newFNodes,
-            nextSibling
-          )
-        } else {
-          if (currentNode && currentNode !== startNode) {
-            try {
-              currentContainer.removeChild(currentNode)
-            } catch (e) {
-              logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
-            }
-          }
-          const fragment = document.createDocumentFragment()
-          for (const child of newFNodes) {
-            const childNode = mountReactive(child, fragment)
-            if (childNode && typeof child === 'object') {
-              setNode(child, childNode)
-            }
-          }
-          currentContainer.insertBefore(fragment, startNode.nextSibling)
-        }
-        currentFNodeList = newFNodes
-        currentFNode = value
-        currentNode = startNode
-        return
-      }
-
-      if (currentFNodeList.length > 0) {
-        for (const childFNode of currentFNodeList) {
-          const childNode = getNode(childFNode)
-          if (childNode && childNode.parentNode === currentContainer) {
-            try {
-              currentContainer.removeChild(childNode)
-            } catch (e) {
-              logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
-            }
-          }
-        }
-        currentFNodeList = []
-      }
-
-      if (value !== currentFNode) {
-        if (
-          (typeof value === 'string' || typeof value === 'number') &&
-          currentNode &&
-          currentNode.nodeType === Node.TEXT_NODE &&
-          currentNode !== startNode
-        ) {
-          domRenderer.updateTextNode(currentNode as Text, String(value))
-        } else {
-          const newNode = mountReactive(value)
-          if (newNode) {
-            if (currentNode && currentNode !== startNode) {
-              if (currentNode.parentNode === currentContainer) {
-                // Optimize: if both old and new are text nodes, just update content
-                if (
-                  currentNode.nodeType === Node.TEXT_NODE &&
-                  newNode.nodeType === Node.TEXT_NODE
-                ) {
-                  domRenderer.updateTextNode(
-                    currentNode as Text,
-                    newNode.textContent || ''
-                  )
-                  // Don't update currentNode reference since we reused it
-                } else {
-                  currentContainer.replaceChild(newNode, currentNode)
-                  currentNode = newNode
-                }
-              } else {
-                currentContainer.insertBefore(newNode, startNode.nextSibling)
-                currentNode = newNode
-              }
-            } else {
-              currentContainer.insertBefore(newNode, startNode.nextSibling)
-              currentNode = newNode
-            }
+        if (Array.isArray(value)) {
+          const newFNodes = value.filter((c) => c != null)
+          if (currentFNodeList.length > 0) {
+            const nextSibling = startNode.nextSibling
+            // Note: reconcileArrays expects parent, oldFNodes, newFNodes, nextSibling
+            reconcileArrays(
+              currentContainer,
+              currentFNodeList,
+              newFNodes,
+              nextSibling
+            )
           } else {
-            if (
-              currentNode &&
-              currentNode !== startNode &&
-              currentNode.parentNode === currentContainer
-            ) {
+            // Clean up old nodes first
+            for (const node of currentNodes) {
+              cleanupReactive(node)
+              if (node.parentNode === currentContainer) {
+                try {
+                  currentContainer.removeChild(node)
+                } catch (e) {
+                  logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
+                }
+              }
+            }
+            currentNodes = []
+
+            const fragment = document.createDocumentFragment()
+            for (const child of newFNodes) {
+              const childNode = mountReactive(child, fragment)
+              if (childNode && typeof child === 'object') {
+                setNode(child, childNode)
+              }
+            }
+            currentNodes = Array.from(fragment.childNodes)
+            currentContainer.insertBefore(fragment, startNode.nextSibling)
+          }
+          currentFNodeList = newFNodes
+          currentFNode = value
+          return
+        }
+
+        if (currentFNodeList.length > 0) {
+          for (const childFNode of currentFNodeList) {
+            const childNode = getNode(childFNode)
+            if (childNode && childNode.parentNode === currentContainer) {
+              cleanupReactive(childNode)
               try {
-                currentContainer.removeChild(currentNode)
+                currentContainer.removeChild(childNode)
               } catch (e) {
                 logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
               }
             }
-            currentNode = startNode
           }
+          currentFNodeList = []
         }
-        currentFNode = value
-      }
+
+        if (value !== currentFNode) {
+          // Clean up old nodes first
+          for (const node of currentNodes) {
+            cleanupReactive(node)
+            if (node.parentNode === currentContainer) {
+              try {
+                currentContainer.removeChild(node)
+              } catch (e) {
+                logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
+              }
+            }
+          }
+          currentNodes = []
+
+          if (
+            (typeof value === 'string' || typeof value === 'number')
+          ) {
+            const textNode = domRenderer.createTextNode(String(value))
+            currentContainer.insertBefore(textNode, startNode.nextSibling)
+            currentNodes = [textNode]
+          } else {
+            const newNode = mountReactive(value)
+            if (newNode) {
+              // If newNode is a fragment, track all children
+              if (newNode.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+                currentNodes = Array.from(newNode.childNodes)
+                currentContainer.insertBefore(newNode, startNode.nextSibling)
+              } else {
+                currentContainer.insertBefore(newNode, startNode.nextSibling)
+                currentNodes = [newNode]
+              }
+            }
+          }
+          currentFNode = value
+        }
+      })
     })
 
     registerReactiveBinding(startNode, dispose)
@@ -413,14 +384,21 @@ export function mountReactive(
           try {
             let result
 
-            try {
-              // Set current component for hook tracking
-              setCurrentComponent(componentInstance)
-              result = component({ ...vnode.props, children: vnode.children })
-            } finally {
-              // Clear current component
-              setCurrentComponent(null)
-            }
+            // Use root() to track any effects created inside the component
+            // These will be automatically cleaned up when disposeRoot is called
+            root((disposeRoot) => {
+              // Register disposeRoot to cleanup component's internal effects
+              onCleanup(disposeRoot)
+
+              try {
+                // Set current component for hook tracking
+                setCurrentComponent(componentInstance)
+                result = component({ ...vnode.props, children: vnode.children })
+              } finally {
+                // Clear current component
+                setCurrentComponent(null)
+              }
+            })
 
             const fragment = document.createDocumentFragment()
             mountReactive(result, fragment)

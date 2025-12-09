@@ -81,21 +81,31 @@ export function createReactiveArrayResult<T, R>(
 
 /**
  * Cache entry for reactive array DOM rendering
+ * Now keyed by FNode.key (from rendered element) instead of source item
  */
-interface ArrayCacheEntry<T> {
-  item: T
+interface ArrayCacheEntry {
   node: Node
   indexSig: Signal<number>
   dispose: () => void
 }
 
 /**
- * Mount a ReactiveArrayResult with optimized DOM caching.
- * Similar to For component but triggered by .map() syntax.
+ * Get key from FNode - uses FNode.key if available, otherwise index
+ */
+function getFNodeKey(vnode: FNode, index: number): string | number {
+  if (vnode && typeof vnode === 'object' && 'key' in vnode && vnode.key != null) {
+    return vnode.key
+  }
+  // Fallback to index-based key with type for uniqueness
+  return `__idx_${index}_${vnode?.type || 'unknown'}`
+}
+
+/**
+ * Mount a ReactiveArrayResult with FNode.key based reconciliation.
+ * Uses FNode.key for stable identity matching instead of source item reference.
  *
  * Performance characteristics:
- * - O(1) for append/prepend
- * - O(1) for item reuse (by reference or key)
+ * - O(1) for item reuse (by FNode.key)
  * - O(n) for reorder with minimal DOM moves
  *
  * @param result - The ReactiveArrayResult from items.map()
@@ -112,69 +122,54 @@ export function mountReactiveArray<T, R>(
   mountFn: (vnode: FNode) => Node | null,
   cleanupFn: (node: Node) => void
 ): () => void {
-  const { source, mapFn, keyFn } = result
+  const { source, mapFn } = result
 
-  // Cache: identity -> { node, indexSig, dispose }
-  // Use keyFn result or item reference as identity
-  let cache = new Map<unknown, ArrayCacheEntry<T>>()
-
-  const getKey = (item: T): unknown => {
-    if (keyFn) return keyFn(item)
-    // For objects, use reference identity
-    // For primitives, use value (may cause issues with duplicates)
-    return item
-  }
+  // Cache: FNode.key -> { node, indexSig, dispose }
+  let cache = new Map<string | number, ArrayCacheEntry>()
 
   const dispose = effect(() => {
     const list = source.value || []
-    const newCache = new Map<unknown, ArrayCacheEntry<T>>()
+    const newCache = new Map<string | number, ArrayCacheEntry>()
     const newNodes: Node[] = []
 
-    // Phase 1: Create/reuse nodes
+    // Phase 1: Remove ALL old nodes first (clean slate approach)
+    // This ensures correct behavior when keys are index-based
+    for (const [, entry] of cache) {
+      entry.dispose()
+      if (entry.node.parentNode === parent) {
+        parent.removeChild(entry.node)
+      }
+    }
+    cache.clear()
+
+    // Phase 2: Create fresh nodes for current list
     for (let i = 0; i < list.length; i++) {
       const item = list[i]
-      const key = getKey(item)
-      let entry = cache.get(key)
 
-      if (!entry) {
-        // New item: create index signal, render, mount
-        const indexSig = signal(i)
-        // Call mapFn with item and reactive index getter
-        const vnode = mapFn(item, () => indexSig.value) as FNode
-        const node = mountFn(vnode)
+      // Create index signal for reactive index access
+      const indexSig = signal(i)
 
-        if (node) {
-          entry = {
-            item,
-            node,
-            indexSig,
-            dispose: () => cleanupFn(node),
-          }
+      // Call mapFn to get FNode (late binding - called at render time)
+      const vnode = mapFn(item, () => indexSig.value) as FNode
+
+      // Get key from FNode
+      const key = getFNodeKey(vnode, i)
+
+      // Mount new node
+      const node = mountFn(vnode)
+
+      if (node) {
+        const entry: ArrayCacheEntry = {
+          node,
+          indexSig,
+          dispose: () => cleanupFn(node),
         }
-      } else {
-        // Existing item: update index if changed
-        if (entry.indexSig.peek() !== i) {
-          entry.indexSig.value = i
-        }
-      }
-
-      if (entry) {
         newCache.set(key, entry)
         newNodes.push(entry.node)
       }
     }
 
-    // Phase 2: Remove nodes no longer in list
-    for (const [key, entry] of cache) {
-      if (!newCache.has(key)) {
-        entry.dispose()
-        if (entry.node.parentNode === parent) {
-          parent.removeChild(entry.node)
-        }
-      }
-    }
-
-    // Phase 3: Reorder nodes efficiently
+    // Phase 3: Insert nodes in correct order
     for (let i = 0; i < newNodes.length; i++) {
       const node = newNodes[i]
       const expectedPosition =
@@ -185,7 +180,7 @@ export function mountReactiveArray<T, R>(
       }
     }
 
-    // Update cache
+    // Update cache for next render
     cache = newCache
   })
 

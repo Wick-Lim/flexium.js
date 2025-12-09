@@ -5,79 +5,69 @@ import { loadItem, useItem } from '../store'
 function Comment(props: { id: number }) {
     const [comment] = useItem(props.id);
 
-    // Load comment data if missing (recursive loading)
-    // We use an effect to trigger load
+    // Load comment data if missing
     effect(() => {
         loadItem(props.id);
     });
 
-    return () => {
-        const c = comment()
-        if (!c || c.type !== 'comment' || !c.text) return null
+    // Use proxy directly - no function wrapper needed
+    if (!comment || comment.type !== 'comment' || !comment.text) return null
 
-        return (
-            <li class="comment">
-                <div class="comment-header">
-                    <span class="by">
-                        <Link to={`/user/${c.by}`}>{c.by}</Link>
-                    </span>
-                    <span class="time"> {new Date(c.time * 1000).toLocaleString()}</span>
-                </div>
-                <div class="comment-text" innerHTML={c.text} />
-                {c.kids && c.kids.length > 0 && (
-                    <ul class="comment-children" style={{ paddingLeft: '20px' }}>
-                        {(c.kids || []).map((kidId: number) => <Comment id={kidId} />)}
-                    </ul>
-                )}
-            </li>
-        )
-    }
+    return (
+        <li class="comment">
+            <div class="comment-header">
+                <span class="by">
+                    <Link to={`/user/${comment.by}`}>{comment.by}</Link>
+                </span>
+                <span class="time"> {new Date(+comment.time * 1000).toLocaleString()}</span>
+            </div>
+            <div class="comment-text" innerHTML={comment.text} />
+            {comment.kids && +comment.kids.length > 0 && (
+                <ul class="comment-children" style={{ paddingLeft: '20px' }}>
+                    {comment.kids.map((kidId: number) => <Comment id={kidId} />)}
+                </ul>
+            )}
+        </li>
+    )
 }
 
 export default function Item() {
     const r = router()
-    const id = () => parseInt(r.params.value.id)
 
     // Local state to track item
     const [item, setItem] = state<any>(undefined);
 
     effect(() => {
-        const itemId = id();
+        const itemId = parseInt(r.params.value.id);
         if (!itemId) return;
-        
+
         loadItem(itemId);
         const [globalItem] = useItem(itemId);
-        // Bind local signal to global item update
-        // polling/subscription pattern
         setItem(globalItem());
     });
 
+    // Use proxy directly
+    if (!item) return <div class="view item-view"><div>Loading...</div></div>
+
     return (
         <div class="view item-view">
-            {() => {
-                const data = item()
-                if (!data) return <div>Loading...</div>
-
-                return (
-                    <div>
-                        <div class="item-view-header">
-                            <h1><a href={data.url} target="_blank">{data.title}</a></h1>
-                            <p class="meta">
-                                {data.points} points | by <Link to={`/user/${data.by}`}>{data.by}</Link>
-                                {' '}| {new Date(data.time * 1000).toLocaleString()}
-                            </p>
-                        </div>
-                        <div class="item-view-comments">
-                            <p class="item-view-comments-header">
-                                {data.descendants} comments
-                            </p>
-                            <ul class="comment-children">
-                                {data.kids && data.kids.map((kidId: number) => <Comment id={kidId} />)}
-                            </ul>
-                        </div>
-                    </div>
-                )
-            }}
+            <div>
+                <div class="item-view-header">
+                    <h1><a href={item.url} target="_blank">{item.title}</a></h1>
+                    <p class="meta">
+                        {item.points} points | by <Link to={`/user/${item.by}`}>{item.by}</Link>
+                        {' '}| {new Date(+item.time * 1000).toLocaleString()}
+                    </p>
+                </div>
+                <div class="item-view-comments">
+                    <p class="item-view-comments-header">
+                        {item.descendants} comments
+                    </p>
+                    <ul class="comment-children">
+                        {item.kids && item.kids.map((kidId: number) => <Comment id={kidId} />)}
+                    </ul>
+                </div>
+            </div>
         </div>
     )
 }

@@ -23,6 +23,7 @@ function Nav() {
 export default function App() {
     return (
         <Router>
+            <a href="#main" class="skip-link">Skip to main content</a>
             <Nav />
             <Route path="/" component={() => <Stories type="top" />} />
             <Route path="/top" component={() => <Stories type="top" />} />

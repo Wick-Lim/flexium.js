@@ -120,11 +120,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ['html', { outputFolder: './test-results/html-report' }],
-    ['list'],
-    ...(process.env.CI ? [['github' as const]] : []),
-  ],
+  reporter: 'list',
 
   use: {
     baseURL: currentConfig.baseURL,

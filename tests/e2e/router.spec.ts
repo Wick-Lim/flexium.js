@@ -165,10 +165,11 @@ test.describe('Flexium Router', () => {
   test.describe('Browser History', () => {
     test('should support browser back button', async ({ page }) => {
       await page.goto('/')
-      await page.click('a:has-text("Top")')
+
+      await page.click('nav a:has-text("Top")', { force: true })
       await expect(page).toHaveURL('/top')
 
-      await page.click('a:has-text("New")')
+      await page.click('nav a:has-text("New")', { force: true })
       await expect(page).toHaveURL('/new')
 
       await page.goBack()
@@ -180,8 +181,9 @@ test.describe('Flexium Router', () => {
 
     test('should support browser forward button', async ({ page }) => {
       await page.goto('/')
-      await page.click('a:has-text("Top")')
-      await page.click('a:has-text("New")')
+
+      await page.click('nav a:has-text("Top")', { force: true })
+      await page.click('nav a:has-text("New")', { force: true })
 
       await page.goBack()
       await page.goBack()
@@ -265,14 +267,15 @@ test.describe('Flexium Router', () => {
       await expect(page.locator('li.news-item')).toHaveCount(2, { timeout: 10000 })
     })
 
+    // Test: Route navigation should update list content correctly
     test('should update content when navigating between routes', async ({ page }) => {
       await page.goto('/top')
       await expect(page.locator('li.news-item')).toHaveCount(5, { timeout: 10000 })
 
-      await page.click('a:has-text("New")')
+      await page.click('nav a:has-text("New")', { force: true })
       await expect(page.locator('li.news-item')).toHaveCount(3, { timeout: 10000 })
 
-      await page.click('a:has-text("Ask")')
+      await page.click('nav a:has-text("Ask")', { force: true })
       await expect(page.locator('li.news-item')).toHaveCount(1, { timeout: 10000 })
     })
   })
@@ -284,13 +287,13 @@ test.describe('Flexium Router', () => {
 
       const start = Date.now()
 
-      await page.click('a:has-text("Top")')
+      await page.click('nav a:has-text("Top")')
       await page.waitForSelector('li.news-item')
 
-      await page.click('a:has-text("New")')
+      await page.click('nav a:has-text("New")')
       await page.waitForSelector('li.news-item')
 
-      await page.click('a:has-text("Show")')
+      await page.click('nav a:has-text("Show")')
       await page.waitForSelector('li.news-item')
 
       const duration = Date.now() - start

@@ -1,9 +1,5 @@
 import { signal, computed as createComputed, createResource } from './signal'
 import type { Signal, Computed, Resource } from './signal'
-import {
-  createReactiveArrayResult,
-  isReactiveArrayMethod,
-} from './reactive-array'
 
 /** Symbol to identify StateProxy and access underlying signal */
 // Use Symbol.for() to ensure the symbol is shared across module boundaries
@@ -273,26 +269,8 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
       }
 
       // For object/array values, access properties on current value
+      // Note: accessing sig.value here tracks the signal in any enclosing effect
       const currentValue = sig.value
-
-      // Special handling for reactive array methods (map, filter, etc.)
-      if (Array.isArray(currentValue) && isReactiveArrayMethod(prop)) {
-        if (prop === 'map') {
-          // Return a function that creates ReactiveArrayResult
-          return <R>(
-            mapFn: (item: unknown, index: number) => R
-          ): ReturnType<typeof createReactiveArrayResult> => {
-            // Wrap the user's mapFn to accept reactive index
-            const wrappedMapFn = (item: unknown, indexGetter: () => number) => {
-              return mapFn(item, indexGetter())
-            }
-            return createReactiveArrayResult(
-              sig as Signal<unknown[]>,
-              wrappedMapFn
-            )
-          }
-        }
-      }
 
       if (currentValue !== null && typeof currentValue === 'object') {
         const propValue = (currentValue as Record<string | symbol, unknown>)[prop]

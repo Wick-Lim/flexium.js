@@ -2,7 +2,7 @@ import { computed } from '../core/signal'
 import { createLocation } from './core'
 import { createRoutesFromChildren, matchRoutes } from './utils'
 import { LinkProps, RouteProps, RouterContext } from './types'
-import { f } from '../renderers/dom/f'
+import { f, isFNode } from '../renderers/dom/f'
 import { RouterCtx, RouteDepthCtx } from './context'
 import { context } from '../core/context'
 import type { FNodeChild } from '../core/renderer'
@@ -28,8 +28,21 @@ export function router(): RouterContext {
 export function Router(props: { children: FNodeChild }) {
   const [location, navigate] = createLocation()
 
-  // Parse route configuration from children
-  const routes = createRoutesFromChildren(props.children)
+  // Separate Route children from non-Route children (like Nav, etc.)
+  const childArray = Array.isArray(props.children) ? props.children : [props.children]
+  const nonRouteChildren: FNodeChild[] = []
+  const routeChildren: FNodeChild[] = []
+
+  for (const child of childArray) {
+    if (isFNode(child) && typeof child.type === 'function' && child.type === Route) {
+      routeChildren.push(child)
+    } else {
+      nonRouteChildren.push(child)
+    }
+  }
+
+  // Parse route configuration from Route children only
+  const routes = createRoutesFromChildren(routeChildren)
 
   // Compute matches
   const matches = computed(() => {
@@ -40,8 +53,6 @@ export function Router(props: { children: FNodeChild }) {
   const params = computed(() => {
     const m = matches()
     if (m.length > 0) {
-      // Merge params from all matches? Usually leaf params are most important.
-      // Or combine them.
       return m[m.length - 1].params
     }
     return {}
@@ -54,40 +65,37 @@ export function Router(props: { children: FNodeChild }) {
     matches,
   }
 
-  // Provide Context
-  // We use a manual Provider wrapper because `Router` returns the root component
-  // But Flexium context is stack-based.
-  // We can wrap the result in a Provider component if we had one.
-  // Or `mountReactive` supports context via `pushProvider` if the component has `_contextId`.
-  // But `createContext` returns an object with `Provider` component.
-
   return () => {
     const ms = matches()
 
-    // No match? Render nothing or 404?
-    // Ideally user provides a "*" route.
-    if (ms.length === 0) return null
+    // Matched route component (or null if no match)
+    let matchedContent: FNodeChild = null
+    if (ms.length > 0) {
+      const rootMatch = ms[0]
 
-    const rootMatch = ms[0]
-
-    // Check beforeEnter guard
-    if (rootMatch.route.beforeEnter) {
-      const result = rootMatch.route.beforeEnter(rootMatch.params)
-      if (result === false) return null
+      // Check beforeEnter guard
+      if (rootMatch.route.beforeEnter) {
+        const result = rootMatch.route.beforeEnter(rootMatch.params)
+        if (result !== false) {
+          matchedContent = f(RouteDepthCtx.Provider, { value: 1 }, [
+            f('div', { key: rootMatch.route.path, style: { display: 'contents' } }, [
+              f(rootMatch.route.component, { params: rootMatch.params }),
+            ]),
+          ])
+        }
+      } else {
+        matchedContent = f(RouteDepthCtx.Provider, { value: 1 }, [
+          f('div', { key: rootMatch.route.path, style: { display: 'contents' } }, [
+            f(rootMatch.route.component, { params: rootMatch.params }),
+          ]),
+        ])
+      }
     }
 
-    const RootComponent = rootMatch.route.component
-
-    // We need to provide RouterCtx AND RouteDepthCtx (0 + 1 = 1 for next outlet)
-    // Wait, Outlet at depth 0 should render match[0]?
-    // No, Router renders match[0] (Root Layout).
-    // Root Layout contains Outlet. Outlet renders match[1].
-    // So Outlet needs depth 1.
-
+    // Render non-Route children (like Nav) and the matched route wrapped in main
     return f(RouterCtx.Provider, { value: routerContext }, [
-      f(RouteDepthCtx.Provider, { value: 1 }, [
-        f(RootComponent, { params: rootMatch.params }),
-      ]),
+      ...nonRouteChildren,
+      f('main', { id: 'main' }, [matchedContent]),
     ])
   }
 }
