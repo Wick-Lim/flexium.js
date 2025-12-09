@@ -1,0 +1,60 @@
+:root {
+    /* Brand Colors */
+    --vp-c-brand: #58a6ff;
+    --vp-c-brand-light: #79c0ff;
+    --vp-c-brand-dark: #1f6feb;
+    --vp-c-brand-next: #bc8cff;
+
+    /* Background Colors - Deep Space Theme */
+    --vp-c-bg: #0d1117;
+    --vp-c-bg-alt: #161b22;
+    --vp-c-bg-elm: #21262d;
+
+    /* Text Colors */
+    --vp-c-text-1: #e6edf3;
+    --vp-c-text-2: #8b949e;
+    --vp-c-text-3: #6e7681;
+
+    /* Borders */
+    --vp-c-border: #30363d;
+    --vp-c-divider: #30363d;
+
+    /* Home Page Hero */
+    --vp-home-hero-name-color: transparent;
+    --vp-home-hero-name-background: linear-gradient(135deg, #58a6ff 30%, #bc8cff 90%);
+
+    /* Custom Gradient Background for Body */
+    --vp-c-bg-body-gradient: radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.08) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(188, 140, 255, 0.08) 0%, transparent 20%);
+}
+
+.VPContent {
+    background-image: var(--vp-c-bg-body-gradient);
+    background-attachment: fixed;
+}
+
+/* Button Overrides */
+.VPButton.brand {
+    background-color: var(--vp-c-brand-dark);
+    border-color: var(--vp-c-brand-dark);
+    color: #fff;
+}
+
+.VPButton.brand:hover {
+    background-color: var(--vp-c-brand);
+    border-color: var(--vp-c-brand);
+}
+
+/* Nav Bar transparent override */
+.VPNavBar {
+    background-color: rgba(13, 17, 23, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid var(--vp-c-border) !important;
+}
+
+/* Code Block overrides */
+.vp-doc div[class*='language-'],
+.vp-block {
+    background-color: #161b22 !important;
+    border: 1px solid #30363d;
+}

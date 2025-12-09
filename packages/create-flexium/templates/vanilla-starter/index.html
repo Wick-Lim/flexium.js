@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,30 +16,34 @@
     }
 
     :root {
-      --color-primary: #667eea;
-      --color-primary-dark: #5a67d8;
-      --color-success: #10b981;
-      --color-danger: #ef4444;
-      --color-gray-50: #f9fafb;
-      --color-gray-100: #f3f4f6;
-      --color-gray-600: #4b5563;
-      --color-gray-900: #111827;
+      --bg-color: #0d1117;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --accent-primary: #58a6ff;
+      --accent-secondary: #bc8cff;
+      --card-bg: #161b22;
+      --border-color: #30363d;
+      --success-color: #238636;
+      --danger-color: #da3633;
       --spacing-sm: 8px;
       --spacing-md: 16px;
       --spacing-lg: 24px;
       --spacing-xl: 32px;
       --radius-md: 8px;
       --radius-lg: 12px;
-      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
+      background-color: var(--bg-color);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(188, 140, 255, 0.1) 0%, transparent 20%);
       min-height: 100vh;
       padding: var(--spacing-lg);
-      color: var(--color-gray-900);
+      color: var(--text-primary);
     }
 
     /* ========================================
@@ -50,7 +55,8 @@
     }
 
     .card {
-      background: white;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       padding: var(--spacing-xl);
       box-shadow: var(--shadow-lg);
@@ -64,12 +70,12 @@
 
     .header h1 {
       font-size: 2.5rem;
-      color: var(--color-primary);
+      color: var(--text-primary);
       margin-bottom: var(--spacing-sm);
     }
 
     .header p {
-      color: var(--color-gray-600);
+      color: var(--text-secondary);
       font-size: 1.1rem;
     }
 
@@ -81,7 +87,7 @@
     }
 
     .counter h2 {
-      color: var(--color-gray-900);
+      color: var(--text-primary);
       margin-bottom: var(--spacing-lg);
     }
 
@@ -95,13 +101,13 @@
 
     .count-display .label {
       font-size: 1.2rem;
-      color: var(--color-gray-600);
+      color: var(--text-secondary);
     }
 
     .count-display .value {
       font-size: 3rem;
       font-weight: bold;
-      color: var(--color-primary);
+      color: var(--accent-primary);
       min-width: 80px;
     }
 
@@ -136,31 +142,32 @@
     }
 
     .btn-success {
-      background: var(--color-success);
+      background: var(--success-color);
       color: white;
     }
 
     .btn-danger {
-      background: var(--color-danger);
+      background: var(--danger-color);
       color: white;
     }
 
     .btn-secondary {
-      background: #6b7280;
-      color: white;
+      background: #21262d;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
     }
 
     /* ========================================
        INFO
        ======================================== */
     .info h3 {
-      color: var(--color-gray-900);
+      color: var(--text-primary);
       margin-bottom: var(--spacing-md);
     }
 
     .info ul {
       list-style-position: inside;
-      color: var(--color-gray-600);
+      color: var(--text-secondary);
       line-height: 1.8;
     }
 
@@ -169,12 +176,13 @@
     }
 
     .info code {
-      background: var(--color-gray-100);
+      background: rgba(13, 17, 23, 0.5);
+      border: 1px solid var(--border-color);
       padding: 2px 6px;
       border-radius: 4px;
       font-family: 'Monaco', 'Courier New', monospace;
       font-size: 0.9em;
-      color: var(--color-primary-dark);
+      color: var(--accent-secondary);
     }
 
     /* ========================================
@@ -214,6 +222,7 @@
     }
   </style>
 </head>
+
 <body>
   <div id="app"></div>
 
@@ -411,4 +420,5 @@
     console.log('🎯 Try clicking the buttons and watch the magic happen!')
   </script>
 </body>
+
 </html>

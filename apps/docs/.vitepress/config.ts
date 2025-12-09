@@ -21,8 +21,8 @@ export default defineConfig({
         ...item,
         changefreq: 'weekly',
         priority: item.url === '' ? 1.0 :
-                  item.url.includes('guide/') ? 0.8 :
-                  item.url.includes('reference/') ? 0.7 : 0.6
+          item.url.includes('guide/') ? 0.8 :
+            item.url.includes('reference/') ? 0.7 : 0.6
       }))
     }
   },
@@ -39,12 +39,8 @@ export default defineConfig({
 
     // Favicon and icons
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
-    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }],
-    ['link', { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' }],
-    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }],
-    ['link', { rel: 'manifest', href: '/site.webmanifest' }],
-    ['meta', { name: 'theme-color', content: '#646cff' }],
-    ['meta', { name: 'msapplication-TileColor', content: '#646cff' }],
+    ['meta', { name: 'theme-color', content: '#0d1117' }],
+    ['meta', { name: 'msapplication-TileColor', content: '#0d1117' }],
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
     ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }],
     ['meta', { name: 'apple-mobile-web-app-title', content: siteName }],
@@ -111,7 +107,21 @@ export default defineConfig({
         },
         'query-input': 'required name=search_term_string'
       }
-    })]
+    })],
+
+    // Google Analytics
+    [
+      'script',
+      { async: '', src: 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX' }
+    ],
+    [
+      'script',
+      {},
+      `window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');`
+    ]
   ],
 
   // Transform page meta for better SEO

@@ -3,10 +3,11 @@
 }
 
 .card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 3rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
 }
 
 .header {
@@ -16,7 +17,7 @@
 .title {
   font-size: 2.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #fff 0%, #b0b8c4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -24,7 +25,7 @@
 }
 
 .subtitle {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   margin-bottom: 1rem;
 }
@@ -40,23 +41,27 @@
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 600;
-  background: #f0f0f0;
-  color: #666;
+  background: #21262d;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .status.online {
-  background: #d4edda;
-  color: #155724;
+  background: rgba(35, 134, 54, 0.2);
+  color: #3fb950;
+  border-color: rgba(35, 134, 54, 0.4);
 }
 
 .status.offline {
-  background: #f8d7da;
-  color: #721c24;
+  background: rgba(218, 54, 51, 0.2);
+  color: #f85149;
+  border-color: rgba(218, 54, 51, 0.4);
 }
 
 .status.installed {
-  background: #d1ecf1;
-  color: #0c5460;
+  background: rgba(56, 139, 253, 0.2);
+  color: #58a6ff;
+  border-color: rgba(56, 139, 253, 0.4);
 }
 
 .counter {
@@ -72,15 +77,16 @@
 .count {
   font-size: 5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
+  text-shadow: 0 0 30px rgba(88, 166, 255, 0.3);
 }
 
 .label {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   margin-top: 0.5rem;
   text-transform: uppercase;
@@ -98,7 +104,7 @@
   padding: 1rem 2rem;
   font-size: 1rem;
   font-weight: 600;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -107,58 +113,66 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #238636;
   color: white;
+  border: 1px solid rgba(240, 246, 252, 0.1);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+  background: #2ea043;
+  box-shadow: 0 10px 20px rgba(35, 134, 54, 0.4);
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: #1f6feb;
   color: white;
+  border: 1px solid rgba(240, 246, 252, 0.1);
 }
 
 .btn-secondary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(240, 147, 251, 0.4);
+  background: #388bfd;
+  box-shadow: 0 10px 20px rgba(56, 139, 253, 0.4);
 }
 
 .btn-reset {
-  background: #f0f0f0;
-  color: #333;
+  background: #21262d;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-reset:hover {
-  background: #e0e0e0;
+  background: #30363d;
   transform: translateY(-2px);
 }
 
 .btn-notification {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  background: #8957e5;
   color: white;
   width: 100%;
   margin-top: 1rem;
+  border: 1px solid rgba(240, 246, 252, 0.1);
 }
 
 .btn-notification:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(250, 112, 154, 0.4);
+  background: #9e6a03;
+  box-shadow: 0 10px 20px rgba(137, 87, 229, 0.4);
 }
 
 .features {
   margin: 2rem 0;
   padding: 1.5rem;
-  background: #f8f9fa;
+  background: #161b22;
   border-radius: 10px;
+  border: 1px solid var(--border-color);
 }
 
 .features h2 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .features ul {
@@ -168,18 +182,24 @@
 
 .features li {
   padding: 0.5rem 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.features li:last-child {
+  border-bottom: none;
 }
 
 .info {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: #e3f2fd;
+  background: rgba(56, 139, 253, 0.1);
   border-radius: 10px;
-  color: #0d47a1;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.6;
+  border: 1px solid rgba(56, 139, 253, 0.2);
 }
 
 @media (max-width: 640px) {

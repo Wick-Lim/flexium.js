@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,25 +17,34 @@
 
     :root {
       /* Colors */
-      --color-primary: #667eea;
-      --color-primary-dark: #5a67d8;
-      --color-secondary: #764ba2;
-      --color-success: #10b981;
-      --color-danger: #ef4444;
-      --color-warning: #f59e0b;
-      --color-info: #3b82f6;
+      --bg-color: #0d1117;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --accent-primary: #58a6ff;
+      --accent-secondary: #bc8cff;
+      --card-bg: #161b22;
+      --border-color: #30363d;
+
+      /* Semantic Colors */
+      --color-primary: #58a6ff;
+      --color-primary-dark: #1f6feb;
+      --color-secondary: #bc8cff;
+      --color-success: #238636;
+      --color-danger: #da3633;
+      --color-warning: #d29922;
+      --color-info: #58a6ff;
 
       /* Neutrals */
-      --color-gray-50: #f9fafb;
-      --color-gray-100: #f3f4f6;
-      --color-gray-200: #e5e7eb;
-      --color-gray-300: #d1d5db;
-      --color-gray-400: #9ca3af;
-      --color-gray-500: #6b7280;
-      --color-gray-600: #4b5563;
-      --color-gray-700: #374151;
-      --color-gray-800: #1f2937;
-      --color-gray-900: #111827;
+      --color-gray-50: #161b22;
+      --color-gray-100: #21262d;
+      --color-gray-200: #30363d;
+      --color-gray-300: #484f58;
+      --color-gray-400: #6e7681;
+      --color-gray-500: #8b949e;
+      --color-gray-600: #c9d1d9;
+      --color-gray-700: #e6edf3;
+      --color-gray-800: #f0f6fc;
+      --color-gray-900: #ffffff;
 
       /* Spacing */
       --spacing-xs: 4px;
@@ -50,10 +60,10 @@
       --radius-xl: 16px;
 
       /* Shadows */
-      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-      --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
+      --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
 
       /* Transitions */
       --transition-fast: 150ms ease;
@@ -63,10 +73,13 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      background-color: var(--bg-color);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(188, 140, 255, 0.1) 0%, transparent 20%);
       min-height: 100vh;
       padding: var(--spacing-lg);
-      color: var(--color-gray-900);
+      color: var(--text-primary);
     }
 
     /* ========================================
@@ -78,16 +91,18 @@
     }
 
     .container {
-      background: white;
+      background: var(--card-bg);
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-xl);
       overflow: hidden;
+      border: 1px solid var(--border-color);
     }
 
     .header {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-      color: white;
+      background: linear-gradient(135deg, #1f2937 0%, #0d1117 100%);
+      color: var(--text-primary);
       padding: var(--spacing-xl);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .header-title {
@@ -111,11 +126,12 @@
     }
 
     .stat-card {
-      background: white;
+      background: var(--bg-color);
       padding: var(--spacing-md);
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-sm);
       transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      border: 1px solid var(--border-color);
     }
 
     .stat-card:hover {
@@ -308,12 +324,13 @@
 
     .filter-btn {
       padding: 8px 16px;
-      border: 2px solid var(--color-gray-300);
-      background: white;
+      border: 2px solid var(--border-color);
+      background: var(--bg-color);
       border-radius: var(--radius-md);
       font-size: 14px;
       cursor: pointer;
       transition: all var(--transition-fast);
+      color: var(--text-secondary);
     }
 
     .filter-btn:hover {
@@ -364,8 +381,8 @@
     }
 
     .todo-item {
-      background: white;
-      border: 2px solid var(--color-gray-200);
+      background: var(--bg-color);
+      border: 2px solid var(--border-color);
       border-radius: var(--radius-md);
       padding: var(--spacing-md);
       transition: all var(--transition-fast);
@@ -569,6 +586,7 @@
         opacity: 0;
         transform: translateY(10px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -587,6 +605,7 @@
     }
   </style>
 </head>
+
 <body>
   <div id="app"></div>
 
@@ -639,7 +658,7 @@
         }
       };
       execute();
-      return () => {};
+      return () => { };
     }
 
     // ========================================
@@ -1144,4 +1163,5 @@
     console.log('  ✓ Production-ready patterns');
   </script>
 </body>
+
 </html>
