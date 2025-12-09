@@ -129,16 +129,17 @@ function render(vnode: VNode, container: Element): void
 
 ### Reactive Bindings
 
-When a signal is used in JSX:
+When state is used in JSX:
 
 ```jsx
-<span>{count.value}</span>
+const [count] = state(0)
+<span>{+count}</span>
 ```
 
 The renderer:
-1. Detects the signal read
+1. Detects the reactive value read
 2. Creates a text node
-3. Sets up an effect to update the text when signal changes
+3. Sets up an effect to update the text when state changes
 4. Only that text node updates - no parent re-render
 
 ## Primitives Layer

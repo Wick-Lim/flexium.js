@@ -187,7 +187,7 @@ const sortedUsers = computed(() => {
 
 // ❌ DOM manipulation in computed
 const displayText = computed(() => {
-  document.title = count.toString(); // DOM side effect!
+  document.title = String(count); // DOM side effect!
   return `Count: ${count}`;
 });
 ```
@@ -210,7 +210,7 @@ const sortedUsers = computed(() => {
 
 // ✅ DOM manipulation in effect
 effect(() => {
-  document.title = count.toString();
+  document.title = String(count);
 });
 ```
 

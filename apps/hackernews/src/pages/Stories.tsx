@@ -21,7 +21,7 @@ function StoryItem(props: { id: number; index: number }) {
                 <span class="by">
                     by <Link to={`/user/${story.by}`}>{story.by}</Link>
                 </span>
-                <span class="time"> {new Date(+story.time * 1000).toLocaleString()}</span>
+                <span class="time"> {new Date(story.time * 1000).toLocaleString()}</span>
                 <span class="comments-link">
                     {' | '}
                     <Link to={`/item/${story.id}`}>{story.comments_count} comments</Link>
@@ -44,7 +44,7 @@ export default function Stories(props: { type: string }) {
         const [globalList] = useList(type);
 
         // If already have data, use it
-        if (+globalList.length > 0) {
+        if (globalList.length > 0) {
             setList([...globalList]);
             setLoading(false);
             return;
@@ -63,7 +63,7 @@ export default function Stories(props: { type: string }) {
         <div class="view">
             <h1 class="visually-hidden">{props.type.charAt(0).toUpperCase() + props.type.slice(1)} Stories</h1>
             <div class="news-list-nav">
-                {loading() && <span>Loading...</span>}
+                {loading && <span>Loading...</span>}
             </div>
 
             <ul class="news-list">

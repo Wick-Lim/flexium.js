@@ -61,12 +61,12 @@ Every feature needs tests. Location: `__tests__/` directory next to source.
 
 ```typescript
 import { describe, it, expect } from 'vitest'
-import { signal } from '../signal'
+import { state } from '../state'
 
-describe('signal', () => {
+describe('state', () => {
   it('should hold a value', () => {
-    const s = signal(42)
-    expect(s.value).toBe(42)
+    const [count] = state(42)
+    expect(+count).toBe(42)
   })
 })
 ```

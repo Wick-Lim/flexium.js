@@ -19,10 +19,10 @@ function Comment(props: { id: number }) {
                 <span class="by">
                     <Link to={`/user/${comment.by}`}>{comment.by}</Link>
                 </span>
-                <span class="time"> {new Date(+comment.time * 1000).toLocaleString()}</span>
+                <span class="time"> {new Date(comment.time * 1000).toLocaleString()}</span>
             </div>
             <div class="comment-text" innerHTML={comment.text} />
-            {comment.kids && +comment.kids.length > 0 && (
+            {comment.kids && comment.kids.length > 0 && (
                 <ul class="comment-children" style={{ paddingLeft: '20px' }}>
                     {comment.kids.map((kidId: number) => <Comment id={kidId} />)}
                 </ul>
@@ -43,7 +43,7 @@ export default function Item() {
 
         loadItem(itemId);
         const [globalItem] = useItem(itemId);
-        setItem(globalItem());
+        setItem(globalItem.valueOf());
     });
 
     // Use proxy directly
@@ -56,7 +56,7 @@ export default function Item() {
                     <h1><a href={item.url} target="_blank">{item.title}</a></h1>
                     <p class="meta">
                         {item.points} points | by <Link to={`/user/${item.by}`}>{item.by}</Link>
-                        {' '}| {new Date(+item.time * 1000).toLocaleString()}
+                        {' '}| {new Date(item.time * 1000).toLocaleString()}
                     </p>
                 </div>
                 <div class="item-view-comments">

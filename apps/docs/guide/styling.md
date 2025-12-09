@@ -54,9 +54,9 @@ function ThemedButton() {
   return (
     <button
       style={() => ({
-        background: +isDark ? '#333' : '#fff',
-        color: +isDark ? '#fff' : '#333',
-        border: `1px solid ${+isDark ? '#555' : '#ddd'}`,
+        background: isDark.valueOf() ? '#333' : '#fff',
+        color: isDark.valueOf() ? '#fff' : '#333',
+        border: `1px solid ${isDark.valueOf() ? '#555' : '#ddd'}`,
         padding: '8px 16px',
         borderRadius: '4px',
         cursor: 'pointer'
@@ -108,10 +108,10 @@ function ProgressBar() {
       overflow: 'hidden'
     }}>
       <div style={() => ({
-        width: `${progress()}%`,
+        width: `${+progress}%`,
         height: '100%',
-        background: progress() > 75 ? '#4caf50' :
-                    progress() > 50 ? '#ff9800' : '#f44336',
+        background: +progress > 75 ? '#4caf50' :
+                    +progress > 50 ? '#ff9800' : '#f44336',
         transition: 'all 0.3s ease'
       })} />
     </div>
@@ -140,7 +140,7 @@ const [isActive, setIsActive] = state(false)
 const [isPrimary, setIsPrimary] = state(true)
 
 // Using template literal
-<button class={`btn ${+isActive ? 'active' : ''} ${+isPrimary ? 'primary' : 'secondary'}`}>
+<button class={`btn ${isActive.valueOf() ? 'active' : ''} ${isPrimary.valueOf() ? 'primary' : 'secondary'}`}>
   Click Me
 </button>
 
@@ -151,8 +151,8 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 
 <button class={() => classNames(
   'btn',
-  +isActive && 'active',
-  +isPrimary ? 'primary' : 'secondary'
+  isActive.valueOf() && 'active',
+  isPrimary.valueOf() ? 'primary' : 'secondary'
 )}>
   Click Me
 </button>
@@ -221,7 +221,7 @@ function App() {
   const [isActive, setIsActive] = state(false)
 
   return (
-    <div class={() => `${styles.container} ${+isActive ? styles.active : ''}`}>
+    <div class={() => `${styles.container} ${isActive.valueOf() ? styles.active : ''}`}>
       Content
     </div>
   )
@@ -272,7 +272,7 @@ function App() {
 
   effect(() => {
     const root = document.documentElement
-    if (theme === 'dark') {
+    if (String(theme) === 'dark') {
       root.style.setProperty('--background', '#1a1a1a')
       root.style.setProperty('--text-color', '#f5f5f5')
       root.style.setProperty('--primary-color', '#64b5f6')
@@ -334,7 +334,7 @@ Combine state-driven styles with CSS transitions for smooth animations:
 const [isExpanded, setIsExpanded] = state(false)
 
 <div style={() => ({
-  maxHeight: +isExpanded ? '500px' : '0',
+  maxHeight: isExpanded.valueOf() ? '500px' : '0',
   overflow: 'hidden',
   transition: 'max-height 0.3s ease-in-out'
 })}>
@@ -355,19 +355,19 @@ function Card() {
       style={() => ({
         padding: '16px',
         borderRadius: '8px',
-        background: +isDisabled ? '#f5f5f5' :
-                    +isSelected ? '#e3f2fd' :
-                    +isHovered ? '#f9f9f9' : '#fff',
-        border: `2px solid ${+isSelected ? '#2196f3' : '#ddd'}`,
-        cursor: +isDisabled ? 'not-allowed' : 'pointer',
-        opacity: +isDisabled ? 0.6 : 1,
-        transform: +isHovered && !+isDisabled ? 'scale(1.02)' : 'scale(1)',
+        background: isDisabled.valueOf() ? '#f5f5f5' :
+                    isSelected.valueOf() ? '#e3f2fd' :
+                    isHovered.valueOf() ? '#f9f9f9' : '#fff',
+        border: `2px solid ${isSelected.valueOf() ? '#2196f3' : '#ddd'}`,
+        cursor: isDisabled.valueOf() ? 'not-allowed' : 'pointer',
+        opacity: isDisabled.valueOf() ? 0.6 : 1,
+        transform: isHovered.valueOf() && !isDisabled.valueOf() ? 'scale(1.02)' : 'scale(1)',
         transition: 'all 0.2s ease',
-        boxShadow: +isHovered && !+isDisabled ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
+        boxShadow: isHovered.valueOf() && !isDisabled.valueOf() ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
       })}
-      onmouseenter={() => !+isDisabled && setIsHovered(true)}
+      onmouseenter={() => !isDisabled.valueOf() && setIsHovered(true)}
       onmouseleave={() => setIsHovered(false)}
-      onclick={() => !+isDisabled && setIsSelected(s => !s)}
+      onclick={() => !isDisabled.valueOf() && setIsSelected(s => !s)}
     >
       Card Content
     </div>
@@ -431,9 +431,9 @@ function ResponsiveLayout() {
   return (
     <div style={() => ({
       display: 'flex',
-      flexDirection: isMobile() ? 'column' : 'row',
-      gap: isMobile() ? '8px' : '16px',
-      padding: isMobile() ? '8px' : '24px'
+      flexDirection: isMobile.valueOf() ? 'column' : 'row',
+      gap: isMobile.valueOf() ? '8px' : '16px',
+      padding: isMobile.valueOf() ? '8px' : '24px'
     })}>
       <div>Content 1</div>
       <div>Content 2</div>
@@ -555,7 +555,7 @@ function ThemeProvider(props) {
     secondary: '#2a2a2a'
   }
 
-  const colors = () => theme === 'light' ? lightColors : darkColors
+  const colors = () => String(theme) === 'light' ? lightColors : darkColors
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
   return (
@@ -705,7 +705,7 @@ function withHover(baseStyle: StyleObject, hoverStyle: StyleObject) {
   const [isHovered, setIsHovered] = state(false)
 
   return {
-    style: () => +isHovered ? mergeStyles(baseStyle, hoverStyle) : baseStyle,
+    style: () => isHovered.valueOf() ? mergeStyles(baseStyle, hoverStyle) : baseStyle,
     handlers: {
       onmouseenter: () => setIsHovered(true),
       onmouseleave: () => setIsHovered(false)
@@ -736,16 +736,16 @@ function InteractiveButton() {
   return (
     <button
       style={() => ({
-        background: +isPressed ? '#1565c0' :
-                    +isHovered ? '#1976d2' :
+        background: isPressed.valueOf() ? '#1565c0' :
+                    isHovered.valueOf() ? '#1976d2' :
                     '#2196f3',
         color: '#fff',
         padding: '8px 16px',
-        border: +isFocused ? '2px solid #64b5f6' : 'none',
+        border: isFocused.valueOf() ? '2px solid #64b5f6' : 'none',
         borderRadius: '4px',
         cursor: 'pointer',
-        transform: +isPressed ? 'scale(0.98)' : 'scale(1)',
-        boxShadow: +isHovered && !+isPressed ? '0 4px 8px rgba(0,0,0,0.2)' : 'none',
+        transform: isPressed.valueOf() ? 'scale(0.98)' : 'scale(1)',
+        boxShadow: isHovered.valueOf() && !isPressed.valueOf() ? '0 4px 8px rgba(0,0,0,0.2)' : 'none',
         transition: 'all 0.2s ease'
       })}
       onmouseenter={() => setIsHovered(true)}
@@ -850,7 +850,7 @@ function AnimatedCard() {
         Toggle
       </button>
 
-      {+isVisible && (
+      {isVisible.valueOf() && (
         <div style={{
           animation: 'slideUp 0.3s ease-out'
         }}>
@@ -871,12 +871,12 @@ function ExpandablePanel() {
   return (
     <div>
       <button onclick={() => setIsExpanded(e => !e)}>
-        {+isExpanded ? 'Collapse' : 'Expand'}
+        {isExpanded.valueOf() ? 'Collapse' : 'Expand'}
       </button>
 
       <div style={() => ({
-        maxHeight: +isExpanded ? '300px' : '0',
-        opacity: +isExpanded ? 1 : 0,
+        maxHeight: isExpanded.valueOf() ? '300px' : '0',
+        opacity: isExpanded.valueOf() ? 1 : 0,
         overflow: 'hidden',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       })}>
@@ -968,8 +968,8 @@ For smooth animations, prefer `transform` and `opacity` over layout-affecting pr
 ```tsx
 // Better performance
 <div style={() => ({
-  opacity: +isVisible ? 1 : 0,
-  transform: `translateY(${+isVisible ? 0 : 20}px)`,
+  opacity: isVisible.valueOf() ? 1 : 0,
+  transform: `translateY(${isVisible.valueOf() ? 0 : 20}px)`,
   transition: 'all 0.3s ease'
 })}>
   Content
@@ -977,8 +977,8 @@ For smooth animations, prefer `transform` and `opacity` over layout-affecting pr
 
 // Worse performance (triggers layout)
 <div style={() => ({
-  marginTop: +isVisible ? '0' : '20px',
-  height: +isVisible ? 'auto' : '0'
+  marginTop: isVisible.valueOf() ? '0' : '20px',
+  height: isVisible.valueOf() ? 'auto' : '0'
 })}>
   Content
 </div>

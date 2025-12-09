@@ -414,7 +414,7 @@ const animate = () => {
     batch(() => {
       x.set(Math.sin(Date.now() / 1000) * 100)
       y.set(Math.cos(Date.now() / 1000) * 100)
-      rotation.set((+rotation + 1) % 360)
+      rotation.set((rotation + 1) % 360)
       scale.set(1 + Math.sin(Date.now() / 500) * 0.2)
     })
 
@@ -439,7 +439,7 @@ const enemies = signal([])
 
 const handlePlayerDeath = () => {
   batch(() => {
-    lives.set(+lives - 1)
+    lives.set(lives - 1)
 
     if (+lives <= 0) {
       // Game over
@@ -453,8 +453,8 @@ const handlePlayerDeath = () => {
 
 const completeLevel = () => {
   batch(() => {
-    score.set(+score + 1000)
-    level.set(+level + 1)
+    score.set(score + 1000)
+    level.set(level + 1)
     enemies.set(generateEnemies(+level))
   })
 }
@@ -550,7 +550,7 @@ const c = signal(0)
 let runCount = 0
 
 effect(() => {
-  +a + +b + +c
+  a + b + c
   runCount++
 })
 
@@ -623,10 +623,10 @@ const ball2Y = signal(100)
 
 const moveBalls = (deltaTime) => {
   batch(() => {
-    ball1X.set(+ball1X + deltaTime * 2)
-    ball1Y.set(+ball1Y + deltaTime * 1)
-    ball2X.set(+ball2X - deltaTime * 1.5)
-    ball2Y.set(+ball2Y + deltaTime * 2.5)
+    ball1X.set(ball1X + deltaTime * 2)
+    ball1Y.set(ball1Y + deltaTime * 1)
+    ball2X.set(ball2X - deltaTime * 1.5)
+    ball2Y.set(ball2Y + deltaTime * 2.5)
   })
 }
 ```
@@ -644,8 +644,8 @@ function ShoppingCart() {
   const addItem = (item) => {
     batch(() => {
       setItems([...items, item])
-      setTotal(+total + item.price)
-      setItemCount(+itemCount + 1)
+      setTotal(total + item.price)
+      setItemCount(itemCount + 1)
     })
   }
 
@@ -654,8 +654,8 @@ function ShoppingCart() {
 
     batch(() => {
       setItems(items.filter(i => i.id !== itemId))
-      setTotal(+total - item.price)
-      setItemCount(+itemCount - 1)
+      setTotal(total - item.price)
+      setItemCount(itemCount - 1)
     })
   }
 

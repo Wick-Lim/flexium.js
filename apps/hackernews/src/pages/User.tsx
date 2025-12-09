@@ -20,7 +20,7 @@ export default function User() {
         if (!userId) return;
 
         const [globalUser] = useUser(userId);
-        setUser(globalUser());
+        setUser(globalUser.valueOf());
     });
 
     // Use proxy directly
@@ -31,7 +31,7 @@ export default function User() {
             <div>
                 <h1>User : {user.id}</h1>
                 <ul class="meta">
-                    <li><span class="label">Created:</span> {new Date(+user.created * 1000).toLocaleString()}</li>
+                    <li><span class="label">Created:</span> {new Date(user.created * 1000).toLocaleString()}</li>
                     <li><span class="label">Karma:</span> {user.karma}</li>
                     <li innerHTML={user.about} class="about" />
                 </ul>

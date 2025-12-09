@@ -31,11 +31,11 @@ bench(`Read ${COUNT.toLocaleString()} signals (Dependency Tracking)`, () => {
     // Creating one effect that reads all signals is unrealistic and heavy on memory for dependency sets
     // Instead, we read in chunks or just verify access time
     
-    // Flexium lazily creates dependency sets. 
+    // Flexium lazily creates dependency sets.
     // Let's measure simple read access first (getter call)
     for (let i = 0; i < COUNT; i++) {
         const [getter] = signals[i];
-        getter(); 
+        +getter;
     }
 }, COUNT);
 
@@ -58,14 +58,14 @@ console.log(`Building reactive chain of depth ${CHAIN_DEPTH}...`);
 // Build chain
 for(let i = 0; i < CHAIN_DEPTH; i++) {
     const prev = currentGetter;
-    const [next] = state(() => prev() + 1); // Derived state
+    const [next] = state(() => prev + 1); // Derived state
     currentGetter = next;
 }
 
 bench(`Update Chain Start (Depth ${CHAIN_DEPTH})`, () => {
     setStart(v => v + 1);
     // Force read end to ensure propagation (pull-based)
-    const val = currentGetter();
+    const val = +currentGetter;
 }, 1); // Single operation, but heavy
 
 // 5. Memory Usage (Approximate)

@@ -652,7 +652,7 @@ function StateAPIDemo() {
   const [count, setCount] = state(0)
 
   // Derived state (like computed)
-  const [doubled] = state(() => count() * 2)
+  const [doubled] = state(() => count * 2)
 
   // Global state with array key
   const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
@@ -668,7 +668,7 @@ function StateAPIDemo() {
       <div class="demo-card">
         <h3>Local State</h3>
         <div class="controls">
-          <button onClick={() => setCount(count() + 1)}>Increment</button>
+          <button onClick={() => setCount(count + 1)}>Increment</button>
           <button onClick={() => setCount(c => c - 1)}>Decrement (with updater)</button>
           <button class="secondary" onClick={() => setCount(0)}>Reset</button>
           <span class="value-display">{count()}</span>
@@ -679,7 +679,7 @@ function StateAPIDemo() {
         </div>
 
         <pre>{`const [count, setCount] = state(0);
-const [doubled] = state(() => count() * 2);
+const [doubled] = state(() => count * 2);
 
 setCount(5);              // Direct value
 setCount(c => c + 1);     // Updater function`}</pre>
@@ -777,7 +777,7 @@ function PerformanceDemo() {
   }
 
   const speedup = withoutBatchTime() > 0
-    ? (withoutBatchTime() / withBatchTime()).toFixed(1)
+    ? (withoutBatchTime / withBatchTime).toFixed(1)
     : '0'
 
   return (
@@ -821,7 +821,7 @@ function PerformanceDemo() {
             <div
               class="bar fast"
               style={{
-                width: `${withBatchTime() > 0 ? (withBatchTime() / withoutBatchTime() * 100) : 0}%`
+                width: `${withBatchTime() > 0 ? (withBatchTime / withoutBatchTime * 100) : 0}%`
               }}
             >
               {withBatchTime().toFixed(2)}ms
@@ -832,7 +832,7 @@ function PerformanceDemo() {
         {withoutBatchTime() > 0 && (
           <div class="success-box">
             <strong>Performance Improvement:</strong> {speedup}x faster with batching!
-            <br/><em>Batching reduced execution time by {((1 - withBatchTime() / withoutBatchTime()) * 100).toFixed(1)}%</em>
+            <br/><em>Batching reduced execution time by {((1 - withBatchTime / withoutBatchTime) * 100).toFixed(1)}%</em>
           </div>
         )}
 
@@ -841,7 +841,7 @@ function PerformanceDemo() {
           <br/>- Creating 10 signals with a shared effect
           <br/>- Updating all 10 signals {iterations()} times
           <br/>- Measuring total execution time
-          <br/>- Without batching: effect runs {iterations() * 10} times
+          <br/>- Without batching: effect runs {iterations * 10} times
           <br/>- With batching: effect runs {iterations()} times
         </div>
       </div>

@@ -42,7 +42,7 @@ export async function loadStories(type: string) {
         const [list, setList] = useList(type);
 
         // If already loaded, skip (basic cache)
-        if (list().length > 0) return;
+        if (list.length > 0) return;
 
         const ids = await fetchIds(type);
 
@@ -73,7 +73,7 @@ export async function loadStories(type: string) {
 export async function loadItem(id: number) {
     try {
         const [item, setItem] = useItem(id);
-        if (item()) return; // Already loaded
+        if (item.valueOf()) return; // Already loaded
 
         const data = await fetchItem(id);
         if (data) {
@@ -89,7 +89,7 @@ export async function loadItem(id: number) {
 export async function loadUser(id: string) {
     try {
         const [user, setUser] = useUser(id);
-        if (user()) return; // Already loaded
+        if (user.valueOf()) return; // Already loaded
 
         const data = await fetchUser(id);
         if (data) {

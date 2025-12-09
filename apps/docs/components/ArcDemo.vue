@@ -113,8 +113,8 @@ onMounted(() => {
       const currentCenterX = centerX()
       const currentCenterY = centerY()
       const currentRadius = radius()
-      const currentStartAngle = (startAngle() * Math.PI) / 180
-      const currentEndAngle = (endAngle() * Math.PI) / 180
+      const currentStartAngle = (startAngle * Math.PI) / 180
+      const currentEndAngle = (endAngle * Math.PI) / 180
       const currentTime = time()
 
       // Draw decorative arcs

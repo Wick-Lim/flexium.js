@@ -160,7 +160,7 @@ test('state works as computed (derived state)', () => {
   const [count, setCount] = state(1);
   // Sync computed function returns [StateValue] - value is computed immediately
   // Inside the compute function, use +count to get the primitive value
-  const [double] = state(() => +count * 2);
+  const [double] = state(() => count * 2);
 
   // For sync computed, value should be available immediately
   // Use +double to cast the proxy to primitive

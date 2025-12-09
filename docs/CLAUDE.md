@@ -83,26 +83,26 @@ Pre-built components following Flexbox/CSS Grid patterns:
 
 ## Code Patterns to Follow
 
-### 1. Signal Usage
+### 1. State Usage
 
 ```javascript
-// Good: Clear, focused signals
-const count = signal(0)
-const isLoading = signal(false)
+// Good: Clear, focused state
+const [count, setCount] = state(0)
+const [isLoading, setIsLoading] = state(false)
 
 // Bad: Deeply nested state
-const state = signal({ user: { profile: { theme: 'dark' } } })
+const [appState, setAppState] = state({ user: { profile: { theme: 'dark' } } })
 ```
 
 ### 2. Component Structure
 
 ```javascript
 function MyComponent(props) {
-  // 1. Signals (state)
-  const value = signal('')
+  // 1. State
+  const [value, setValue] = state('')
 
   // 2. Computed values
-  const isEmpty = computed(() => value.value === '')
+  const [isEmpty] = state(() => String(value) === '')
 
   // 3. Effects (side effects)
   effect(() => { /* ... */ })
@@ -128,20 +128,24 @@ effect(() => {
 
 ## What NOT to Do
 
-1. **Don't mutate signal values directly**
+1. **Don't mutate state values directly**
    ```javascript
+   const [items, setItems] = state([])
+
    // Bad
-   items.value.push(newItem)
+   items.push(newItem)
 
    // Good
-   items.value = [...items.value, newItem]
+   setItems([...items, newItem])
    ```
 
-2. **Don't create signals in loops**
+2. **Don't create state in loops**
    ```javascript
-   // Bad: Creates new signals on every render
+   const [items] = state([...])
+
+   // Bad: Creates new state on every render
    items.map(item => {
-     const selected = signal(false)
+     const [selected, setSelected] = state(false)
      return <Item selected={selected} />
    })
    ```

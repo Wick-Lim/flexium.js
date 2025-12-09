@@ -214,10 +214,10 @@ import { state } from 'flexium'
 
 // Local state
 const [count, setCount] = state(0)
-setCount(count() + 1)
+setCount(count + 1)
 
 // Computed state
-const [doubled] = state(() => count() * 2)
+const [doubled] = state(() => count * 2)
 
 // Global state with array key
 const [theme, setTheme] = state('light', { key: ['app', 'theme'] })

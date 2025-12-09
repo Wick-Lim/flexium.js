@@ -81,7 +81,7 @@ function RenderDemo() {
 
   // Mount a new app
   const mountNewApp = () => {
-    const id = counter() + 1
+    const id = counter + 1
     setCounter(id)
 
     const colors = ['#dbeafe', '#fce7f3', '#dcfce7', '#fef3c7', '#e0e7ff']

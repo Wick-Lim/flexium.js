@@ -64,7 +64,7 @@ effect(() => {
 const [theme, setTheme] = state('light')
 
 effect(() => {
-  document.body.classList.toggle('dark', theme === 'dark')
+  document.body.classList.toggle('dark', String(theme) === 'dark')
 })
 ```
 

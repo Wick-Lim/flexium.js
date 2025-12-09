@@ -37,9 +37,8 @@ function App() {
     global.setRows = setData;
 
     return () => {
-        const rows = data();
         return h('div', { id: 'container' }, [
-            rows.map(item => h(Row, { id: item.id, label: item.label }))
+            data.map(item => h(Row, { id: item.id, label: item.label }))
         ]);
     };
 }

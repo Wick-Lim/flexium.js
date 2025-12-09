@@ -92,14 +92,14 @@ React re-renders entire component trees. Then you optimize with memo(), useMemo(
 Flexium updates only what depends on what changed. No optimization needed. It's just how signals work.
 
 ```javascript
-const name = signal('John')
-const age = signal(30)
+const [name] = state('John')
+const [age] = state(30)
 
 // Only this text node updates when name changes
-<span>{name.value}</span>
+<span>{String(name)}</span>
 
-// This doesn't re-run when name changes
-<span>{age.value}</span>
+// This doesn't re-run when age changes
+<span>{+age}</span>
 ```
 
 ### 4. Honesty
@@ -186,8 +186,8 @@ function App() {
 
   return (
     <Column gap={16}>
-      <Text>Count: {count}</Text>
-      <Text>Doubled: {doubled}</Text>
+      <Text>Count: {+count}</Text>
+      <Text>Doubled: {+doubled}</Text>
       <Row gap={8}>
         <Button onClick={() => setCount(c => c - 1)}>-</Button>
         <Button onClick={() => setCount(c => c + 1)}>+</Button>
