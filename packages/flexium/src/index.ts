@@ -22,7 +22,7 @@
  * ```
  */
 
-export const VERSION = '0.8.14'
+export const VERSION = '0.8.15'
 
 // Intentionally empty - use explicit submodule imports
 // flexium/core, flexium/dom, flexium/canvas, flexium/primitives, flexium/router
