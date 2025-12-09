@@ -9,9 +9,9 @@ State values are **Proxy objects**. When comparing with `===`, you **must cast t
 if (count === 5) { ... }
 
 // ✅ CORRECT - Cast to primitive
-if (+count === 5) { ... }        // number (use +)
-if (`${name}` === 'Alice') { }   // string (use template)
-if (user.id === 1) { ... }       // compare properties directly
+if (+count === 5) { ... }           // number (use +)
+if (String(name) === 'Alice') { }   // string (use String())
+if (user.id === 1) { ... }          // compare properties directly
 ```
 :::
 

@@ -88,10 +88,16 @@ async function deploy(type) {
     process.exit(1);
   }
 
-  // 5. Run tests
-  console.log('\n🧪 Running tests...');
+  // 5. Run tests (unit + e2e)
+  console.log('\n🧪 Running unit tests...');
   if (!run('npm run test:unit')) {
-    console.error('❌ Tests failed');
+    console.error('❌ Unit tests failed');
+    process.exit(1);
+  }
+
+  console.log('\n🌐 Running E2E tests...');
+  if (!run('npm run test:e2e')) {
+    console.error('❌ E2E tests failed');
     process.exit(1);
   }
 

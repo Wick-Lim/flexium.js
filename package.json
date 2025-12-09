@@ -1,6 +1,6 @@
 {
   "name": "flexium-monorepo",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "private": true,
   "description": "Flexium - Fine-grained reactive UI framework (monorepo)",
   "type": "module",
@@ -19,6 +19,10 @@
     "bench": "node tests/performance/benchmark.mjs",
     "bench:compare": "node tests/performance/comparison-benchmark.mjs",
     "test:e2e": "npx playwright test -c tests/playwright.config.ts",
+    "test:e2e:quick": "BROWSER_LEVEL=quick npx playwright test -c tests/playwright.config.ts",
+    "test:e2e:full": "BROWSER_LEVEL=full npx playwright test -c tests/playwright.config.ts",
+    "test:e2e:primitives": "TEST_SUITE=primitives npx playwright test -c tests/playwright.config.ts",
+    "test:e2e:router": "npx playwright test -c tests/playwright.config.ts tests/e2e/router.spec.ts",
     "test:e2e:chromium": "npx playwright test -c tests/playwright.config.ts --project=chromium",
     "test:e2e:firefox": "npx playwright test -c tests/playwright.config.ts --project=firefox",
     "test:e2e:webkit": "npx playwright test -c tests/playwright.config.ts --project=webkit",

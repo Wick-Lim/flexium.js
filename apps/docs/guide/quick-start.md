@@ -108,14 +108,15 @@ const [theme, setTheme] = state(undefined, { key: 'theme' });
 Flexium handles loading and error states for you.
 
 ```tsx
-const [user, refetch, isLoading, error] = state(async () => {
+// status: 'idle' | 'loading' | 'success' | 'error'
+const [user, refetch, status, error] = state(async () => {
   const res = await fetch('/api/user');
   return res.json();
 });
 
 return (
   <div>
-    {isLoading && <p>Loading...</p>}
+    {String(status) === 'loading' && <p>Loading...</p>}
     {error && <p>Error: {error.message}</p>}
     {user && <p>Welcome, {user.name}</p>}
   </div>

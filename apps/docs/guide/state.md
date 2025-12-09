@@ -22,9 +22,9 @@ State values are **Proxy objects**. When comparing with `===`, you **must cast t
 if (count === 5) { ... }
 
 // ✅ CORRECT - Cast to primitive
-if (+count === 5) { ... }        // number (use +)
-if (`${name}` === 'Alice') { }   // string (use template)
-if (user.id === 1) { ... }       // compare properties directly
+if (+count === 5) { ... }           // number (use +)
+if (String(name) === 'Alice') { }   // string (use String())
+if (user.id === 1) { ... }          // compare properties directly
 ```
 :::
 
@@ -109,14 +109,15 @@ Pass an async function (or a function returning a Promise) to `state()` to creat
 ```tsx
 function UserProfile({ id }) {
   // Automatically fetches when component mounts or dependencies change
-  const [user, refetch, isLoading, error] = state(async () => {
+  const [user, refetch, status, error] = state(async () => {
     const response = await fetch(`/api/users/${id}`);
     if (!response.ok) throw new Error('Failed to fetch');
     return response.json();
   });
 
   // Render based on loading/error state
-  if (isLoading) return <div>Loading...</div>;
+  // status: 'idle' | 'loading' | 'success' | 'error'
+  if (String(status) === 'loading') return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
   // Data is available - use values directly
@@ -130,7 +131,7 @@ function UserProfile({ id }) {
 ```
 
 - **Automatic Tracking**: If the async function uses other signals, it will auto-refetch when they change.
-- **Return Values**: `[data, refetch, isLoading, error]` - all reactive proxies.
+- **Return Values**: `[data, refetch, status, error]` - all reactive proxies. Status is `'idle' | 'loading' | 'success' | 'error'`.
 
 ### 4. Computed State (Derived)
 

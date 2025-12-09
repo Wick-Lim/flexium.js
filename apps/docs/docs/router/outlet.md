@@ -231,7 +231,7 @@ function LoadingLayout() {
   return (
     <div class="layout">
       <Header />
-      {isLoading() ? <Spinner /> : <Outlet />}
+      {isLoading ? <Spinner /> : <Outlet />}
     </div>
   )
 }
