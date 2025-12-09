@@ -32,7 +32,7 @@ const node = <div class="container">Hello</div>
 // Results in FNode { type: 'div', props: { class: 'container' }, children: ['Hello'] }
 ```
 
-**Related:** `FNodeChild`, `VNode` (deprecated alias)
+**Related:** `FNodeChild`, `FNode`
 
 ### FNodeChild
 
@@ -59,7 +59,7 @@ function MyComponent(): FNodeChild {
 }
 ```
 
-**Related:** `FNode`, `VNodeChild` (deprecated alias)
+**Related:** `FNode`, `FNodeChild`
 
 ## Reactivity Types
 

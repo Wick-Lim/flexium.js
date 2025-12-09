@@ -322,6 +322,14 @@ setTimeout(() => {
 }, 1000);
 ```
 
+### Event Delegation
+
+Flexium uses efficient event delegation for all standard events. Listeners are attached to the document root rather than individual elements, reducing memory usage and setup time.
+
+- **Smart Traversal**: Uses `event.composedPath()` for fast target resolution, even through Shadow DOM.
+- **Automatic Cleanup**: Global listeners are managed automatically.
+- **Batching**: Event handlers automatically batch state updates.
+
 ## Memory Management
 
 ### Root Scopes

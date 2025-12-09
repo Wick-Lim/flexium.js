@@ -132,6 +132,10 @@ renderToString(<div data-value={'"quoted" & <special>'} />)
 // '<div data-value="&quot;quoted&quot; &amp; &lt;special&gt;"></div>'
 ```
 
+### Attribute Sanitization
+
+Attribute names are also validated to prevent injection attacks. Only valid attribute names (alphanumeric, hyphens, colons) are allowed. Invalid attributes are stripped during server rendering.
+
 ## hydrate() Function
 
 The `hydrate()` function attaches event handlers and reactivity to existing server-rendered HTML.
