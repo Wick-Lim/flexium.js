@@ -338,16 +338,7 @@ createEffect(() => {
 - Built-in **global state and async** handling are important
 - You prefer **native JavaScript** over special components
 
-### Choose React When:
-- You need the **largest ecosystem** and community
-- Your team is **already experienced** with React
-- You need **extensive third-party libraries**
-- **Long-term stability** is critical
 
-### Choose SolidJS When:
-- **Maximum performance** is the absolute priority
-- You want **fine-grained control** over primitives
-- You don't mind learning **new component patterns** (`<For>`, `<Show>`)
 
 ## Summary
 
