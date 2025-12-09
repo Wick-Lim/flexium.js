@@ -27,26 +27,53 @@ function dispatchEvent(event: Event) {
   const eventType = event.type.toLowerCase()
   const bubbles = !NON_BUBBLING_EVENTS.has(eventType)
 
-  // Bubble up from target to document (or just target if non-bubbling)
-  while (target && target !== document) {
-    const handlers = nodeHandlers.get(target)
-    if (handlers && handlers.has(eventType)) {
-      const handler = handlers.get(eventType)
-      if (handler) {
-        try {
-          handler(event)
-        } catch (error) {
-          logError(ErrorCodes.EVENT_HANDLER_FAILED, { eventType }, error)
-        }
-        if (event.cancelBubble) {
-          break
+  // Use composedPath if available (handles Shadow DOM and is faster)
+  if (event.composedPath) {
+    const path = event.composedPath()
+    for (const node of path) {
+      const targetNode = node as Node
+      // Stop at document or if we hit the end
+      if (targetNode === document || !targetNode) break
+
+      const handlers = nodeHandlers.get(targetNode)
+      if (handlers && handlers.has(eventType)) {
+        const handler = handlers.get(eventType)
+        if (handler) {
+          try {
+            handler(event)
+          } catch (error) {
+            logError(ErrorCodes.EVENT_HANDLER_FAILED, { eventType }, error)
+          }
+          if (event.cancelBubble) {
+            return
+          }
         }
       }
+
+      if (!bubbles) break
     }
+  } else {
+    // Fallback: Bubble up from target to document
+    while (target && target !== document) {
+      const handlers = nodeHandlers.get(target)
+      if (handlers && handlers.has(eventType)) {
+        const handler = handlers.get(eventType)
+        if (handler) {
+          try {
+            handler(event)
+          } catch (error) {
+            logError(ErrorCodes.EVENT_HANDLER_FAILED, { eventType }, error)
+          }
+          if (event.cancelBubble) {
+            break
+          }
+        }
+      }
 
-    if (!bubbles) break // Stop if event doesn't bubble
+      if (!bubbles) break // Stop if event doesn't bubble
 
-    target = target.parentNode
+      target = target.parentNode
+    }
   }
 }
 

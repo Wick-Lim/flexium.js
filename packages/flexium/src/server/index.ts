@@ -68,6 +68,12 @@ export function renderToString(vnode: any): string {
           continue
         }
 
+        // Security: Validate attribute name to prevent injection
+        // Only allow alphanumeric, hyphens, and colons
+        if (!/^[a-zA-Z0-9-:]+$/.test(key)) {
+          continue
+        }
+
         if (key === 'className' || key === 'class') {
           html += ` class="${escapeHtml(value)}"`
         } else if (key === 'style' && typeof value === 'object') {
