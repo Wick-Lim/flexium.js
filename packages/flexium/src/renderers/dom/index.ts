@@ -145,6 +145,61 @@ const SKIP_PROPS = new Set([
 ])
 
 /**
+ * SVG Namespace URI
+ */
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
+
+/**
+ * Common SVG tags that require namespace
+ */
+const SVG_TAGS = new Set([
+  'svg',
+  'path',
+  'circle',
+  'rect',
+  'line',
+  'polyline',
+  'polygon',
+  'ellipse',
+  'g',
+  'text',
+  'tspan',
+  'defs',
+  'use',
+  'symbol',
+  'marker',
+  'linearGradient',
+  'radialGradient',
+  'stop',
+  'clipPath',
+  'pattern',
+  'mask',
+  'filter',
+])
+
+/**
+ * SVG Attribute Case Mapping
+ * React-like camelCase to SVG case-sensitive attributes
+ */
+const SVG_ATTR_MAP: Record<string, string> = {
+  viewBox: 'viewBox',
+  preserveAspectRatio: 'preserveAspectRatio',
+  strokeWidth: 'stroke-width',
+  strokeLinecap: 'stroke-linecap',
+  strokeLinejoin: 'stroke-linejoin',
+  strokeDasharray: 'stroke-dasharray',
+  strokeDashoffset: 'stroke-dashoffset',
+  fillOpacity: 'fill-opacity',
+  strokeOpacity: 'stroke-opacity',
+  stopColor: 'stop-color',
+  stopOpacity: 'stop-opacity',
+  clipPath: 'clip-path',
+  markerEnd: 'marker-end',
+  markerStart: 'marker-start',
+  markerMid: 'marker-mid',
+}
+
+/**
  * Convert pixel value to CSS string
  */
 function px(value: number | string): string {
@@ -207,7 +262,7 @@ function transformValue(
  * Apply style props to DOM element efficiently
  */
 function updateStyles(
-  element: HTMLElement,
+  element: HTMLElement | SVGElement,
   oldProps: Record<string, unknown>,
   newProps: Record<string, unknown>
 ): void {
@@ -269,7 +324,7 @@ function updateStyles(
       const cssProp = config.cssProp as keyof CSSStyleDeclaration
 
       if (style[cssProp] !== '') {
-        ;(style as unknown as Record<string, string>)[cssProp as string] = ''
+        ; (style as unknown as Record<string, string>)[cssProp as string] = ''
       }
 
       // Apply any side effects
@@ -294,11 +349,11 @@ function updateStyles(
       // Update the style property
       if (transformedValue === undefined) {
         if (style[cssProp] !== '') {
-          ;(style as unknown as Record<string, string>)[cssProp as string] = ''
+          ; (style as unknown as Record<string, string>)[cssProp as string] = ''
         }
       } else {
         if (style[cssProp] !== transformedValue) {
-          ;(style as unknown as Record<string, string>)[cssProp as string] =
+          ; (style as unknown as Record<string, string>)[cssProp as string] =
             transformedValue
         }
       }
@@ -349,10 +404,17 @@ function normalizeClass(value: any): string {
  */
 export class DOMRenderer implements Renderer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createNode(type: string, props: Record<string, any>): HTMLElement {
+  createNode(type: string, props: Record<string, any>): HTMLElement | SVGElement {
     // Map component type to HTML element
     const tagName = ELEMENT_MAPPING[type] ?? type
-    const element = document.createElement(tagName)
+
+    let element: HTMLElement | SVGElement
+
+    if (SVG_TAGS.has(tagName)) {
+      element = document.createElementNS(SVG_NAMESPACE, tagName) as SVGElement
+    } else {
+      element = document.createElement(tagName)
+    }
 
     // Store original type for reference
     if (ELEMENT_MAPPING[type]) {
@@ -366,7 +428,7 @@ export class DOMRenderer implements Renderer {
   }
 
   updateNode(
-    node: HTMLElement,
+    node: HTMLElement | SVGElement,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     oldProps: Record<string, any>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -374,7 +436,12 @@ export class DOMRenderer implements Renderer {
   ): void {
     // 1. Handle className
     if (newProps.className !== oldProps.className) {
-      node.className = normalizeClass(newProps.className)
+      const className = normalizeClass(newProps.className)
+      if (node instanceof SVGElement) {
+        node.setAttribute('class', className)
+      } else {
+        node.className = className
+      }
     }
 
     // 2. Update Styles (Efficiently)
@@ -422,8 +489,11 @@ export class DOMRenderer implements Renderer {
         } else if (newVal === true) {
           node.setAttribute(strKey, '')
         } else {
+          // Handle SVG attributes
+          const attrName = SVG_ATTR_MAP[strKey] || strKey
+
           // Escape attribute value to prevent XSS attacks
-          node.setAttribute(strKey, escapeAttrValue(String(newVal)))
+          node.setAttribute(attrName, escapeAttrValue(String(newVal)))
         }
       }
     }

@@ -1,6 +1,28 @@
 import { effect, isSignal } from '../../core/signal'
 
 /**
+ * SVG Attribute Case Mapping
+ * React-like camelCase to SVG case-sensitive attributes
+ */
+const SVG_ATTR_MAP: Record<string, string> = {
+  viewBox: 'viewBox',
+  preserveAspectRatio: 'preserveAspectRatio',
+  strokeWidth: 'stroke-width',
+  strokeLinecap: 'stroke-linecap',
+  strokeLinejoin: 'stroke-linejoin',
+  strokeDasharray: 'stroke-dasharray',
+  strokeDashoffset: 'stroke-dashoffset',
+  fillOpacity: 'fill-opacity',
+  strokeOpacity: 'stroke-opacity',
+  stopColor: 'stop-color',
+  stopOpacity: 'stop-opacity',
+  clipPath: 'clip-path',
+  markerEnd: 'marker-end',
+  markerStart: 'marker-start',
+  markerMid: 'marker-mid',
+}
+
+/**
  * Hydration options
  */
 export interface HydrateOptions {
@@ -213,11 +235,16 @@ function hydrateProps(
           el.setAttribute('class', String(value.value))
         } else if (propName === 'style' && typeof value.value === 'object') {
           Object.assign((el as HTMLElement).style, value.value)
-        } else if (propName in el) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ;(el as any)[propName] = value.value
         } else {
-          el.setAttribute(propName, String(value.value))
+          // Handle SVG attributes
+          const attrName = SVG_ATTR_MAP[propName] || propName
+
+          if (propName in el && !(el instanceof SVGElement)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ; (el as any)[propName] = value.value
+          } else {
+            el.setAttribute(attrName, String(value.value))
+          }
         }
       })
       continue

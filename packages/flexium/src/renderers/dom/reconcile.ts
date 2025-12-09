@@ -66,17 +66,18 @@ export function reconcileArrays(
   const seen = new Set<string | number | undefined>()
 
   // Forward pass: process new nodes
+  let currentChild = parent.firstChild
+
   for (let i = 0; i < newFNodes.length; i++) {
     const newFNode = newFNodes[i]
     const key = newFNode.key ?? `__idx_${i}_${newFNode.type}`
     seen.add(key)
 
     const oldFNode = keyToOldFNode.get(key)
-    // Cache the current child at position i to avoid multiple live NodeList accesses
-    const currentChild = parent.childNodes[i]
-    const refNode = nextSibling
-      ? (currentChild || nextSibling)
-      : currentChild || null
+
+    // Determine the reference node for insertion
+    // If currentChild is valid, insert before it. Otherwise append (refNode is null).
+    const refNode = currentChild
 
     if (!oldFNode || oldFNode.type !== newFNode.type) {
       // New node or type changed: create and insert
@@ -84,6 +85,7 @@ export function reconcileArrays(
       if (node) {
         setNode(newFNode, node)
         parent.insertBefore(node, refNode)
+        // We inserted a new node before currentChild, so currentChild is still the next one to process
       }
       // If type changed, old node will be removed in cleanup pass
     } else {
@@ -91,10 +93,16 @@ export function reconcileArrays(
       patchNode(oldFNode, newFNode)
 
       const node = getNode(newFNode)
-      // Use cached currentChild to avoid redundant live NodeList access
-      if (node && currentChild !== node) {
-        // Position wrong: move to correct position
-        parent.insertBefore(node, refNode)
+      if (node) {
+        if (currentChild !== node) {
+          // Position wrong: move to correct position (before currentChild)
+          parent.insertBefore(node, refNode)
+          // We moved the node here. currentChild is still the next one to process.
+        } else {
+          // Position correct: match!
+          // Advance pointer since we consumed this node
+          currentChild = currentChild?.nextSibling || null
+        }
       }
     }
   }
@@ -104,7 +112,10 @@ export function reconcileArrays(
     const node = getNode(fnode)
     if (!seen.has(key) && node) {
       cleanupReactive(node)
-      domRenderer.removeChild(parent, node)
+      // Check if node is still attached before removing
+      if (node.parentNode === parent) {
+        domRenderer.removeChild(parent, node)
+      }
     }
   }
 }
