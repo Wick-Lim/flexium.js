@@ -1,17 +1,17 @@
 # Framework Comparison
 
-How does Flexium compare to React and SolidJS? This guide helps you understand the key differences.
+How does Flexium compare to React and Svelte? This guide helps you understand the key differences.
 
 ## At a Glance
 
-| Feature | Flexium | React | SolidJS | Svelte |
-|---------|---------|-------|---------|--------|
-| **Reactivity** | Signals (Proxy) | Virtual DOM | Signals | Compiler |
-| **API Philosophy** | Unified (`state()`) | Hooks (multiple) | Primitives (multiple) | Syntax (`let`, `$`) |
-| **Re-rendering** | Fine-grained | Component tree | Fine-grained | Fine-grained |
-| **List Rendering** | `items.map()` works | `items.map()` works | Need `<For>` | `{#each}` block |
-| **Bundle Size** | ~8KB | ~42KB | ~7KB | ~2KB (runtime) |
-| **Learning Curve** | Low | Moderate | Moderate | Low |
+| Feature | Flexium | React | Svelte |
+|---------|---------|-------|--------|
+| **Reactivity** | Signals (Proxy) | Virtual DOM | Compiler |
+| **API Philosophy** | Unified (`state()`) | Hooks (multiple) | Syntax (`let`, `$`) |
+| **Re-rendering** | Fine-grained | Component tree | Fine-grained |
+| **List Rendering** | `items.map()` works | `items.map()` works | `{#each}` block |
+| **Bundle Size** | ~8KB | ~42KB | ~2KB (runtime) |
+| **Learning Curve** | **Zero** (for React devs) | Moderate | Moderate (New Syntax) |
 
 ## The Flexium Difference
 
@@ -50,20 +50,7 @@ function Component() {
 }
 ```
 
-```jsx [SolidJS]
-import { createSignal, createMemo, createResource } from 'solid-js'
 
-function Component() {
-  // Different primitives for different needs
-  const [count, setCount] = createSignal(0)             // local
-  const doubled = createMemo(() => count() * 2)         // derived
-  const [user] = createResource(fetchUser)              // async
-  // global state requires Context or module-level setup
-
-  // Must call as functions - count() not count
-  return <div>{count()} × 2 = {doubled()}</div>
-}
-```
 
 ```html [Svelte]
 <script>
@@ -87,7 +74,7 @@ This is where Flexium really shines:
 ::: code-group
 
 ```jsx [Flexium ✨]
-// React syntax + SolidJS performance = Best of both worlds
+// React syntax + Svelte performance = Best of both worlds
 function TodoList() {
   const [todos, setTodos] = state([...])
 
@@ -122,25 +109,7 @@ function TodoList() {
 // ❌ Needs memo() for optimization
 ```
 
-```jsx [SolidJS]
-// Must use <For> component
-import { For } from 'solid-js'
 
-function TodoList() {
-  const [todos, setTodos] = createSignal([...])
-
-  return (
-    <ul>
-      <For each={todos()}>
-        {(todo) => <li>{todo.text}</li>}
-      </For>
-    </ul>
-  )
-}
-// ❌ Different syntax to learn
-// ✅ Optimized
-// ❌ items().map() doesn't work reactively!
-```
 
 ```html [Svelte]
 <!-- Must use template syntax -->
@@ -185,17 +154,7 @@ count + 10          // 15
 // Familiar, but re-renders entire component
 ```
 
-```jsx [SolidJS]
-const [count] = createSignal(5)
 
-// Must always call as function
-count()             // 5
-count() + 10        // 15
-`Value: ${count()}` // "Value: 5"
-
-// Forget the ()? Bug!
-count + 10          // "[Function] + 10" ❌
-```
 
 :::
 
@@ -235,27 +194,7 @@ function Component() {
 // ❌ Re-renders entire component
 ```
 
-```jsx [SolidJS]
-// Must use Show component for optimization
-import { Show } from 'solid-js'
 
-function Component() {
-  const [show] = createSignal(true)
-
-  return (
-    <div>
-      <Show when={show()}>
-        <Child />
-      </Show>
-      <Show when={show()} fallback={<B />}>
-        <A />
-      </Show>
-    </div>
-  )
-}
-// ❌ Different syntax from React
-// ✅ Fine-grained updates
-```
 
 :::
 
@@ -291,35 +230,25 @@ useEffect(() => {
 }, []) // Forgot to add count!
 ```
 
-```jsx [SolidJS]
-import { createEffect } from 'solid-js'
 
-// Auto-tracking but different syntax
-createEffect(() => {
-  console.log('Count:', count())
-  console.log('Name:', name())
-})
-// ✅ Automatic dependency tracking
-// ❌ Must use count() not count
-```
 
 :::
 
 ## Performance Comparison
 
-| Operation | Flexium | React | SolidJS |
-|-----------|---------|-------|---------|
-| State Creation | 640K ops/s | 450K ops/s | 1.8M ops/s |
-| State Update | 1.3M ops/s | 180K ops/s | 1.5M ops/s |
-| Computed Read | 14M ops/s | 350K ops/s | 1.2M ops/s |
-| List Update | O(1) append | O(n) diff | O(1) append |
+| Operation | Flexium | React |
+|-----------|---------|-------|
+| State Creation | 640K ops/s | 450K ops/s |
+| State Update | 1.3M ops/s | 180K ops/s |
+| Computed Read | 14M ops/s | 350K ops/s |
+| List Update | O(1) append | O(n) diff |
 
-**Key insight**: Flexium and SolidJS are **3-10x faster** than React. SolidJS is ~20% faster than Flexium, but Flexium offers simpler APIs.
+**Key insight**: Flexium matches **Svelte's performance** without forcing you to learn a **new template language**. If you know React, you already know Flexium.
 
 ### Why the Performance Difference?
 
-| Aspect | Flexium / SolidJS | React |
-|--------|-------------------|-------|
+| Aspect | Flexium / Svelte | React |
+|--------|------------------|-------|
 | Update Strategy | Direct DOM updates | Virtual DOM diffing |
 | Granularity | Only affected nodes | Entire component tree |
 | Optimization | Fast by default | Needs memo, useMemo, useCallback |
@@ -330,7 +259,6 @@ createEffect(() => {
 |-----------|---------------|-------------------|
 | **Flexium** | `state()`, `effect()` | Hours |
 | React | useState, useMemo, useCallback, useEffect, useContext, useReducer, + external libs | Days to weeks |
-| SolidJS | createSignal, createMemo, createEffect, createResource, For, Show, Switch | Days |
 
 ## Migration Guide
 
@@ -346,23 +274,21 @@ createEffect(() => {
 | Recoil/Jotai | `state(x, { key })` | Built-in |
 | `items.map()` | `items.map()` | Same! But optimized |
 
-### From SolidJS to Flexium
+### From Svelte to Flexium
 
-| SolidJS | Flexium | Notes |
-|---------|---------|-------|
-| `createSignal(x)` | `state(x)` | |
-| `createMemo(() => x)` | `state(() => x)` | Auto-detected |
-| `createResource(fn)` | `state(async () => fn())` | Auto-detected |
-| `createStore({})` | `state({})` | |
-| `<For each={items}>` | `items.map()` | React syntax! |
-| `<Show when={x}>` | `{() => x && ...}` | Native JS |
+| Svelte | Flexium | Notes |
+|--------|---------|-------|
+| `let x = $state(0)` | `const [x, setX] = state(0)` | |
+| `$derived(x * 2)` | `state(() => x * 2)` | Auto-detected |
+| `{#each}` | `items.map()` | React syntax! |
+| `{#if}` | `{() => x && ...}` | Native JS |
 
 ## When to Choose What
 
 ### Choose Flexium When:
 - You want **one API** for all state needs
 - **Fast onboarding** and low learning curve matter
-- You want **React-like syntax** with Signal performance
+- You want **React-like syntax** with Svelte performance
 - Built-in **global state and async** handling are important
 - You prefer **native JavaScript** over special components
 
@@ -373,11 +299,11 @@ createEffect(() => {
 | Aspect | Winner | Why |
 |--------|--------|-----|
 | **API Simplicity** | Flexium | One `state()` for everything |
-| **Learning Curve** | Flexium/Svelte | Very low barrier to entry |
-| **List Rendering DX** | Flexium | React syntax with optimization |
-| **Raw Performance** | SolidJS/Svelte | Compiler/Fine-grained optimized |
+| **Learning Curve** | Flexium | **Zero** for React devs vs Svelte's new syntax |
+| **List Rendering DX** | Flexium | Standard JS `.map()` vs Svelte's `{#each}` |
+| **Raw Performance** | Flexium/Svelte | Both are fine-grained & VDOM-less |
 | **Ecosystem** | React | Massive library support |
-| **TypeScript DX** | Flexium/React | Just TypeScript, no custom file formats |
+| **TypeScript DX** | Flexium/React | Standard TS vs Svelte's custom DSL |
 | **Global State** | Flexium | Built-in, zero setup |
 | **Bundle Size** | Svelte | Tiny runtime (compiler does heavy lifting) |
 
