@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { signal, computed, effect, batch, untrack } from '../signal'
+import { signal, computed, effect, batch, untrack, flushSync } from '../signal'
 
 describe('Signal System - Comprehensive', () => {
   describe('signal()', () => {
@@ -109,6 +109,7 @@ describe('Signal System - Comprehensive', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
+      flushSync()
       expect(runCount).toBe(2)
     })
 
@@ -124,9 +125,11 @@ describe('Signal System - Comprehensive', () => {
       expect(fullName).toBe('John Doe')
 
       firstName.value = 'Jane'
+      flushSync()
       expect(fullName).toBe('Jane Doe')
 
       lastName.value = 'Smith'
+      flushSync()
       expect(fullName).toBe('Jane Smith')
     })
 
@@ -142,7 +145,9 @@ describe('Signal System - Comprehensive', () => {
       })
 
       count.value = 1
+      flushSync()
       count.value = 2
+      flushSync()
       dispose()
 
       expect(cleanups).toEqual([0, 1, 2])
@@ -159,6 +164,7 @@ describe('Signal System - Comprehensive', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
+      flushSync()
       expect(runCount).toBe(2)
 
       dispose()
@@ -240,6 +246,7 @@ describe('Signal System - Comprehensive', () => {
 
       // Only a should trigger
       a.value = 10
+      flushSync()
       expect(result).toBe(12)
 
       // b should not trigger

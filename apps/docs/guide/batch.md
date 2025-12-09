@@ -10,15 +10,15 @@ head:
       content: Prevent cascading updates with batching. Learn when and how to batch multiple signal updates for optimal performance.
 ---
 
-# Batch API
+# Batch API & Automatic Batching
 
-The `batch()` API allows you to group multiple signal updates together, ensuring that effects and UI updates only run once after all changes are complete. This is essential for performance when making multiple related state changes.
+Flexium automatically optimizes your state updates to ensure high performance. In most cases, you don't need to do anything! 
 
-## What is Batching?
+## Automatic Batching
 
-Batching is the process of deferring reactive updates until a group of signal changes is complete. Instead of running effects and updating the UI after each individual signal change, batching queues all updates and executes them once at the end.
+Flexium now supports **Automatic Batching** by default. Multiple state updates occurring in the same "tick" (microtask) are coalesced into a single UI update. This works inside `setTimeout`, promises, event handlers, and native async APIs.
 
-### Without Batching
+### Example
 
 ```tsx
 import { signal, effect } from 'flexium/advanced'
@@ -32,35 +32,31 @@ effect(() => {
 })
 // Logs: "John Doe, age 30"
 
-// Each update triggers the effect separately
-firstName.set('Jane')  // Logs: "Jane Doe, age 30"
-lastName.set('Smith')  // Logs: "Jane Smith, age 30"
-age.set(25)            // Logs: "Jane Smith, age 25"
-// Effect ran 3 times!
+// These updates are automatically batched!
+setTimeout(() => {
+  firstName.set('Jane')
+  lastName.set('Smith')
+  age.set(25)
+}, 0)
+// Effect runs only ONCE after the timeout callback finishes.
+// Logs: "Jane Smith, age 25"
 ```
 
-### With Batching
+## Manual Batching
+
+The `batch()` API is still available for scenarios where you want **Synchronous Batched Updates**. When you use `batch()`, effects run immediately after the batch callback completes, rather than waiting for the next microtask. This is useful when you need to measure the DOM immediately after a set of updates.
 
 ```tsx
 import { signal, effect, batch } from 'flexium/advanced'
 
-const firstName = signal('John')
-const lastName = signal('Doe')
-const age = signal(30)
+// ... signals ...
 
-effect(() => {
-  console.log(`${firstName} ${lastName}, age ${age}`)
-})
-// Logs: "John Doe, age 30"
-
-// All updates are batched together
+// Updates run immediately after this block
 batch(() => {
   firstName.set('Jane')
   lastName.set('Smith')
-  age.set(25)
 })
-// Logs: "Jane Smith, age 25"
-// Effect ran only once!
+// DOM is updated HERE, synchronously.
 ```
 
 ## Import

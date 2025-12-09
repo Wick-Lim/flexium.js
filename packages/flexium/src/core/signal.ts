@@ -248,14 +248,26 @@ class SignalNode<T> implements IObservable {
 
   notify(): void {
     if (batchDepth > 0) {
-      // Queue subscribers for batched execution
+      // Manual batch: queue subscribers
       this.subscribers.forEach((sub) => batchQueue.add(sub))
     } else {
-      // Use array spread instead of new Set() for better performance
-      // This still creates a snapshot to avoid issues when effects unsubscribe/resubscribe
-      const subscribersToNotify = [...this.subscribers]
-      for (let i = 0; i < subscribersToNotify.length; i++) {
-        subscribersToNotify[i].execute()
+      // Automatic microtask batch
+      if (this.subscribers.size > 0) {
+        // Split subscribers: ComputedNodes must run SYNC to mark dirty, Effects run ASYNC
+        const effectsToQueue: ISubscriber[] = []
+
+        for (const sub of this.subscribers) {
+          if (sub instanceof ComputedNode) {
+            sub.execute() // Mark dirty immediately
+          } else {
+            effectsToQueue.push(sub)
+          }
+        }
+
+        if (effectsToQueue.length > 0) {
+          effectsToQueue.forEach(sub => autoBatchQueue.add(sub))
+          scheduleAutoBatch()
+        }
       }
     }
   }
@@ -331,17 +343,62 @@ class ComputedNode<T> implements ISubscriber, IObservable {
 
   notify(): void {
     if (batchDepth > 0) {
-      // Queue subscribers for batched execution
+      // Manual batch: queue subscribers
       this.subscribers.forEach((sub) => batchQueue.add(sub))
     } else {
-      // Use array spread instead of new Set() for better performance
-      // This still creates a snapshot to avoid issues when effects unsubscribe/resubscribe
-      const subscribersToNotify = [...this.subscribers]
-      for (let i = 0; i < subscribersToNotify.length; i++) {
-        subscribersToNotify[i].execute()
+      // Automatic microtask batch
+      if (this.subscribers.size > 0) {
+        // Split subscribers: ComputedNodes must run SYNC to mark dirty, Effects run ASYNC
+        const effectsToQueue: ISubscriber[] = []
+
+        for (const sub of this.subscribers) {
+          if (sub instanceof ComputedNode) {
+            sub.execute() // Mark dirty immediately
+          } else {
+            effectsToQueue.push(sub)
+          }
+        }
+
+        if (effectsToQueue.length > 0) {
+          effectsToQueue.forEach(sub => autoBatchQueue.add(sub))
+          scheduleAutoBatch()
+        }
       }
     }
   }
+}
+
+// Auto-batching state (Microtask Scheduler)
+const autoBatchQueue = new Set<ISubscriber>()
+let isAutoBatchScheduled = false
+
+function scheduleAutoBatch() {
+  if (!isAutoBatchScheduled) {
+    isAutoBatchScheduled = true
+    queueMicrotask(flushAutoBatch)
+  }
+}
+
+function flushAutoBatch() {
+  isAutoBatchScheduled = false
+  if (autoBatchQueue.size === 0) return
+
+  const queue = new Set(autoBatchQueue)
+  autoBatchQueue.clear()
+
+  // Execute effects
+  queue.forEach((sub) => sub.execute())
+}
+
+/**
+ * Force flush any pending auto-batched effects synchronously.
+ * Useful for testing or measuring DOM immediately after updates.
+ */
+export function flushSync(fn?: () => void): void {
+  if (fn) {
+    batch(fn)
+  }
+  flushAutoBatch()
 }
 
 /**

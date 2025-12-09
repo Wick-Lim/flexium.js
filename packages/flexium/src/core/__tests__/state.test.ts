@@ -281,6 +281,14 @@ describe('State API', () => {
       // Same proxy should now return updated value
       expect(+count).toBe(10)
     })
+
+    it('should support object spread syntax', () => {
+      const [user] = state({ name: 'Alice', age: 30 })
+      const spread = { ...user }
+
+      expect(spread).toEqual({ name: 'Alice', age: 30 })
+      expect(spread.name).toBe('Alice')
+    })
   })
 
   describe('Edge Cases', () => {

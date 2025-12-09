@@ -15,16 +15,27 @@ head:
 `state()` is the single, unified API for all state management in Flexium.
 It handles local state, shared global state, async data fetching, and derived values.
 
-::: danger Important: Proxy Comparison
-State values are **Proxy objects**. When comparing with `===`, you **must cast to primitive** first:
-```tsx
-// ❌ WRONG - Proxy comparison always fails
-if (count === 5) { ... }
+::: danger Important: Proxy Access Patterns
+Flexium State is a **Callable Proxy**. While you can use it directly in arithmetic (`count + 1`) and JSX, **Logic and Comparison** require explicit handling.
 
-// ✅ CORRECT - Cast to primitive
-if (+count === 5) { ... }           // number (use +)
-if (String(name) === 'Alice') { }   // string (use String())
-if (user.id === 1) { ... }          // compare properties directly
+We recommend the **Function Call Syntax** `()` for consistency:
+
+```tsx
+const [count] = state(0);
+const [isVisible] = state(true);
+
+// ✅ Recommended: Function Call Syntax (Safe & Clear)
+if (count() === 5) { ... }
+if (!isVisible()) { ... }
+
+// ⚠️ Arithmetic (Works directly)
+const next = count + 1; // 1
+
+// ❌ Avoid: Direct Proxy Comparison (Always fails)
+if (count === 5) { ... } // false (Proxy !== number)
+
+// ❌ Avoid: Direct Boolean Coercion (Always true)
+if (!isVisible) { ... } // false (Proxy is always truthy)
 ```
 :::
 
@@ -225,6 +236,7 @@ const [user] = state(
 
 1.  **Use `state()` for everything**: It's the universal primitive.
 2.  **Destructure the tuple**: `const [val, setVal] = state(...)` is the standard pattern.
-3.  **Use values directly**: `count + 1` works automatically thanks to Symbol.toPrimitive.
-4.  **Use array keys for dynamic data**: `['user', userId]` instead of `'user-' + userId`.
-5.  **Use params for explicit dependencies**: Makes code self-documenting.
+3.  **Use `()` for Logic/Comparison**: `if (count() === 10)` is safer than implicit coercion.
+4.  **Use values directly**: `count + 1` works automatically thanks to Symbol.toPrimitive.
+5.  **Use array keys for dynamic data**: `['user', userId]` instead of `'user-' + userId`.
+6.  **Use params for explicit dependencies**: Makes code self-documenting.

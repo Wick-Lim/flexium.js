@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { signal, computed, effect, batch, untrack, root } from '../signal'
+import { signal, computed, effect, batch, untrack, root, flushSync } from '../signal'
 
 describe('Signal System', () => {
   describe('signal()', () => {
@@ -165,6 +165,7 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
+      flushSync()
       expect(runCount).toBe(2)
     })
 
@@ -180,9 +181,11 @@ describe('Signal System', () => {
       expect(fullName).toBe('John Doe')
 
       firstName.value = 'Jane'
+      flushSync()
       expect(fullName).toBe('Jane Doe')
 
       lastName.value = 'Smith'
+      flushSync()
       expect(fullName).toBe('Jane Smith')
     })
 
@@ -198,7 +201,9 @@ describe('Signal System', () => {
       })
 
       count.value = 1
+      flushSync()
       count.value = 2
+      flushSync()
       dispose()
 
       expect(cleanups).toEqual([0, 1, 2])
@@ -215,6 +220,7 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
+      flushSync()
       expect(runCount).toBe(2)
 
       dispose()
@@ -240,6 +246,7 @@ describe('Signal System', () => {
       )
 
       count.value = 1
+      flushSync()
       expect(errors).toHaveLength(1)
       expect(errors[0].message).toBe('Test error')
     })
@@ -260,10 +267,12 @@ describe('Signal System', () => {
 
       // count is tracked
       count.value = 1
+      flushSync()
       expect(runCount).toBe(2)
 
       // Remove count dependency
       showCount.value = false
+      flushSync()
       expect(runCount).toBe(3)
 
       // count is no longer tracked
@@ -367,6 +376,7 @@ describe('Signal System', () => {
 
       // Only a should trigger
       a.value = 10
+      flushSync()
       expect(result).toBe(12)
 
       // b should not trigger
@@ -390,6 +400,7 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
+      flushSync()
       expect(runCount).toBe(2)
 
       dispose()
@@ -436,6 +447,7 @@ describe('Signal System', () => {
 
       const start = performance.now()
       count.value = 2
+      flushSync()
       const updateTime = performance.now() - start
 
       expect(results[1]).toBe(51)

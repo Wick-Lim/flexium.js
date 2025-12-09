@@ -232,9 +232,10 @@ export function getStateSignal(stateValue: unknown): Signal<unknown> | null {
  * This ensures compatibility with code expecting getter functions.
  */
 function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
-  // Use a function as the target so the proxy is callable
+  // Use an arrow function as the target so the proxy is callable but has no prototype
+  // This prevents invariant violations in ownKeys trap
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const target = function() { return sig.value } as any
+  const target = () => sig.value
 
   const proxy = new Proxy(target, {
     // Make the proxy callable - returns current value
@@ -459,7 +460,7 @@ function state<T, P = unknown>(
     }
 
     if (isAsync) {
-      const refetch = cached._stateActions?.refetch || (() => {})
+      const refetch = cached._stateActions?.refetch || (() => { })
       // Use state() for derived values - dogfooding the unified API
       const [statusValue] = state<AsyncStatus>(() => {
         if (cached.error) return 'error'
@@ -597,7 +598,7 @@ function state<T, P = unknown>(
  * state.delete(['user', 'profile', userId])
  * ```
  */
-state.delete = function(key: StateKey): boolean {
+state.delete = function (key: StateKey): boolean {
   const serializedKey = serializeKey(key)
   return globalStateRegistry.delete(serializedKey)
 }
@@ -610,7 +611,7 @@ state.delete = function(key: StateKey): boolean {
  * state.clear()
  * ```
  */
-state.clear = function(): void {
+state.clear = function (): void {
   globalStateRegistry.clear()
   hasWarnedAboutSize = false
 }
@@ -625,7 +626,7 @@ state.clear = function(): void {
  * if (state.has('theme')) { ... }
  * ```
  */
-state.has = function(key: StateKey): boolean {
+state.has = function (key: StateKey): boolean {
   const serializedKey = serializeKey(key)
   return globalStateRegistry.has(serializedKey)
 }
