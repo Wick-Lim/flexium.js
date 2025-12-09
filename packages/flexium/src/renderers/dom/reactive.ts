@@ -74,7 +74,7 @@ function registerReactiveBinding(node: Node, dispose: () => void): void {
  * ```
  */
 export function mountReactive(
-  vnode:
+  node:
     | FNode
     | string
     | number
@@ -93,18 +93,18 @@ export function mountReactive(
   container?: Node
 ): Node | null {
   // Handle null/undefined/boolean (falsy JSX values)
-  if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
+  if (node === null || node === undefined || typeof node === 'boolean') {
     return null
   }
 
   // Handle List component
-  if (isListComponent(vnode)) {
+  if (isListComponent(node)) {
     const parent = container || document.createDocumentFragment()
 
     const listDispose = mountListComponent(
-      vnode,
+      node,
       parent,
-      (childVnode) => mountReactive(childVnode),
+      (childNode) => mountReactive(childNode),
       cleanupReactive
     )
 
@@ -116,8 +116,8 @@ export function mountReactive(
   }
 
   // Handle StateValue (from state() API)
-  if (isStateValue(vnode)) {
-    const sig = getStateSignal(vnode)
+  if (isStateValue(node)) {
+    const sig = getStateSignal(node)
     if (sig) {
       const startNode = document.createTextNode('')
       const parent = container || document.createDocumentFragment()
@@ -189,7 +189,7 @@ export function mountReactive(
   }
 
   // Handle signals and functions (reactive children)
-  if (isSignal(vnode) || typeof vnode === 'function') {
+  if (isSignal(node) || typeof node === 'function') {
     const startNode = document.createTextNode('')
     const parent = container || document.createDocumentFragment()
     domRenderer.appendChild(parent, startNode)
@@ -201,7 +201,7 @@ export function mountReactive(
 
     const dispose = effect(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const value = isSignal(vnode) ? (vnode as Signal<any>).value : (vnode as () => unknown)()
+      const value = isSignal(node) ? (node as Signal<any>).value : (node as () => unknown)()
       const currentContainer = startNode.parentNode
 
       // Safety check: if node is detached, we can't update siblings
@@ -220,11 +220,11 @@ export function mountReactive(
           )
         } else {
           // Clean up old nodes first
-          for (const node of currentNodes) {
-            cleanupReactive(node)
-            if (node.parentNode === currentContainer) {
+          for (const childNode of currentNodes) {
+            cleanupReactive(childNode)
+            if (childNode.parentNode === currentContainer) {
               try {
-                currentContainer.removeChild(node)
+                currentContainer.removeChild(childNode)
               } catch (e) {
                 logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
               }
@@ -264,11 +264,11 @@ export function mountReactive(
 
       if (value !== currentFNode) {
         // Clean up old nodes first
-        for (const node of currentNodes) {
-          cleanupReactive(node)
-          if (node.parentNode === currentContainer) {
+        for (const childNode of currentNodes) {
+          cleanupReactive(childNode)
+          if (childNode.parentNode === currentContainer) {
             try {
-              currentContainer.removeChild(node)
+              currentContainer.removeChild(childNode)
             } catch (e) {
               logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
             }
@@ -304,9 +304,9 @@ export function mountReactive(
     return container ? startNode : parent
   }
 
-  if (Array.isArray(vnode)) {
+  if (Array.isArray(node)) {
     const fragment = document.createDocumentFragment()
-    for (const child of vnode) {
+    for (const child of node) {
       mountReactive(child, fragment)
     }
     if (container) {
@@ -316,17 +316,17 @@ export function mountReactive(
   }
 
   // Handle text nodes
-  if (typeof vnode === 'string' || typeof vnode === 'number') {
-    const textNode = domRenderer.createTextNode(String(vnode))
+  if (typeof node === 'string' || typeof node === 'number') {
+    const textNode = domRenderer.createTextNode(String(node))
     if (container) domRenderer.appendChild(container, textNode)
     return textNode
   }
 
   // Handle FNodes
-  if (isFNode(vnode)) {
+  if (isFNode(node)) {
     // Handle function components
-    if (typeof vnode.type === 'function') {
-      const component = vnode.type
+    if (typeof node.type === 'function') {
+      const component = node.type
       const startNode = document.createTextNode('')
       const parent = container || document.createDocumentFragment()
       domRenderer.appendChild(parent, startNode)
@@ -353,14 +353,14 @@ export function mountReactive(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const contextId = (component as any)._contextId
             if (contextId) {
-              pushProvider(contextId, vnode.props.value)
+              pushProvider(contextId, node.props.value)
             }
 
             let result
             try {
               // Set current component for hook tracking
               setCurrentComponent(componentInstance)
-              result = component({ ...vnode.props, children: vnode.children })
+              result = component({ ...node.props, children: node.children })
             } finally {
               // Clear current component
               setCurrentComponent(null)
@@ -405,12 +405,12 @@ export function mountReactive(
               // If we were using reconciliation, currentFNodeList handles the nodes
               // If not, currentNodes handles them.
               // We iterate currentNodes to be safe.
-              for (const node of currentNodes) {
-                cleanupReactive(node)
+              for (const childNode of currentNodes) {
+                cleanupReactive(childNode)
                 // Only remove if still attached (reconcileArrays might have moved them)
-                if (node.parentNode === currentParent) {
+                if (childNode.parentNode === currentParent) {
                   try {
-                    currentParent.removeChild(node)
+                    currentParent.removeChild(childNode)
                   } catch (e) {
                     logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
                   }
@@ -439,9 +439,9 @@ export function mountReactive(
     }
 
     // Handle fragments
-    if (vnode.type === 'fragment') {
+    if (node.type === 'fragment') {
       const fragment = document.createDocumentFragment()
-      for (const child of vnode.children) {
+      for (const child of node.children) {
         mountReactive(child, fragment)
       }
       if (container) {
@@ -451,21 +451,21 @@ export function mountReactive(
     }
 
     // Handle built-in elements
-    const node = domRenderer.createNode(vnode.type, vnode.props)
-    const disposeProps = setupReactiveProps(node, vnode.props)
+    const domNode = domRenderer.createNode(node.type, node.props)
+    const disposeProps = setupReactiveProps(domNode, node.props)
     if (disposeProps.length > 0) {
-      REACTIVE_BINDINGS.set(node, new Set(disposeProps))
+      REACTIVE_BINDINGS.set(domNode, new Set(disposeProps))
     }
 
-    for (const child of vnode.children) {
-      mountReactive(child, node)
+    for (const child of node.children) {
+      mountReactive(child, domNode)
     }
 
     if (container) {
-      domRenderer.appendChild(container, node)
+      domRenderer.appendChild(container, domNode)
     }
 
-    return node
+    return domNode
   }
 
   return null
@@ -549,7 +549,7 @@ export function createReactiveRoot(container: HTMLElement) {
   let currentRootNode: Node | null = null
 
   return {
-    render(vnode: FNode) {
+    render(node: FNode) {
       if (currentRootNode) {
         cleanupReactive(currentRootNode)
         container.innerHTML = ''
@@ -562,7 +562,7 @@ export function createReactiveRoot(container: HTMLElement) {
 
       rootDispose = effect(() => {
         container.innerHTML = ''
-        currentRootNode = mountReactive(vnode, container)
+        currentRootNode = mountReactive(node, container)
       })
     },
     unmount() {

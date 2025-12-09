@@ -32,7 +32,6 @@ const NODE_DATA = new WeakMap<Node, NodeData>()
  * - Component functions automatically re-render when signals change
  *
  * @param vnode - Flexium node to render
- * @param container - DOM element to render into
  * @returns The rendered DOM node
  *
  * @example
@@ -40,84 +39,84 @@ const NODE_DATA = new WeakMap<Node, NodeData>()
  * render(f('div', {}, [count]), document.body);
  * // The div will automatically update when count changes
  */
+/**
+ * Mounts a Flexium node to a container
+ * @param node - Flexium node to render
+ * @param container - DOM element to mount to
+ */
 export function render(
-  vnode: FNode | string | number | null | undefined | Function,
+  node: FNode | string | number | null | undefined | Function,
   container: HTMLElement
 ): Node | null {
-  // Use reactive rendering for automatic signal tracking
-  return mountReactive(vnode, container)
+  // Clear container
+  container.innerHTML = ''
+  return mountReactive(node, container)
 }
 
 /**
- * Mount a flexium node to create a DOM node (internal)
+ * Internal function to mount a node
  */
-function mountVNode(vnode: FNodeChild | Function): Node | null {
-  // Handle null/undefined/boolean (falsy JSX values)
-  if (vnode === null || vnode === undefined || typeof vnode === 'boolean') {
+function mountNode(node: FNodeChild | Function): Node | null {
+  // Handle primitives
+  if (node === null || node === undefined || typeof node === 'boolean') {
     return null
   }
 
-  // Handle arrays of children
-  if (Array.isArray(vnode)) {
+  // Handle arrays (fragments)
+  if (Array.isArray(node)) {
     const fragment = document.createDocumentFragment()
-    for (const child of vnode) {
-      const childNode = mountVNode(child)
+    for (const child of node) {
+      const childNode = mountNode(child)
       if (childNode) {
-        fragment.appendChild(childNode)
+        domRenderer.appendChild(fragment, childNode)
       }
     }
     return fragment
   }
 
-  // Handle functions (lazy components)
-  if (typeof vnode === 'function') {
-    return mountVNode(vnode())
+  // Handle functions (signals or components returning functions)
+  if (typeof node === 'function') {
+    return mountNode(node())
   }
 
-  // Handle text nodes
-  if (typeof vnode === 'string' || typeof vnode === 'number') {
-    return domRenderer.createTextNode(String(vnode))
+  // Handle strings/numbers
+  if (typeof node === 'string' || typeof node === 'number') {
+    return domRenderer.createTextNode(String(node))
   }
 
   // Handle FNodes
-  if (isFNode(vnode)) {
+  if (isFNode(node)) {
     // Handle function components
-    if (typeof vnode.type === 'function') {
-      const component = vnode.type
-      const result = component({ ...vnode.props, children: vnode.children })
-      return mountVNode(result)
+    if (typeof node.type === 'function') {
+      const component = node.type
+      const result = component({ ...node.props, children: node.children })
+      return mountNode(result)
     }
 
     // Handle fragments
-    if (vnode.type === 'fragment') {
+    if (node.type === 'fragment') {
       const fragment = document.createDocumentFragment()
-      for (const child of vnode.children) {
-        const childNode = mountVNode(child)
+      for (const child of node.children) {
+        const childNode = mountNode(child)
         if (childNode) {
-          fragment.appendChild(childNode)
+          domRenderer.appendChild(fragment, childNode)
         }
       }
       return fragment
     }
 
-    // Handle built-in elements
-    const node = domRenderer.createNode(vnode.type, vnode.props)
+    // Handle DOM elements
+    const domNode = domRenderer.createNode(node.type, node.props)
 
-    // Store node data for future reconciliation
-    NODE_DATA.set(node, {
-      vnode,
-      props: vnode.props,
-    })
-
-    // Mount children
-    for (const child of vnode.children) {
-      const childNode = mountVNode(child)
+    // Handle children
+    for (const child of node.children) {
+      const childNode = mountNode(child)
       if (childNode) {
-        domRenderer.appendChild(node, childNode)
+        domRenderer.appendChild(domNode, childNode)
       }
     }
 
-    return node
+    return domNode
   }
 
   return null
@@ -153,7 +152,7 @@ export function update(
 ): void {
   // If types don't match, replace the node
   if (oldVNode.type !== newVNode.type) {
-    const newNode = mountVNode(newVNode)
+    const newNode = mountNode(newVNode)
     if (newNode && node.parentNode) {
       node.parentNode.replaceChild(newNode, node)
     }
@@ -189,7 +188,7 @@ export function update(
       }
     } else if (!oldChild) {
       // Add new child
-      const newChildNode = mountVNode(newChild)
+      const newChildNode = mountNode(newChild)
       if (newChildNode) {
         domRenderer.appendChild(node, newChildNode)
       }
@@ -201,7 +200,7 @@ export function update(
         }
       } else {
         // Replace text with element
-        const newChildNode = mountVNode(newChild)
+        const newChildNode = mountNode(newChild)
         if (newChildNode && childNode) {
           node.replaceChild(newChildNode, childNode)
           unmount(childNode)
@@ -210,7 +209,7 @@ export function update(
     } else if (isFNode(oldChild)) {
       if (typeof newChild === 'string' || typeof newChild === 'number') {
         // Replace element with text
-        const newChildNode = mountVNode(newChild)
+        const newChildNode = mountNode(newChild)
         if (newChildNode && childNode) {
           node.replaceChild(newChildNode, childNode)
           unmount(childNode)

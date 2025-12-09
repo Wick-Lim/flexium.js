@@ -33,7 +33,7 @@
  */
 
 import type { FNode } from './core/renderer'
-import { createFNode } from './core/vnode'
+import { createFNode } from './core/fnode'
 
 /**
  * Flatten nested children arrays

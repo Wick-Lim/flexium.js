@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { createFNode } from '../vnode'
+import { createFNode } from '../fnode'
 import type { FNode } from '../renderer'
 
 describe('createFNode', () => {
@@ -98,7 +98,7 @@ describe('createFNode', () => {
         createFNode('div', {}, []),
         createFNode('span', { className: 'test' }, []),
         createFNode('p', {}, ['text'], 1),
-        createFNode('button', { onClick: () => {} }, ['Click'], 'btn'),
+        createFNode('button', { onClick: () => { } }, ['Click'], 'btn'),
       ]
 
       const shapes = nodes.map((node) => Object.keys(node).join(','))
@@ -114,7 +114,7 @@ describe('createFNode', () => {
       const props = {
         className: 'container',
         style: { color: 'red', fontSize: 16 },
-        onClick: () => {},
+        onClick: () => { },
         'data-testid': 'my-component',
         disabled: false,
       }
@@ -288,19 +288,4 @@ describe('createFNode', () => {
   })
 })
 
-describe('createFNode (deprecated)', () => {
-  it('should be an alias for createFNode', () => {
-    expect(createFNode).toBe(createFNode)
-  })
 
-  it('should work exactly like createFNode', () => {
-    const props = { className: 'test' }
-    const children = ['text']
-    const key = 'my-key'
-
-    const fnodeResult = createFNode('div', props, children, key)
-    const vnodeResult = createFNode('div', props, children, key)
-
-    expect(vnodeResult).toEqual(fnodeResult)
-  })
-})

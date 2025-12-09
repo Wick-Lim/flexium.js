@@ -18,26 +18,26 @@ const VOID_ELEMENTS = new Set([
 ])
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function renderToString(vnode: any): string {
-  if (vnode === null || vnode === undefined || vnode === false) {
+export function renderToString(node: any): string {
+  if (node === null || node === undefined || node === false) {
     return ''
   }
 
-  if (typeof vnode === 'string' || typeof vnode === 'number') {
-    return escapeHtml(String(vnode))
+  if (typeof node === 'string' || typeof node === 'number') {
+    return escapeHtml(String(node))
   }
 
-  if (Array.isArray(vnode)) {
-    return vnode.map(renderToString).join('')
+  if (Array.isArray(node)) {
+    return node.map(renderToString).join('')
   }
 
-  if (isSignal(vnode)) {
-    return renderToString(vnode.value)
+  if (isSignal(node)) {
+    return renderToString(node.value)
   }
 
   // Handle fragments (type === null or type === 'fragment')
-  if (vnode.type === null || vnode.type === 'fragment') {
-    const children = vnode.children || vnode.props?.children
+  if (node.type === null || node.type === 'fragment') {
+    const children = node.children || node.props?.children
     if (children) {
       return Array.isArray(children)
         ? children.map(renderToString).join('')
@@ -46,13 +46,13 @@ export function renderToString(vnode: any): string {
     return ''
   }
 
-  if (typeof vnode.type === 'function') {
-    const result = vnode.type({ ...vnode.props, children: vnode.children })
+  if (typeof node.type === 'function') {
+    const result = node.type({ ...node.props, children: node.children })
     return renderToString(result)
   }
 
-  if (typeof vnode.type === 'string') {
-    const { type, props, children } = vnode
+  if (typeof node.type === 'string') {
+    const { type, props, children } = node
     let html = `<${type}`
 
     if (props) {

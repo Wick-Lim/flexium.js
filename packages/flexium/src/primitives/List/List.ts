@@ -177,7 +177,7 @@ function mountSimpleList<T>(
   if (className) container.className = className
   if (style) {
     Object.entries(style).forEach(([key, value]) => {
-      ;(container.style as unknown as Record<string, string>)[key] =
+      ; (container.style as unknown as Record<string, string>)[key] =
         typeof value === 'number' ? `${value}px` : value
     })
   }
@@ -259,7 +259,7 @@ function mountSimpleList<T>(
 function mountVirtualList<T>(
   comp: ListComponent<T>,
   parent: Node,
-  mountFn: (vnode: FNode) => Node | null,
+  mountFn: (node: FNode) => Node | null,
   cleanupFn: (node: Node) => void
 ): () => void {
   const {
@@ -276,7 +276,7 @@ function mountVirtualList<T>(
 
   if (!height || !itemSize) {
     console.warn('List: height and itemSize are required when virtual is true')
-    return () => {}
+    return () => { }
   }
 
   // Create container structure

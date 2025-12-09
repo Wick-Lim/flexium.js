@@ -15,7 +15,7 @@
  */
 
 import type { FNode } from '../../core/renderer'
-import { createFNode } from '../../core/vnode'
+import { createFNode } from '../../core/fnode'
 
 /**
  * JSX factory function for Flexium
