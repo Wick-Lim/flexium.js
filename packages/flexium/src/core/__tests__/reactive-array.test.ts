@@ -77,7 +77,7 @@ describe('Array State', () => {
 
       const result = items.map((item: string) => item.toUpperCase())
 
-      // .map() returns a regular array, not ReactiveArrayResult
+      // .map() returns a regular array (reconciliation happens at render layer)
       expect(Array.isArray(result)).toBe(true)
       expect(result).toEqual(['A', 'B', 'C'])
     })

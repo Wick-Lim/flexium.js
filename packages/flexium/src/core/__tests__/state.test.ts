@@ -331,9 +331,8 @@ describe('State API', () => {
 
     it('should support array methods', () => {
       const [items] = state([1, 2, 3])
-      // .map() now returns ReactiveArrayResult for JSX reactivity
-      // Use items() or [...items] for plain array operations
-      expect(items().map((x: number) => x * 2)).toEqual([2, 4, 6])
+      // .map() returns a regular array, reconciliation happens at render layer
+      expect(items.map((x: number) => x * 2)).toEqual([2, 4, 6])
       expect(items.filter((x: number) => x > 1)).toEqual([2, 3])
     })
   })

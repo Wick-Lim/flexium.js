@@ -342,6 +342,7 @@ export function mountReactive(
       domRenderer.appendChild(parent, startNode)
 
       let currentNodes: Node[] = []
+      let currentFNodeList: FNode[] = []
       const contextSnapshot = captureContext()
 
       // Create component instance for hook tracking
@@ -358,28 +359,13 @@ export function mountReactive(
             pushProvider(contextId, vnode.props.value)
           }
 
-          onCleanup(() => {
-            const currentParent = startNode.parentNode
-            if (currentParent) {
-              let nodeToRemove = startNode.nextSibling
-              for (let i = 0; i < currentNodes.length; i++) {
-                if (nodeToRemove) {
-                  const next = nodeToRemove.nextSibling
-                  cleanupReactive(nodeToRemove)
-                  try {
-                    currentParent.removeChild(nodeToRemove)
-                  } catch (e) {
-                    logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
-                  }
-                  nodeToRemove = next
-                }
-              }
-            } else {
-              // If startNode is detached, just cleanup reactions
-              currentNodes.forEach(cleanupReactive)
-            }
-            currentNodes = []
-          })
+          // Note: We do NOT use onCleanup for DOM removal here because we want to support
+          // reconciliation (diffing) which requires the old nodes to exist.
+          // We handle DOM removal manually in the fallback path.
+
+          // However, we still need to cleanup reactive bindings if the component is unmounted
+          // or if we do a full re-render.
+          // We register a cleanup for the *root* effect that handles this.
 
           try {
             let result
@@ -400,10 +386,63 @@ export function mountReactive(
               }
             })
 
+            // Attempt Reconciliation for Arrays (e.g. items.map)
+            // This enables efficient list updates without full re-render
+            const isArray = Array.isArray(result)
+            // Check if it's a list of FNodes (elements) that we can reconcile
+            // We skip reconciliation for primitives or fragments to be safe for now
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const canReconcile = isArray && (result as unknown as any[]).every(item =>
+              isFNode(item) && item.type !== 'fragment'
+            )
+
+            if (canReconcile) {
+              const parent = startNode.parentNode
+              if (parent) {
+                // Normalize result to FNode[] (already checked, but for type safety)
+                const newFNodes = result as unknown as FNode[]
+
+                // Use reconcileArrays to diff/patch the DOM
+                reconcileArrays(
+                  parent,
+                  currentFNodeList,
+                  newFNodes,
+                  startNode.nextSibling
+                )
+
+                // Update state for next render
+                currentFNodeList = newFNodes
+                // Update currentNodes so we know what to remove if we switch to fallback
+                currentNodes = newFNodes.map(fn => getNode(fn)).filter(n => n != null) as Node[]
+                return
+              }
+            }
+
+            // Fallback: Standard Mount (Destroy & Recreate)
+            // Clean up old nodes first
+            const currentParent = startNode.parentNode
+            if (currentParent) {
+              // If we were using reconciliation, currentFNodeList handles the nodes
+              // If not, currentNodes handles them.
+              // We iterate currentNodes to be safe.
+              for (const node of currentNodes) {
+                cleanupReactive(node)
+                // Only remove if still attached (reconcileArrays might have moved them)
+                if (node.parentNode === currentParent) {
+                  try {
+                    currentParent.removeChild(node)
+                  } catch (e) {
+                    logError(ErrorCodes.DOM_CLEANUP_FAILED, { operation: 'removeChild' }, e)
+                  }
+                }
+              }
+            }
+            currentNodes = []
+            currentFNodeList = []
+
             const fragment = document.createDocumentFragment()
             mountReactive(result, fragment)
 
-            const currentParent = startNode.parentNode
             if (currentParent) {
               currentNodes = Array.from(fragment.childNodes)
               currentParent.insertBefore(fragment, startNode.nextSibling)
