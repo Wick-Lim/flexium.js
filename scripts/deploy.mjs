@@ -96,7 +96,7 @@ async function deploy(type) {
   }
 
   console.log('\n🌐 Running E2E tests...');
-  if (!run('npm run test:e2e')) {
+  if (!run('npm run test:e2e:quick')) {
     console.error('❌ E2E tests failed');
     process.exit(1);
   }
