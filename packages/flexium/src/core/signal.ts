@@ -53,8 +53,31 @@ interface IObservable {
 }
 
 // Global context for dependency tracking
+// Global context for dependency tracking
 let activeEffect: ISubscriber | null = null
-let owner: { cleanups: (() => void)[] } | null = null
+
+export interface Owner {
+  cleanups: (() => void)[]
+  context: Record<symbol, unknown> | null
+}
+
+let owner: Owner | null = null
+
+/**
+ * Get the current owner (scope)
+ * @internal
+ */
+export function getOwner(): Owner | null {
+  return owner
+}
+
+/**
+ * Set the current owner (scope)
+ * @internal
+ */
+export function setOwner(newOwner: Owner | null): void {
+  owner = newOwner
+}
 
 // Batching state
 let batchDepth = 0
@@ -120,10 +143,14 @@ class EffectNode implements ISubscriber {
   private isExecuting = false
   private isQueued = false
 
+  private owner: Owner | null = null
+
   constructor(
     public fn: () => void | (() => void),
     public onError?: (error: Error) => void
-  ) {}
+  ) {
+    this.owner = owner
+  }
 
   execute(): void {
     if (this.isExecuting) {
@@ -158,7 +185,9 @@ class EffectNode implements ISubscriber {
     this.dependencies.clear()
 
     const prevEffect = activeEffect
+    const prevOwner = owner
     activeEffect = this
+    owner = this.owner
 
     try {
       const result = this.fn()
@@ -173,6 +202,7 @@ class EffectNode implements ISubscriber {
       }
     } finally {
       activeEffect = prevEffect
+      owner = prevOwner
     }
   }
 
@@ -194,7 +224,7 @@ class EffectNode implements ISubscriber {
 class SignalNode<T> implements IObservable {
   subscribers = new Set<ISubscriber>()
 
-  constructor(private _value: T) {}
+  constructor(private _value: T) { }
 
   get(): T {
     // Track dependency if inside an effect or computed
@@ -240,7 +270,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   private _value!: T
   private _dirty = true
 
-  constructor(private computeFn: () => T) {}
+  constructor(private computeFn: () => T) { }
 
   execute(): void {
     // When a dependency changes, mark as dirty and notify subscribers
@@ -358,9 +388,9 @@ export function signal<T>(initialValue: T): Signal<T> {
   }
   sig.peek = () => node.peek()
 
-  // Mark as signal for detection
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(sig as any)[SIGNAL_MARKER] = true
+    // Mark as signal for detection
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ; (sig as any)[SIGNAL_MARKER] = true
 
   // Register with devtools if enabled
   if (devToolsHooks?.onSignalCreate) {
@@ -392,9 +422,9 @@ export function computed<T>(fn: () => T): Computed<T> {
 
   comp.peek = () => node.peek()
 
-  // Mark as signal for detection
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(comp as any)[SIGNAL_MARKER] = true
+    // Mark as signal for detection
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ; (comp as any)[SIGNAL_MARKER] = true
 
   return comp
 }
@@ -427,22 +457,22 @@ export function effect(
   const wrappedFn =
     devToolsId >= 0
       ? () => {
-          if (devToolsHooks?.onEffectRun) {
-            devToolsHooks.onEffectRun(devToolsId, 'running')
-          }
-          try {
-            const result = fn()
-            if (devToolsHooks?.onEffectRun) {
-              devToolsHooks.onEffectRun(devToolsId, 'idle')
-            }
-            return result
-          } catch (error) {
-            if (devToolsHooks?.onEffectRun) {
-              devToolsHooks.onEffectRun(devToolsId, 'error', error as Error)
-            }
-            throw error
-          }
+        if (devToolsHooks?.onEffectRun) {
+          devToolsHooks.onEffectRun(devToolsId, 'running')
         }
+        try {
+          const result = fn()
+          if (devToolsHooks?.onEffectRun) {
+            devToolsHooks.onEffectRun(devToolsId, 'idle')
+          }
+          return result
+        } catch (error) {
+          if (devToolsHooks?.onEffectRun) {
+            devToolsHooks.onEffectRun(devToolsId, 'error', error as Error)
+          }
+          throw error
+        }
+      }
       : fn
 
   const node = new EffectNode(wrappedFn, options?.onError)
@@ -528,7 +558,10 @@ export function batch<T>(fn: () => T): T {
  */
 export function root<T>(fn: (dispose: () => void) => T): T {
   const prevOwner = owner
-  const newOwner = { cleanups: [] as (() => void)[] }
+  const newOwner: Owner = {
+    cleanups: [],
+    context: prevOwner ? Object.create(prevOwner.context) : null,
+  }
   owner = newOwner
 
   const dispose = () => {
@@ -681,8 +714,8 @@ export function createResource<T, S = any>(
       },
     },
   })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(resource as any)[SIGNAL_MARKER] = true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ; (resource as any)[SIGNAL_MARKER] = true
 
   const actions = {
     mutate: (v: T | undefined) => value.set(v),

@@ -1,6 +1,5 @@
 import type { FNodeChild } from './renderer'
-
-const contextStack = new Map<symbol, unknown[]>()
+import { getOwner, setOwner } from './signal'
 
 export interface Context<T> {
   id: symbol
@@ -14,7 +13,7 @@ export function createContext<T>(defaultValue: T): Context<T> {
   const Provider = (props: { value: T; children: FNodeChild }): FNodeChild => {
     return props.children
   }
-  ;(Provider as unknown as { _contextId: symbol })._contextId = id
+    ; (Provider as unknown as { _contextId: symbol })._contextId = id
 
   return {
     id,
@@ -32,9 +31,12 @@ export function createContext<T>(defaultValue: T): Context<T> {
  * ```
  */
 export function context<T>(ctx: Context<T>): T {
-  const stack = contextStack.get(ctx.id)
-  if (stack && stack.length > 0) {
-    return stack[stack.length - 1] as T
+  const owner = getOwner()
+  if (owner && owner.context) {
+    const value = owner.context[ctx.id]
+    if (value !== undefined) {
+      return value as T
+    }
   }
   return ctx.defaultValue
 }
@@ -46,55 +48,44 @@ export function context<T>(ctx: Context<T>): T {
  * @param value - The value to push onto the context stack
  */
 export function pushProvider(id: symbol, value: unknown): void {
-  if (!contextStack.has(id)) {
-    contextStack.set(id, [])
+  const owner = getOwner()
+  if (owner) {
+    if (!owner.context) {
+      owner.context = {}
+    }
+    owner.context[id] = value
   }
-  contextStack.get(id)!.push(value)
 }
 
 /**
  * Pop a value from the context stack for a given context ID.
- * @internal Used by the renderer during component unmounting.
- * @param id - The context symbol identifier
+ * @internal No-op in Owner-based context system (handled by scope)
  */
-export function popProvider(id: symbol): void {
-  const stack = contextStack.get(id)
-  if (stack) {
-    stack.pop()
-  }
+export function popProvider(_id: symbol): void {
+  // No-op: Context scoping is handled by the Owner prototype chain
 }
 
 /**
  * Capture the current context state
+ * Returns an opaque handle to the current owner scope.
  */
-export function captureContext(): Map<symbol, unknown> {
-  const snapshot = new Map<symbol, unknown>()
-  for (const [id, stack] of contextStack) {
-    if (stack.length > 0) {
-      snapshot.set(id, stack[stack.length - 1])
-    }
-  }
-  return snapshot
+export function captureContext(): unknown {
+  return getOwner()
 }
 
 /**
  * Run a function with the captured context restored
  */
 export function runWithContext<T>(
-  snapshot: Map<symbol, unknown>,
+  snapshot: unknown,
   fn: () => T
 ): T {
-  const pushedIds: symbol[] = []
-  for (const [id, value] of snapshot) {
-    pushProvider(id, value)
-    pushedIds.push(id)
-  }
-
+  const prev = getOwner()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setOwner(snapshot as any)
   try {
     return fn()
   } finally {
-    for (const id of pushedIds) {
-      popProvider(id)
-    }
+    setOwner(prev)
   }
 }
