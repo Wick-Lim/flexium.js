@@ -1,6 +1,6 @@
 {
   "name": "create-flexium",
-  "version": "0.7.16",
+  "version": "0.8.0",
   "publishConfig": {
     "access": "public"
   },
