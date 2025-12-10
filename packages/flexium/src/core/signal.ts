@@ -246,8 +246,15 @@ class ComputedNode<T> implements ISubscriber, IObservable {
       // Performance: Use nodeType instead of instanceof
       if (dep.nodeType === NodeType.Computed) {
         const computedDep = dep as ComputedNode<unknown>
+        // Performance: Check version first before calling peek() (peek() may trigger computation)
+        // If already updated, version will be greater than lastCleanEpoch
+        if (computedDep.version > this.lastCleanEpoch) {
+          return true
+        }
+        // Only call peek() if dirty/stale (will update version if needed)
         if (Flags.has(computedDep, SubscriberFlags.Dirty | SubscriberFlags.Stale)) {
           computedDep.peek()
+          // Check version again after peek() (may have been updated)
           if (computedDep.version > this.lastCleanEpoch) {
             return true
           }

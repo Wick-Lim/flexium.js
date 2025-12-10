@@ -54,10 +54,13 @@ export class EffectNode implements ISubscriber {
     }
 
     private run(): void {
-        for (const cleanup of this.cleanups) {
-            cleanup()
+        // Performance: Fast path when no cleanups
+        if (this.cleanups.length > 0) {
+            for (const cleanup of this.cleanups) {
+                cleanup()
+            }
+            this.cleanups = []
         }
-        this.cleanups = []
 
         // Clean up previous dependencies via Graph helper
         Graph.disconnectDependencies(this)

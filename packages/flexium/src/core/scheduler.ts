@@ -20,11 +20,14 @@ export function flushAutoBatch(): void {
     isAutoBatchScheduled = false
     if (autoBatchQueue.size === 0) return
 
-    const queue = new Set(autoBatchQueue)
+    // Performance: Convert Set to array instead of copying Set (faster)
+    const queue = Array.from(autoBatchQueue)
     autoBatchQueue.clear()
 
-    // Execute effects
-    queue.forEach((sub) => sub.execute())
+    // Execute effects - use for loop instead of forEach (slightly faster)
+    for (let i = 0; i < queue.length; i++) {
+        queue[i].execute()
+    }
 }
 
 export function addToAutoBatch(sub: ISubscriber): void {
@@ -72,9 +75,13 @@ export function sync<T>(fn?: () => T): T | void {
             batchDepth--
             if (batchDepth === 0) {
                 // Execute all queued subscribers from manual batch
-                const queue = new Set(batchQueue)
+                // Performance: Convert Set to array instead of copying Set (faster)
+                const queue = Array.from(batchQueue)
                 batchQueue.clear()
-                queue.forEach((sub) => sub.execute())
+                // Use for loop instead of forEach (slightly faster)
+                for (let i = 0; i < queue.length; i++) {
+                    queue[i].execute()
+                }
             }
         }
     }

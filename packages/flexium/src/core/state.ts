@@ -493,14 +493,16 @@ function state<T, P = unknown>(
 
     if (isAsync) {
       const refetch = cached._stateActions?.refetch || (() => { })
-      // Use state() for derived values - dogfooding the unified API
-      const [statusValue] = state<AsyncStatus>(() => {
+      // Performance: Use computed directly instead of state() to avoid recursion
+      const statusComputed = createComputed<AsyncStatus>(() => {
         if (cached.error) return 'error'
         if (cached.loading) return 'loading'
         if (cached.value !== undefined) return 'success'
         return 'idle'
       })
-      const [errorValue] = state<unknown>(() => cached.error)
+      const errorComputed = createComputed<unknown>(() => cached.error)
+      const statusValue = createStateProxy(statusComputed)
+      const errorValue = createStateProxy(errorComputed)
       return [proxy, refetch, statusValue, errorValue] as [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
     }
 
@@ -537,14 +539,16 @@ function state<T, P = unknown>(
       }
 
       const proxy = createStateProxy(s._signal as Signal<T>)
-      // Use state() for derived values - dogfooding the unified API
-      const [statusValue] = state<AsyncStatus>(() => {
+      // Performance: Use computed directly instead of state() to avoid recursion
+      const statusComputed = createComputed<AsyncStatus>(() => {
         if (s.error) return 'error'
         if (s.loading) return 'loading'
         if (s.value !== undefined) return 'success'
         return 'idle'
       })
-      const [errorValue] = state<unknown>(() => s.error)
+      const errorComputed = createComputed<unknown>(() => s.error)
+      const statusValue = createStateProxy(statusComputed)
+      const errorValue = createStateProxy(errorComputed)
 
       return [proxy, resActions.refetch, statusValue, errorValue] as [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
     }
@@ -576,14 +580,16 @@ function state<T, P = unknown>(
       }
 
       const proxy = createStateProxy(s._signal as Signal<T>)
-      // Use state() for derived values - dogfooding the unified API
-      const [statusValue] = state<AsyncStatus>(() => {
+      // Performance: Use computed directly instead of state() to avoid recursion
+      const statusComputed = createComputed<AsyncStatus>(() => {
         if (s.error) return 'error'
         if (s.loading) return 'loading'
         if (s.value !== undefined) return 'success'
         return 'idle'
       })
-      const [errorValue] = state<unknown>(() => s.error)
+      const errorComputed = createComputed<unknown>(() => s.error)
+      const statusValue = createStateProxy(statusComputed)
+      const errorValue = createStateProxy(errorComputed)
 
       return [proxy, resActions.refetch, statusValue, errorValue] as [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
     }
