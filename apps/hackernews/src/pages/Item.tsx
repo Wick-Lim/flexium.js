@@ -35,7 +35,7 @@ export default function Item(props: { params?: { id?: string } } = {}) {
     const r = router()
     const [item, setItem] = state<any>(undefined)
 
-    effect(async () => {
+    effect(() => {
         const params = r.params
         const pathname = r.location.pathname
         const idStr = params.id || props.params?.id;
@@ -51,8 +51,8 @@ export default function Item(props: { params?: { id?: string } } = {}) {
             return
         }
 
-        // Load item data (async) - await to ensure it completes
-        await loadItem(parsedId);
+        // Load item data (async) - no await needed, reactive system will handle updates
+        loadItem(parsedId);
         
         // Track the global item state reactively - this will update when loadItem completes
         const [globalItem] = useItem(parsedId);

@@ -6,7 +6,7 @@ export default function User(props: { params?: { id?: string } } = {}) {
     const r = router()
     const [user, setUser] = state<any>(undefined)
 
-    effect(async () => {
+    effect(() => {
         const params = r.params
         const idStr = params.id || props.params?.id;
         
@@ -15,8 +15,8 @@ export default function User(props: { params?: { id?: string } } = {}) {
             return
         }
         
-        // Load user data (async) - await to ensure it completes
-        await loadUser(idStr);
+        // Load user data (async) - no await needed, reactive system will handle updates
+        loadUser(idStr);
         
         // Track the global user state reactively - this will update when loadUser completes
         const [globalUser] = useUser(idStr);
