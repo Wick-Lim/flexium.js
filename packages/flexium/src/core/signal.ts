@@ -36,12 +36,25 @@ export function setDevToolsHooks(hooks: DevToolsHooks | null): void {
   devToolsHooks = hooks
 }
 
+// Flags for subscriber state (Optimization: Bitmasking)
+const enum SubscriberFlags {
+  Running = 1 << 0,
+  Notified = 1 << 1,
+  Dirty = 1 << 2,
+  Stale = 1 << 3,
+  Tracking = 1 << 4,
+}
+
+// Global version clock for epoch-based validation
+let globalVersion = 0
+
 /**
  * Base interface for subscriber nodes
  */
 interface ISubscriber {
   execute(): void
   dependencies: Set<IObservable>
+  flags: SubscriberFlags
 }
 
 /**
@@ -49,6 +62,7 @@ interface ISubscriber {
  */
 interface IObservable {
   subscribers: Set<ISubscriber>
+  version: number // For epoch-based check
   notify(): void
 }
 
@@ -140,8 +154,7 @@ export interface Computed<T> {
 class EffectNode implements ISubscriber {
   dependencies = new Set<IObservable>()
   cleanups: (() => void)[] = []
-  private isExecuting = false
-  private isQueued = false
+  flags = 0 // detached by default, will set flags during execution
 
   private owner: Owner | null = null
 
@@ -153,19 +166,19 @@ class EffectNode implements ISubscriber {
   }
 
   execute(): void {
-    if (this.isExecuting) {
-      this.isQueued = true
+    if ((this.flags & SubscriberFlags.Running) !== 0) {
+      this.flags |= SubscriberFlags.Notified
       return
     }
 
-    this.isExecuting = true
+    this.flags |= SubscriberFlags.Running
 
     try {
       this.run()
     } finally {
-      this.isExecuting = false
-      if (this.isQueued) {
-        this.isQueued = false
+      this.flags &= ~SubscriberFlags.Running
+      if ((this.flags & SubscriberFlags.Notified) !== 0) {
+        this.flags &= ~SubscriberFlags.Notified
         // Schedule microtask to avoid stack overflow and infinite sync loops
         queueMicrotask(() => this.execute())
       }
@@ -223,6 +236,7 @@ class EffectNode implements ISubscriber {
  */
 class SignalNode<T> implements IObservable {
   subscribers = new Set<ISubscriber>()
+  version = 0
 
   constructor(private _value: T) { }
 
@@ -238,6 +252,7 @@ class SignalNode<T> implements IObservable {
   set(newValue: T): void {
     if (this._value !== newValue) {
       this._value = newValue
+      this.version = ++globalVersion
       this.notify()
     }
   }
@@ -253,19 +268,20 @@ class SignalNode<T> implements IObservable {
     } else {
       // Automatic microtask batch
       if (this.subscribers.size > 0) {
-        // Split subscribers: ComputedNodes must run SYNC to mark dirty, Effects run ASYNC
-        const effectsToQueue: ISubscriber[] = []
+        // Optimization: Avoid array allocation for effectsToQueue
+        // Directly check and queue
+        let shouldSchedule = false
 
         for (const sub of this.subscribers) {
           if (sub instanceof ComputedNode) {
             sub.execute() // Mark dirty immediately
           } else {
-            effectsToQueue.push(sub)
+            autoBatchQueue.add(sub)
+            shouldSchedule = true
           }
         }
 
-        if (effectsToQueue.length > 0) {
-          effectsToQueue.forEach(sub => autoBatchQueue.add(sub))
+        if (shouldSchedule) {
           scheduleAutoBatch()
         }
       }
@@ -279,15 +295,93 @@ class SignalNode<T> implements IObservable {
 class ComputedNode<T> implements ISubscriber, IObservable {
   subscribers = new Set<ISubscriber>()
   dependencies = new Set<IObservable>()
+  flags = SubscriberFlags.Dirty | SubscriberFlags.Stale
+  version = 0
   private _value!: T
-  private _dirty = true
+
+  // Optimization: Track last clean epoch to avoid redundant re-computation
+  private lastCleanEpoch = 0
 
   constructor(private computeFn: () => T) { }
 
   execute(): void {
     // When a dependency changes, mark as dirty and notify subscribers
-    this._dirty = true
+    this.flags |= SubscriberFlags.Dirty
+    this.flags |= SubscriberFlags.Stale // Also stale until re-verified
     this.notify()
+  }
+
+  private _updateIfDirty(): void {
+    // 1. If not dirty and not stale, we are valid.
+    if ((this.flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)) === 0) {
+      return
+    }
+
+    // 2. If Stale but not Dirty, check dependencies for updates without potentially running the user function
+    if ((this.flags & SubscriberFlags.Dirty) === 0 && (this.flags & SubscriberFlags.Stale) !== 0) {
+      if (!this._needsRefetch()) {
+        this.flags &= ~SubscriberFlags.Stale
+        return
+      }
+    }
+
+    // 3. Must re-compute
+    this.flags &= ~SubscriberFlags.Dirty
+    this.flags &= ~SubscriberFlags.Stale
+
+    // Clear previous dependencies
+    // Note: In advanced implementations, we might diff dependencies.
+    // Here we clear generic Set for simplicity, but optimized Graph would be better.
+    for (const dep of this.dependencies) {
+      dep.subscribers.delete(this)
+    }
+    this.dependencies.clear()
+
+    const prevEffect = activeEffect
+    activeEffect = this
+
+    // Track global version before compute
+    const prevEpoch = globalVersion
+
+    try {
+      const newValue = this.computeFn()
+      if (this._value !== newValue) {
+        this._value = newValue
+        this.version = ++globalVersion
+      }
+      this.lastCleanEpoch = globalVersion
+    } finally {
+      activeEffect = prevEffect
+    }
+  }
+
+  private _needsRefetch(): boolean {
+    // If we have no dependencies, we are constant or manual trigger
+    if (this.dependencies.size === 0) return true;
+
+    // Fast check: if any dependency version > lastCleanEpoch, we might need update
+    for (const dep of this.dependencies) {
+      // Ideally we would store the version of the dependency seen during last compute.
+      // But for now, let's assume if dep.version > this.lastCleanEpoch, it changed.
+      // This is a heuristic. Accurate versioning requires storing version map.
+      if (dep.version > this.lastCleanEpoch) {
+        // Deep check for computed dependencies?
+        // If dep is Computed, it might have re-computed but returned same value (version might not have bumped if we implemented it right)
+        // But SignalNode bumps version on set() always if value changed.
+        return true
+      }
+
+      // If dependency is computed, it might be stale itself
+      if (dep instanceof ComputedNode) {
+        if ((dep.flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)) !== 0) {
+          dep.peek() // force update
+          if (dep.version > this.lastCleanEpoch) {
+            return true
+          }
+        }
+      }
+    }
+    return false
   }
 
   get(): T {
@@ -297,47 +391,12 @@ class ComputedNode<T> implements ISubscriber, IObservable {
       activeEffect.dependencies.add(this)
     }
 
-    if (this._dirty) {
-      this._dirty = false
-
-      // Clear previous dependencies
-      for (const dep of this.dependencies) {
-        dep.subscribers.delete(this)
-      }
-      this.dependencies.clear()
-
-      const prevEffect = activeEffect
-      activeEffect = this
-
-      try {
-        this._value = this.computeFn()
-      } finally {
-        activeEffect = prevEffect
-      }
-    }
-
+    this._updateIfDirty()
     return this._value
   }
 
   peek(): T {
-    if (this._dirty) {
-      this._dirty = false
-
-      // Clear previous dependencies
-      for (const dep of this.dependencies) {
-        dep.subscribers.delete(this)
-      }
-      this.dependencies.clear()
-
-      const prevEffect = activeEffect
-      activeEffect = this
-
-      try {
-        this._value = this.computeFn()
-      } finally {
-        activeEffect = prevEffect
-      }
-    }
+    this._updateIfDirty()
     return this._value
   }
 
@@ -348,19 +407,19 @@ class ComputedNode<T> implements ISubscriber, IObservable {
     } else {
       // Automatic microtask batch
       if (this.subscribers.size > 0) {
-        // Split subscribers: ComputedNodes must run SYNC to mark dirty, Effects run ASYNC
-        const effectsToQueue: ISubscriber[] = []
+        // Optimization: Avoid array allocation for effectsToQueue
+        let shouldSchedule = false
 
         for (const sub of this.subscribers) {
           if (sub instanceof ComputedNode) {
             sub.execute() // Mark dirty immediately
           } else {
-            effectsToQueue.push(sub)
+            autoBatchQueue.add(sub)
+            shouldSchedule = true
           }
         }
 
-        if (effectsToQueue.length > 0) {
-          effectsToQueue.forEach(sub => autoBatchQueue.add(sub))
+        if (shouldSchedule) {
           scheduleAutoBatch()
         }
       }
