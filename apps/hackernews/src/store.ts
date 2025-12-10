@@ -72,10 +72,12 @@ export async function loadStories(type: string) {
 
 export async function loadItem(id: number) {
     try {
-        console.log('[Store] loadItem called with id:', id);
+        console.log('[Store] loadItem called with id:', id, typeof id);
+        console.log('[Store] loadItem - about to call useItem');
         const [item, setItem] = useItem(id);
+        console.log('[Store] loadItem - useItem returned, item:', item, 'setItem:', typeof setItem);
         const existingItem = item.valueOf();
-        console.log('[Store] loadItem - existingItem:', existingItem ? 'exists' : 'none');
+        console.log('[Store] loadItem - existingItem:', existingItem ? `exists (id=${(existingItem as any).id})` : 'none');
         if (existingItem) {
             console.log('[Store] loadItem - item already loaded, returning');
             return; // Already loaded
@@ -85,15 +87,17 @@ export async function loadItem(id: number) {
         const data = await fetchItem(id);
         console.log('[Store] loadItem - fetched data:', data ? `id=${data.id}, title=${data.title}` : 'null');
         if (data) {
+            console.log('[Store] loadItem - calling setItem with data');
             setItem(data);
-            console.log('[Store] loadItem - setItem called with data');
+            console.log('[Store] loadItem - setItem called');
             const verify = useItem(id)[0].valueOf();
-            console.log('[Store] loadItem - verify after setItem:', verify ? `id=${verify.id}` : 'null');
+            console.log('[Store] loadItem - verify after setItem:', verify ? `id=${(verify as any).id}` : 'null');
         } else {
-            console.warn(`No data returned for item ${id}`);
+            console.warn(`[Store] No data returned for item ${id}`);
         }
     } catch (error) {
-        console.error(`Error loading item ${id}:`, error);
+        console.error(`[Store] Error loading item ${id}:`, error);
+        console.error('[Store] Error stack:', error instanceof Error ? error.stack : 'no stack');
     }
 }
 

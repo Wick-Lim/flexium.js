@@ -33,38 +33,38 @@ function Comment(props: { id: number }) {
 
 export default function Item(props: { params?: { id?: string } } = {}) {
     const r = router()
-    const [currentItemId, setCurrentItemId] = state<number | null>(null)
+    const [item, setItem] = state<any>(undefined)
 
-    effect(() => {
+    effect(async () => {
         const params = r.params
         const pathname = r.location.pathname
         const idStr = params.id || props.params?.id;
         
         if (!idStr) {
-            setCurrentItemId(null)
+            setItem(undefined)
             return
         }
         
         const parsedId = parseInt(idStr);
         if (!parsedId) {
-            setCurrentItemId(null)
+            setItem(undefined)
             return
         }
 
-        setCurrentItemId(parsedId)
-        // Load item data (async)
-        loadItem(parsedId);
+        // Load item data (async) - await to ensure it completes
+        await loadItem(parsedId);
+        
+        // Track the global item state reactively - this will update when loadItem completes
+        const [globalItem] = useItem(parsedId);
+        // Reading globalItem.value here tracks the signal, so when loadItem sets it, this effect will re-run
+        const currentItem = globalItem.valueOf();
+        setItem(currentItem);
     });
-
-    // Track the global item state reactively - reading currentItemId tracks it
-    const itemId = currentItemId.valueOf()
-    if (!itemId) return <div class="view item-view"><div>Loading...</div></div>
     
-    const [item] = useItem(itemId)
-    // Reading item tracks the signal, so when loadItem completes, component will re-render
+    // Use proxy directly
+    if (!item) return <div class="view item-view"><div>Loading...</div></div>
+    
     const itemValue = item.valueOf()
-    
-    if (!itemValue) return <div class="view item-view"><div>Loading...</div></div>
 
     return (
         <div class="view item-view">

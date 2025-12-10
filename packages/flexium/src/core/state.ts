@@ -160,8 +160,9 @@ function serializeKey(key: StateKey): string {
  * @internal
  */
 function checkRegistrySize(): void {
+  const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
   if (
-    process.env.NODE_ENV !== 'production' &&
+    isDev &&
     !hasWarnedAboutSize &&
     globalStateRegistry.size >= DEV_WARNING_THRESHOLD
   ) {
@@ -330,8 +331,9 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
           // Optional dev mode warning for comparison operations
           // Note: This is intentionally minimal to avoid performance overhead
           // Full comparison detection would require stack trace analysis
-          if (process.env.NODE_ENV !== 'production' && 
-              process.env.FLEXIUM_WARN_COMPARISON === 'true') {
+          const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
+          if (isDev && 
+              typeof process !== 'undefined' && process.env?.FLEXIUM_WARN_COMPARISON === 'true') {
             // Only warn if explicitly enabled via environment variable
             // Most users should rely on ESLint rules instead
           }

@@ -63,7 +63,8 @@ function getErrorDetails(code: ErrorCode): {
   message: string
   suggestion?: string
 } {
-  if (process.env.NODE_ENV !== 'production') {
+  const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
+  if (isDev) {
     const errorDefinitions: Record<ErrorCode, ErrorDefinition> = {
       [ErrorCodes.EFFECT_EXECUTION_FAILED]: {
         message: 'Effect execution failed',
