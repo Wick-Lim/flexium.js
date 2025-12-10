@@ -36,6 +36,10 @@ export function setDevToolsHooks(hooks: DevToolsHooks | null): void {
   devToolsHooks = hooks
 }
 
+// ==================================================================================
+// 1. Core Primitives & Flags
+// ==================================================================================
+
 // Flags for subscriber state (Optimization: Bitmasking)
 const enum SubscriberFlags {
   Running = 1 << 0,
@@ -45,15 +49,43 @@ const enum SubscriberFlags {
   Tracking = 1 << 4,
 }
 
-// Global version clock for epoch-based validation
+// Global version clock for epoch-based validation (Optimization: Epochs)
 let globalVersion = 0
+
+/**
+ * Link node connecting a Subscriber (Effect/Computed) to a Dependency (Signal/Computed).
+ *
+ * ASCII Visualization of the Doubly Linked Graph:
+ *
+ * [Signal A] <==> [Link 1] <==> [Effect B]
+ *                    ^
+ *                    | (Prev/Next Sub on Signal A)
+ *                    v
+ *                 [Link 2] <==> [Effect C]
+ *
+ * Each Link serves as a node in TWO lists simultaneously:
+ * 1. The Subscriber's list of dependencies (prevDep/nextDep)
+ * 2. The Dependency's list of subscribers (prevSub/nextSub)
+ */
+interface Link {
+  dep: IObservable | undefined
+  sub: ISubscriber | undefined
+
+  // Pointers for Dependency's subscriber list
+  prevSub: Link | undefined
+  nextSub: Link | undefined
+
+  // Pointers for Subscriber's dependency list
+  prevDep: Link | undefined
+  nextDep: Link | undefined
+}
 
 /**
  * Base interface for subscriber nodes
  */
 interface ISubscriber {
   execute(): void
-  dependencies: Set<IObservable>
+  depsHead: Link | undefined // Head of dependencies list
   flags: SubscriberFlags
 }
 
@@ -61,12 +93,11 @@ interface ISubscriber {
  * Base interface for observable nodes
  */
 interface IObservable {
-  subscribers: Set<ISubscriber>
+  subsHead: Link | undefined // Head of subscribers list
   version: number // For epoch-based check
   notify(): void
 }
 
-// Global context for dependency tracking
 // Global context for dependency tracking
 let activeEffect: ISubscriber | null = null
 
@@ -95,7 +126,135 @@ export function setOwner(newOwner: Owner | null): void {
 
 // Batching state
 let batchDepth = 0
+// Batch queue now needs to store raw subscribers. Set is efficient for uniqueness.
 const batchQueue = new Set<ISubscriber>()
+
+// Auto-batching state (Microtask Scheduler)
+const autoBatchQueue = new Set<ISubscriber>()
+let isAutoBatchScheduled = false
+
+// ==================================================================================
+// 2. Graph Helpers (Internal)
+// ==================================================================================
+
+/**
+ * Internal Graph operations to manage the "Hardcore" Linked List structure.
+ * Encapsulates raw pointer arithmetic for readability.
+ */
+namespace Graph {
+  /**
+   * Connects a dependency (Signal) to a subscriber (Effect/Computed).
+   * Allocates a Link from the pool and stitches it into both lists.
+   */
+  export function connect(dep: IObservable, sub: ISubscriber): void {
+    const link = LinkPool.alloc(dep, sub)
+
+    // Add to Subscriber's dependency list (prepend)
+    link.nextDep = sub.depsHead
+    if (sub.depsHead) {
+      sub.depsHead.prevDep = link
+    }
+    sub.depsHead = link
+
+    // Add to Dependency's subscriber list (prepend)
+    link.nextSub = dep.subsHead
+    if (dep.subsHead) {
+      dep.subsHead.prevSub = link
+    }
+    dep.subsHead = link
+  }
+
+  /**
+   * Fully disconnects a subscriber from all its dependencies.
+   * Walks the 'depsHead' list and unlinks each one.
+   */
+  export function disconnectDependencies(sub: ISubscriber): void {
+    let link = sub.depsHead
+    while (link) {
+      const dep = link.dep!
+      const nextDep = link.nextDep
+
+      // Remove link from dependency's subscriber list
+      // This is a standard doubly-linked list removal
+      if (link.prevSub) {
+        link.prevSub.nextSub = link.nextSub
+      } else {
+        dep.subsHead = link.nextSub
+      }
+      if (link.nextSub) {
+        link.nextSub.prevSub = link.prevSub
+      }
+
+      LinkPool.free(link)
+      link = nextDep
+    }
+    sub.depsHead = undefined
+  }
+}
+
+/**
+ * Pool for Link objects to eliminate GC pressure.
+ */
+namespace LinkPool {
+  const pool: Link[] = []
+  let size = 0
+
+  export function alloc(dep: IObservable, sub: ISubscriber): Link {
+    if (size > 0) {
+      const link = pool[--size]
+      link.dep = dep
+      link.sub = sub
+      link.prevSub = undefined
+      link.nextSub = undefined
+      link.prevDep = undefined
+      link.nextDep = undefined
+      return link
+    }
+    return {
+      dep,
+      sub,
+      prevSub: undefined,
+      nextSub: undefined,
+      prevDep: undefined,
+      nextDep: undefined,
+    }
+  }
+
+  export function free(link: Link): void {
+    link.dep = undefined
+    link.sub = undefined
+    // Clearing pointers is optional for safety but good for debugging leaks
+    link.prevSub = undefined
+    link.nextSub = undefined
+    link.prevDep = undefined
+    link.nextDep = undefined
+
+    if (size < 10000) { // Safety cap
+      pool[size++] = link
+    }
+  }
+}
+
+/**
+ * Flag helpers for readability
+ */
+namespace Flags {
+  export function has(obj: { flags: number }, flag: SubscriberFlags): boolean {
+    return (obj.flags & flag) !== 0
+  }
+
+  export function add(obj: { flags: number }, flag: SubscriberFlags): void {
+    obj.flags |= flag
+  }
+
+  export function remove(obj: { flags: number }, flag: SubscriberFlags): void {
+    obj.flags &= ~flag
+  }
+}
+
+// ==================================================================================
+// 3. User Facing API
+// ==================================================================================
 
 /**
  * Runs a function once when the component mounts.
@@ -152,7 +311,7 @@ export interface Computed<T> {
  * Internal effect node for dependency tracking
  */
 class EffectNode implements ISubscriber {
-  dependencies = new Set<IObservable>()
+  depsHead: Link | undefined
   cleanups: (() => void)[] = []
   flags = 0 // detached by default, will set flags during execution
 
@@ -166,19 +325,19 @@ class EffectNode implements ISubscriber {
   }
 
   execute(): void {
-    if ((this.flags & SubscriberFlags.Running) !== 0) {
-      this.flags |= SubscriberFlags.Notified
+    if (Flags.has(this, SubscriberFlags.Running)) {
+      Flags.add(this, SubscriberFlags.Notified)
       return
     }
 
-    this.flags |= SubscriberFlags.Running
+    Flags.add(this, SubscriberFlags.Running)
 
     try {
       this.run()
     } finally {
-      this.flags &= ~SubscriberFlags.Running
-      if ((this.flags & SubscriberFlags.Notified) !== 0) {
-        this.flags &= ~SubscriberFlags.Notified
+      Flags.remove(this, SubscriberFlags.Running)
+      if (Flags.has(this, SubscriberFlags.Notified)) {
+        Flags.remove(this, SubscriberFlags.Notified)
         // Schedule microtask to avoid stack overflow and infinite sync loops
         queueMicrotask(() => this.execute())
       }
@@ -191,11 +350,8 @@ class EffectNode implements ISubscriber {
     }
     this.cleanups = []
 
-    // Clear previous dependencies
-    for (const dep of this.dependencies) {
-      dep.subscribers.delete(this)
-    }
-    this.dependencies.clear()
+    // Clean up previous dependencies via Graph helper
+    Graph.disconnectDependencies(this)
 
     const prevEffect = activeEffect
     const prevOwner = owner
@@ -224,10 +380,7 @@ class EffectNode implements ISubscriber {
       cleanup()
     }
     this.cleanups = []
-    for (const dep of this.dependencies) {
-      dep.subscribers.delete(this)
-    }
-    this.dependencies.clear()
+    Graph.disconnectDependencies(this)
   }
 }
 
@@ -235,7 +388,7 @@ class EffectNode implements ISubscriber {
  * Internal signal node for writable signals
  */
 class SignalNode<T> implements IObservable {
-  subscribers = new Set<ISubscriber>()
+  subsHead: Link | undefined
   version = 0
 
   constructor(private _value: T) { }
@@ -243,8 +396,7 @@ class SignalNode<T> implements IObservable {
   get(): T {
     // Track dependency if inside an effect or computed
     if (activeEffect) {
-      this.subscribers.add(activeEffect)
-      activeEffect.dependencies.add(this)
+      Graph.connect(this, activeEffect)
     }
     return this._value
   }
@@ -264,21 +416,26 @@ class SignalNode<T> implements IObservable {
   notify(): void {
     if (batchDepth > 0) {
       // Manual batch: queue subscribers
-      this.subscribers.forEach((sub) => batchQueue.add(sub))
+      let link = this.subsHead
+      while (link) {
+        if (link.sub) batchQueue.add(link.sub)
+        link = link.nextSub
+      }
     } else {
       // Automatic microtask batch
-      if (this.subscribers.size > 0) {
-        // Optimization: Avoid array allocation for effectsToQueue
-        // Directly check and queue
+      if (this.subsHead) {
         let shouldSchedule = false
+        let link: Link | undefined = this.subsHead
 
-        for (const sub of this.subscribers) {
+        while (link) {
+          const sub = link.sub!
           if (sub instanceof ComputedNode) {
             sub.execute() // Mark dirty immediately
           } else {
             autoBatchQueue.add(sub)
             shouldSchedule = true
           }
+          link = link.nextSub
         }
 
         if (shouldSchedule) {
@@ -293,8 +450,8 @@ class SignalNode<T> implements IObservable {
  * Internal computed node for derived values
  */
 class ComputedNode<T> implements ISubscriber, IObservable {
-  subscribers = new Set<ISubscriber>()
-  dependencies = new Set<IObservable>()
+  subsHead: Link | undefined
+  depsHead: Link | undefined
   flags = SubscriberFlags.Dirty | SubscriberFlags.Stale
   version = 0
   private _value!: T
@@ -306,42 +463,32 @@ class ComputedNode<T> implements ISubscriber, IObservable {
 
   execute(): void {
     // When a dependency changes, mark as dirty and notify subscribers
-    this.flags |= SubscriberFlags.Dirty
-    this.flags |= SubscriberFlags.Stale // Also stale until re-verified
+    Flags.add(this, SubscriberFlags.Dirty | SubscriberFlags.Stale)
     this.notify()
   }
 
   private _updateIfDirty(): void {
     // 1. If not dirty and not stale, we are valid.
-    if ((this.flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)) === 0) {
+    if (!Flags.has(this, SubscriberFlags.Dirty) && !Flags.has(this, SubscriberFlags.Stale)) {
       return
     }
 
-    // 2. If Stale but not Dirty, check dependencies for updates without potentially running the user function
-    if ((this.flags & SubscriberFlags.Dirty) === 0 && (this.flags & SubscriberFlags.Stale) !== 0) {
+    // 2. If Stale but not Dirty, check dependencies
+    if (!Flags.has(this, SubscriberFlags.Dirty) && Flags.has(this, SubscriberFlags.Stale)) {
       if (!this._needsRefetch()) {
-        this.flags &= ~SubscriberFlags.Stale
+        Flags.remove(this, SubscriberFlags.Stale)
         return
       }
     }
 
     // 3. Must re-compute
-    this.flags &= ~SubscriberFlags.Dirty
-    this.flags &= ~SubscriberFlags.Stale
+    Flags.remove(this, SubscriberFlags.Dirty | SubscriberFlags.Stale)
 
-    // Clear previous dependencies
-    // Note: In advanced implementations, we might diff dependencies.
-    // Here we clear generic Set for simplicity, but optimized Graph would be better.
-    for (const dep of this.dependencies) {
-      dep.subscribers.delete(this)
-    }
-    this.dependencies.clear()
+    // Clear previous dependencies via Graph helper
+    Graph.disconnectDependencies(this)
 
     const prevEffect = activeEffect
     activeEffect = this
-
-    // Track global version before compute
-    const prevEpoch = globalVersion
 
     try {
       const newValue = this.computeFn()
@@ -356,30 +503,25 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   }
 
   private _needsRefetch(): boolean {
-    // If we have no dependencies, we are constant or manual trigger
-    if (this.dependencies.size === 0) return true;
+    if (!this.depsHead) return true;
 
-    // Fast check: if any dependency version > lastCleanEpoch, we might need update
-    for (const dep of this.dependencies) {
-      // Ideally we would store the version of the dependency seen during last compute.
-      // But for now, let's assume if dep.version > this.lastCleanEpoch, it changed.
-      // This is a heuristic. Accurate versioning requires storing version map.
+    // Iterate dependencies via linked list
+    let link: Link | undefined = this.depsHead
+    while (link) {
+      const dep = link.dep!
       if (dep.version > this.lastCleanEpoch) {
-        // Deep check for computed dependencies?
-        // If dep is Computed, it might have re-computed but returned same value (version might not have bumped if we implemented it right)
-        // But SignalNode bumps version on set() always if value changed.
         return true
       }
 
-      // If dependency is computed, it might be stale itself
       if (dep instanceof ComputedNode) {
-        if ((dep.flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)) !== 0) {
-          dep.peek() // force update
+        if (Flags.has(dep, SubscriberFlags.Dirty | SubscriberFlags.Stale)) {
+          dep.peek()
           if (dep.version > this.lastCleanEpoch) {
             return true
           }
         }
       }
+      link = link.nextDep
     }
     return false
   }
@@ -387,8 +529,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   get(): T {
     // Track dependency if inside an effect or computed
     if (activeEffect && activeEffect !== this) {
-      this.subscribers.add(activeEffect)
-      activeEffect.dependencies.add(this)
+      Graph.connect(this, activeEffect)
     }
 
     this._updateIfDirty()
@@ -402,21 +543,27 @@ class ComputedNode<T> implements ISubscriber, IObservable {
 
   notify(): void {
     if (batchDepth > 0) {
-      // Manual batch: queue subscribers
-      this.subscribers.forEach((sub) => batchQueue.add(sub))
+      // Manual batch
+      let link = this.subsHead
+      while (link) {
+        if (link.sub) batchQueue.add(link.sub)
+        link = link.nextSub
+      }
     } else {
       // Automatic microtask batch
-      if (this.subscribers.size > 0) {
-        // Optimization: Avoid array allocation for effectsToQueue
+      if (this.subsHead) {
         let shouldSchedule = false
+        let link: Link | undefined = this.subsHead
 
-        for (const sub of this.subscribers) {
+        while (link) {
+          const sub = link.sub!
           if (sub instanceof ComputedNode) {
-            sub.execute() // Mark dirty immediately
+            sub.execute()
           } else {
             autoBatchQueue.add(sub)
             shouldSchedule = true
           }
+          link = link.nextSub
         }
 
         if (shouldSchedule) {
@@ -427,10 +574,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   }
 }
 
-// Auto-batching state (Microtask Scheduler)
-const autoBatchQueue = new Set<ISubscriber>()
-let isAutoBatchScheduled = false
-
+// ... internal schedulers ...
 function scheduleAutoBatch() {
   if (!isAutoBatchScheduled) {
     isAutoBatchScheduled = true
