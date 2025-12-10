@@ -286,15 +286,15 @@ A complete game built with Flexium's game module. Use arrow keys or WASD to cont
 
 ::: details View Source Code
 ```tsx
-import { signal, effect } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
 import { keyboard, createLoop, Keys } from 'flexium/interactive'
 
-const snake = signal([{ x: 7, y: 7 }])
-const direction = signal('RIGHT')
-const food = signal({ x: 12, y: 7 })
-const score = signal(0)
+const [snake, setSnake] = state([{ x: 7, y: 7 }])
+const [direction, setDirection] = state('RIGHT')
+const [food, setFood] = state({ x: 12, y: 7 })
+const [score, setScore] = state(0)
 
 function SnakeGame() {
   const kb = keyboard()
@@ -314,11 +314,11 @@ function SnakeGame() {
   return (
     <Canvas width={300} height={300}>
       {/* Render food */}
-      <DrawRect x={food.value.x * 20} y={food.value.y * 20}
+      <DrawRect x={food().x * 20} y={food().y * 20}
                 width={20} height={20} fill="#e74c3c" />
 
       {/* Render snake */}
-      {snake.value.map((segment, i) => (
+      {snake().map((segment, i) => (
         <DrawRect x={segment.x * 20} y={segment.y * 20}
                   width={20} height={20} fill={i === 0 ? '#27ae60' : '#2ecc71'} />
       ))}
@@ -340,24 +340,24 @@ Authentication, shopping cart, and notifications with multiple providers working
 
 ::: details View Source Code
 ```tsx
-import { createContext, context, signal } from 'flexium/core'
+import { createContext, context, state } from 'flexium/core'
 
 const AuthContext = createContext({
-  user: signal(null),
+  user: () => null,
   login: (name) => {},
   logout: () => {}
 })
 
 const CartContext = createContext({
-  items: signal([]),
+  items: () => [],
   addItem: (product) => {},
   removeItem: (id) => {},
   updateQty: (id, delta) => {},
-  total: signal(0)
+  total: () => 0
 })
 
 const NotificationContext = createContext({
-  notifications: signal([]),
+  notifications: () => [],
   notify: (msg, type) => {}
 })
 
@@ -385,7 +385,7 @@ function Shop() {
 
   return (
     <div>
-      {user.value ? (
+      {user() ? (
         <button onclick={logout}>Logout</button>
       ) : (
         <button onclick={() => login('Alice')}>Login</button>
@@ -398,13 +398,13 @@ function Shop() {
             addItem(product)
             notify(`Added ${product.name}`, 'success')
           }}
-          disabled={!user.value}
+          disabled={!user()}
         >
           Add {product.name} - ${product.price}
         </button>
       ))}
 
-      <div>Cart Total: ${total.value}</div>
+      <div>Cart Total: ${total()}</div>
     </div>
   )
 }

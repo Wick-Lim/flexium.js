@@ -18,17 +18,18 @@ A flexible component for rendering lists with optional virtualization support.
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { signal } from 'flexium/signal';
+import { state } from 'flexium/core';
 
 // Simple list (renders all items)
-const items = signal(['Apple', 'Banana', 'Cherry']);
+const [items] = state(['Apple', 'Banana', 'Cherry']);
 
 <List items={items}>
   {(item, index) => <div>{index()}: {item}</div>}
 </List>
 
 // Virtual list (for large datasets)
-const largeItems = signal(Array.from({ length: 10000 }, (_, i) => `Item ${i}`));
+// Virtual list (for large datasets)
+const [largeItems] = state(Array.from({ length: 10000 }, (_, i) => `Item ${i}`));
 
 <List items={largeItems} virtual height={400} itemSize={50}>
   {(item, index) => <div>{item}</div>}
@@ -74,7 +75,7 @@ interface VariableSizeConfig {
 ### Simple List
 
 ```tsx
-const fruits = signal(['Apple', 'Banana', 'Cherry', 'Date']);
+const [fruits] = state(['Apple', 'Banana', 'Cherry', 'Date']);
 
 <List items={fruits} getKey={(item) => item}>
   {(fruit, index) => (
@@ -88,7 +89,7 @@ const fruits = signal(['Apple', 'Banana', 'Cherry', 'Date']);
 ### Virtual List with 10K Items
 
 ```tsx
-const items = signal(
+const [items] = state(
   Array.from({ length: 10000 }, (_, i) => ({
     id: i,
     name: `Item ${i}`,

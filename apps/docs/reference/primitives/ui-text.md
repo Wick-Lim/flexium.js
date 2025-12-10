@@ -61,10 +61,10 @@ document.body.appendChild(text.element);
 ### With Reactive Content
 
 ```typescript
-import { signal } from 'flexium/core';
+import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const count = signal(0);
+const [count, setCount] = state(0);
 
 const text = createText({
   as: 'span',
@@ -73,9 +73,9 @@ const text = createText({
   fontWeight: 'bold',
 });
 
-// Text automatically updates when signal changes
-count.set(1);
-count.set(2);
+// Text automatically updates when state changes
+setCount(1);
+setCount(2);
 ```
 
 ### With Truncation
@@ -485,19 +485,19 @@ overflow: hidden;
 Text content can be reactive using signals:
 
 ```typescript
-import { signal } from 'flexium/core';
+import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const username = signal('Guest');
+const [username, setUsername] = state('Guest');
 
 const greeting = createText({
   as: 'p',
-  children: username, // Pass signal directly
+  children: username, // Pass state proxy directly
 });
 
 // Text automatically updates
-username.set('John'); // Displays "John"
-username.set('Jane'); // Displays "Jane"
+setUsername('John'); // Displays "John"
+setUsername('Jane'); // Displays "Jane"
 ```
 
 ### Computed Text
@@ -505,12 +505,12 @@ username.set('Jane'); // Displays "Jane"
 Combine with computed signals for derived text:
 
 ```typescript
-import { signal, computed } from 'flexium/core';
+import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const firstName = signal('John');
-const lastName = signal('Doe');
-const fullName = computed(() => `${firstName.value} ${lastName.value}`);
+const [firstName, setFirstName] = state('John');
+const [lastName] = state('Doe');
+const [fullName] = state(() => `${firstName} ${lastName}`);
 
 const nameDisplay = createText({
   as: 'p',
@@ -518,7 +518,7 @@ const nameDisplay = createText({
 });
 
 // Updates automatically when either signal changes
-firstName.set('Jane'); // Displays "Jane Doe"
+setFirstName('Jane'); // Displays "Jane Doe"
 ```
 
 ## Number Formatting
@@ -529,7 +529,7 @@ Numeric values are automatically converted to strings:
 import { signal } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const count = signal(0);
+const [count, setCount] = state(0);
 
 const counter = createText({
   as: 'span',
@@ -538,8 +538,8 @@ const counter = createText({
   fontWeight: 'bold',
 });
 
-count.set(42); // Displays "42"
-count.set(100); // Displays "100"
+setCount(42); // Displays "42"
+setCount(100); // Displays "100"
 ```
 
 ## Cleanup

@@ -7,7 +7,7 @@ Signals are the foundation of Flexium's reactivity system. They provide fine-gra
 A signal is a reactive container that holds a value. When the value changes, any part of the UI that depends on it automatically updates—no manual DOM manipulation required.
 
 ```tsx
-import { signal } from 'flexium/core'
+import { signal } from 'flexium/advanced'
 
 const count = signal(0)
 
@@ -27,7 +27,7 @@ console.log(count.value) // 5
 The `signal()` function creates a standalone reactive value:
 
 ```tsx
-import { signal } from 'flexium/core'
+import { signal } from 'flexium/advanced'
 
 // Primitive values
 const name = signal('Alice')

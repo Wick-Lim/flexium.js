@@ -10,7 +10,7 @@ head:
       content: Prevent cascading updates with synchronization. Learn when and how to sync multiple signal updates for optimal performance.
 ---
 
-# Sync API & Automatic Batching
+# Sync API & Automatic Synchronization
 
 Flexium automatically optimizes your state updates to ensure high performance. In most cases, you don't need to do anything! 
 
@@ -171,27 +171,27 @@ function addItemAndMeasure() {
 }
 ```
 
-### batch() vs flushSync()
+### sync() Usage (formerly batch)
 
-| Feature | `batch()` | `flushSync()` |
+| Feature | `sync(fn)` | `sync()` (no args) |
 |---------|-----------|---------------|
-| Groups updates | Yes | Yes (with callback) |
-| Effects run | Synchronously after batch | Synchronously (forced) |
+| Groups updates | Yes | No |
+| Effects run | Synchronously after block | Synchronously (forced) |
 | Use case | Grouping related updates | Forcing pending updates |
 | Auto-batch aware | N/A | Flushes auto-batch queue |
 
 ```tsx
-// batch() - for grouping updates
-batch(() => {
+// sync(fn) - for grouping updates
+sync(() => {
   a.value = 1
   b.value = 2
 })
 // Effects run here, synchronously
 
-// flushSync() - for forcing queued updates
+// sync() - for forcing queued updates
 a.value = 1 // Queued by auto-batch
 b.value = 2 // Queued by auto-batch
-flushSync()  // Forces all queued effects to run NOW
+sync()  // Forces all queued effects to run NOW
 ```
 
 ## Why Use Sync?
@@ -245,13 +245,13 @@ batch(() => {
 ### Simple Batching
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const x = signal(0)
 const y = signal(0)
 
-// Update both coordinates in one batch
-batch(() => {
+// Update both coordinates in one sync block
+sync(() => {
   x.set(10)
   y.set(20)
 })
@@ -262,12 +262,12 @@ batch(() => {
 The `batch()` function returns the value returned by the callback:
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const items = signal([])
 const count = signal(0)
 
-const result = batch(() => {
+const result = sync(() => {
   items.set([1, 2, 3, 4, 5])
   count.set(5)
   return 'Updates complete'
@@ -281,7 +281,7 @@ console.log(result) // "Updates complete"
 Batch multiple state changes triggered by user interactions:
 
 ```tsx
-import { state, batch } from 'flexium/core'
+import { state, sync } from 'flexium/core'
 
 function UserForm() {
   const [firstName, setFirstName] = state('')
@@ -292,8 +292,8 @@ function UserForm() {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    // Batch all validation state updates
-    batch(() => {
+    // Sync all validation state updates
+    sync(() => {
       const newErrors = {}
 
       if (!firstName) newErrors.firstName = 'Required'
@@ -341,7 +341,7 @@ function UserForm() {
 Batches can be nested, and effects will only run after the outermost batch completes:
 
 ```tsx
-import { signal, effect, batch } from 'flexium/advanced'
+import { signal, effect, sync } from 'flexium/advanced'
 
 const count = signal(0)
 let runCount = 0
@@ -351,13 +351,13 @@ effect(() => {
   runCount++
 })
 
-batch(() => {
+sync(() => {
   count.set(1)
 
-  batch(() => {
+  sync(() => {
     count.set(2)
 
-    batch(() => {
+    sync(() => {
       count.set(3)
     })
   })
@@ -380,14 +380,14 @@ Flexium uses a depth counter to track nested sync blocks:
 
 This ensures that no matter how deeply sync blocks are nested, effects only run once when all updates are complete.
 
-## When to Use Batch
+## When to Use Sync
 
 ### Form Updates
 
 Batch multiple form field updates:
 
 ```tsx
-import { state, batch } from 'flexium/core'
+import { state, sync } from 'flexium/core'
 
 function ProfileEditor() {
   const [form, setForm] = state({
@@ -401,7 +401,7 @@ function ProfileEditor() {
     const user = await fetch(`/api/users/${userId}`).then(r => r.json())
 
     // Update all form fields at once
-    batch(() => {
+    sync(() => {
       setForm({
         name: user.name,
         email: user.email,
@@ -435,14 +435,14 @@ function ProfileEditor() {
 Process arrays of updates efficiently:
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const items = signal([])
 const count = signal(0)
 const total = signal(0)
 
 const addMultipleItems = (newItems) => {
-  batch(() => {
+  sync(() => {
     items.set([...items.peek(), ...newItems])
     count.set(count.peek() + newItems.length)
     total.set(total.peek() + newItems.reduce((sum, item) => sum + item.price, 0))
@@ -464,7 +464,7 @@ addMultipleItems(
 Update multiple states from API responses:
 
 ```tsx
-import { state, batch } from 'flexium/core'
+import { state, sync } from 'flexium/core'
 
 function DataDashboard() {
   const [users, setUsers] = state([])
@@ -484,15 +484,15 @@ function DataDashboard() {
         statsRes.json()
       ])
 
-      // Update all states in one batch
-      batch(() => {
+      // Update all states in one sync block
+      sync(() => {
         setUsers(usersData)
         setStats(statsData)
         setLoading(false)
         setError(null)
       })
     } catch (err) {
-      batch(() => {
+      sync(() => {
         setError(err.message)
         setLoading(false)
       })
@@ -520,7 +520,7 @@ function DataDashboard() {
 Batch updates in animation loops:
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const x = signal(0)
 const y = signal(0)
@@ -549,7 +549,7 @@ animate()
 Update game state atomically:
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const score = signal(0)
 const lives = signal(3)
@@ -557,7 +557,7 @@ const level = signal(1)
 const enemies = signal([])
 
 const handlePlayerDeath = () => {
-  batch(() => {
+  sync(() => {
     lives.set(lives - 1)
 
     if (+lives <= 0) {
@@ -579,15 +579,15 @@ const completeLevel = () => {
 }
 ```
 
-## When NOT to Use Batch
+## When NOT to Use Sync
 
 ### Single Updates
 
 Don't batch single signal updates - it adds unnecessary overhead:
 
 ```tsx
-// Bad - unnecessary batching
-batch(() => {
+// Bad - unnecessary syncing
+sync(() => {
   count.set(1)
 })
 
@@ -604,7 +604,7 @@ const userCount = signal(0)
 const themeColor = signal('blue')
 
 // These are independent - no shared effects
-// Batching provides no benefit
+// Syncing provides no benefit
 userCount.set(10)
 themeColor.set('red')
 ```
@@ -615,7 +615,7 @@ Event handlers are automatically batched in some frameworks. Check if your conte
 
 ```tsx
 // In Flexium event handlers, updates are NOT automatically batched
-// So you should use batch() when updating multiple signals
+// So you should use sync() when updating multiple signals
 
 <button onclick={() => {
   // These run separately without batch()
@@ -661,7 +661,7 @@ batch(() => {
 ### Performance Metrics
 
 ```tsx
-import { signal, effect, batch } from 'flexium/advanced'
+import { signal, effect, sync } from 'flexium/advanced'
 
 const a = signal(0)
 const b = signal(0)
@@ -673,12 +673,12 @@ effect(() => {
   runCount++
 })
 
-// Without batch
-console.time('without-batch')
+// Without sync
+console.time('without-sync')
 a.set(1)
 b.set(2)
 c.set(3)
-console.timeEnd('without-batch')
+console.timeEnd('without-sync')
 console.log('Runs:', runCount) // 4 (initial + 3 updates)
 
 runCount = 0
@@ -699,7 +699,7 @@ console.log('Runs:', runCount) // 1 (synced update)
 ### 1. Resetting Form State
 
 ```tsx
-import { state, batch } from 'flexium/core'
+import { state, sync } from 'flexium/core'
 
 function ContactForm() {
   const [name, setName] = state('')
@@ -708,7 +708,7 @@ function ContactForm() {
   const [submitted, setSubmitted] = state(false)
 
   const resetForm = () => {
-    batch(() => {
+    sync(() => {
       setName('')
       setEmail('')
       setMessage('')
@@ -720,7 +720,7 @@ function ContactForm() {
     e.preventDefault()
     await submitForm({ name, email, message })
 
-    batch(() => {
+    sync(() => {
       resetForm()
       setSubmitted(true)
     })
@@ -733,7 +733,7 @@ function ContactForm() {
 ### 2. Synchronized Animations
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const ball1X = signal(0)
 const ball1Y = signal(0)
@@ -741,7 +741,7 @@ const ball2X = signal(100)
 const ball2Y = signal(100)
 
 const moveBalls = (deltaTime) => {
-  batch(() => {
+  sync(() => {
     ball1X.set(ball1X + deltaTime * 2)
     ball1Y.set(ball1Y + deltaTime * 1)
     ball2X.set(ball2X - deltaTime * 1.5)
@@ -753,7 +753,7 @@ const moveBalls = (deltaTime) => {
 ### 3. Shopping Cart Updates
 
 ```tsx
-import { state, batch } from 'flexium/core'
+import { state, sync } from 'flexium/core'
 
 function ShoppingCart() {
   const [items, setItems] = state([])
@@ -761,7 +761,7 @@ function ShoppingCart() {
   const [itemCount, setItemCount] = state(0)
 
   const addItem = (item) => {
-    batch(() => {
+    sync(() => {
       setItems([...items, item])
       setTotal(total + item.price)
       setItemCount(itemCount + 1)
@@ -771,7 +771,7 @@ function ShoppingCart() {
   const removeItem = (itemId) => {
     const item = items.find(i => i.id === itemId)
 
-    batch(() => {
+    sync(() => {
       setItems(items.filter(i => i.id !== itemId))
       setTotal(total - item.price)
       setItemCount(itemCount - 1)
@@ -779,7 +779,7 @@ function ShoppingCart() {
   }
 
   const clearCart = () => {
-    batch(() => {
+    sync(() => {
       setItems([])
       setTotal(0)
       setItemCount(0)
@@ -799,7 +799,7 @@ function ShoppingCart() {
 ### 4. Real-time Data Synchronization
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const temperature = signal(20)
 const humidity = signal(50)
@@ -808,7 +808,7 @@ const timestamp = signal(Date.now())
 
 // WebSocket updates multiple sensor values
 websocket.on('sensor-data', (data) => {
-  batch(() => {
+  sync(() => {
     temperature.set(data.temp)
     humidity.set(data.humidity)
     pressure.set(data.pressure)
@@ -825,14 +825,14 @@ Always batch updates that are logically related:
 
 ```tsx
 // Good - related updates batched together
-batch(() => {
+sync(() => {
   setUser(newUser)
   setPermissions(newUser.permissions)
   setLastLogin(Date.now())
 })
 
 // Bad - unrelated updates batched
-batch(() => {
+sync(() => {
   setUser(newUser)
   setThemeColor('blue') // Unrelated!
 })
@@ -843,7 +843,7 @@ batch(() => {
 When reading current values inside a batch, use `peek()` to avoid creating dependencies:
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const count = signal(0)
 
@@ -918,7 +918,7 @@ Add comments explaining why updates are batched together:
 ```tsx
 // Batch all cart state updates to ensure UI consistency
 // and prevent intermediate states where count doesn't match items array
-batch(() => {
+sync(() => {
   setCartItems(newItems)
   setCartCount(newItems.length)
   setCartTotal(calculateTotal(newItems))
@@ -932,7 +932,7 @@ batch(() => {
 You can track when batches are active:
 
 ```tsx
-import { signal, batch, effect } from 'flexium/advanced'
+import { signal, sync, effect } from 'flexium/advanced'
 
 const count = signal(0)
 
@@ -941,7 +941,7 @@ effect(() => {
 })
 
 console.log('Before batch')
-batch(() => {
+sync(() => {
   console.log('Inside batch')
   count.set(1)
   console.log('Still inside batch')
@@ -952,7 +952,7 @@ console.log('After batch')
 
 // Output:
 // Effect running, count: 0
-// Before batch
+// Before sync
 // Inside batch
 // Still inside batch
 // Batch ending

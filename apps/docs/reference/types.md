@@ -84,21 +84,23 @@ interface Signal<T> {
 
 **Usage:**
 ```tsx
-const count = signal(0)
+import { state } from 'flexium/core'
+
+const [count, setCount] = state(0)
 
 // Read value (tracks dependency)
-console.log(count) // 0
+console.log(+count) // 0
 console.log(count + 1) // 1
 
 // Update value
-count.value++
-count.set(5)
+setCount(c => c + 1)
+setCount(5)
 
 // Read without tracking
 const current = count.peek()
 ```
 
-**Related:** `Computed`, `effect()`, `signal()`
+**Related:** `Computed`, `effect()`, `state()`
 
 ### Computed
 
@@ -119,15 +121,17 @@ interface Computed<T> {
 
 **Usage:**
 ```tsx
-const count = signal(1)
-const doubled = computed(() => count * 2)
+import { state } from 'flexium/core'
 
-console.log(doubled) // 2
-count.value = 5
-console.log(doubled) // 10
+const [count, setCount] = state(1)
+const [doubled] = state(() => count * 2)
+
+console.log(+doubled) // 2
+setCount(5)
+console.log(+doubled) // 10
 ```
 
-**Related:** `Signal`, `computed()`
+**Related:** `Signal`, `state()`
 
 ### Resource
 
@@ -153,16 +157,18 @@ interface Resource<T> extends Signal<T | undefined> {
 
 **Usage:**
 ```tsx
-const [user, { mutate, refetch }] = createResource(userId, fetchUser)
+import { state } from 'flexium/core'
+// state() handles async functions as resources
+const [user, refetch, status, error] = state(async () => fetchUser(userId))
 
 return () => {
-  if (user.loading) return <div>Loading...</div>
-  if (user.error) return <div>Error: {user.error.message}</div>
-  return <div>{user?.name}</div>
+  if (status() === 'loading') return <div>Loading...</div>
+  if (error()) return <div>Error: {error().message}</div>
+  return <div>{user()?.name}</div>
 }
 ```
 
-**Related:** `createResource()`, `Signal`
+**Related:** `state()`, `Signal`
 
 ## Component Types
 
@@ -505,8 +511,10 @@ interface DrawRectProps {
 
 **Usage:**
 ```tsx
-const x = signal(10)
-const fill = signal('red')
+import { state } from 'flexium/core'
+
+const [x] = state(10)
+const [fill] = state('red')
 
 <DrawRect
   x={x}

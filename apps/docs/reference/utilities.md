@@ -54,7 +54,7 @@ Returns the current value of the context. If no provider is found in the compone
 #### Usage
 
 ```tsx
-import { createContext, context } from 'flexium';
+import { createContext, context } from 'flexium/core';
 
 // Create a context with a default value
 const ThemeContext = createContext<'light' | 'dark'>('light');
@@ -81,7 +81,7 @@ function ThemedButton() {
 #### Complex Context Example
 
 ```tsx
-import { createContext, context, signal } from 'flexium';
+import { createContext, context, state } from 'flexium/core';
 
 interface User {
   id: string;
@@ -90,7 +90,7 @@ interface User {
 }
 
 interface AuthContextValue {
-  user: Signal<User | null>;
+  user: () => User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: () => boolean;
@@ -99,7 +99,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 function AuthProvider({ children }) {
-  const user = signal<User | null>(null);
+  const [user, setUser] = state<User | null>(null);
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -107,15 +107,15 @@ function AuthProvider({ children }) {
       body: JSON.stringify({ email, password })
     });
     const userData = await response.json();
-    user.value = userData;
+    setUser(userData);
   };
 
   const logout = () => {
-    user.value = null;
+    setUser(null);
   };
 
   const isAuthenticated = () => {
-    return user.value !== null;
+    return user() !== null;
   };
 
   const value: AuthContextValue = {
@@ -139,7 +139,7 @@ function UserProfile() {
     throw new Error('UserProfile must be used within AuthProvider');
   }
 
-  const currentUser = auth.user.value;
+  const currentUser = auth.user();
 
   if (!currentUser) {
     return <div>Please log in</div>;
@@ -203,10 +203,10 @@ Returns a `RouterContext` object:
 
 | Property | Type | Description |
 | --- | --- | --- |
-| `location` | `Signal<Location>` | Reactive signal with current location (pathname, search, hash, query) |
-| `params` | `Computed<Record<string, string>>` | Reactive computed signal with route parameters |
+| `location` | `() => Location` | Reactive signal getter with current location (pathname, search, hash, query) |
+| `params` | `() => Record<string, string>` | Reactive computed getter with route parameters |
 | `navigate` | `(path: string) => void` | Function to navigate to a new path |
-| `matches` | `Computed<RouteMatch[]>` | Reactive computed signal with matched routes (root to leaf) |
+| `matches` | `() => RouteMatch[]` | Reactive computed getter with matched routes (root to leaf) |
 
 #### Usage
 
@@ -217,14 +217,14 @@ function UserProfile() {
   const r = router();
 
   // Access current location
-  const location = r.location;
+  const location = r.location();
   console.log(location.pathname); // "/users/123"
   console.log(location.search);   // "?tab=posts"
   console.log(location.hash);     // "#comments"
   console.log(location.query);    // { tab: "posts" }
 
   // Access route parameters
-  const params = r.params;
+  const params = r.params();
   console.log(params.id); // "123"
 
   // Navigate programmatically
@@ -246,10 +246,10 @@ function UserProfile() {
 ```tsx
 function SearchBar() {
   const r = router();
-  const query = signal('');
+  const [query, setQuery] = state('');
 
   const handleSearch = () => {
-    const searchQuery = query.value;
+    const searchQuery = query();
     r.navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
@@ -257,8 +257,8 @@ function SearchBar() {
     <div>
       <input
         type="text"
-        value={query}
-        oninput={(e) => query.value = e.target.value}
+        value={query()}
+        oninput={(e) => setQuery(e.target.value)}
         placeholder="Search..."
       />
       <button onclick={handleSearch}>Search</button>
@@ -278,7 +278,7 @@ function ProtectedAction() {
 
     if (!isAuthorized) {
       // Redirect to login with return URL
-      const returnUrl = r.location.pathname;
+      const returnUrl = r.location().pathname;
       r.navigate(`/login?return=${encodeURIComponent(returnUrl)}`);
       return;
     }
@@ -332,7 +332,7 @@ Returns a `KeyboardState` object:
 | `isJustPressed(key)` | `(key: string) => boolean` | Check if a key was pressed this frame |
 | `isJustReleased(key)` | `(key: string) => boolean` | Check if a key was released this frame |
 | `getPressedKeys()` | `() => string[]` | Get array of all currently pressed keys |
-| `keys` | `Signal<Set<string>>` | Reactive signal that updates when key state changes |
+| `keys` | `() => Set<string>` | Reactive signal getter that updates when key state changes |
 | `clearFrameState()` | `() => void` | Clear just-pressed/released state (call at end of frame) |
 | `dispose()` | `() => void` | Remove event listeners and cleanup |
 
@@ -344,12 +344,12 @@ import { effect } from 'flexium';
 
 function PlayerController() {
   const keyboard = keyboard();
-  const position = signal({ x: 0, y: 0 });
+  const [position, setPosition] = state({ x: 0, y: 0 });
 
   // React to keyboard input
   effect(() => {
     const speed = 5;
-    const newPos = { ...position.value };
+    const newPos = { ...position() };
 
     if (keyboard.isPressed(Keys.ArrowUp)) {
       newPos.y -= speed;
@@ -364,12 +364,12 @@ function PlayerController() {
       newPos.x += speed;
     }
 
-    position.value = newPos;
+    setPosition(newPos);
   });
 
   return (
     <div style={{
-      transform: `translate(${position.value.x}px, ${position.value.y}px)`
+      transform: `translate(${position().x}px, ${position().y}px)`
     }}>
       Player
     </div>
@@ -387,7 +387,11 @@ function Game() {
   const player = signal({ x: 100, y: 100, jumping: false });
 
   createLoop((dt) => {
-    const pos = { ...player.value };
+  const keyboard = keyboard();
+  const [player, setPlayer] = state({ x: 100, y: 100, jumping: false });
+
+  createLoop((dt) => {
+    const pos = { ...player() };
 
     // Check for jump
     if (keyboard.isJustPressed(Keys.Space) && !pos.jumping) {
@@ -402,7 +406,7 @@ function Game() {
       pos.x += 200 * dt;
     }
 
-    player.value = pos;
+    setPlayer(pos);
 
     // Clear frame state at end of update
     keyboard.clearFrameState();
@@ -412,8 +416,8 @@ function Game() {
     <div>
       <div style={{
         position: 'absolute',
-        left: `${player.value.x}px`,
-        top: `${player.value.y}px`
+        left: `${player().x}px`,
+        top: `${player().y}px`
       }}>
         🎮
       </div>
@@ -449,8 +453,8 @@ Keys.Digit0, Keys.Digit1, Keys.Digit2, ...
 
 ```tsx
 function CanvasInput() {
-  const canvasRef = signal<HTMLCanvasElement | null>(null);
-  const kb = keyboard(canvasRef.value || window);
+  const [canvasRef] = state<HTMLCanvasElement | null>(null);
+  const kb = keyboard(canvasRef() || window);
 
   return (
     <canvas
@@ -510,13 +514,13 @@ Returns a `MouseState` object:
 
 | Property | Type | Description |
 | --- | --- | --- |
-| `position` | `Signal<Vec2>` | Current mouse position `{ x, y }` |
-| `delta` | `Signal<Vec2>` | Mouse movement delta since last frame |
+| `position` | `() => Vec2` | Current mouse position `{ x, y }` |
+| `delta` | `() => Vec2` | Mouse movement delta since last frame |
 | `isPressed(button)` | `(button: number) => boolean` | Check if mouse button is pressed (0=left, 1=middle, 2=right) |
 | `isLeftPressed()` | `() => boolean` | Check if left mouse button is pressed |
 | `isRightPressed()` | `() => boolean` | Check if right mouse button is pressed |
 | `isMiddlePressed()` | `() => boolean` | Check if middle mouse button is pressed |
-| `wheelDelta` | `Signal<number>` | Wheel delta (positive = scroll down) |
+| `wheelDelta` | `() => number` | Wheel delta (positive = scroll down) |
 | `clearFrameState()` | `() => void` | Clear delta and wheel state (call at end of frame) |
 | `dispose()` | `() => void` | Remove event listeners and cleanup |
 
@@ -530,7 +534,7 @@ function MouseTracker() {
 
   return (
     <div>
-      <p>Position: {mouse.position.x}, {mouse.position.y}</p>
+      <p>Position: {mouse.position().x}, {mouse.position().y}</p>
       <p>Delta: {mouse.delta().x}, {mouse.delta().y}</p>
       <p>Left Button: {mouse.isLeftPressed() ? 'Pressed' : 'Released'}</p>
       <p>Wheel: {mouse.wheelDelta()}</p>
@@ -543,24 +547,24 @@ function MouseTracker() {
 
 ```tsx
 import { mouse } from 'flexium/interactive';
-import { signal, effect } from 'flexium';
+import { state, effect } from 'flexium/core';
 
 function DrawingCanvas() {
-  const canvasRef = signal<HTMLCanvasElement | null>(null);
+  const [canvasRef] = state<HTMLCanvasElement | null>(null);
   const mouse = mouse({
     target: window,
-    canvas: canvasRef.value || undefined
+    canvas: canvasRef() || undefined
   });
 
   effect(() => {
-    const canvas = canvasRef.value;
+    const canvas = canvasRef();
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    if (mouse.isLeftPressed) {
-      const pos = mouse.position;
+    if (mouse.isLeftPressed()) {
+      const pos = mouse.position();
       ctx.fillStyle = 'blue';
       ctx.fillRect(pos.x - 5, pos.y - 5, 10, 10);
     }
@@ -584,19 +588,17 @@ import { mouse, createLoop } from 'flexium/interactive';
 
 function ShootingGame() {
   const mouse = mouse();
-  const crosshair = signal({ x: 0, y: 0 });
-  const projectiles = signal<Array<{ x: number, y: number }>>([]);
+  const [crosshair, setCrosshair] = state({ x: 0, y: 0 });
+  const [projectiles, setProjectiles] = state<Array<{ x: number, y: number }>>([]);
 
   createLoop((dt) => {
     // Update crosshair position
-    const pos = mouse.position;
-    crosshair.value = { x: pos.x, y: pos.y };
+    const pos = mouse.position();
+    setCrosshair({ x: pos.x, y: pos.y });
 
     // Shoot on left click
-    if (mouse.isLeftPressed) {
-      const newProjectiles = [...projectiles.value];
-      newProjectiles.push({ x: pos.x, y: pos.y });
-      projectiles.value = newProjectiles;
+    if (mouse.isLeftPressed()) {
+      setProjectiles([...projectiles(), { x: pos.x, y: pos.y }]);
     }
 
     // Clear frame state
@@ -608,8 +610,8 @@ function ShootingGame() {
       {/* Crosshair */}
       <div style={{
         position: 'absolute',
-        left: `${crosshair.value.x}px`,
-        top: `${crosshair.value.y}px`,
+        left: `${crosshair().x}px`,
+        top: `${crosshair().y}px`,
         transform: 'translate(-50%, -50%)',
         width: '20px',
         height: '20px',
@@ -619,7 +621,7 @@ function ShootingGame() {
       }} />
 
       {/* Projectiles */}
-      {projectiles.value.map((p, i) => (
+      {projectiles().map((p, i) => (
         <div key={i} style={{
           position: 'absolute',
           left: `${p.x}px`,
@@ -640,23 +642,23 @@ function ShootingGame() {
 ```tsx
 function ZoomableView() {
   const mouse = mouse();
-  const zoom = signal(1);
+  const [zoom, setZoom] = state(1);
 
   effect(() => {
     const wheel = mouse.wheelDelta();
     if (wheel !== 0) {
-      const newZoom = zoom.value + (wheel * -0.1);
-      zoom.value = Math.max(0.5, Math.min(3, newZoom));
+      const newZoom = zoom() + (wheel * -0.1);
+      setZoom(Math.max(0.5, Math.min(3, newZoom)));
     }
   });
 
   return (
     <div style={{
-      transform: `scale(${zoom.value})`,
+      transform: `scale(${zoom()})`,
       transformOrigin: 'center center',
       transition: 'transform 0.1s'
     }}>
-      Zoom level: {zoom.value.toFixed(2)}
+      Zoom level: {zoom().toFixed(2)}
     </div>
   );
 }
@@ -710,34 +712,36 @@ Flexium doesn't have special rules for hooks - you can create custom hooks by co
 #### Form Hook
 
 ```tsx
+import { state } from 'flexium/core';
+
 function useForm<T>(initialValues: T) {
-  const values = signal(initialValues);
-  const errors = signal<Record<string, string>>({});
-  const touched = signal<Record<string, boolean>>({});
+  const [values, setValues] = state(initialValues);
+  const [errors, setErrors] = state<Record<string, string>>({});
+  const [touched, setTouched] = state<Record<string, boolean>>({});
 
   const setValue = (field: keyof T, value: unknown) => {
-    values.value = { ...values.value, [field]: value };
+    setValues(prev => ({ ...prev, [field]: value }));
   };
 
   const setError = (field: keyof T, error: string) => {
-    errors.value = { ...errors.value, [field]: error };
+    setErrors(prev => ({ ...prev, [field]: error }));
   };
 
   const setTouched = (field: keyof T) => {
-    touched.value = { ...touched.value, [field]: true };
+    setTouched(prev => ({ ...prev, [field]: true }));
   };
 
   const validate = (validators: Record<keyof T, (value: unknown) => string | null>) => {
     const newErrors: Record<string, string> = {};
 
     for (const field in validators) {
-      const error = validators[field](values.value[field]);
+      const error = validators[field](values()[field]);
       if (error) {
         newErrors[field] = error;
       }
     }
 
-    errors.value = newErrors;
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -765,7 +769,7 @@ function LoginForm() {
     });
 
     if (isValid) {
-      console.log('Submit:', form.values.value);
+      console.log('Submit:', form.values());
     }
   };
 
@@ -773,22 +777,22 @@ function LoginForm() {
     <form onsubmit={handleSubmit}>
       <input
         type="email"
-        value={form.values.value.email}
+        value={form.values().email}
         oninput={(e) => form.setValue('email', e.target.value)}
         onblur={() => form.setTouched('email')}
       />
-      {form.errors.value.email && form.touched.value.email && (
-        <div class="error">{form.errors.value.email}</div>
+      {form.errors().email && form.touched().email && (
+        <div class="error">{form.errors().email}</div>
       )}
 
       <input
         type="password"
-        value={form.values.value.password}
+        value={form.values().password}
         oninput={(e) => form.setValue('password', e.target.value)}
         onblur={() => form.setTouched('password')}
       />
-      {form.errors.value.password && form.touched.value.password && (
-        <div class="error">{form.errors.value.password}</div>
+      {form.errors().password && form.touched().password && (
+        <div class="error">{form.errors().password}</div>
       )}
 
       <button type="submit">Login</button>

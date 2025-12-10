@@ -105,16 +105,16 @@ With `autoImport: true`, you can use Flexium primitives without explicit imports
 
 ```tsx
 // Before (without autoImport)
-import { signal, effect, computed } from 'flexium';
+import { state, effect } from 'flexium/core';
 
 function Counter() {
-  const count = signal(0);
+  const [count, setCount] = state(0);
   // ...
 }
 
 // After (with autoImport)
 function Counter() {
-  const count = signal(0); // No import needed!
+  const [count, setCount] = state(0); // No import needed!
   // ...
 }
 ```
@@ -148,13 +148,13 @@ The plugin enables HMR for Flexium components automatically. When you save a fil
 
 ```tsx
 // Counter.tsx
-import { signal } from 'flexium';
+import { state } from 'flexium/core';
 
 export function Counter() {
-  const count = signal(0);
+  const [count, setCount] = state(0);
 
   return (
-    <button onClick={() => count.set(count + 1)}>
+    <button onClick={() => setCount(count + 1)}>
       Count: {count}
     </button>
   );
@@ -231,10 +231,11 @@ Alternatively, use pragma comments in individual files:
 
 ```tsx
 /** @jsxImportSource flexium */
+import { state } from 'flexium/core';
 
 function App() {
-  const count = signal(0);
-  return <button onClick={() => count.set(count + 1)}>{count}</button>;
+  const [count, setCount] = state(0);
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
 }
 ```
 
@@ -263,7 +264,7 @@ If auto imports aren't working:
 
 1. Verify `autoImport: true` in the plugin options
 2. Restart the Vite dev server after changing the config
-3. Check that you're using supported primitives (signal, effect, computed, etc.)
+3. Check that you're using supported primitives (state, effect, etc.)
 
 ## Migration from Manual Configuration
 

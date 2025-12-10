@@ -188,7 +188,7 @@ Use the `virtual` prop on `<List>`:
 Use `untrack()` to read without creating dependencies:
 
 ```tsx
-import { untrack } from 'flexium/core'
+import { untrack } from 'flexium/advanced'
 
 effect(() => {
   const value = trigger
