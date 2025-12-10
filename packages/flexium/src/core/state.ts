@@ -230,12 +230,21 @@ export function getStateSignal(stateValue: unknown): Signal<unknown> | null {
  * Create a reactive proxy that behaves like a value but stays reactive.
  * The proxy is also callable - calling it returns the current value.
  * This ensures compatibility with code expecting getter functions.
+ * 
+ * Performance optimization: Cache value and type checks to avoid repeated sig.value calls.
  */
 function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
   // Use an arrow function as the target so the proxy is callable but has no prototype
   // This prevents invariant violations in ownKeys trap
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const target = () => sig.value
+
+  // Performance: Cache common property accessors to avoid repeated lookups
+  const PEEK_PROP = 'peek'
+  const VALUE_OF_PROP = 'valueOf'
+  const TO_STRING_PROP = 'toString'
+  const TO_JSON_PROP = 'toJSON'
+  const TO_PRIMITIVE_SYMBOL = Symbol.toPrimitive
 
   const proxy = new Proxy(target, {
     // Make the proxy callable - returns current value
@@ -250,36 +259,45 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
       }
 
       // Allow direct access to peek() without tracking
-      if (prop === 'peek') {
+      if (prop === PEEK_PROP) {
         return sig.peek
       }
 
       // Symbol.toPrimitive - called for +, -, ==, template literals, etc.
-      if (prop === Symbol.toPrimitive) {
+      if (prop === TO_PRIMITIVE_SYMBOL) {
         return (_hint: string) => sig.value
       }
 
       // valueOf - called for numeric operations
-      if (prop === 'valueOf') {
+      if (prop === VALUE_OF_PROP) {
         return () => sig.value
       }
 
       // toString - called for string concatenation
-      if (prop === 'toString') {
+      if (prop === TO_STRING_PROP) {
         return () => String(sig.value)
       }
 
       // toJSON - called for JSON.stringify
-      if (prop === 'toJSON') {
+      if (prop === TO_JSON_PROP) {
         return () => sig.value
       }
 
+      // Performance: Read value once and cache type check result
       // For object/array values, access properties on current value
       // Note: accessing sig.value here tracks the signal in any enclosing effect
       const currentValue = sig.value
 
-      if (currentValue !== null && typeof currentValue === 'object') {
-        const propValue = (currentValue as Record<string | symbol, unknown>)[prop]
+      // Performance: Early return for null (most common non-object case)
+      if (currentValue === null) {
+        return undefined
+      }
+
+      // Performance: Type check once
+      const isObject = typeof currentValue === 'object'
+      if (isObject) {
+        const obj = currentValue as Record<string | symbol, unknown>
+        const propValue = obj[prop]
         // If it's a function (like array methods), bind it to the current value
         if (typeof propValue === 'function') {
           return propValue.bind(currentValue)
@@ -293,17 +311,22 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
     // For property checks (like 'length' in array)
     has(_target, prop) {
       if (prop === STATE_SIGNAL) return true
+      // Performance: Read value once
       const currentValue = sig.value
-      if (currentValue !== null && typeof currentValue === 'object') {
-        return prop in (currentValue as object)
-      }
-      return false
+      // Performance: Early return for null
+      if (currentValue === null) return false
+      // Performance: Type check once
+      return typeof currentValue === 'object' && prop in (currentValue as object)
     },
 
     // For Object.keys, for...in loops
     ownKeys(_target) {
+      // Performance: Read value once
       const currentValue = sig.value
-      if (currentValue !== null && typeof currentValue === 'object') {
+      // Performance: Early return for null
+      if (currentValue === null) return []
+      // Performance: Type check once
+      if (typeof currentValue === 'object') {
         return Reflect.ownKeys(currentValue as object)
       }
       return []
@@ -313,8 +336,12 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
       if (prop === STATE_SIGNAL) {
         return { configurable: true, enumerable: false, value: sig }
       }
+      // Performance: Read value once
       const currentValue = sig.value
-      if (currentValue !== null && typeof currentValue === 'object') {
+      // Performance: Early return for null
+      if (currentValue === null) return undefined
+      // Performance: Type check once
+      if (typeof currentValue === 'object') {
         const desc = Object.getOwnPropertyDescriptor(currentValue as object, prop)
         if (desc) {
           // Make it configurable to satisfy Proxy invariants

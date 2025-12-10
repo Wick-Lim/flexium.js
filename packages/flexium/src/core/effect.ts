@@ -4,7 +4,8 @@ import {
     Flags,
     type Link,
     type ISubscriber,
-    SubscriberFlags
+    SubscriberFlags,
+    NodeType
 } from './graph'
 import {
     Owner,
@@ -21,6 +22,7 @@ export class EffectNode implements ISubscriber {
     depsHead: Link | undefined
     cleanups: (() => void)[] = []
     flags = 0 // detached by default, will set flags during execution
+    nodeType = NodeType.Effect
 
     private owner: Owner | null = null
 

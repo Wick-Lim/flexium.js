@@ -24,6 +24,16 @@ export const enum SubscriberFlags {
 }
 
 /**
+ * Node type identifiers for fast type checking (Performance: Avoid instanceof)
+ */
+export const enum NodeType {
+    Signal = 1,
+    Computed = 2,
+    Effect = 3,
+    Resource = 4,
+}
+
+/**
  * Link node connecting a Subscriber (Effect/Computed) to a Dependency (Signal/Computed).
  *
  * ASCII Visualization of the Doubly Linked Graph:
@@ -58,6 +68,7 @@ export interface ISubscriber {
     execute(): void
     depsHead: Link | undefined // Head of dependencies list
     flags: SubscriberFlags
+    nodeType: NodeType // Fast type checking (Performance optimization)
 }
 
 /**
@@ -67,6 +78,7 @@ export interface IObservable {
     subsHead: Link | undefined // Head of subscribers list
     version: number // For epoch-based check
     notify(): void
+    nodeType: NodeType // Fast type checking (Performance optimization)
 }
 
 // ==================================================================================

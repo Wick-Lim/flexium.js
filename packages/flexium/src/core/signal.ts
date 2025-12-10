@@ -15,7 +15,8 @@ import {
   type Link,
   type ISubscriber,
   type IObservable,
-  SubscriberFlags
+  SubscriberFlags,
+  NodeType
 } from './graph'
 import {
   type Owner,
@@ -94,6 +95,7 @@ export interface Computed<T> {
 class SignalNode<T> implements IObservable {
   subsHead: Link | undefined
   version = 0
+  nodeType = NodeType.Signal
 
   constructor(private _value: T) { }
 
@@ -134,7 +136,8 @@ class SignalNode<T> implements IObservable {
 
         while (link) {
           const sub = link.sub!
-          if (sub instanceof ComputedNode) {
+          // Performance: Use nodeType instead of instanceof (much faster)
+          if (sub.nodeType === NodeType.Computed) {
             sub.execute() // Mark dirty immediately
           } else {
             addToAutoBatch(sub)
@@ -159,6 +162,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   depsHead: Link | undefined
   flags = SubscriberFlags.Dirty | SubscriberFlags.Stale
   version = 0
+  nodeType = NodeType.Computed
   private _value!: T
 
   // Optimization: Track last clean epoch to avoid redundant re-computation
@@ -239,10 +243,12 @@ class ComputedNode<T> implements ISubscriber, IObservable {
         return true
       }
 
-      if (dep instanceof ComputedNode) {
-        if (Flags.has(dep, SubscriberFlags.Dirty | SubscriberFlags.Stale)) {
-          dep.peek()
-          if (dep.version > this.lastCleanEpoch) {
+      // Performance: Use nodeType instead of instanceof
+      if (dep.nodeType === NodeType.Computed) {
+        const computedDep = dep as ComputedNode<unknown>
+        if (Flags.has(computedDep, SubscriberFlags.Dirty | SubscriberFlags.Stale)) {
+          computedDep.peek()
+          if (computedDep.version > this.lastCleanEpoch) {
             return true
           }
         }
@@ -284,7 +290,8 @@ class ComputedNode<T> implements ISubscriber, IObservable {
 
         while (link) {
           const sub = link.sub!
-          if (sub instanceof ComputedNode) {
+          // Performance: Use nodeType instead of instanceof (much faster)
+          if (sub.nodeType === NodeType.Computed) {
             sub.execute()
           } else {
             addToAutoBatch(sub)
@@ -437,8 +444,9 @@ export function isSignal(value: unknown): value is Signal<any> | Computed<any> {
  */
 export function onCleanup(fn: () => void): void {
   const activeEffect = getActiveEffect()
-  if (activeEffect instanceof EffectNode) {
-    activeEffect.cleanups.push(fn)
+  // Performance: Use nodeType instead of instanceof
+  if (activeEffect && activeEffect.nodeType === NodeType.Effect) {
+    (activeEffect as EffectNode).cleanups.push(fn)
   } else {
     logWarning(ErrorCodes.CLEANUP_OUTSIDE_EFFECT)
   }
@@ -557,3 +565,9 @@ export function createResource<T, S = any>(
 
   return [resource, actions]
 }
+
+// Re-export commonly used functions for convenience
+// These are imported from other modules but re-exported here for backward compatibility
+export { effect } from './effect'
+export { root, onMount, untrack } from './owner'
+export { sync as batch } from './scheduler'
