@@ -5,11 +5,10 @@
  */
 
 export {
-  signal,
   effect,
   untrack,
   batch,
   root,
-  type Signal,
-  type Computed,
 } from './signal'
+
+export { state } from './state'

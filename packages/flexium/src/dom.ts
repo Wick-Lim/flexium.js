@@ -4,9 +4,10 @@
  * Complete DOM rendering system with reactive components
  */
 
-// Re-export core reactivity
-export { effect, root } from './core/signal'
-export { state } from './core/state'
+// Core reactivity is NO LONGER re-exported.
+// Please import directly from 'flexium/core'.
+// export { effect, root } from './core/signal'
+// export { state } from './core/state'
 
 // DOM renderer
 export { DOMRenderer, domRenderer } from './renderers/dom'

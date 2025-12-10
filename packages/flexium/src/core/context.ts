@@ -1,5 +1,5 @@
 import type { FNodeChild } from './renderer'
-import { getOwner, setOwner } from './signal'
+import { getOwner, setOwner } from './owner'
 
 export interface Context<T> {
   id: symbol

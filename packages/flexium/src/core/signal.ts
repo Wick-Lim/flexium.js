@@ -9,6 +9,23 @@
  */
 
 import { ErrorCodes, logError, logWarning } from './errors'
+import {
+  Graph,
+  Flags,
+  type Link,
+  type ISubscriber,
+  type IObservable,
+  SubscriberFlags
+} from './graph'
+import {
+  type Owner,
+  getOwner,
+  setOwner,
+  onMount,
+  root
+} from './owner'
+
+export { root, onMount } from './owner'
 
 /**
  * DevTools hooks interface - set by devtools module to avoid circular imports
@@ -36,93 +53,11 @@ export function setDevToolsHooks(hooks: DevToolsHooks | null): void {
   devToolsHooks = hooks
 }
 
-// ==================================================================================
-// 1. Core Primitives & Flags
-// ==================================================================================
-
-// Flags for subscriber state (Optimization: Bitmasking)
-const enum SubscriberFlags {
-  Running = 1 << 0,
-  Notified = 1 << 1,
-  Dirty = 1 << 2,
-  Stale = 1 << 3,
-  Tracking = 1 << 4,
-}
-
 // Global version clock for epoch-based validation (Optimization: Epochs)
 let globalVersion = 0
 
-/**
- * Link node connecting a Subscriber (Effect/Computed) to a Dependency (Signal/Computed).
- *
- * ASCII Visualization of the Doubly Linked Graph:
- *
- * [Signal A] <==> [Link 1] <==> [Effect B]
- *                    ^
- *                    | (Prev/Next Sub on Signal A)
- *                    v
- *                 [Link 2] <==> [Effect C]
- *
- * Each Link serves as a node in TWO lists simultaneously:
- * 1. The Subscriber's list of dependencies (prevDep/nextDep)
- * 2. The Dependency's list of subscribers (prevSub/nextSub)
- */
-interface Link {
-  dep: IObservable | undefined
-  sub: ISubscriber | undefined
-
-  // Pointers for Dependency's subscriber list
-  prevSub: Link | undefined
-  nextSub: Link | undefined
-
-  // Pointers for Subscriber's dependency list
-  prevDep: Link | undefined
-  nextDep: Link | undefined
-}
-
-/**
- * Base interface for subscriber nodes
- */
-interface ISubscriber {
-  execute(): void
-  depsHead: Link | undefined // Head of dependencies list
-  flags: SubscriberFlags
-}
-
-/**
- * Base interface for observable nodes
- */
-interface IObservable {
-  subsHead: Link | undefined // Head of subscribers list
-  version: number // For epoch-based check
-  notify(): void
-}
-
 // Global context for dependency tracking
 let activeEffect: ISubscriber | null = null
-
-export interface Owner {
-  cleanups: (() => void)[]
-  context: Record<symbol, unknown> | null
-}
-
-let owner: Owner | null = null
-
-/**
- * Get the current owner (scope)
- * @internal
- */
-export function getOwner(): Owner | null {
-  return owner
-}
-
-/**
- * Set the current owner (scope)
- * @internal
- */
-export function setOwner(newOwner: Owner | null): void {
-  owner = newOwner
-}
 
 // Batching state
 let batchDepth = 0
@@ -134,157 +69,8 @@ const autoBatchQueue = new Set<ISubscriber>()
 let isAutoBatchScheduled = false
 
 // ==================================================================================
-// 2. Graph Helpers (Internal)
-// ==================================================================================
-
-/**
- * Internal Graph operations to manage the "Hardcore" Linked List structure.
- * Encapsulates raw pointer arithmetic for readability.
- */
-namespace Graph {
-  /**
-   * Connects a dependency (Signal) to a subscriber (Effect/Computed).
-   * Allocates a Link from the pool and stitches it into both lists.
-   */
-  export function connect(dep: IObservable, sub: ISubscriber): void {
-    const link = LinkPool.alloc(dep, sub)
-
-    // Add to Subscriber's dependency list (prepend)
-    link.nextDep = sub.depsHead
-    if (sub.depsHead) {
-      sub.depsHead.prevDep = link
-    }
-    sub.depsHead = link
-
-    // Add to Dependency's subscriber list (prepend)
-    link.nextSub = dep.subsHead
-    if (dep.subsHead) {
-      dep.subsHead.prevSub = link
-    }
-    dep.subsHead = link
-  }
-
-  /**
-   * Fully disconnects a subscriber from all its dependencies.
-   * Walks the 'depsHead' list and unlinks each one.
-   */
-  export function disconnectDependencies(sub: ISubscriber): void {
-    let link = sub.depsHead
-    while (link) {
-      const dep = link.dep!
-      const nextDep = link.nextDep
-
-      // Remove link from dependency's subscriber list
-      // This is a standard doubly-linked list removal
-      if (link.prevSub) {
-        link.prevSub.nextSub = link.nextSub
-      } else {
-        dep.subsHead = link.nextSub
-      }
-      if (link.nextSub) {
-        link.nextSub.prevSub = link.prevSub
-      }
-
-      LinkPool.free(link)
-      link = nextDep
-    }
-    sub.depsHead = undefined
-  }
-}
-
-/**
- * Pool for Link objects to eliminate GC pressure.
- */
-namespace LinkPool {
-  const pool: Link[] = []
-  let size = 0
-
-  export function alloc(dep: IObservable, sub: ISubscriber): Link {
-    if (size > 0) {
-      const link = pool[--size]
-      link.dep = dep
-      link.sub = sub
-      link.prevSub = undefined
-      link.nextSub = undefined
-      link.prevDep = undefined
-      link.nextDep = undefined
-      return link
-    }
-    return {
-      dep,
-      sub,
-      prevSub: undefined,
-      nextSub: undefined,
-      prevDep: undefined,
-      nextDep: undefined,
-    }
-  }
-
-  export function free(link: Link): void {
-    link.dep = undefined
-    link.sub = undefined
-    // Clearing pointers is optional for safety but good for debugging leaks
-    link.prevSub = undefined
-    link.nextSub = undefined
-    link.prevDep = undefined
-    link.nextDep = undefined
-
-    if (size < 10000) { // Safety cap
-      pool[size++] = link
-    }
-  }
-}
-
-/**
- * Flag helpers for readability
- */
-namespace Flags {
-  export function has(obj: { flags: number }, flag: SubscriberFlags): boolean {
-    return (obj.flags & flag) !== 0
-  }
-
-  export function add(obj: { flags: number }, flag: SubscriberFlags): void {
-    obj.flags |= flag
-  }
-
-  export function remove(obj: { flags: number }, flag: SubscriberFlags): void {
-    obj.flags &= ~flag
-  }
-}
-
-// ==================================================================================
 // 3. User Facing API
 // ==================================================================================
-
-/**
- * Runs a function once when the component mounts.
- * Unlike effect(), onMount does not track dependencies - it runs exactly once.
- *
- * @param fn - Function to run on mount. Can return a cleanup function.
- *
- * @example
- * ```tsx
- * function MyComponent() {
- *   onMount(() => {
- *     console.log('Mounted!');
- *     return () => console.log('Unmounted!');
- *   });
- *   return <div>Hello</div>;
- * }
- * ```
- */
-export function onMount(fn: () => void | (() => void)): void {
-  // Schedule the mount callback to run after the current execution
-  // This ensures the component is fully rendered before mount runs
-  queueMicrotask(() => {
-    const cleanup = fn()
-
-    // Register cleanup with owner if available
-    if (cleanup && typeof cleanup === 'function' && owner) {
-      owner.cleanups.push(cleanup)
-    }
-  })
-}
 
 /**
  * Base interface for reactive signals
@@ -321,7 +107,7 @@ class EffectNode implements ISubscriber {
     public fn: () => void | (() => void),
     public onError?: (error: Error) => void
   ) {
-    this.owner = owner
+    this.owner = getOwner()
   }
 
   execute(): void {
@@ -354,9 +140,9 @@ class EffectNode implements ISubscriber {
     Graph.disconnectDependencies(this)
 
     const prevEffect = activeEffect
-    const prevOwner = owner
+    const prevOwner = getOwner()
     activeEffect = this
-    owner = this.owner
+    setOwner(this.owner)
 
     try {
       const result = this.fn()
@@ -371,7 +157,7 @@ class EffectNode implements ISubscriber {
       }
     } finally {
       activeEffect = prevEffect
-      owner = prevOwner
+      setOwner(prevOwner)
     }
   }
 
@@ -739,6 +525,7 @@ export function effect(
   node.execute()
   const dispose = () => node.dispose()
 
+  const owner = getOwner()
   if (owner) {
     owner.cleanups.push(dispose)
   }
@@ -816,27 +603,7 @@ export function batch<T>(fn: () => T): T {
  * @param fn - Function that creates effects
  * @returns Dispose function for all effects in the scope
  */
-export function root<T>(fn: (dispose: () => void) => T): T {
-  const prevOwner = owner
-  const newOwner: Owner = {
-    cleanups: [],
-    context: prevOwner ? Object.create(prevOwner.context) : null,
-  }
-  owner = newOwner
 
-  const dispose = () => {
-    for (const cleanup of newOwner.cleanups) {
-      cleanup()
-    }
-    newOwner.cleanups = []
-  }
-
-  try {
-    return fn(dispose)
-  } finally {
-    owner = prevOwner
-  }
-}
 
 /**
  * Symbol to mark signals for detection
