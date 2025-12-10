@@ -2,42 +2,46 @@ import { state, effect } from 'flexium/core'
 import { router } from 'flexium/router'
 import { loadUser, useUser } from '../store'
 
-export default function User() {
+export default function User(props: { params?: { id?: string } } = {}) {
     const r = router()
+    const [currentUserId, setCurrentUserId] = state<string | null>(null)
 
-    const [user, setUser] = state<any>(undefined);
-
-    // Effect 1: Load user data when userId changes
     effect(() => {
-        const userId = r.params.value.id;
-        if (!userId) return;
-        loadUser(userId);
+        const params = r.params
+        const idStr = params.id || props.params?.id;
+        
+        if (!idStr) {
+            setCurrentUserId(null)
+            return
+        }
+        
+        setCurrentUserId(idStr)
+        // Load user data (async)
+        loadUser(idStr);
     });
 
-    // Effect 2: Sync global user state to local state reactively
-    effect(() => {
-        const userId = r.params.value.id;
-        if (!userId) return;
-
-        const [globalUser] = useUser(userId);
-        setUser(globalUser.valueOf());
-    });
-
-    // Use proxy directly
-    if (!user) return <div class="view user-view"><div>Loading...</div></div>
+    // Track the global user state reactively - reading currentUserId tracks it
+    const userId = currentUserId.valueOf()
+    if (!userId) return <div class="view user-view"><div>Loading...</div></div>
+    
+    const [user] = useUser(userId)
+    // Reading user tracks the signal, so when loadUser completes, component will re-render
+    const userValue = user.valueOf()
+    
+    if (!userValue) return <div class="view user-view"><div>Loading...</div></div>
 
     return (
         <div class="view user-view">
             <div>
-                <h1>User : {user.id}</h1>
+                <h1>User : {userValue.id}</h1>
                 <ul class="meta">
-                    <li><span class="label">Created:</span> {new Date(user.created * 1000).toLocaleString()}</li>
-                    <li><span class="label">Karma:</span> {user.karma}</li>
-                    <li innerHTML={user.about} class="about" />
+                    <li><span class="label">Created:</span> {new Date(userValue.created * 1000).toLocaleString()}</li>
+                    <li><span class="label">Karma:</span> {userValue.karma}</li>
+                    <li innerHTML={userValue.about} class="about" />
                 </ul>
                 <p class="links">
-                    <a href={`https://news.ycombinator.com/submitted?id=${user.id}`}>submissions</a> |
-                    <a href={`https://news.ycombinator.com/threads?id=${user.id}`}>comments</a>
+                    <a href={`https://news.ycombinator.com/submitted?id=${userValue.id}`}>submissions</a> |
+                    <a href={`https://news.ycombinator.com/threads?id=${userValue.id}`}>comments</a>
                 </p>
             </div>
         </div>

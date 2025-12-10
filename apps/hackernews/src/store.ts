@@ -72,12 +72,23 @@ export async function loadStories(type: string) {
 
 export async function loadItem(id: number) {
     try {
+        console.log('[Store] loadItem called with id:', id);
         const [item, setItem] = useItem(id);
-        if (item.valueOf()) return; // Already loaded
+        const existingItem = item.valueOf();
+        console.log('[Store] loadItem - existingItem:', existingItem ? 'exists' : 'none');
+        if (existingItem) {
+            console.log('[Store] loadItem - item already loaded, returning');
+            return; // Already loaded
+        }
 
+        console.log('[Store] loadItem - fetching item', id);
         const data = await fetchItem(id);
+        console.log('[Store] loadItem - fetched data:', data ? `id=${data.id}, title=${data.title}` : 'null');
         if (data) {
             setItem(data);
+            console.log('[Store] loadItem - setItem called with data');
+            const verify = useItem(id)[0].valueOf();
+            console.log('[Store] loadItem - verify after setItem:', verify ? `id=${verify.id}` : 'null');
         } else {
             console.warn(`No data returned for item ${id}`);
         }
@@ -88,12 +99,23 @@ export async function loadItem(id: number) {
 
 export async function loadUser(id: string) {
     try {
+        console.log('[Store] loadUser called with id:', id);
         const [user, setUser] = useUser(id);
-        if (user.valueOf()) return; // Already loaded
+        const existingUser = user.valueOf();
+        console.log('[Store] loadUser - existingUser:', existingUser ? 'exists' : 'none');
+        if (existingUser) {
+            console.log('[Store] loadUser - user already loaded, returning');
+            return; // Already loaded
+        }
 
+        console.log('[Store] loadUser - fetching user', id);
         const data = await fetchUser(id);
+        console.log('[Store] loadUser - fetched data:', data ? `id=${data.id}` : 'null');
         if (data) {
             setUser(data);
+            console.log('[Store] loadUser - setUser called with data');
+            const verify = useUser(id)[0].valueOf();
+            console.log('[Store] loadUser - verify after setUser:', verify ? `id=${verify.id}` : 'null');
         } else {
             console.warn(`No data returned for user ${id}`);
         }

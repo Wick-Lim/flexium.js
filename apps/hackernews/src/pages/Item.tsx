@@ -31,40 +31,57 @@ function Comment(props: { id: number }) {
     )
 }
 
-export default function Item() {
+export default function Item(props: { params?: { id?: string } } = {}) {
     const r = router()
-
-    // Local state to track item
-    const [item, setItem] = state<any>(undefined);
+    const [currentItemId, setCurrentItemId] = state<number | null>(null)
 
     effect(() => {
-        const itemId = parseInt(r.params.value.id);
-        if (!itemId) return;
+        const params = r.params
+        const pathname = r.location.pathname
+        const idStr = params.id || props.params?.id;
+        
+        if (!idStr) {
+            setCurrentItemId(null)
+            return
+        }
+        
+        const parsedId = parseInt(idStr);
+        if (!parsedId) {
+            setCurrentItemId(null)
+            return
+        }
 
-        loadItem(itemId);
-        const [globalItem] = useItem(itemId);
-        setItem(globalItem.valueOf());
+        setCurrentItemId(parsedId)
+        // Load item data (async)
+        loadItem(parsedId);
     });
 
-    // Use proxy directly
-    if (!item) return <div class="view item-view"><div>Loading...</div></div>
+    // Track the global item state reactively - reading currentItemId tracks it
+    const itemId = currentItemId.valueOf()
+    if (!itemId) return <div class="view item-view"><div>Loading...</div></div>
+    
+    const [item] = useItem(itemId)
+    // Reading item tracks the signal, so when loadItem completes, component will re-render
+    const itemValue = item.valueOf()
+    
+    if (!itemValue) return <div class="view item-view"><div>Loading...</div></div>
 
     return (
         <div class="view item-view">
             <div>
                 <div class="item-view-header">
-                    <h1><a href={item.url} target="_blank">{item.title}</a></h1>
+                    <h1><a href={itemValue.url} target="_blank">{itemValue.title}</a></h1>
                     <p class="meta">
-                        {item.points} points | by <Link to={`/user/${item.by}`}>{item.by}</Link>
-                        {' '}| {new Date(item.time * 1000).toLocaleString()}
+                        {itemValue.points} points | by <Link to={`/user/${itemValue.by}`}>{itemValue.by}</Link>
+                        {' '}| {new Date(itemValue.time * 1000).toLocaleString()}
                     </p>
                 </div>
                 <div class="item-view-comments">
                     <p class="item-view-comments-header">
-                        {item.descendants} comments
+                        {itemValue.descendants} comments
                     </p>
                     <ul class="comment-children">
-                        {item.kids && item.kids.map((kidId: number) => <Comment id={kidId} />)}
+                        {itemValue.kids && itemValue.kids.map((kidId: number) => <Comment id={kidId} />)}
                     </ul>
                 </div>
             </div>

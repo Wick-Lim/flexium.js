@@ -142,20 +142,36 @@ test.describe('Flexium Router', () => {
     })
 
     test('should display item with correct ID from URL params', async ({ page }) => {
+      // Capture console logs
+      page.on('console', msg => {
+        const text = msg.text()
+        if (text.includes('[Router]') || text.includes('[Item]') || text.includes('[User]') || text.includes('[Store]')) {
+          console.log('Browser console:', text)
+        }
+      })
+      
       await page.goto('/item/123')
 
       // Wait for content to load
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(2000)
 
       // Should show item details
       await expect(page.locator('body')).toContainText('Test Story 123')
     })
 
     test('should navigate to user profile page', async ({ page }) => {
+      // Capture console logs
+      page.on('console', msg => {
+        const text = msg.text()
+        if (text.includes('[Router]') || text.includes('[Item]') || text.includes('[User]') || text.includes('[Store]')) {
+          console.log('Browser console:', text)
+        }
+      })
+      
       await page.goto('/user/testuser')
 
       // Wait for content to load
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(2000)
 
       // Should show user details
       await expect(page.locator('body')).toContainText('testuser')
@@ -211,12 +227,30 @@ test.describe('Flexium Router', () => {
     })
 
     test('should handle direct navigation to /item/:id', async ({ page }) => {
+      // Capture console logs
+      page.on('console', msg => {
+        const text = msg.text()
+        if (text.includes('[Router]') || text.includes('[Item]') || text.includes('[User]') || text.includes('[Store]')) {
+          console.log('Browser console:', text)
+        }
+      })
+      
       await page.goto('/item/42')
+      await page.waitForTimeout(2000)
       await expect(page.locator('body')).toContainText('Test Story 42')
     })
 
     test('should handle direct navigation to /user/:id', async ({ page }) => {
+      // Capture console logs
+      page.on('console', msg => {
+        const text = msg.text()
+        if (text.includes('[Router]') || text.includes('[Item]') || text.includes('[User]') || text.includes('[Store]')) {
+          console.log('Browser console:', text)
+        }
+      })
+      
       await page.goto('/user/johndoe')
+      await page.waitForTimeout(2000)
       await expect(page.locator('body')).toContainText('johndoe')
     })
   })
