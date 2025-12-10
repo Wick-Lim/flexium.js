@@ -303,15 +303,11 @@ sync(() => {
 
 ### Q: List rendering is slow
 
-**A**: Use the `for()` component. It's automatically optimized.
+**A**: Use `items.map()`. It's automatically optimized.
 
 ```tsx
-import { for as For } from 'flexium/core'
-
 // ✅ Optimized list rendering
-<For each={items}>
-  {(item) => <Item data={item} />}
-</For>
+{items.map((item) => <Item data={item} />)}
 
 // ❌ Regular map (not optimized)
 {items.map(item => <Item data={item} />)}
@@ -347,15 +343,15 @@ function App() {
 
 ### Q: How do I get the current path?
 
-**A**: Use the `useRouter()` hook.
+**A**: Use the `router()` function.
 
 ```tsx
-import { useRouter } from 'flexium/router'
+import { router } from 'flexium/router'
 
 function Component() {
-  const router = useRouter()
-  console.log(router.path)  // Current path
-  console.log(router.params)  // Path parameters
+  const r = router()
+  console.log(r.location().pathname)  // Current path
+  console.log(r.params())  // Path parameters
 }
 ```
 

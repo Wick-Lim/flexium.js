@@ -5,7 +5,7 @@
  *
  * @example
  * ```tsx
- * import { state, effect, sync } from 'flexium/core'
+ * import { state, effect } from 'flexium/core'
  * ```
  */
 
@@ -13,10 +13,5 @@
 export { state, ref, equals, isTruthy, isStateValue } from './core/state'
 export type { StateAction, StateValue, AsyncStatus, StateKey, StateOptions, RefObject } from './core/state'
 
-// Side effects and synchronization (necessary primitives)
-export { effect, onMount, onCleanup, root, untrack } from './core/signal'
-export { sync } from './core/scheduler'
-
-// Context API
-export { createContext, context } from './core/context'
-export type { Context } from './core/context'
+// Side effects (necessary primitives)
+export { effect } from './core/signal'

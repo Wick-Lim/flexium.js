@@ -1,11 +1,12 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { state, sync, effect } from 'flexium/core'
+import { state, effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
-function BatchExample() {
+function SyncExample() {
   const [counter1, setCounter1] = state(0)
   const [counter2, setCounter2] = state(0)
   const [counter3, setCounter3] = state(0)
@@ -27,7 +28,7 @@ function BatchExample() {
     setCounter3(c => c + 1)
   }
 
-  const incrementAllBatched = () => {
+  const incrementAllSynced = () => {
     sync(() => {
       setCounter1(c => c + 1)
       setCounter2(c => c + 1)
@@ -64,14 +65,14 @@ function BatchExample() {
           fontSize: '20px',
           fontWeight: '600'
         }
-      }, ['Batch Updates Demo']),
+      }, ['Sync Updates Demo']),
       f('p', {
         style: {
           margin: '0',
           color: '#6b7280',
           fontSize: '14px'
         }
-      }, ['Compare batched vs unbatched updates to see performance difference'])
+      }, ['Compare synced vs unsynced updates to see performance difference'])
     ]),
 
     // Render Count Display
@@ -238,10 +239,10 @@ function BatchExample() {
             flex: '1',
             minWidth: '200px'
           }
-        }, ['Increment All (Unbatched)']),
+        }, ['Increment All (Unsynced)']),
 
         f('button', {
-          onclick: incrementAllBatched,
+          onclick: incrementAllSynced,
           style: {
             padding: '12px 24px',
             background: '#10b981',
@@ -254,7 +255,7 @@ function BatchExample() {
             flex: '1',
             minWidth: '200px'
           }
-        }, ['Increment All (Batched)']),
+        }, ['Increment All (Synced)']),
 
         f('button', {
           onclick: resetAll,
@@ -296,7 +297,7 @@ function BatchExample() {
             fontWeight: '700',
             marginBottom: '4px'
           }
-        }, ['Unbatched (Red)']),
+        }, ['Unsynced (Red)']),
         f('div', {}, ['Updates each counter separately, causing 3 separate renders'])
       ]),
 
@@ -315,7 +316,7 @@ function BatchExample() {
             fontWeight: '700',
             marginBottom: '4px'
           }
-        }, ['Batched (Green)']),
+        }, ['Synced (Green)']),
         f('div', {}, ['Updates all counters together, causing only 1 render'])
       ])
     ]),
@@ -328,7 +329,7 @@ function BatchExample() {
         fontSize: '13px',
         textAlign: 'center'
       }
-    }, ['Watch the render count: batched updates are more efficient!'])
+    }, ['Watch the render count: synced updates are more efficient!'])
   ])
 
   return containerNode
@@ -336,7 +337,7 @@ function BatchExample() {
 
 onMounted(() => {
   if (container.value) {
-    const app = BatchExample()
+    const app = SyncExample()
     render(app, container.value)
   }
 })

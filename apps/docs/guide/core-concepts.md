@@ -179,10 +179,10 @@ These primitives work consistently across web and canvas renderers.
 ### Mount/Unmount
 
 ```tsx
-import { onMount, onCleanup } from 'flexium/core'
+import { effect } from 'flexium/core'
 
 function MyComponent() {
-  onMount(() => {
+  effect(() => {
     console.log('Mounted!')
     return () => console.log('Unmounting!')
   })

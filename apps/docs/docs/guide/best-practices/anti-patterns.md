@@ -322,12 +322,8 @@ const [count, setCount] = state(0)
   <Item key={item.id} data={item} />
 ))}
 
-// ✅ Correct approach - use For component
-import { for as For } from 'flexium/core'
-
-<For each={items}>
-  {(item) => <Item data={item} />}
-</For>
+// ✅ Correct approach - use items.map()
+{items.map((item) => <Item data={item} />)}
 ```
 
 ---
@@ -462,15 +458,17 @@ function Component() {
   // Remains in memory after component unmounts
 }
 
-// ✅ Correct approach - cleanup in cleanup
-import { state, effect, onCleanup } from 'flexium/core'
+// ✅ Correct approach - cleanup in effect
+import { state, effect } from 'flexium/core'
 
 function Component() {
   const [data] = state(async () => fetch('/api/data'), {
     key: 'temp:data'
   })
   
-  onCleanup(() => {
+  effect(() => {
+    // Effect runs on mount
+    return () => {
     state.delete('temp:data')  // Cleanup
   })
 }

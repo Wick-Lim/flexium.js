@@ -1,129 +1,58 @@
 # Context API
 
-Share state across the component tree without prop drilling.
+::: warning Deprecated
+The Context API is deprecated. Use `state()` with `key` option instead for sharing state across components.
 
-<script setup>
-import ContextDemo from '../../components/ContextDemo.vue'
-</script>
+Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `state()` with keys for global state sharing.
+:::
 
-## Live Demo
+## Recommended: Use state() with key
 
-<ClientOnly>
-  <ContextDemo />
-</ClientOnly>
-
-## Import
+Instead of Context API, use `state()` with a `key` option:
 
 ```tsx
-import { createContext, context } from 'flexium/core'
-```
+import { state } from 'flexium/core'
 
-## Functions
+// Share theme across all components
+const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app:theme' })
 
-### createContext
-
-```ts
-function createContext<T>(defaultValue: T): Context<T>
-```
-
-### context
-
-```ts
-function context<T>(ctx: Context<T>): T
-```
-
-## Usage
-
-### Creating a Context
-
-```tsx
-interface ThemeContextValue {
-  theme: Accessor<'light' | 'dark'>
-  toggleTheme: () => void
-}
-
-const ThemeContext = createContext<ThemeContextValue>({
-  theme: () => 'light',
-  toggleTheme: () => {}
-})
-```
-
-### Provider Component
-
-```tsx
-function ThemeProvider(props: { children: any }) {
-  const [theme, setTheme] = state<'light' | 'dark'>('light')
-
-  const toggleTheme = () => {
-    setTheme(t => t === 'light' ? 'dark' : 'light')
-  }
-
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {props.children}
-    </ThemeContext.Provider>
-  )
-}
-```
-
-### Consuming Context
-
-```tsx
+// In any component
 function ThemeToggle() {
-  const { theme, toggleTheme } = context(ThemeContext)
-
+  const [theme, setTheme] = state('light', { key: 'app:theme' })
+  
   return (
-    <button onclick={toggleTheme}>
+    <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
       Current: {theme}
     </button>
   )
 }
 ```
 
-### Complete Example
+### Complete Example: Auth State
 
 ```tsx
-// Auth Context
-interface AuthContextValue {
-  user: Accessor<User | null>
-  login: (credentials: Credentials) => Promise<void>
-  logout: () => void
-}
+import { state } from 'flexium/core'
 
-const AuthContext = createContext<AuthContextValue>({...})
-
-function AuthProvider(props: { children: any }) {
-  const [user, setUser] = state<User | null>(null)
-
+// Auth state - shared globally
+function useAuth() {
+  const [user, setUser] = state<User | null>(null, { key: 'auth:user' })
+  
   const login = async (credentials: Credentials) => {
     const user = await api.login(credentials)
     setUser(user)
   }
-
+  
   const logout = () => {
     setUser(null)
   }
-
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {props.children}
-    </AuthContext.Provider>
-  )
+  
+  return { user, login, logout }
 }
 
-// Usage
-function App() {
-  return (
-    <AuthProvider>
-      <Header />
-      <MainContent />
-    </AuthProvider>
-  )
-}
-
+// Use in any component
 function Header() {
-  const { user, logout } = context(AuthContext)
-
+  const { user, logout } = useAuth()
+  
   return (
     <header>
       {user ? (
@@ -139,53 +68,73 @@ function Header() {
 }
 ```
 
-### Multiple Contexts
+### Multiple Global States
 
 ```tsx
-function App() {
-  return (
-    <ThemeProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <Router />
-        </NotificationProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  )
-}
+import { state } from 'flexium/core'
 
+// Theme state
+const [theme, setTheme] = state('light', { key: 'app:theme' })
+
+// Auth state
+const [user, setUser] = state(null, { key: 'app:auth:user' })
+
+// Cart state
+const [items, setItems] = state([], { key: 'app:cart:items' })
+
+// Use in any component
 function Dashboard() {
-  const { theme } = context(ThemeContext)
-  const { user } = context(AuthContext)
-  const { notify } = context(NotificationContext)
-
-  // Use all contexts
+  const [theme] = state('light', { key: 'app:theme' })
+  const [user] = state(null, { key: 'app:auth:user' })
+  const [items] = state([], { key: 'app:cart:items' })
+  
+  // Use all states
 }
 ```
 
-## Behavior
+## Benefits of state() with key
 
-- Context value is **inherited** down the component tree
-- **Nearest Provider** value is used when nested
-- **Default value** is used when no Provider is found
-- Values can include **signals** for reactivity
+- ✅ **No Provider boilerplate** - No wrapper components needed
+- ✅ **No hierarchy** - Access from anywhere, not just child components
+- ✅ **Simpler mental model** - Same API as local state
+- ✅ **Automatic cleanup** - Use `state.delete(key)` when needed
+- ✅ **Type-safe** - Full TypeScript support
 
-## Best Practices
+## Migration from Context API
 
-1. **Keep contexts focused** - One context per concern
-2. **Use signals** in context values for reactivity
-3. **Provide sensible defaults** for development
-4. **Create helper functions** for complex contexts:
+If you're using deprecated Context API, migrate to `state()` with keys:
 
 ```tsx
-function getAuth() {
-  const ctx = context(AuthContext)
-  if (!ctx) throw new Error('getAuth must be used within AuthProvider')
-  return ctx
+// ❌ Old way (deprecated)
+import { createContext, context } from 'flexium/core'
+
+const ThemeContext = createContext('light')
+
+function ThemeProvider(props) {
+  const [theme, setTheme] = state('light')
+  return (
+    <ThemeContext.Provider value={theme}>
+      {props.children}
+    </ThemeContext.Provider>
+  )
+}
+
+function Child() {
+  const theme = context(ThemeContext)
+  return <div>{theme}</div>
+}
+
+// ✅ New way
+import { state } from 'flexium/core'
+
+// No Provider needed!
+function Child() {
+  const [theme] = state('light', { key: 'app:theme' })
+  return <div>{theme}</div>
 }
 ```
 
 ## See Also
 
-- [state()](/docs/core/state)
-- [computed()](/docs/core/computed)
+- [state()](/docs/core/state) - Complete state() documentation with key option
+- [Best Practices: State Organization](/docs/guide/best-practices/state-organization) - How to organize global state

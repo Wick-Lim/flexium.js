@@ -127,7 +127,8 @@ Computed values only recalculate when their dependencies change, and they cache 
 When you need a derived value, use `computed()` instead of `effect()` with manual state updates:
 
 ```tsx
-import { signal, computed, effect } from 'flexium/advanced';
+import { effect } from 'flexium/core';
+import { signal, computed } from 'flexium/advanced';
 
 const [firstName, setFirstName] = signal('John');
 const [lastName, setLastName] = signal('Doe');
@@ -203,7 +204,8 @@ const total = computed(() => price.value * (1 + tax.value));
 - **Setting up subscriptions or event listeners**
 
 ```tsx
-import { signal, effect } from 'flexium/advanced';
+import { effect } from 'flexium/core';
+import { signal } from 'flexium/advanced';
 
 const [userId, setUserId] = signal(null);
 
@@ -228,7 +230,8 @@ effect(() => {
 ### Performance Comparison
 
 ```tsx
-import { signal, computed, effect } from 'flexium/advanced';
+import { effect } from 'flexium/core';
+import { signal, computed } from 'flexium/advanced';
 
 const [count, setCount] = signal(0);
 
@@ -258,7 +261,7 @@ doubled.value;   // Recomputes now
 When making multiple state changes, sync them to avoid intermediate updates:
 
 ```tsx
-import { sync } from 'flexium/core';
+import { sync } from 'flexium/advanced';
 import { signal } from 'flexium/advanced';
 
 const [firstName, setFirstName] = signal('John');
@@ -337,7 +340,9 @@ Flexium uses efficient event delegation for all standard events. Listeners are a
 Use `root()` to create disposal scopes for effects and computations:
 
 ```tsx
-import { root, effect, signal } from 'flexium/advanced';
+import { effect } from 'flexium/core';
+import { root } from 'flexium/advanced';
+import { signal } from 'flexium/advanced';
 
 const [count, setCount] = signal(0);
 
@@ -396,7 +401,9 @@ function Timer() {
 Use `untrack()` to read a signal without creating a dependency:
 
 ```tsx
-import { signal, effect, untrack } from 'flexium/advanced';
+import { effect } from 'flexium/core';
+import { untrack } from 'flexium/advanced';
+import { signal } from 'flexium/advanced';
 
 const [count, setCount] = signal(0);
 const [multiplier, setMultiplier] = signal(2);
@@ -488,18 +495,22 @@ function BigList() {
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { state, memo } from 'flexium/core';
+import { state } from 'flexium/core';
 
 function OptimizedList() {
   const [items] = state([...]); // 100,000 items
 
-  // Memoize the item renderer
-  const renderItem = memo((item, index) => (
-    <div class="item">
-      <span>{index}</span>
-      <span>{item.name}</span>
-    </div>
-  ));
+  // List component automatically optimizes rendering
+  return (
+    <List items={items}>
+      {(item, index) => (
+        <div class="item">
+          <span>{index}</span>
+          <span>{item.name}</span>
+        </div>
+      )}
+    </List>
+  );
 
   return (
     <List
@@ -523,15 +534,27 @@ function OptimizedList() {
 Split your application into smaller chunks that load on demand:
 
 ```tsx
-import { lazy, Suspense } from 'flexium/core';
-
-// Lazy load components
-const Dashboard = lazy(() => import('./Dashboard'));
-const Settings = lazy(() => import('./Settings'));
-const Profile = lazy(() => import('./Profile'));
-
+// Use dynamic imports with state for code splitting
 function App() {
   const [route, setRoute] = state('dashboard');
+  const [components, setComponents] = state({
+    dashboard: null,
+    settings: null,
+    profile: null
+  });
+
+  // Load components on demand
+  effect(() => {
+    if (route === 'dashboard' && !components.dashboard) {
+      import('./Dashboard').then(m => setComponents(prev => ({ ...prev, dashboard: m.default })));
+    }
+    if (route === 'settings' && !components.settings) {
+      import('./Settings').then(m => setComponents(prev => ({ ...prev, settings: m.default })));
+    }
+    if (route === 'profile' && !components.profile) {
+      import('./Profile').then(m => setComponents(prev => ({ ...prev, profile: m.default })));
+    }
+  });
 
   return (
     <div>
@@ -541,11 +564,9 @@ function App() {
         <button onclick={() => setRoute('profile')}>Profile</button>
       </nav>
 
-      <Suspense fallback={<div>Loading...</div>}>
-        {route === 'dashboard' && <Dashboard />}
-        {route === 'settings' && <Settings />}
-        {route === 'profile' && <Profile />}
-      </Suspense>
+      {route === 'dashboard' && (components.dashboard ? <components.dashboard /> : <div>Loading...</div>)}
+      {route === 'settings' && (components.settings ? <components.settings /> : <div>Loading...</div>)}
+      {route === 'profile' && (components.profile ? <components.profile /> : <div>Loading...</div>)}
     </div>
   );
 }
@@ -557,11 +578,15 @@ With Flexium Router, automatically split by route:
 
 ```tsx
 import { Router, Route } from 'flexium/router';
-import { lazy } from 'flexium/core';
+// Use dynamic imports with state for code splitting
+const [Home, setHome] = state(null);
+const [About, setAbout] = state(null);
+const [Contact, setContact] = state(null);
 
-const Home = lazy(() => import('./pages/Home'));
-const About = lazy(() => import('./pages/About'));
-const Contact = lazy(() => import('./pages/Contact'));
+// Load on demand
+import('./pages/Home').then(m => setHome(m.default));
+import('./pages/About').then(m => setAbout(m.default));
+import('./pages/Contact').then(m => setContact(m.default));
 
 function App() {
   return (
@@ -579,20 +604,20 @@ function App() {
 Load data only when needed:
 
 ```tsx
-import { state, Show } from 'flexium/core';
+import { state, effect } from 'flexium/core';
 
 function UserProfile({ userId }) {
   const [expanded, setExpanded] = state(false);
+  const [details, setDetails] = state(null);
 
   // Only fetch when expanded
-  const [details, { refetch }] = state(
-    async () => {
-      if (!expanded) return null;
-      const res = await fetch(`/api/users/${userId}/details`);
-      return res.json();
-    },
-    { key: `user-${userId}-details` }
-  );
+  effect(() => {
+    if (expanded && !details) {
+      fetch(`/api/users/${userId}/details`)
+        .then(res => res.json())
+        .then(data => setDetails(data));
+    }
+  });
 
   return (
     <div>
@@ -601,7 +626,7 @@ function UserProfile({ userId }) {
         {expanded ? 'Hide' : 'Show'} Details
       </button>
 
-      {expanded && (
+      {expanded && details && (
         !details.loading ? (
           <div>{details?.bio}</div>
         ) : (
@@ -668,7 +693,8 @@ import { render } from 'flexium/dom';
 import { Column, Row, Text } from 'flexium/primitives';
 
 // Advanced APIs
-import { signal, computed, root, untrack } from 'flexium/advanced';
+import { root, untrack } from 'flexium/advanced';
+import { signal, computed } from 'flexium/advanced';
 
 // Router
 import { Router, Route, Link } from 'flexium/router';
@@ -791,7 +817,8 @@ function Dashboard() {
 For expensive calculations, memoize outside the render:
 
 ```tsx
-import { state, computed } from 'flexium/core';
+import { state } from 'flexium/core';
+import { computed } from 'flexium/advanced';
 
 function DataTable({ rawData }) {
   // Expensive computation - do it once
@@ -871,13 +898,13 @@ Flexium works with React DevTools for component profiling:
 1. **Use computed for derived values** - Lazy, memoized, efficient
 2. **Batch multiple updates** - Reduce intermediate renders
 3. **Leverage List with virtual mode for long lists** - Constant memory, smooth scrolling
-4. **Code split with lazy()** - Smaller initial bundles
+4. **Code split with dynamic imports** - Smaller initial bundles
 5. **Import only what you need** - Better tree shaking
 6. **Use untrack() judiciously** - Prevent unnecessary dependencies
 7. **Clean up effects in root scopes** - Avoid memory leaks
 8. **Profile before optimizing** - Measure, don't guess
 9. **Keep components small** - Easier to optimize and maintain
-10. **Use Show/For instead of conditionals** - Optimized for reactivity
+10. **Use conditional rendering with && or ternary** - Optimized for reactivity
 
 ## Benchmarks
 

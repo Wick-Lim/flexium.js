@@ -7,7 +7,7 @@ describe('eslint-plugin-flexium', () => {
     expect(rules['no-signal-outside-reactive']).toBeDefined();
     expect(rules['effect-cleanup']).toBeDefined();
     expect(rules['no-side-effect-in-computed']).toBeDefined();
-    expect(rules['prefer-batch']).toBeDefined();
+    expect(rules['prefer-sync']).toBeDefined();
     expect(rules['no-missing-dependencies']).toBeDefined();
     expect(rules['effect-dependencies-complete']).toBeDefined();
     expect(rules['no-signal-mutation']).toBeDefined();
@@ -33,7 +33,7 @@ describe('eslint-plugin-flexium', () => {
     expect(recommended.rules['flexium/no-signal-outside-reactive']).toBe('warn');
     expect(recommended.rules['flexium/effect-cleanup']).toBe('warn');
     expect(recommended.rules['flexium/no-side-effect-in-computed']).toBe('error');
-    expect(recommended.rules['flexium/prefer-batch']).toBe('off');
+    expect(recommended.rules['flexium/prefer-sync']).toBe('off');
     expect(recommended.rules['flexium/no-missing-dependencies']).toBe('warn');
     expect(recommended.rules['flexium/effect-dependencies-complete']).toBe('warn');
     expect(recommended.rules['flexium/no-signal-mutation']).toBe('warn');
@@ -51,7 +51,7 @@ describe('eslint-plugin-flexium', () => {
     expect(strict.rules['flexium/no-signal-outside-reactive']).toBe('error');
     expect(strict.rules['flexium/effect-cleanup']).toBe('error');
     expect(strict.rules['flexium/no-side-effect-in-computed']).toBe('error');
-    expect(strict.rules['flexium/prefer-batch']).toBe('warn');
+    expect(strict.rules['flexium/prefer-sync']).toBe('warn');
     expect(strict.rules['flexium/no-missing-dependencies']).toBe('error');
     expect(strict.rules['flexium/effect-dependencies-complete']).toBe('error');
     expect(strict.rules['flexium/no-signal-mutation']).toBe('error');

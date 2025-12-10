@@ -150,8 +150,8 @@ effect(() => {
 })
 ```
 
-::: tip
-Flexium also exports `onMount` and `onCleanup` for compatibility, but `effect()` is the recommended approach.
+::: warning Deprecated APIs
+`onMount()` and `onCleanup()` are deprecated. Use `effect()` instead. See [Lifecycle Management](/docs/core/lifecycle) for migration guide.
 :::
 
 ## Notes

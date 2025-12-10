@@ -432,15 +432,15 @@ function CheckoutButton() {
 Navigate in response to data changes:
 
 ```tsx
-import { useEffect } from 'flexium'
+import { effect } from 'flexium/core'
 import { router } from 'flexium/router'
 
 function OrderStatus() {
   const r = router()
-  const params = r.params
+  const params = r.params()
   const orderId = params.id
 
-  useEffect(() => {
+  effect(() => {
     const checkStatus = async () => {
       const order = await fetchOrder(orderId)
 
@@ -466,7 +466,8 @@ Create smooth transitions between routes using CSS and Flexium's reactive system
 ### Basic Fade Transition
 
 ```tsx
-import { signal, useEffect } from 'flexium'
+import { effect } from 'flexium/core'
+import { signal } from 'flexium/advanced'
 import { router } from 'flexium/router'
 
 function TransitionWrapper({ children }) {
@@ -474,7 +475,7 @@ function TransitionWrapper({ children }) {
   const location = r.location
   const isTransitioning = signal(false)
 
-  useEffect(() => {
+  effect(() => {
     // Trigger transition on location change
     isTransitioning.value = true
 
@@ -506,8 +507,8 @@ function PageTransition({ children }) {
   const currentPath = signal('')
   const isAnimating = signal(false)
 
-  useEffect(() => {
-    const newPath = location.pathname
+  effect(() => {
+    const newPath = location().pathname
 
     if (currentPath.value !== newPath) {
       isAnimating.value = true
@@ -894,4 +895,4 @@ function App() {
 
 - [Router API Reference](/reference/router) - Complete API documentation
 - [State Management](/guide/state) - Managing application state
-- [Context](/guide/context) - Sharing data with Context
+- [Global State](/guide/context) - Sharing state globally with state() key

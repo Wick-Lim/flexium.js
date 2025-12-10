@@ -209,8 +209,7 @@ export default defineConfig({
           items: [
             { text: 'state()', link: '/docs/core/state' },
             { text: 'effect()', link: '/docs/core/effect' },
-            { text: 'sync()', link: '/docs/core/sync' },
-            { text: 'for()', link: '/docs/core/for' }
+            { text: 'Lifecycle', link: '/docs/core/lifecycle' }
           ]
         },
         {
@@ -315,8 +314,7 @@ export default defineConfig({
           items: [
             { text: 'state()', link: '/docs/core/state' },
             { text: 'effect()', link: '/docs/core/effect' },
-            { text: 'sync()', link: '/docs/core/sync' },
-            { text: 'for()', link: '/docs/core/for' }
+            { text: 'Lifecycle', link: '/docs/core/lifecycle' }
           ]
         },
         {
@@ -414,8 +412,7 @@ export default defineConfig({
           items: [
             { text: 'state()', link: '/docs/core/state' },
             { text: 'effect()', link: '/docs/core/effect' },
-            { text: 'sync()', link: '/docs/core/sync' },
-            { text: 'for()', link: '/docs/core/for' }
+            { text: 'Lifecycle', link: '/docs/core/lifecycle' }
           ]
         },
         {

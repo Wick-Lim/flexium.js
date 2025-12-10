@@ -181,7 +181,7 @@ function ProductPage({ productId }: { productId: string }) {
 
 ```tsx
 // ✅ Cleanup on component unmount
-import { state, effect, onCleanup } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 
 function TemporaryComponent() {
   const [data] = state(async () => {
@@ -189,8 +189,10 @@ function TemporaryComponent() {
   }, { key: 'temp:data' })
   
   // Cleanup on component unmount
-  onCleanup(() => {
-    state.delete('temp:data')
+  effect(() => {
+    return () => {
+      state.delete('temp:data')
+    }
   })
   
   return <div>...</div>

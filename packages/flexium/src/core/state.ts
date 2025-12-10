@@ -1,4 +1,4 @@
-import { signal, computed as createComputed, createResource } from './signal'
+import { signal, computed, createResource } from './signal'
 import type { Signal, Computed, Resource } from './signal'
 
 /** Symbol to identify StateProxy and access underlying signal */
@@ -560,13 +560,13 @@ function state<T, P = unknown>(
     if (isAsync) {
       const refetch = cached._stateActions?.refetch || (() => { })
       // Performance: Use computed directly instead of state() to avoid recursion
-      const statusComputed = createComputed<AsyncStatus>(() => {
+      const statusComputed = computed<AsyncStatus>(() => {
         if (cached.error) return 'error'
         if (cached.loading) return 'loading'
         if (cached.value !== undefined) return 'success'
         return 'idle'
       })
-      const errorComputed = createComputed<unknown>(() => cached.error)
+      const errorComputed = computed<unknown>(() => cached.error)
       const statusValue = createStateProxy(statusComputed)
       const errorValue = createStateProxy(errorComputed)
       return [proxy, refetch, statusValue, errorValue] as [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>]
@@ -606,13 +606,13 @@ function state<T, P = unknown>(
 
       const proxy = createStateProxy(s._signal as Signal<T>)
       // Performance: Use computed directly instead of state() to avoid recursion
-      const statusComputed = createComputed<AsyncStatus>(() => {
+      const statusComputed = computed<AsyncStatus>(() => {
         if (s.error) return 'error'
         if (s.loading) return 'loading'
         if (s.value !== undefined) return 'success'
         return 'idle'
       })
-      const errorComputed = createComputed<unknown>(() => s.error)
+      const errorComputed = computed<unknown>(() => s.error)
       const statusValue = createStateProxy(statusComputed)
       const errorValue = createStateProxy(errorComputed)
 
@@ -626,7 +626,7 @@ function state<T, P = unknown>(
       testResult = fn()
     } catch {
       // If it throws during initial call, treat as computed (will throw on access)
-      const comp = createComputed(fn as () => T)
+      const comp = computed(fn as () => T)
       const s = toComputedStateObject(comp)
       if (key) {
         globalStateRegistry.set(key, s)
@@ -647,13 +647,13 @@ function state<T, P = unknown>(
 
       const proxy = createStateProxy(s._signal as Signal<T>)
       // Performance: Use computed directly instead of state() to avoid recursion
-      const statusComputed = createComputed<AsyncStatus>(() => {
+      const statusComputed = computed<AsyncStatus>(() => {
         if (s.error) return 'error'
         if (s.loading) return 'loading'
         if (s.value !== undefined) return 'success'
         return 'idle'
       })
-      const errorComputed = createComputed<unknown>(() => s.error)
+      const errorComputed = computed<unknown>(() => s.error)
       const statusValue = createStateProxy(statusComputed)
       const errorValue = createStateProxy(errorComputed)
 
@@ -661,7 +661,7 @@ function state<T, P = unknown>(
     }
 
     // Sync function → Computed (memoized derived value)
-    const comp = createComputed(fn as () => T)
+    const comp = computed(fn as () => T)
     const s = toComputedStateObject(comp)
     if (key) {
       globalStateRegistry.set(key, s)
@@ -814,5 +814,8 @@ export function createState<T>(initial: T): [StateValue<T>, StateAction<T>] {
  * ```
  */
 export function createComputed<T>(fn: () => T): [StateValue<T>] {
-  return state(fn)
+  // Use the imported computed from signal.ts, not state() to avoid recursion
+  const comp = computed(fn)
+  const s = toComputedStateObject(comp)
+  return [createStateProxy(comp)] as [StateValue<T>]
 }

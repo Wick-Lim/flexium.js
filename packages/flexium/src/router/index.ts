@@ -1,3 +1,5 @@
 export * from './types'
 export * from './core'
 export * from './components'
+export { matchRoutes, createRoutesFromChildren } from './utils'
+export { matchPath } from './core'

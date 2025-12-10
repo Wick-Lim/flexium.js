@@ -22,7 +22,7 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 
 | Function | Package | Description |
 | --- | --- | --- |
-| [`context()`](#context) | `flexium/core` | Access values from a context provider |
+| [`state()` with `key`](#state-with-key) | `flexium/core` | Share state globally (replaces Context API) |
 | [`router()`](#router) | `flexium/router` | Access routing state and navigation |
 | [`keyboard()`](#keyboard) | `flexium/interactive` | Track keyboard input state |
 | [`mouse()`](#mouse) | `flexium/interactive` | Track mouse position and button state |
@@ -33,43 +33,23 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 
 ### context
 
-Access values from a Context provider. Works with contexts created by `createContext()`.
+::: warning Deprecated
+The Context API is deprecated. Use `state()` with `key` option instead.
 
-#### Signature
+Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `state()` with keys for global state sharing.
+:::
 
-```tsx
-function context<T>(ctx: Context<T>): T
-```
-
-#### Parameters
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `context` | `Context<T>` | Context object created by `createContext()` |
-
-#### Return Value
-
-Returns the current value of the context. If no provider is found in the component tree, returns the context's default value.
-
-#### Usage
+**Recommended**: Use `state()` with `key` option instead:
 
 ```tsx
-import { createContext, context } from 'flexium/core';
+import { state } from 'flexium/core';
 
-// Create a context with a default value
-const ThemeContext = createContext<'light' | 'dark'>('light');
-
-function App() {
-  return (
-    <ThemeContext.Provider value="dark">
-      <ThemedButton />
-    </ThemeContext.Provider>
-  );
-}
+// Share theme globally - no Provider needed
+const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app:theme' });
 
 function ThemedButton() {
-  const theme = context(ThemeContext);
-
+  const [theme] = state('light', { key: 'app:theme' });
+  
   return (
     <button class={`btn-${theme}`}>
       Current theme: {theme}
@@ -78,10 +58,10 @@ function ThemedButton() {
 }
 ```
 
-#### Complex Context Example
+#### Complex Example: Auth State
 
 ```tsx
-import { createContext, context, state } from 'flexium/core';
+import { state } from 'flexium/core';
 
 interface User {
   id: string;
@@ -89,17 +69,9 @@ interface User {
   email: string;
 }
 
-interface AuthContextValue {
-  user: () => User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: () => boolean;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
-
-function AuthProvider({ children }) {
-  const [user, setUser] = state<User | null>(null);
+// Auth state - shared globally
+function useAuth() {
+  const [user, setUser] = state<User | null>(null, { key: 'app:auth:user' });
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -118,28 +90,13 @@ function AuthProvider({ children }) {
     return user() !== null;
   };
 
-  const value: AuthContextValue = {
-    user,
-    login,
-    logout,
-    isAuthenticated
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return { user, login, logout, isAuthenticated };
 }
 
 function UserProfile() {
-  const auth = context(AuthContext);
+  const { user, logout } = useAuth();
 
-  if (!auth) {
-    throw new Error('UserProfile must be used within AuthProvider');
-  }
-
-  const currentUser = auth.user();
+  const currentUser = user();
 
   if (!currentUser) {
     return <div>Please log in</div>;
@@ -149,23 +106,30 @@ function UserProfile() {
     <div>
       <h1>Welcome, {currentUser.name}</h1>
       <p>Email: {currentUser.email}</p>
-      <button onclick={auth.logout}>Log Out</button>
+      <button onclick={logout}>Log Out</button>
     </div>
   );
 }
 ```
 
-#### Multiple Contexts
+#### Multiple Global States
 
 ```tsx
-const ThemeContext = createContext('light');
-const LanguageContext = createContext('en');
-const UserContext = createContext(null);
+import { state } from 'flexium/core';
+
+// Theme state
+const [theme] = state('light', { key: 'app:theme' });
+
+// Language state
+const [lang] = state('en', { key: 'app:language' });
+
+// User state
+const [user] = state(null, { key: 'app:user' });
 
 function ProfileCard() {
-  const theme = context(ThemeContext);
-  const lang = context(LanguageContext);
-  const user = context(UserContext);
+  const [theme] = state('light', { key: 'app:theme' });
+  const [lang] = state('en', { key: 'app:language' });
+  const [user] = state(null, { key: 'app:user' });
 
   return (
     <div class={`card-${theme}`}>
@@ -178,10 +142,10 @@ function ProfileCard() {
 
 #### Best Practices
 
-1. **Provide default values**: Always provide sensible defaults to `createContext()`
-2. **Type safety**: Use TypeScript for type-safe context values
-3. **Check for null**: When context might not have a provider, check for null
-4. **Avoid overuse**: Don't use context for every piece of state - prefer props for local data
+1. **Use descriptive keys**: Use hierarchical keys like `'app:theme'` or `['app', 'auth', 'user']`
+2. **Type safety**: Use TypeScript for type-safe state
+3. **Cleanup when needed**: Use `state.delete(key)` to clean up unused global state
+4. **Avoid overuse**: Don't use global state for every piece of data - prefer local state when possible
 
 ---
 
@@ -340,7 +304,7 @@ Returns a `KeyboardState` object:
 
 ```tsx
 import { keyboard, Keys } from 'flexium/interactive';
-import { effect } from 'flexium';
+import { state, effect } from 'flexium/core';
 
 function PlayerController() {
   const keyboard = keyboard();
@@ -381,12 +345,9 @@ function PlayerController() {
 
 ```tsx
 import { keyboard, Keys, createLoop } from 'flexium/interactive';
+import { state } from 'flexium/core';
 
 function Game() {
-  const keyboard = keyboard();
-  const player = signal({ x: 100, y: 100, jumping: false });
-
-  createLoop((dt) => {
   const keyboard = keyboard();
   const [player, setPlayer] = state({ x: 100, y: 100, jumping: false });
 
@@ -474,8 +435,8 @@ function CanvasInput() {
 function GameComponent() {
   const keyboard = keyboard();
 
-  onCleanup(() => {
-    keyboard.dispose();
+  effect(() => {
+    return () => keyboard.dispose();
   });
 
   return <div>Game</div>;
@@ -677,11 +638,13 @@ MouseButton.Right   // 2
 #### Cleanup
 
 ```tsx
+import { effect } from 'flexium/core'
+
 function GameComponent() {
   const mouse = mouse();
 
-  onCleanup(() => {
-    mouse.dispose();
+  effect(() => {
+    return () => mouse.dispose();
   });
 
   return <div>Game</div>;
@@ -804,14 +767,16 @@ function LoginForm() {
 #### Fetch Hook
 
 ```tsx
+import { state, effect } from 'flexium/core';
+
 function useFetch<T>(url: string) {
-  const data = signal<T | null>(null);
-  const loading = signal(true);
-  const error = signal<Error | null>(null);
+  const [data, setData] = state<T | null>(null);
+  const [loading, setLoading] = state(true);
+  const [error, setError] = state<Error | null>(null);
 
   const refetch = async () => {
-    loading.value = true;
-    error.value = null;
+    setLoading(true);
+    setError(null);
 
     try {
       const response = await fetch(url);
@@ -819,16 +784,16 @@ function useFetch<T>(url: string) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const json = await response.json();
-      data.value = json;
+      setData(json);
     } catch (err) {
-      error.value = err as Error;
+      setError(err as Error);
     } finally {
-      loading.value = false;
+      setLoading(false);
     }
   };
 
   // Fetch on mount
-  onMount(() => {
+  effect(() => {
     refetch();
   });
 
@@ -839,14 +804,14 @@ function useFetch<T>(url: string) {
 function UserList() {
   const { data, loading, error, refetch } = useFetch<User[]>('/api/users');
 
-  if (loading.value) return <div>Loading...</div>;
-  if (error.value) return <div>Error: {error.value.message}</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div>
       <button onclick={refetch}>Refresh</button>
       <ul>
-        {data.value?.map(user => (
+        {data?.map(user => (
           <li key={user.id}>{user.name}</li>
         ))}
       </ul>
@@ -859,19 +824,21 @@ function UserList() {
 
 ```tsx
 function useLocalStorage<T>(key: string, initialValue: T) {
+  import { state, effect } from 'flexium/core';
+  
   const storedValue = localStorage.getItem(key);
-  const value = signal<T>(
+  const [value, setValue] = state<T>(
     storedValue ? JSON.parse(storedValue) : initialValue
   );
 
   // Save to localStorage on change
   effect(() => {
-    localStorage.setItem(key, JSON.stringify(value.value));
+    localStorage.setItem(key, JSON.stringify(value));
   });
 
   const remove = () => {
     localStorage.removeItem(key);
-    value.value = initialValue;
+    setValue(initialValue);
   };
 
   return [value, remove] as const;
@@ -879,12 +846,12 @@ function useLocalStorage<T>(key: string, initialValue: T) {
 
 // Usage
 function ThemeToggle() {
-  const [theme, clearTheme] = useLocalStorage('theme', 'light');
+  const [theme, setTheme] = useLocalStorage('theme', 'light');
 
   return (
     <div>
-      <button onclick={() => theme.value = theme.value === 'light' ? 'dark' : 'light'}>
-        Toggle Theme (Current: {theme.value})
+      <button onclick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+        Toggle Theme (Current: {theme})
       </button>
       <button onclick={clearTheme}>
         Reset Theme
@@ -897,16 +864,18 @@ function ThemeToggle() {
 #### Window Size Hook
 
 ```tsx
+import { state, effect } from 'flexium/core';
+
 function useWindowSize() {
-  const width = signal(window.innerWidth);
-  const height = signal(window.innerHeight);
+  const [width, setWidth] = state(window.innerWidth);
+  const [height, setHeight] = state(window.innerHeight);
 
   const handleResize = () => {
-    width.value = window.innerWidth;
-    height.value = window.innerHeight;
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
   };
 
-  onMount(() => {
+  effect(() => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   });
@@ -920,9 +889,9 @@ function ResponsiveComponent() {
 
   return (
     <div>
-      <p>Window size: {width.value} x {height.value}</p>
-      {width.value < 768 && <div>Mobile view</div>}
-      {width.value >= 768 && <div>Desktop view</div>}
+      <p>Window size: {width} x {height}</p>
+      {+width < 768 && <div>Mobile view</div>}
+      {+width >= 768 && <div>Desktop view</div>}
     </div>
   );
 }
@@ -959,13 +928,17 @@ function ResponsiveComponent() {
 ### 1. Always Cleanup Resources
 
 ```tsx
+import { effect } from 'flexium/core'
+
 function GameComponent() {
   const keyboard = keyboard();
   const mouse = mouse();
 
-  onCleanup(() => {
-    keyboard.dispose();
-    mouse.dispose();
+  effect(() => {
+    return () => {
+      keyboard.dispose();
+      mouse.dispose();
+    };
   });
 
   return <div>Game</div>;
@@ -975,20 +948,21 @@ function GameComponent() {
 ### 2. Type Safety with TypeScript
 
 ```tsx
-import { context, createContext } from 'flexium';
+  import { state } from 'flexium/core';
 
 interface AppState {
   user: User | null;
   theme: 'light' | 'dark';
 }
 
-const AppContext = createContext<AppState>({
+  // Use state() with key instead of Context
+  const [appState, setAppState] = state<AppState>({
   user: null,
   theme: 'light'
 });
 
 function Component() {
-  const state: AppState = context(AppContext);
+  const [appState] = state({ key: 'app:state' });
   // TypeScript ensures correct usage
 }
 ```
@@ -996,15 +970,19 @@ function Component() {
 ### 3. Combine Utilities Effectively
 
 ```tsx
+import { state, effect } from 'flexium/core';
+import { router } from 'flexium/router';
+import { keyboard, Keys } from 'flexium/interactive';
+
 function GamePlayer() {
   const { navigate } = router();
   const kb = keyboard();
-  const position = signal({ x: 0, y: 0 });
+  const [position, setPosition] = state({ x: 0, y: 0 });
 
   effect(() => {
     // Update position based on keyboard
     if (kb.isPressed(Keys.ArrowUp)) {
-      position.value = { ...position.value, y: position.value.y - 5 };
+      setPosition(p => ({ ...p, y: p.y - 5 }));
     }
     // ...
   });
@@ -1021,8 +999,8 @@ function DataDisplay() {
 
   // Use derived state for expensive transformations
   const [processedData] = state(() => {
-    if (!data.value) return [];
-    return expensiveTransformation(data.value);
+    if (!data) return [];
+    return expensiveTransformation(data);
   });
 
   return <div>{JSON.stringify(processedData)}</div>;
@@ -1032,9 +1010,11 @@ function DataDisplay() {
 ### 5. Keep Hooks Simple and Focused
 
 ```tsx
+import { state } from 'flexium/core';
+
 // Good: Single responsibility
 function useAuth() {
-  const user = signal(null);
+  const [user, setUser] = state(null);
   const login = async (credentials) => { /* ... */ };
   const logout = () => { /* ... */ };
   return { user, login, logout };
@@ -1042,8 +1022,8 @@ function useAuth() {
 
 // Bad: Too many responsibilities
 function useEverything() {
-  const user = signal(null);
-  const theme = signal('light');
+  const [user, setUser] = state(null);
+  const [theme, setTheme] = state('light');
   const keyboard = keyboard();
   const router = router();
   // Too much!
@@ -1055,7 +1035,7 @@ function useEverything() {
 ## See Also
 
 - [State Management](/guide/state) - Working with signals and effects
-- [Context API](/guide/context) - Detailed context guide
+- [Global State Sharing](/guide/context) - Using state() with key for global state
 - [Router Guide](/guide/router) - Complete routing documentation
 - [Interactive Apps](/guide/interactive) - Building games with Flexium
 - [Animation](/guide/animation) - Animation techniques and patterns

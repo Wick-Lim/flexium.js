@@ -427,41 +427,11 @@ describe('vite-plugin-flexium', () => {
       expect(result?.code).toContain("import { effect } from 'flexium'");
     });
 
-    it('should add import for batch when used', () => {
-      const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'batch(() => { count.value++; name.value = "test"; });';
-      const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
+    // Note: batch is deprecated - use sync from flexium/advanced instead
 
-      expect(result).not.toBeNull();
-      expect(result?.code).toContain("import { batch } from 'flexium'");
-    });
+    // Note: onCleanup and createContext are deprecated - use effect() and state() with key instead
 
-    it('should add import for onCleanup when used', () => {
-      const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'onCleanup(() => clearInterval(id));';
-      const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
-
-      expect(result).not.toBeNull();
-      expect(result?.code).toContain("import { onCleanup } from 'flexium'");
-    });
-
-    it('should add import for createContext when used', () => {
-      const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'const ThemeContext = createContext();';
-      const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
-
-      expect(result).not.toBeNull();
-      expect(result?.code).toContain("import { createContext } from 'flexium'");
-    });
-
-    it('should add import for useContext when used', () => {
-      const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'const theme = useContext(ThemeContext);';
-      const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
-
-      expect(result).not.toBeNull();
-      expect(result?.code).toContain("import { useContext } from 'flexium'");
-    });
+    // Note: useContext is deprecated - use state() with key instead
 
     it('should add multiple imports when multiple primitives are used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);

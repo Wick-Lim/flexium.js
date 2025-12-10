@@ -340,43 +340,72 @@ Authentication, shopping cart, and notifications with multiple providers working
 
 ::: details View Source Code
 ```tsx
-import { createContext, context, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
-const AuthContext = createContext({
-  user: () => null,
-  login: (name) => {},
-  logout: () => {}
-})
+// Auth state - shared globally
+function useAuth() {
+  const [user, setUser] = state(null, { key: 'app:auth:user' })
+  
+  const login = (name: string) => {
+    setUser({ name })
+  }
+  
+  const logout = () => {
+    setUser(null)
+  }
+  
+  return { user, login, logout }
+}
 
-const CartContext = createContext({
-  items: () => [],
-  addItem: (product) => {},
-  removeItem: (id) => {},
-  updateQty: (id, delta) => {},
-  total: () => 0
-})
+// Cart state - shared globally
+function useCart() {
+  const [items, setItems] = state<Array<{id: number, name: string, price: number, qty: number}>>([], { key: 'app:cart:items' })
+  
+  const addItem = (product: {id: number, name: string, price: number}) => {
+    setItems(items => {
+      const existing = items.find(item => item.id === product.id)
+      if (existing) {
+        return items.map(item => item.id === product.id ? {...item, qty: item.qty + 1} : item)
+      }
+      return [...items, {...product, qty: 1}]
+    })
+  }
+  
+  const removeItem = (id: number) => {
+    setItems(items => items.filter(item => item.id !== id))
+  }
+  
+  const updateQty = (id: number, delta: number) => {
+    setItems(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
+  }
+  
+  const [total] = state(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), { key: 'app:cart:total' })
+  
+  return { items, addItem, removeItem, updateQty, total }
+}
 
-const NotificationContext = createContext({
-  notifications: () => [],
-  notify: (msg, type) => {}
-})
+// Notification state - shared globally
+function useNotifications() {
+  const [notifications, setNotifications] = state<Array<{msg: string, type: string}>>([], { key: 'app:notifications' })
+  
+  const notify = (msg: string, type: string) => {
+    setNotifications(n => [...n, { msg, type }])
+    setTimeout(() => {
+      setNotifications(n => n.slice(1))
+    }, 3000)
+  }
+  
+  return { notifications, notify }
+}
 
 function App() {
-  return (
-    <AuthProvider>
-      <CartProvider>
-        <NotificationProvider>
-          <Shop />
-        </NotificationProvider>
-      </CartProvider>
-    </AuthProvider>
-  )
+  return <Shop />
 }
 
 function Shop() {
-  const { user, login, logout } = context(AuthContext)
-  const { items, addItem, total } = context(CartContext)
-  const { notify } = context(NotificationContext)
+  const { user, login, logout } = useAuth()
+  const { items, addItem, total } = useCart()
+  const { notify } = useNotifications()
 
   const products = [
     { id: 1, name: 'Flexium Pro', price: 99 },

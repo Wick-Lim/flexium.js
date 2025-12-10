@@ -149,7 +149,8 @@ Test signal creation, updates, and reactivity:
 
 ```ts
 import { describe, it, expect, vi } from 'vitest';
-import { signal, computed, effect } from 'flexium/advanced';
+import { effect } from 'flexium/core';
+import { signal, computed } from 'flexium/advanced';
 
 describe('Signal System', () => {
   it('should create a signal with initial value', () => {
@@ -260,7 +261,8 @@ Test side effects and cleanup:
 
 ```ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { signal, effect } from 'flexium/advanced';
+import { effect } from 'flexium/core';
+import { signal } from 'flexium/advanced';
 
 describe('Effects', () => {
   it('should run effect immediately', () => {

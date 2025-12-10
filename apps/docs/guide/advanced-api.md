@@ -24,17 +24,19 @@ Most applications should use the `state()` API from `flexium/core`. The advanced
 ## Import
 
 ```tsx
-import { signal, root, untrack, onCleanup } from 'flexium/advanced'
+import { signal, computed } from 'flexium/advanced'
+import { root, untrack } from 'flexium/advanced'
 ```
 
 ## API Overview
 
-| Export | Description |
-|--------|-------------|
-| `signal(value)` | Create a raw reactive signal |
-| `root(fn)` | Create an isolated reactive scope |
-| `untrack(fn)` | Read values without creating dependencies |
-| `onCleanup(fn)` | Register cleanup function |
+| Export | Source | Description |
+|--------|--------|-------------|
+| `signal(value)` | `flexium/advanced` | Create a raw reactive signal |
+| `computed(fn)` | `flexium/advanced` | Create a computed signal |
+| `root(fn)` | `flexium/core` | Create an isolated reactive scope |
+| `untrack(fn)` | `flexium/core` | Read values without creating dependencies |
+| `onCleanup(fn)` | `flexium/core` | Register cleanup function |
 
 ## signal()
 
@@ -73,7 +75,9 @@ count.set(prev => prev + 1)
 Creates an isolated reactive scope. Useful for managing cleanup of effects.
 
 ```tsx
-import { signal, effect, root } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { root } from 'flexium/advanced'
 
 const count = signal(0)
 
@@ -97,7 +101,9 @@ count.value = 2  // No log - effect was disposed
 Reads reactive values without creating dependencies. Useful when you need to access a value but don't want updates to that value to trigger re-computation.
 
 ```tsx
-import { signal, effect, untrack } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { untrack } from 'flexium/advanced'
 
 const count = signal(0)
 const multiplier = signal(2)
@@ -117,7 +123,8 @@ multiplier.value = 10  // No log - multiplier is untracked
 Here's an example of building a custom store using advanced primitives:
 
 ```tsx
-import { signal, effect } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
+import { effect } from 'flexium/core'
 
 function createStore<T extends object>(initialState: T) {
   const state = signal(initialState)

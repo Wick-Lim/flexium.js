@@ -58,14 +58,18 @@ const [user, setUser] = state(null, { key: 'currentUser' })
 Or use Context API:
 
 ```tsx
-const ThemeContext = createContext('light')
+import { state } from 'flexium/core'
 
 function App() {
-  return (
-    <ThemeContext.Provider value="dark">
-      <MyComponent />
-    </ThemeContext.Provider>
-  )
+  // Set theme globally - no Provider needed
+  const [theme, setTheme] = state('dark', { key: 'app:theme' })
+  return <MyComponent />
+}
+
+function MyComponent() {
+  // Access theme from anywhere
+  const [theme] = state('light', { key: 'app:theme' })
+  return <div>Theme: {theme}</div>
 }
 ```
 

@@ -1,299 +1,168 @@
-# Context API
+# Global State Sharing
 
-The Context API allows you to share data across components without prop drilling. It's useful for global state like themes, user authentication, or locale settings.
+::: warning Deprecated: Context API
+The Context API (`createContext`, `context`) is deprecated. Use `state()` with `key` option instead.
 
-## Creating a Context
+Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `state()` with keys for global state sharing.
+:::
 
-Use `createContext()` to create a context with a default value:
+## Recommended: Use state() with key
 
-```tsx
-import { createContext, context } from 'flexium/core'
-
-// Create a context with a default value
-const ThemeContext = createContext('light')
-```
-
-The default value is used when a component calls `context()` without a matching `Provider` above it.
-
-## Providing Context
-
-Wrap your component tree with the context's `Provider` to make a value available:
+Instead of Context API, use `state()` with a `key` option to share state globally:
 
 ```tsx
-function App() {
-  const [theme, setTheme] = state('dark')
+import { state } from 'flexium/core'
 
-  return (
-    <ThemeContext.Provider value={theme}>
-      <Header />
-      <Content />
-      <Footer />
-    </ThemeContext.Provider>
-  )
-}
-```
+// Share theme globally - no Provider needed
+const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app:theme' })
 
-## Consuming Context
-
-Use `context()` to read the current context value:
-
-```tsx
+// In any component - access the same state
 function ThemedButton() {
-  const theme = context(ThemeContext)
-
+  const [theme, setTheme] = state('light', { key: 'app:theme' })
+  
   return (
     <button
+      onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
       style={{
         background: theme === 'dark' ? '#333' : '#fff',
         color: theme === 'dark' ? '#fff' : '#333'
       }}
     >
-      Click me
+      Current theme: {theme}
     </button>
   )
 }
 ```
 
-## Complete Example
-
-Here's a complete theme switching example:
+## Complete Example: Auth State
 
 ```tsx
-import { state, createContext, context } from 'flexium/core'
-import { render } from 'flexium/dom'
-import { Row, Column, Text, Pressable } from 'flexium/primitives'
+import { state } from 'flexium/core'
 
-// 1. Create the context
-const ThemeContext = createContext<'light' | 'dark'>('light')
-
-// 2. Create a hook for easier access
-function useTheme() {
-  return context(ThemeContext)
-}
-
-// 3. Theme-aware components
-function ThemedCard(props: { title: string; children: any }) {
-  const theme = useTheme()
-
-  const styles = {
-    light: { background: '#ffffff', color: '#1a1a1a', border: '1px solid #e5e5e5' },
-    dark: { background: '#2d2d2d', color: '#ffffff', border: '1px solid #404040' }
+// Auth state - shared globally
+function useAuth() {
+  const [user, setUser] = state<User | null>(null, { key: 'app:auth:user' })
+  
+  const login = async (email: string, password: string) => {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    })
+    const userData = await response.json()
+    setUser(userData)
   }
-
-  return (
-    <Column style={{ ...styles[theme], padding: '16px', borderRadius: '8px' }}>
-      <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{props.title}</Text>
-      {props.children}
-    </Column>
-  )
-}
-
-function ThemeToggle() {
-  const theme = useTheme()
-
-  return (
-    <Pressable
-      onPress={() => {
-        // Toggle theme (would need to lift state up in real app)
-      }}
-      style={{
-        padding: '8px 16px',
-        background: theme === 'dark' ? '#4a4a4a' : '#e0e0e0',
-        borderRadius: '4px'
-      }}
-    >
-      <Text>Current: {theme}</Text>
-    </Pressable>
-  )
-}
-
-// 4. App with Provider
-function App() {
-  const [theme, setTheme] = state<'light' | 'dark'>('light')
-
-  return (
-    <ThemeContext.Provider value={theme}>
-      <Column style={{ gap: '16px', padding: '24px' }}>
-        <ThemedCard title="Welcome">
-          <Text>This card follows the current theme.</Text>
-        </ThemedCard>
-        <ThemeToggle />
-      </Column>
-    </ThemeContext.Provider>
-  )
-}
-
-render(<App />, document.getElementById('app')!)
-```
-
-## Nested Providers
-
-You can nest providers to override context values for specific parts of your app:
-
-```tsx
-function App() {
-  return (
-    <ThemeContext.Provider value="light">
-      <Header />  {/* Uses light theme */}
-
-      <ThemeContext.Provider value="dark">
-        <Sidebar />  {/* Uses dark theme */}
-      </ThemeContext.Provider>
-
-      <Content />  {/* Uses light theme */}
-    </ThemeContext.Provider>
-  )
-}
-```
-
-The innermost provider's value takes precedence.
-
-## Common Patterns
-
-### Authentication Context
-
-```tsx
-interface AuthState {
-  user: User | null
-  login: (credentials: Credentials) => Promise<void>
-  logout: () => void
-}
-
-const AuthContext = createContext<AuthState>({
-  user: null,
-  login: async () => {},
-  logout: () => {}
-})
-
-function AuthProvider(props: { children: any }) {
-  const [user, setUser] = state<User | null>(null)
-
-  const login = async (credentials: Credentials) => {
-    const user = await api.login(credentials)
-    setUser(user)
-  }
-
+  
   const logout = () => {
     setUser(null)
   }
-
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {props.children}
-    </AuthContext.Provider>
-  )
+  
+  return { user, login, logout }
 }
 
-// Usage
-function UserMenu() {
-  const { user, logout } = context(AuthContext)
-
-  return user ? (
-    <Row>
-      <Text>Hello, {user.name}</Text>
-      <Pressable onPress={logout}>
-        <Text>Logout</Text>
-      </Pressable>
-    </Row>
-  ) : (
-    <LoginButton />
+// Use in any component
+function Header() {
+  const { user, logout } = useAuth()
+  
+  return (
+    <header>
+      {user ? (
+        <>
+          <span>Welcome, {user.name}</span>
+          <button onclick={logout}>Logout</button>
+        </>
+      ) : (
+        <LoginButton />
+      )}
+    </header>
   )
 }
 ```
 
-### Locale/i18n Context
+## Multiple Global States
 
 ```tsx
-const LocaleContext = createContext({
-  locale: 'en',
-  t: (key: string) => key
-})
+import { state } from 'flexium/core'
 
-function LocaleProvider(props: { children: any }) {
-  const [locale, setLocale] = state('en')
-  const translations = getTranslations(locale)
+// Theme state
+const [theme, setTheme] = state('light', { key: 'app:theme' })
 
-  const t = (key: string) => translations[key] || key
+// Language state
+const [lang, setLang] = state('en', { key: 'app:language' })
 
+// User state
+const [user, setUser] = state(null, { key: 'app:user' })
+
+// Use in any component
+function ProfileCard() {
+  const [theme] = state('light', { key: 'app:theme' })
+  const [lang] = state('en', { key: 'app:language' })
+  const [user] = state(null, { key: 'app:user' })
+  
   return (
-    <LocaleContext.Provider value={{ locale, t }}>
-      {props.children}
-    </LocaleContext.Provider>
+    <div class={`card-${theme}`}>
+      <h2>{lang === 'en' ? 'Profile' : 'Profil'}</h2>
+      <p>{user?.name}</p>
+    </div>
   )
-}
-
-// Usage
-function Greeting() {
-  const { t } = context(LocaleContext)
-  return <Text>{t('welcome_message')}</Text>
 }
 ```
 
-## API Reference
+## Benefits of state() with key
 
-### `createContext<T>(defaultValue: T): Context<T>`
+- ✅ **No Provider boilerplate** - No wrapper components needed
+- ✅ **No hierarchy** - Access from anywhere, not just child components
+- ✅ **Simpler mental model** - Same API as local state
+- ✅ **Automatic cleanup** - Use `state.delete(key)` when needed
+- ✅ **Type-safe** - Full TypeScript support
 
-Creates a new context object.
+## Migration from Context API
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `defaultValue` | `T` | The default value used when no Provider is found |
+If you're using deprecated Context API, migrate to `state()` with keys:
 
-Returns a `Context<T>` object with:
-- `Provider`: Component to provide the context value
-- `id`: Internal symbol for identification
-- `defaultValue`: The default value
+```tsx
+// ❌ Old way (deprecated)
+import { createContext, context } from 'flexium/core'
 
-### `context<T>(ctx: Context<T>): T`
+const ThemeContext = createContext('light')
 
-Reads the current value from a context.
+function App() {
+  const [theme, setTheme] = state('dark')
+  return (
+    <ThemeContext.Provider value={theme}>
+      <Child />
+    </ThemeContext.Provider>
+  )
+}
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `context` | `Context<T>` | The context object to read from |
+function Child() {
+  const theme = context(ThemeContext)
+  return <div>{theme}</div>
+}
 
-Returns the current context value, or the default value if no Provider is found above in the tree.
+// ✅ New way
+import { state } from 'flexium/core'
+
+function App() {
+  // Set theme globally - no Provider needed
+  const [theme, setTheme] = state('dark', { key: 'app:theme' })
+  return <Child />
+}
+
+function Child() {
+  // Access theme from anywhere
+  const [theme] = state('light', { key: 'app:theme' })
+  return <div>{theme}</div>
+}
+```
 
 ## Best Practices
 
-1. **Keep contexts focused**: Create separate contexts for different concerns (theme, auth, locale) rather than one giant global context.
+1. **Use descriptive keys**: Use hierarchical keys like `'app:theme'` or `['app', 'auth', 'user']`
+2. **Type safety**: Use TypeScript for type-safe state
+3. **Cleanup when needed**: Use `state.delete(key)` to clean up unused global state
+4. **Avoid overuse**: Don't use global state for every piece of data - prefer local state when possible
 
-2. **Memoize provider values**: When using objects as context values, consider memoizing to prevent unnecessary re-renders:
+## See Also
 
-   ```tsx
-   const value = useMemo(() => ({ user, login, logout }), [user])
-   ```
-
-3. **Create custom hooks**: Wrap `context()` in a custom hook for better DX:
-
-   ```tsx
-   function useAuth() {
-     return context(AuthContext)
-   }
-   ```
-
-4. **Handle missing providers**: For required contexts, consider throwing an error if used without a provider:
-
-   ```tsx
-   function useAuth() {
-     const auth = context(AuthContext)
-     if (auth === null) {
-       throw new Error('useAuth must be used within an AuthProvider')
-     }
-     return auth
-   }
-   ```
-
-## When to Use Context
-
-Use Context for:
-- Theme settings
-- User authentication
-- Locale/language preferences
-- Feature flags
-- Any data that many components need access to
-
-Consider alternatives for:
-- Frequently changing data (use signals directly)
-- Data only needed by a few components (use props)
-- Complex state logic (use state management with signals)
+- [state()](/docs/core/state) - Complete state() documentation with key option
+- [Best Practices: State Organization](/docs/guide/best-practices/state-organization) - How to organize global state

@@ -406,7 +406,7 @@ createHeading(3, { children: 'Subsection' }); // Skipped h2
 Use `ariaLive` for dynamic content that should be announced:
 
 ```typescript
-import { signal } from 'flexium/core';
+import { signal } from 'flexium/advanced';
 import { createText } from 'flexium/primitives/ui';
 
 const status = signal('Loading...');
@@ -526,7 +526,7 @@ setFirstName('Jane'); // Displays "Jane Doe"
 Numeric values are automatically converted to strings:
 
 ```typescript
-import { signal } from 'flexium/core';
+import { signal } from 'flexium/advanced';
 import { createText } from 'flexium/primitives/ui';
 
 const [count, setCount] = state(0);

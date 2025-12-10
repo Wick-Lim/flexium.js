@@ -243,10 +243,8 @@ function createAutoImportPlugin(opts: Required<FlexiumPluginOptions>): Plugin {
     "signal",
     "computed",
     "effect",
-    "sync",
-    "onCleanup",
-    "createContext",
-    "useContext",
+    // Note: sync, root, untrack are in flexium/advanced
+    // Note: onMount, onCleanup, createContext, context are deprecated
   ];
 
   return {

@@ -110,7 +110,7 @@ The Transition component provides high-level enter/exit animations for condition
 
 ```tsx
 import { Transition } from 'flexium/primitives'
-import { Show, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
 function App() {
   const [visible, setVisible] = state(false)

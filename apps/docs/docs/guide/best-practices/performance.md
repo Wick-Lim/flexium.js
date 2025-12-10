@@ -181,17 +181,13 @@ function ItemList() {
   )
 }
 
-// ✅ Good example - For component (auto-optimized)
-import { for as For } from 'flexium/core'
-
+// ✅ Good example - items.map() (auto-optimized)
 function ItemList() {
   const [items, setItems] = state([...])
   
   return (
     <div>
-      <For each={items}>
-        {(item) => <Item data={item} />}
-      </For>
+      {items.map((item) => <Item data={item} />)}
     </div>
   )
 }
@@ -203,12 +199,10 @@ function ItemList() {
 
 ```tsx
 // ✅ Consider virtualization for very large lists
-import { for as For } from 'flexium/core'
-
 function VirtualizedList() {
   const [items, setItems] = state([...])  // 10000+ items
   
-  // For component auto-optimizes, but
+  // items.map() auto-optimizes, but
   // consider additional virtualization library if needed
   return (
     <div style={{ height: '600px', overflow: 'auto' }}>
@@ -228,14 +222,16 @@ function VirtualizedList() {
 
 ```tsx
 // ✅ Cleanup on component unmount
-import { state, onCleanup } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 
 function TemporaryComponent() {
   const [data] = state(async () => {
     return fetch('/api/temp-data').then(r => r.json())
   }, { key: 'temp:data' })
   
-  onCleanup(() => {
+  effect(() => {
+    // Effect runs on mount
+    return () => {
     state.delete('temp:data')  // Memory cleanup
   })
   

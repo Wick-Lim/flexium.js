@@ -308,28 +308,26 @@ function Child() {
   return <div>Theme: {theme}</div>
 }
 
-// ✅ After (Flexium)
-import { context } from 'flexium/core'
-
-const ThemeContext = context('light')
+// ✅ After (Flexium) - Use state() with key
+import { state } from 'flexium/core'
 
 function App() {
-  return (
-    <ThemeContext.Provider value="dark">
-      <Child />
-    </ThemeContext.Provider>
-  )
+  // Set theme globally - no Provider needed
+  const [theme, setTheme] = state('dark', { key: 'app:theme' })
+  return <Child />
 }
 
 function Child() {
-  const theme = ThemeContext.use()
+  // Access theme from anywhere
+  const [theme] = state('light', { key: 'app:theme' })
   return <div>Theme: {theme}</div>
 }
 ```
 
 **Changes**:
-- `createContext` → `context`
-- `useContext` → `Context.use()`
+- `createContext` → `state()` with `key` option
+- `useContext` → `state()` with same `key`
+- No Provider needed - state is global
 
 ---
 
@@ -454,23 +452,23 @@ function UserDetail() {
 }
 
 // ✅ After (Flexium Router)
-import { useRouter } from 'flexium/router'
+import { router } from 'flexium/router'
 
 function UserDetail() {
-  const router = useRouter()
-  const id = router.params.id
+  const r = router()
+  const id = r.params().id
   
-  const goBack = () => router.back()
-  const goHome = () => router.push('/')
+  const goBack = () => window.history.back()
+  const goHome = () => r.navigate('/')
   
   return <div>User {id}</div>
 }
 ```
 
 **Changes**:
-- `useNavigate` → `useRouter`
-- `useParams` → `router.params`
-- `navigate(-1)` → `router.back()`
+- `useNavigate` → `router()`
+- `useParams` → `router().params()`
+- `navigate(-1)` → `window.history.back()` or `router().navigate('/previous-path')`
 - `navigate('/')` → `router.push('/')`
 
 ---
@@ -526,12 +524,8 @@ function UserDetail() {
   <Item key={item.id} data={item} />
 ))}
 
-// ✅ After (Flexium) - Option 2: Optimized For component
-import { for as For } from 'flexium/core'
-
-<For each={items}>
-  {(item) => <Item data={item} />}
-</For>
+// ✅ After (Flexium) - Option 2: Optimized items.map()
+{items.map((item) => <Item data={item} />)}
 ```
 
 **Changes**:
@@ -782,7 +776,7 @@ setB(2)
 setC(3)  // Effect runs 3 times
 
 // ✅ Solution: Use sync()
-import { sync } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 sync(() => {
   setA(1)
   setB(2)
@@ -805,7 +799,7 @@ const [count, setCount] = state<number>(0)
 ### 1. Use Sync Updates
 
 ```tsx
-import { sync } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 
 // Multiple state updates at once
 sync(() => {
@@ -815,15 +809,11 @@ sync(() => {
 })
 ```
 
-### 2. Use For Component
+### 2. Use items.map()
 
 ```tsx
-import { for as For } from 'flexium/core'
-
 // Optimized list rendering
-<For each={items}>
-  {(item) => <Item data={item} />}
-</For>
+{items.map((item) => <Item data={item} />)}
 ```
 
 ### 3. Use Global State Appropriately

@@ -1,5 +1,5 @@
 <script setup>
-import BatchDemo from '../../components/BatchDemo.vue'
+import SyncDemo from '../../components/SyncDemo.vue'
 </script>
 
 # sync()
@@ -9,13 +9,13 @@ Synchronize state updates to the DOM.
 ## Live Demo
 
 <ClientOnly>
-  <BatchDemo />
+  <SyncDemo />
 </ClientOnly>
 
 ## Import
 
 ```ts
-import { sync } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 ```
 
 ## Signature

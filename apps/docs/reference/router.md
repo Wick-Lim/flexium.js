@@ -959,8 +959,8 @@ function NotFound() {
   ];
 
   // Log 404 for analytics
-  useEffect(() => {
-    logPageNotFound(location.pathname);
+  effect(() => {
+    logPageNotFound(location().pathname);
   });
 
   return (
@@ -1073,15 +1073,16 @@ Create smooth animations when navigating between routes.
 #### Basic Fade Transition
 
 ```tsx
-import { signal, effect } from 'flexium';
+import { effect } from 'flexium/core';
+import { signal } from 'flexium/advanced';
 import { router } from 'flexium/router';
 
 function TransitionWrapper({ children }) {
   const r = router();
-  const location = r.location;
+  const location = r.location();
   const isTransitioning = signal(false);
 
-  useEffect(() => {
+  effect(() => {
     // Trigger transition on location change
     isTransitioning.value = true;
 
@@ -1127,7 +1128,7 @@ function SlideTransition({ children }) {
   const isAnimating = signal(false);
   const direction = signal<'left' | 'right'>('right');
 
-  useEffect(() => {
+  effect(() => {
     isAnimating.value = true;
 
     setTimeout(() => {
@@ -1160,7 +1161,7 @@ function PageTransition({ children }) {
   const location = r.location;
   const isLoading = signal(true);
 
-  useEffect(() => {
+  effect(() => {
     isLoading.value = true;
 
     // Simulate page load
@@ -1216,8 +1217,8 @@ function RouteTransition({ children }) {
     return 'fade';
   };
 
-  useEffect(() => {
-    previousPath.value = location.pathname;
+  effect(() => {
+    previousPath.value = location().pathname;
   });
 
   const transitionClass = getTransitionType();
@@ -1664,9 +1665,9 @@ Restore scroll position on navigation:
 ```tsx
 function ScrollManager() {
   const r = router();
-  const location = r.location;
+  const location = r.location();
 
-  useEffect(() => {
+  effect(() => {
     // Scroll to top on route change
     window.scrollTo(0, 0);
 
@@ -1706,10 +1707,10 @@ const routeConfig = [
 
 function DocumentTitle() {
   const r = router();
-  const location = r.location;
+  const location = r.location();
 
-  useEffect(() => {
-    const route = findRouteByPath(location.pathname);
+  effect(() => {
+    const route = findRouteByPath(location().pathname);
     if (route?.meta?.title) {
       document.title = `${route.meta.title} - My App`;
     }
@@ -1725,4 +1726,4 @@ function DocumentTitle() {
 
 - [Router Guide](/guide/router) - Introduction to routing in Flexium
 - [State Management](/guide/state) - Managing application state
-- [Context](/guide/context) - Sharing data with Context
+- [Global State](/guide/context) - Sharing state globally with state() key

@@ -75,10 +75,11 @@ export function App() {
 Create `src/main.tsx`:
 
 ```tsx
-import { mount } from 'flexium/dom'
+import { render } from 'flexium/dom'
 import { App } from './App'
 
-mount(document.getElementById('app')!, <App />)
+import { render } from 'flexium/dom'
+render(<App />, document.getElementById('app')!)
 ```
 
 ## Understanding the API

@@ -94,7 +94,8 @@ const [color, setColor] = state('#333')
 Use computed values for derived styles:
 
 ```tsx
-import { state, computed } from 'flexium/core'
+import { state } from 'flexium/core'
+import { computed } from 'flexium/advanced'
 
 function ProgressBar() {
   const [progress, setProgress] = state(0)
@@ -530,43 +531,31 @@ function App() {
 Use context to provide theme throughout your app:
 
 ```tsx
-import { createContext, context, state } from 'flexium/core'
+import { state } from 'flexium/core'
 
-const ThemeContext = createContext<{
-  theme: () => 'light' | 'dark'
-  colors: () => Record<string, string>
-  toggleTheme: () => void
-}>()
+// Theme state - shared globally with key
+const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app:theme' })
 
-function ThemeProvider(props) {
-  const [theme, setTheme] = state<'light' | 'dark'>('light')
-
-  const lightColors = {
-    background: '#ffffff',
-    text: '#333333',
-    primary: '#2196f3',
-    secondary: '#f5f5f5'
-  }
-
-  const darkColors = {
-    background: '#1a1a1a',
-    text: '#f5f5f5',
-    primary: '#64b5f6',
-    secondary: '#2a2a2a'
-  }
-
-  const colors = () => String(theme) === 'light' ? lightColors : darkColors
-  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
-
-  return (
-    <ThemeContext.Provider value={{ theme, colors, toggleTheme }}>
-      {props.children}
-    </ThemeContext.Provider>
-  )
+const lightColors = {
+  background: '#ffffff',
+  text: '#333333',
+  primary: '#2196f3',
+  secondary: '#f5f5f5'
 }
 
+const darkColors = {
+  background: '#1a1a1a',
+  text: '#f5f5f5',
+  primary: '#64b5f6',
+  secondary: '#2a2a2a'
+}
+
+const [colors] = state(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
+const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
+
 function ThemedButton() {
-  const { colors } = context(ThemeContext)!
+  const [theme] = state('light', { key: 'app:theme' })
+  const [colors] = state(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
 
   return (
     <button style={() => ({
@@ -951,7 +940,9 @@ function updateTheme() {
   setWeight(500)
 }
 
-// Good: Synced updates
+// Good: Synced updates (advanced API)
+import { sync } from 'flexium/advanced'
+
 function updateTheme() {
   sync(() => {
     setColor('#fff')

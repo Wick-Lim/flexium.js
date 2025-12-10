@@ -21,7 +21,9 @@ Flexium now supports **Automatic Batching** by default. Multiple state updates o
 ### Example
 
 ```tsx
-import { signal, effect } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const firstName = signal('John')
 const lastName = signal('Doe')
@@ -47,7 +49,9 @@ setTimeout(() => {
 The `sync()` API is available for scenarios where you want **Synchronous Updates**. When you use `sync()`, effects run immediately after the callback completes, rather than waiting for the next microtask. This is also useful when you need to measure the DOM immediately after a set of updates.
 
 ```tsx
-import { signal, effect, sync } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 // ... signals ...
 
@@ -68,7 +72,7 @@ The `sync()` function is available from multiple import paths:
 import { sync } from 'flexium/advanced'
 
 // From core (for convenience)
-import { sync } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 ```
 
 ## Force Sync
@@ -82,7 +86,9 @@ The `sync()` function (without arguments) forces any pending auto-batched effect
 ### Basic Usage
 
 ```tsx
-import { signal, effect, sync } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const count = signal(0)
 let effectRan = false
@@ -105,7 +111,9 @@ console.log(effectRan) // true
 `sync()` optionally accepts a callback. Updates inside the callback are batched, and all effects run before `sync()` returns:
 
 ```tsx
-import { signal, effect, sync } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const firstName = signal('John')
 const lastName = signal('Doe')
@@ -130,7 +138,9 @@ console.log(fullName) // "Jane Smith"
 
 ```tsx
 import { describe, it, expect } from 'vitest'
-import { signal, effect, sync } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 describe('Counter', () => {
   it('should update when count changes', () => {
@@ -156,7 +166,8 @@ describe('Counter', () => {
 Use `sync()` when you need to measure the DOM immediately after updates:
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const items = signal(['a', 'b', 'c'])
 
@@ -208,7 +219,9 @@ Batching provides significant performance improvements by:
 ### Performance Impact Example
 
 ```tsx
-import { signal, effect, sync } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const [count, setCount] = signal(0)
 const [items, setItems] = signal([])
@@ -245,7 +258,8 @@ sync(() => {
 ### Simple Batching
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const x = signal(0)
 const y = signal(0)
@@ -262,7 +276,8 @@ sync(() => {
 The `sync()` function returns the value returned by the callback:
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const items = signal([])
 const count = signal(0)
@@ -281,7 +296,8 @@ console.log(result) // "Updates complete"
 Batch multiple state changes triggered by user interactions:
 
 ```tsx
-import { state, sync } from 'flexium/core'
+import { state } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 
 function UserForm() {
   const [firstName, setFirstName] = state('')
@@ -341,7 +357,9 @@ function UserForm() {
 Sync blocks can be nested, and effects will only run after the outermost sync completes:
 
 ```tsx
-import { signal, effect, sync } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const count = signal(0)
 let runCount = 0
@@ -387,7 +405,8 @@ This ensures that no matter how deeply sync blocks are nested, effects only run 
 Batch multiple form field updates:
 
 ```tsx
-import { state, sync } from 'flexium/core'
+import { state } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 
 function ProfileEditor() {
   const [form, setForm] = state({
@@ -435,7 +454,8 @@ function ProfileEditor() {
 Process arrays of updates efficiently:
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const items = signal([])
 const count = signal(0)
@@ -464,7 +484,8 @@ addMultipleItems(
 Update multiple states from API responses:
 
 ```tsx
-import { state, sync } from 'flexium/core'
+import { state } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 
 function DataDashboard() {
   const [users, setUsers] = state([])
@@ -520,7 +541,8 @@ function DataDashboard() {
 Batch updates in animation loops:
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const x = signal(0)
 const y = signal(0)
@@ -549,7 +571,8 @@ animate()
 Update game state atomically:
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const score = signal(0)
 const lives = signal(3)
@@ -661,7 +684,9 @@ sync(() => {
 ### Performance Metrics
 
 ```tsx
-import { signal, effect, sync } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const a = signal(0)
 const b = signal(0)
@@ -699,7 +724,8 @@ console.log('Runs:', runCount) // 1 (synced update)
 ### 1. Resetting Form State
 
 ```tsx
-import { state, sync } from 'flexium/core'
+import { state } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 
 function ContactForm() {
   const [name, setName] = state('')
@@ -733,7 +759,8 @@ function ContactForm() {
 ### 2. Synchronized Animations
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const ball1X = signal(0)
 const ball1Y = signal(0)
@@ -753,7 +780,8 @@ const moveBalls = (deltaTime) => {
 ### 3. Shopping Cart Updates
 
 ```tsx
-import { state, sync } from 'flexium/core'
+import { state } from 'flexium/core'
+import { sync } from 'flexium/advanced'
 
 function ShoppingCart() {
   const [items, setItems] = state([])
@@ -799,7 +827,8 @@ function ShoppingCart() {
 ### 4. Real-time Data Synchronization
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const temperature = signal(20)
 const humidity = signal(50)
@@ -843,7 +872,8 @@ sync(() => {
 When reading current values inside a sync block, use `peek()` to avoid creating dependencies:
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const count = signal(0)
 
@@ -865,7 +895,8 @@ sync(() => {
 Use the return value for operations that need confirmation:
 
 ```tsx
-import { signal, sync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const inventory = signal([])
 const soldItems = signal([])
@@ -932,7 +963,9 @@ sync(() => {
 You can track when sync blocks are active:
 
 ```tsx
-import { signal, sync, effect } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const count = signal(0)
 
@@ -965,7 +998,9 @@ console.log('After sync')
 Measure the performance benefit of syncing:
 
 ```tsx
-import { signal, effect, sync } from 'flexium/advanced'
+import { effect } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+import { signal } from 'flexium/advanced'
 
 const signals = Array.from({ length: 100 }, () => signal(0))
 

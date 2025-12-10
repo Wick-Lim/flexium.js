@@ -1,33 +1,32 @@
-# Lifecycle Hooks
+# Lifecycle Management
 
-Manage component lifecycle with mount and cleanup hooks.
+Flexium uses `effect()` for all lifecycle needs. There are no separate mount or cleanup hooks.
+
+::: warning Deprecated
+`onMount()` and `onCleanup()` are deprecated. Use `effect()` instead.
+:::
 
 ## Import
 
 ```ts
-import { onMount, onCleanup } from 'flexium/core'
+import { effect } from 'flexium/core'
 ```
 
-## onMount()
+## Using effect() for Lifecycle
 
-Run code once when a component mounts.
+`effect()` handles all lifecycle needs - no separate hooks required:
 
-### Signature
-
-```ts
-function onMount(fn: () => void | (() => void)): void
-```
-
-### Usage
+### Mount + Cleanup
 
 ```tsx
-import { onMount } from 'flexium/core'
+import { effect } from 'flexium/core'
 
 function MyComponent() {
-  onMount(() => {
+  // Runs once on mount, cleanup on unmount
+  effect(() => {
     console.log('Component mounted!')
-
-    // Optional: return cleanup function
+    
+    // Return cleanup function
     return () => console.log('Component unmounted!')
   })
 
@@ -40,10 +39,12 @@ function MyComponent() {
 #### Initialize Third-Party Libraries
 
 ```tsx
+import { effect } from 'flexium/core'
+
 function ChartComponent() {
   let chartInstance
 
-  onMount(() => {
+  effect(() => {
     chartInstance = new Chart(document.getElementById('chart'), {
       type: 'bar',
       data: chartData
@@ -59,25 +60,29 @@ function ChartComponent() {
 #### Fetch Initial Data
 
 ```tsx
+import { state, effect } from 'flexium/core'
+
 function UserProfile(props) {
   const [user, setUser] = state(null)
 
-  onMount(async () => {
-    const response = await fetch(`/api/users/${props.id}`)
-    setUser(await response.json())
+  effect(() => {
+    // Fetch runs once on mount
+    fetch(`/api/users/${props.id}`)
+      .then(res => res.json())
+      .then(data => setUser(data))
   })
 
-  return {user && (
-    <div>{user.name}</div>
-  )}
+  return user && <div>{user.name}</div>
 }
 ```
 
 #### Set Up Event Listeners
 
 ```tsx
+import { effect } from 'flexium/core'
+
 function KeyboardHandler() {
-  onMount(() => {
+  effect(() => {
     const handler = (e) => console.log('Key pressed:', e.key)
     window.addEventListener('keydown', handler)
 
@@ -88,58 +93,36 @@ function KeyboardHandler() {
 }
 ```
 
-## onCleanup()
-
-Register a cleanup function that runs before effect re-execution or component disposal.
-
-### Signature
-
-```ts
-function onCleanup(fn: () => void): void
-```
-
-### Usage
+### Reactive Effects with Cleanup
 
 ```tsx
-import { effect, onCleanup } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 
-const [count, setCount] = state(0)
-
-effect(() => {
-  const interval = setInterval(() => {
-    setCount(c => c + 1)
-  }, 1000)
-
-  // Cleanup when effect re-runs or disposes
-  onCleanup(() => clearInterval(interval))
-})
-```
-
-### Examples
-
-#### Clean Up Subscriptions
-
-```tsx
 function WebSocketComponent() {
   const [messages, setMessages] = state([])
+  const [userId, setUserId] = state(1)
 
   effect(() => {
-    const ws = new WebSocket('wss://example.com')
+    // Re-creates WebSocket when userId changes
+    const ws = new WebSocket(`wss://example.com/${userId}`)
 
     ws.onmessage = (e) => {
       setMessages(m => [...m, e.data])
     }
 
-    onCleanup(() => ws.close())
+    // Cleanup before re-run or unmount
+    return () => ws.close()
   })
 
   return <div>{messages.map(msg => <div>{msg}</div>)}</div>
 }
 ```
 
-#### Cancel Pending Requests
+### Cancel Pending Requests
 
 ```tsx
+import { state, effect } from 'flexium/core'
+
 function SearchResults(props) {
   const [results, setResults] = state([])
 
@@ -152,16 +135,19 @@ function SearchResults(props) {
       .then(res => res.json())
       .then(data => setResults(data))
 
-    onCleanup(() => controller.abort())
+    // Cancel request if query changes or component unmounts
+    return () => controller.abort()
   })
 
   return <div>{results.map(item => <div>{item.title}</div>)}</div>
 }
 ```
 
-#### Dispose Timers
+### Dispose Timers
 
 ```tsx
+import { state, effect } from 'flexium/core'
+
 function Countdown(props) {
   const [time, setTime] = state(props.seconds)
 
@@ -172,7 +158,7 @@ function Countdown(props) {
       setTime(t => t - 1)
     }, 1000)
 
-    onCleanup(() => clearTimeout(timeout))
+    return () => clearTimeout(timeout)
   })
 
   return <div>{time} seconds remaining</div>
@@ -181,44 +167,41 @@ function Countdown(props) {
 
 ## Behavior
 
-### onMount
-
-- Runs **once** after the component is fully rendered
-- Executes in a **microtask** (after current execution completes)
-- Cleanup function runs when component unmounts
-- Does **not** track reactive dependencies
-
-### onCleanup
-
-- Must be called **inside** an effect or component
-- Runs **before** the effect re-executes
-- Runs when the component is **disposed**
-- Multiple cleanup functions are allowed
-
-## Comparison
-
-| Feature | onMount | onCleanup | effect |
-|---------|---------|-----------|--------|
-| Runs on mount | Once | N/A | Once |
-| Tracks dependencies | No | No | Yes |
-| Re-runs on change | No | N/A | Yes |
-| Cleanup support | Return function | Register function | Return function |
+- **Runs on mount**: Effect runs once when component mounts
+- **Tracks dependencies**: Automatically tracks reactive values you read
+- **Re-runs on change**: Effect re-runs when dependencies change
+- **Cleanup support**: Return a function for cleanup
+- **Automatic cleanup**: Cleanup runs before re-run or on unmount
 
 ## Best Practices
 
-1. **Use onMount for one-time setup** - initialization that doesn't depend on reactive state
-2. **Use onCleanup for resource disposal** - close connections, cancel requests
-3. **Use effect for reactive side effects** - when you need to respond to state changes
-4. **Return cleanup from onMount** - cleaner than separate onCleanup in mount
+1. **Use effect() for all lifecycle needs** - mount, cleanup, and reactive side effects
+2. **Return cleanup function** - for resources that need disposal
+3. **Avoid infinite loops** - don't update tracked state inside effects without conditions
 
-## Notes
+## Migration from onMount/onCleanup
 
-- `onCleanup` outside an effect will trigger a warning
-- Both hooks work in server-side rendering contexts
-- Cleanup functions are called in reverse order of registration
+If you're using deprecated `onMount()` or `onCleanup()`, migrate to `effect()`:
+
+```tsx
+// ❌ Old way (deprecated)
+import { onMount, onCleanup } from 'flexium/core'
+
+onMount(() => {
+  const ws = new WebSocket('...')
+  onCleanup(() => ws.close())
+})
+
+// ✅ New way
+import { effect } from 'flexium/core'
+
+effect(() => {
+  const ws = new WebSocket('...')
+  return () => ws.close()
+})
+```
 
 ## See Also
 
-- [effect()](/docs/core/effect) - Reactive side effects
-- [state()](/docs/core/state) - Reactive state
-- [computed()](/docs/core/computed) - Derived values
+- [effect()](/docs/core/effect) - Complete effect() documentation
+- [state()](/docs/core/state) - Reactive state management

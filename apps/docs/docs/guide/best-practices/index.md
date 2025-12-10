@@ -94,11 +94,7 @@ sync(() => {
 ### List Optimization
 
 ```tsx
-import { for as For } from 'flexium/core'
-
-<For each={items}>
-  {(item) => <Item data={item} />}
-</For>
+{items.map((item) => <Item data={item} />)}
 ```
 
 ---

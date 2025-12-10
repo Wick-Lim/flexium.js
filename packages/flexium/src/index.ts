@@ -6,7 +6,7 @@
  * @example
  * ```tsx
  * // Core reactivity
- * import { state, effect, sync } from 'flexium/core'
+ * import { state, effect } from 'flexium/core'
  *
  * // DOM rendering
  * import { render, createRoot, Portal } from 'flexium/dom'

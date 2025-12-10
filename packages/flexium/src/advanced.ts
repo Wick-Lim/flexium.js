@@ -5,20 +5,19 @@
  * Most users should use `state()` from the main entry point instead.
  *
  * @example
- * import { signal, root } from 'flexium/advanced'
+ * import { signal, computed, sync, root, untrack } from 'flexium/advanced'
  */
 
 export {
   signal,
-  onCleanup,
+  computed,
 } from './core/signal'
 
-export {
-  root,
-  untrack,
-} from './core/owner'
-
 export type { Signal, Computed } from './core/signal'
+
+// Advanced control primitives
+export { root, untrack } from './core/owner'
+export { sync } from './core/scheduler'
 
 // DevTools
 export { enableDevTools, disableDevTools } from './devtools'
