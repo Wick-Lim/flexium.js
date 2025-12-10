@@ -4,11 +4,7 @@
  * Fine-grained reactive signals without Virtual DOM
  */
 
-export {
-  effect,
-  untrack,
-  sync,
-} from './signal'
-
+export { effect } from './effect'
+export { sync } from './scheduler'
 export { root, onMount } from './owner'
 export { state } from './state'

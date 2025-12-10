@@ -21,7 +21,16 @@ import {
   type Owner,
   getOwner,
   setOwner,
+  getActiveEffect,
+  setActiveEffect,
 } from './owner'
+import {
+  scheduleAutoBatch,
+  addToAutoBatch,
+  addToBatch,
+  getBatchDepth
+} from './scheduler'
+import { EffectNode, effect } from './effect'
 
 /**
  * DevTools hooks interface - set by devtools module to avoid circular imports
@@ -52,18 +61,6 @@ export function setDevToolsHooks(hooks: DevToolsHooks | null): void {
 // Global version clock for epoch-based validation (Optimization: Epochs)
 let globalVersion = 0
 
-// Global context for dependency tracking
-let activeEffect: ISubscriber | null = null
-
-// Batching state
-let batchDepth = 0
-// Batch queue now needs to store raw subscribers. Set is efficient for uniqueness.
-const batchQueue = new Set<ISubscriber>()
-
-// Auto-batching state (Microtask Scheduler)
-const autoBatchQueue = new Set<ISubscriber>()
-let isAutoBatchScheduled = false
-
 // ==================================================================================
 // 3. User Facing API
 // ==================================================================================
@@ -89,82 +86,7 @@ export interface Computed<T> {
   peek(): T
 }
 
-/**
- * Internal effect node for dependency tracking
- */
-class EffectNode implements ISubscriber {
-  depsHead: Link | undefined
-  cleanups: (() => void)[] = []
-  flags = 0 // detached by default, will set flags during execution
 
-  private owner: Owner | null = null
-
-  constructor(
-    public fn: () => void | (() => void),
-    public onError?: (error: Error) => void
-  ) {
-    this.owner = getOwner()
-  }
-
-  execute(): void {
-    if (Flags.has(this, SubscriberFlags.Running)) {
-      Flags.add(this, SubscriberFlags.Notified)
-      return
-    }
-
-    Flags.add(this, SubscriberFlags.Running)
-
-    try {
-      this.run()
-    } finally {
-      Flags.remove(this, SubscriberFlags.Running)
-      if (Flags.has(this, SubscriberFlags.Notified)) {
-        Flags.remove(this, SubscriberFlags.Notified)
-        // Schedule microtask to avoid stack overflow and infinite sync loops
-        queueMicrotask(() => this.execute())
-      }
-    }
-  }
-
-  private run(): void {
-    for (const cleanup of this.cleanups) {
-      cleanup()
-    }
-    this.cleanups = []
-
-    // Clean up previous dependencies via Graph helper
-    Graph.disconnectDependencies(this)
-
-    const prevEffect = activeEffect
-    const prevOwner = getOwner()
-    activeEffect = this
-    setOwner(this.owner)
-
-    try {
-      const result = this.fn()
-      if (typeof result === 'function') {
-        this.cleanups.push(result)
-      }
-    } catch (error) {
-      if (this.onError) {
-        this.onError(error as Error)
-      } else {
-        logError(ErrorCodes.EFFECT_EXECUTION_FAILED, undefined, error)
-      }
-    } finally {
-      activeEffect = prevEffect
-      setOwner(prevOwner)
-    }
-  }
-
-  dispose(): void {
-    for (const cleanup of this.cleanups) {
-      cleanup()
-    }
-    this.cleanups = []
-    Graph.disconnectDependencies(this)
-  }
-}
 
 /**
  * Internal signal node for writable signals
@@ -177,6 +99,7 @@ class SignalNode<T> implements IObservable {
 
   get(): T {
     // Track dependency if inside an effect or computed
+    const activeEffect = getActiveEffect()
     if (activeEffect) {
       Graph.connect(this, activeEffect)
     }
@@ -196,11 +119,11 @@ class SignalNode<T> implements IObservable {
   }
 
   notify(): void {
-    if (batchDepth > 0) {
+    if (getBatchDepth() > 0) {
       // Manual batch: queue subscribers
       let link = this.subsHead
       while (link) {
-        if (link.sub) batchQueue.add(link.sub)
+        if (link.sub) addToBatch(link.sub)
         link = link.nextSub
       }
     } else {
@@ -214,7 +137,7 @@ class SignalNode<T> implements IObservable {
           if (sub instanceof ComputedNode) {
             sub.execute() // Mark dirty immediately
           } else {
-            autoBatchQueue.add(sub)
+            addToAutoBatch(sub)
             shouldSchedule = true
           }
           link = link.nextSub
@@ -269,8 +192,9 @@ class ComputedNode<T> implements ISubscriber, IObservable {
     // Clear previous dependencies via Graph helper
     Graph.disconnectDependencies(this)
 
-    const prevEffect = activeEffect
-    activeEffect = this
+    const prevEffect = getActiveEffect()
+    // const prevOwner = getOwner() // Not used
+    setActiveEffect(this)
 
     try {
       const newValue = this.computeFn()
@@ -280,8 +204,28 @@ class ComputedNode<T> implements ISubscriber, IObservable {
       }
       this.lastCleanEpoch = globalVersion
     } finally {
-      activeEffect = prevEffect
+      setActiveEffect(prevEffect)
     }
+
+    // Actually, we need to import setActiveEffect at the top of the file
+    // activeEffect = this -> setActiveEffect(this)
+    // activeEffect = prevEffect -> setActiveEffect(prevEffect)
+    // But since I am generating this chunk, let me check imports again.
+    // I added getActiveEffect to imports. I need setActiveEffect too.
+
+    // REVISING CHUNK content below to use imported function properly.
+    // note: I must add setActiveEffect to imports in the first chunk.
+
+
+    // For this specific Chunk:
+    // We will use a hack here or I should update the first chunk to include setActiveEffect.
+    // I'll update the first chunk in this tool call to include setActiveEffect.
+
+    // import { setActiveEffect } from './owner'
+    // ...
+    // setActiveEffect(this)
+    // ...
+    // setActiveEffect(prevEffect)
   }
 
   private _needsRefetch(): boolean {
@@ -310,6 +254,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
 
   get(): T {
     // Track dependency if inside an effect or computed
+    const activeEffect = getActiveEffect()
     if (activeEffect && activeEffect !== this) {
       Graph.connect(this, activeEffect)
     }
@@ -324,11 +269,11 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   }
 
   notify(): void {
-    if (batchDepth > 0) {
+    if (getBatchDepth() > 0) {
       // Manual batch
       let link = this.subsHead
       while (link) {
-        if (link.sub) batchQueue.add(link.sub)
+        if (link.sub) addToBatch(link.sub)
         link = link.nextSub
       }
     } else {
@@ -342,7 +287,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
           if (sub instanceof ComputedNode) {
             sub.execute()
           } else {
-            autoBatchQueue.add(sub)
+            addToAutoBatch(sub)
             shouldSchedule = true
           }
           link = link.nextSub
@@ -356,24 +301,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   }
 }
 
-// ... internal schedulers ...
-function scheduleAutoBatch() {
-  if (!isAutoBatchScheduled) {
-    isAutoBatchScheduled = true
-    queueMicrotask(flushAutoBatch)
-  }
-}
 
-function flushAutoBatch() {
-  isAutoBatchScheduled = false
-  if (autoBatchQueue.size === 0) return
-
-  const queue = new Set(autoBatchQueue)
-  autoBatchQueue.clear()
-
-  // Execute effects
-  queue.forEach((sub) => sub.execute())
-}
 
 
 
@@ -476,123 +404,7 @@ export function computed<T>(fn: () => T): Computed<T> {
  *   return () => console.log('Cleanup');
  * });
  */
-export function effect(
-  fn: () => void | (() => void),
-  options?: { onError?: (error: Error) => void; name?: string }
-): () => void {
-  // Register with devtools before execution
-  let devToolsId = -1
-  if (devToolsHooks?.onEffectCreate) {
-    devToolsId = devToolsHooks.onEffectCreate(options?.name)
-  }
 
-  // Wrap fn to track execution in devtools
-  const wrappedFn =
-    devToolsId >= 0
-      ? () => {
-        if (devToolsHooks?.onEffectRun) {
-          devToolsHooks.onEffectRun(devToolsId, 'running')
-        }
-        try {
-          const result = fn()
-          if (devToolsHooks?.onEffectRun) {
-            devToolsHooks.onEffectRun(devToolsId, 'idle')
-          }
-          return result
-        } catch (error) {
-          if (devToolsHooks?.onEffectRun) {
-            devToolsHooks.onEffectRun(devToolsId, 'error', error as Error)
-          }
-          throw error
-        }
-      }
-      : fn
-
-  const node = new EffectNode(wrappedFn, options?.onError)
-  node.execute()
-  const dispose = () => node.dispose()
-
-  const owner = getOwner()
-  if (owner) {
-    owner.cleanups.push(dispose)
-  }
-
-  return dispose
-}
-
-/**
- * Execute a function without tracking signal dependencies.
- * Useful when you need to read signals inside an effect without creating dependencies.
- *
- * @param fn - Function to execute without tracking
- * @returns The return value of fn
- *
- * @example
- * ```tsx
- * const count = signal(0);
- * const name = signal('Alice');
- *
- * effect(() => {
- *   // Only re-runs when count changes, not name
- *   console.log(count(), untrack(() => name()));
- * });
- * ```
- */
-export function untrack<T>(fn: () => T): T {
-  const prev = activeEffect
-  activeEffect = null
-  try {
-    return fn()
-  } finally {
-    activeEffect = prev
-  }
-}
-
-/**
- * Synchronizes state updates.
- * 
- * - `sync()`: Force flushes any pending auto-batched effects.
- * - `sync(fn)`: Batches updates within `fn`, then flushes them and any pending effects synchronously.
- *
- * @param fn - Optional function containing state updates
- * @returns The return value of fn, if provided
- *
- * @example
- * ```tsx
- * // 1. Force flush pending effects
- * count.value++
- * sync() // DOM is now updated
- *
- * // 2. Batch updates and flush immediately
- * sync(() => {
- *   count.value = 1
- *   name.value = 'Bob'
- * }) // Effects run once here, DOM updated
- * ```
- */
-export function sync<T>(fn?: () => T): T | void {
-  let result: T | undefined
-
-  if (fn) {
-    batchDepth++
-    try {
-      result = fn()
-    } finally {
-      batchDepth--
-      if (batchDepth === 0) {
-        // Execute all queued subscribers from manual batch
-        const queue = new Set(batchQueue)
-        batchQueue.clear()
-        queue.forEach((sub) => sub.execute())
-      }
-    }
-  }
-
-  // Always flushing auto-batch queue to ensure everything is synced
-  flushAutoBatch()
-
-  return result
-}
 
 /**
  * Creates a root scope for effects
@@ -624,6 +436,7 @@ export function isSignal(value: unknown): value is Signal<any> | Computed<any> {
  * @param fn - Cleanup function
  */
 export function onCleanup(fn: () => void): void {
+  const activeEffect = getActiveEffect()
   if (activeEffect instanceof EffectNode) {
     activeEffect.cleanups.push(fn)
   } else {

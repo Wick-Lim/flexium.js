@@ -10,10 +10,10 @@
 
 import { describe, it, expect, beforeEach } from 'vitest'
 import { state, STATE_SIGNAL } from '../state'
-import { effect } from '../signal'
+import { effect } from '../index'
 
 // Helper to wait for microtasks
-const tick = () => new Promise((resolve) => queueMicrotask(resolve))
+const tick = () => new Promise<void>((resolve) => queueMicrotask(() => resolve()))
 
 // Helper to extract primitive value from StateProxy
 const val = <T>(proxy: T): T => {

@@ -7,7 +7,7 @@ import {
   captureContext,
   runWithContext,
 } from '../context'
-import { root } from '../signal'
+import { root } from '../owner'
 
 describe('Context API', () => {
   describe('createContext', () => {

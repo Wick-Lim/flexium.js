@@ -14,6 +14,36 @@ export interface Owner {
     owner: Owner | null // Parent owner
 }
 
+import type { ISubscriber } from './graph'
+
+// Global context for dependency tracking
+let activeEffect: ISubscriber | null = null
+
+export function getActiveEffect(): ISubscriber | null {
+    return activeEffect
+}
+
+export function setActiveEffect(effect: ISubscriber | null): void {
+    activeEffect = effect
+}
+
+/**
+ * Execute a function without tracking signal dependencies.
+ * Useful when you need to read signals inside an effect without creating dependencies.
+ *
+ * @param fn - Function to execute without tracking
+ * @returns The return value of fn
+ */
+export function untrack<T>(fn: () => T): T {
+    const prev = activeEffect
+    activeEffect = null
+    try {
+        return fn()
+    } finally {
+        activeEffect = prev
+    }
+}
+
 let owner: Owner | null = null
 
 /**

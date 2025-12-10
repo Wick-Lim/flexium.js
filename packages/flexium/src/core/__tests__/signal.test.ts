@@ -5,7 +5,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { signal, computed, effect, sync, untrack, root } from '../signal'
+import { signal, computed } from '../signal'
+import { effect } from '../effect'
+import { sync } from '../scheduler'
+import { untrack, root } from '../owner'
 
 describe('Signal System', () => {
   describe('signal()', () => {

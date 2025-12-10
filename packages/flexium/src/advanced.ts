@@ -10,10 +10,13 @@
 
 export {
   signal,
-  root,
-  untrack,
   onCleanup,
 } from './core/signal'
+
+export {
+  root,
+  untrack,
+} from './core/owner'
 
 export type { Signal, Computed } from './core/signal'
 
