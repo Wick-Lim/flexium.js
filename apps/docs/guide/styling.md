@@ -933,12 +933,12 @@ const staticStyle = { color: 'red', padding: '8px' }
 <button class="btn-primary">Click Me</button>
 ```
 
-### Batch Style Updates
+### Sync Style Updates
 
 Group multiple style changes together:
 
 ```tsx
-import { batch } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 const [color, setColor] = state('#333')
 const [size, setSize] = state(16)
@@ -951,9 +951,9 @@ function updateTheme() {
   setWeight(500)
 }
 
-// Good: Batched updates
+// Good: Synced updates
 function updateTheme() {
-  batch(() => {
+  sync(() => {
     setColor('#fff')
     setSize(18)
     setWeight(500)
@@ -1012,7 +1012,7 @@ For lists with many items, use CSS classes instead of inline styles:
 3. **Prefer reactive functions over manual DOM manipulation**: Let Flexium handle updates
 4. **Extract reusable styles**: Create style utilities and constants for consistency
 5. **Use CSS Modules for component isolation**: Prevent class name conflicts in larger apps
-6. **Batch related state updates**: Reduce unnecessary re-renders
+6. **Sync related state updates**: Reduce unnecessary re-renders
 7. **Keep specificity low**: Avoid overly specific selectors that are hard to override
 8. **Use semantic class names**: Make styles maintainable and self-documenting
 9. **Test responsive behavior**: Use browser dev tools to test different screen sizes

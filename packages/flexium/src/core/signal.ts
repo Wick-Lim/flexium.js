@@ -21,11 +21,7 @@ import {
   type Owner,
   getOwner,
   setOwner,
-  onMount,
-  root
 } from './owner'
-
-export { root, onMount } from './owner'
 
 /**
  * DevTools hooks interface - set by devtools module to avoid circular imports
@@ -379,16 +375,7 @@ function flushAutoBatch() {
   queue.forEach((sub) => sub.execute())
 }
 
-/**
- * Force flush any pending auto-batched effects synchronously.
- * Useful for testing or measuring DOM immediately after updates.
- */
-export function flushSync(fn?: () => void): void {
-  if (fn) {
-    batch(fn)
-  }
-  flushAutoBatch()
-}
+
 
 /**
  * Creates a reactive signal
@@ -562,38 +549,49 @@ export function untrack<T>(fn: () => T): T {
 }
 
 /**
- * Batches multiple signal updates together.
- * Effects will only run once after all updates complete.
+ * Synchronizes state updates.
+ * 
+ * - `sync()`: Force flushes any pending auto-batched effects.
+ * - `sync(fn)`: Batches updates within `fn`, then flushes them and any pending effects synchronously.
  *
- * @param fn - Function containing signal updates to batch
- * @returns The return value of fn
+ * @param fn - Optional function containing state updates
+ * @returns The return value of fn, if provided
  *
  * @example
  * ```tsx
- * const count = signal(0);
- * const name = signal('Alice');
+ * // 1. Force flush pending effects
+ * count.value++
+ * sync() // DOM is now updated
  *
- * effect(() => console.log(count(), name())); // runs once
- *
- * batch(() => {
- *   count.value = 1;
- *   name.value = 'Bob';
- * }); // effect runs only once after batch completes
+ * // 2. Batch updates and flush immediately
+ * sync(() => {
+ *   count.value = 1
+ *   name.value = 'Bob'
+ * }) // Effects run once here, DOM updated
  * ```
  */
-export function batch<T>(fn: () => T): T {
-  batchDepth++
-  try {
-    return fn()
-  } finally {
-    batchDepth--
-    if (batchDepth === 0) {
-      // Execute all queued subscribers
-      const queue = new Set(batchQueue)
-      batchQueue.clear()
-      queue.forEach((sub) => sub.execute())
+export function sync<T>(fn?: () => T): T | void {
+  let result: T | undefined
+
+  if (fn) {
+    batchDepth++
+    try {
+      result = fn()
+    } finally {
+      batchDepth--
+      if (batchDepth === 0) {
+        // Execute all queued subscribers from manual batch
+        const queue = new Set(batchQueue)
+        batchQueue.clear()
+        queue.forEach((sub) => sub.execute())
+      }
     }
   }
+
+  // Always flushing auto-batch queue to ensure everything is synced
+  flushAutoBatch()
+
+  return result
 }
 
 /**

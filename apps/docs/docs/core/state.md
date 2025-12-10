@@ -196,4 +196,4 @@ function Counter() {
 ## See Also
 
 - [effect()](/docs/core/effect)
-- [batch()](/docs/core/batch)
+- [sync()](/docs/core/sync)

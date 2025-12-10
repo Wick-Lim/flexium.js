@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { state, batch, effect } from 'flexium/core'
+import { state, sync, effect } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
@@ -28,7 +28,7 @@ function BatchExample() {
   }
 
   const incrementAllBatched = () => {
-    batch(() => {
+    sync(() => {
       setCounter1(c => c + 1)
       setCounter2(c => c + 1)
       setCounter3(c => c + 1)
@@ -36,7 +36,7 @@ function BatchExample() {
   }
 
   const resetAll = () => {
-    batch(() => {
+    sync(() => {
       setCounter1(0)
       setCounter2(0)
       setCounter3(0)

@@ -181,7 +181,7 @@ export type StateAction<T> = (newValue: T | ((prev: T) => T)) => void
  * StateValue type - a value-like proxy that behaves like T.
  * Can be used directly in expressions and JSX.
  */
-export type StateValue<T> = T & (() => T)
+export type StateValue<T> = T & (() => T) & { peek(): T }
 
 /**
  * Check if a value is a StateValue (created by the state() API).
@@ -247,6 +247,11 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
       // Return underlying signal for reactive binding detection
       if (prop === STATE_SIGNAL) {
         return sig
+      }
+
+      // Allow direct access to peek() without tracking
+      if (prop === 'peek') {
+        return sig.peek
       }
 
       // Symbol.toPrimitive - called for +, -, ==, template literals, etc.

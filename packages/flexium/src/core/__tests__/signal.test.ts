@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { signal, computed, effect, batch, untrack, root, flushSync } from '../signal'
+import { signal, computed, effect, sync, untrack, root } from '../signal'
 
 describe('Signal System', () => {
   describe('signal()', () => {
@@ -165,7 +165,7 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
-      flushSync()
+      sync()
       expect(runCount).toBe(2)
     })
 
@@ -181,11 +181,11 @@ describe('Signal System', () => {
       expect(fullName).toBe('John Doe')
 
       firstName.value = 'Jane'
-      flushSync()
+      sync()
       expect(fullName).toBe('Jane Doe')
 
       lastName.value = 'Smith'
-      flushSync()
+      sync()
       expect(fullName).toBe('Jane Smith')
     })
 
@@ -201,9 +201,9 @@ describe('Signal System', () => {
       })
 
       count.value = 1
-      flushSync()
+      sync()
       count.value = 2
-      flushSync()
+      sync()
       dispose()
 
       expect(cleanups).toEqual([0, 1, 2])
@@ -220,7 +220,7 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
-      flushSync()
+      sync()
       expect(runCount).toBe(2)
 
       dispose()
@@ -246,7 +246,7 @@ describe('Signal System', () => {
       )
 
       count.value = 1
-      flushSync()
+      sync()
       expect(errors).toHaveLength(1)
       expect(errors[0].message).toBe('Test error')
     })
@@ -267,12 +267,12 @@ describe('Signal System', () => {
 
       // count is tracked
       count.value = 1
-      flushSync()
+      sync()
       expect(runCount).toBe(2)
 
       // Remove count dependency
       showCount.value = false
-      flushSync()
+      sync()
       expect(runCount).toBe(3)
 
       // count is no longer tracked
@@ -281,7 +281,7 @@ describe('Signal System', () => {
     })
   })
 
-  describe('batch()', () => {
+  describe('sync()', () => {
     it('should batch multiple updates', () => {
       const count = signal(0)
       const name = signal('John')
@@ -295,7 +295,7 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
 
-      batch(() => {
+      sync(() => {
         count.value = 1
         name.value = 'Jane'
       })
@@ -314,9 +314,9 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
 
-      batch(() => {
+      sync(() => {
         count.value = 1
-        batch(() => {
+        sync(() => {
           count.value = 2
         })
         count.value = 3
@@ -338,7 +338,7 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
 
-      batch(() => {
+      sync(() => {
         a.value = 10
         b.value = 20
         c.value = 30
@@ -376,7 +376,7 @@ describe('Signal System', () => {
 
       // Only a should trigger
       a.value = 10
-      flushSync()
+      sync()
       expect(result).toBe(12)
 
       // b should not trigger
@@ -400,7 +400,7 @@ describe('Signal System', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
-      flushSync()
+      sync()
       expect(runCount).toBe(2)
 
       dispose()
@@ -447,7 +447,7 @@ describe('Signal System', () => {
 
       const start = performance.now()
       count.value = 2
-      flushSync()
+      sync()
       const updateTime = performance.now() - start
 
       expect(results[1]).toBe(51)

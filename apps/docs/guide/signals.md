@@ -223,4 +223,4 @@ effect(() => {
 
 - [state()](/docs/core/state) - State management API
 - [effect()](/docs/core/effect) - Side effects
-- [batch()](/docs/core/batch) - Batch updates
+- [sync()](/docs/core/sync) - Sync updates

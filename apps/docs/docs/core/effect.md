@@ -157,10 +157,10 @@ Flexium also exports `onMount` and `onCleanup` for compatibility, but `effect()`
 ## Notes
 
 - Avoid creating infinite loops by updating tracked state inside effects
-- Use `batch()` to group multiple state updates within effects
+- Use `sync()` to group multiple state updates within effects
 - Effects are synchronous by default
 
 ## See Also
 
 - [state()](/docs/core/state)
-- [batch()](/docs/core/batch)
+- [sync()](/docs/core/sync)

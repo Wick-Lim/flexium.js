@@ -1,16 +1,16 @@
 ---
-title: Batch API - Optimizing Multiple Updates
-description: Learn how to use Flexium's batch() API to optimize multiple signal updates and prevent cascading re-renders.
+title: Sync API - Optimizing Multiple Updates
+description: Learn how to use Flexium's sync() API to optimize multiple signal updates and prevent cascading re-renders.
 head:
   - - meta
     - property: og:title
-      content: Batch API - Flexium Performance Optimization
+      content: Sync API - Flexium Performance Optimization
   - - meta
     - property: og:description
-      content: Prevent cascading updates with batching. Learn when and how to batch multiple signal updates for optimal performance.
+      content: Prevent cascading updates with synchronization. Learn when and how to sync multiple signal updates for optimal performance.
 ---
 
-# Batch API & Automatic Batching
+# Sync API & Automatic Batching
 
 Flexium automatically optimizes your state updates to ensure high performance. In most cases, you don't need to do anything! 
 
@@ -42,17 +42,17 @@ setTimeout(() => {
 // Logs: "Jane Smith, age 25"
 ```
 
-## Manual Batching
+## Manual Synchronization
 
-The `batch()` API is still available for scenarios where you want **Synchronous Batched Updates**. When you use `batch()`, effects run immediately after the batch callback completes, rather than waiting for the next microtask. This is useful when you need to measure the DOM immediately after a set of updates.
+The `sync()` API is available for scenarios where you want **Synchronous Updates**. When you use `sync()`, effects run immediately after the callback completes, rather than waiting for the next microtask. This is also useful when you need to measure the DOM immediately after a set of updates.
 
 ```tsx
-import { signal, effect, batch } from 'flexium/advanced'
+import { signal, effect, sync } from 'flexium/advanced'
 
 // ... signals ...
 
 // Updates run immediately after this block
-batch(() => {
+sync(() => {
   firstName.set('Jane')
   lastName.set('Smith')
 })
@@ -61,19 +61,19 @@ batch(() => {
 
 ## Import
 
-The `batch()` and `flushSync()` functions are available from multiple import paths:
+The `sync()` function is available from multiple import paths:
 
 ```tsx
 // From advanced API
-import { batch, flushSync } from 'flexium/advanced'
+import { sync } from 'flexium/advanced'
 
 // From core (for convenience)
-import { batch, flushSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 ```
 
-## flushSync()
+## Force Sync
 
-The `flushSync()` function forces any pending auto-batched effects to run **synchronously**. This is useful for:
+The `sync()` function (without arguments) forces any pending auto-batched effects to run **synchronously**. This is useful for:
 
 - **Testing**: Ensuring effects have run before making assertions
 - **DOM Measurement**: Measuring the DOM immediately after state updates
@@ -82,7 +82,7 @@ The `flushSync()` function forces any pending auto-batched effects to run **sync
 ### Basic Usage
 
 ```tsx
-import { signal, effect, flushSync } from 'flexium/advanced'
+import { signal, effect, sync } from 'flexium/advanced'
 
 const count = signal(0)
 let effectRan = false
@@ -95,17 +95,17 @@ effect(() => {
 count.value = 1
 // Effect is queued (auto-batching)
 
-flushSync()
+sync()
 // Effect has now run synchronously!
 console.log(effectRan) // true
 ```
 
 ### With Callback
 
-`flushSync()` optionally accepts a callback. Updates inside the callback are batched, and all effects run before `flushSync()` returns:
+`sync()` optionally accepts a callback. Updates inside the callback are batched, and all effects run before `sync()` returns:
 
 ```tsx
-import { signal, effect, flushSync } from 'flexium/advanced'
+import { signal, effect, sync } from 'flexium/advanced'
 
 const firstName = signal('John')
 const lastName = signal('Doe')
@@ -115,7 +115,7 @@ effect(() => {
   fullName = `${firstName.value} ${lastName.value}`
 })
 
-flushSync(() => {
+sync(() => {
   firstName.value = 'Jane'
   lastName.value = 'Smith'
 })
@@ -144,7 +144,7 @@ describe('Counter', () => {
     expect(displayValue).toBe(0)
 
     count.value = 5
-    flushSync() // Force effects to run
+    sync() // Force effects to run
 
     expect(displayValue).toBe(10)
   })
@@ -194,7 +194,7 @@ b.value = 2 // Queued by auto-batch
 flushSync()  // Forces all queued effects to run NOW
 ```
 
-## Why Use Batch?
+## Why Use Sync?
 
 ### Performance Benefits
 
@@ -369,16 +369,16 @@ console.log(runCount) // 2 (initial run + 1 batch run)
 // Effect only ran once after all nested batches completed
 ```
 
-### How Nested Batching Works
+### How Nested Sync Works
 
-Flexium uses a depth counter to track nested batches:
+Flexium uses a depth counter to track nested sync blocks:
 
-1. Each `batch()` call increments the depth counter
+1. Each `sync()` call increments the depth counter
 2. Signal changes are queued while depth > 0
-3. When a batch completes, the depth counter decrements
+3. When a block completes, the depth counter decrements
 4. When depth reaches 0, all queued effects execute
 
-This ensures that no matter how deeply batches are nested, effects only run once when all updates are complete.
+This ensures that no matter how deeply sync blocks are nested, effects only run once when all updates are complete.
 
 ## When to Use Batch
 
@@ -530,7 +530,7 @@ const scale = signal(1)
 const animate = () => {
   requestAnimationFrame(() => {
     // Batch all position/transform updates
-    batch(() => {
+    sync(() => {
       x.set(Math.sin(Date.now() / 1000) * 100)
       y.set(Math.cos(Date.now() / 1000) * 100)
       rotation.set((rotation + 1) % 360)
@@ -571,7 +571,7 @@ const handlePlayerDeath = () => {
 }
 
 const completeLevel = () => {
-  batch(() => {
+  sync(() => {
     score.set(score + 1000)
     level.set(level + 1)
     enemies.set(generateEnemies(+level))
@@ -625,9 +625,9 @@ Event handlers are automatically batched in some frameworks. Check if your conte
   Update
 </button>
 
-// Better with explicit batch
+// Better with explicit sync
 <button onclick={() => {
-  batch(() => {
+  sync(() => {
     setCount(c => c + 1)
     setName('Updated')
   })
@@ -683,15 +683,15 @@ console.log('Runs:', runCount) // 4 (initial + 3 updates)
 
 runCount = 0
 
-// With batch
-console.time('with-batch')
-batch(() => {
+// With sync
+console.time('with-sync')
+sync(() => {
   a.set(10)
   b.set(20)
   c.set(30)
 })
-console.timeEnd('with-batch')
-console.log('Runs:', runCount) // 1 (batched update)
+console.timeEnd('with-sync')
+console.log('Runs:', runCount) // 1 (synced update)
 ```
 
 ## Common Use Cases
@@ -848,30 +848,30 @@ import { signal, batch } from 'flexium/advanced'
 const count = signal(0)
 
 // Good - uses peek()
-batch(() => {
+sync(() => {
   const current = count.peek()
   count.set(current + 1)
 })
 
 // Also okay - direct value access
-batch(() => {
+sync(() => {
   const current = +count
   count.set(current + 1)
 })
 ```
 
-### 3. Return Values from Batches
+### 3. Return Values from Sync Blocks
 
 Use the return value for operations that need confirmation:
 
 ```tsx
-import { signal, batch } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const inventory = signal([])
 const soldItems = signal([])
 
 const sellItem = (itemId) => {
-  return batch(() => {
+  return sync(() => {
     const item = inventory.find(i => i.id === itemId)
 
     if (!item) return false
@@ -888,13 +888,13 @@ if (sellItem(123)) {
 }
 ```
 
-### 4. Avoid Side Effects in Batches
+### 4. Avoid Side Effects in Sync Blocks
 
-Keep batches focused on state updates only:
+Keep sync blocks focused on state updates only:
 
 ```tsx
-// Bad - mixing side effects with batching
-batch(() => {
+// Bad - mixing side effects with syncing
+sync(() => {
   setLoading(false)
   setData(newData)
   console.log('Data loaded') // Side effect
@@ -902,7 +902,7 @@ batch(() => {
 })
 
 // Good - separate concerns
-batch(() => {
+sync(() => {
   setLoading(false)
   setData(newData)
 })

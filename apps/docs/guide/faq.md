@@ -171,7 +171,7 @@ Yes, Flexium works with most CSS-in-JS solutions. Just apply classes or styles a
 
 - **Fine-grained updates**: Only nodes that depend on changed signals update
 - **No Virtual DOM**: Direct DOM manipulation without diffing overhead
-- **Automatic batching**: Multiple updates are batched together
+- **Automatic Synchronization**: Multiple updates are synchronized together
 
 ### How do I optimize large lists?
 

@@ -192,9 +192,9 @@ function InteractiveCanvas() {
 
 ## Performance
 
-### Automatic Batching
+### Automatic Synchronization
 
-Canvas updates are automatically batched and debounced with `requestAnimationFrame`:
+Canvas updates are automatically synchronized and debounced with `requestAnimationFrame`:
 
 ```tsx
 const [x, setX] = state(0)

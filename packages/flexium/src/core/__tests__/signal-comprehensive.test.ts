@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { signal, computed, effect, batch, untrack, flushSync } from '../signal'
+import { signal, computed, effect, sync, untrack } from '../signal'
 
 describe('Signal System - Comprehensive', () => {
   describe('signal()', () => {
@@ -109,7 +109,7 @@ describe('Signal System - Comprehensive', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
-      flushSync()
+      sync()
       expect(runCount).toBe(2)
     })
 
@@ -125,11 +125,11 @@ describe('Signal System - Comprehensive', () => {
       expect(fullName).toBe('John Doe')
 
       firstName.value = 'Jane'
-      flushSync()
+      sync()
       expect(fullName).toBe('Jane Doe')
 
       lastName.value = 'Smith'
-      flushSync()
+      sync()
       expect(fullName).toBe('Jane Smith')
     })
 
@@ -145,9 +145,9 @@ describe('Signal System - Comprehensive', () => {
       })
 
       count.value = 1
-      flushSync()
+      sync()
       count.value = 2
-      flushSync()
+      sync()
       dispose()
 
       expect(cleanups).toEqual([0, 1, 2])
@@ -164,7 +164,7 @@ describe('Signal System - Comprehensive', () => {
 
       expect(runCount).toBe(1)
       count.value = 1
-      flushSync()
+      sync()
       expect(runCount).toBe(2)
 
       dispose()
@@ -173,7 +173,7 @@ describe('Signal System - Comprehensive', () => {
     })
   })
 
-  describe('batch()', () => {
+  describe('sync()', () => {
     it('should batch multiple updates', () => {
       const count = signal(0)
       const name = signal('John')
@@ -187,7 +187,7 @@ describe('Signal System - Comprehensive', () => {
 
       expect(runCount).toBe(1)
 
-      batch(() => {
+      sync(() => {
         count.value = 1
         name.value = 'Jane'
       })
@@ -206,9 +206,9 @@ describe('Signal System - Comprehensive', () => {
 
       expect(runCount).toBe(1)
 
-      batch(() => {
+      sync(() => {
         count.value = 1
-        batch(() => {
+        sync(() => {
           count.value = 2
         })
         count.value = 3
@@ -246,7 +246,7 @@ describe('Signal System - Comprehensive', () => {
 
       // Only a should trigger
       a.value = 10
-      flushSync()
+      sync()
       expect(result).toBe(12)
 
       // b should not trigger

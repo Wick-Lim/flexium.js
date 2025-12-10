@@ -40,19 +40,23 @@ The signal system implements a **push-pull** reactive model:
 - **Dynamic**: Dependencies update each time effect/computed runs
 - **Precise**: Only affected nodes update, no component re-renders
 
-### Batching
+### Synchronization
 
 ```typescript
-batch(() => {
+// 1. Force flush
+sync(); 
+
+// 2. Batch updates
+sync(() => {
   signal1.value = x;
   signal2.value = y;
   signal3.value = z;
-}); // All effects run once at the end
+}); // Effects run once at the end
 ```
 
-- Prevents cascading updates
-- Collects effects in a Set during batch
-- Executes all unique effects once when batch completes
+- `sync()`: Force flushes pending effects synchronously
+- `sync(fn)`: Batches updates inside `fn` and flushes synchronously
+- Prevents cascading updates and ensures consistency
 
 ## Performance Characteristics
 
@@ -63,7 +67,7 @@ batch(() => {
 | Computed read (cached) | O(1) | ~0ms |
 | Computed read (dirty) | O(dependencies) | < 1ms |
 | Effect create | O(1) + run | Variable |
-| Batch N updates | O(unique effects) | < 1ms |
+| Sync N updates | O(unique effects) | < 1ms |
 
 ## Memory Model
 
@@ -109,12 +113,17 @@ const dispose = effect(() => {
 dispose(); // Stop tracking and run cleanup
 ```
 
-### batch(fn: () => void): void
+### sync\<T\>(fn?: () => T): T | void
 
-Batches multiple updates to run effects once.
+Synchronizes state updates.
 
 ```typescript
-batch(() => {
+// 1. Force flush
+count.value++;
+sync(); // DOM updated immediately
+
+// 2. Batch updates
+sync(() => {
   signal1.value = x;
   signal2.value = y;
 }); // Effects run once

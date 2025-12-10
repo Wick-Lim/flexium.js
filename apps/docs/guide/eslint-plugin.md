@@ -72,7 +72,7 @@ Configure rules individually to match your project's needs:
     "flexium/no-signal-outside-reactive": "warn",
     "flexium/effect-cleanup": "warn",
     "flexium/no-side-effect-in-computed": "error",
-    "flexium/prefer-batch": "off"
+    "flexium/prefer-sync": "off"
   }
 }
 ```
@@ -277,16 +277,16 @@ effect(() => {
 });
 ```
 
-### `flexium/prefer-batch`
+### `flexium/prefer-sync`
 
-Suggest using `batch()` when multiple signals are updated consecutively.
+Suggest using `sync()` when multiple signals are updated consecutively.
 
-**Why?** Multiple signal updates without batching can cause unnecessary re-renders.
+**Why?** Multiple signal updates without syncing can cause unnecessary re-renders.
 
 #### Bad
 
 ```javascript
-// ⚠️ Warning - multiple updates without batch (3 separate re-renders)
+// ⚠️ Warning - multiple updates without sync (3 separate re-renders)
 count.value = 1;
 name.value = 'test';
 active.value = true;
@@ -303,18 +303,18 @@ function updateUser(id: number, data: UserData) {
 #### Good
 
 ```javascript
-import { batch } from 'flexium';
+import { sync } from 'flexium';
 
-// ✅ Batched updates (single re-render)
-batch(() => {
+// ✅ Synced updates (single re-render)
+sync(() => {
   count.value = 1;
   name.value = 'test';
   active.value = true;
 });
 
-// ✅ Batched function
+// ✅ Synced function
 function updateUser(id: number, data: UserData) {
-  batch(() => {
+  sync(() => {
     userId.value = id;
     userName.value = data.name;
     userEmail.value = data.email;
@@ -322,7 +322,7 @@ function updateUser(id: number, data: UserData) {
   });
 }
 
-// ✅ Single signal update doesn't need batching
+// ✅ Single signal update doesn't need syncing
 count.value = 1;
 ```
 
@@ -332,7 +332,7 @@ Configure the threshold for when to warn about consecutive updates:
 
 ```json
 {
-  "flexium/prefer-batch": ["warn", { "threshold": 2 }]
+  "flexium/prefer-sync": ["warn", { "threshold": 2 }]
 }
 ```
 
@@ -353,7 +353,7 @@ The Flexium ESLint plugin works alongside other ESLint configurations:
   "plugins": ["@typescript-eslint", "flexium"],
   "rules": {
     // Override specific rules if needed
-    "flexium/prefer-batch": "off"
+    "flexium/prefer-sync": "off"
   }
 }
 ```
@@ -399,7 +399,7 @@ If you're getting too many warnings during migration:
    {
      "extends": ["plugin:flexium/recommended"],
      "rules": {
-       "flexium/prefer-batch": "off"
+       "flexium/prefer-sync": "off"
      }
    }
    ```

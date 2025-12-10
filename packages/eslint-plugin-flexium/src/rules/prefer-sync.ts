@@ -1,6 +1,6 @@
 import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
-type MessageIds = "preferBatch";
+type MessageIds = "preferSync";
 type Options = [{ threshold?: number }];
 
 const rule: TSESLint.RuleModule<MessageIds, Options> = {
@@ -9,11 +9,11 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     type: "suggestion",
     docs: {
       description:
-        "Suggest using batch() when multiple signals are updated consecutively",
+        "Suggest using sync() when multiple signals are updated consecutively",
     },
     messages: {
-      preferBatch:
-        "Multiple signal updates ({{count}}) detected. Consider using batch() to prevent cascading re-renders.",
+      preferSync:
+        "Multiple signal updates ({{count}}) detected. Consider using sync() to prevent cascading re-renders.",
     },
     schema: [
       {
@@ -81,7 +81,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       if (consecutiveUpdates.length >= threshold) {
         context.report({
           node: consecutiveUpdates[0],
-          messageId: "preferBatch",
+          messageId: "preferSync",
           data: {
             count: String(consecutiveUpdates.length),
           },
@@ -118,15 +118,15 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       },
 
       ExpressionStatement(node: TSESTree.ExpressionStatement) {
-        // Check if already inside batch()
+        // Check if already inside sync()
         const ancestors = context.getAncestors();
         for (const ancestor of ancestors) {
           if (
             ancestor.type === "CallExpression" &&
             ancestor.callee.type === "Identifier" &&
-            ancestor.callee.name === "batch"
+            ancestor.callee.name === "sync"
           ) {
-            return; // Already inside batch, don't warn
+            return; // Already inside sync, don't warn
           }
         }
 

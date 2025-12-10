@@ -2,9 +2,9 @@
 import BatchDemo from '../../components/BatchDemo.vue'
 </script>
 
-# batch()
+# sync()
 
-Group multiple state updates to prevent intermediate renders.
+Synchronize state updates to the DOM.
 
 ## Live Demo
 
@@ -15,13 +15,17 @@ Group multiple state updates to prevent intermediate renders.
 ## Import
 
 ```ts
-import { batch } from 'flexium/core'
+import { sync } from 'flexium/core'
 ```
 
 ## Signature
 
 ```ts
-function batch<T>(fn: () => T): T
+// 1. Force Flush
+function sync(): void
+
+// 2. Batch Updates
+function sync<T>(fn: () => T): T
 ```
 
 ## Usage
@@ -38,8 +42,8 @@ setFirstName('Jane')
 setLastName('Smith')
 setAge(30)
 
-// With batch: 1 combined update
-batch(() => {
+// With sync: 1 combined update
+sync(() => {
   setFirstName('Jane')
   setLastName('Smith')
   setAge(30)
@@ -55,7 +59,7 @@ function UserForm() {
   const [errors, setErrors] = state({})
 
   const handleSubmit = () => {
-    batch(() => {
+    sync(() => {
       setName('')
       setEmail('')
       setErrors({})
@@ -79,7 +83,7 @@ const [sortBy, setSortBy] = state('name')
 const [page, setPage] = state(1)
 
 function resetFilters() {
-  batch(() => {
+  sync(() => {
     setFilter('')
     setSortBy('name')
     setPage(1)
@@ -90,7 +94,7 @@ function resetFilters() {
 ### With Return Value
 
 ```tsx
-const result = batch(() => {
+const result = sync(() => {
   setCount(prev => prev + 1)
   setTotal(prev => prev + 100)
   return 'done'
@@ -99,13 +103,13 @@ const result = batch(() => {
 console.log(result) // 'done'
 ```
 
-### Nested Batches
+### Nested Syncs
 
 ```tsx
-batch(() => {
+sync(() => {
   setA(1)
 
-  batch(() => {
+  sync(() => {
     setB(2)
     setC(3)
   })
@@ -127,19 +131,19 @@ batch(() => {
 
 ## Behavior
 
-- All state updates inside `batch()` are **deferred**
-- Effects and DOM updates happen **once** after the batch completes
-- Batches can be **nested** - updates apply when outermost batch completes
-- Reading state inside batch returns the **pending** value
+- `sync()` (no args): Force flushes pending effects immediately
+- `sync(fn)`: Batches updates inside `fn`, then flushes immediately
+- Reading state inside sync returns the **pending** value
 
 ## When to Use
 
-Use `batch()` when:
+Use `sync()` when:
 
 - Updating multiple related states together
 - Resetting form or filter states
 - Handling events that modify multiple values
 - Optimizing performance-critical updates
+- Measuring DOM immediately after updates
 
 ## Notes
 

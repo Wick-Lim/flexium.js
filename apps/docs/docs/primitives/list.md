@@ -299,9 +299,9 @@ Fixed heights provide the best performance:
 itemSize={50}  // Preferred for uniform items
 ```
 
-### 4. Batch Updates
+### 4. Sync Updates
 
-When updating the items array, batch changes in a single signal update:
+When updating the items array, sync changes in a single signal update:
 
 ```tsx
 // Good - single update

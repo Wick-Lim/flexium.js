@@ -607,7 +607,7 @@ Flexium's architecture is designed for simplicity and performance:
 ┌─────────────────────────────────────────────────────────┐
 │                  Flexium Core API                        │
 │  ┌──────────┐  ┌────────┐  ┌────────┐  ┌──────────┐   │
-│  │ state()  │  │ effect │  │ batch  │  │  mount   │   │
+│  │ state()  │  │ effect │  │  sync  │  │  mount   │   │
 │  └──────────┘  └────────┘  └────────┘  └──────────┘   │
 └────────────────────┬────────────────────────────────────┘
                      │
@@ -685,7 +685,7 @@ Compared to React 18 on common operations:
 ### Real-World Performance
 
 ```tsx
-import { state, batch } from 'flexium/core';
+import { state, sync } from 'flexium/core';
 
 // Efficiently update 1000 items
 function LargeList() {
@@ -694,7 +694,7 @@ function LargeList() {
   );
 
   const updateAll = () => {
-    batch(() => {
+    sync(() => {
       // Even updating 1000 items at once is fast
       setItems(items => items.map(item => ({
         ...item,
@@ -748,7 +748,7 @@ function LargeList() {
    - Resource management
 
 2. **Performance Optimization** (1 day)
-   - Learn batching
+   - Learn syncing
    - Understand computed vs effect
    - Profile your applications
 

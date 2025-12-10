@@ -289,6 +289,24 @@ describe('State API', () => {
       expect(spread).toEqual({ name: 'Alice', age: 30 })
       expect(spread.name).toBe('Alice')
     })
+
+    it('should allow direct peek access without tracking', () => {
+      const [count, setCount] = state(0)
+      let executionCount = 0
+
+      effect(() => {
+        // peek should NOT track
+        count.peek()
+        executionCount++
+      })
+
+      expect(executionCount).toBe(1)
+
+      setCount(1)
+      // Should NOT re-run because we only peeked
+      expect(executionCount).toBe(1)
+      expect(count.peek()).toBe(1)
+    })
   })
 
   describe('Edge Cases', () => {

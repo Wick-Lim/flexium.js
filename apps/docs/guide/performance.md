@@ -253,12 +253,12 @@ setCount(2); // Effect runs immediately, computed marks stale
 doubled.value;   // Recomputes now
 ```
 
-## Batch Updates
+## Sync Updates
 
-When making multiple state changes, batch them to avoid intermediate updates:
+When making multiple state changes, sync them to avoid intermediate updates:
 
 ```tsx
-import { batch } from 'flexium/core';
+import { sync } from 'flexium/core';
 import { signal } from 'flexium/advanced';
 
 const [firstName, setFirstName] = signal('John');
@@ -275,7 +275,7 @@ function updateUser(user) {
 
 // Good - batches into 1 update
 function updateUser(user) {
-  batch(() => {
+  sync(() => {
     setFirstName(user.first);
     setLastName(user.last);
     setAge(user.age);
@@ -284,7 +284,7 @@ function updateUser(user) {
 }
 ```
 
-Batching is especially important when:
+Batching/Syncing is especially important when:
 - Updating multiple related signals
 - Processing arrays of changes
 - Responding to user input that affects multiple states
@@ -312,9 +312,9 @@ setTimeout(() => {
   setActive(true);
 }, 1000);
 
-// Wrap in batch() for async contexts
+// Wrap in sync() for async contexts
 setTimeout(() => {
-  batch(() => {
+  sync(() => {
     setCount(c => c + 1);
     setName('Updated');
     setActive(true);
@@ -328,7 +328,7 @@ Flexium uses efficient event delegation for all standard events. Listeners are a
 
 - **Smart Traversal**: Uses `event.composedPath()` for fast target resolution, even through Shadow DOM.
 - **Automatic Cleanup**: Global listeners are managed automatically.
-- **Batching**: Event handlers automatically batch state updates.
+- **Automatic Batching**: Event handlers automatically batch state updates.
 
 ## Memory Management
 

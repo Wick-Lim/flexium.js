@@ -7,8 +7,8 @@
 export {
   effect,
   untrack,
-  batch,
-  root,
+  sync,
 } from './signal'
 
+export { root, onMount } from './owner'
 export { state } from './state'
