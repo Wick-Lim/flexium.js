@@ -10,7 +10,7 @@
  */
 
 // State management - THE unified API
-export { state, ref } from './core/state'
+export { state, ref, equals, isTruthy, isStateValue } from './core/state'
 export type { StateAction, StateValue, AsyncStatus, StateKey, StateOptions, RefObject } from './core/state'
 
 // Side effects and batching (necessary primitives)

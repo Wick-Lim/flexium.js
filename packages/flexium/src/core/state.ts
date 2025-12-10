@@ -227,6 +227,62 @@ export function getStateSignal(stateValue: unknown): Signal<unknown> | null {
 }
 
 /**
+ * Compare a StateValue with a primitive value safely.
+ * Handles Proxy comparison automatically by extracting the underlying value.
+ * 
+ * @param stateValue - The StateValue to compare
+ * @param value - The value to compare against
+ * @returns true if the StateValue's underlying value equals the comparison value
+ * 
+ * @example
+ * ```tsx
+ * const [count, setCount] = state(0)
+ * 
+ * // ✅ Safe comparison using helper
+ * if (equals(count, 5)) {
+ *   console.log('Count is 5')
+ * }
+ * 
+ * // ❌ Direct comparison (always false)
+ * if (count === 5) { ... }
+ * ```
+ */
+export function equals<T>(stateValue: StateValue<T>, value: T): boolean {
+  if (!isStateValue(stateValue)) {
+    return false
+  }
+  const actualValue = stateValue.peek()
+  return actualValue === value
+}
+
+/**
+ * Check if a StateValue is truthy.
+ * Useful for boolean checks without explicit conversion.
+ * 
+ * @param stateValue - The StateValue to check
+ * @returns true if the underlying value is truthy
+ * 
+ * @example
+ * ```tsx
+ * const [user, setUser] = state<User | null>(null)
+ * 
+ * // ✅ Safe boolean check
+ * if (isTruthy(user)) {
+ *   console.log('User exists:', user.name)
+ * }
+ * 
+ * // ❌ Direct check (always true for Proxy)
+ * if (user) { ... }
+ * ```
+ */
+export function isTruthy<T>(stateValue: StateValue<T>): boolean {
+  if (!isStateValue(stateValue)) {
+    return false
+  }
+  return Boolean(stateValue.peek())
+}
+
+/**
  * Create a reactive proxy that behaves like a value but stays reactive.
  * The proxy is also callable - calling it returns the current value.
  * This ensures compatibility with code expecting getter functions.
