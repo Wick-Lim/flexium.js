@@ -185,6 +185,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   private _updateIfDirty(): void {
     // Performance: Inline flag checks for better branch prediction
     // 1. If not dirty and not stale, we are valid (most common case)
+    // Note: This check is now done in peek()/get() for fast path, but kept here for safety
     const flags = this.flags
     const dirtyOrStale = flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)
     if (dirtyOrStale === 0) {
@@ -284,12 +285,22 @@ class ComputedNode<T> implements ISubscriber, IObservable {
       Graph.connect(this, activeEffect)
     }
 
-    this._updateIfDirty()
+    // Performance: Fast path - check if update needed before calling _updateIfDirty
+    const flags = this.flags
+    const dirtyOrStale = flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)
+    if (dirtyOrStale !== 0) {
+      this._updateIfDirty()
+    }
     return this._value
   }
 
   peek(): T {
-    this._updateIfDirty()
+    // Performance: Fast path - check if update needed before calling _updateIfDirty
+    const flags = this.flags
+    const dirtyOrStale = flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)
+    if (dirtyOrStale !== 0) {
+      this._updateIfDirty()
+    }
     return this._value
   }
 

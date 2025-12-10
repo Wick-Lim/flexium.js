@@ -145,16 +145,20 @@ export namespace Graph {
         const link = LinkPool.alloc(dep, sub)
 
         // Add to Subscriber's dependency list (prepend)
-        link.nextDep = sub.depsHead
-        if (sub.depsHead) {
-            sub.depsHead.prevDep = link
+        // Performance: Cache depsHead to avoid repeated property access
+        const depsHead = sub.depsHead
+        link.nextDep = depsHead
+        if (depsHead) {
+            depsHead.prevDep = link
         }
         sub.depsHead = link
 
         // Add to Dependency's subscriber list (prepend)
-        link.nextSub = dep.subsHead
-        if (dep.subsHead) {
-            dep.subsHead.prevSub = link
+        // Performance: Cache subsHead to avoid repeated property access
+        const subsHead = dep.subsHead
+        link.nextSub = subsHead
+        if (subsHead) {
+            subsHead.prevSub = link
         }
         dep.subsHead = link
     }
@@ -167,17 +171,21 @@ export namespace Graph {
         let link = sub.depsHead
         while (link) {
             const dep = link.dep!
+            // Performance: Cache nextDep and pointers before modifying link
             const nextDep = link.nextDep
+            const prevSub = link.prevSub
+            const nextSub = link.nextSub
 
             // Remove link from dependency's subscriber list
             // This is a standard doubly-linked list removal
-            if (link.prevSub) {
-                link.prevSub.nextSub = link.nextSub
+            // Performance: Branch prediction - middle nodes are more common
+            if (prevSub) {
+                prevSub.nextSub = nextSub
             } else {
-                dep.subsHead = link.nextSub
+                dep.subsHead = nextSub
             }
-            if (link.nextSub) {
-                link.nextSub.prevSub = link.prevSub
+            if (nextSub) {
+                nextSub.prevSub = prevSub
             }
 
             LinkPool.free(link)
