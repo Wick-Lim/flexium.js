@@ -1,26 +1,26 @@
 ---
-title: CanvasText - Canvas Text Rendering Component
-description: API reference for Flexium's CanvasText component. Draw text on canvas with fonts, colors, and alignment options.
+title: DrawText - Canvas Text Rendering Component
+description: API reference for Flexium's DrawText component. Draw text on canvas with fonts, colors, and alignment options.
 head:
   - - meta
     - property: og:title
-      content: CanvasText Component - Flexium Canvas API
+      content: DrawText Component - Flexium Canvas API
   - - meta
     - property: og:description
-      content: CanvasText component for rendering text on canvas. Support for fonts, colors, and text alignment.
+      content: DrawText component for rendering text on canvas. Support for fonts, colors, and text alignment.
 ---
 
-# CanvasText
+# DrawText
 
-Draws text on the canvas. Note: This component is exported as `CanvasText` to avoid conflict with the core `Text` primitive, but inside the docs we refer to it as Text in the context of Canvas, or you can import it as `CanvasText`.
+Draws text on the canvas.
 
 ## Usage
 
 ```tsx
-import { Canvas, CanvasText } from 'flexium/canvas';
+import { Canvas, DrawText } from 'flexium/canvas';
 
 <Canvas width={300} height={100}>
-  <CanvasText
+  <DrawText
     x={10}
     y={50}
     text="Hello Canvas"

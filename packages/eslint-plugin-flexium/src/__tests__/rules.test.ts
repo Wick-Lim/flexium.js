@@ -16,6 +16,7 @@ describe('eslint-plugin-flexium', () => {
     expect(rules['no-circular-dependency']).toBeDefined();
     expect(rules['component-naming']).toBeDefined();
     expect(rules['no-signal-reassignment']).toBeDefined();
+    expect(rules['no-state-comparison']).toBeDefined();
   });
 
   it('should export configs', () => {
@@ -41,6 +42,7 @@ describe('eslint-plugin-flexium', () => {
     expect(recommended.rules['flexium/no-circular-dependency']).toBe('error');
     expect(recommended.rules['flexium/component-naming']).toBe('warn');
     expect(recommended.rules['flexium/no-signal-reassignment']).toBe('error');
+    expect(recommended.rules['flexium/no-state-comparison']).toBe('error');
   });
 
   it('strict config should have stricter rule settings', () => {
@@ -58,5 +60,6 @@ describe('eslint-plugin-flexium', () => {
     expect(strict.rules['flexium/no-circular-dependency']).toBe('error');
     expect(strict.rules['flexium/component-naming']).toBe('error');
     expect(strict.rules['flexium/no-signal-reassignment']).toBe('error');
+    expect(strict.rules['flexium/no-state-comparison']).toBe('error');
   });
 });

@@ -219,7 +219,7 @@ Interactive canvas with particle trail effects. Move your mouse to see smooth, r
 ::: details View Source Code
 ```tsx
 import { state, effect } from 'flexium/core'
-import { Canvas, Circle } from 'flexium/canvas'
+import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function ParticleCanvas() {
   const [mouseX, setMouseX] = state(150)
@@ -252,7 +252,7 @@ function ParticleCanvas() {
     >
       {/* Particle trail */}
       {particles.map((p, i) => (
-        <Circle
+        <DrawCircle
           key={i}
           x={p.x}
           y={p.y}
@@ -262,7 +262,7 @@ function ParticleCanvas() {
       ))}
 
       {/* Main cursor circle */}
-      <Circle
+      <DrawCircle
         x={mouseX}
         y={mouseY}
         radius={20}

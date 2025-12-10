@@ -79,6 +79,69 @@ Configure rules individually to match your project's needs:
 
 ## Rules
 
+### `flexium/no-state-comparison`
+
+Prevent direct comparison of `state()` proxy values which always fail.
+
+**Why?** State values returned by `state()` are Proxy objects. Direct comparison with `===` or boolean coercion always fails because:
+- `stateValue === 5` is always `false` (Proxy !== primitive)
+- `if (stateValue)` is always `true` (Proxy objects are always truthy)
+- `if (!stateValue)` is always `false`
+
+#### Bad
+
+```tsx
+const [count, setCount] = state(0);
+const [isVisible, setVisible] = state(false);
+
+// ❌ Direct comparison always fails
+if (count === 5) {
+  doSomething(); // Never runs!
+}
+
+// ❌ Boolean coercion is unreliable
+if (!isVisible) {
+  hide(); // Never runs! Proxy is always truthy
+}
+
+// ❌ Direct use in ternary
+const message = count ? 'Has value' : 'Empty'; // Always 'Has value'
+```
+
+#### Good
+
+```tsx
+const [count, setCount] = state(0);
+const [isVisible, setVisible] = state(false);
+
+// ✅ Use function call syntax
+if (count() === 5) {
+  doSomething();
+}
+
+// ✅ Use function call for boolean checks
+if (!isVisible()) {
+  hide();
+}
+
+// ✅ Use unary plus for number comparison
+if (+count === 5) {
+  doSomething();
+}
+
+// ✅ Use String() for string comparison
+if (String(name) === 'Alice') {
+  greet();
+}
+
+// ✅ Direct property access is fine
+if (user.id === 1) {
+  // Works because we're comparing the property, not the proxy
+}
+```
+
+---
+
 ### `flexium/no-signal-outside-reactive`
 
 Disallow reading signal values outside of reactive contexts.

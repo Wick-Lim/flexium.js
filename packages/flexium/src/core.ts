@@ -10,8 +10,8 @@
  */
 
 // State management - THE unified API
-export { state } from './core/state'
-export type { StateAction, StateValue, AsyncStatus, StateKey, StateOptions } from './core/state'
+export { state, ref } from './core/state'
+export type { StateAction, StateValue, AsyncStatus, StateKey, StateOptions, RefObject } from './core/state'
 
 // Side effects and batching (necessary primitives)
 export { effect, onMount, onCleanup, batch, root, untrack } from './core/signal'

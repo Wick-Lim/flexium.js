@@ -61,14 +61,137 @@ batch(() => {
 
 ## Import
 
-The `batch()` function is available from multiple import paths:
+The `batch()` and `flushSync()` functions are available from multiple import paths:
 
 ```tsx
 // From advanced API
-import { batch } from 'flexium/advanced'
+import { batch, flushSync } from 'flexium/advanced'
 
 // From core (for convenience)
-import { batch } from 'flexium/core'
+import { batch, flushSync } from 'flexium/core'
+```
+
+## flushSync()
+
+The `flushSync()` function forces any pending auto-batched effects to run **synchronously**. This is useful for:
+
+- **Testing**: Ensuring effects have run before making assertions
+- **DOM Measurement**: Measuring the DOM immediately after state updates
+- **Critical Synchronous Updates**: When you need updates to apply immediately
+
+### Basic Usage
+
+```tsx
+import { signal, effect, flushSync } from 'flexium/advanced'
+
+const count = signal(0)
+let effectRan = false
+
+effect(() => {
+  count.value
+  effectRan = true
+})
+
+count.value = 1
+// Effect is queued (auto-batching)
+
+flushSync()
+// Effect has now run synchronously!
+console.log(effectRan) // true
+```
+
+### With Callback
+
+`flushSync()` optionally accepts a callback. Updates inside the callback are batched, and all effects run before `flushSync()` returns:
+
+```tsx
+import { signal, effect, flushSync } from 'flexium/advanced'
+
+const firstName = signal('John')
+const lastName = signal('Doe')
+let fullName = ''
+
+effect(() => {
+  fullName = `${firstName.value} ${lastName.value}`
+})
+
+flushSync(() => {
+  firstName.value = 'Jane'
+  lastName.value = 'Smith'
+})
+
+// Effect has already run!
+console.log(fullName) // "Jane Smith"
+```
+
+### Testing Example
+
+`flushSync()` is essential for testing reactive code:
+
+```tsx
+import { describe, it, expect } from 'vitest'
+import { signal, effect, flushSync } from 'flexium/advanced'
+
+describe('Counter', () => {
+  it('should update when count changes', () => {
+    const count = signal(0)
+    let displayValue = 0
+
+    effect(() => {
+      displayValue = count.value * 2
+    })
+
+    expect(displayValue).toBe(0)
+
+    count.value = 5
+    flushSync() // Force effects to run
+
+    expect(displayValue).toBe(10)
+  })
+})
+```
+
+### DOM Measurement
+
+Use `flushSync()` when you need to measure the DOM immediately after updates:
+
+```tsx
+import { signal, flushSync } from 'flexium/advanced'
+
+const items = signal(['a', 'b', 'c'])
+
+function addItemAndMeasure() {
+  flushSync(() => {
+    items.value = [...items.value, 'd']
+  })
+
+  // DOM is now updated, safe to measure
+  const list = document.querySelector('.list')
+  console.log('List height:', list.scrollHeight)
+}
+```
+
+### batch() vs flushSync()
+
+| Feature | `batch()` | `flushSync()` |
+|---------|-----------|---------------|
+| Groups updates | Yes | Yes (with callback) |
+| Effects run | Synchronously after batch | Synchronously (forced) |
+| Use case | Grouping related updates | Forcing pending updates |
+| Auto-batch aware | N/A | Flushes auto-batch queue |
+
+```tsx
+// batch() - for grouping updates
+batch(() => {
+  a.value = 1
+  b.value = 2
+})
+// Effects run here, synchronously
+
+// flushSync() - for forcing queued updates
+a.value = 1 // Queued by auto-batch
+b.value = 2 // Queued by auto-batch
+flushSync()  // Forces all queued effects to run NOW
 ```
 
 ## Why Use Batch?
@@ -866,11 +989,13 @@ console.timeEnd('with-batch')
 ## Summary
 
 - **batch()** groups multiple signal updates to run effects only once
+- **flushSync()** forces pending auto-batched effects to run synchronously
 - Use batching for **related state changes** like form updates, bulk operations, and API responses
+- Use `flushSync()` for **testing** and **DOM measurement** scenarios
 - **Nested batches** are fully supported - effects run after the outermost batch completes
 - Don't batch **single updates** or **unrelated changes**
 - Always **batch updates** in async callbacks and animation frames
 - Use **peek()** inside batches to avoid unnecessary dependency tracking
 - Batching can provide **3-10x performance improvements** for multi-signal updates
 
-Batching is a powerful tool for optimizing Flexium applications. When used correctly, it ensures your UI stays responsive and consistent, even with complex state updates.
+Batching and synchronization are powerful tools for optimizing Flexium applications. When used correctly, they ensure your UI stays responsive and consistent, even with complex state updates.

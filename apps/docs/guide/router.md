@@ -625,6 +625,103 @@ Handle 404s at different route levels:
 </Router>
 ```
 
+## Security Features
+
+Flexium's router includes built-in security features to protect your application from common vulnerabilities.
+
+### XSS Prevention
+
+The router automatically blocks navigation to dangerous protocols that could be used for XSS attacks:
+
+```tsx
+// These are automatically blocked:
+r.navigate('javascript:alert(1)')      // Blocked
+r.navigate('data:text/html,...')       // Blocked
+r.navigate('vbscript:MsgBox(1)')       // Blocked
+r.navigate('file:///etc/passwd')       // Blocked
+
+// These are allowed (normal navigation):
+r.navigate('/users/123')               // Allowed
+r.navigate('https://example.com')      // Allowed (but may leave SPA)
+r.navigate('/page?query=value')        // Allowed
+```
+
+When an unsafe path is detected, the navigation is blocked and an error is logged:
+
+```
+[Flexium Router] Blocked navigation to unsafe path: javascript:alert(1)
+```
+
+### Blocked Protocols
+
+| Protocol | Reason |
+|----------|--------|
+| `javascript:` | Executes arbitrary JavaScript (XSS) |
+| `data:` | Can embed executable content |
+| `vbscript:` | Executes VBScript (IE legacy) |
+| `file:` | Accesses local filesystem |
+
+### User Input Sanitization
+
+When accepting navigation paths from user input, the router's built-in protection will block malicious attempts. However, you should still validate and sanitize user input:
+
+```tsx
+function SearchBar() {
+  const r = router()
+
+  const handleSearch = (query: string) => {
+    // Validate query before using in navigation
+    const sanitizedQuery = encodeURIComponent(query)
+    r.navigate(`/search?q=${sanitizedQuery}`)
+  }
+
+  return (
+    <input
+      type="text"
+      oninput={(e) => handleSearch(e.target.value)}
+      placeholder="Search..."
+    />
+  )
+}
+```
+
+### Combining Guards with Security
+
+For sensitive routes, combine built-in XSS protection with authentication guards:
+
+```tsx
+<Route
+  path="/admin"
+  component={AdminPanel}
+  beforeEnter={(params) => {
+    // Custom authentication check
+    const user = getCurrentUser()
+    if (!user || !user.isAdmin) {
+      r.navigate('/login')
+      return false
+    }
+
+    // Log access for audit trail
+    logAccess(user.id, '/admin')
+
+    return true
+  }}
+/>
+```
+
+### SSR Safety
+
+The router includes SSR guards to prevent errors in server-side environments:
+
+```tsx
+// Safe to call in SSR - no-op on server
+r.navigate('/dashboard')  // Does nothing on server
+
+// Location defaults safely on server
+r.location.pathname  // Returns '/' on server
+r.location.query     // Returns {} on server
+```
+
 ## Routing Modes
 
 Flexium's router uses the browser's History API for clean URLs.

@@ -1,26 +1,26 @@
 ---
-title: Rect - Canvas Rectangle Component
-description: API reference for Flexium's Rect component. Draw rectangles on canvas with reactive properties.
+title: DrawRect - Canvas Rectangle Component
+description: API reference for Flexium's DrawRect component. Draw rectangles on canvas with reactive properties.
 head:
   - - meta
     - property: og:title
-      content: Rect Component - Flexium Canvas API
+      content: DrawRect Component - Flexium Canvas API
   - - meta
     - property: og:description
-      content: Rect component for drawing rectangles on canvas. Declarative JSX syntax with reactive properties.
+      content: DrawRect component for drawing rectangles on canvas. Declarative JSX syntax with reactive properties.
 ---
 
-# Rect
+# DrawRect
 
 Draws a rectangle on the canvas.
 
 ## Usage
 
 ```tsx
-import { Canvas, Rect } from 'flexium/canvas';
+import { Canvas, DrawRect } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
-  <Rect
+  <DrawRect
     x={10}
     y={10}
     width={100}

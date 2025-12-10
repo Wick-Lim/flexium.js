@@ -29,11 +29,11 @@ Traditional canvas code is imperative and hard to maintain. Flexium makes it dec
 ## Basic Usage
 
 ```tsx
-import { Canvas, Rect, Circle } from 'flexium/canvas'
+import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
 
 <Canvas width={400} height={400}>
-  <Rect x={50} y={50} width={100} height={100} fill="blue" />
-  <Circle x={200} y={200} radius={50} fill="red" />
+  <DrawRect x={50} y={50} width={100} height={100} fill="blue" />
+  <DrawCircle x={200} y={200} radius={50} fill="red" />
 </Canvas>
 ```
 
@@ -43,7 +43,7 @@ Canvas elements update automatically when state changes:
 
 ```tsx
 import { state, effect } from 'flexium/core'
-import { Canvas, Circle } from 'flexium/canvas'
+import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function AnimatedCircle() {
   const [x, setX] = state(50)
@@ -58,7 +58,7 @@ function AnimatedCircle() {
 
   return (
     <Canvas width={400} height={400}>
-      <Circle x={x} y={200} radius={30} fill="blue" />
+      <DrawCircle x={x} y={200} radius={30} fill="blue" />
     </Canvas>
   )
 }
@@ -68,12 +68,12 @@ The canvas re-renders automatically when `x` changes. No manual `requestAnimatio
 
 ## Available Primitives
 
-### Rect
+### DrawRect
 
 Draw rectangles:
 
 ```tsx
-<Rect
+<DrawRect
   x={50}
   y={50}
   width={100}
@@ -85,12 +85,12 @@ Draw rectangles:
 />
 ```
 
-### Circle
+### DrawCircle
 
 Draw circles:
 
 ```tsx
-<Circle
+<DrawCircle
   x={100}
   y={100}
   radius={50}
@@ -100,12 +100,12 @@ Draw circles:
 />
 ```
 
-### Path
+### DrawPath
 
 Draw SVG paths:
 
 ```tsx
-<Path
+<DrawPath
   d="M 10 10 L 100 100 L 10 100 Z"
   fill="green"
   stroke="black"
@@ -113,12 +113,12 @@ Draw SVG paths:
 />
 ```
 
-### CanvasText
+### DrawText
 
 Render text:
 
 ```tsx
-<CanvasText
+<DrawText
   x={100}
   y={100}
   text="Hello Canvas!"
@@ -130,12 +130,12 @@ Render text:
 />
 ```
 
-### Line
+### DrawLine
 
 Draw lines:
 
 ```tsx
-<Line
+<DrawLine
   x1={10}
   y1={10}
   x2={100}
@@ -145,12 +145,12 @@ Draw lines:
 />
 ```
 
-### Arc
+### DrawArc
 
 Draw arcs:
 
 ```tsx
-<Arc
+<DrawArc
   x={100}
   y={100}
   radius={50}
@@ -168,7 +168,7 @@ Combine with event handlers for interactivity:
 
 ```tsx
 import { state } from 'flexium/core'
-import { Canvas, Circle } from 'flexium/canvas'
+import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function InteractiveCanvas() {
   const [mouseX, setMouseX] = state(200)
@@ -183,7 +183,7 @@ function InteractiveCanvas() {
       }}
     >
       <Canvas width={400} height={400}>
-        <Circle x={mouseX} y={mouseY} radius={20} fill="blue" />
+        <DrawCircle x={mouseX} y={mouseY} radius={20} fill="blue" />
       </Canvas>
     </div>
   )
@@ -228,7 +228,7 @@ For advanced use cases, access the underlying canvas:
 
 ```tsx
 import { state, effect } from 'flexium/core'
-import { Canvas, Line, Circle, CanvasText } from 'flexium/canvas'
+import { Canvas, DrawLine, DrawCircle, DrawText } from 'flexium/canvas'
 
 function RealtimeChart() {
   const [dataPoints, setDataPoints] = state([50, 60, 55, 70, 65, 80])
@@ -247,7 +247,7 @@ function RealtimeChart() {
     <Canvas width={600} height={300} style={{ border: '1px solid #ccc' }}>
       {/* Grid lines */}
       {[0, 1, 2, 3, 4].map((i) => (
-        <Line
+        <DrawLine
           key={i}
           x1={0}
           y1={i * 60}
@@ -267,7 +267,7 @@ function RealtimeChart() {
         const y2 = 300 - value * 2
 
         return (
-          <Line
+          <DrawLine
             key={i}
             x1={x1}
             y1={y1}
@@ -281,7 +281,7 @@ function RealtimeChart() {
 
       {/* Data points */}
       {dataPoints().map((value, i) => (
-        <Circle
+        <DrawCircle
           key={i}
           x={i * 100}
           y={300 - value * 2}
@@ -291,7 +291,7 @@ function RealtimeChart() {
       ))}
 
       {/* Labels */}
-      <CanvasText
+      <DrawText
         x={10}
         y={20}
         text="Real-Time Data"

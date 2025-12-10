@@ -1,26 +1,26 @@
 ---
-title: Path - Canvas Path Component
-description: API reference for Flexium's Path component. Draw custom SVG-like paths on canvas with reactive properties.
+title: DrawPath - Canvas Path Component
+description: API reference for Flexium's DrawPath component. Draw custom SVG-like paths on canvas with reactive properties.
 head:
   - - meta
     - property: og:title
-      content: Path Component - Flexium Canvas API
+      content: DrawPath Component - Flexium Canvas API
   - - meta
     - property: og:description
-      content: Path component for drawing custom SVG-like paths on canvas. Supports complex shapes and curves.
+      content: DrawPath component for drawing custom SVG-like paths on canvas. Supports complex shapes and curves.
 ---
 
-# Path
+# DrawPath
 
 Draws a custom SVG-like path on the canvas.
 
 ## Usage
 
 ```tsx
-import { Canvas, Path } from 'flexium/canvas';
+import { Canvas, DrawPath } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
-  <Path
+  <DrawPath
     d="M 10 10 L 50 10 L 30 50 Z"
     fill="purple"
     stroke="black"

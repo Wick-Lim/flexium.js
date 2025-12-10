@@ -1,26 +1,26 @@
 ---
-title: Line - Canvas Line Component
-description: API reference for Flexium's Line component. Draw straight lines on canvas with reactive properties.
+title: DrawLine - Canvas Line Component
+description: API reference for Flexium's DrawLine component. Draw straight lines on canvas with reactive properties.
 head:
   - - meta
     - property: og:title
-      content: Line Component - Flexium Canvas API
+      content: DrawLine Component - Flexium Canvas API
   - - meta
     - property: og:description
-      content: Line component for drawing straight lines on canvas. Declarative JSX syntax with stroke options.
+      content: DrawLine component for drawing straight lines on canvas. Declarative JSX syntax with stroke options.
 ---
 
-# Line
+# DrawLine
 
 Draws a straight line on the canvas.
 
 ## Usage
 
 ```tsx
-import { Canvas, Line } from 'flexium/canvas';
+import { Canvas, DrawLine } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
-  <Line
+  <DrawLine
     x1={10}
     y1={10}
     x2={100}

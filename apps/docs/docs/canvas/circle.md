@@ -1,26 +1,26 @@
 ---
-title: Circle - Canvas Circle Component
-description: API reference for Flexium's Circle component. Draw circles on canvas with reactive properties.
+title: DrawCircle - Canvas Circle Component
+description: API reference for Flexium's DrawCircle component. Draw circles on canvas with reactive properties.
 head:
   - - meta
     - property: og:title
-      content: Circle Component - Flexium Canvas API
+      content: DrawCircle Component - Flexium Canvas API
   - - meta
     - property: og:description
-      content: Circle component for drawing circles on canvas. Declarative JSX syntax with reactive properties.
+      content: DrawCircle component for drawing circles on canvas. Declarative JSX syntax with reactive properties.
 ---
 
-# Circle
+# DrawCircle
 
 Draws a circle on the canvas.
 
 ## Usage
 
 ```tsx
-import { Canvas, Circle } from 'flexium/canvas';
+import { Canvas, DrawCircle } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
-  <Circle
+  <DrawCircle
     x={100}
     y={100}
     radius={50}

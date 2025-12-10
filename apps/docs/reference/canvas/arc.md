@@ -1,26 +1,26 @@
 ---
-title: Arc - Canvas Arc Component
-description: API reference for Flexium's Arc component. Draw arcs and partial circles on canvas with reactive properties.
+title: DrawArc - Canvas Arc Component
+description: API reference for Flexium's DrawArc component. Draw arcs and partial circles on canvas with reactive properties.
 head:
   - - meta
     - property: og:title
-      content: Arc Component - Flexium Canvas API
+      content: DrawArc Component - Flexium Canvas API
   - - meta
     - property: og:description
-      content: Arc component for drawing arcs and partial circles on canvas. Great for charts and gauges.
+      content: DrawArc component for drawing arcs and partial circles on canvas. Great for charts and gauges.
 ---
 
-# Arc
+# DrawArc
 
 Draws an arc on the canvas.
 
 ## Usage
 
 ```tsx
-import { Canvas, Arc } from 'flexium/canvas';
+import { Canvas, DrawArc } from 'flexium/canvas';
 
 <Canvas width={200} height={200}>
-  <Arc
+  <DrawArc
     x={100}
     y={100}
     radius={50}

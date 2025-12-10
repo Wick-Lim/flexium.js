@@ -465,6 +465,24 @@ export function mountReactive(
       domRenderer.appendChild(container, domNode)
     }
 
+    // Handle ref (callback or object with .current)
+    const ref = node.props.ref
+    if (ref) {
+      if (typeof ref === 'function') {
+        // Callback ref
+        ref(domNode)
+        registerReactiveBinding(domNode, () => {
+          ref(null)
+        })
+      } else if (typeof ref === 'object' && 'current' in ref) {
+        // Object ref (like useRef)
+        ref.current = domNode
+        registerReactiveBinding(domNode, () => {
+          ref.current = null
+        })
+      }
+    }
+
     return domNode
   }
 

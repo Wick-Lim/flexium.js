@@ -642,3 +642,39 @@ Object.defineProperty(state, 'size', {
 // Export with proper typing (cast to include static methods)
 const _state = state as StateFunction
 export { _state as state }
+
+/**
+ * Ref object type for DOM element references
+ */
+export interface RefObject<T> {
+  current: T | null
+}
+
+/**
+ * Create a ref object to hold a reference to a DOM element.
+ * Use with the `ref` prop on JSX elements.
+ *
+ * @param initialValue - Initial value (typically null)
+ * @returns A ref object with a `current` property
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const inputRef = ref<HTMLInputElement>(null)
+ *
+ *   const focusInput = () => {
+ *     inputRef.current?.focus()
+ *   }
+ *
+ *   return (
+ *     <div>
+ *       <input ref={inputRef} type="text" />
+ *       <button onclick={focusInput}>Focus</button>
+ *     </div>
+ *   )
+ * }
+ * ```
+ */
+export function ref<T>(initialValue: T | null): RefObject<T> {
+  return { current: initialValue }
+}

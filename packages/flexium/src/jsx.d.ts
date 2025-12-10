@@ -212,6 +212,11 @@ declare global {
       ontouchend?: (event: TouchEvent) => void
       ontouchcancel?: (event: TouchEvent) => void
 
+      // Ref - callback function or object with .current property
+      ref?:
+        | ((element: HTMLElement | SVGElement | null) => void)
+        | { current: HTMLElement | SVGElement | null }
+
       // Children
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       children?: any

@@ -10,6 +10,7 @@ import preferComputed from "./rules/prefer-computed";
 import noCircularDependency from "./rules/no-circular-dependency";
 import componentNaming from "./rules/component-naming";
 import noSignalReassignment from "./rules/no-signal-reassignment";
+import noStateComparison from "./rules/no-state-comparison";
 
 const rules = {
   "no-signal-outside-reactive": noSignalOutsideReactive,
@@ -24,6 +25,7 @@ const rules = {
   "no-circular-dependency": noCircularDependency,
   "component-naming": componentNaming,
   "no-signal-reassignment": noSignalReassignment,
+  "no-state-comparison": noStateComparison,
 };
 
 const configs = {
@@ -42,6 +44,7 @@ const configs = {
       "flexium/no-circular-dependency": "error",
       "flexium/component-naming": "warn",
       "flexium/no-signal-reassignment": "error",
+      "flexium/no-state-comparison": "error",
     },
   },
   strict: {
@@ -59,6 +62,7 @@ const configs = {
       "flexium/no-circular-dependency": "error",
       "flexium/component-naming": "error",
       "flexium/no-signal-reassignment": "error",
+      "flexium/no-state-comparison": "error",
     },
   },
   all: {
@@ -76,6 +80,7 @@ const configs = {
       "flexium/no-circular-dependency": "error",
       "flexium/component-naming": "error",
       "flexium/no-signal-reassignment": "error",
+      "flexium/no-state-comparison": "error",
     },
   },
 };
