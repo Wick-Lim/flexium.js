@@ -7,4 +7,4 @@
 export { effect } from './effect'
 export { sync } from './scheduler'
 export { root, onMount } from './owner'
-export { state } from './state'
+export { state, createState, createComputed } from './state'

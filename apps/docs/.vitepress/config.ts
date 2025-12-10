@@ -210,7 +210,8 @@ export default defineConfig({
           items: [
             { text: 'state()', link: '/docs/core/state' },
             { text: 'effect()', link: '/docs/core/effect' },
-            { text: 'batch()', link: '/docs/core/batch' }
+            { text: 'sync()', link: '/docs/core/sync' },
+            { text: 'for()', link: '/docs/core/for' }
           ]
         },
         {
@@ -275,10 +276,28 @@ export default defineConfig({
           ]
         },
         {
+          text: 'Guide',
+          collapsed: false,
+          items: [
+            { text: 'Best Practices', link: '/docs/guide/best-practices/' },
+            { text: 'Migration from React', link: '/docs/guide/migration/from-react' },
+            { text: 'FAQ', link: '/docs/guide/faq' }
+          ]
+        },
+        {
+          text: 'Examples',
+          collapsed: false,
+          items: [
+            { text: 'Overview', link: '/docs/examples/' },
+            { text: 'Form Validation', link: '/docs/examples/form-validation' },
+            { text: 'Data Fetching', link: '/docs/examples/data-fetching' },
+            { text: 'State Machine', link: '/docs/examples/state-machine' }
+          ]
+        },
+        {
           text: 'Advanced',
           collapsed: true,
           items: [
-            { text: 'List Rendering', link: '/docs/core/for' },
             { text: 'Context API', link: '/docs/core/context' }
           ]
         },
@@ -287,6 +306,204 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: 'Types', link: '/docs/types' }
+          ]
+        }
+      ],
+      '/docs/guide/': [
+        {
+          text: 'flexium/core',
+          collapsed: false,
+          items: [
+            { text: 'state()', link: '/docs/core/state' },
+            { text: 'effect()', link: '/docs/core/effect' },
+            { text: 'sync()', link: '/docs/core/sync' },
+            { text: 'for()', link: '/docs/core/for' }
+          ]
+        },
+        {
+          text: 'flexium/dom',
+          collapsed: false,
+          items: [
+            { text: 'render()', link: '/docs/dom/render' },
+            { text: 'f()', link: '/docs/dom/f' },
+            { text: '&lt;Portal /&gt;', link: '/docs/dom/portal' }
+          ]
+        },
+        {
+          text: 'flexium/primitives',
+          collapsed: false,
+          items: [
+            { text: '&lt;Row /&gt;', link: '/docs/primitives/row' },
+            { text: '&lt;Column /&gt;', link: '/docs/primitives/column' },
+            { text: '&lt;Grid /&gt;', link: '/docs/primitives/grid' },
+            { text: '&lt;Stack /&gt;', link: '/docs/primitives/stack' },
+            { text: '&lt;Spacer /&gt;', link: '/docs/primitives/spacer' },
+            { text: '&lt;ScrollView /&gt;', link: '/docs/primitives/scrollview' },
+            { text: '&lt;Text /&gt;', link: '/docs/primitives/text' },
+            { text: '&lt;Image /&gt;', link: '/docs/primitives/image' },
+            { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
+            { text: '&lt;Button /&gt;', link: '/docs/primitives/button' },
+            { text: '&lt;List /&gt;', link: '/docs/primitives/list' },
+            { text: 'Forms (state)', link: '/docs/primitives/form' },
+            { text: 'Motion', link: '/docs/primitives/motion' }
+          ]
+        },
+        {
+          text: 'flexium/canvas',
+          collapsed: false,
+          items: [
+            { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
+            { text: '&lt;DrawRect /&gt;', link: '/docs/canvas/rect' },
+            { text: '&lt;DrawCircle /&gt;', link: '/docs/canvas/circle' },
+            { text: '&lt;DrawArc /&gt;', link: '/docs/canvas/arc' },
+            { text: '&lt;DrawLine /&gt;', link: '/docs/canvas/line' },
+            { text: '&lt;DrawPath /&gt;', link: '/docs/canvas/path' },
+            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' }
+          ]
+        },
+        {
+          text: 'flexium/router',
+          collapsed: false,
+          items: [
+            { text: '&lt;Router /&gt;', link: '/docs/router/router' },
+            { text: '&lt;Route /&gt;', link: '/docs/router/route' },
+            { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
+            { text: '&lt;Link /&gt;', link: '/docs/router/link' },
+            { text: 'router()', link: '/docs/router/router-hook' }
+          ]
+        },
+        {
+          text: 'flexium/interactive',
+          collapsed: false,
+          items: [
+            { text: 'keyboard()', link: '/docs/interactive/keyboard' },
+            { text: 'mouse()', link: '/docs/interactive/mouse' },
+            { text: 'createLoop()', link: '/docs/interactive/loop' }
+          ]
+        },
+        {
+          text: 'Guide',
+          collapsed: false,
+          items: [
+            { text: 'Best Practices', link: '/docs/guide/best-practices/' },
+            { text: 'Migration from React', link: '/docs/guide/migration/from-react' },
+            { text: 'FAQ', link: '/docs/guide/faq' }
+          ]
+        },
+        {
+          text: 'Examples',
+          collapsed: false,
+          items: [
+            { text: 'Overview', link: '/docs/examples/' },
+            { text: 'Form Validation', link: '/docs/examples/form-validation' },
+            { text: 'Data Fetching', link: '/docs/examples/data-fetching' },
+            { text: 'State Machine', link: '/docs/examples/state-machine' }
+          ]
+        },
+        {
+          text: 'Advanced',
+          collapsed: true,
+          items: [
+            { text: 'Context API', link: '/docs/core/context' }
+          ]
+        }
+      ],
+      '/docs/examples/': [
+        {
+          text: 'flexium/core',
+          collapsed: false,
+          items: [
+            { text: 'state()', link: '/docs/core/state' },
+            { text: 'effect()', link: '/docs/core/effect' },
+            { text: 'sync()', link: '/docs/core/sync' },
+            { text: 'for()', link: '/docs/core/for' }
+          ]
+        },
+        {
+          text: 'flexium/dom',
+          collapsed: false,
+          items: [
+            { text: 'render()', link: '/docs/dom/render' },
+            { text: 'f()', link: '/docs/dom/f' },
+            { text: '&lt;Portal /&gt;', link: '/docs/dom/portal' }
+          ]
+        },
+        {
+          text: 'flexium/primitives',
+          collapsed: false,
+          items: [
+            { text: '&lt;Row /&gt;', link: '/docs/primitives/row' },
+            { text: '&lt;Column /&gt;', link: '/docs/primitives/column' },
+            { text: '&lt;Grid /&gt;', link: '/docs/primitives/grid' },
+            { text: '&lt;Stack /&gt;', link: '/docs/primitives/stack' },
+            { text: '&lt;Spacer /&gt;', link: '/docs/primitives/spacer' },
+            { text: '&lt;ScrollView /&gt;', link: '/docs/primitives/scrollview' },
+            { text: '&lt;Text /&gt;', link: '/docs/primitives/text' },
+            { text: '&lt;Image /&gt;', link: '/docs/primitives/image' },
+            { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
+            { text: '&lt;Button /&gt;', link: '/docs/primitives/button' },
+            { text: '&lt;List /&gt;', link: '/docs/primitives/list' },
+            { text: 'Forms (state)', link: '/docs/primitives/form' },
+            { text: 'Motion', link: '/docs/primitives/motion' }
+          ]
+        },
+        {
+          text: 'flexium/canvas',
+          collapsed: false,
+          items: [
+            { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
+            { text: '&lt;DrawRect /&gt;', link: '/docs/canvas/rect' },
+            { text: '&lt;DrawCircle /&gt;', link: '/docs/canvas/circle' },
+            { text: '&lt;DrawArc /&gt;', link: '/docs/canvas/arc' },
+            { text: '&lt;DrawLine /&gt;', link: '/docs/canvas/line' },
+            { text: '&lt;DrawPath /&gt;', link: '/docs/canvas/path' },
+            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' }
+          ]
+        },
+        {
+          text: 'flexium/router',
+          collapsed: false,
+          items: [
+            { text: '&lt;Router /&gt;', link: '/docs/router/router' },
+            { text: '&lt;Route /&gt;', link: '/docs/router/route' },
+            { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
+            { text: '&lt;Link /&gt;', link: '/docs/router/link' },
+            { text: 'router()', link: '/docs/router/router-hook' }
+          ]
+        },
+        {
+          text: 'flexium/interactive',
+          collapsed: false,
+          items: [
+            { text: 'keyboard()', link: '/docs/interactive/keyboard' },
+            { text: 'mouse()', link: '/docs/interactive/mouse' },
+            { text: 'createLoop()', link: '/docs/interactive/loop' }
+          ]
+        },
+        {
+          text: 'Guide',
+          collapsed: false,
+          items: [
+            { text: 'Best Practices', link: '/docs/guide/best-practices/' },
+            { text: 'Migration from React', link: '/docs/guide/migration/from-react' },
+            { text: 'FAQ', link: '/docs/guide/faq' }
+          ]
+        },
+        {
+          text: 'Examples',
+          collapsed: false,
+          items: [
+            { text: 'Overview', link: '/docs/examples/' },
+            { text: 'Form Validation', link: '/docs/examples/form-validation' },
+            { text: 'Data Fetching', link: '/docs/examples/data-fetching' },
+            { text: 'State Machine', link: '/docs/examples/state-machine' }
+          ]
+        },
+        {
+          text: 'Advanced',
+          collapsed: true,
+          items: [
+            { text: 'Context API', link: '/docs/core/context' }
           ]
         }
       ],

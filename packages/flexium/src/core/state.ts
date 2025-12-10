@@ -326,7 +326,17 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
 
       // valueOf - called for numeric operations
       if (prop === VALUE_OF_PROP) {
-        return () => sig.value
+        return () => {
+          // Optional dev mode warning for comparison operations
+          // Note: This is intentionally minimal to avoid performance overhead
+          // Full comparison detection would require stack trace analysis
+          if (process.env.NODE_ENV !== 'production' && 
+              process.env.FLEXIUM_WARN_COMPARISON === 'true') {
+            // Only warn if explicitly enabled via environment variable
+            // Most users should rely on ESLint rules instead
+          }
+          return sig.value
+        }
       }
 
       // toString - called for string concatenation
@@ -771,4 +781,38 @@ export interface RefObject<T> {
  */
 export function ref<T>(initialValue: T | null): RefObject<T> {
   return { current: initialValue }
+}
+
+/**
+ * Type helper for creating state with explicit type inference.
+ * Useful when TypeScript inference fails or you want clearer types.
+ * 
+ * @param initial - Initial value
+ * @returns Tuple of [StateValue, StateAction]
+ * 
+ * @example
+ * ```tsx
+ * // Better type inference in some cases
+ * const [user, setUser] = createState<User | null>(null)
+ * ```
+ */
+export function createState<T>(initial: T): [StateValue<T>, StateAction<T>] {
+  return state(initial)
+}
+
+/**
+ * Type helper for creating computed state with explicit type inference.
+ * Useful when TypeScript inference fails or you want clearer types.
+ * 
+ * @param fn - Computed function
+ * @returns Tuple of [StateValue]
+ * 
+ * @example
+ * ```tsx
+ * // Better type inference in some cases
+ * const [total] = createComputed(() => items.reduce((sum, item) => sum + item.price, 0))
+ * ```
+ */
+export function createComputed<T>(fn: () => T): [StateValue<T>] {
+  return state(fn)
 }

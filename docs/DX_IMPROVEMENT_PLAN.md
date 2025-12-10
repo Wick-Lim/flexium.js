@@ -71,7 +71,7 @@ if (prop === 'valueOf') {
 
 ### 2. 마이그레이션 가이드 작성
 
-**목표**: React/Vue/Solid에서 Flexium로 마이그레이션하는 단계별 가이드
+**목표**: React에서 Flexium로 마이그레이션하는 단계별 가이드
 
 **구현 계획**:
 
@@ -83,8 +83,6 @@ if (prop === 'valueOf') {
 migration/
 ├── index.md              # 마이그레이션 개요
 ├── from-react.md         # React → Flexium
-├── from-vue.md           # Vue → Flexium
-├── from-solid.md         # Solid → Flexium
 └── common-patterns.md    # 공통 패턴 변환
 ```
 
@@ -145,65 +143,6 @@ migration/
 
 **예상 작업 시간**: 4-6시간
 **난이도**: 낮음 (문서 작성)
-
----
-
-#### 2.3 Vue → Flexium 가이드
-
-**포함 내용**:
-
-1. **API 매핑**
-   ```markdown
-   | Vue 3 | Flexium |
-   |-------|---------|
-   | ref | state |
-   | computed | state(() => ...) |
-   | watch | effect |
-   | provide/inject | context |
-   ```
-
-2. **컴포넌트 변환**
-   ```vue
-   <!-- Vue -->
-   <script setup>
-   import { ref, computed } from 'vue'
-   const count = ref(0)
-   const doubled = computed(() => count.value * 2)
-   </script>
-   
-   <!-- Flexium -->
-   <script setup>
-   import { state } from 'flexium/core'
-   const [count, setCount] = state(0)
-   const [doubled] = state(() => count * 2)
-   </script>
-   ```
-
-**예상 작업 시간**: 3-4시간
-**난이도**: 낮음
-
----
-
-#### 2.4 Solid → Flexium 가이드
-
-**포함 내용**:
-
-1. **API 비교** (이미 매우 유사함)
-   ```markdown
-   | Solid | Flexium |
-   |-------|---------|
-   | createSignal | state |
-   | createMemo | state(() => ...) |
-   | createEffect | effect |
-   ```
-
-2. **차이점 설명**
-   - Flexium의 통합 API
-   - Proxy 기반 접근
-   - Global state 지원
-
-**예상 작업 시간**: 2-3시간
-**난이도**: 낮음
 
 ---
 
@@ -572,9 +511,8 @@ export function createComputed<T>(fn: () => T): [StateValue<T>] {
 
 ### 다음 주
 
-3. **마이그레이션 가이드 - Vue, Solid**
-4. **베스트 프랙티스 - 성능 최적화**
-5. **안티패턴 가이드**
+3. **베스트 프랙티스 - 성능 최적화**
+4. **안티패턴 가이드**
 
 ### 그 다음 주
 
@@ -754,9 +692,8 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
 ### Week 2
 4. 베스트 프랙티스 - 상태 구조화 (3-4시간)
 5. 베스트 프랙티스 - 성능 최적화 (2-3시간)
-6. Vue/Solid 마이그레이션 가이드 (5-7시간)
 
-**총 시간**: 10-14시간
+**총 시간**: 5-7시간
 
 ### Week 3-4
 7. 고급 예제 - 폼 검증 (2-3시간)
