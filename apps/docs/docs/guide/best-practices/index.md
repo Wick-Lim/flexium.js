@@ -25,7 +25,7 @@ Learn when to use local vs global state, how to name state keys, and how to mana
 Learn how to optimize the performance of Flexium apps.
 
 **Key Topics:**
-- Batch updates (`sync()`)
+- Sync updates (`sync()`)
 - Computed optimization
 - List rendering optimization
 - Global State cleanup
@@ -79,7 +79,7 @@ const [data, refetch, status] = state(async () => {
 })
 ```
 
-### Batch Updates
+### Sync Updates
 
 ```tsx
 import { sync } from 'flexium/core'

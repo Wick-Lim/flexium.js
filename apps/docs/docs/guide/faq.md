@@ -74,7 +74,7 @@ const [data] = state(() => ({
 }))
 ```
 
-Or use `sync()` to batch multiple updates:
+Or use `sync()` to sync multiple updates:
 
 ```tsx
 import { sync } from 'flexium/core'
@@ -279,7 +279,7 @@ if (isStateValue(count)) {
 
 ### Q: How do I update multiple states at once?
 
-**A**: Use `sync()` to batch updates.
+**A**: Use `sync()` to sync updates.
 
 ```tsx
 import { sync } from 'flexium/core'

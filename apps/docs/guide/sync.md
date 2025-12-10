@@ -126,11 +126,11 @@ console.log(fullName) // "Jane Smith"
 
 ### Testing Example
 
-`flushSync()` is essential for testing reactive code:
+`sync()` is essential for testing reactive code:
 
 ```tsx
 import { describe, it, expect } from 'vitest'
-import { signal, effect, flushSync } from 'flexium/advanced'
+import { signal, effect, sync } from 'flexium/advanced'
 
 describe('Counter', () => {
   it('should update when count changes', () => {
@@ -153,15 +153,15 @@ describe('Counter', () => {
 
 ### DOM Measurement
 
-Use `flushSync()` when you need to measure the DOM immediately after updates:
+Use `sync()` when you need to measure the DOM immediately after updates:
 
 ```tsx
-import { signal, flushSync } from 'flexium/advanced'
+import { signal, sync } from 'flexium/advanced'
 
 const items = signal(['a', 'b', 'c'])
 
 function addItemAndMeasure() {
-  flushSync(() => {
+  sync(() => {
     items.value = [...items.value, 'd']
   })
 
@@ -208,14 +208,14 @@ Batching provides significant performance improvements by:
 ### Performance Impact Example
 
 ```tsx
-import { signal, effect, batch } from 'flexium/advanced'
+import { signal, effect, sync } from 'flexium/advanced'
 
 const [count, setCount] = signal(0)
 const [items, setItems] = signal([])
 const [loading, setLoading] = signal(false)
 const [error, setError] = signal(null)
 
-// This effect would run 4 times without batching
+// This effect would run 4 times without syncing
 effect(() => {
   console.log('State updated:', {
     count: count,
@@ -225,14 +225,14 @@ effect(() => {
   })
 })
 
-// Without batch: 4 effect executions
+// Without sync: 4 effect executions
 setCount(10)
 setItems([1, 2, 3])
 setLoading(false)
 setError(null)
 
-// With batch: 1 effect execution
-batch(() => {
+// With sync: 1 effect execution
+sync(() => {
   setCount(10)
   setItems([1, 2, 3])
   setLoading(false)
@@ -259,7 +259,7 @@ sync(() => {
 
 ### With Return Values
 
-The `batch()` function returns the value returned by the callback:
+The `sync()` function returns the value returned by the callback:
 
 ```tsx
 import { signal, sync } from 'flexium/advanced'
@@ -336,9 +336,9 @@ function UserForm() {
 }
 ```
 
-## Nested Batches
+## Nested Sync
 
-Batches can be nested, and effects will only run after the outermost batch completes:
+Sync blocks can be nested, and effects will only run after the outermost sync completes:
 
 ```tsx
 import { signal, effect, sync } from 'flexium/advanced'
@@ -365,8 +365,8 @@ sync(() => {
   count.set(4)
 })
 
-console.log(runCount) // 2 (initial run + 1 batch run)
-// Effect only ran once after all nested batches completed
+console.log(runCount) // 2 (initial run + 1 sync run)
+// Effect only ran once after all nested sync blocks completed
 ```
 
 ### How Nested Sync Works
@@ -609,16 +609,16 @@ userCount.set(10)
 themeColor.set('red')
 ```
 
-### Already Batched Contexts
+### Already Synced Contexts
 
-Event handlers are automatically batched in some frameworks. Check if your context already provides batching:
+Event handlers are automatically synced in some frameworks. Check if your context already provides syncing:
 
 ```tsx
-// In Flexium event handlers, updates are NOT automatically batched
+// In Flexium event handlers, updates are NOT automatically synced
 // So you should use sync() when updating multiple signals
 
 <button onclick={() => {
-  // These run separately without batch()
+  // These run separately without sync()
   setCount(c => c + 1)
   setName('Updated')
 }}>
@@ -640,18 +640,18 @@ Event handlers are automatically batched in some frameworks. Check if your conte
 
 ### Visual Comparison
 
-Here's what happens with and without batching:
+Here's what happens with and without syncing:
 
-**Without Batch:**
+**Without Sync:**
 ```
 setFirstName('Jane')  → Effect runs → DOM updates
 setLastName('Smith')  → Effect runs → DOM updates
 setAge(25)            → Effect runs → DOM updates
 ```
 
-**With Batch:**
+**With Sync:**
 ```
-batch(() => {
+sync(() => {
   setFirstName('Jane')   → Queued
   setLastName('Smith')   → Queued
   setAge(25)             → Queued
@@ -819,28 +819,28 @@ websocket.on('sensor-data', (data) => {
 
 ## Best Practices
 
-### 1. Batch Related Updates
+### 1. Sync Related Updates
 
-Always batch updates that are logically related:
+Always sync updates that are logically related:
 
 ```tsx
-// Good - related updates batched together
+// Good - related updates synced together
 sync(() => {
   setUser(newUser)
   setPermissions(newUser.permissions)
   setLastLogin(Date.now())
 })
 
-// Bad - unrelated updates batched
+// Bad - unrelated updates synced
 sync(() => {
   setUser(newUser)
   setThemeColor('blue') // Unrelated!
 })
 ```
 
-### 2. Use peek() Inside Batches
+### 2. Use peek() Inside Sync Blocks
 
-When reading current values inside a batch, use `peek()` to avoid creating dependencies:
+When reading current values inside a sync block, use `peek()` to avoid creating dependencies:
 
 ```tsx
 import { signal, sync } from 'flexium/advanced'
@@ -911,12 +911,12 @@ console.log('Data loaded')
 trackAnalytics('data-loaded')
 ```
 
-### 5. Document Complex Batches
+### 5. Document Complex Sync Blocks
 
-Add comments explaining why updates are batched together:
+Add comments explaining why updates are synced together:
 
 ```tsx
-// Batch all cart state updates to ensure UI consistency
+// Sync all cart state updates to ensure UI consistency
 // and prevent intermediate states where count doesn't match items array
 sync(() => {
   setCartItems(newItems)
@@ -925,11 +925,11 @@ sync(() => {
 })
 ```
 
-## Debugging Batched Updates
+## Debugging Sync Updates
 
-### Track Batch Depth
+### Track Sync Depth
 
-You can track when batches are active:
+You can track when sync blocks are active:
 
 ```tsx
 import { signal, sync, effect } from 'flexium/advanced'
@@ -940,32 +940,32 @@ effect(() => {
   console.log('Effect running, count:', count)
 })
 
-console.log('Before batch')
+console.log('Before sync')
 sync(() => {
-  console.log('Inside batch')
+  console.log('Inside sync')
   count.set(1)
-  console.log('Still inside batch')
+  console.log('Still inside sync')
   count.set(2)
-  console.log('Batch ending')
+  console.log('Sync ending')
 })
-console.log('After batch')
+console.log('After sync')
 
 // Output:
 // Effect running, count: 0
 // Before sync
-// Inside batch
-// Still inside batch
-// Batch ending
-// After batch
+// Inside sync
+// Still inside sync
+// Sync ending
+// After sync
 // Effect running, count: 2
 ```
 
 ### Performance Profiling
 
-Measure the performance benefit of batching:
+Measure the performance benefit of syncing:
 
 ```tsx
-import { signal, effect, batch } from 'flexium/advanced'
+import { signal, effect, sync } from 'flexium/advanced'
 
 const signals = Array.from({ length: 100 }, () => signal(0))
 
@@ -973,29 +973,29 @@ effect(() => {
   signals.forEach(s => +s)
 })
 
-// Without batch
-console.time('no-batch')
+// Without sync
+console.time('no-sync')
 signals.forEach((s, i) => s.set(i))
-console.timeEnd('no-batch')
+console.timeEnd('no-sync')
 
-// With batch
-console.time('with-batch')
-batch(() => {
+// With sync
+console.time('with-sync')
+sync(() => {
   signals.forEach((s, i) => s.set(i + 100))
 })
-console.timeEnd('with-batch')
+console.timeEnd('with-sync')
 ```
 
 ## Summary
 
-- **batch()** groups multiple signal updates to run effects only once
-- **flushSync()** forces pending auto-batched effects to run synchronously
-- Use batching for **related state changes** like form updates, bulk operations, and API responses
-- Use `flushSync()` for **testing** and **DOM measurement** scenarios
-- **Nested batches** are fully supported - effects run after the outermost batch completes
-- Don't batch **single updates** or **unrelated changes**
-- Always **batch updates** in async callbacks and animation frames
-- Use **peek()** inside batches to avoid unnecessary dependency tracking
-- Batching can provide **3-10x performance improvements** for multi-signal updates
+- **sync()** groups multiple signal updates to run effects only once
+- **sync()** (without args) forces pending auto-batched effects to run synchronously
+- Use sync for **related state changes** like form updates, bulk operations, and API responses
+- Use `sync()` for **testing** and **DOM measurement** scenarios
+- **Nested sync blocks** are fully supported - effects run after the outermost sync completes
+- Don't sync **single updates** or **unrelated changes**
+- Always **sync updates** in async callbacks and animation frames
+- Use **peek()** inside sync blocks to avoid unnecessary dependency tracking
+- Syncing can provide **3-10x performance improvements** for multi-signal updates
 
-Batching and synchronization are powerful tools for optimizing Flexium applications. When used correctly, they ensure your UI stays responsive and consistent, even with complex state updates.
+Synchronization is a powerful tool for optimizing Flexium applications. When used correctly, it ensures your UI stays responsive and consistent, even with complex state updates.

@@ -6,7 +6,7 @@ title: Performance Optimization Guide
 
 Learn how to optimize the performance of Flexium apps.
 
-## Batch Updates
+## Sync Updates
 
 ### Multiple State Updates at Once
 
@@ -20,7 +20,7 @@ function handleSubmit() {
   // Causes 4 re-renders
 }
 
-// ✅ Good example - batch updates
+// ✅ Good example - sync updates
 import { sync } from 'flexium/core'
 
 function handleSubmit() {
@@ -421,7 +421,7 @@ effect(() => {
 
 ### Optimization Checklist
 
-- [ ] Have you batched multiple state updates with `sync()`?
+- [ ] Have you synced multiple state updates with `sync()`?
 - [ ] Have you memoized complex calculations with `state(() => ...)`?
 - [ ] Have you used `For` component for large lists?
 - [ ] Have you cleaned up unused global state?
@@ -432,7 +432,7 @@ effect(() => {
 
 ## Related Documentation
 
-- [sync() API](/docs/core/sync) - Batch update API
+- [sync() API](/docs/core/sync) - Sync update API
 - [state() API](/docs/core/state) - State API documentation
 - [for() API](/docs/core/for) - List rendering API
 - [Best Practices - State Organization](/docs/guide/best-practices/state-organization)

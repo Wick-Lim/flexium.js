@@ -243,7 +243,7 @@ function createAutoImportPlugin(opts: Required<FlexiumPluginOptions>): Plugin {
     "signal",
     "computed",
     "effect",
-    "batch",
+    "sync",
     "onCleanup",
     "createContext",
     "useContext",

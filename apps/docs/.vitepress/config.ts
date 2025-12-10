@@ -189,7 +189,6 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: 'Effects', link: '/guide/effects' },
-            { text: 'Batch API', link: '/guide/batch' },
             { text: 'Portal', link: '/guide/portal' },
             { text: 'Motion', link: '/guide/motion' }
           ]

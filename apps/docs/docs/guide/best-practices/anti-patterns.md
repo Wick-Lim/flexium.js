@@ -280,7 +280,7 @@ setA(1)  // Re-render 1
 setB(2)  // Re-render 2
 setC(3)  // Re-render 3
 
-// ✅ Correct approach - batch updates
+// ✅ Correct approach - sync updates
 import { sync } from 'flexium/core'
 sync(() => {
   setA(1)
@@ -499,7 +499,7 @@ function Component() {
 2. ✅ Use `isTruthy()` helper
 3. ✅ Read state inside JSX or effect
 4. ✅ Don't use global if local is sufficient
-5. ✅ Batch updates with `sync()`
+5. ✅ Sync updates with `sync()`
 6. ✅ Optimize lists with `For` component
 7. ✅ Always return cleanup functions
 8. ✅ Specify types explicitly

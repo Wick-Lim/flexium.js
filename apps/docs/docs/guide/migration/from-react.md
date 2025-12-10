@@ -802,7 +802,7 @@ const [count, setCount] = state<number>(0)
 
 ## Performance Considerations
 
-### 1. Use Batch Updates
+### 1. Use Sync Updates
 
 ```tsx
 import { sync } from 'flexium/core'

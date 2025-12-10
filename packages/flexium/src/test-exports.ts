@@ -16,8 +16,8 @@ export {
   createResource,
   onMount,
   untrack,
-  batch,
 } from './core/signal'
+export { sync } from './core/scheduler'
 
 export { state } from './core/state'
 

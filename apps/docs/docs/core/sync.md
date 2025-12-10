@@ -24,7 +24,7 @@ import { sync } from 'flexium/core'
 // 1. Force Flush
 function sync(): void
 
-// 2. Batch Updates
+// 2. Sync Updates
 function sync<T>(fn: () => T): T
 ```
 
@@ -37,7 +37,7 @@ const [firstName, setFirstName] = state('John')
 const [lastName, setLastName] = state('Doe')
 const [age, setAge] = state(25)
 
-// Without batch: 3 separate updates
+// Without sync: 3 separate updates
 setFirstName('Jane')
 setLastName('Smith')
 setAge(30)
@@ -132,7 +132,7 @@ sync(() => {
 ## Behavior
 
 - `sync()` (no args): Force flushes pending effects immediately
-- `sync(fn)`: Batches updates inside `fn`, then flushes immediately
+- `sync(fn)`: Syncs updates inside `fn`, then flushes immediately
 - Reading state inside sync returns the **pending** value
 
 ## When to Use
@@ -147,9 +147,9 @@ Use `sync()` when:
 
 ## Notes
 
-- Event handlers in Flexium are automatically batched
-- Async operations break out of the batch context
-- Batching is automatic within synchronous code blocks in many cases
+- Event handlers in Flexium are automatically synced
+- Async operations break out of the sync context
+- Syncing is automatic within synchronous code blocks in many cases
 
 ## See Also
 

@@ -601,4 +601,3 @@ export function createResource<T, S = any>(
 // These are imported from other modules but re-exported here for backward compatibility
 export { effect } from './effect'
 export { root, onMount, untrack } from './owner'
-export { sync as batch } from './scheduler'

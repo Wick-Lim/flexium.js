@@ -70,7 +70,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
                 intermediate.callee.type === "Identifier" &&
                 (intermediate.callee.name === "effect" ||
                   intermediate.callee.name === "computed" ||
-                  intermediate.callee.name === "batch")
+                  intermediate.callee.name === "sync")
               ) {
                 isDirectlyInComponent = false;
                 break;
