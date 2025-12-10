@@ -93,10 +93,12 @@ export interface Computed<T> {
  * Internal signal node for writable signals
  */
 class SignalNode<T> implements IObservable {
-  subsHead: Link | undefined
-  version = 0
-  nodeType = NodeType.Signal
-
+  // Performance: Hot path fields first (CPU cache line optimization)
+  version = 0           // Frequently read
+  nodeType = NodeType.Signal  // Frequently checked
+  subsHead: Link | undefined  // Frequently accessed
+  
+  // Cold path field
   constructor(private _value: T) { }
 
   get(): T {
@@ -121,15 +123,9 @@ class SignalNode<T> implements IObservable {
   }
 
   notify(): void {
-    if (getBatchDepth() > 0) {
-      // Manual batch: queue subscribers
-      let link = this.subsHead
-      while (link) {
-        if (link.sub) addToBatch(link.sub)
-        link = link.nextSub
-      }
-    } else {
-      // Automatic microtask batch
+    // Performance: Branch prediction - check most common case first (no batch)
+    if (getBatchDepth() === 0) {
+      // Automatic microtask batch (most common path)
       if (this.subsHead) {
         let shouldSchedule = false
         let link: Link | undefined = this.subsHead
@@ -150,6 +146,13 @@ class SignalNode<T> implements IObservable {
           scheduleAutoBatch()
         }
       }
+    } else {
+      // Manual batch: queue subscribers (less common path)
+      let link = this.subsHead
+      while (link) {
+        if (link.sub) addToBatch(link.sub)
+        link = link.nextSub
+      }
     }
   }
 }
@@ -158,40 +161,48 @@ class SignalNode<T> implements IObservable {
  * Internal computed node for derived values
  */
 class ComputedNode<T> implements ISubscriber, IObservable {
-  subsHead: Link | undefined
-  depsHead: Link | undefined
-  flags = SubscriberFlags.Dirty | SubscriberFlags.Stale
-  version = 0
-  nodeType = NodeType.Computed
+  // Performance: Hot path fields first (CPU cache line optimization)
+  version = 0           // Frequently read
+  nodeType = NodeType.Computed  // Frequently checked
+  flags = SubscriberFlags.Dirty | SubscriberFlags.Stale  // Frequently checked
+  subsHead: Link | undefined  // Frequently accessed
+  depsHead: Link | undefined  // Frequently accessed
+  
+  // Cold path fields
   private _value!: T
-
   // Optimization: Track last clean epoch to avoid redundant re-computation
   private lastCleanEpoch = 0
 
   constructor(private computeFn: () => T) { }
 
   execute(): void {
+    // Performance: Inline bit operation instead of function call
     // When a dependency changes, mark as dirty and notify subscribers
-    Flags.add(this, SubscriberFlags.Dirty | SubscriberFlags.Stale)
+    this.flags |= SubscriberFlags.Dirty | SubscriberFlags.Stale
     this.notify()
   }
 
   private _updateIfDirty(): void {
-    // 1. If not dirty and not stale, we are valid.
-    if (!Flags.has(this, SubscriberFlags.Dirty) && !Flags.has(this, SubscriberFlags.Stale)) {
+    // Performance: Inline flag checks for better branch prediction
+    // 1. If not dirty and not stale, we are valid (most common case)
+    const flags = this.flags
+    const dirtyOrStale = flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)
+    if (dirtyOrStale === 0) {
       return
     }
 
     // 2. If Stale but not Dirty, check dependencies
-    if (!Flags.has(this, SubscriberFlags.Dirty) && Flags.has(this, SubscriberFlags.Stale)) {
+    // Performance: Single bit check instead of two function calls
+    if ((flags & SubscriberFlags.Dirty) === 0 && (flags & SubscriberFlags.Stale) !== 0) {
       if (!this._needsRefetch()) {
-        Flags.remove(this, SubscriberFlags.Stale)
+        this.flags &= ~SubscriberFlags.Stale
         return
       }
     }
 
     // 3. Must re-compute
-    Flags.remove(this, SubscriberFlags.Dirty | SubscriberFlags.Stale)
+    // Performance: Single bit operation instead of function call
+    this.flags &= ~(SubscriberFlags.Dirty | SubscriberFlags.Stale)
 
     // Clear previous dependencies via Graph helper
     Graph.disconnectDependencies(this)
@@ -251,8 +262,9 @@ class ComputedNode<T> implements ISubscriber, IObservable {
         if (computedDep.version > this.lastCleanEpoch) {
           return true
         }
+        // Performance: Inline bit check instead of function call
         // Only call peek() if dirty/stale (will update version if needed)
-        if (Flags.has(computedDep, SubscriberFlags.Dirty | SubscriberFlags.Stale)) {
+        if ((computedDep.flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)) !== 0) {
           computedDep.peek()
           // Check version again after peek() (may have been updated)
           if (computedDep.version > this.lastCleanEpoch) {
@@ -282,15 +294,9 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   }
 
   notify(): void {
-    if (getBatchDepth() > 0) {
-      // Manual batch
-      let link = this.subsHead
-      while (link) {
-        if (link.sub) addToBatch(link.sub)
-        link = link.nextSub
-      }
-    } else {
-      // Automatic microtask batch
+    // Performance: Branch prediction - check most common case first (no batch)
+    if (getBatchDepth() === 0) {
+      // Automatic microtask batch (most common path)
       if (this.subsHead) {
         let shouldSchedule = false
         let link: Link | undefined = this.subsHead
@@ -310,6 +316,13 @@ class ComputedNode<T> implements ISubscriber, IObservable {
         if (shouldSchedule) {
           scheduleAutoBatch()
         }
+      }
+    } else {
+      // Manual batch (less common path)
+      let link = this.subsHead
+      while (link) {
+        if (link.sub) addToBatch(link.sub)
+        link = link.nextSub
       }
     }
   }

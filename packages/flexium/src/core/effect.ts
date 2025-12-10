@@ -34,19 +34,21 @@ export class EffectNode implements ISubscriber {
     }
 
     execute(): void {
-        if (Flags.has(this, SubscriberFlags.Running)) {
-            Flags.add(this, SubscriberFlags.Notified)
+        // Performance: Inline bit operations for better performance
+        if ((this.flags & SubscriberFlags.Running) !== 0) {
+            this.flags |= SubscriberFlags.Notified
             return
         }
 
-        Flags.add(this, SubscriberFlags.Running)
+        this.flags |= SubscriberFlags.Running
 
         try {
             this.run()
         } finally {
-            Flags.remove(this, SubscriberFlags.Running)
-            if (Flags.has(this, SubscriberFlags.Notified)) {
-                Flags.remove(this, SubscriberFlags.Notified)
+            // Performance: Inline bit operations
+            this.flags &= ~SubscriberFlags.Running
+            if ((this.flags & SubscriberFlags.Notified) !== 0) {
+                this.flags &= ~SubscriberFlags.Notified
                 // Schedule microtask to avoid stack overflow and infinite sync loops
                 queueMicrotask(() => this.execute())
             }
