@@ -53,6 +53,11 @@ const TEMPLATES = {
     description: 'Monorepo setup with shared packages and workspaces',
     path: './templates/monorepo-starter',
   },
+  'dashboard-template': {
+    name: 'Admin Dashboard (Complex)',
+    description: 'Premium dark-themed dashboard with charts and data visualization',
+    path: './templates/dashboard-template',
+  },
 }
 
 // Create readline interface

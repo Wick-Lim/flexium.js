@@ -208,6 +208,20 @@ function App() {
     </Router>
   );
 }
+
+function UserProfile({ params }) {
+  // Params are passed as props to the component
+  return <h1>User: {params.id}</h1>;
+}
+
+// Or use the hook
+import { useRouter } from 'flexium/router';
+
+function UserProfileHook() {
+  const router = useRouter();
+  // router.params is a signal
+  return <h1>User: {router.params.value.id}</h1>;
+}
 ```
 
 ## Documentation

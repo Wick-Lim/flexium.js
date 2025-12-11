@@ -611,41 +611,42 @@
 
   <script type="module">
     // ========================================
-    // FLEXIUM SIGNAL IMPLEMENTATION
+    // FLEXIUM SIGNAL IMPLEMENTATION (Simplified)
     // ========================================
-    // In production: import { signal, computed, effect } from 'flexium/core'
 
     let activeEffect = null;
 
-    function signal(initialValue) {
+    function state(initialValue) {
       let value = initialValue;
       const subscribers = new Set();
 
-      const sig = {
-        get value() {
-          if (activeEffect) {
-            subscribers.add(activeEffect);
-          }
-          return value;
-        },
-        set value(newValue) {
-          if (value !== newValue) {
-            value = newValue;
-            subscribers.forEach(sub => sub());
-          }
-        },
-        peek: () => value,
+      const read = () => {
+        if (activeEffect) {
+          subscribers.add(activeEffect);
+        }
+        return value;
       };
 
-      return sig;
+      const write = (newValue) => {
+        if (typeof newValue === 'function') {
+          newValue = newValue(value);
+        }
+
+        if (value !== newValue) {
+          value = newValue;
+          subscribers.forEach(sub => sub());
+        }
+      };
+
+      return [read, write];
     }
 
     function computed(fn) {
-      const result = signal(undefined);
+      const [read, write] = state(undefined);
       effect(() => {
-        result.value = fn();
+        write(fn());
       });
-      return result;
+      return [read];
     }
 
     function effect(fn) {
@@ -690,45 +691,45 @@
     // ========================================
 
     // Todo list state
-    const todos = signal(loadFromStorage());
+    const [todos, setTodos] = state(loadFromStorage());
 
     // Form state
-    const newTodoTitle = signal('');
-    const newTodoDescription = signal('');
-    const newTodoCategory = signal('personal');
-    const newTodoPriority = signal('medium');
+    const [newTodoTitle, setNewTodoTitle] = state('');
+    const [newTodoDescription, setNewTodoDescription] = state('');
+    const [newTodoCategory, setNewTodoCategory] = state('personal');
+    const [newTodoPriority, setNewTodoPriority] = state('medium');
 
     // Form validation
-    const titleError = signal(null);
-    const titleTouched = signal(false);
+    const [titleError, setTitleError] = state(null);
+    const [titleTouched, setTitleTouched] = state(false);
 
     // Filter state
-    const filterStatus = signal('all');
-    const filterCategory = signal('all');
-    const searchQuery = signal('');
+    const [filterStatus, setFilterStatus] = state('all');
+    const [filterCategory, setFilterCategory] = state('all');
+    const [searchQuery, setSearchQuery] = state('');
 
     // Computed values
-    const totalTodos = computed(() => todos.value.length);
-    const completedTodos = computed(() => todos.value.filter(t => t.completed).length);
-    const activeTodos = computed(() => todos.value.filter(t => !t.completed).length);
+    const [totalTodos] = computed(() => todos().length);
+    const [completedTodos] = computed(() => todos().filter(t => t.completed).length);
+    const [activeTodos] = computed(() => todos().filter(t => !t.completed).length);
 
-    const filteredTodos = computed(() => {
-      let result = todos.value;
+    const [filteredTodos] = computed(() => {
+      let result = todos();
 
       // Filter by status
-      if (filterStatus.value === 'active') {
+      if (filterStatus() === 'active') {
         result = result.filter(t => !t.completed);
-      } else if (filterStatus.value === 'completed') {
+      } else if (filterStatus() === 'completed') {
         result = result.filter(t => t.completed);
       }
 
       // Filter by category
-      if (filterCategory.value !== 'all') {
-        result = result.filter(t => t.category === filterCategory.value);
+      if (filterCategory() !== 'all') {
+        result = result.filter(t => t.category === filterCategory());
       }
 
       // Filter by search
-      const query = searchQuery.value.toLowerCase();
+      const query = searchQuery().toLowerCase();
       if (query) {
         result = result.filter(t =>
           t.title.toLowerCase().includes(query) ||
@@ -739,10 +740,10 @@
       return result;
     });
 
-    const completionPercentage = computed(() => {
-      const total = totalTodos.value;
+    const [completionPercentage] = computed(() => {
+      const total = totalTodos();
       if (total === 0) return 0;
-      return Math.round((completedTodos.value / total) * 100);
+      return Math.round((completedTodos() / total) * 100);
     });
 
     // ========================================
@@ -750,21 +751,21 @@
     // ========================================
 
     function validateTitle() {
-      const title = newTodoTitle.value.trim();
+      const title = newTodoTitle().trim();
       if (!title) {
-        titleError.value = 'Title is required';
+        setTitleError('Title is required');
         return false;
       }
       if (title.length < 3) {
-        titleError.value = 'Title must be at least 3 characters';
+        setTitleError('Title must be at least 3 characters');
         return false;
       }
-      titleError.value = null;
+      setTitleError(null);
       return true;
     }
 
     function addTodo() {
-      titleTouched.value = true;
+      setTitleTouched(true);
 
       if (!validateTitle()) {
         return;
@@ -772,46 +773,46 @@
 
       const newTodo = {
         id: Date.now() + Math.random(),
-        title: newTodoTitle.value.trim(),
-        description: newTodoDescription.value.trim(),
-        category: newTodoCategory.value,
-        priority: newTodoPriority.value,
+        title: newTodoTitle().trim(),
+        description: newTodoDescription().trim(),
+        category: newTodoCategory(),
+        priority: newTodoPriority(),
         completed: false,
         createdAt: new Date().toISOString()
       };
 
-      todos.value = [...todos.value, newTodo];
+      setTodos(prev => [...prev, newTodo]);
 
       // Reset form
-      newTodoTitle.value = '';
-      newTodoDescription.value = '';
-      newTodoCategory.value = 'personal';
-      newTodoPriority.value = 'medium';
-      titleTouched.value = false;
-      titleError.value = null;
+      setNewTodoTitle('');
+      setNewTodoDescription('');
+      setNewTodoCategory('personal');
+      setNewTodoPriority('medium');
+      setTitleTouched(false);
+      setTitleError(null);
     }
 
     function toggleTodo(id) {
-      todos.value = todos.value.map(todo =>
+      setTodos(prev => prev.map(todo =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      );
+      ));
     }
 
     function deleteTodo(id) {
       if (confirm('Are you sure you want to delete this todo?')) {
-        todos.value = todos.value.filter(todo => todo.id !== id);
+        setTodos(prev => prev.filter(todo => todo.id !== id));
       }
     }
 
     function clearCompleted() {
       if (confirm('Clear all completed todos?')) {
-        todos.value = todos.value.filter(todo => !todo.completed);
+        setTodos(prev => prev.filter(todo => !todo.completed));
       }
     }
 
     function deleteAll() {
       if (confirm('Delete all todos? This cannot be undone!')) {
-        todos.value = [];
+        setTodos([]);
       }
     }
 
@@ -821,12 +822,12 @@
 
     // Auto-save to localStorage
     effect(() => {
-      saveToStorage(todos.value);
+      saveToStorage(todos());
     });
 
     // Validate title on change
     effect(() => {
-      if (titleTouched.value) {
+      if (titleTouched()) {
         validateTitle();
       }
     });
@@ -854,19 +855,19 @@
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-label">Total Tasks</div>
-              <div class="stat-value primary">${totalTodos.value}</div>
+              <div class="stat-value primary">${totalTodos()}</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Active</div>
-              <div class="stat-value warning">${activeTodos.value}</div>
+              <div class="stat-value warning">${activeTodos()}</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Completed</div>
-              <div class="stat-value success">${completedTodos.value}</div>
+              <div class="stat-value success">${completedTodos()}</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Progress</div>
-              <div class="stat-value">${completionPercentage.value}%</div>
+              <div class="stat-value">${completionPercentage()}%</div>
             </div>
           </div>
 
@@ -878,11 +879,11 @@
                 <input
                   type="text"
                   id="todo-title"
-                  class="form-input ${titleError.value && titleTouched.value ? 'error' : ''}"
+                  class="form-input ${titleError() && titleTouched() ? 'error' : ''}"
                   placeholder="What needs to be done?"
-                  value="${escapeHtml(newTodoTitle.value)}"
+                  value="${escapeHtml(newTodoTitle())}"
                 />
-                ${titleError.value && titleTouched.value ? `<div class="form-error">${escapeHtml(titleError.value)}</div>` : ''}
+                ${titleError() && titleTouched() ? `<div class="form-error">${escapeHtml(titleError())}</div>` : ''}
               </div>
             </div>
 
@@ -893,7 +894,7 @@
                   id="todo-description"
                   class="form-textarea"
                   placeholder="Add more details (optional)"
-                >${escapeHtml(newTodoDescription.value)}</textarea>
+                >${escapeHtml(newTodoDescription())}</textarea>
               </div>
             </div>
 
@@ -901,19 +902,19 @@
               <div class="form-group">
                 <label class="form-label" for="todo-category">Category</label>
                 <select id="todo-category" class="form-select">
-                  <option value="personal" ${newTodoCategory.value === 'personal' ? 'selected' : ''}>Personal</option>
-                  <option value="work" ${newTodoCategory.value === 'work' ? 'selected' : ''}>Work</option>
-                  <option value="shopping" ${newTodoCategory.value === 'shopping' ? 'selected' : ''}>Shopping</option>
-                  <option value="health" ${newTodoCategory.value === 'health' ? 'selected' : ''}>Health</option>
+                  <option value="personal" ${newTodoCategory() === 'personal' ? 'selected' : ''}>Personal</option>
+                  <option value="work" ${newTodoCategory() === 'work' ? 'selected' : ''}>Work</option>
+                  <option value="shopping" ${newTodoCategory() === 'shopping' ? 'selected' : ''}>Shopping</option>
+                  <option value="health" ${newTodoCategory() === 'health' ? 'selected' : ''}>Health</option>
                 </select>
               </div>
 
               <div class="form-group">
                 <label class="form-label" for="todo-priority">Priority</label>
                 <select id="todo-priority" class="form-select">
-                  <option value="low" ${newTodoPriority.value === 'low' ? 'selected' : ''}>Low</option>
-                  <option value="medium" ${newTodoPriority.value === 'medium' ? 'selected' : ''}>Medium</option>
-                  <option value="high" ${newTodoPriority.value === 'high' ? 'selected' : ''}>High</option>
+                  <option value="low" ${newTodoPriority() === 'low' ? 'selected' : ''}>Low</option>
+                  <option value="medium" ${newTodoPriority() === 'medium' ? 'selected' : ''}>Medium</option>
+                  <option value="high" ${newTodoPriority() === 'high' ? 'selected' : ''}>High</option>
                 </select>
               </div>
             </div>
@@ -927,31 +928,31 @@
           <div class="filters-section">
             <div class="filters-row">
               <div class="filter-group">
-                <button class="filter-btn ${filterStatus.value === 'all' ? 'active' : ''}" data-status="all">
+                <button class="filter-btn ${filterStatus() === 'all' ? 'active' : ''}" data-status="all">
                   All
                 </button>
-                <button class="filter-btn ${filterStatus.value === 'active' ? 'active' : ''}" data-status="active">
+                <button class="filter-btn ${filterStatus() === 'active' ? 'active' : ''}" data-status="active">
                   Active
                 </button>
-                <button class="filter-btn ${filterStatus.value === 'completed' ? 'active' : ''}" data-status="completed">
+                <button class="filter-btn ${filterStatus() === 'completed' ? 'active' : ''}" data-status="completed">
                   Completed
                 </button>
               </div>
 
               <div class="filter-group">
-                <button class="filter-btn ${filterCategory.value === 'all' ? 'active' : ''}" data-category="all">
+                <button class="filter-btn ${filterCategory() === 'all' ? 'active' : ''}" data-category="all">
                   All
                 </button>
-                <button class="filter-btn ${filterCategory.value === 'work' ? 'active' : ''}" data-category="work">
+                <button class="filter-btn ${filterCategory() === 'work' ? 'active' : ''}" data-category="work">
                   Work
                 </button>
-                <button class="filter-btn ${filterCategory.value === 'personal' ? 'active' : ''}" data-category="personal">
+                <button class="filter-btn ${filterCategory() === 'personal' ? 'active' : ''}" data-category="personal">
                   Personal
                 </button>
-                <button class="filter-btn ${filterCategory.value === 'shopping' ? 'active' : ''}" data-category="shopping">
+                <button class="filter-btn ${filterCategory() === 'shopping' ? 'active' : ''}" data-category="shopping">
                   Shopping
                 </button>
-                <button class="filter-btn ${filterCategory.value === 'health' ? 'active' : ''}" data-category="health">
+                <button class="filter-btn ${filterCategory() === 'health' ? 'active' : ''}" data-category="health">
                   Health
                 </button>
               </div>
@@ -962,7 +963,7 @@
                   type="text"
                   class="search-input"
                   placeholder="Search todos..."
-                  value="${escapeHtml(searchQuery.value)}"
+                  value="${escapeHtml(searchQuery())}"
                   id="search-input"
                 />
               </div>
@@ -971,17 +972,17 @@
 
           <!-- Todos -->
           <div class="todos-section">
-            ${filteredTodos.value.length === 0 ? `
+            ${filteredTodos().length === 0 ? `
               <div class="empty-state">
                 <div class="empty-icon">📝</div>
                 <div class="empty-message">No tasks found</div>
                 <div class="empty-hint">
-                  ${searchQuery.value ? 'Try a different search term' : 'Add a new task to get started!'}
+                  ${searchQuery() ? 'Try a different search term' : 'Add a new task to get started!'}
                 </div>
               </div>
             ` : `
               <div class="todo-list">
-                ${filteredTodos.value.map(todo => `
+                ${filteredTodos().map(todo => `
                   <div class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo.id}">
                     <input
                       type="checkbox"
@@ -1044,10 +1045,10 @@
 
       if (titleInput) {
         titleInput.addEventListener('input', (e) => {
-          newTodoTitle.value = e.target.value;
+          setNewTodoTitle(e.target.value);
         });
         titleInput.addEventListener('blur', () => {
-          titleTouched.value = true;
+          setTitleTouched(true);
         });
         titleInput.addEventListener('keypress', (e) => {
           if (e.key === 'Enter') {
@@ -1058,19 +1059,19 @@
 
       if (descInput) {
         descInput.addEventListener('input', (e) => {
-          newTodoDescription.value = e.target.value;
+          setNewTodoDescription(e.target.value);
         });
       }
 
       if (categorySelect) {
         categorySelect.addEventListener('change', (e) => {
-          newTodoCategory.value = e.target.value;
+          setNewTodoCategory(e.target.value);
         });
       }
 
       if (prioritySelect) {
         prioritySelect.addEventListener('change', (e) => {
-          newTodoPriority.value = e.target.value;
+          setNewTodoPriority(e.target.value);
         });
       }
 
@@ -1080,21 +1081,21 @@
 
       if (searchInput) {
         searchInput.addEventListener('input', (e) => {
-          searchQuery.value = e.target.value;
+          setSearchQuery(e.target.value);
         });
       }
 
       // Status filters
       document.querySelectorAll('[data-status]').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          filterStatus.value = e.target.dataset.status;
+          setFilterStatus(e.target.dataset.status);
         });
       });
 
       // Category filters
       document.querySelectorAll('[data-category]').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          filterCategory.value = e.target.dataset.category;
+          setFilterCategory(e.target.dataset.category);
         });
       });
 
@@ -1130,19 +1131,20 @@
     // ========================================
 
     // Re-render when any state changes
+    // Re-render when any state changes
     effect(() => {
       // Access all reactive values to create dependencies
-      todos.value;
-      filteredTodos.value;
-      newTodoTitle.value;
-      newTodoDescription.value;
-      newTodoCategory.value;
-      newTodoPriority.value;
-      titleError.value;
-      titleTouched.value;
-      filterStatus.value;
-      filterCategory.value;
-      searchQuery.value;
+      todos();
+      filteredTodos();
+      newTodoTitle();
+      newTodoDescription();
+      newTodoCategory();
+      newTodoPriority();
+      titleError();
+      titleTouched();
+      filterStatus();
+      filterCategory();
+      searchQuery();
 
       render();
     });
