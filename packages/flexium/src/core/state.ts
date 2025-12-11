@@ -316,6 +316,10 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
   const TO_JSON_PROP = 'toJSON'
   const TO_PRIMITIVE_SYMBOL = Symbol.toPrimitive
 
+  // Performance: Cache dev mode check (rarely changes, so cache at proxy creation time)
+  const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
+  const warnComparison = isDev && typeof process !== 'undefined' && process.env?.FLEXIUM_WARN_COMPARISON === 'true'
+
   const proxy = new Proxy(target, {
     // Make the proxy callable - returns current value
     apply() {
@@ -323,60 +327,59 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
     },
 
     get(_target, prop) {
-      // Return underlying signal for reactive binding detection
+      // Performance: Check most common cases first (branch prediction optimization)
+      // STATE_SIGNAL is checked first as it's used internally for reactive binding
       if (prop === STATE_SIGNAL) {
         return sig
       }
 
-      // Allow direct access to peek() without tracking
+      // peek() is frequently accessed, check early
       if (prop === PEEK_PROP) {
         return sig.peek
       }
 
-      // Symbol.toPrimitive - called for +, -, ==, template literals, etc.
-      if (prop === TO_PRIMITIVE_SYMBOL) {
-        return (_hint: string) => sig.value
-      }
-
-      // valueOf - called for numeric operations
-      if (prop === VALUE_OF_PROP) {
-        return () => {
-          // Optional dev mode warning for comparison operations
-          // Note: This is intentionally minimal to avoid performance overhead
-          // Full comparison detection would require stack trace analysis
-          const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
-          if (isDev &&
-            typeof process !== 'undefined' && process.env?.FLEXIUM_WARN_COMPARISON === 'true') {
-            // Only warn if explicitly enabled via environment variable
-            // Most users should rely on ESLint rules instead
-          }
-          return sig.value
-        }
-      }
-
-      // toString - called for string concatenation
-      if (prop === TO_STRING_PROP) {
-        return () => String(sig.value)
-      }
-
-      // toJSON - called for JSON.stringify
-      if (prop === TO_JSON_PROP) {
-        return () => sig.value
-      }
-
-      // Performance: Read value once and cache type check result
-      // For object/array values, access properties on current value
+      // Performance: Early return for object property access (most common case)
+      // Read value once and check type before special property checks
       // Note: accessing sig.value here tracks the signal in any enclosing effect
       const currentValue = sig.value
 
-      // Performance: Early return for null (most common non-object case)
+      // Early return for null (most common non-object case)
       if (currentValue === null) {
+        // Still need to check special properties even for null values
+        if (prop === TO_PRIMITIVE_SYMBOL) return () => null
+        if (prop === VALUE_OF_PROP) return () => null
+        if (prop === TO_STRING_PROP) return () => 'null'
+        if (prop === TO_JSON_PROP) return () => null
         return undefined
       }
 
-      // Performance: Type check once
+      // Type check once - reuse result
       const isObject = typeof currentValue === 'object'
+      
+      // Handle special properties for object values
       if (isObject) {
+        // Check special properties first before accessing object properties
+        if (prop === TO_PRIMITIVE_SYMBOL) {
+          return (_hint: string) => currentValue
+        }
+        if (prop === VALUE_OF_PROP) {
+          return () => {
+            // Performance: Use cached warnComparison instead of checking env every time
+            if (warnComparison) {
+              // Only warn if explicitly enabled via environment variable
+              // Most users should rely on ESLint rules instead
+            }
+            return currentValue
+          }
+        }
+        if (prop === TO_STRING_PROP) {
+          return () => String(currentValue)
+        }
+        if (prop === TO_JSON_PROP) {
+          return () => currentValue
+        }
+
+        // Access object property
         const obj = currentValue as Record<string | symbol, unknown>
         const propValue = obj[prop]
         // If it's a function (like array methods), bind it to the current value
@@ -384,6 +387,26 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
           return propValue.bind(currentValue)
         }
         return propValue
+      }
+
+      // Handle special properties for primitive values
+      if (prop === TO_PRIMITIVE_SYMBOL) {
+        return (_hint: string) => currentValue
+      }
+      if (prop === VALUE_OF_PROP) {
+        return () => {
+          // Performance: Use cached warnComparison instead of checking env every time
+          if (warnComparison) {
+            // Only warn if explicitly enabled via environment variable
+          }
+          return currentValue
+        }
+      }
+      if (prop === TO_STRING_PROP) {
+        return () => String(currentValue)
+      }
+      if (prop === TO_JSON_PROP) {
+        return () => currentValue
       }
 
       return undefined

@@ -251,24 +251,29 @@ class ComputedNode<T> implements ISubscriber, IObservable {
     let link: Link | undefined = this.depsHead
     while (link) {
       const dep = link.dep!
+      
+      // Performance: Check version first (fastest check, avoids type check for most cases)
       if (dep.version > this.lastCleanEpoch) {
         return true
       }
 
       // Performance: Use nodeType instead of instanceof
+      // Only check computed dependencies if version check passed (less common case)
       if (dep.nodeType === NodeType.Computed) {
         const computedDep = dep as ComputedNode<unknown>
-        // Performance: Check version first before calling peek() (peek() may trigger computation)
-        // If already updated, version will be greater than lastCleanEpoch
-        if (computedDep.version > this.lastCleanEpoch) {
-          return true
-        }
-        // Performance: Inline bit check instead of function call
-        // Only call peek() if dirty/stale (will update version if needed)
-        if ((computedDep.flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)) !== 0) {
+        
+        // Performance: Check if dirty/stale before calling peek() (peek() may trigger computation)
+        // Only call peek() if actually needs update
+        const flags = computedDep.flags
+        const isDirtyOrStale = (flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)) !== 0
+        
+        if (isDirtyOrStale) {
+          // Performance: Track version before peek() to detect if it actually updated
+          const oldVersion = computedDep.version
           computedDep.peek()
-          // Check version again after peek() (may have been updated)
-          if (computedDep.version > this.lastCleanEpoch) {
+          // Only check version again if peek() actually updated it (version changed)
+          // This avoids redundant comparison when peek() didn't change anything
+          if (computedDep.version !== oldVersion && computedDep.version > this.lastCleanEpoch) {
             return true
           }
         }
@@ -369,9 +374,13 @@ export function signal<T>(initialValue: T): Signal<T> {
     },
     set(newValue: T) {
       node.set(newValue)
-      // Notify devtools of update
-      if (devToolsId >= 0 && devToolsHooks?.onSignalUpdate) {
-        devToolsHooks.onSignalUpdate(devToolsId, newValue)
+      // Performance: Check devToolsId first (most signals don't have devtools)
+      // Then check hooks existence (short-circuit if null)
+      if (devToolsId >= 0) {
+        const hooks = devToolsHooks
+        if (hooks?.onSignalUpdate) {
+          hooks.onSignalUpdate(devToolsId, newValue)
+        }
       }
     },
     enumerable: true,
@@ -380,9 +389,13 @@ export function signal<T>(initialValue: T): Signal<T> {
 
   sig.set = (newValue: T) => {
     node.set(newValue)
-    // Notify devtools of update
-    if (devToolsId >= 0 && devToolsHooks?.onSignalUpdate) {
-      devToolsHooks.onSignalUpdate(devToolsId, newValue)
+    // Performance: Check devToolsId first (most signals don't have devtools)
+    // Then check hooks existence (short-circuit if null)
+    if (devToolsId >= 0) {
+      const hooks = devToolsHooks
+      if (hooks?.onSignalUpdate) {
+        hooks.onSignalUpdate(devToolsId, newValue)
+      }
     }
   }
   sig.peek = () => node.peek()
@@ -391,9 +404,11 @@ export function signal<T>(initialValue: T): Signal<T> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ; (sig as any)[SIGNAL_MARKER] = true
 
+  // Performance: Cache hooks check to avoid repeated optional chaining
   // Register with devtools if enabled
-  if (devToolsHooks?.onSignalCreate) {
-    devToolsId = devToolsHooks.onSignalCreate(sig as Signal<unknown>)
+  const hooks = devToolsHooks
+  if (hooks?.onSignalCreate) {
+    devToolsId = hooks.onSignalCreate(sig as Signal<unknown>)
   }
 
   return sig
