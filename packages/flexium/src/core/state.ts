@@ -67,6 +67,53 @@ function toSignalStateObject<T>(sig: Signal<T>): StateObject {
 // Global registry for keyed states
 const globalStateRegistry = new Map<string, StateObject>()
 
+// Namespace registry: maps namespace to set of state keys
+const namespaceRegistry = new Map<string, Set<string>>()
+
+// State metadata for monitoring and auto-cleanup
+interface StateMetadata {
+  key: string
+  namespace?: string
+  createdAt: number
+  lastAccessed: number
+  accessCount: number
+  // Reference counting for auto-cleanup
+  referenceCount: number
+  // Weak reference to signal for auto-cleanup detection
+  signalRef?: WeakRef<Signal<unknown> | Computed<unknown> | Resource<unknown>>
+}
+
+const stateMetadata = new Map<string, StateMetadata>()
+
+// Auto-cleanup configuration
+interface AutoCleanupConfig {
+  enabled: boolean
+  maxIdleTime: number // milliseconds
+  checkInterval: number // milliseconds
+  minAccessCount: number // minimum accesses before considering for cleanup
+}
+
+let autoCleanupConfig: AutoCleanupConfig = {
+  enabled: true, // Default: enabled
+  maxIdleTime: 5 * 60 * 1000, // 5 minutes default
+  checkInterval: 60 * 1000, // 1 minute default
+  minAccessCount: 0,
+}
+
+let autoCleanupInterval: ReturnType<typeof setInterval> | null = null
+
+// Initialize auto-cleanup on module load (if in browser environment)
+if (typeof window !== 'undefined' || typeof globalThis !== 'undefined') {
+  // Use setTimeout to ensure module is fully loaded
+  setTimeout(() => {
+    if (autoCleanupConfig.enabled && !autoCleanupInterval) {
+      autoCleanupInterval = setInterval(() => {
+        performAutoCleanup()
+      }, autoCleanupConfig.checkInterval)
+    }
+  }, 0)
+}
+
 // Dev mode warning thresholds
 const DEV_WARNING_THRESHOLD = 10000
 let hasWarnedAboutSize = false
@@ -123,6 +170,36 @@ export function resetHookIndex(instance: ComponentInstance): void {
 /** Key type - string or array of serializable values */
 export type StateKey = string | readonly (string | number | boolean | null | undefined | object)[]
 
+/**
+ * Statistics about global states
+ */
+export interface StateStats {
+  /** Total number of global states */
+  total: number
+  /** Number of states by namespace */
+  byNamespace: Record<string, number>
+  /** Namespaces with most states */
+  topNamespaces: Array<{ namespace: string; count: number }>
+  /** Average access count per state */
+  averageAccessCount: number
+}
+
+/**
+ * Statistics for a specific namespace
+ */
+export interface NamespaceStats {
+  /** Namespace name */
+  namespace: string
+  /** Number of states in this namespace */
+  count: number
+  /** Total access count for all states in namespace */
+  totalAccessCount: number
+  /** Average access count per state */
+  averageAccessCount: number
+  /** States in this namespace */
+  states: Array<{ key: string; accessCount: number; createdAt: number }>
+}
+
 // Cache for array key serialization to avoid repeated JSON.stringify calls
 const keyCache = new WeakMap<readonly unknown[], string>()
 
@@ -151,6 +228,186 @@ function serializeKey(key: StateKey): string {
     console.warn('[Flexium] Failed to serialize state key, using fallback:', error)
     const fallback = String(key)
     return fallback
+  }
+}
+
+/**
+ * Register a state in the namespace registry
+ * @internal
+ */
+function registerStateInNamespace(key: string, namespace?: string): void {
+  if (!namespace) return
+
+  if (!namespaceRegistry.has(namespace)) {
+    namespaceRegistry.set(namespace, new Set())
+  }
+  namespaceRegistry.get(namespace)!.add(key)
+}
+
+/**
+ * Unregister a state from the namespace registry
+ * @internal
+ */
+function unregisterStateFromNamespace(key: string, namespace?: string): void {
+  if (!namespace) return
+
+  const namespaceSet = namespaceRegistry.get(namespace)
+  if (namespaceSet) {
+    namespaceSet.delete(key)
+    if (namespaceSet.size === 0) {
+      namespaceRegistry.delete(namespace)
+    }
+  }
+}
+
+/**
+ * Update state metadata (for monitoring and auto-cleanup)
+ * @internal
+ */
+function updateStateMetadata(
+  key: string,
+  namespace?: string,
+  signal?: Signal<unknown> | Computed<unknown> | Resource<unknown>
+): void {
+  const now = Date.now()
+  const existing = stateMetadata.get(key)
+  
+  if (existing) {
+    existing.lastAccessed = now
+    existing.accessCount++
+    existing.referenceCount++
+    if (namespace && existing.namespace !== namespace) {
+      // Namespace changed - update it
+      if (existing.namespace) {
+        unregisterStateFromNamespace(key, existing.namespace)
+      }
+      existing.namespace = namespace
+      registerStateInNamespace(key, namespace)
+    }
+    if (signal && typeof WeakRef !== 'undefined') {
+      existing.signalRef = new WeakRef(signal)
+    }
+  } else {
+    stateMetadata.set(key, {
+      key,
+      namespace,
+      createdAt: now,
+      lastAccessed: now,
+      accessCount: 1,
+      referenceCount: 1,
+      signalRef: signal && typeof WeakRef !== 'undefined' ? new WeakRef(signal) : undefined,
+    })
+    registerStateInNamespace(key, namespace)
+  }
+}
+
+/**
+ * Decrement reference count for a state
+ * @internal
+ */
+function decrementReferenceCount(key: string): void {
+  const metadata = stateMetadata.get(key)
+  if (metadata) {
+    metadata.referenceCount = Math.max(0, metadata.referenceCount - 1)
+  }
+}
+
+/**
+ * Auto-cleanup: Remove states that haven't been accessed recently
+ * @internal
+ */
+function performAutoCleanup(): void {
+  if (!autoCleanupConfig.enabled) return
+
+  const now = Date.now()
+  const keysToRemove: string[] = []
+
+  for (const [key, metadata] of stateMetadata.entries()) {
+    // Check if signal is still alive (if WeakRef is available)
+    if (metadata.signalRef && typeof WeakRef !== 'undefined') {
+      const signal = metadata.signalRef.deref()
+      if (!signal) {
+        // Signal was garbage collected, safe to remove
+        keysToRemove.push(key)
+        continue
+      }
+    }
+
+    // Check if state is idle and has low reference count
+    const idleTime = now - metadata.lastAccessed
+    if (
+      idleTime > autoCleanupConfig.maxIdleTime &&
+      metadata.referenceCount === 0 &&
+      metadata.accessCount >= autoCleanupConfig.minAccessCount
+    ) {
+      keysToRemove.push(key)
+    }
+  }
+
+  // Remove idle states
+  for (const key of keysToRemove) {
+    const metadata = stateMetadata.get(key)
+    if (metadata?.namespace) {
+      unregisterStateFromNamespace(key, metadata.namespace)
+    }
+    stateMetadata.delete(key)
+    globalStateRegistry.delete(key)
+  }
+
+  if (keysToRemove.length > 0 && typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+    console.log(`[Flexium] Auto-cleaned ${keysToRemove.length} idle states`)
+  }
+}
+
+/**
+ * Enable automatic cleanup of idle states
+ * Auto-cleanup is enabled by default. Use this to reconfigure or re-enable after disabling.
+ * @param config - Configuration for auto-cleanup
+ *
+ * @example
+ * ```ts
+ * state.enableAutoCleanup({
+ *   maxIdleTime: 10 * 60 * 1000, // 10 minutes
+ *   checkInterval: 2 * 60 * 1000, // Check every 2 minutes
+ * })
+ * ```
+ */
+function enableAutoCleanup(config?: Partial<AutoCleanupConfig>): void {
+  autoCleanupConfig = { ...autoCleanupConfig, ...config, enabled: true }
+
+  // Clear existing interval if any
+  if (autoCleanupInterval) {
+    clearInterval(autoCleanupInterval)
+  }
+
+  // Start auto-cleanup interval
+  autoCleanupInterval = setInterval(() => {
+    performAutoCleanup()
+  }, autoCleanupConfig.checkInterval)
+
+  if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+    console.log('[Flexium] Auto-cleanup enabled')
+  }
+}
+
+/**
+ * Disable automatic cleanup
+ * Note: Auto-cleanup is enabled by default. Use this only if you need to disable it.
+ *
+ * @example
+ * ```ts
+ * // Disable auto-cleanup (not recommended for production)
+ * state.disableAutoCleanup()
+ * ```
+ */
+function disableAutoCleanup(): void {
+  autoCleanupConfig.enabled = false
+  if (autoCleanupInterval) {
+    clearInterval(autoCleanupInterval)
+    autoCleanupInterval = null
+  }
+  if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+    console.log('[Flexium] Auto-cleanup disabled')
   }
 }
 
@@ -497,6 +754,13 @@ export interface StateOptions<P = unknown> {
    */
   key?: StateKey
   /**
+   * Namespace for grouping related states. Useful for cleanup and monitoring.
+   * @example
+   * state('value', { key: 'key', namespace: 'erp' })
+   * state.clearNamespace('erp') // Clears all states in 'erp' namespace
+   */
+  namespace?: string
+  /**
    * Parameters to pass to the function (for computed/async state).
    * Improves DX by making dependencies explicit.
    * @example
@@ -540,10 +804,22 @@ interface StateFunction {
   delete: (key: StateKey) => boolean
   /** Clear all global states */
   clear: () => void
+  /** Clear all states in a namespace */
+  clearNamespace: (namespace: string) => number
   /** Check if a global state exists */
   has: (key: StateKey) => boolean
   /** Current number of global states */
   readonly size: number
+  /** Get statistics about global states */
+  getStats: () => StateStats
+  /** Get statistics for a specific namespace */
+  getNamespaceStats: (namespace: string) => NamespaceStats
+  /** Enable automatic cleanup of idle states */
+  enableAutoCleanup: (config?: Partial<AutoCleanupConfig>) => void
+  /** Disable automatic cleanup */
+  disableAutoCleanup: () => void
+  /** Check if auto-cleanup is enabled */
+  readonly isAutoCleanupEnabled: boolean
 }
 
 // Overload 1: Value → [StateValue, Setter]
@@ -581,6 +857,7 @@ function state<T, P = unknown>(
   options?: StateOptions<P>
 ): [StateValue<T>] | [StateValue<T>, StateAction<T>] | [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>] {
   const key = options?.key ? serializeKey(options.key) : undefined
+  const namespace = options?.namespace
   const params = options?.params
 
   // 0. Hook System - reuse state from previous render if inside a component
@@ -610,6 +887,7 @@ function state<T, P = unknown>(
   // 1. Check Global Registry for keyed state
   if (key && globalStateRegistry.has(key)) {
     const cached = globalStateRegistry.get(key)!
+    updateStateMetadata(key, namespace, cached._signal)
     const isAsync = 'loading' in cached && cached._stateActions?.refetch !== undefined
     const isComputed = cached._isComputed
 
@@ -665,6 +943,7 @@ function state<T, P = unknown>(
 
       if (key) {
         globalStateRegistry.set(key, s)
+        updateStateMetadata(key, namespace, s._signal)
         checkRegistrySize()
       }
 
@@ -694,6 +973,7 @@ function state<T, P = unknown>(
       const s = toComputedStateObject(comp)
       if (key) {
         globalStateRegistry.set(key, s)
+        updateStateMetadata(key, namespace, s._signal)
         checkRegistrySize()
       }
       return [createStateProxy(comp)] as [StateValue<T>]
@@ -706,6 +986,7 @@ function state<T, P = unknown>(
 
       if (key) {
         globalStateRegistry.set(key, s)
+        updateStateMetadata(key, namespace, s._signal)
         checkRegistrySize()
       }
 
@@ -725,13 +1006,14 @@ function state<T, P = unknown>(
     }
 
     // Sync function → Computed (memoized derived value)
-    const comp = computed(fn as () => T)
-    const s = toComputedStateObject(comp)
-    if (key) {
-      globalStateRegistry.set(key, s)
-      checkRegistrySize()
-    }
-    return [createStateProxy(comp)] as [StateValue<T>]
+      const comp = computed(fn as () => T)
+      const s = toComputedStateObject(comp)
+      if (key) {
+        globalStateRegistry.set(key, s)
+        updateStateMetadata(key, namespace, s._signal)
+        checkRegistrySize()
+      }
+      return [createStateProxy(comp)] as [StateValue<T>]
   }
 
   // 3. Plain value → Signal with setter
@@ -740,6 +1022,7 @@ function state<T, P = unknown>(
 
   if (key) {
     globalStateRegistry.set(key, s)
+    updateStateMetadata(key, namespace)
     checkRegistrySize()
   }
 
@@ -768,6 +1051,13 @@ function state<T, P = unknown>(
  */
 state.delete = function (key: StateKey): boolean {
   const serializedKey = serializeKey(key)
+  const metadata = stateMetadata.get(serializedKey)
+  
+  if (metadata?.namespace) {
+    unregisterStateFromNamespace(serializedKey, metadata.namespace)
+  }
+  
+  stateMetadata.delete(serializedKey)
   return globalStateRegistry.delete(serializedKey)
 }
 
@@ -781,6 +1071,8 @@ state.delete = function (key: StateKey): boolean {
  */
 state.clear = function (): void {
   globalStateRegistry.clear()
+  namespaceRegistry.clear()
+  stateMetadata.clear()
   hasWarnedAboutSize = false
 }
 
@@ -800,10 +1092,138 @@ state.has = function (key: StateKey): boolean {
 }
 
 /**
+ * Clear all states in a namespace
+ * @param namespace - The namespace to clear
+ * @returns Number of states cleared
+ *
+ * @example
+ * ```ts
+ * const cleared = state.clearNamespace('erp')
+ * console.log(`Cleared ${cleared} states`)
+ * ```
+ */
+state.clearNamespace = function (namespace: string): number {
+  const namespaceSet = namespaceRegistry.get(namespace)
+  if (!namespaceSet || namespaceSet.size === 0) {
+    return 0
+  }
+
+  let cleared = 0
+  for (const key of namespaceSet) {
+    if (globalStateRegistry.delete(key)) {
+      stateMetadata.delete(key)
+      cleared++
+    }
+  }
+
+  namespaceRegistry.delete(namespace)
+  return cleared
+}
+
+/**
+ * Get statistics about global states
+ * @returns Statistics object with total count, namespace breakdown, etc.
+ *
+ * @example
+ * ```ts
+ * const stats = state.getStats()
+ * console.log(`Total states: ${stats.total}`)
+ * console.log(`By namespace:`, stats.byNamespace)
+ * ```
+ */
+state.getStats = function (): StateStats {
+  const byNamespace: Record<string, number> = {}
+  let totalAccessCount = 0
+
+  for (const [namespace, keys] of namespaceRegistry.entries()) {
+    byNamespace[namespace] = keys.size
+  }
+
+  for (const metadata of stateMetadata.values()) {
+    totalAccessCount += metadata.accessCount
+  }
+
+  const topNamespaces = Object.entries(byNamespace)
+    .map(([namespace, count]) => ({ namespace, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+
+  const averageAccessCount =
+    stateMetadata.size > 0 ? totalAccessCount / stateMetadata.size : 0
+
+  return {
+    total: globalStateRegistry.size,
+    byNamespace,
+    topNamespaces,
+    averageAccessCount,
+  }
+}
+
+/**
+ * Get statistics for a specific namespace
+ * @param namespace - The namespace to get statistics for
+ * @returns Statistics object for the namespace
+ *
+ * @example
+ * ```ts
+ * const stats = state.getNamespaceStats('erp')
+ * console.log(`ERP has ${stats.count} states`)
+ * ```
+ */
+state.getNamespaceStats = function (namespace: string): NamespaceStats {
+  const namespaceSet = namespaceRegistry.get(namespace)
+  const states: Array<{ key: string; accessCount: number; createdAt: number }> = []
+  let totalAccessCount = 0
+
+  if (namespaceSet) {
+    for (const key of namespaceSet) {
+      const metadata = stateMetadata.get(key)
+      if (metadata) {
+        states.push({
+          key,
+          accessCount: metadata.accessCount,
+          createdAt: metadata.createdAt,
+        })
+        totalAccessCount += metadata.accessCount
+      }
+    }
+  }
+
+  const count = states.length
+  const averageAccessCount = count > 0 ? totalAccessCount / count : 0
+
+  return {
+    namespace,
+    count,
+    totalAccessCount,
+    averageAccessCount,
+    states,
+  }
+}
+
+/**
  * Get the current number of global states
  */
 Object.defineProperty(state, 'size', {
   get: () => globalStateRegistry.size,
+  enumerable: true,
+})
+
+/**
+ * Enable automatic cleanup
+ */
+state.enableAutoCleanup = enableAutoCleanup
+
+/**
+ * Disable automatic cleanup
+ */
+state.disableAutoCleanup = disableAutoCleanup
+
+/**
+ * Check if auto-cleanup is enabled
+ */
+Object.defineProperty(state, 'isAutoCleanupEnabled', {
+  get: () => autoCleanupConfig.enabled,
   enumerable: true,
 })
 
