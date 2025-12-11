@@ -4,6 +4,46 @@ import { mountReactive, cleanupReactive } from './reactive'
 import { getNode, setNode } from './node-map'
 
 /**
+ * Object pool for Map/Set used in reconciliation to reduce GC pressure
+ * Performance: Reuse Map and Set instances instead of creating new ones
+ */
+namespace ReconciliationPool {
+  const mapPool: Map<string | number | undefined, FNode>[] = []
+  const setPool: Set<string | number | undefined>[] = []
+  const MAX_POOL_SIZE = 10
+
+  export function getMap(): Map<string | number | undefined, FNode> {
+    if (mapPool.length > 0) {
+      const map = mapPool.pop()!
+      map.clear()
+      return map
+    }
+    return new Map()
+  }
+
+  export function getSet(): Set<string | number | undefined> {
+    if (setPool.length > 0) {
+      const set = setPool.pop()!
+      set.clear()
+      return set
+    }
+    return new Set()
+  }
+
+  export function release(
+    map: Map<string | number | undefined, FNode>,
+    set: Set<string | number | undefined>
+  ): void {
+    if (mapPool.length < MAX_POOL_SIZE) {
+      mapPool.push(map)
+    }
+    if (setPool.length < MAX_POOL_SIZE) {
+      setPool.push(set)
+    }
+  }
+}
+
+/**
  * Reconcile two arrays of FNodes using hybrid key-based approach.
  * Simple Map lookup + position check for optimal DOM operations.
  *
@@ -146,19 +186,17 @@ export function reconcileArrays(
     return
   }
 
-  // Performance: Pre-allocate Map/Set with expected size to reduce rehashing
-  const expectedSize = Math.max(oldLen, newLen)
-  const keyToOldFNode = new Map<string | number | undefined, FNode>()
-  // Note: Map doesn't support initial capacity, but we can optimize by pre-setting size hint
+  // Performance: Reuse Map/Set from pool to reduce GC pressure
+  const keyToOldFNode = ReconciliationPool.getMap()
+  const seen = ReconciliationPool.getSet()
+
+  // Build key-to-node mapping
   for (let i = 0; i < oldLen; i++) {
     const fnode = oldFNodes[i]
     // Use key if available, otherwise use index with type prefix for uniqueness
     const key = fnode.key ?? `__idx_${i}_${fnode.type}`
     keyToOldFNode.set(key, fnode)
   }
-
-  // Performance: Pre-allocate Set with expected size
-  const seen = new Set<string | number | undefined>()
 
   // Forward pass: process new nodes
   let currentChild = parent.firstChild
@@ -213,6 +251,9 @@ export function reconcileArrays(
       }
     }
   }
+
+  // Performance: Return Map/Set to pool for reuse
+  ReconciliationPool.release(keyToOldFNode, seen)
 }
 
 /**

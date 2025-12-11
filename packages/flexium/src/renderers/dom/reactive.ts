@@ -547,17 +547,23 @@ function setupReactiveProps(
 ): (() => void)[] {
   const disposers: (() => void)[] = []
 
-  // Performance: Pre-separate event handlers from regular props to avoid repeated startsWith checks
-  const regularProps: Array<[string, unknown]> = []
+  // Performance: Filter reactive props in a single pass
+  // Only process props that are signals or functions (reactive props)
+  // Skip event handlers (they are handled separately in updateNode)
+  const reactiveProps: Array<[string, unknown]> = []
   for (const key in props) {
     // Skip event handlers (they are handled separately in updateNode)
-    if (!key.startsWith('on')) {
-      regularProps.push([key, props[key]])
+    if (key.startsWith('on')) continue
+    
+    const value = props[key]
+    // Only collect reactive props (signals or functions)
+    if (isSignal(value) || typeof value === 'function') {
+      reactiveProps.push([key, value])
     }
   }
 
-  // Process only regular props (no event handlers)
-  for (const [key, value] of regularProps) {
+  // Process only reactive props (reduces iterations)
+  for (const [key, value] of reactiveProps) {
     if (isSignal(value)) {
       // Track previous value to avoid unnecessary DOM updates
       // Use sentinel for first run to ensure initial value is set
@@ -579,10 +585,8 @@ function setupReactiveProps(
         }
       })
       disposers.push(dispose)
-      continue
-    }
-
-    if (typeof value === 'function') {
+    } else {
+      // value is a function (already checked in filter above)
       // Track previous value to avoid unnecessary DOM updates
       // Use sentinel for first run to ensure initial value is set
       let prevValue: unknown = UNINITIALIZED
