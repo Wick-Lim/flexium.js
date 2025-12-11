@@ -127,7 +127,8 @@ class SignalNode<T> implements IObservable {
     if (getBatchDepth() === 0) {
       // Automatic microtask batch (most common path)
       if (this.subsHead) {
-        let shouldSchedule = false
+        // Performance: Schedule immediately on first non-computed subscriber
+        let hasScheduled = false
         let link: Link | undefined = this.subsHead
 
         while (link) {
@@ -137,13 +138,12 @@ class SignalNode<T> implements IObservable {
             sub.execute() // Mark dirty immediately
           } else {
             addToAutoBatch(sub)
-            shouldSchedule = true
+            if (!hasScheduled) {
+              hasScheduled = true
+              scheduleAutoBatch() // Schedule on first non-computed subscriber
+            }
           }
           link = link.nextSub
-        }
-
-        if (shouldSchedule) {
-          scheduleAutoBatch()
         }
       }
     } else {

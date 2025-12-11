@@ -89,6 +89,9 @@ export function root<T>(fn: (dispose: () => void) => T): T {
     owner = newOwner
 
     const dispose = () => {
+        // Performance: Fast path when no cleanups
+        if (newOwner.cleanups.length === 0) return
+        
         for (const cleanup of newOwner.cleanups) {
             cleanup()
         }

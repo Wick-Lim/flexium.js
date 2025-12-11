@@ -646,10 +646,12 @@ function state<T, P = unknown>(
   // 2. Handle function input (computed or async)
   if (typeof initialValueOrFetcher === 'function') {
     const originalFn = initialValueOrFetcher as (params?: P) => T | Promise<T>
-    // Wrap function to inject params if provided
+    
+    // Performance: Avoid function wrapping when params is undefined
+    // Reuse original function directly to avoid closure overhead
     const fn = params !== undefined
       ? () => originalFn(params)
-      : originalFn as () => T | Promise<T>
+      : (originalFn as () => T | Promise<T>)
 
     // Try to detect if it's async by checking constructor name
     // This handles `async () => ...` functions
