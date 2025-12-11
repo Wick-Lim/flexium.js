@@ -15,7 +15,7 @@ Synchronize state updates to the DOM.
 ## Import
 
 ```ts
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 ```
 
 ## Signature

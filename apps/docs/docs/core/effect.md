@@ -150,8 +150,8 @@ effect(() => {
 })
 ```
 
-::: warning Deprecated APIs
-`onMount()` and `onCleanup()` are deprecated. Use `effect()` instead. See [Lifecycle Management](/docs/core/lifecycle) for migration guide.
+::: info
+`onMount()` and `onCleanup()` have been removed. Use `effect()` instead. See [Lifecycle Management](/docs/core/lifecycle) for migration guide.
 :::
 
 ## Notes

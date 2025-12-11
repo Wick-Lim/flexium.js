@@ -34,9 +34,8 @@ import { root, untrack } from 'flexium/advanced'
 |--------|--------|-------------|
 | `signal(value)` | `flexium/advanced` | Create a raw reactive signal |
 | `computed(fn)` | `flexium/advanced` | Create a computed signal |
-| `root(fn)` | `flexium/core` | Create an isolated reactive scope |
-| `untrack(fn)` | `flexium/core` | Read values without creating dependencies |
-| `onCleanup(fn)` | `flexium/core` | Register cleanup function |
+| `root(fn)` | `flexium/advanced` | Create an isolated reactive scope |
+| `untrack(fn)` | `flexium/advanced` | Read values without creating dependencies |
 
 ## signal()
 

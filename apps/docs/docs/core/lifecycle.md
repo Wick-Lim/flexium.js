@@ -2,8 +2,8 @@
 
 Flexium uses `effect()` for all lifecycle needs. There are no separate mount or cleanup hooks.
 
-::: warning Deprecated
-`onMount()` and `onCleanup()` are deprecated. Use `effect()` instead.
+::: info
+`onMount()` and `onCleanup()` have been removed. Use `effect()` instead.
 :::
 
 ## Import
@@ -181,10 +181,10 @@ function Countdown(props) {
 
 ## Migration from onMount/onCleanup
 
-If you're using deprecated `onMount()` or `onCleanup()`, migrate to `effect()`:
+If you were using `onMount()` or `onCleanup()`, migrate to `effect()`:
 
 ```tsx
-// ❌ Old way (deprecated)
+// ❌ Old way (removed)
 import { onMount, onCleanup } from 'flexium/core'
 
 onMount(() => {
