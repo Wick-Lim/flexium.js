@@ -54,15 +54,110 @@ export function reconcileArrays(
     return
   }
 
-  // Build key → FNode map from old nodes
+  // Performance: Fast path for small lists (5 or fewer items) - avoid Map/Set overhead
+  const oldLen = oldFNodes.length
+  const newLen = newFNodes.length
+  const SMALL_LIST_THRESHOLD = 5
+
+  if (oldLen <= SMALL_LIST_THRESHOLD && newLen <= SMALL_LIST_THRESHOLD) {
+    // Simple linear reconciliation for small lists
+    let oldIdx = 0
+    let newIdx = 0
+    let currentChild = parent.firstChild
+
+    while (oldIdx < oldLen || newIdx < newLen) {
+      if (newIdx >= newLen) {
+        // Remove remaining old nodes
+        while (oldIdx < oldLen) {
+          const oldFNode = oldFNodes[oldIdx++]
+          const node = oldFNode && getNode(oldFNode)
+          if (node) {
+            cleanupReactive(node)
+            domRenderer.removeChild(parent, node)
+          }
+        }
+        break
+      }
+
+      if (oldIdx >= oldLen) {
+        // Add remaining new nodes
+        const fragment = document.createDocumentFragment()
+        while (newIdx < newLen) {
+          const newFNode = newFNodes[newIdx++]
+          const node = mountReactive(newFNode, undefined)
+          if (node) {
+            setNode(newFNode, node)
+            fragment.appendChild(node)
+          }
+        }
+        if (nextSibling) {
+          parent.insertBefore(fragment, nextSibling)
+        } else {
+          parent.appendChild(fragment)
+        }
+        break
+      }
+
+      const oldFNode = oldFNodes[oldIdx]
+      const newFNode = newFNodes[newIdx]
+      const oldKey = oldFNode.key ?? `__idx_${oldIdx}_${oldFNode.type}`
+      const newKey = newFNode.key ?? `__idx_${newIdx}_${newFNode.type}`
+
+      if (oldKey === newKey && oldFNode.type === newFNode.type) {
+        // Same node: patch and advance both
+        patchNode(oldFNode, newFNode)
+        currentChild = currentChild?.nextSibling || null
+        oldIdx++
+        newIdx++
+      } else {
+        // Different: check if we can find matching old node
+        let found = false
+        for (let searchIdx = oldIdx + 1; searchIdx < oldLen; searchIdx++) {
+          const searchFNode = oldFNodes[searchIdx]
+          const searchKey = searchFNode.key ?? `__idx_${searchIdx}_${searchFNode.type}`
+          if (searchKey === newKey && searchFNode.type === newFNode.type) {
+            // Found match: remove nodes between oldIdx and searchIdx, then patch
+            for (let removeIdx = oldIdx; removeIdx < searchIdx; removeIdx++) {
+              const removeFNode = oldFNodes[removeIdx]
+              const node = removeFNode && getNode(removeFNode)
+              if (node) {
+                cleanupReactive(node)
+                domRenderer.removeChild(parent, node)
+              }
+            }
+            patchNode(searchFNode, newFNode)
+            oldIdx = searchIdx + 1
+            newIdx++
+            found = true
+            break
+          }
+        }
+        if (!found) {
+          // No match: insert new node
+          const node = mountReactive(newFNode, undefined)
+          if (node) {
+            setNode(newFNode, node)
+            parent.insertBefore(node, currentChild)
+          }
+          newIdx++
+        }
+      }
+    }
+    return
+  }
+
+  // Performance: Pre-allocate Map/Set with expected size to reduce rehashing
+  const expectedSize = Math.max(oldLen, newLen)
   const keyToOldFNode = new Map<string | number | undefined, FNode>()
-  for (let i = 0; i < oldFNodes.length; i++) {
+  // Note: Map doesn't support initial capacity, but we can optimize by pre-setting size hint
+  for (let i = 0; i < oldLen; i++) {
     const fnode = oldFNodes[i]
     // Use key if available, otherwise use index with type prefix for uniqueness
     const key = fnode.key ?? `__idx_${i}_${fnode.type}`
     keyToOldFNode.set(key, fnode)
   }
 
+  // Performance: Pre-allocate Set with expected size
   const seen = new Set<string | number | undefined>()
 
   // Forward pass: process new nodes

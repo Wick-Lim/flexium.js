@@ -58,8 +58,10 @@ export class EffectNode implements ISubscriber {
     private run(): void {
         // Performance: Fast path when no cleanups
         if (this.cleanups.length > 0) {
-            for (const cleanup of this.cleanups) {
-                cleanup()
+            // Performance: Run cleanups in reverse order (most recent first)
+            // This ensures proper dependency cleanup order and matches React's behavior
+            for (let i = this.cleanups.length - 1; i >= 0; i--) {
+                this.cleanups[i]()
             }
             this.cleanups = []
         }
@@ -90,10 +92,14 @@ export class EffectNode implements ISubscriber {
     }
 
     dispose(): void {
-        for (const cleanup of this.cleanups) {
-            cleanup()
+        // Performance: Run cleanups in reverse order (most recent first)
+        // This ensures proper dependency cleanup order
+        if (this.cleanups.length > 0) {
+            for (let i = this.cleanups.length - 1; i >= 0; i--) {
+                this.cleanups[i]()
+            }
+            this.cleanups = []
         }
-        this.cleanups = []
         Graph.disconnectDependencies(this)
     }
 }

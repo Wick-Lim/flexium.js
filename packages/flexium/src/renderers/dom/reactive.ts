@@ -498,10 +498,18 @@ function setupReactiveProps(
   props: Record<string, any>
 ): (() => void)[] {
   const disposers: (() => void)[] = []
+  
+  // Performance: Pre-separate event handlers from regular props to avoid repeated startsWith checks
+  const regularProps: Array<[string, unknown]> = []
   for (const key in props) {
-    const value = props[key]
-    if (key.startsWith('on')) continue
+    // Skip event handlers (they are handled separately in updateNode)
+    if (!key.startsWith('on')) {
+      regularProps.push([key, props[key]])
+    }
+  }
 
+  // Process only regular props (no event handlers)
+  for (const [key, value] of regularProps) {
     if (isSignal(value)) {
       // Track previous value to avoid unnecessary DOM updates
       // Use sentinel for first run to ensure initial value is set

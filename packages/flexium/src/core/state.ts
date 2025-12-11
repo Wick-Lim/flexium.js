@@ -284,13 +284,26 @@ export function isTruthy<T>(stateValue: StateValue<T>): boolean {
 }
 
 /**
+ * Cache for StateProxy instances to avoid repeated Proxy creation for the same signal.
+ * Uses WeakMap so proxies are automatically garbage collected when signals are no longer referenced.
+ */
+const proxyCache = new WeakMap<Signal<unknown> | Computed<unknown>, StateValue<unknown>>()
+
+/**
  * Create a reactive proxy that behaves like a value but stays reactive.
  * The proxy is also callable - calling it returns the current value.
  * This ensures compatibility with code expecting getter functions.
  * 
  * Performance optimization: Cache value and type checks to avoid repeated sig.value calls.
+ * Performance optimization: Reuse Proxy instances for the same signal to reduce allocation overhead.
  */
 function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
+  // Check cache first - reuse existing proxy if available
+  const cached = proxyCache.get(sig as Signal<unknown> | Computed<unknown>)
+  if (cached) {
+    return cached as StateValue<T>
+  }
+
   // Use an arrow function as the target so the proxy is callable but has no prototype
   // This prevents invariant violations in ownKeys trap
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -419,6 +432,9 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
       return undefined
     },
   })
+
+  // Cache the proxy for future reuse
+  proxyCache.set(sig as Signal<unknown> | Computed<unknown>, proxy as StateValue<unknown>)
 
   return proxy as StateValue<T>
 }
