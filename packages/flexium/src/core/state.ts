@@ -290,6 +290,13 @@ export function isTruthy<T>(stateValue: StateValue<T>): boolean {
 const proxyCache = new WeakMap<Signal<unknown> | Computed<unknown>, StateValue<unknown>>()
 
 /**
+ * Cache for bound functions to avoid repeated bind() calls.
+ * Uses nested WeakMap: function -> (object -> bound function)
+ * Performance: Reuse bound functions instead of creating new ones on each access
+ */
+const boundFunctionCache = new WeakMap<Function, WeakMap<object, Function>>()
+
+/**
  * Create a reactive proxy that behaves like a value but stays reactive.
  * The proxy is also callable - calling it returns the current value.
  * This ensures compatibility with code expecting getter functions.
@@ -382,9 +389,22 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
         // Access object property
         const obj = currentValue as Record<string | symbol, unknown>
         const propValue = obj[prop]
+        // Performance: Cache bound functions to avoid repeated bind() calls
         // If it's a function (like array methods), bind it to the current value
         if (typeof propValue === 'function') {
-          return propValue.bind(currentValue)
+          // Check cache first
+          let functionCache = boundFunctionCache.get(propValue)
+          if (!functionCache) {
+            functionCache = new WeakMap()
+            boundFunctionCache.set(propValue, functionCache)
+          }
+          
+          let bound = functionCache.get(currentValue)
+          if (!bound) {
+            bound = propValue.bind(currentValue)
+            functionCache.set(currentValue, bound)
+          }
+          return bound
         }
         return propValue
       }

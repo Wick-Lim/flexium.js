@@ -408,7 +408,11 @@ export function mountReactive(
             try {
               // Set current component for hook tracking
               setCurrentComponent(componentInstance)
-              result = component({ ...node.props, children: node.children })
+              // Performance: Avoid object spread when children is undefined (reuse props object)
+              const componentProps = node.children !== undefined
+                ? { ...node.props, children: node.children }
+                : node.props
+              result = component(componentProps)
             } finally {
               // Clear current component
               setCurrentComponent(null)

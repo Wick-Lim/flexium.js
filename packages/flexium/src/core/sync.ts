@@ -20,8 +20,12 @@ export function flushAutoBatch(): void {
     isAutoBatchScheduled = false
     if (autoBatchQueue.size === 0) return
 
-    // Performance: Convert Set to array instead of copying Set (faster)
-    const queue = Array.from(autoBatchQueue)
+    // Performance: Direct iteration instead of Array.from() to avoid array allocation
+    // Build array while iterating Set
+    const queue: ISubscriber[] = []
+    for (const sub of autoBatchQueue) {
+        queue.push(sub)
+    }
     autoBatchQueue.clear()
 
     // Execute effects - use for loop instead of forEach (slightly faster)
@@ -75,8 +79,11 @@ export function sync<T>(fn?: () => T): T | void {
             batchDepth--
             if (batchDepth === 0) {
                 // Execute all queued subscribers from manual batch
-                // Performance: Convert Set to array instead of copying Set (faster)
-                const queue = Array.from(batchQueue)
+                // Performance: Direct iteration instead of Array.from() to avoid array allocation
+                const queue: ISubscriber[] = []
+                for (const sub of batchQueue) {
+                    queue.push(sub)
+                }
                 batchQueue.clear()
                 // Use for loop instead of forEach (slightly faster)
                 for (let i = 0; i < queue.length; i++) {
