@@ -201,7 +201,8 @@ When you outgrow this template:
 
 3. **Import from npm instead:**
    ```javascript
-   import { signal, computed, effect } from 'flexium/core'
+   ```javascript
+   import { state, effect } from 'flexium/core'
    ```
 
 4. **Split into multiple files**

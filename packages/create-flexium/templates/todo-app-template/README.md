@@ -88,11 +88,12 @@ todo-app-template/
 - Mobile breakpoints
 - Animations
 
-### 2. Signal System (Lines 621-690)
-- `signal()` - Create reactive values
-- `computed()` - Derive values from signals
-- `effect()` - Run side effects
-- `batch()` - Optimize multiple updates
+### 2. State System (Lines 621-690)
+- `state()` - Unified reactive state management
+- `state(() => ...)` - Computed/Derived values
+- `state(async () => ...)` - Async resources
+- `effect()` - Side effects with automatic dependency tracking
+- `sync()` - Optimized updates when changing multiple values
 
 ### 3. State Management (Lines 713-805)
 - Todo list state
@@ -122,88 +123,75 @@ todo-app-template/
 
 ## Key Patterns
 
-### Signal Pattern
-
+### State Pattern (Local)
 ```javascript
-// Create signal
-const count = signal(0)
+// Create state
+const [count, setCount] = state(0)
 
-// Read value
-console.log(count.value)
+// Read value (direct usage)
+console.log(count)
 
 // Update value
-count.value++
-
-// Automatically triggers all dependent effects
+setCount(c => c + 1)
 ```
 
 ### Computed Pattern
-
 ```javascript
-// Create computed value
-const doubled = computed(() => count.value * 2)
+// Create computed state
+// Pass a function that returns the value
+const [doubled] = state(() => count * 2)
 
 // Always up-to-date
-console.log(doubled.value) // count * 2
+console.log(doubled) // count * 2
 ```
 
 ### Effect Pattern
-
 ```javascript
 // Run side effect
 effect(() => {
-  console.log('Count changed:', count.value)
+  console.log('Count changed:', count)
 })
-
-// Runs immediately and whenever count changes
 ```
 
-### Batch Pattern
-
+### Sync/Batch Pattern
 ```javascript
-// Update multiple signals efficiently
-batch(() => {
-  signal1.value = newValue1
-  signal2.value = newValue2
-  signal3.value = newValue3
+// Update multiple states efficiently
+sync(() => {
+  setCount(10)
+  setFlag(true)
 })
-// Effects run once after all updates
+// Effects run once after updates
 ```
 
 ### Form Validation Pattern
-
 ```javascript
-const input = signal('')
-const error = computed(() => {
-  if (!input.value) return 'Required'
-  if (input.value.length < 3) return 'Too short'
+const [input, setInput] = state('')
+const [error] = state(() => {
+  if (!input) return 'Required'
+  if (input.length < 3) return 'Too short'
   return null
 })
-
-// Error updates automatically
 ```
 
 ### Filter Pattern
-
 ```javascript
-const items = signal([...])
-const filter = signal('all')
-const filtered = computed(() => {
-  if (filter.value === 'all') return items.value
-  return items.value.filter(item => item.status === filter.value)
+const [items] = state([...])
+const [filter, setFilter] = state('all')
+const [filtered] = state(() => {
+  if (filter === 'all') return items
+  return items.filter(item => item.status === filter)
 })
 ```
 
 ### Persistence Pattern
-
 ```javascript
 // Auto-save effect
 effect(() => {
-  localStorage.setItem('key', JSON.stringify(todos.value))
+  localStorage.setItem('key', JSON.stringify(todos))
 })
 
 // Load on init
-const todos = signal(loadFromStorage())
+const [todos] = state(loadFromStorage())
 ```
 
 ## Customization Guide

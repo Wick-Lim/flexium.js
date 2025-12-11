@@ -87,10 +87,10 @@ Create new components in the `src/` directory:
 // src/MyComponent.tsx
 import { state } from 'flexium/core'
 
-// State must be declared outside component
-const [count, setCount] = state(0)
-
 export function MyComponent() {
+  // Local state - created when component renders (runs once)
+  const [count, setCount] = state(0)
+
   return (
     <div>
       <p>Count: {count}</p>
@@ -123,23 +123,25 @@ State is the core of Flexium's reactivity:
 ```tsx
 import { state, effect } from 'flexium/core'
 
-// Create state (must be outside component)
-const [count, setCount] = state(0)
+function Example() {
+  // Create state (local to this component instance)
+  const [count, setCount] = state(0)
 
-// Read state value
-console.log(+count) // 0
+  // Read state value
+  console.log(+count) // 0
 
-// Update state value
-setCount(1) // Set directly
-setCount(c => c + 1) // With updater function
+  // Update state value
+  setCount(1) // Set directly
+  setCount(c => c + 1) // With updater function
 
-// Create derived (computed) values
-const [doubled] = state(() => count * 2)
+  // Create derived (computed) values
+  const [doubled] = state(() => count * 2)
 
-// Run side effects
-effect(() => {
-  console.log('Count changed:', +count)
-})
+  // Run side effects
+  effect(() => {
+    console.log('Count changed:', +count)
+  })
+}
 ```
 
 ### Styling

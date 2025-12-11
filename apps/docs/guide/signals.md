@@ -1,226 +1,77 @@
-# Signals
+# Signals (Advanced)
 
-Signals are the foundation of Flexium's reactivity system. They provide fine-grained reactive updates, ensuring your UI stays in sync with your data efficiently.
+::: info Recommended API
+For most application development, we recommend using the unified **[state()](/guide/state)** API. 
+`signal` and `computed` are low-level primitives available in `flexium/advanced` that power `state()`. They are useful for library authors or building custom reactivity abstractions.
+:::
 
-## What is a Signal?
+## The `signal` Primitive
 
-A signal is a reactive container that holds a value. When the value changes, any part of the UI that depends on it automatically updates—no manual DOM manipulation required.
+A `SignalNode` is the atomic unit of reactivity. It holds a value and notifies subscribers when it changes.
 
 ```tsx
 import { signal } from 'flexium/advanced'
 
+// Create
 const count = signal(0)
 
-// Read the value
-console.log(count.value) // 0
-console.log(+count) // 0 - using unary + operator
+// Read (tracks dependency)
+console.log(count.value)
 
-// Update the value
+// Write (triggers notifications)
 count.set(5)
-console.log(count.value) // 5
+// OR
+count.value = 5
 ```
 
-## Creating Signals
+### Methods
 
-### With `signal()`
+- `.value`: Getter/Setter for the value. Accessing it tracks the signal in the current effect.
+- `.peek()`: Reads the value **without** tracking.
+- `.set(val)`: Sets the value.
+- `.subscribe(fn)`: Manually subscribe to changes (rarely needed, use `effect`).
 
-The `signal()` function creates a standalone reactive value:
+## The `computed` Primitive
+
+Derived values that automatically update when their dependencies change.
 
 ```tsx
-import { signal } from 'flexium/advanced'
+import { computed } from 'flexium/advanced'
 
-// Primitive values
-const name = signal('Alice')
-const age = signal(25)
-const isActive = signal(true)
+const count = signal(1)
+const double = computed(() => count.value * 2)
 
-// Objects and arrays
-const user = signal({ name: 'Bob', email: 'bob@example.com' })
-const items = signal([1, 2, 3])
+console.log(double.value) // 2
+
+count.set(5)
+console.log(double.value) // 10
 ```
 
-### With `state()`
+- **Lazy**: Computeds are only re-evaluated when read.
+- **Cached**: If dependencies haven't changed, the cached value is returned.
+- **Pure**: Computed functions should be pure and side-effect free.
 
-The `state()` function provides a React-like tuple interface:
+## Comparison with `state()`
 
-```tsx
-import { state } from 'flexium/core'
+| Feature | `signal()` (Low-level) | `state()` (High-level) |
+|---------|------------------------|------------------------|
+| **Import** | `flexium/advanced` | `flexium/core` |
+| **Interface** | Object (`.value`) | Proxy / Tuple |
+| **Ergonomics** | Verbose | Concise |
+| **JSX** | Supported (`{count}`) | Supported (`{count}`) |
+| **Use Case** | Libraries, Primitives | Apps, Components |
 
-const [count, setCount] = state(0)
+## Manual Subscriptions
 
-// Read
-console.log(count) // 0
-console.log(count + 1) // 1
-
-// Update with value
-setCount(5)
-
-// Update with function
-setCount(prev => prev + 1)
-```
-
-## Reading Signal Values
-
-State proxies returned by `state()` can be read in multiple ways:
-
-```tsx
-const [count, setCount] = state(10)
-
-// 1. Direct value access (proxy behavior)
-console.log(count) // 10
-const doubled = count * 2 // 20
-
-// 2. Using .peek() (doesn't track as dependency)
-console.log(count.peek()) // 10
-```
-
-### In JSX
-
-Signals auto-unwrap in JSX:
-
-```tsx
-function Counter() {
-  const [count, setCount] = state(0)
-
-  return (
-    <div>
-      <p>Count: {count}</p>  {/* Auto-unwrapped */}
-      <button onclick={() => setCount(c => c + 1)}>+</button>
-    </div>
-  )
-}
-```
-
-## Updating Signals
-
-### Direct Value
-
-```tsx
-const name = signal('Alice')
-name.set('Bob')
-```
-
-### Function Update
+If you need to manually listen to a signal outside of an effect (e.g. bridging to another library):
 
 ```tsx
 const count = signal(0)
-count.set(prev => prev + 1)
-```
 
-### Object Mutation
-
-For objects, you can spread and update:
-
-```tsx
-const user = signal({ name: 'Alice', age: 25 })
-user.set(prev => ({ ...prev, age: 26 }))
-```
-
-## Derived Values
-
-Derived values are computed from other signals:
-
-```tsx
-import { state } from 'flexium/core'
-
-const [price, setPrice] = state(100)
-const [quantity, setQuantity] = state(2)
-
-// Derived value - no setter, auto-updates
-const [total] = state(() => price * quantity)
-
-console.log(+total) // 200
-
-setPrice(150)
-console.log(+total) // 300 (auto-updated!)
-```
-
-## Effects
-
-Effects run side effects when signals change:
-
-```tsx
-import { state, effect } from 'flexium/core'
-
-const [count, setCount] = state(0)
-
-effect(() => {
-  console.log('Count changed:', count)
+const unsubscribe = count.subscribe((newValue) => {
+  console.log('Stream updated:', newValue)
 })
 
-setCount(1) // logs: "Count changed: 1"
-setCount(2) // logs: "Count changed: 2"
+// later
+unsubscribe()
 ```
-
-### Cleanup in Effects
-
-Return a cleanup function for proper resource management:
-
-```tsx
-effect(() => {
-  const interval = setInterval(() => {
-    console.log('tick')
-  }, 1000)
-
-  return () => clearInterval(interval) // Cleanup
-})
-```
-
-## Best Practices
-
-### 1. Keep Signals Granular
-
-```tsx
-// Good - fine-grained updates
-const firstName = signal('John')
-const lastName = signal('Doe')
-
-// Avoid - coarse updates
-const user = signal({ firstName: 'John', lastName: 'Doe' })
-```
-
-### 2. Use Derived State for Computed Values
-
-```tsx
-// Good - derived state
-const [fullName] = state(() => `${firstName} ${lastName}`)
-
-// Avoid - manual calculation everywhere
-function getFullName() {
-  return `${firstName} ${lastName}`
-}
-```
-
-### 3. Avoid Reading in Loops Without Need
-
-```tsx
-// Good - read once
-const [list, setList] = state([])
-const items = list
-items.forEach(item => console.log(item))
-
-// Avoid - reading repeatedly (though with proxy it auto-converts)
-for (let i = 0; i < list.length; i++) {
-  console.log(list[i])
-}
-```
-
-### 4. Use peek() When You Don't Want Tracking
-
-```tsx
-const [trigger, setTrigger] = state(false)
-const [config, setConfig] = state({})
-
-effect(() => {
-  // Only track 'trigger', not 'config'
-  if (trigger) {
-    console.log(config.peek())
-  }
-})
-```
-
-## See Also
-
-- [state()](/docs/core/state) - State management API
-- [effect()](/docs/core/effect) - Side effects
-- [sync()](/docs/core/sync) - Sync updates

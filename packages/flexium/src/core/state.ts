@@ -346,6 +346,10 @@ if (typeof window !== 'undefined' || typeof globalThis !== 'undefined') {
   setTimeout(() => {
     if (autoCleanupConfig.enabled && !autoCleanupInterval) {
       autoCleanupInterval = setInterval(performAutoCleanup, autoCleanupConfig.checkInterval)
+      // Allow process to exit in Node.js environment even if interval is running
+      if (autoCleanupInterval && typeof autoCleanupInterval === 'object' && 'unref' in autoCleanupInterval && typeof autoCleanupInterval.unref === 'function') {
+        (autoCleanupInterval as any).unref()
+      }
     }
   }, 0)
 }

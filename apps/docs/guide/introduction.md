@@ -16,6 +16,10 @@ Flexium is a next-generation UI framework built for performance, simplicity, and
 
 At its core, Flexium aims to solve the complexity and performance issues that plague modern web development. By leveraging signals for fine-grained reactivity, eliminating the Virtual DOM overhead, and providing a unified API for all state management needs, Flexium delivers exceptional performance while maintaining an intuitive developer experience.
 
+::: tip New in v0.10: Unified State API
+Flexium v0.10 introduces the unified `state()` API, replacing `signal()`, `computed()`, and `createResource()` with a single, cohesive primitive. Upgrading from v0.9? Check out the [Migration Guide](/guide/migration-v0.10).
+:::
+
 ## Why Flexium?
 
 Flexium stands out from other frameworks through several key innovations:
