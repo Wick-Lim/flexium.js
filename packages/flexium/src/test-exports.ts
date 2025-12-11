@@ -16,7 +16,7 @@ export {
   createResource,
   untrack,
 } from './core/signal'
-export { sync } from './core/scheduler'
+export { sync } from './core/sync'
 
 export { state } from './core/state'
 

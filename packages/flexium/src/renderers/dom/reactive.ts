@@ -498,7 +498,7 @@ function setupReactiveProps(
   props: Record<string, any>
 ): (() => void)[] {
   const disposers: (() => void)[] = []
-  
+
   // Performance: Pre-separate event handlers from regular props to avoid repeated startsWith checks
   const regularProps: Array<[string, unknown]> = []
   for (const key in props) {
@@ -573,22 +573,42 @@ export function cleanupReactive(node: Node): void {
 export function createReactiveRoot(container: HTMLElement) {
   let rootDispose: (() => void) | null = null
   let currentRootNode: Node | null = null
+  let currentFNode: FNode | null = null
 
   return {
     render(node: FNode) {
-      if (currentRootNode) {
+      // Performance: If rendering the same node, skip cleanup (optimization for re-renders)
+      const isSameNode = currentFNode === node
+
+      if (!isSameNode && currentRootNode) {
         cleanupReactive(currentRootNode)
-        container.innerHTML = ''
+        // Performance: Use removeChild instead of innerHTML when possible (faster)
+        // Only use innerHTML if container has many children
+        if (container.childNodes.length === 1) {
+          container.removeChild(currentRootNode)
+        } else {
+          container.innerHTML = ''
+        }
         currentRootNode = null
       }
+
       if (rootDispose) {
         rootDispose()
         rootDispose = null
       }
 
       rootDispose = effect(() => {
-        container.innerHTML = ''
+        // Performance: Only clear if we have existing content and it's different
+        if (!isSameNode && container.firstChild) {
+          // Performance: Use removeChild for single child, innerHTML for multiple
+          if (container.childNodes.length === 1) {
+            container.removeChild(container.firstChild!)
+          } else {
+            container.innerHTML = ''
+          }
+        }
         currentRootNode = mountReactive(node, container)
+        currentFNode = node
       })
     },
     unmount() {
@@ -597,7 +617,14 @@ export function createReactiveRoot(container: HTMLElement) {
         rootDispose = null
       }
       cleanupReactive(container)
-      container.innerHTML = ''
+      // Performance: Use removeChild when possible
+      if (container.childNodes.length === 1) {
+        container.removeChild(container.firstChild!)
+      } else {
+        container.innerHTML = ''
+      }
+      currentRootNode = null
+      currentFNode = null
     },
   }
 }

@@ -317,14 +317,19 @@ function updateStyles(
   // 3. Handle Flexium specific style props - only check props that exist
   // Optimized: iterate directly without creating intermediate Set
 
+  // Performance: Cache style access and avoid unnecessary checks
+  const styleRecord = style as unknown as Record<string, string>
+
   // Check oldProps for removed style props
   for (const propName in oldProps) {
     if (propName in STYLE_PROPS_CONFIG && !(propName in newProps)) {
       const config = STYLE_PROPS_CONFIG[propName]
-      const cssProp = config.cssProp as keyof CSSStyleDeclaration
+      const cssProp = config.cssProp as string
 
-      if (style[cssProp] !== '') {
-        ; (style as unknown as Record<string, string>)[cssProp as string] = ''
+      // Performance: Only clear if actually set (avoid unnecessary DOM writes)
+      const currentValue = styleRecord[cssProp]
+      if (currentValue !== undefined && currentValue !== '') {
+        styleRecord[cssProp] = ''
       }
 
       // Apply any side effects
@@ -340,21 +345,26 @@ function updateStyles(
       const oldValue = oldProps[propName]
       const newValue = newProps[propName]
 
+      // Performance: Skip if value hasn't changed
       if (oldValue === newValue) continue
 
       const config = STYLE_PROPS_CONFIG[propName]
       const transformedValue = transformValue(newValue, config.transform)
-      const cssProp = config.cssProp as keyof CSSStyleDeclaration
+      const cssProp = config.cssProp as string
+
+      // Performance: Cache current value and only update if different
+      const currentValue = styleRecord[cssProp]
 
       // Update the style property
       if (transformedValue === undefined) {
-        if (style[cssProp] !== '') {
-          ; (style as unknown as Record<string, string>)[cssProp as string] = ''
+        // Only clear if actually set
+        if (currentValue !== undefined && currentValue !== '') {
+          styleRecord[cssProp] = ''
         }
       } else {
-        if (style[cssProp] !== transformedValue) {
-          ; (style as unknown as Record<string, string>)[cssProp as string] =
-            transformedValue
+        // Only update if value actually changed
+        if (currentValue !== transformedValue) {
+          styleRecord[cssProp] = transformedValue
         }
       }
 

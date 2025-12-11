@@ -17,7 +17,7 @@ export type { Signal, Computed } from './core/signal'
 
 // Advanced control primitives
 export { root, untrack } from './core/owner'
-export { sync } from './core/scheduler'
+export { sync } from './core/sync'
 
 // DevTools
 export { enableDevTools, disableDevTools } from './devtools'

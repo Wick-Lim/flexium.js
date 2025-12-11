@@ -30,7 +30,7 @@ import {
   addToAutoBatch,
   addToBatch,
   getBatchDepth
-} from './scheduler'
+} from './sync'
 import { EffectNode, effect } from './effect'
 
 /**

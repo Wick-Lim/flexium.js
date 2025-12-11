@@ -5,6 +5,5 @@
  */
 
 export { effect } from './effect'
-export { sync } from './scheduler'
-export { root } from './owner'
+export { sync } from './sync'
 export { state } from './state'
