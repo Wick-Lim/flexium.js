@@ -97,7 +97,7 @@ class SignalNode<T> implements IObservable {
   version = 0           // Frequently read
   nodeType = NodeType.Signal  // Frequently checked
   subsHead: Link | undefined  // Frequently accessed
-  
+
   // Cold path field
   constructor(private _value: T) { }
 
@@ -167,7 +167,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   flags = SubscriberFlags.Dirty | SubscriberFlags.Stale  // Frequently checked
   subsHead: Link | undefined  // Frequently accessed
   depsHead: Link | undefined  // Frequently accessed
-  
+
   // Cold path fields
   private _value!: T
   // Optimization: Track last clean epoch to avoid redundant re-computation
@@ -600,4 +600,4 @@ export function createResource<T, S = any>(
 // Re-export commonly used functions for convenience
 // These are imported from other modules but re-exported here for backward compatibility
 export { effect } from './effect'
-export { root, onMount, untrack } from './owner'
+export { root, untrack } from './owner'

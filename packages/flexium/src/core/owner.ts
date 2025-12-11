@@ -102,21 +102,4 @@ export function root<T>(fn: (dispose: () => void) => T): T {
     }
 }
 
-/**
- * Runs a function once when the component mounts.
- * Unlike effect(), onMount does not track dependencies - it runs exactly once.
- *
- * @param fn - Function to run on mount. Can return a cleanup function.
- */
-export function onMount(fn: () => void | (() => void)): void {
-    // Schedule the mount callback to run after the current execution
-    // This ensures the component is fully rendered before mount runs
-    queueMicrotask(() => {
-        const cleanup = fn()
 
-        // Register cleanup with owner if available
-        if (cleanup && typeof cleanup === 'function' && owner) {
-            owner.cleanups.push(cleanup)
-        }
-    })
-}

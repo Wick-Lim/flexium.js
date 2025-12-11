@@ -345,8 +345,8 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
           // Note: This is intentionally minimal to avoid performance overhead
           // Full comparison detection would require stack trace analysis
           const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
-          if (isDev && 
-              typeof process !== 'undefined' && process.env?.FLEXIUM_WARN_COMPARISON === 'true') {
+          if (isDev &&
+            typeof process !== 'undefined' && process.env?.FLEXIUM_WARN_COMPARISON === 'true') {
             // Only warn if explicitly enabled via environment variable
             // Most users should rely on ESLint rules instead
           }
@@ -801,39 +801,4 @@ export function ref<T>(initialValue: T | null): RefObject<T> {
   return { current: initialValue }
 }
 
-/**
- * Type helper for creating state with explicit type inference.
- * Useful when TypeScript inference fails or you want clearer types.
- * 
- * @param initial - Initial value
- * @returns Tuple of [StateValue, StateAction]
- * 
- * @example
- * ```tsx
- * // Better type inference in some cases
- * const [user, setUser] = createState<User | null>(null)
- * ```
- */
-export function createState<T>(initial: T): [StateValue<T>, StateAction<T>] {
-  return state(initial)
-}
 
-/**
- * Type helper for creating computed state with explicit type inference.
- * Useful when TypeScript inference fails or you want clearer types.
- * 
- * @param fn - Computed function
- * @returns Tuple of [StateValue]
- * 
- * @example
- * ```tsx
- * // Better type inference in some cases
- * const [total] = createComputed(() => items.reduce((sum, item) => sum + item.price, 0))
- * ```
- */
-export function createComputed<T>(fn: () => T): [StateValue<T>] {
-  // Use the imported computed from signal.ts, not state() to avoid recursion
-  const comp = computed(fn)
-  const s = toComputedStateObject(comp)
-  return [createStateProxy(comp)] as [StateValue<T>]
-}

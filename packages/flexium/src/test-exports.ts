@@ -14,7 +14,6 @@ export {
   isSignal,
   onCleanup,
   createResource,
-  onMount,
   untrack,
 } from './core/signal'
 export { sync } from './core/scheduler'

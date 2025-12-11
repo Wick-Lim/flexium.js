@@ -6,5 +6,5 @@
 
 export { effect } from './effect'
 export { sync } from './scheduler'
-export { root, onMount } from './owner'
-export { state, createState, createComputed } from './state'
+export { root } from './owner'
+export { state } from './state'
