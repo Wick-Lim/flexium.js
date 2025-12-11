@@ -16,8 +16,8 @@ Flexium is a next-generation UI framework built for performance, simplicity, and
 
 At its core, Flexium aims to solve the complexity and performance issues that plague modern web development. By leveraging signals for fine-grained reactivity, eliminating the Virtual DOM overhead, and providing a unified API for all state management needs, Flexium delivers exceptional performance while maintaining an intuitive developer experience.
 
-::: tip New in v0.10: Unified State API
-Flexium v0.10 introduces the unified `state()` API, replacing `signal()`, `computed()`, and `createResource()` with a single, cohesive primitive.
+::: tip New in v0.10: Enhanced Proxy Architecture
+Flexium v0.10 strengthens the internal Proxy object implementation, enabling direct usage of state values in JSX and arithmetic operations without requiring `.value` accessors. The API remains the same as v0.9, but with improved performance and developer experience.
 :::
 
 ## Why Flexium?
