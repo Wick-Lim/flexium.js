@@ -111,7 +111,7 @@ const [age] = state(30)
 - No dependency array footguns
 - No rules of hooks
 
-Signals are explicit. You read `.value`, you write `.value`. Dependencies are tracked automatically by what you read.
+Signals are explicit. You use state values directly (no `.value` needed). Dependencies are tracked automatically by what you access.
 
 ## What We Don't Do
 
@@ -146,6 +146,8 @@ Virtual DOM was revolutionary in 2013. It's 2024 now.
 | Requires optimization (memo, etc.) | Fast by default |
 | Complex mental model | Simple mental model |
 | Hard to debug | Easy to trace |
+
+Flexium uses a **Hybrid Proxy Architecture** that enables direct usage of state values in JSX and arithmetic operations, making signals feel like plain values while maintaining fine-grained reactivity.
 
 ### Why One state() Instead of Multiple Hooks?
 

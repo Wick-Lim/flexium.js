@@ -5,7 +5,6 @@
 Read these documents first:
 1. [PHILOSOPHY.md](./PHILOSOPHY.md) - Why Flexium exists
 2. [ARCHITECTURE.md](./ARCHITECTURE.md) - How Flexium works
-3. [CLAUDE.md](./CLAUDE.md) - For AI agents
 
 ## Development Setup
 

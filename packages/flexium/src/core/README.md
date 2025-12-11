@@ -83,14 +83,7 @@ sync(() => {
 }); // DOM updates once here
 ```
 
-## Comparison with v0.9 (Signals)
 
-| Feature | v0.9 (Old) | v0.10 (New) |
-|---------|------------|-------------|
-| API | `signal()`, `computed()` | `state()` (Unified) |
-| Access | `.value` property | Direct interaction (via Proxy) |
-| Async | Separate `createResource` | `state(async () => ...)` |
-| Global | `createContext` / prop drilling | `state(val, { key: '...' })` |
 
 ## License
 
