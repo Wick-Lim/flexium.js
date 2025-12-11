@@ -80,7 +80,8 @@ interface StateMetadata {
   // Reference counting for auto-cleanup
   referenceCount: number
   // Weak reference to signal for auto-cleanup detection
-  signalRef?: WeakRef<Signal<unknown> | Computed<unknown> | Resource<unknown>>
+  // WeakRef is available in ES2021+
+  signalRef?: WeakRef<Signal<unknown> | Computed<unknown> | Resource<unknown>> | undefined
 }
 
 const stateMetadata = new Map<string, StateMetadata>()
@@ -747,19 +748,20 @@ export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error'
 export interface StateOptions<P = unknown> {
   /**
    * Key for global state sharing. Can be a string or array.
-   * Array keys are useful for hierarchical namespacing.
+   * Array keys enable hierarchical namespacing - the first element acts as namespace.
    * @example
+   * // Simple key (no namespace)
    * state('light', { key: 'theme' })
-   * state(null, { key: ['user', 'profile', userId] })
+   * 
+   * // Array key - first element is namespace
+   * state('light', { key: ['ui', 'theme'] })  // namespace: 'ui'
+   * state(null, { key: ['erp', 'inventory', 'products'] })  // namespace: 'erp'
+   * state(null, { key: ['erp', 'sales', 'orders', orderId] })  // namespace: 'erp'
+   * 
+   * // Clear all states with a specific prefix
+   * state.clearByPrefix(['erp', 'inventory'])  // Clears all 'erp.inventory.*' states
    */
   key?: StateKey
-  /**
-   * Namespace for grouping related states. Useful for cleanup and monitoring.
-   * @example
-   * state('value', { key: 'key', namespace: 'erp' })
-   * state.clearNamespace('erp') // Clears all states in 'erp' namespace
-   */
-  namespace?: string
   /**
    * Parameters to pass to the function (for computed/async state).
    * Improves DX by making dependencies explicit.
@@ -804,16 +806,16 @@ interface StateFunction {
   delete: (key: StateKey) => boolean
   /** Clear all global states */
   clear: () => void
-  /** Clear all states in a namespace */
-  clearNamespace: (namespace: string) => number
+  /** Clear all states with a key prefix (array key) */
+  clearByPrefix: (prefix: StateKey) => number
   /** Check if a global state exists */
   has: (key: StateKey) => boolean
   /** Current number of global states */
   readonly size: number
   /** Get statistics about global states */
   getStats: () => StateStats
-  /** Get statistics for a specific namespace */
-  getNamespaceStats: (namespace: string) => NamespaceStats
+  /** Get statistics for a specific namespace (via key prefix) */
+  getNamespaceStats: (prefix: StateKey) => NamespaceStats
   /** Enable automatic cleanup of idle states */
   enableAutoCleanup: (config?: Partial<AutoCleanupConfig>) => void
   /** Disable automatic cleanup */
@@ -856,8 +858,12 @@ function state<T, P = unknown>(
   initialValueOrFetcher: T | ((params?: P) => T) | ((params?: P) => Promise<T>),
   options?: StateOptions<P>
 ): [StateValue<T>] | [StateValue<T>, StateAction<T>] | [StateValue<T | undefined>, () => void, StateValue<AsyncStatus>, StateValue<unknown>] {
-  const key = options?.key ? serializeKey(options.key) : undefined
-  const namespace = options?.namespace
+  const rawKey = options?.key
+  const key = rawKey ? serializeKey(rawKey) : undefined
+  // Extract namespace from key: if key is array, first element is namespace
+  const namespace = Array.isArray(rawKey) && rawKey.length > 0 
+    ? String(rawKey[0]) 
+    : undefined
   const params = options?.params
 
   // 0. Hook System - reuse state from previous render if inside a component
@@ -1092,31 +1098,70 @@ state.has = function (key: StateKey): boolean {
 }
 
 /**
- * Clear all states in a namespace
- * @param namespace - The namespace to clear
+ * Clear all states with a key prefix
+ * Works with array keys - clears all states that start with the given prefix
+ * @param prefix - The key prefix to match (string or array)
  * @returns Number of states cleared
  *
  * @example
  * ```ts
- * const cleared = state.clearNamespace('erp')
- * console.log(`Cleared ${cleared} states`)
+ * // Clear all states with 'erp' namespace
+ * state.clearByPrefix(['erp'])
+ * 
+ * // Clear all states with 'erp.inventory' prefix
+ * state.clearByPrefix(['erp', 'inventory'])
+ * 
+ * // Clear all states with 'ui.theme' prefix
+ * state.clearByPrefix(['ui', 'theme'])
  * ```
  */
-state.clearNamespace = function (namespace: string): number {
-  const namespaceSet = namespaceRegistry.get(namespace)
-  if (!namespaceSet || namespaceSet.size === 0) {
-    return 0
+state.clearByPrefix = function (prefix: StateKey): number {
+  const prefixStr = serializeKey(prefix)
+  let cleared = 0
+  const keysToDelete: string[] = []
+
+  // Find all keys that start with the prefix
+  // For array keys serialized as JSON: ["ui"] -> '["ui"]', ["ui","theme"] -> '["ui","theme"]'
+  // prefix ["ui"] should match ["ui","theme"], ["ui","locale"], etc.
+  for (const [key, metadata] of stateMetadata.entries()) {
+    // For exact match
+    if (key === prefixStr) {
+      keysToDelete.push(key)
+      continue
+    }
+    
+    // For prefix match: remove closing bracket and check if key continues with comma
+    // prefix ["ui"] -> '["ui"]', we want to match '["ui","theme"]'
+    // So we check if key starts with '["ui"' (without closing bracket) followed by ','
+    if (prefixStr.endsWith(']')) {
+      const prefixWithoutBracket = prefixStr.slice(0, -1) // Remove ']'
+      if (key.startsWith(prefixWithoutBracket) && key.length > prefixWithoutBracket.length) {
+        const nextChar = key[prefixWithoutBracket.length]
+        // Next char should be ',' (continuing array) or ']' (exact match already handled)
+        if (nextChar === ',') {
+          keysToDelete.push(key)
+        }
+      }
+    } else {
+      // String key prefix match
+      if (key.startsWith(prefixStr)) {
+        keysToDelete.push(key)
+      }
+    }
   }
 
-  let cleared = 0
-  for (const key of namespaceSet) {
+  // Delete found keys
+  for (const key of keysToDelete) {
+    const metadata = stateMetadata.get(key)
+    if (metadata?.namespace) {
+      unregisterStateFromNamespace(key, metadata.namespace)
+    }
+    stateMetadata.delete(key)
     if (globalStateRegistry.delete(key)) {
-      stateMetadata.delete(key)
       cleared++
     }
   }
 
-  namespaceRegistry.delete(namespace)
   return cleared
 }
 
@@ -1160,25 +1205,57 @@ state.getStats = function (): StateStats {
 }
 
 /**
- * Get statistics for a specific namespace
- * @param namespace - The namespace to get statistics for
+ * Get statistics for a specific namespace (extracted from key prefix)
+ * @param prefix - The key prefix to get statistics for (string or array)
  * @returns Statistics object for the namespace
  *
  * @example
  * ```ts
- * const stats = state.getNamespaceStats('erp')
+ * // Get stats for 'erp' namespace
+ * const stats = state.getNamespaceStats(['erp'])
  * console.log(`ERP has ${stats.count} states`)
+ * 
+ * // Get stats for 'erp.inventory' prefix
+ * const stats = state.getNamespaceStats(['erp', 'inventory'])
  * ```
  */
-state.getNamespaceStats = function (namespace: string): NamespaceStats {
-  const namespaceSet = namespaceRegistry.get(namespace)
+state.getNamespaceStats = function (prefix: StateKey): NamespaceStats {
+  const prefixStr = serializeKey(prefix)
+  const namespace = Array.isArray(prefix) && prefix.length > 0 ? String(prefix[0]) : prefixStr
   const states: Array<{ key: string; accessCount: number; createdAt: number }> = []
   let totalAccessCount = 0
 
-  if (namespaceSet) {
-    for (const key of namespaceSet) {
-      const metadata = stateMetadata.get(key)
-      if (metadata) {
+  // Find all keys that start with the prefix
+  for (const [key, metadata] of stateMetadata.entries()) {
+    // For exact match
+    if (key === prefixStr) {
+      states.push({
+        key,
+        accessCount: metadata.accessCount,
+        createdAt: metadata.createdAt,
+      })
+      totalAccessCount += metadata.accessCount
+      continue
+    }
+    
+    // For prefix match: remove closing bracket and check if key continues with comma
+    if (prefixStr.endsWith(']')) {
+      const prefixWithoutBracket = prefixStr.slice(0, -1) // Remove ']'
+      if (key.startsWith(prefixWithoutBracket) && key.length > prefixWithoutBracket.length) {
+        const nextChar = key[prefixWithoutBracket.length]
+        // Next char should be ',' (continuing array)
+        if (nextChar === ',') {
+          states.push({
+            key,
+            accessCount: metadata.accessCount,
+            createdAt: metadata.createdAt,
+          })
+          totalAccessCount += metadata.accessCount
+        }
+      }
+    } else {
+      // String key prefix match
+      if (key.startsWith(prefixStr)) {
         states.push({
           key,
           accessCount: metadata.accessCount,

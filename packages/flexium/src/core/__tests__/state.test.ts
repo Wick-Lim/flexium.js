@@ -652,24 +652,24 @@ describe('State API', () => {
     })
   })
 
-  describe('Namespace Management', () => {
+  describe('Namespace Management (via Array Keys)', () => {
     beforeEach(() => {
       state.clear()
     })
 
-    it('should register state in namespace', () => {
-      const [theme] = state('light', { key: 'theme', namespace: 'ui' })
+    it('should register state in namespace via array key', () => {
+      const [theme] = state('light', { key: ['ui', 'theme'] })
       expect(val(theme)).toBe('light')
-      expect(state.has('theme')).toBe(true)
+      expect(state.has(['ui', 'theme'])).toBe(true)
 
       const stats = state.getStats()
       expect(stats.byNamespace['ui']).toBe(1)
     })
 
     it('should track multiple states in same namespace', () => {
-      state('light', { key: 'theme', namespace: 'ui' })
-      state('en', { key: 'locale', namespace: 'ui' })
-      state(true, { key: 'sidebarOpen', namespace: 'ui' })
+      state('light', { key: ['ui', 'theme'] })
+      state('en', { key: ['ui', 'locale'] })
+      state(true, { key: ['ui', 'sidebarOpen'] })
 
       const stats = state.getStats()
       expect(stats.byNamespace['ui']).toBe(3)
@@ -677,9 +677,9 @@ describe('State API', () => {
     })
 
     it('should track states in different namespaces', () => {
-      state('light', { key: 'theme', namespace: 'ui' })
-      state({ id: 1 }, { key: 'user', namespace: 'erp' })
-      state([1, 2, 3], { key: 'products', namespace: 'erp' })
+      state('light', { key: ['ui', 'theme'] })
+      state({ id: 1 }, { key: ['erp', 'user'] })
+      state([1, 2, 3], { key: ['erp', 'products'] })
 
       const stats = state.getStats()
       expect(stats.byNamespace['ui']).toBe(1)
@@ -687,28 +687,42 @@ describe('State API', () => {
       expect(stats.total).toBe(3)
     })
 
-    it('should clear namespace', () => {
-      state('light', { key: 'theme', namespace: 'ui' })
-      state('en', { key: 'locale', namespace: 'ui' })
-      state({ id: 1 }, { key: 'user', namespace: 'erp' })
+    it('should clear by prefix', () => {
+      state('light', { key: ['ui', 'theme'] })
+      state('en', { key: ['ui', 'locale'] })
+      state({ id: 1 }, { key: ['erp', 'user'] })
 
       expect(state.size).toBe(3)
 
-      const cleared = state.clearNamespace('ui')
+      const cleared = state.clearByPrefix(['ui'])
       expect(cleared).toBe(2)
       expect(state.size).toBe(1)
-      expect(state.has('theme')).toBe(false)
-      expect(state.has('locale')).toBe(false)
-      expect(state.has('user')).toBe(true)
+      expect(state.has(['ui', 'theme'])).toBe(false)
+      expect(state.has(['ui', 'locale'])).toBe(false)
+      expect(state.has(['erp', 'user'])).toBe(true)
     })
 
-    it('should return 0 when clearing non-existent namespace', () => {
-      const cleared = state.clearNamespace('nonexistent')
+    it('should return 0 when clearing non-existent prefix', () => {
+      const cleared = state.clearByPrefix(['nonexistent'])
       expect(cleared).toBe(0)
     })
 
+    it('should clear by nested prefix', () => {
+      state({ products: [] }, { key: ['erp', 'inventory', 'products'] })
+      state(0, { key: ['erp', 'inventory', 'stockCount'] })
+      state({ orders: [] }, { key: ['erp', 'sales', 'orders'] })
+
+      expect(state.size).toBe(3)
+
+      // Clear only inventory, not sales
+      const cleared = state.clearByPrefix(['erp', 'inventory'])
+      expect(cleared).toBe(2)
+      expect(state.size).toBe(1)
+      expect(state.has(['erp', 'sales', 'orders'])).toBe(true)
+    })
+
     it('should update metadata on state access', () => {
-      const [count, setCount] = state(0, { key: 'count', namespace: 'app' })
+      const [count, setCount] = state(0, { key: ['app', 'count'] })
       
       // Access state multiple times
       val(count)
@@ -716,22 +730,22 @@ describe('State API', () => {
       setCount(1)
       val(count)
 
-      const stats = state.getNamespaceStats('app')
+      const stats = state.getNamespaceStats(['app'])
       expect(stats.count).toBe(1)
       expect(stats.states[0].accessCount).toBeGreaterThan(0)
     })
 
     it('should get namespace statistics', () => {
-      state(1, { key: 'a', namespace: 'test' })
-      state(2, { key: 'b', namespace: 'test' })
-      state(3, { key: 'c', namespace: 'test' })
+      state(1, { key: ['test', 'a'] })
+      state(2, { key: ['test', 'b'] })
+      state(3, { key: ['test', 'c'] })
 
       // Access states
-      val(state(undefined, { key: 'a' }))
-      val(state(undefined, { key: 'b' }))
-      val(state(undefined, { key: 'b' }))
+      val(state(undefined, { key: ['test', 'a'] }))
+      val(state(undefined, { key: ['test', 'b'] }))
+      val(state(undefined, { key: ['test', 'b'] }))
 
-      const stats = state.getNamespaceStats('test')
+      const stats = state.getNamespaceStats(['test'])
       expect(stats.namespace).toBe('test')
       expect(stats.count).toBe(3)
       expect(stats.states.length).toBe(3)
@@ -740,28 +754,28 @@ describe('State API', () => {
     })
 
     it('should handle state deletion with namespace', () => {
-      state('light', { key: 'theme', namespace: 'ui' })
-      state('en', { key: 'locale', namespace: 'ui' })
+      state('light', { key: ['ui', 'theme'] })
+      state('en', { key: ['ui', 'locale'] })
 
       expect(state.size).toBe(2)
       expect(state.getStats().byNamespace['ui']).toBe(2)
 
-      state.delete('theme')
+      state.delete(['ui', 'theme'])
       
       expect(state.size).toBe(1)
       expect(state.getStats().byNamespace['ui']).toBe(1)
-      expect(state.has('locale')).toBe(true)
+      expect(state.has(['ui', 'locale'])).toBe(true)
     })
 
     it('should get top namespaces in stats', () => {
       // Create multiple namespaces with different counts
       for (let i = 0; i < 5; i++) {
-        state(i, { key: `erp-${i}`, namespace: 'erp' })
+        state(i, { key: ['erp', `item-${i}`] })
       }
       for (let i = 0; i < 3; i++) {
-        state(i, { key: `ui-${i}`, namespace: 'ui' })
+        state(i, { key: ['ui', `item-${i}`] })
       }
-      state(1, { key: 'single', namespace: 'other' })
+      state(1, { key: ['other', 'single'] })
 
       const stats = state.getStats()
       expect(stats.topNamespaces.length).toBeGreaterThan(0)
@@ -770,41 +784,41 @@ describe('State API', () => {
     })
 
     it('should track access count in metadata', () => {
-      const [count] = state(0, { key: 'count', namespace: 'app' })
+      const [count] = state(0, { key: ['app', 'count'] })
       
       // Access state through state() API (which triggers metadata update)
-      const [count2] = state(undefined, { key: 'count' })
+      const [count2] = state(undefined, { key: ['app', 'count'] })
       val(count2) // This triggers updateStateMetadata
       
-      const stats1 = state.getNamespaceStats('app')
+      const stats1 = state.getNamespaceStats(['app'])
       expect(stats1.states[0].accessCount).toBeGreaterThanOrEqual(1)
 
       // More accesses through state() API
-      state(undefined, { key: 'count' })
-      state(undefined, { key: 'count' })
+      state(undefined, { key: ['app', 'count'] })
+      state(undefined, { key: ['app', 'count'] })
       
-      const stats2 = state.getNamespaceStats('app')
+      const stats2 = state.getNamespaceStats(['app'])
       expect(stats2.states[0].accessCount).toBeGreaterThanOrEqual(3)
     })
 
     it('should handle computed state with namespace', () => {
-      const [base] = state(10, { key: 'base', namespace: 'calc' })
-      const [doubled] = state(() => +base * 2, { key: 'doubled', namespace: 'calc' })
+      const [base] = state(10, { key: ['calc', 'base'] })
+      const [doubled] = state(() => +base * 2, { key: ['calc', 'doubled'] })
 
       expect(val(doubled)).toBe(20)
 
-      const stats = state.getNamespaceStats('calc')
+      const stats = state.getNamespaceStats(['calc'])
       expect(stats.count).toBe(2)
     })
 
     it('should handle async state with namespace', async () => {
       const [data] = state(
         async () => ({ id: 1 }),
-        { key: 'data', namespace: 'api' }
+        { key: ['api', 'data'] }
       )
 
       await tick()
-      const stats = state.getNamespaceStats('api')
+      const stats = state.getNamespaceStats(['api'])
       expect(stats.count).toBe(1)
     })
   })
