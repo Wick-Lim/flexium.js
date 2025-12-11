@@ -161,7 +161,6 @@ export default defineConfig({
             { text: 'Introduction', link: '/guide/introduction' },
             { text: 'Quick Start', link: '/guide/quick-start' },
             { text: 'Installation', link: '/guide/installation' },
-            { text: 'Migration to v0.10', link: '/guide/migration-v0.10' },
             { text: 'Comparison', link: '/guide/comparison' }
           ]
         },
