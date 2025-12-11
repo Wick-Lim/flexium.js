@@ -596,7 +596,8 @@ function setupReactiveProps(
       let prevValue: unknown = UNINITIALIZED
       const dispose = effect(() => {
         try {
-          const newValue = value()
+          // TypeScript: value is guaranteed to be a function here (checked in filter above)
+          const newValue = (value as () => unknown)()
           // Only update DOM if value actually changed (always update on first run)
           if (newValue !== prevValue) {
             // Performance: Batch DOM node updates

@@ -399,10 +399,11 @@ function createStateProxy<T>(sig: Signal<T> | Computed<T>): StateValue<T> {
             boundFunctionCache.set(propValue, functionCache)
           }
           
-          let bound = functionCache.get(currentValue)
+          let bound: Function | undefined = functionCache.get(currentValue)
           if (!bound) {
             bound = propValue.bind(currentValue)
-            functionCache.set(currentValue, bound)
+            // TypeScript: bound is guaranteed to be Function here
+            functionCache.set(currentValue, bound as Function)
           }
           return bound
         }
