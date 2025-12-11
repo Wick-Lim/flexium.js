@@ -5,7 +5,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { signal, computed } from '../signal'
 import { effect } from '../effect'
-import { sync } from '../scheduler'
+import { sync } from '../sync'
 import { untrack } from '../owner'
 
 describe('Signal System - Comprehensive', () => {

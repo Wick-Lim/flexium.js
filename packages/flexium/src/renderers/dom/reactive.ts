@@ -33,6 +33,47 @@ import { setNode, getNode } from './node-map'
 const REACTIVE_BINDINGS = new WeakMap<Node, Set<() => void>>()
 
 /**
+ * DOM Update Batching System
+ * Batches DOM updates using requestAnimationFrame to improve performance
+ * when multiple signals update simultaneously.
+ */
+type DOMUpdateTask = () => void
+
+const domUpdateQueue = new Set<DOMUpdateTask>()
+let isDOMUpdateScheduled = false
+
+/**
+ * Schedule a DOM update to be batched
+ */
+function scheduleDOMUpdate(task: DOMUpdateTask): void {
+  domUpdateQueue.add(task)
+  if (!isDOMUpdateScheduled) {
+    isDOMUpdateScheduled = true
+    // Use requestAnimationFrame to batch DOM updates with browser rendering cycle
+    requestAnimationFrame(() => {
+      flushDOMUpdates()
+    })
+  }
+}
+
+/**
+ * Flush all pending DOM updates
+ */
+function flushDOMUpdates(): void {
+  isDOMUpdateScheduled = false
+  if (domUpdateQueue.size === 0) return
+
+  // Performance: Convert Set to array for faster iteration
+  const queue = Array.from(domUpdateQueue)
+  domUpdateQueue.clear()
+
+  // Execute all DOM updates
+  for (let i = 0; i < queue.length; i++) {
+    queue[i]()
+  }
+}
+
+/**
  * Register a dispose function for a node's reactive bindings.
  * Ensures the bindings set exists and adds the dispose function to it.
  */
@@ -136,7 +177,12 @@ export function mountReactive(
           currentNode.nodeType === Node.TEXT_NODE &&
           currentNode !== startNode
         ) {
-          domRenderer.updateTextNode(currentNode as Text, String(value))
+          // Performance: Batch simple text node updates
+          const textNode = currentNode as Text
+          const textValue = String(value)
+          scheduleDOMUpdate(() => {
+            domRenderer.updateTextNode(textNode, textValue)
+          })
         } else {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const newNode = mountReactive(value as any)
@@ -148,10 +194,12 @@ export function mountReactive(
                   currentNode.nodeType === Node.TEXT_NODE &&
                   newNode.nodeType === Node.TEXT_NODE
                 ) {
-                  domRenderer.updateTextNode(
-                    currentNode as Text,
-                    newNode.textContent || ''
-                  )
+                  // Performance: Batch text node updates
+                  const textNode = currentNode as Text
+                  const textContent = newNode.textContent || ''
+                  scheduleDOMUpdate(() => {
+                    domRenderer.updateTextNode(textNode, textContent)
+                  })
                   // Don't update currentNode reference since we reused it
                 } else {
                   currentContainer.replaceChild(newNode, currentNode)
@@ -518,11 +566,15 @@ function setupReactiveProps(
         const newValue = value.value
         // Only update DOM if value actually changed (always update on first run)
         if (newValue !== prevValue) {
-          domRenderer.updateNode(
-            node,
-            { [key]: prevValue === UNINITIALIZED ? undefined : prevValue },
-            { [key]: newValue }
-          )
+          // Performance: Batch DOM node updates
+          const oldPropValue = prevValue === UNINITIALIZED ? undefined : prevValue
+          scheduleDOMUpdate(() => {
+            domRenderer.updateNode(
+              node,
+              { [key]: oldPropValue },
+              { [key]: newValue }
+            )
+          })
           prevValue = newValue
         }
       })
@@ -539,11 +591,15 @@ function setupReactiveProps(
           const newValue = value()
           // Only update DOM if value actually changed (always update on first run)
           if (newValue !== prevValue) {
-            domRenderer.updateNode(
-              node,
-              { [key]: prevValue === UNINITIALIZED ? undefined : prevValue },
-              { [key]: newValue }
-            )
+            // Performance: Batch DOM node updates
+            const oldPropValue = prevValue === UNINITIALIZED ? undefined : prevValue
+            scheduleDOMUpdate(() => {
+              domRenderer.updateNode(
+                node,
+                { [key]: oldPropValue },
+                { [key]: newValue }
+              )
+            })
             prevValue = newValue
           }
         } catch (e) {
@@ -636,7 +692,10 @@ export function reactiveText(getText: () => string): Text {
   const textNode = document.createTextNode('')
   const dispose = effect(() => {
     const text = getText()
-    domRenderer.updateTextNode(textNode, text)
+    // Performance: Batch text node updates
+    scheduleDOMUpdate(() => {
+      domRenderer.updateTextNode(textNode, text)
+    })
   })
   registerReactiveBinding(textNode, dispose)
   return textNode
