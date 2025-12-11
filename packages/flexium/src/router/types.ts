@@ -1,4 +1,4 @@
-import { Signal, Computed } from '../core/signal'
+import type { Signal, Computed } from '../core/signal'
 import type { FNodeChild } from '../core/renderer'
 
 export interface Location {

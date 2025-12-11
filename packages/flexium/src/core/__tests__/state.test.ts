@@ -22,7 +22,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const val = <T>(proxy: T): T => {
   if (proxy && (typeof proxy === 'object' || typeof proxy === 'function') && STATE_SIGNAL in (proxy as object)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (proxy as any)[STATE_SIGNAL].value
+    return (proxy as any)[STATE_SIGNAL].get()
   }
   return proxy
 }
@@ -723,7 +723,7 @@ describe('State API', () => {
 
     it('should update metadata on state access', () => {
       const [count, setCount] = state(0, { key: ['app', 'count'] })
-      
+
       // Access state multiple times
       val(count)
       val(count)
@@ -761,7 +761,7 @@ describe('State API', () => {
       expect(state.getStats().byNamespace['ui']).toBe(2)
 
       state.delete(['ui', 'theme'])
-      
+
       expect(state.size).toBe(1)
       expect(state.getStats().byNamespace['ui']).toBe(1)
       expect(state.has(['ui', 'locale'])).toBe(true)
@@ -785,18 +785,18 @@ describe('State API', () => {
 
     it('should track access count in metadata', () => {
       const [count] = state(0, { key: ['app', 'count'] })
-      
+
       // Access state through state() API (which triggers metadata update)
       const [count2] = state(undefined, { key: ['app', 'count'] })
       val(count2) // This triggers updateStateMetadata
-      
+
       const stats1 = state.getNamespaceStats(['app'])
       expect(stats1.states[0].accessCount).toBeGreaterThanOrEqual(1)
 
       // More accesses through state() API
       state(undefined, { key: ['app', 'count'] })
       state(undefined, { key: ['app', 'count'] })
-      
+
       const stats2 = state.getNamespaceStats(['app'])
       expect(stats2.states[0].accessCount).toBeGreaterThanOrEqual(3)
     })
@@ -884,7 +884,7 @@ describe('State API', () => {
 
     it('should not clean up states that are still referenced', async () => {
       const [count] = state(0, { key: 'count' })
-      
+
       state.enableAutoCleanup({
         maxIdleTime: 50,
         checkInterval: 100,

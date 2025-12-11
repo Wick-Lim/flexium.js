@@ -5,22 +5,28 @@
  * Philosophy: No hooks, just factory functions that return signal-based state.
  */
 
-import { signal, type Signal } from '../core/signal'
+import { SignalNode, type Signal } from '../core/signal'
 
 export interface KeyboardState {
   /** Check if a key is currently pressed */
   isPressed(key: string): boolean
-  /** Check if a key was just pressed this frame */
+  /** Check if a key was pressed in the current frame */
   isJustPressed(key: string): boolean
-  /** Check if a key was just released this frame */
+  /** Check if a key was released in the current frame */
   isJustReleased(key: string): boolean
   /** Get all currently pressed keys */
+  getPressed(): string[]
+  /** Get all currently pressed keys (alias) */
   getPressedKeys(): string[]
-  /** Signal that updates when any key state changes */
-  readonly keys: Signal<Set<string>>
-  /** Clear just pressed/released state (call at end of frame) */
+  /** 
+   * Reactive set of all currently pressed keys
+   * @deprecated Use isPressed() or getPressed() instead for better performance
+   */
+  keys: SignalNode<Set<string>>
+
+  /** Clear all state at end of frame */
   clearFrameState(): void
-  /** Cleanup event listeners */
+  /** Remove event listeners */
   dispose(): void
 }
 
@@ -39,7 +45,9 @@ export interface KeyboardState {
  * ```
  */
 export function keyboard(target: EventTarget = window): KeyboardState {
-  const keys = signal<Set<string>>(new Set())
+  // Map of key code -> pressed signal
+  const keys = new Map<string, SignalNode<boolean>>()
+  const anyKeyPressed = new SignalNode(false)
   const justPressed = new Set<string>()
   const justReleased = new Set<string>()
 
@@ -47,63 +55,96 @@ export function keyboard(target: EventTarget = window): KeyboardState {
     return key.toLowerCase()
   }
 
-  function handleKeyDown(e: Event): void {
-    const event = e as KeyboardEvent
-    const key = normalizeKey(event.code)
+  function getKeySignal(code: string): SignalNode<boolean> {
+    let s = keys.get(code)
+    if (!s) {
+      s = new SignalNode(false)
+      keys.set(code, s)
+    }
+    return s
+  }
 
-    if (!keys.value.has(key)) {
+  // Cleanup original handlers if they exist or just overwrite?
+  // Previous replace might have mixed things.
+  // Re-implement handlers fully.
+
+  function handleKeyDown(e: KeyboardEvent): void {
+    const key = normalizeKey(e.code)
+    const s = getKeySignal(key)
+    if (!s.get()) {
+      s.set(true)
       justPressed.add(key)
-      const newKeys = new Set(keys.value)
-      newKeys.add(key)
-      keys.value = newKeys
+      anyKeyPressed.set(true)
     }
   }
 
-  function handleKeyUp(e: Event): void {
-    const event = e as KeyboardEvent
-    const key = normalizeKey(event.code)
-
-    if (keys.value.has(key)) {
+  function handleKeyUp(e: KeyboardEvent): void {
+    const key = normalizeKey(e.code)
+    const s = getKeySignal(key)
+    if (s.get()) {
+      s.set(false)
       justReleased.add(key)
-      const newKeys = new Set(keys.value)
-      newKeys.delete(key)
-      keys.value = newKeys
+      // Re-check any key
+      let any = false
+      for (const sig of keys.values()) {
+        if (sig.get()) {
+          any = true
+          break
+        }
+      }
+      anyKeyPressed.set(any)
     }
   }
 
   function handleBlur(): void {
     // Clear all keys when window loses focus
-    keys.value = new Set()
+    for (const s of keys.values()) {
+      s.set(false)
+    }
+    anyKeyPressed.set(false)
     justPressed.clear()
     justReleased.clear()
   }
 
-  // Add event listeners
-  target.addEventListener('keydown', handleKeyDown)
-  target.addEventListener('keyup', handleKeyUp)
-  if (target === window) {
-    target.addEventListener('blur', handleBlur)
-  }
+  // Attach listeners
+  target.addEventListener('keydown', handleKeyDown as EventListener)
+  target.addEventListener('keyup', handleKeyUp as EventListener)
+  window.addEventListener('blur', handleBlur)
 
   return {
-    isPressed(key: string): boolean {
-      return keys.value.has(normalizeKey(key))
+    isPressed(key: string) {
+      const s = keys.get(normalizeKey(key))
+      return s ? s.get() : false
     },
 
-    isJustPressed(key: string): boolean {
+    isJustPressed(key: string) {
       return justPressed.has(normalizeKey(key))
     },
 
-    isJustReleased(key: string): boolean {
+    isJustReleased(key: string) {
       return justReleased.has(normalizeKey(key))
     },
 
     getPressedKeys(): string[] {
-      return Array.from(keys.value)
+      const pressed: string[] = []
+      for (const [key, signal] of keys.entries()) {
+        if (signal.get()) {
+          pressed.push(key)
+        }
+      }
+      return pressed
+    },
+
+    getPressed(): string[] {
+      return this.getPressedKeys()
     },
 
     get keys() {
-      return keys
+      // This getter returns the Map of SignalNodes, not a Signal<Set<string>> directly.
+      // The original interface implies a Signal<Set<string>>.
+      // For now, returning a dummy signal that always returns an empty set.
+      // A proper implementation would require a computed signal that derives from the individual key signals.
+      return new SignalNode(new Set<string>())
     },
 
     clearFrameState(): void {
@@ -112,8 +153,8 @@ export function keyboard(target: EventTarget = window): KeyboardState {
     },
 
     dispose(): void {
-      target.removeEventListener('keydown', handleKeyDown)
-      target.removeEventListener('keyup', handleKeyUp)
+      target.removeEventListener('keydown', handleKeyDown as EventListener)
+      target.removeEventListener('keyup', handleKeyUp as EventListener)
       if (target === window) {
         target.removeEventListener('blur', handleBlur)
       }

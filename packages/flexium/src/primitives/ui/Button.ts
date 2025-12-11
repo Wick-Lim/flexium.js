@@ -5,7 +5,8 @@
  * Includes full ARIA support and style props
  */
 
-import { signal, effect, onCleanup, type Signal } from '../../core/signal'
+import { SignalNode, onCleanup, type Signal } from '../../core/signal'
+import { effect } from '../../core/effect'
 import { ErrorCodes, logError, logWarning } from '../../core/errors'
 import { f } from '../../renderers/dom/f'
 import type { FNode } from '../../core/renderer'
@@ -37,8 +38,8 @@ export interface ButtonProps {
   type?: ButtonType
   variant?: ButtonVariant
   size?: ButtonSize
-  disabled?: Signal<boolean> | boolean
-  loading?: Signal<boolean> | boolean
+  disabled?: Signal<boolean> | SignalNode<boolean> | boolean
+  loading?: Signal<boolean> | SignalNode<boolean> | boolean
   fullWidth?: boolean
 
   // Content
@@ -138,9 +139,10 @@ export function Button(props: ButtonProps): FNode {
     if (!button) return
 
     // Convert disabled/loading to signals if needed
+    // Safety: we normalize to an object with .value property (both Signal and SignalNode have it now)
     const disabledSignal =
-      typeof disabled === 'boolean' ? signal(disabled) : disabled
-    const loadingSignal = typeof loading === 'boolean' ? signal(loading) : loading
+      typeof disabled === 'boolean' ? new SignalNode(disabled) : disabled
+    const loadingSignal = typeof loading === 'boolean' ? new SignalNode(loading) : loading
 
     // Find content elements after mount
     const contentWrapper = button.querySelector('.button-content') as HTMLElement
@@ -149,8 +151,9 @@ export function Button(props: ButtonProps): FNode {
 
     // Handle disabled state
     effect(() => {
-      button.disabled = disabledSignal.value
-      if (disabledSignal.value) {
+      const val = disabledSignal.value // Works for SignalNode and Signal(Proxy)
+      button.disabled = val
+      if (val) {
         button.setAttribute('aria-disabled', 'true')
       } else {
         button.removeAttribute('aria-disabled')
@@ -321,7 +324,7 @@ export function Button(props: ButtonProps): FNode {
         leftIcon && f('span', { class: 'button-icon button-icon-left' }, leftIcon),
         f('span', { class: 'button-text' }, children),
         rightIcon &&
-          f('span', { class: 'button-icon button-icon-right' }, rightIcon),
+        f('span', { class: 'button-icon button-icon-right' }, rightIcon),
       ].filter(Boolean)
     ),
   ]

@@ -5,17 +5,13 @@
  * but are still required for unit testing the core logic.
  */
 
-// Core Signal System
 export {
-  signal,
-  computed,
-  effect,
-  root,
   isSignal,
   onCleanup,
   createResource,
-  untrack,
 } from './core/signal'
+export { effect } from './core/effect'
+export { root, untrack } from './core/owner'
 export { sync } from './core/sync'
 
 export { state } from './core/state'

@@ -7,8 +7,10 @@
  */
 
 import type { FNode } from '../../core/renderer'
-import { effect, isSignal, onCleanup, root } from '../../core/signal'
-import type { Signal, Computed } from '../../core/signal'
+import { isSignal, onCleanup } from '../../core/signal'
+import { effect } from '../../core/effect'
+import { root } from '../../core/owner'
+import type { SignalNode, ComputedNode } from '../../core/signal'
 import { domRenderer } from './index'
 import { isFNode } from './f'
 import {
@@ -121,9 +123,9 @@ export function mountReactive(
     | number
     | boolean
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | Signal<any>
+    | SignalNode<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | Computed<any>
+    | ComputedNode<any>
     | null
     | undefined
     | Function
@@ -167,7 +169,7 @@ export function mountReactive(
       let currentNode: Node | null = startNode
 
       const dispose = effect(() => {
-        const value = sig.value
+        const value = sig.get()
         const currentContainer = startNode.parentNode
         if (!currentContainer) return
 
@@ -249,7 +251,7 @@ export function mountReactive(
 
     const dispose = effect(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const value = isSignal(node) ? (node as Signal<any>).value : (node as () => unknown)()
+      const value = isSignal(node) ? (node as SignalNode<any>).get() : (node as () => unknown)()
       const currentContainer = startNode.parentNode
 
       // Safety check: if node is detached, we can't update siblings
@@ -558,7 +560,7 @@ function setupReactiveProps(
   for (const key in props) {
     // Skip event handlers (they are handled separately in updateNode)
     if (key.startsWith('on')) continue
-    
+
     const value = props[key]
     // Only collect reactive props (signals or functions)
     if (isSignal(value) || typeof value === 'function') {
@@ -573,7 +575,7 @@ function setupReactiveProps(
       // Use sentinel for first run to ensure initial value is set
       let prevValue: unknown = UNINITIALIZED
       const dispose = effect(() => {
-        const newValue = value.value
+        const newValue = value.get()
         // Only update DOM if value actually changed (always update on first run)
         if (newValue !== prevValue) {
           // Performance: Batch DOM node updates

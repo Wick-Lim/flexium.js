@@ -336,8 +336,7 @@ export function getBaseValue<T>(
     responsiveValue !== null &&
     'base' in responsiveValue
   ) {
-    // @ts-ignore - we know base exists because of the check
-    return responsiveValue.base
+    return (responsiveValue as { base?: T }).base
   }
   return responsiveValue as T
 }

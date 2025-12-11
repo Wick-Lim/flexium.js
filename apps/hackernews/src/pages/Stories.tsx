@@ -6,29 +6,39 @@ function StoryItem(props: { id: number; index: number }) {
     // Subscribe to item state
     const [story] = useItem(props.id);
 
-    // Use proxy directly - no function wrapper needed
-    if (!story) return <li class="news-item">Loading...</li>
+    // Use function-based return to enable reactivity in the renderer
+    // This allows the loading state to switch dynamically
+    return () => {
+        // Safe access because we know the Signal wraps a value, 
+        // and we handled the potential undefined access in state.ts safely now.
+        // But story itself is a Proxy, so we access properties.
 
-    return (
-        <li class="news-item">
-            <span class="score">{story.points}</span>
-            <span class="title">
-                <a href={story.url} target="_blank" rel="noreferrer">{story.title}</a>
-                <span class="host"> ({story.domain || '...'})</span>
-            </span>
-            <br />
-            <span class="meta">
-                <span class="by">
-                    by <Link to={`/user/${story.by}`}>{story.by}</Link>
+        // Check if data is loaded (indicated by presence of required field, e.g. title)
+        if (!story.title) {
+            return <li class="news-item">Loading...</li>
+        }
+
+        return (
+            <li class="news-item">
+                <span class="score">{story.points}</span>
+                <span class="title">
+                    <a href={story.url} target="_blank" rel="noreferrer">{story.title}</a>
+                    <span class="host"> ({story.domain || '...'})</span>
                 </span>
-                <span class="time"> {new Date(story.time * 1000).toLocaleString()}</span>
-                <span class="comments-link">
-                    {' | '}
-                    <Link to={`/item/${story.id}`}>{story.comments_count} comments</Link>
+                <br />
+                <span class="meta">
+                    <span class="by">
+                        by <Link to={`/user/${story.by}`}>{story.by}</Link>
+                    </span>
+                    <span class="time"> {new Date(story.time * 1000).toLocaleString()}</span>
+                    <span class="comments-link">
+                        {' | '}
+                        <Link to={`/item/${story.id}`}>{story.comments_count} comments</Link>
+                    </span>
                 </span>
-            </span>
-        </li>
-    )
+            </li>
+        )
+    }
 }
 
 export default function Stories(props: { type: string }) {

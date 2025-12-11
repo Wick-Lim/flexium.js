@@ -20,7 +20,8 @@
  */
 
 // Re-export core reactivity
-export { signal, computed, effect, root } from './core/signal'
+export { effect } from './core/effect'
+export { root } from './core/owner'
 export type { Signal, Computed } from './core/signal'
 
 // Canvas primitives

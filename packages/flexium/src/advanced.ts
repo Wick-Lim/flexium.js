@@ -5,13 +5,12 @@
  * Most users should use `state()` from the main entry point instead.
  *
  * @example
- * import { signal, computed, sync, root, untrack } from 'flexium/advanced'
+ * import { sync, root, untrack } from 'flexium/advanced'
+ * import { state } from 'flexium/core'
  */
 
-export {
-  signal,
-  computed,
-} from './core/signal'
+// Signal factories are removed. Use SignalNode/ComputedNode if needed for low-level or state() for high-level.
+export { SignalNode, ComputedNode } from './core/signal'
 
 export type { Signal, Computed } from './core/signal'
 

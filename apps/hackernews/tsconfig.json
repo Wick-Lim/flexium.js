@@ -4,7 +4,7 @@
         "useDefineForClassFields": true,
         "module": "ESNext",
         "lib": [
-            "ES2020",
+            "ES2021",
             "DOM",
             "DOM.Iterable"
         ],
@@ -27,7 +27,10 @@
             "flexium/*": [
                 "../../packages/flexium/src/*"
             ]
-        }
+        },
+        "types": [
+            "node"
+        ]
     },
     "include": [
         "src"

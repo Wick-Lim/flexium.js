@@ -1,4 +1,5 @@
-import { signal, effect } from '../../core/signal'
+import { SignalNode } from '../../core/signal'
+import { effect } from '../../core/effect'
 import type { FNode } from '../../core/renderer'
 import type {
   ListProps,
@@ -6,6 +7,7 @@ import type {
   ListCacheEntry,
   SizeConfig,
 } from './types'
+// import { SignalNode, effect } from '../../core/signal' -- Already imported at top
 
 /** Marker symbol for List components */
 export const LIST_MARKER = Symbol('flexium.list')
@@ -206,8 +208,8 @@ function mountSimpleList<T>(
       currentKeys.add(key)
 
       if (!cache.has(key)) {
-        const indexSig = signal(index)
-        const vnode = renderItem(item, () => indexSig())
+        const indexSig = new SignalNode(index)
+        const vnode = renderItem(item, () => indexSig.get())
         const node = mountFn(vnode)
 
         if (node && node instanceof HTMLElement) {
@@ -297,20 +299,14 @@ function mountVirtualList<T>(
   const innerContainer = document.createElement('div')
   innerContainer.style.position = 'relative'
   innerContainer.style.width = '100%'
-  innerContainer.style.willChange = 'transform'
-
-  container.appendChild(innerContainer)
-  parent.appendChild(container)
-
   // Reactive state
-  const scrollTopSig = signal(0)
+  const scrollTopSig = new SignalNode(0)
   const cache = new Map<string | number, ListCacheEntry<T>>()
 
   // Track previous visible range
   let prevStartIndex = -1
   let prevEndIndex = -1
 
-  // Scroll handler
   const handleScroll = () => {
     scrollTopSig.set(container.scrollTop)
     onScroll?.(container.scrollTop)
@@ -329,7 +325,7 @@ function mountVirtualList<T>(
   // Main render effect
   const disposeEffect = effect(() => {
     const list = each() || []
-    const currentScrollTop = scrollTopSig()
+    const currentScrollTop = scrollTopSig.get()
     const viewportHeight = container.clientHeight || parseFloat(String(height))
     const itemHeight = getItemHeight(itemSize, 0)
 
@@ -366,10 +362,18 @@ function mountVirtualList<T>(
 
       let entry = cache.get(key)
 
+      // Use cache or create new row state
+      let rowState = cache.get(key)?.state
+      if (!rowState) {
+        rowState = new SignalNode(item)
+      } else {
+        rowState.set(item)
+      }
+
       if (!entry) {
         // Create new item
-        const indexSig = signal(i)
-        const vnode = renderItem(item, () => indexSig())
+        const indexSig = new SignalNode(i)
+        const vnode = renderItem(item, () => indexSig.get())
         const node = mountFn(vnode)
 
         if (node && node instanceof HTMLElement) {

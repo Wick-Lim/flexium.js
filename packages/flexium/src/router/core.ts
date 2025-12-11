@@ -5,7 +5,7 @@
  * path matching, and navigation.
  */
 
-import { signal, Signal } from '../core/signal'
+import { SignalNode } from '../core/signal'
 import { Location } from './types'
 
 /**
@@ -28,7 +28,7 @@ import { Location } from './types'
  * cleanup();
  * ```
  */
-export function createLocation(): [Signal<Location>, (path: string) => void, () => void] {
+export function createLocation(): [SignalNode<Location>, (path: string) => void, () => void] {
   // SSR guard: return safe defaults on server
   const getDefaultLoc = (): Location => ({
     pathname: '/',
@@ -49,7 +49,7 @@ export function createLocation(): [Signal<Location>, (path: string) => void, () 
     }
   }
 
-  const loc = signal(getLoc())
+  const loc = new SignalNode(getLoc())
 
   const navigate = (path: string) => {
     // SSR guard
@@ -61,13 +61,13 @@ export function createLocation(): [Signal<Location>, (path: string) => void, () 
       return
     }
     window.history.pushState({}, '', path)
-    loc.value = getLoc()
+    loc.set(getLoc())
   }
 
   // SSR guard for popstate listener
   const handlePopState = () => {
     try {
-      loc.value = getLoc()
+      loc.set(getLoc())
     } catch (error) {
       console.error('[Flexium Router] Error handling popstate:', error)
     }

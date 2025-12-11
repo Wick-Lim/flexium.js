@@ -1,4 +1,4 @@
-import type { Signal } from '../../core/signal'
+import type { SignalNode } from '../../core/signal'
 import type { FNode } from '../../core/renderer'
 
 /**
@@ -73,9 +73,10 @@ export interface ListCacheEntry<T> {
   item: T
   key: string | number
   node: Node
-  indexSig: Signal<number>
+  indexSig: SignalNode<number>
   dispose: () => void
   measuredHeight?: number
+  state?: SignalNode<T>
 }
 
 /**

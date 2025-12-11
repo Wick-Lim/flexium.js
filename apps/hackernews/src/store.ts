@@ -67,6 +67,8 @@ export async function loadStories(type: string) {
         });
     } catch (error) {
         console.error(`Error loading ${type} stories:`, error);
+        // Ensure UI doesn't hang in loading state infinitely if convenient, 
+        // but simple error logging is fine for now.
     }
 }
 

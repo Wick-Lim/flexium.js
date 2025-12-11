@@ -40,10 +40,13 @@ export function Canvas(props: CanvasProps): FNode {
         const ctx = canvas.getContext('2d')
         if (!ctx) return
 
-        // Render canvas children with effect for reactivity
+        // Check if effect is available before trying to import
         // Import effect and onCleanup dynamically to avoid circular deps
-        import('../../core/signal')
-          .then(({ effect, onCleanup, isSignal }) => {
+        Promise.all([
+          import('../../core/effect').then(m => m.effect),
+          import('../../core/signal').then(m => ({ onCleanup: m.onCleanup, isSignal: m.isSignal }))
+        ])
+          .then(([effect, { onCleanup, isSignal }]) => {
             let rafId: number | undefined
 
             const scheduleRender = () => {

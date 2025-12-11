@@ -109,11 +109,15 @@ export class EffectNode implements ISubscriber {
  * @returns Dispose function to stop the effect
  *
  * @example
- * const count = signal(0);
- * const dispose = effect(() => {
- *   console.log('Count:', count.value);
- *   return () => console.log('Cleanup');
+ * ```ts
+ * const [count, setCount] = state(0);
+ * 
+ * effect(() => {
+ *   console.log(count());
  * });
+ * 
+ * setCount(1); // logs: 1
+ * ```
  */
 export function effect(
     fn: () => void | (() => void),

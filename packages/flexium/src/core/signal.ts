@@ -50,6 +50,10 @@ export interface DevToolsHooks {
 // Global hooks registry - set by devtools when enabled
 let devToolsHooks: DevToolsHooks | null = null
 
+export function getDevToolsHooks() {
+  return devToolsHooks
+}
+
 /**
  * Register devtools hooks (called by devtools module)
  * @internal
@@ -91,7 +95,7 @@ export interface Computed<T> {
 /**
  * Internal signal node for writable signals
  */
-class SignalNode<T> implements IObservable {
+export class SignalNode<T> implements IObservable {
   // Performance: Hot path fields first (CPU cache line optimization)
   version = 0           // Frequently read
   nodeType = NodeType.Signal  // Frequently checked
@@ -99,6 +103,17 @@ class SignalNode<T> implements IObservable {
 
   // Cold path field
   constructor(private _value: T) { }
+
+  /**
+   * Compatibility wrapper for legacy .value access
+   */
+  get value(): T {
+    return this.get()
+  }
+
+  set value(newValue: T) {
+    this.set(newValue)
+  }
 
   get(): T {
     // Track dependency if inside an effect or computed
@@ -159,7 +174,7 @@ class SignalNode<T> implements IObservable {
 /**
  * Internal computed node for derived values
  */
-class ComputedNode<T> implements ISubscriber, IObservable {
+export class ComputedNode<T> implements ISubscriber, IObservable {
   // Performance: Hot path fields first (CPU cache line optimization)
   version = 0           // Frequently read
   nodeType = NodeType.Computed  // Frequently checked
@@ -173,6 +188,13 @@ class ComputedNode<T> implements ISubscriber, IObservable {
   private lastCleanEpoch = 0
 
   constructor(private computeFn: () => T) { }
+
+  /**
+   * Compatibility wrapper for legacy .value access
+   */
+  get value(): T {
+    return this.get()
+  }
 
   execute(): void {
     // Performance: Inline bit operation instead of function call
@@ -347,100 +369,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
 
 
 
-/**
- * Creates a reactive signal
- *
- * @param initialValue - The initial value of the signal
- * @returns A signal object with value getter/setter
- *
- * @example
- * const count = signal(0);
- * count.value++; // triggers subscribers
- * console.log(count()); // alternative getter syntax
- */
-export function signal<T>(initialValue: T): Signal<T> {
-  const node = new SignalNode(initialValue)
-  let devToolsId = -1
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sig = function (this: any) {
-    return node.get()
-  } as Signal<T>
-
-  Object.defineProperty(sig, 'value', {
-    get() {
-      return node.get()
-    },
-    set(newValue: T) {
-      node.set(newValue)
-      // Performance: Check devToolsId first (most signals don't have devtools)
-      // Then check hooks existence (short-circuit if null)
-      if (devToolsId >= 0) {
-        const hooks = devToolsHooks
-        if (hooks?.onSignalUpdate) {
-          hooks.onSignalUpdate(devToolsId, newValue)
-        }
-      }
-    },
-    enumerable: true,
-    configurable: true,
-  })
-
-  sig.set = (newValue: T) => {
-    node.set(newValue)
-    // Performance: Check devToolsId first (most signals don't have devtools)
-    // Then check hooks existence (short-circuit if null)
-    if (devToolsId >= 0) {
-      const hooks = devToolsHooks
-      if (hooks?.onSignalUpdate) {
-        hooks.onSignalUpdate(devToolsId, newValue)
-      }
-    }
-  }
-  sig.peek = () => node.peek()
-
-    // Mark as signal for detection
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ; (sig as any)[SIGNAL_MARKER] = true
-
-  // Performance: Cache hooks check to avoid repeated optional chaining
-  // Register with devtools if enabled
-  const hooks = devToolsHooks
-  if (hooks?.onSignalCreate) {
-    devToolsId = hooks.onSignalCreate(sig as Signal<unknown>)
-  }
-
-  return sig
-}
-
-/**
- * Creates a computed signal (derived value)
- * @internal Use `state(() => ...)` instead
- */
-export function computed<T>(fn: () => T): Computed<T> {
-  const node = new ComputedNode(fn)
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const comp = function (this: any) {
-    return node.get()
-  } as Computed<T>
-
-  Object.defineProperty(comp, 'value', {
-    get() {
-      return node.get()
-    },
-    enumerable: true,
-    configurable: true,
-  })
-
-  comp.peek = () => node.peek()
-
-    // Mark as signal for detection
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ; (comp as any)[SIGNAL_MARKER] = true
-
-  return comp
-}
 
 /**
  * Creates a side effect that runs when dependencies change
@@ -450,11 +379,14 @@ export function computed<T>(fn: () => T): Computed<T> {
  * @returns Dispose function to stop the effect
  *
  * @example
- * const count = signal(0);
+ * ```ts
+ * const [count, setCount] = state(0);
+ * 
  * const dispose = effect(() => {
- *   console.log('Count:', count.value);
+ *   console.log('Count:', count());
  *   return () => console.log('Cleanup');
  * });
+ * ```
  */
 
 
@@ -478,8 +410,8 @@ const SIGNAL_MARKER = Symbol('flexium.signal')
  * @internal Use state() which handles all reactive patterns
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isSignal(value: unknown): value is Signal<any> | Computed<any> {
-  return value !== null && typeof value === 'function' && SIGNAL_MARKER in value
+export function isSignal(value: unknown): value is SignalNode<any> | ComputedNode<any> {
+  return value instanceof SignalNode || value instanceof ComputedNode
 }
 
 /**
@@ -521,23 +453,23 @@ export function createResource<T, S = any>(
     { value, refetching }: { value: T | undefined; refetching: any }
   ) => Promise<T>
 ): [Resource<T>, { mutate: (v: T | undefined) => void; refetch: () => void }] {
-  const value = signal<T | undefined>(undefined)
+  const value = new SignalNode<T | undefined>(undefined)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const error = signal<any>(undefined)
-  const loading = signal<boolean>(false)
-  const state = signal<
+  const error = new SignalNode<any>(undefined)
+  const loading = new SignalNode<boolean>(false)
+  const state = new SignalNode<
     'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'
   >('unresolved')
 
   const load = async (currentSource: S, refetching = false) => {
     if (refetching) {
-      state.value = 'refreshing'
-      loading.value = true
+      state.set('refreshing')
+      loading.set(true)
     } else {
-      state.value = 'pending'
-      loading.value = true
+      state.set('pending')
+      loading.set(true)
     }
-    error.value = undefined
+    error.set(undefined)
 
     // Track the current promise to avoid race conditions
     // We use a local variable instead of a shared 'lastPromise'
@@ -556,27 +488,37 @@ export function createResource<T, S = any>(
     try {
       const result = await currentPromise
       if (latestPromise === currentPromise) {
-        value.value = result
-        state.value = 'ready'
-        loading.value = false
+        value.set(result)
+        state.set('ready')
+        loading.set(false)
       }
     } catch (err) {
       if (latestPromise === currentPromise) {
-        error.value = err
-        state.value = 'errored'
-        loading.value = false
+        error.set(err)
+        state.set('errored')
+        loading.set(false)
       }
     }
   }
 
   let latestPromise: Promise<T> | null = null
 
+  /*
+   * Helper to get current source value
+   */
   const getSource = () => {
     if (typeof source === 'function') {
+      // Check if it's a SignalNode/ComputedNode
       if (isSignal(source)) {
-        return source.value
+        return source.get()
       }
+      // It's a plain function
       return (source as () => S)()
+    }
+    // It's a static value (or SignalNode passed as value if generic S allows)
+    // If S is SignalNode, then isSignal(source) is true.
+    if (isSignal(source)) {
+      return source.get()
     }
     return source
   }
@@ -587,31 +529,33 @@ export function createResource<T, S = any>(
     load(currentSource, false)
   })
 
+  // Create the resource object (read-only signal interface)
   const resource = function () {
-    return value()
+    return value.get()
   } as Resource<T>
 
   Object.defineProperties(resource, {
-    value: { get: () => value.value },
-    loading: { get: () => loading.value },
-    error: { get: () => error.value },
-    state: { get: () => state.value },
+    value: { get: () => value.get() },
+    loading: { get: () => loading.get() },
+    error: { get: () => error.get() },
+    state: { get: () => state.get() },
     latest: { get: () => value.peek() },
     peek: { value: () => value.peek() },
-    set: { value: (v: T) => value.set(v) },
+    // no set exposed on resource object
   })
+    // Mark as signal/node for detection if needed, or just let it be a function-signal
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ; (resource as any)[SIGNAL_MARKER] = true
 
   const actions = {
     mutate: (v: T | undefined) => value.set(v),
-    refetch: () => load(getSource(), true),
+    refetch: () => {
+      const currentSource = getSource()
+      load(currentSource, true)
+    },
   }
 
   return [resource, actions]
 }
 
-// Re-export commonly used functions for convenience
-// These are imported from other modules but re-exported here for backward compatibility
-export { effect } from './effect'
-export { root, untrack } from './owner'
+

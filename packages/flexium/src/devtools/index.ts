@@ -15,7 +15,8 @@
  * ```
  */
 
-import { Signal, Computed, setDevToolsHooks } from '../core/signal'
+import { setDevToolsHooks } from '../core/signal'
+import type { Signal, Computed } from '../core/signal'
 import { ErrorCodes, logError } from '../core/errors'
 
 export interface DevToolsState {
@@ -97,7 +98,7 @@ export function enableDevTools(): void {
   // Expose to window for browser extension
   if (typeof window !== 'undefined') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(window as any).__FLEXIUM_DEVTOOLS__ = {
+    ; (window as any).__FLEXIUM_DEVTOOLS__ = {
       getState: getDevToolsState,
       getSignals: () => Array.from(devToolsState.signals.values()),
       getEffects: () => Array.from(devToolsState.effects.values()),

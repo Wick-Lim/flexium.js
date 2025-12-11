@@ -1,6 +1,6 @@
 {
   "name": "flexium",
-  "version": "0.9.1",
+  "version": "0.10.3",
   "description": "A lightweight, signals-based UI framework with cross-platform renderers",
   "publishConfig": {
     "access": "public"
@@ -155,6 +155,7 @@
     "url": "https://github.com/Wick-Lim/flexium.js/issues"
   },
   "devDependencies": {
+    "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitest/ui": "^1.0.0",

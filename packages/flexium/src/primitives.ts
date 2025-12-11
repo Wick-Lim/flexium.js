@@ -9,7 +9,8 @@
  */
 
 // Re-export core reactivity
-export { effect, root } from './core/signal'
+export { effect } from './core/effect'
+export { root } from './core/owner'
 export { state } from './core/state'
 
 // Layout primitives

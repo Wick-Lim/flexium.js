@@ -1,4 +1,5 @@
-import { effect, isSignal } from '../../core/signal'
+import { isSignal } from '../../core/signal'
+import { effect } from '../../core/effect'
 
 /**
  * SVG Attribute Case Mapping

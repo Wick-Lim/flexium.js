@@ -5,7 +5,7 @@
  * Philosophy: No hooks, just factory functions that return signal-based state.
  */
 
-import { signal, type Signal } from '../core/signal'
+import { SignalNode, type Signal } from '../core/signal'
 
 export interface Vec2 {
   x: number
@@ -14,9 +14,9 @@ export interface Vec2 {
 
 export interface MouseState {
   /** Current mouse position relative to target */
-  readonly position: Signal<Vec2>
+  readonly position: SignalNode<Vec2>
   /** Mouse position delta since last frame */
-  readonly delta: Signal<Vec2>
+  readonly delta: SignalNode<Vec2>
   /** Check if a mouse button is pressed (0=left, 1=middle, 2=right) */
   isPressed(button: number): boolean
   /** Check if left mouse button is pressed */
@@ -26,7 +26,7 @@ export interface MouseState {
   /** Check if middle mouse button is pressed */
   isMiddlePressed(): boolean
   /** Wheel delta (positive = scroll down) */
-  readonly wheelDelta: Signal<number>
+  readonly wheelDelta: SignalNode<number>
   /** Clear frame state (call at end of frame) */
   clearFrameState(): void
   /** Cleanup event listeners */
@@ -58,10 +58,10 @@ export interface MouseOptions {
 export function mouse(options: MouseOptions = {}): MouseState {
   const { target = window, canvas } = options
 
-  const position = signal<Vec2>({ x: 0, y: 0 })
-  const delta = signal<Vec2>({ x: 0, y: 0 })
-  const wheelDelta = signal<number>(0)
-  const buttons = signal<Set<number>>(new Set())
+  const position = new SignalNode<Vec2>({ x: 0, y: 0 })
+  const delta = new SignalNode<Vec2>({ x: 0, y: 0 })
+  const wheelDelta = new SignalNode<number>(0)
+  const buttons = new SignalNode<Set<number>>(new Set())
 
   let lastX = 0
   let lastY = 0
@@ -94,32 +94,32 @@ export function mouse(options: MouseOptions = {}): MouseState {
     lastX = coords.x
     lastY = coords.y
 
-    position.value = coords
-    delta.value = { x: frameDeltaX, y: frameDeltaY }
+    position.set(coords)
+    delta.set({ x: frameDeltaX, y: frameDeltaY })
   }
 
   function handleMouseDown(e: Event): void {
     const event = e as MouseEvent
-    const newButtons = new Set(buttons.value)
+    const newButtons = new Set(buttons.get())
     newButtons.add(event.button)
-    buttons.value = newButtons
+    buttons.set(newButtons)
   }
 
   function handleMouseUp(e: Event): void {
     const event = e as MouseEvent
-    const newButtons = new Set(buttons.value)
+    const newButtons = new Set(buttons.get())
     newButtons.delete(event.button)
-    buttons.value = newButtons
+    buttons.set(newButtons)
   }
 
   function handleWheel(e: Event): void {
     const event = e as WheelEvent
     frameWheelDelta += Math.sign(event.deltaY)
-    wheelDelta.value = frameWheelDelta
+    wheelDelta.set(frameWheelDelta)
   }
 
   function handleMouseLeave(): void {
-    buttons.value = new Set()
+    buttons.set(new Set())
   }
 
   function handleContextMenu(_e: Event): void {
@@ -132,11 +132,10 @@ export function mouse(options: MouseOptions = {}): MouseState {
   eventTarget.addEventListener('mousemove', handleMouseMove)
   eventTarget.addEventListener('mousedown', handleMouseDown)
   eventTarget.addEventListener('mouseup', handleMouseUp)
-  eventTarget.addEventListener('wheel', handleWheel, { passive: true })
+  eventTarget.addEventListener('wheel', handleWheel)
   eventTarget.addEventListener('mouseleave', handleMouseLeave)
   eventTarget.addEventListener('contextmenu', handleContextMenu)
 
-  // Handle mouse up outside target
   if (target !== window) {
     window.addEventListener('mouseup', handleMouseUp)
   }
