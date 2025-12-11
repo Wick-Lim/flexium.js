@@ -1,4 +1,4 @@
-import type { Signal, Computed } from '../core/signal'
+import type { StateValue } from '../core/state'
 import type { FNodeChild } from '../core/renderer'
 
 export interface Location {
@@ -9,11 +9,11 @@ export interface Location {
 }
 
 export interface RouterContext {
-  location: Signal<Location> | Computed<Location>
-  params: Signal<Record<string, string>> | Computed<Record<string, string>>
+  location: StateValue<Location>
+  params: StateValue<Record<string, string>>
   navigate: (path: string) => void
   // Matches for the current URL (ordered by depth)
-  matches: Signal<RouteMatch[]> | Computed<RouteMatch[]>
+  matches: StateValue<RouteMatch[]>
 }
 export interface RouteProps {
   path?: string // path can be optional for layout routes or index

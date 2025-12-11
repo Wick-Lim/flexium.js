@@ -7,20 +7,16 @@
  */
 
 import type { FNode } from '../../core/renderer'
-import { isSignal, onCleanup } from '../../core/signal'
+import { isSignal, isStateValue, getStateSignal, type StateValue } from '../../core/state'
+import { onCleanup } from '../../core/effect'
 import { effect } from '../../core/effect'
 import { root } from '../../core/owner'
-import type { SignalNode, ComputedNode } from '../../core/signal'
 import { domRenderer } from './index'
 import { isFNode } from './f'
 import {
   pushProvider,
 } from '../../core/context'
 import { reconcileArrays } from './reconcile'
-import {
-  isStateValue,
-  getStateSignal,
-} from '../../core/state'
 import {
   setCurrentComponent,
   createComponentInstance,
@@ -125,9 +121,7 @@ export function mountReactive(
     | number
     | boolean
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | SignalNode<any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | ComputedNode<any>
+    | StateValue<any>
     | null
     | undefined
     | Function
@@ -171,7 +165,7 @@ export function mountReactive(
       let currentNode: Node | null = startNode
 
       const dispose = effect(() => {
-        const value = sig.get()
+        const value = (sig as StateValue<unknown>)()
         const currentContainer = startNode.parentNode
         if (!currentContainer) return
 
@@ -253,7 +247,7 @@ export function mountReactive(
 
     const dispose = effect(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const value = isSignal(node) ? (node as SignalNode<any>).get() : (node as () => unknown)()
+      const value = isSignal(node) ? (node as StateValue<unknown>)() : (node as () => unknown)()
       const currentContainer = startNode.parentNode
 
       // Safety check: if node is detached, we can't update siblings
@@ -572,12 +566,12 @@ function setupReactiveProps(
 
   // Process only reactive props (reduces iterations)
   for (const [key, value] of reactiveProps) {
-    if (isSignal(value)) {
+    if (isStateValue(value)) {
       // Track previous value to avoid unnecessary DOM updates
       // Use sentinel for first run to ensure initial value is set
       let prevValue: unknown = UNINITIALIZED
       const dispose = effect(() => {
-        const newValue = value.get()
+        const newValue = (value as StateValue<unknown>)()
         // Only update DOM if value actually changed (always update on first run)
         if (newValue !== prevValue) {
           // Performance: Batch DOM node updates

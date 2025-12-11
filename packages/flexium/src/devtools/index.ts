@@ -16,7 +16,7 @@
  */
 
 import { setDevToolsHooks } from '../core/devtools'
-import type { Signal, Computed } from '../core/signal'
+import type { StateValue } from '../core/state'
 import { ErrorCodes, logError } from '../core/errors'
 
 export interface DevToolsState {
@@ -167,7 +167,7 @@ function emit(event: DevToolsEventType, data: unknown): void {
  * @internal
  */
 export function registerSignal(
-  signal: Signal<unknown> | Computed<unknown>,
+  signal: StateValue<unknown>,
   name?: string
 ): number {
   if (!devToolsState.enabled) return -1
@@ -303,8 +303,8 @@ export function unregisterComponent(id: number): void {
 export function createNamedSignal<T>(
   name: string,
   initialValue: T,
-  signalFn: (v: T) => Signal<T>
-): Signal<T> {
+  signalFn: (v: T) => StateValue<T>
+): StateValue<T> {
   const s = signalFn(initialValue)
 
   if (devToolsState.enabled) {

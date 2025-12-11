@@ -5,14 +5,14 @@
  * @internal
  */
 
-import type { Signal } from './signal'
+import type { StateValue } from './state'
 
 /**
  * DevTools hooks interface - set by devtools module to avoid circular imports
  * @internal
  */
 export interface DevToolsHooks {
-  onSignalCreate?: (signal: Signal<unknown>, name?: string) => number
+  onSignalCreate?: (signal: StateValue<unknown>, name?: string) => number
   onSignalUpdate?: (id: number, value: unknown) => void
   onEffectCreate?: (name?: string) => number
   onEffectRun?: (

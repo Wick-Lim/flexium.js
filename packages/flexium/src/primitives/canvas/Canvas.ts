@@ -43,10 +43,10 @@ export function Canvas(props: CanvasProps): FNode {
         // Check if effect is available before trying to import
         // Import effect and onCleanup dynamically to avoid circular deps
         Promise.all([
-          import('../../core/effect').then(m => m.effect),
-          import('../../core/signal').then(m => ({ onCleanup: m.onCleanup, isSignal: m.isSignal }))
+          import('../../core/effect').then(m => ({ effect: m.effect, onCleanup: m.onCleanup })),
+          import('../../core/state').then(m => ({ isSignal: m.isSignal }))
         ])
-          .then(([effect, { onCleanup, isSignal }]) => {
+          .then(([{ effect, onCleanup }, { isSignal }]) => {
             let rafId: number | undefined
 
             const scheduleRender = () => {
@@ -76,7 +76,7 @@ export function Canvas(props: CanvasProps): FNode {
                     const value = child.props[key]
                     // If it's a signal, access its value to track it
                     if (isSignal(value)) {
-                      void value.value // Touch the signal to track dependency
+                      void (value as any)() // Touch the signal to track dependency
                     }
                   }
                 }

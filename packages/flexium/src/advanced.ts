@@ -9,10 +9,9 @@
  * import { state } from 'flexium/core'
  */
 
-// Signal factories are removed. Use SignalNode/ComputedNode if needed for low-level or state() for high-level.
-export { SignalNode, ComputedNode } from './core/signal'
-
-export type { Signal, Computed } from './core/signal'
+// Signal factories are removed. Use state() for all reactive state management.
+// Low-level Proxy-based signals are available via state() API.
+export type { StateValue as Signal, StateValue as Computed } from './core/state'
 
 // Advanced control primitives
 export { root, untrack } from './core/owner'

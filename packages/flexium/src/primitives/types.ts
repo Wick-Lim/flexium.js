@@ -4,7 +4,7 @@
  * These types work across web (DOM) and React Native
  */
 
-import type { Signal } from '../core/signal'
+import type { StateValue } from '../core/state'
 
 /**
  * Common style properties that work on both web and React Native
@@ -181,49 +181,49 @@ export interface CanvasProps {
  * Rectangle drawing props
  */
 export interface DrawRectProps {
-  x: number | Signal<number>
-  y: number | Signal<number>
-  width: number | Signal<number>
-  height: number | Signal<number>
-  fill?: string | Signal<string>
-  stroke?: string | Signal<string>
-  strokeWidth?: number | Signal<number>
-  opacity?: number | Signal<number>
+  x: number | StateValue<number>
+  y: number | StateValue<number>
+  width: number | StateValue<number>
+  height: number | StateValue<number>
+  fill?: string | StateValue<string>
+  stroke?: string | StateValue<string>
+  strokeWidth?: number | StateValue<number>
+  opacity?: number | StateValue<number>
 }
 
 /**
  * Circle drawing props
  */
 export interface DrawCircleProps {
-  x: number | Signal<number>
-  y: number | Signal<number>
-  radius: number | Signal<number>
-  fill?: string | Signal<string>
-  stroke?: string | Signal<string>
-  strokeWidth?: number | Signal<number>
-  opacity?: number | Signal<number>
+  x: number | StateValue<number>
+  y: number | StateValue<number>
+  radius: number | StateValue<number>
+  fill?: string | StateValue<string>
+  stroke?: string | StateValue<string>
+  strokeWidth?: number | StateValue<number>
+  opacity?: number | StateValue<number>
 }
 
 /**
  * Path drawing props
  */
 export interface DrawPathProps {
-  d: string | Signal<string>
-  fill?: string | Signal<string>
-  stroke?: string | Signal<string>
-  strokeWidth?: number | Signal<number>
-  opacity?: number | Signal<number>
+  d: string | StateValue<string>
+  fill?: string | StateValue<string>
+  stroke?: string | StateValue<string>
+  strokeWidth?: number | StateValue<number>
+  opacity?: number | StateValue<number>
 }
 
 /**
  * Canvas text drawing props
  */
 export interface DrawTextProps {
-  x: number | Signal<number>
-  y: number | Signal<number>
-  text: string | Signal<string>
-  fill?: string | Signal<string>
-  fontSize?: number | Signal<number>
+  x: number | StateValue<number>
+  y: number | StateValue<number>
+  text: string | StateValue<string>
+  fill?: string | StateValue<string>
+  fontSize?: number | StateValue<number>
   fontFamily?: string
   fontWeight?: 'normal' | 'bold' | number
   textAlign?: 'left' | 'center' | 'right'
@@ -234,27 +234,27 @@ export interface DrawTextProps {
  * Line drawing props
  */
 export interface DrawLineProps {
-  x1: number | Signal<number>
-  y1: number | Signal<number>
-  x2: number | Signal<number>
-  y2: number | Signal<number>
-  stroke?: string | Signal<string>
-  strokeWidth?: number | Signal<number>
-  opacity?: number | Signal<number>
+  x1: number | StateValue<number>
+  y1: number | StateValue<number>
+  x2: number | StateValue<number>
+  y2: number | StateValue<number>
+  stroke?: string | StateValue<string>
+  strokeWidth?: number | StateValue<number>
+  opacity?: number | StateValue<number>
 }
 
 /**
  * Arc drawing props
  */
 export interface DrawArcProps {
-  x: number | Signal<number>
-  y: number | Signal<number>
-  radius: number | Signal<number>
-  startAngle: number | Signal<number>
-  endAngle: number | Signal<number>
+  x: number | StateValue<number>
+  y: number | StateValue<number>
+  radius: number | StateValue<number>
+  startAngle: number | StateValue<number>
+  endAngle: number | StateValue<number>
   counterclockwise?: boolean
-  fill?: string | Signal<string>
-  stroke?: string | Signal<string>
-  strokeWidth?: number | Signal<number>
-  opacity?: number | Signal<number>
+  fill?: string | StateValue<string>
+  stroke?: string | StateValue<string>
+  strokeWidth?: number | StateValue<number>
+  opacity?: number | StateValue<number>
 }

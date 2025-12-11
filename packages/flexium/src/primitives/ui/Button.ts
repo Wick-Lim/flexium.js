@@ -5,7 +5,8 @@
  * Includes full ARIA support and style props
  */
 
-import { SignalNode, onCleanup, type Signal } from '../../core/signal'
+import { state, type StateValue } from '../../core/state'
+import { onCleanup } from '../../core/effect'
 import { effect } from '../../core/effect'
 import { ErrorCodes, logError, logWarning } from '../../core/errors'
 import { f } from '../../renderers/dom/f'
@@ -38,8 +39,8 @@ export interface ButtonProps {
   type?: ButtonType
   variant?: ButtonVariant
   size?: ButtonSize
-  disabled?: Signal<boolean> | SignalNode<boolean> | boolean
-  loading?: Signal<boolean> | SignalNode<boolean> | boolean
+  disabled?: StateValue<boolean> | boolean
+  loading?: StateValue<boolean> | boolean
   fullWidth?: boolean
 
   // Content
@@ -139,10 +140,10 @@ export function Button(props: ButtonProps): FNode {
     if (!button) return
 
     // Convert disabled/loading to signals if needed
-    // Safety: we normalize to an object with .value property (both Signal and SignalNode have it now)
-    const disabledSignal =
-      typeof disabled === 'boolean' ? new SignalNode(disabled) : disabled
-    const loadingSignal = typeof loading === 'boolean' ? new SignalNode(loading) : loading
+    const disabledSignal: StateValue<boolean> | boolean =
+      typeof disabled === 'boolean' ? state(disabled)[0] : disabled
+    const loadingSignal: StateValue<boolean> | boolean =
+      typeof loading === 'boolean' ? state(loading)[0] : loading
 
     // Find content elements after mount
     const contentWrapper = button.querySelector('.button-content') as HTMLElement
@@ -151,7 +152,7 @@ export function Button(props: ButtonProps): FNode {
 
     // Handle disabled state
     effect(() => {
-      const val = disabledSignal.value // Works for SignalNode and Signal(Proxy)
+      const val = typeof disabledSignal === 'function' ? (disabledSignal as StateValue<boolean>)() : disabledSignal
       button.disabled = val
       if (val) {
         button.setAttribute('aria-disabled', 'true')
@@ -162,7 +163,7 @@ export function Button(props: ButtonProps): FNode {
 
     // Handle loading state
     effect(() => {
-      const isLoading = loadingSignal.value
+      const isLoading = typeof loadingSignal === 'function' ? (loadingSignal as StateValue<boolean>)() : loadingSignal
 
       if (isLoading) {
         // Show spinner

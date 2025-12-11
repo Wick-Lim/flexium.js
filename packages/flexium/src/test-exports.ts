@@ -7,9 +7,13 @@
 
 export {
   isSignal,
+} from './core/state'
+export {
   onCleanup,
+} from './core/effect'
+export {
   createResource,
-} from './core/signal'
+} from './core/resource'
 export { effect } from './core/effect'
 export { root, untrack } from './core/owner'
 export { sync } from './core/sync'

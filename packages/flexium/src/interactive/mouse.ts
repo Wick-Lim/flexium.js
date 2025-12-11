@@ -5,7 +5,7 @@
  * Philosophy: No hooks, just factory functions that return signal-based state.
  */
 
-import { SignalNode, type Signal } from '../core/signal'
+import { state, type StateValue } from '../core/state'
 
 export interface Vec2 {
   x: number
@@ -14,9 +14,9 @@ export interface Vec2 {
 
 export interface MouseState {
   /** Current mouse position relative to target */
-  readonly position: SignalNode<Vec2>
+  readonly position: StateValue<Vec2>
   /** Mouse position delta since last frame */
-  readonly delta: SignalNode<Vec2>
+  readonly delta: StateValue<Vec2>
   /** Check if a mouse button is pressed (0=left, 1=middle, 2=right) */
   isPressed(button: number): boolean
   /** Check if left mouse button is pressed */
@@ -26,7 +26,7 @@ export interface MouseState {
   /** Check if middle mouse button is pressed */
   isMiddlePressed(): boolean
   /** Wheel delta (positive = scroll down) */
-  readonly wheelDelta: SignalNode<number>
+  readonly wheelDelta: StateValue<number>
   /** Clear frame state (call at end of frame) */
   clearFrameState(): void
   /** Cleanup event listeners */
@@ -58,10 +58,10 @@ export interface MouseOptions {
 export function mouse(options: MouseOptions = {}): MouseState {
   const { target = window, canvas } = options
 
-  const position = new SignalNode<Vec2>({ x: 0, y: 0 })
-  const delta = new SignalNode<Vec2>({ x: 0, y: 0 })
-  const wheelDelta = new SignalNode<number>(0)
-  const buttons = new SignalNode<Set<number>>(new Set())
+  const [position, setPosition] = state<Vec2>({ x: 0, y: 0 })
+  const [delta, setDelta] = state<Vec2>({ x: 0, y: 0 })
+  const [wheelDelta, setWheelDelta] = state<number>(0)
+  const [buttons, setButtons] = state<Set<number>>(new Set())
 
   let lastX = 0
   let lastY = 0
@@ -94,32 +94,32 @@ export function mouse(options: MouseOptions = {}): MouseState {
     lastX = coords.x
     lastY = coords.y
 
-    position.set(coords)
-    delta.set({ x: frameDeltaX, y: frameDeltaY })
+    setPosition(coords)
+    setDelta({ x: frameDeltaX, y: frameDeltaY })
   }
 
   function handleMouseDown(e: Event): void {
     const event = e as MouseEvent
-    const newButtons = new Set(buttons.get())
+    const newButtons = new Set(buttons())
     newButtons.add(event.button)
-    buttons.set(newButtons)
+    setButtons(newButtons)
   }
 
   function handleMouseUp(e: Event): void {
     const event = e as MouseEvent
-    const newButtons = new Set(buttons.get())
+    const newButtons = new Set(buttons())
     newButtons.delete(event.button)
-    buttons.set(newButtons)
+    setButtons(newButtons)
   }
 
   function handleWheel(e: Event): void {
     const event = e as WheelEvent
     frameWheelDelta += Math.sign(event.deltaY)
-    wheelDelta.set(frameWheelDelta)
+    setWheelDelta(frameWheelDelta)
   }
 
   function handleMouseLeave(): void {
-    buttons.set(new Set())
+    setButtons(new Set())
   }
 
   function handleContextMenu(_e: Event): void {
@@ -154,27 +154,27 @@ export function mouse(options: MouseOptions = {}): MouseState {
     },
 
     isPressed(button: number): boolean {
-      return buttons.value.has(button)
+      return buttons().has(button)
     },
 
     isLeftPressed(): boolean {
-      return buttons.value.has(0)
+      return buttons().has(0)
     },
 
     isRightPressed(): boolean {
-      return buttons.value.has(2)
+      return buttons().has(2)
     },
 
     isMiddlePressed(): boolean {
-      return buttons.value.has(1)
+      return buttons().has(1)
     },
 
     clearFrameState(): void {
       frameDeltaX = 0
       frameDeltaY = 0
       frameWheelDelta = 0
-      delta.value = { x: 0, y: 0 }
-      wheelDelta.value = 0
+      setDelta({ x: 0, y: 0 })
+      setWheelDelta(0)
     },
 
     dispose(): void {

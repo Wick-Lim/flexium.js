@@ -1,4 +1,4 @@
-import { isSignal } from '../core/signal'
+import { isSignal } from '../core/state'
 
 const VOID_ELEMENTS = new Set([
   'area',
@@ -32,7 +32,7 @@ export function renderToString(node: any): string {
   }
 
   if (isSignal(node)) {
-    return renderToString(node.value)
+    return renderToString((node as any)())
   }
 
   // Handle fragments (type === null or type === 'fragment')

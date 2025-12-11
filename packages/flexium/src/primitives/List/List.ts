@@ -1,4 +1,4 @@
-import { SignalNode } from '../../core/signal'
+import { state } from '../../core/state'
 import { effect } from '../../core/effect'
 import type { FNode } from '../../core/renderer'
 import type {
@@ -208,16 +208,21 @@ function mountSimpleList<T>(
       currentKeys.add(key)
 
       if (!cache.has(key)) {
-        const indexSig = new SignalNode(index)
-        const vnode = renderItem(item, () => indexSig.get())
+        const [indexSig, setIndexSig] = state(index)
+        const vnode = renderItem(item, () => indexSig())
         const node = mountFn(vnode)
 
         if (node && node instanceof HTMLElement) {
           node.setAttribute('role', 'listitem')
           container.appendChild(node)
 
-          cache.set(key, {
+          // Store setter on indexSig for later updates
+          ;(indexSig as any).__setter = setIndexSig
+          const entry: ListCacheEntry<T> = {
+            item,
+            key,
             node,
+            indexSig,
             dispose: () => {
               try {
                 cleanupFn(node)
@@ -225,7 +230,8 @@ function mountSimpleList<T>(
                 // Ignore cleanup errors
               }
             },
-          })
+          }
+          cache.set(key, entry)
         }
       }
     })
@@ -300,7 +306,7 @@ function mountVirtualList<T>(
   innerContainer.style.position = 'relative'
   innerContainer.style.width = '100%'
   // Reactive state
-  const scrollTopSig = new SignalNode(0)
+  const [scrollTopSig, setScrollTopSig] = state(0)
   const cache = new Map<string | number, ListCacheEntry<T>>()
 
   // Track previous visible range
@@ -308,7 +314,7 @@ function mountVirtualList<T>(
   let prevEndIndex = -1
 
   const handleScroll = () => {
-    scrollTopSig.set(container.scrollTop)
+    setScrollTopSig(container.scrollTop)
     onScroll?.(container.scrollTop)
   }
 
@@ -325,7 +331,7 @@ function mountVirtualList<T>(
   // Main render effect
   const disposeEffect = effect(() => {
     const list = each() || []
-    const currentScrollTop = scrollTopSig.get()
+    const currentScrollTop = scrollTopSig()
     const viewportHeight = container.clientHeight || parseFloat(String(height))
     const itemHeight = getItemHeight(itemSize, 0)
 
@@ -365,15 +371,23 @@ function mountVirtualList<T>(
       // Use cache or create new row state
       let rowState = cache.get(key)?.state
       if (!rowState) {
-        rowState = new SignalNode(item)
+        const [sig, setSig] = state(item)
+        rowState = sig
+        // Store setter for updates
+        ;(rowState as any).__setter = setSig
       } else {
-        rowState.set(item)
+        const setter = (rowState as any).__setter
+        if (setter) {
+          setter(item)
+        }
       }
 
       if (!entry) {
         // Create new item
-        const indexSig = new SignalNode(i)
-        const vnode = renderItem(item, () => indexSig.get())
+        const [indexSig, setIndexSig] = state(i)
+        // Store setter on indexSig for later updates
+        ;(indexSig as any).__setter = setIndexSig
+        const vnode = renderItem(item, () => indexSig())
         const node = mountFn(vnode)
 
         if (node && node instanceof HTMLElement) {
@@ -407,8 +421,19 @@ function mountVirtualList<T>(
         }
       } else {
         // Update existing item position
-        if (entry.indexSig.peek() !== i) {
-          entry.indexSig.set(i)
+        const currentIndex = entry.indexSig.peek()
+        if (currentIndex !== i) {
+          // Get setter from cache entry or create new state
+          const setter = (entry.indexSig as any).__setter
+          if (setter) {
+            setter(i)
+          } else {
+            // Fallback: create new state (shouldn't happen normally)
+            const [newIndexSig, newSetIndexSig] = state(i)
+            ;(newIndexSig as any).__setter = newSetIndexSig
+            entry.indexSig = newIndexSig
+            newSetIndexSig(i)
+          }
         }
         const node = entry.node as HTMLElement
         node.style.transform = `translateY(${i * itemHeight}px)`

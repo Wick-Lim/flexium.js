@@ -1,4 +1,4 @@
-import { ErrorCodes, logError } from './errors'
+import { ErrorCodes, logError, logWarning } from './errors'
 import {
     Graph,
 
@@ -137,4 +137,19 @@ export function effect(
     }
 
     return dispose
+}
+
+/**
+ * Registers a cleanup function that runs before the current effect re-runs or is disposed
+ *
+ * @param fn - Cleanup function
+ */
+export function onCleanup(fn: () => void): void {
+    const activeEffect = getActiveEffect()
+    // Performance: Use nodeType instead of instanceof
+    if (activeEffect && activeEffect.nodeType === NodeType.Effect) {
+        (activeEffect as EffectNode).cleanups.push(fn)
+    } else {
+        logWarning(ErrorCodes.CLEANUP_OUTSIDE_EFFECT)
+    }
 }

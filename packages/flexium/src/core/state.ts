@@ -8,7 +8,7 @@
  * - Computed values (like selectors)
  */
 
-import { createResource } from './signal'
+import { createResource } from './resource'
 import { createSignalProxy, createComputedProxy, getProxyFromStateValue } from './proxy'
 import { getCurrentComponent, setCurrentComponent } from './component'
 import {
@@ -46,9 +46,20 @@ export interface StateOptions<P = unknown> {
   params?: P
 }
 
-export function isStateValue(value: unknown): boolean {
+/**
+ * Check if a value is a state value (Proxy-based)
+ */
+export function isStateValue(value: unknown): value is StateValue<unknown> {
   // Hybrid proxies are functions
   return (typeof value === 'object' || typeof value === 'function') && value !== null && STATE_SIGNAL in value
+}
+
+/**
+ * Check if a value is a signal (alias for isStateValue for compatibility)
+ * @deprecated Use isStateValue instead
+ */
+export function isSignal(value: unknown): value is StateValue<unknown> {
+  return isStateValue(value)
 }
 
 // Helper to get the underlying proxy from a StateValue
@@ -160,7 +171,7 @@ function stateImplementation<T, P = unknown>(
       refetch = actions.refetch
 
       // Create computed proxy for resource value
-      proxy = createComputedProxy(() => res.value, key) as any
+      proxy = createComputedProxy(() => res(), key) as any
 
       // Status Computed
       statusProxy = createComputedProxy(() => res.loading ? 'loading' : res.error ? 'error' : res.state === 'unresolved' ? 'idle' : 'success', key) as any

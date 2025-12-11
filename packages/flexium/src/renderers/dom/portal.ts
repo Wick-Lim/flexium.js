@@ -1,5 +1,5 @@
 import { mountReactive, cleanupReactive } from './reactive'
-import { onCleanup } from '../../core/signal'
+import { onCleanup } from '../../core/effect'
 
 interface PortalProps {
   mount?: HTMLElement

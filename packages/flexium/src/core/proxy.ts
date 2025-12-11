@@ -306,10 +306,10 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
       return target.set
     }
     
-    // Get the current value
+    // Get the current value (track dependency)
     const innerValue = meta.computeFn ? getComputedValue(meta, target as any) : meta._value
     
-    // Track dependency if in effect/computed
+    // Track dependency if in effect/computed (before property access checks)
     const activeEffect = getActiveEffect()
     if (activeEffect && activeEffect !== (target as any)) {
       Graph.connect(target as IObservable, activeEffect)
@@ -329,9 +329,26 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
       }
     }
     
+    // For function-specific properties on the target function itself, hide them
+    // This ensures object spread only includes innerValue properties
+    // Note: 'length' is NOT a function property - it's an array property, so we handle it separately
+    // This check must come AFTER we've determined innerValue is an object
+    if (prop === 'prototype' || prop === 'name' || prop === 'caller' || prop === 'arguments') {
+      // Only return if innerValue itself is a function
+      if (typeof innerValue === 'function') {
+        return (innerValue as any)[prop]
+      }
+      // For non-function innerValue, return undefined to hide target function's properties
+      // But only if innerValue is not an object (to avoid hiding object properties)
+      if (innerValue === null || typeof innerValue !== 'object') {
+        return undefined
+      }
+      // If innerValue is an object, continue to property access below
+    }
+    
     // Recursive Forwarding for object properties
     if (innerValue !== null && typeof innerValue === 'object') {
-      // For object spread, we need to return the actual property value
+      // Get the property value from innerValue
       const val = Reflect.get(innerValue, prop)
       
       if (typeof val === 'function') {
@@ -355,17 +372,21 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
         return (innerValue as any)[prop].bind(innerValue)
       }
       
-      // Track property access for reactivity
-      getDep(innerValue, prop, val)()
+      // Track property access for reactivity (this creates/get a signal for the property)
+      // Call the signal to track dependency
+      const depSignal = getDep(innerValue, prop, val)
+      depSignal() // Track dependency - this returns the signal's value
       
       // Create nested proxy for nested objects
       if (val !== null && typeof val === 'object') {
         return createNestedProxy(val)
       }
+      // Return the actual property value from innerValue (not from signal)
+      // The signal is only for tracking, we return the actual value
       return val
     }
     
-    // Primitive property access
+    // Primitive property access (for primitives like numbers, strings)
     const val = (innerValue as any)[prop]
     return typeof val === 'function' ? val.bind(innerValue) : val
   },
@@ -414,25 +435,102 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
       getDep(innerValue, 'iterate')()
     }
     
-    // Return keys of innerValue
+    // Return keys of innerValue (not target function)
+    // This ensures object spread only includes innerValue properties
     // Note: Proxy spec requires ownKeys to match getOwnPropertyDescriptor
-    // Since we return descriptors for innerValue keys, we return innerValue keys here
-    return Reflect.ownKeys(innerValue)
+    // Since getOwnPropertyDescriptor returns descriptors for function properties (prototype, name, etc.),
+    // we must include them in ownKeys to satisfy the Proxy spec
+    // But we only include non-enumerable ones that getOwnPropertyDescriptor returns descriptors for
+    const keys = Reflect.ownKeys(innerValue)
+    const targetKeys = Reflect.ownKeys(target)
+    // Add function properties that getOwnPropertyDescriptor returns descriptors for
+    // These are non-enumerable so won't appear in object spread
+    const functionProps = ['prototype', 'name', 'length']
+    const result = [...keys]
+    for (const prop of functionProps) {
+      if (targetKeys.includes(prop) && !result.includes(prop)) {
+        // Only add if getOwnPropertyDescriptor would return a descriptor for it
+        const desc = Reflect.getOwnPropertyDescriptor(target, prop)
+        if (desc) {
+          result.push(prop)
+        }
+      }
+    }
+    return result
+  },
+  
+  getPrototypeOf(target) {
+    const meta = proxyMetadata.get(target as any)!
+    const innerValue = meta.computeFn ? getComputedValue(meta, target as any) : meta._value
+    
+    if (innerValue !== null && typeof innerValue === 'object') {
+      return Reflect.getPrototypeOf(innerValue)
+    }
+    
+    // For primitives, return Object.prototype
+    return Object.prototype
   },
   
   getOwnPropertyDescriptor(target, prop) {
     if (prop === STATE_SIGNAL) {
       return { configurable: true, enumerable: false, value: target }
     }
+    
     const meta = proxyMetadata.get(target as any)!
     const innerValue = meta.computeFn ? getComputedValue(meta, target as any) : meta._value
+    
+    // Hide function-specific properties (prototype, name, etc.) from target function
+    // Only expose properties from innerValue
+    // This is critical: target is a function, but we want to expose innerValue's properties
+    // Note: 'length' is NOT a function property - it's an array property, so we handle it separately
+    if (prop === 'prototype' || prop === 'name' || prop === 'caller' || prop === 'arguments') {
+      // For 'prototype', we must return a descriptor because target is a function
+      // Return the actual function's prototype descriptor exactly as it is
+      // IMPORTANT: We must preserve ALL descriptor properties exactly to match target
+      if (prop === 'prototype') {
+        const targetDesc = Reflect.getOwnPropertyDescriptor(target, prop)
+        if (targetDesc) {
+          // Return the descriptor exactly as it is - don't modify any properties
+          return targetDesc
+        }
+        // If no descriptor exists, return undefined (not a descriptor)
+        return undefined
+      }
+      // For other function properties (name, caller, arguments), check innerValue first
+      // If innerValue has this property, return its descriptor (not the function's)
+      if (innerValue !== null && typeof innerValue === 'object') {
+        const innerDesc = Reflect.getOwnPropertyDescriptor(innerValue, prop)
+        if (innerDesc) {
+          // innerValue has this property, return its descriptor
+          return {
+            ...innerDesc,
+            configurable: true,
+            enumerable: true
+          }
+        }
+      }
+      // Only return descriptor if innerValue itself is a function (not the target function)
+      if (typeof innerValue === 'function') {
+        const desc = Reflect.getOwnPropertyDescriptor(innerValue, prop)
+        if (desc) {
+          return {
+            ...desc,
+            configurable: true,
+            enumerable: true
+          }
+        }
+      }
+      // For other function properties, return undefined to hide function properties
+      return undefined
+    }
     
     if (innerValue === null || typeof innerValue !== 'object') {
       // For primitives, return undefined (no own properties)
       return undefined
     }
     
-    // Return descriptor from innerValue
+    // Return descriptor from innerValue (not from target function)
+    // This ensures object spread works correctly
     const desc = Reflect.getOwnPropertyDescriptor(innerValue, prop)
     if (desc) {
       // Make sure descriptor is configurable and enumerable for spread syntax
@@ -442,7 +540,9 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
         enumerable: true
       }
     }
-    return desc
+    
+    // For properties that don't exist on innerValue, return undefined
+    return undefined
   }
 }
 

@@ -1,4 +1,4 @@
-import { isSignal } from '../../core/signal'
+import { isSignal } from '../../core/state'
 import { effect } from '../../core/effect'
 
 /**
@@ -121,7 +121,7 @@ function hydrateNode(
   if (isSignal(vnode)) {
     if (domNode.nodeType === Node.TEXT_NODE) {
       effect(() => {
-        domNode.textContent = String(vnode.value)
+        domNode.textContent = String((vnode as any)())
       })
       return domNode.nextSibling
     }
@@ -232,19 +232,20 @@ function hydrateProps(
     if (isSignal(value)) {
       const propName = key === 'className' ? 'class' : key
       effect(() => {
+        const val = (value as any)()
         if (propName === 'class') {
-          el.setAttribute('class', String(value.value))
-        } else if (propName === 'style' && typeof value.value === 'object') {
-          Object.assign((el as HTMLElement).style, value.value)
+          el.setAttribute('class', String(val))
+        } else if (propName === 'style' && typeof val === 'object') {
+          Object.assign((el as HTMLElement).style, val)
         } else {
           // Handle SVG attributes
           const attrName = SVG_ATTR_MAP[propName] || propName
 
           if (propName in el && !(el instanceof SVGElement)) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ; (el as any)[propName] = value.value
+            ; (el as any)[propName] = val
           } else {
-            el.setAttribute(attrName, String(value.value))
+            el.setAttribute(attrName, String(val))
           }
         }
       })

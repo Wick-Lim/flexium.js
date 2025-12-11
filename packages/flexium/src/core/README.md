@@ -7,7 +7,7 @@ The core reactivity system of Flexium, powering the unified `state()` API.
 Flexium v0.10+ introduces a **Hybrid Proxy Architecture**:
 
 1. **High-Level API**: `state()` returns a Proxy that behaves like a simple value but tracks dependencies automatically.
-2. **Low-Level Primitives**: `SignalNode`, `ComputedNode`, and `EffectNode` handle the graph updates efficiently.
+2. **Proxy-Centric Architecture**: Proxy directly stores values and manages dependency graph - no wrapper classes needed.
 
 ### 1. Unified State (`state()`)
 
@@ -42,17 +42,18 @@ Dependencies are tracked automatically when you access state values (via Proxy `
     │                             │
     ▼ notify()                    │
 ┌────────────┐                    │
-│ SignalNode │ ───────────────────┘
+│   Proxy    │ ───────────────────┘
+│ (internal) │
 └────────────┘
 ```
 
-## Internal Primitives
+## Internal Architecture
 
-While `state()` is the public API, these primitives power it under the hood (available via `flexium/advanced`):
+The `state()` API is built on a **Proxy-centric signaling architecture**:
 
-- **SignalNode**: The atomic unit of state.
-- **ComputedNode**: A derived signal that caches its value.
-- **EffectNode**: A subscriber that runs a side-effect.
+- **Proxy**: Directly stores values and manages dependency graph - Proxy IS the signal
+- **EffectNode**: A subscriber that runs a side-effect
+- **Graph**: Doubly-linked list for efficient dependency tracking
 
 ## Performance Characteristics
 

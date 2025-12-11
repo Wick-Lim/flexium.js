@@ -1,4 +1,4 @@
-import { ComputedNode, type SignalNode } from '../core/signal'
+import { state, type StateValue } from '../core/state'
 import { createLocation } from './core'
 import { createRoutesFromChildren, matchRoutes } from './utils'
 import { LinkProps, RouteProps, RouterContext } from './types'
@@ -45,13 +45,13 @@ export function Router(props: { children: FNodeChild }) {
   const routes = createRoutesFromChildren(routeChildren)
 
   // Compute matches
-  const matches = new ComputedNode(() => {
-    const loc = location.get()
+  const [matches] = state(() => {
+    const loc = location()
     return matchRoutes(routes, loc.pathname) || []
   })
 
-  const params = new ComputedNode(() => {
-    const m = matches.get()
+  const [params] = state(() => {
+    const m = matches()
     if (m.length > 0) {
       return m[m.length - 1].params
     }
@@ -72,94 +72,10 @@ export function Router(props: { children: FNodeChild }) {
     get(target, prop) {
       const value = target[prop as keyof RouterContext]
 
-      // For signal/computed properties (location, params, matches),
-      // return a proxy that automatically reads the signal's value when properties are accessed
-      // This makes router() work like state() - property access triggers tracking
+      // For state values (location, params, matches), return them directly
+      // They are already Proxy-based and work like state() - property access triggers tracking
       if (prop === 'location' || prop === 'params' || prop === 'matches') {
-        const signal = value as SignalNode<unknown> | ComputedNode<unknown>
-
-        // Create a callable target function (like state proxy does)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const target = () => signal.get()
-
-        // Return a proxy that wraps the signal and automatically reads its value
-        // when properties are accessed, ensuring subscriptions are registered
-        // This follows the same pattern as state() proxy for consistency
-        return new Proxy(target, {
-          // Make the proxy callable - returns current value
-          apply() {
-            return signal.get()
-          },
-
-          get(_target, innerProp) {
-            // Accessing .value triggers subscription registration via signal's value getter
-            if (innerProp === 'value') {
-              return signal.get()
-            }
-
-            // Allow direct access to peek() without tracking
-            if (innerProp === 'peek') {
-              return signal.peek
-            }
-
-            // Calling as function also triggers subscription
-            if (innerProp === Symbol.toPrimitive || innerProp === 'toString' || innerProp === 'valueOf') {
-              return () => signal.get()
-            }
-
-            // For other signal properties (set, etc.), access them normally
-            const signalProp = (signal as any)[innerProp]
-            if (typeof signalProp === 'function') {
-              return signalProp.bind(signal)
-            }
-
-            // If the signal's value is an object, access its properties
-            // This enables r.location.pathname and r.params.id to work and register subscriptions
-            // Note: accessing signal.value here tracks the signal in any enclosing effect
-            const currentValue = signal.get()
-            if (currentValue !== null && typeof currentValue === 'object') {
-              const obj = currentValue as Record<string | symbol, unknown>
-              const objProp = obj[innerProp]
-              // If it's a function (like array methods), bind it to the current value
-              if (typeof objProp === 'function') {
-                return objProp.bind(currentValue)
-              }
-              return objProp
-            }
-
-            return signalProp
-          },
-
-          // For property checks (like 'id' in params)
-          has(_target, innerProp) {
-            if (innerProp === 'value' || innerProp === 'peek') return true
-            const currentValue = signal.get()
-            if (currentValue !== null && typeof currentValue === 'object') {
-              return innerProp in (currentValue as object)
-            }
-            return innerProp in signal
-          },
-
-          // For Object.keys, for...in loops
-          ownKeys(_target) {
-            const currentValue = signal.get()
-            if (currentValue !== null && typeof currentValue === 'object') {
-              return Reflect.ownKeys(currentValue as object)
-            }
-            return []
-          },
-
-          getOwnPropertyDescriptor(_target, innerProp) {
-            const currentValue = signal.get()
-            if (currentValue !== null && typeof currentValue === 'object') {
-              const desc = Object.getOwnPropertyDescriptor(currentValue as object, innerProp)
-              if (desc) {
-                return { ...desc, configurable: true }
-              }
-            }
-            return undefined
-          }
-        })
+        return value as StateValue<unknown>
       }
 
       // For navigate, return as-is
@@ -168,7 +84,7 @@ export function Router(props: { children: FNodeChild }) {
   }) as RouterContext
 
   return () => {
-    const ms = matches.get()
+    const ms = matches()
 
     // Matched route component (or null if no match)
     let matchedContent: FNodeChild = null

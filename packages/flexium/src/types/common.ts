@@ -4,7 +4,7 @@
  */
 
 import type { FNode } from '../core/renderer'
-import type { Signal, Computed } from '../core/signal'
+import type { StateValue } from '../core/state'
 
 /**
  * Valid child types that can be rendered
@@ -36,15 +36,14 @@ export type RenderableNode =
   | boolean
   | null
   | undefined
-  | Signal<unknown>
-  | Computed<unknown>
+  | StateValue<unknown>
   | RenderFunction
   | RenderableNode[]
 
 /**
  * Props that can contain signals
  */
-export type ReactiveProps = Record<string, Signal<unknown> | Computed<unknown>>
+export type ReactiveProps = Record<string, StateValue<unknown>>
 
 /**
  * Style value type

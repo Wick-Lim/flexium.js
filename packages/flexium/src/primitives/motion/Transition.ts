@@ -5,7 +5,7 @@
  * Works seamlessly with For and conditional rendering (ternary, &&).
  */
 
-import { onCleanup } from '../../core/signal'
+import { onCleanup } from '../../core/effect'
 import type { AnimatableProps, MotionController } from './Motion'
 import { MotionController as MC } from './Motion'
 import { f } from '../../renderers/dom/f'
