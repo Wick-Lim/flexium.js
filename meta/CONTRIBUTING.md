@@ -37,7 +37,7 @@ flexium.js/
 │   │   └── primitives/   # UI components
 │   └── __tests__/
 ├── apps/docs/            # VitePress documentation site
-└── docs/                 # Internal docs (you're here)
+└── meta/                 # Internal docs (you're here)
 ```
 
 ## Making Changes
