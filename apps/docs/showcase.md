@@ -14,6 +14,56 @@ head:
 
 Experience the power of Flexium's fine-grained reactivity directly in your browser. All demos below are running live, powered by the core `flexium` library.
 
+## Real-World Examples
+
+Check out these full applications built with Flexium:
+
+<div class="example-grid">
+
+<a href="https://flexium-js-hackernews.vercel.app/" target="_blank" class="example-card">
+  <div class="example-icon">📰</div>
+  <div class="example-content">
+    <h3>Hacker News</h3>
+    <p>Classic Hacker News clone with real-time data fetching and routing.</p>
+  </div>
+</a>
+
+<a href="https://flexium-js-dashboard.vercel.app/" target="_blank" class="example-card">
+  <div class="example-icon">📊</div>
+  <div class="example-content">
+    <h3>Admin Dashboard</h3>
+    <p>Premium dark-themed dashboard with charts and data visualization.</p>
+  </div>
+</a>
+
+<a href="https://flexium-js-ecommerce.vercel.app/" target="_blank" class="example-card">
+  <div class="example-icon">🛍️</div>
+  <div class="example-content">
+    <h3>E-commerce Store</h3>
+    <p>Modern shopping experience with cart management and product filtering.</p>
+  </div>
+</a>
+
+<a href="https://flexium-js-social-media.vercel.app/" target="_blank" class="example-card">
+  <div class="example-icon">📱</div>
+  <div class="example-content">
+    <h3>Social Media</h3>
+    <p>App-like social feed with interactive posts and user profiles.</p>
+  </div>
+</a>
+
+<a href="https://flexium-js-task-manager.vercel.app/" target="_blank" class="example-card">
+  <div class="example-icon">✅</div>
+  <div class="example-content">
+    <h3>Task Manager</h3>
+    <p>Productivity tool with Kanban board and task organization.</p>
+  </div>
+</a>
+
+</div>
+
+---
+
 <script setup>
 import ShowcaseDemo from './components/ShowcaseDemo.vue'
 import TodoDemo from './components/TodoDemo.vue'
