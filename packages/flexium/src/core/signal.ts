@@ -11,7 +11,6 @@
 import { ErrorCodes, logWarning } from './errors'
 import {
   Graph,
-
   type Link,
   type ISubscriber,
   type IObservable,
@@ -19,8 +18,6 @@ import {
   NodeType
 } from './graph'
 import {
-
-
   getActiveEffect,
   setActiveEffect,
 } from './owner'
@@ -31,36 +28,7 @@ import {
   getBatchDepth
 } from './sync'
 import { EffectNode, effect } from './effect'
-
-/**
- * DevTools hooks interface - set by devtools module to avoid circular imports
- * @internal
- */
-export interface DevToolsHooks {
-  onSignalCreate?: (signal: Signal<unknown>, name?: string) => number
-  onSignalUpdate?: (id: number, value: unknown) => void
-  onEffectCreate?: (name?: string) => number
-  onEffectRun?: (
-    id: number,
-    status: 'idle' | 'running' | 'error',
-    error?: Error
-  ) => void
-}
-
-// Global hooks registry - set by devtools when enabled
-let devToolsHooks: DevToolsHooks | null = null
-
-export function getDevToolsHooks() {
-  return devToolsHooks
-}
-
-/**
- * Register devtools hooks (called by devtools module)
- * @internal
- */
-export function setDevToolsHooks(hooks: DevToolsHooks | null): void {
-  devToolsHooks = hooks
-}
+import { getDevToolsHooks } from './devtools'
 
 // Global version clock for epoch-based validation (Optimization: Epochs)
 let globalVersion = 0
@@ -79,6 +47,7 @@ export interface Signal<T> {
   set(value: T): void
   peek(): T
 }
+
 
 /**
  * Computed signal interface (read-only)

@@ -21,8 +21,8 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const val = <T>(proxy: T): T => {
   if (proxy && (typeof proxy === 'object' || typeof proxy === 'function') && STATE_SIGNAL in (proxy as object)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (proxy as any)[STATE_SIGNAL].get()
+    // Proxy is callable function, so call it directly
+    return typeof proxy === 'function' ? (proxy as any)() : proxy
   }
   return proxy
 }

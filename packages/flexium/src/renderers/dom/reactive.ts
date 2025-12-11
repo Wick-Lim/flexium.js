@@ -20,10 +20,12 @@ import { reconcileArrays } from './reconcile'
 import {
   isStateValue,
   getStateSignal,
+} from '../../core/state'
+import {
   setCurrentComponent,
   createComponentInstance,
   resetHookIndex,
-} from '../../core/state'
+} from '../../core/component'
 import {
   isListComponent,
   mountListComponent,

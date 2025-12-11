@@ -15,7 +15,7 @@
  * ```
  */
 
-import { setDevToolsHooks } from '../core/signal'
+import { setDevToolsHooks } from '../core/devtools'
 import type { Signal, Computed } from '../core/signal'
 import { ErrorCodes, logError } from '../core/errors'
 
