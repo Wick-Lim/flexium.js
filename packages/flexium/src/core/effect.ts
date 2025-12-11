@@ -1,7 +1,7 @@
 import { ErrorCodes, logError } from './errors'
 import {
     Graph,
-    Flags,
+
     type Link,
     type ISubscriber,
     SubscriberFlags,
@@ -15,9 +15,6 @@ import {
     setActiveEffect
 } from './owner'
 
-/**
- * Internal effect node for dependency tracking
- */
 export class EffectNode implements ISubscriber {
     depsHead: Link | undefined
     cleanups: (() => void)[] = []

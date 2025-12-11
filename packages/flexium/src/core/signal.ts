@@ -8,10 +8,10 @@
  * - Batching prevents cascading updates for performance
  */
 
-import { ErrorCodes, logError, logWarning } from './errors'
+import { ErrorCodes, logWarning } from './errors'
 import {
   Graph,
-  Flags,
+
   type Link,
   type ISubscriber,
   type IObservable,
@@ -19,9 +19,8 @@ import {
   NodeType
 } from './graph'
 import {
-  type Owner,
-  getOwner,
-  setOwner,
+
+
   getActiveEffect,
   setActiveEffect,
 } from './owner'
@@ -251,7 +250,7 @@ class ComputedNode<T> implements ISubscriber, IObservable {
     let link: Link | undefined = this.depsHead
     while (link) {
       const dep = link.dep!
-      
+
       // Performance: Check version first (fastest check, avoids type check for most cases)
       if (dep.version > this.lastCleanEpoch) {
         return true
@@ -261,12 +260,12 @@ class ComputedNode<T> implements ISubscriber, IObservable {
       // Only check computed dependencies if version check passed (less common case)
       if (dep.nodeType === NodeType.Computed) {
         const computedDep = dep as ComputedNode<unknown>
-        
+
         // Performance: Check if dirty/stale before calling peek() (peek() may trigger computation)
         // Only call peek() if actually needs update
         const flags = computedDep.flags
         const isDirtyOrStale = (flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)) !== 0
-        
+
         if (isDirtyOrStale) {
           // Performance: Track version before peek() to detect if it actually updated
           const oldVersion = computedDep.version

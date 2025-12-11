@@ -62,7 +62,7 @@ export default function Stories(props: { type: string }) {
     return (
         <div class="view">
             <h1 class="visually-hidden">{props.type.charAt(0).toUpperCase() + props.type.slice(1)} Stories</h1>
-            <div class="news-list-nav">
+            <div class="item-list-nav">
                 {+loading && <span>Loading...</span>}
             </div>
 

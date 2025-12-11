@@ -7,27 +7,27 @@ export default function User(props: { params?: { id?: string } } = {}) {
     const [user, setUser] = state<any>(undefined)
 
     effect(() => {
-        const params = r.params
+        const params = r.params.value
         const idStr = params.id || props.params?.id;
-        
+
         if (!idStr) {
             setUser(undefined)
             return
         }
-        
+
         // Load user data (async) - no await needed, reactive system will handle updates
         loadUser(idStr);
-        
+
         // Track the global user state reactively - this will update when loadUser completes
         const [globalUser] = useUser(idStr);
         // Reading globalUser.value here tracks the signal, so when loadUser sets it, this effect will re-run
         const currentUser = globalUser.valueOf();
         setUser(currentUser);
     });
-    
+
     // Use proxy directly
     if (!user) return <div class="view user-view"><div>Loading...</div></div>
-    
+
     const userValue = user.valueOf()
 
     return (

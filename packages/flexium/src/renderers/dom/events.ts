@@ -23,7 +23,7 @@ const nodeHandlers = new WeakMap<Node, Map<string, EventHandler>>()
  * Global event dispatcher that handles delegation
  */
 function dispatchEvent(event: Event) {
-  let target = event.target as Node | null
+
   const eventType = event.type.toLowerCase()
   const bubbles = !NON_BUBBLING_EVENTS.has(eventType)
 

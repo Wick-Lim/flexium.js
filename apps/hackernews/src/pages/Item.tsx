@@ -36,15 +36,14 @@ export default function Item(props: { params?: { id?: string } } = {}) {
     const [item, setItem] = state<any>(undefined)
 
     effect(() => {
-        const params = r.params
-        const pathname = r.location.pathname
+        const params = r.params.value
         const idStr = params.id || props.params?.id;
-        
+
         if (!idStr) {
             setItem(undefined)
             return
         }
-        
+
         const parsedId = parseInt(idStr);
         if (!parsedId) {
             setItem(undefined)
@@ -53,17 +52,17 @@ export default function Item(props: { params?: { id?: string } } = {}) {
 
         // Load item data (async) - no await needed, reactive system will handle updates
         loadItem(parsedId);
-        
+
         // Track the global item state reactively - this will update when loadItem completes
         const [globalItem] = useItem(parsedId);
         // Reading globalItem.value here tracks the signal, so when loadItem sets it, this effect will re-run
         const currentItem = globalItem.valueOf();
         setItem(currentItem);
     });
-    
+
     // Use proxy directly
     if (!item) return <div class="view item-view"><div>Loading...</div></div>
-    
+
     const itemValue = item.valueOf()
 
     return (
