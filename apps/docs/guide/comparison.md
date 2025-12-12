@@ -189,8 +189,8 @@ function Component() {
 
   return (
     <div>
-      {show && <Child />}
-      {show ? <A /> : <B />}
+      {show() && <Child />}
+      {show() ? <A /> : <B />}
     </div>
   )
 }
