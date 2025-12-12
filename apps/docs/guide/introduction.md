@@ -28,7 +28,7 @@ Flexium stands out from other frameworks through several key innovations:
 - **Fine-Grained Reactivity**: No Virtual DOM overhead. Updates are surgical and precise, updating only what changed.
 - **Cross-Platform**: Write once using universal primitives (`Row`, `Column`, `Text`) and run on Web and Canvas. Native support coming soon.
 - **Type Safety**: Built with TypeScript for a superior developer experience with full type inference.
-- **Tiny Bundle Size**: Core package is ~10-15kb gzipped, 70% smaller than React.
+- **Tiny Bundle Size**: Core package is ~10KB gzipped, 70% smaller than React.
 - **Zero Configuration**: Works out of the box with Vite, no complex setup required.
 
 ## Framework Comparison
@@ -88,7 +88,7 @@ function Counter() {
 | Reactivity | Virtual DOM + Reconciliation | Fine-grained Signals |
 | State API | useState, useReducer, useContext | Unified `state()` |
 | Updates | Re-render entire component tree | Surgical DOM updates |
-| Bundle Size | ~45kb gzipped | ~10-15kb gzipped |
+| Bundle Size | ~45kb gzipped | ~10KB gzipped |
 | Performance | Good with optimization | Excellent by default |
 | Dependency Tracking | Manual arrays | Automatic |
 | Learning Curve | Moderate (hooks rules) | Low (simple mental model) |
@@ -137,7 +137,7 @@ function UserProfile() {
 | Async Data | createResource (separate) | Built into `state()` |
 | Global State | Context or stores | `state()` with key option |
 | List Rendering | Must use `<For>` component | `items.map()` works with auto-optimization |
-| Bundle Size | ~7kb gzipped | ~10-15kb gzipped |
+| Bundle Size | ~7kb gzipped | ~10KB gzipped |
 | Cross-Platform | Web-focused | Web + Canvas (Native: coming soon) |
 | Primitives | HTML tags | Universal primitives (Row, Column, Text) |
 
@@ -186,7 +186,7 @@ function Counter() {
 | Reactivity | Proxy-based | Signal-based |
 | Template Syntax | SFC templates or JSX | JSX |
 | State Creation | ref, reactive | Unified `state()` |
-| Bundle Size | ~30kb gzipped | ~10-15kb gzipped |
+| Bundle Size | ~30kb gzipped | ~10KB gzipped |
 | TypeScript | Good (improved in v3) | Excellent (built-in) |
 | Ecosystem | Large, mature | Growing |
 
@@ -231,7 +231,7 @@ function Counter() {
 | Feature | Preact | Flexium |
 |---------|--------|---------|
 | Reactivity | Virtual DOM | Fine-grained Signals |
-| Bundle Size | ~3-4kb core | ~10-15kb full framework |
+| Bundle Size | ~3-4kb core | ~10KB full framework |
 | API | React-like hooks | Unified state() |
 | Performance | Good | Better (no VDOM) |
 | React Compat | High (preact/compat) | N/A (different paradigm) |

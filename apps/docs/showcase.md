@@ -508,7 +508,7 @@ Unlike React or Vue, Flexium **does not use a Virtual DOM** for updates. When yo
 | Update Mechanism | Direct signal subscription | Tree diffing |
 | Component Re-renders | Never (after initial) | On every state change |
 | Memory | Minimal (no virtual tree) | Maintains virtual tree copy |
-| Bundle Size | ~10-15KB | 30-100KB+ |
+| Bundle Size | ~10KB | 30-100KB+ |
 
 ### Framework Interop
 

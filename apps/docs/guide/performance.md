@@ -913,6 +913,6 @@ Flexium's fine-grained reactivity and no-VDOM architecture provide significant p
 - **Initial render**: 2-3x faster than React
 - **Update performance**: 3-10x faster than React (no diffing)
 - **Memory usage**: 40-60% less than React (no VDOM)
-- **Bundle size**: 10-15kb gzipped (vs 45kb+ for React)
+- **Bundle size**: ~10KB gzipped (vs 45kb+ for React)
 
 For detailed benchmarks and comparisons, see our [benchmark repository](https://github.com/flexium-js/benchmarks).

@@ -42,7 +42,7 @@ features:
     details: Universal primitives for Web and Canvas. Native support coming soon.
   - icon: 📦
     title: Lightweight
-    details: Minimal bundle size (~10-15KB) with tree-shakeable exports.
+    details: Minimal bundle size (~10KB) with tree-shakeable exports.
   - icon: 🛠
     title: TypeScript First
     details: Built with TypeScript for superior type safety and developer experience.

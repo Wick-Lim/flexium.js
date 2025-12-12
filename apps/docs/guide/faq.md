@@ -19,7 +19,7 @@ Flexium is a lightweight, signals-based UI framework with fine-grained reactivit
 | Reactivity | Fine-grained signals | Virtual DOM diffing |
 | Updates | Only affected nodes | Component re-renders |
 | State | `signal()` / `state()` | `useState()` / stores |
-| Size | ~8KB gzipped | ~45KB gzipped |
+| Size | ~10KB gzipped | ~45KB gzipped |
 | JSX | Yes | Yes |
 
 ### Can I use Flexium with TypeScript?

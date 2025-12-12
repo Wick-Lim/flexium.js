@@ -10,7 +10,7 @@ How does Flexium compare to React and Svelte? This guide helps you understand th
 | **API Philosophy** | Unified (`state()`) | Hooks (multiple) | Syntax (`let`, `$`) |
 | **Re-rendering** | Fine-grained | Component tree | Fine-grained |
 | **List Rendering** | `items.map()` works | `items.map()` works | `{#each}` block |
-| **Bundle Size** | ~8KB (with Router & Motion) | ~42KB (React only) | ~2KB (runtime) |
+| **Bundle Size** | ~10KB (with Router & Motion) | ~42KB (React only) | ~2KB (runtime) |
 | **Learning Curve** | **Zero** (for React devs) | Moderate | Moderate (New Syntax) |
 
 ## The Flexium Difference
