@@ -45,13 +45,13 @@ Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchie
 import { state } from 'flexium/core';
 
 // Share theme globally - no Provider needed
-const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app:theme' });
+const theme = state<'light' | 'dark'>('light', { key: 'app:theme' });
 
 function ThemedButton() {
-  const [theme] = state('light', { key: 'app:theme' });
+  const theme = state('light', { key: 'app:theme' });
   
   return (
-    <button class={`btn-${theme}`}>
+    <button class={`btn-${theme.valueOf()}`}>
       Current theme: {theme}
     </button>
   );
@@ -71,7 +71,7 @@ interface User {
 
 // Auth state - shared globally
 function useAuth() {
-  const [user, setUser] = state<User | null>(null, { key: 'app:auth:user' });
+  const user = state<User | null>(null, { key: 'app:auth:user' });
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -79,15 +79,15 @@ function useAuth() {
       body: JSON.stringify({ email, password })
     });
     const userData = await response.json();
-    setUser(userData);
+    user.set(userData);
   };
 
   const logout = () => {
-    setUser(null);
+    user.set(null);
   };
 
   const isAuthenticated = () => {
-    return user() !== null;
+    return user.valueOf() !== null;
   };
 
   return { user, login, logout, isAuthenticated };
@@ -96,7 +96,7 @@ function useAuth() {
 function UserProfile() {
   const { user, logout } = useAuth();
 
-  const currentUser = user();
+  const currentUser = user.valueOf();
 
   if (!currentUser) {
     return <div>Please log in</div>;
@@ -118,23 +118,23 @@ function UserProfile() {
 import { state } from 'flexium/core';
 
 // Theme state
-const [theme] = state('light', { key: 'app:theme' });
+const theme = state('light', { key: 'app:theme' });
 
 // Language state
-const [lang] = state('en', { key: 'app:language' });
+const lang = state('en', { key: 'app:language' });
 
 // User state
-const [user] = state(null, { key: 'app:user' });
+const user = state(null, { key: 'app:user' });
 
 function ProfileCard() {
-  const [theme] = state('light', { key: 'app:theme' });
-  const [lang] = state('en', { key: 'app:language' });
-  const [user] = state(null, { key: 'app:user' });
+  const theme = state('light', { key: 'app:theme' });
+  const lang = state('en', { key: 'app:language' });
+  const user = state(null, { key: 'app:user' });
 
   return (
-    <div class={`card-${theme}`}>
-      <h2>{lang === 'en' ? 'Profile' : 'Profil'}</h2>
-      <p>{user?.name}</p>
+    <div class={`card-${theme.valueOf()}`}>
+      <h2>{lang.valueOf() === 'en' ? 'Profile' : 'Profil'}</h2>
+      <p>{user.name}</p>
     </div>
   );
 }
@@ -167,10 +167,10 @@ Returns a `RouterContext` object:
 
 | Property | Type | Description |
 | --- | --- | --- |
-| `location` | `() => Location` | Reactive signal getter with current location (pathname, search, hash, query) |
-| `params` | `() => Record<string, string>` | Reactive computed getter with route parameters |
+| `location` | `StateValue<Location>` | Reactive signal with current location (pathname, search, hash, query) |
+| `params` | `StateValue<Record<string, string>>` | Reactive computed signal with route parameters |
 | `navigate` | `(path: string) => void` | Function to navigate to a new path |
-| `matches` | `() => RouteMatch[]` | Reactive computed getter with matched routes (root to leaf) |
+| `matches` | `StateValue<RouteMatch[]>` | Reactive computed signal with matched routes (root to leaf) |
 
 #### Usage
 
@@ -181,14 +181,14 @@ function UserProfile() {
   const r = router();
 
   // Access current location
-  const location = r.location();
+  const location = r.location;
   console.log(location.pathname); // "/users/123"
   console.log(location.search);   // "?tab=posts"
   console.log(location.hash);     // "#comments"
   console.log(location.query);    // { tab: "posts" }
 
   // Access route parameters
-  const params = r.params();
+  const params = r.params;
   console.log(params.id); // "123"
 
   // Navigate programmatically
@@ -210,10 +210,10 @@ function UserProfile() {
 ```tsx
 function SearchBar() {
   const r = router();
-  const [query, setQuery] = state('');
+  const query = state('');
 
   const handleSearch = () => {
-    const searchQuery = query();
+    const searchQuery = query.valueOf();
     r.navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
@@ -221,8 +221,8 @@ function SearchBar() {
     <div>
       <input
         type="text"
-        value={query()}
-        oninput={(e) => setQuery(e.target.value)}
+        value={query.valueOf()}
+        oninput={(e) => query.set(e.target.value)}
         placeholder="Search..."
       />
       <button onclick={handleSearch}>Search</button>
@@ -242,7 +242,7 @@ function ProtectedAction() {
 
     if (!isAuthorized) {
       // Redirect to login with return URL
-      const returnUrl = r.location().pathname;
+      const returnUrl = r.location.pathname;
       r.navigate(`/login?return=${encodeURIComponent(returnUrl)}`);
       return;
     }
@@ -328,12 +328,12 @@ function PlayerController() {
       newPos.x += speed;
     }
 
-    setPosition(newPos);
+    position.set(newPos);
   });
 
   return (
     <div style={{
-      transform: `translate(${position().x}px, ${position().y}px)`
+      transform: `translate(${position.x}px, ${position.y}px)`
     }}>
       Player
     </div>
@@ -349,10 +349,10 @@ import { state } from 'flexium/core';
 
 function Game() {
   const keyboard = keyboard();
-  const [player, setPlayer] = state({ x: 100, y: 100, jumping: false });
+  const player = state({ x: 100, y: 100, jumping: false });
 
   createLoop((dt) => {
-    const pos = { ...player() };
+    const pos = { ...player.valueOf() };
 
     // Check for jump
     if (keyboard.isJustPressed(Keys.Space) && !pos.jumping) {
@@ -367,7 +367,7 @@ function Game() {
       pos.x += 200 * dt;
     }
 
-    setPlayer(pos);
+    player.set(pos);
 
     // Clear frame state at end of update
     keyboard.clearFrameState();
@@ -377,8 +377,8 @@ function Game() {
     <div>
       <div style={{
         position: 'absolute',
-        left: `${player().x}px`,
-        top: `${player().y}px`
+        left: `${player.x}px`,
+        top: `${player.y}px`
       }}>
         🎮
       </div>
@@ -414,8 +414,8 @@ Keys.Digit0, Keys.Digit1, Keys.Digit2, ...
 
 ```tsx
 function CanvasInput() {
-  const [canvasRef] = state<HTMLCanvasElement | null>(null);
-  const kb = keyboard(canvasRef() || window);
+  const canvasRef = state<HTMLCanvasElement | null>(null);
+  const kb = keyboard(canvasRef.valueOf() || window);
 
   return (
     <canvas
@@ -511,14 +511,14 @@ import { mouse } from 'flexium/interactive';
 import { state, effect } from 'flexium/core';
 
 function DrawingCanvas() {
-  const [canvasRef] = state<HTMLCanvasElement | null>(null);
+  const canvasRef = state<HTMLCanvasElement | null>(null);
   const mouse = mouse({
     target: window,
-    canvas: canvasRef() || undefined
+    canvas: canvasRef.valueOf() || undefined
   });
 
   effect(() => {
-    const canvas = canvasRef();
+    const canvas = canvasRef.valueOf();
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
@@ -549,17 +549,17 @@ import { mouse, createLoop } from 'flexium/interactive';
 
 function ShootingGame() {
   const mouse = mouse();
-  const [crosshair, setCrosshair] = state({ x: 0, y: 0 });
-  const [projectiles, setProjectiles] = state<Array<{ x: number, y: number }>>([]);
+  const crosshair = state({ x: 0, y: 0 });
+  const projectiles = state<Array<{ x: number, y: number }>>([]);
 
   createLoop((dt) => {
     // Update crosshair position
     const pos = mouse.position();
-    setCrosshair({ x: pos.x, y: pos.y });
+    crosshair.set({ x: pos.x, y: pos.y });
 
     // Shoot on left click
     if (mouse.isLeftPressed()) {
-      setProjectiles([...projectiles(), { x: pos.x, y: pos.y }]);
+      projectiles.set([...projectiles.valueOf(), { x: pos.x, y: pos.y }]);
     }
 
     // Clear frame state
@@ -571,8 +571,8 @@ function ShootingGame() {
       {/* Crosshair */}
       <div style={{
         position: 'absolute',
-        left: `${crosshair().x}px`,
-        top: `${crosshair().y}px`,
+        left: `${crosshair.x}px`,
+        top: `${crosshair.y}px`,
         transform: 'translate(-50%, -50%)',
         width: '20px',
         height: '20px',
@@ -582,7 +582,7 @@ function ShootingGame() {
       }} />
 
       {/* Projectiles */}
-      {projectiles().map((p, i) => (
+      {projectiles.valueOf().map((p, i) => (
         <div key={i} style={{
           position: 'absolute',
           left: `${p.x}px`,
@@ -603,23 +603,23 @@ function ShootingGame() {
 ```tsx
 function ZoomableView() {
   const mouse = mouse();
-  const [zoom, setZoom] = state(1);
+  const zoom = state(1);
 
   effect(() => {
     const wheel = mouse.wheelDelta();
     if (wheel !== 0) {
-      const newZoom = zoom() + (wheel * -0.1);
-      setZoom(Math.max(0.5, Math.min(3, newZoom)));
+      const newZoom = zoom.valueOf() + (wheel * -0.1);
+      zoom.set(Math.max(0.5, Math.min(3, newZoom)));
     }
   });
 
   return (
     <div style={{
-      transform: `scale(${zoom()})`,
+      transform: `scale(${zoom.valueOf()})`,
       transformOrigin: 'center center',
       transition: 'transform 0.1s'
     }}>
-      Zoom level: {zoom().toFixed(2)}
+      Zoom level: {zoom.valueOf().toFixed(2)}
     </div>
   );
 }
@@ -678,33 +678,33 @@ Flexium doesn't have special rules for hooks - you can create custom hooks by co
 import { state } from 'flexium/core';
 
 function useForm<T>(initialValues: T) {
-  const [values, setValues] = state(initialValues);
-  const [errors, setErrors] = state<Record<string, string>>({});
-  const [touched, setTouched] = state<Record<string, boolean>>({});
+  const values = state(initialValues);
+  const errors = state<Record<string, string>>({});
+  const touched = state<Record<string, boolean>>({});
 
   const setValue = (field: keyof T, value: unknown) => {
-    setValues(prev => ({ ...prev, [field]: value }));
+    values.set({ ...values.valueOf(), [field]: value });
   };
 
   const setError = (field: keyof T, error: string) => {
-    setErrors(prev => ({ ...prev, [field]: error }));
+    errors.set({ ...errors.valueOf(), [field]: error });
   };
 
   const setTouched = (field: keyof T) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    touched.set({ ...touched.valueOf(), [field]: true });
   };
 
   const validate = (validators: Record<keyof T, (value: unknown) => string | null>) => {
     const newErrors: Record<string, string> = {};
 
     for (const field in validators) {
-      const error = validators[field](values()[field]);
+      const error = validators[field](values[field]);
       if (error) {
         newErrors[field] = error;
       }
     }
 
-    setErrors(newErrors);
+    errors.set(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -732,7 +732,7 @@ function LoginForm() {
     });
 
     if (isValid) {
-      console.log('Submit:', form.values());
+      console.log('Submit:', form.values.valueOf());
     }
   };
 
@@ -740,22 +740,22 @@ function LoginForm() {
     <form onsubmit={handleSubmit}>
       <input
         type="email"
-        value={form.values().email}
+        value={form.values.email}
         oninput={(e) => form.setValue('email', e.target.value)}
         onblur={() => form.setTouched('email')}
       />
-      {form.errors().email && form.touched().email && (
-        <div class="error">{form.errors().email}</div>
+      {form.errors.email && form.touched.email && (
+        <div class="error">{form.errors.email}</div>
       )}
 
       <input
         type="password"
-        value={form.values().password}
+        value={form.values.password}
         oninput={(e) => form.setValue('password', e.target.value)}
         onblur={() => form.setTouched('password')}
       />
-      {form.errors().password && form.touched().password && (
-        <div class="error">{form.errors().password}</div>
+      {form.errors.password && form.touched.password && (
+        <div class="error">{form.errors.password}</div>
       )}
 
       <button type="submit">Login</button>
@@ -770,13 +770,13 @@ function LoginForm() {
 import { state, effect } from 'flexium/core';
 
 function useFetch<T>(url: string) {
-  const [data, setData] = state<T | null>(null);
-  const [loading, setLoading] = state(true);
-  const [error, setError] = state<Error | null>(null);
+  const data = state<T | null>(null);
+  const loading = state(true);
+  const error = state<Error | null>(null);
 
   const refetch = async () => {
-    setLoading(true);
-    setError(null);
+    loading.set(true);
+    error.set(null);
 
     try {
       const response = await fetch(url);
@@ -784,11 +784,11 @@ function useFetch<T>(url: string) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const json = await response.json();
-      setData(json);
+      data.set(json);
     } catch (err) {
-      setError(err as Error);
+      error.set(err as Error);
     } finally {
-      setLoading(false);
+      loading.set(false);
     }
   };
 

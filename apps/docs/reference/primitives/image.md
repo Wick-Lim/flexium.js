@@ -208,12 +208,12 @@ Plus all properties from [CommonStyle](/reference/types#commonstyle) for layout,
 
 ```tsx
 function ImageWithLoading({ src, alt }) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const loading = state(true);
+  const error = state(false);
 
   return (
     <div style={{ position: 'relative' }}>
-      {loading && (
+      {loading.valueOf() && (
         <div style={{
           position: 'absolute',
           top: 0,
@@ -229,7 +229,7 @@ function ImageWithLoading({ src, alt }) {
         </div>
       )}
 
-      {error && (
+      {error.valueOf() && (
         <div style={{
           backgroundColor: '#fee',
           padding: 20,
@@ -244,13 +244,13 @@ function ImageWithLoading({ src, alt }) {
         alt={alt}
         width={400}
         height={300}
-        onLoad={() => setLoading(false)}
+        onLoad={() => loading.set(false)}
         onError={() => {
-          setLoading(false);
-          setError(true);
+          loading.set(false);
+          error.set(true);
         }}
         style={{
-          display: error ? 'none' : 'block',
+          display: error.valueOf() ? 'none' : 'block',
           borderRadius: 8
         }}
       />
@@ -334,13 +334,13 @@ function ImageWithLoading({ src, alt }) {
 
 ```tsx
 function ImageWithFallback({ src, fallbackSrc, alt, ...props }) {
-  const [imgSrc, setImgSrc] = useState(src);
+  const imgSrc = state(src);
 
   return (
     <Image
-      src={imgSrc}
+      src={imgSrc.valueOf()}
       alt={alt}
-      onError={() => setImgSrc(fallbackSrc)}
+      onError={() => imgSrc.set(fallbackSrc)}
       {...props}
     />
   );
@@ -687,22 +687,22 @@ const MemoizedImage = memo(({ src, alt, width, height }) => (
 
 ```tsx
 function ProgressiveImage({ src, placeholder, alt, ...props }) {
-  const [currentSrc, setCurrentSrc] = useState(placeholder);
+  const currentSrc = state(placeholder);
 
-  useEffect(() => {
+  effect(() => {
     const img = new window.Image();
     img.src = src;
-    img.onload = () => setCurrentSrc(src);
-  }, [src]);
+    img.onload = () => currentSrc.set(src);
+  });
 
   return (
     <Image
-      src={currentSrc}
+      src={currentSrc.valueOf()}
       alt={alt}
       {...props}
       style={{
         ...props.style,
-        filter: currentSrc === placeholder ? 'blur(10px)' : 'none',
+        filter: currentSrc.valueOf() === placeholder ? 'blur(10px)' : 'none',
         transition: 'filter 0.3s'
       }}
     />

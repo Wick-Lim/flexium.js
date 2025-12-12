@@ -69,7 +69,7 @@ import { effect } from 'flexium/core'
 import { MotionController } from 'flexium/primitives'
 
 function AnimatedBox() {
-  const [isVisible, setIsVisible] = state(false)
+  const isVisible = state(false)
   let element
   let controller
 
@@ -78,7 +78,7 @@ function AnimatedBox() {
 
     effect(() => {
       controller.animate({
-        animate: isVisible
+        animate: isVisible.valueOf()
           ? { opacity: 1, scale: 1 }
           : { opacity: 0, scale: 0.8 },
         duration: 300
@@ -91,7 +91,7 @@ function AnimatedBox() {
   return (
     <div>
       <div ref={element}>Box</div>
-      <button onClick={() => setIsVisible(!isVisible)}>Toggle</button>
+      <button onClick={() => isVisible.set(!isVisible.valueOf())}>Toggle</button>
     </div>
   )
 }

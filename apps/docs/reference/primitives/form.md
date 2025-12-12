@@ -22,12 +22,12 @@ Use `state()` to manage form values and validation state:
 import { state } from 'flexium';
 
 function LoginForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     email: '',
     password: ''
   });
 
-  const [errors, setErrors] = state({
+  const errors = state({
     email: null as string | null,
     password: null as string | null
   });
@@ -36,7 +36,7 @@ function LoginForm() {
     e.preventDefault();
 
     // Reset errors
-    setErrors({ email: null, password: null });
+    errors.set({ email: null, password: null });
 
     // Validate
     const newErrors: any = {};
@@ -53,7 +53,7 @@ function LoginForm() {
     }
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+      errors.set(newErrors);
       return;
     }
 
@@ -70,7 +70,7 @@ function LoginForm() {
           id="email"
           type="email"
           value={formData.email}
-          oninput={(e) => setFormData({ ...formData, email: e.target.value })}
+          oninput={(e) => formData.set({ ...formData.valueOf(), email: e.target.value })}
         />
         {errors.email && <div class="error">{errors.email}</div>}
       </div>
@@ -81,7 +81,7 @@ function LoginForm() {
           id="password"
           type="password"
           value={formData.password}
-          oninput={(e) => setFormData({ ...formData, password: e.target.value })}
+          oninput={(e) => formData.set({ ...formData.valueOf(), password: e.target.value })}
         />
         {errors.password && <div class="error">{errors.password}</div>}
       </div>
@@ -100,21 +100,21 @@ Add validation as users type:
 import { state, effect } from 'flexium';
 
 function RegistrationForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     username: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
 
-  const [errors, setErrors] = state({
+  const errors = state({
     username: null as string | null,
     email: null as string | null,
     password: null as string | null,
     confirmPassword: null as string | null
   });
 
-  const [touched, setTouched] = state({
+  const touched = state({
     username: false,
     email: false,
     password: false,
@@ -147,14 +147,14 @@ function RegistrationForm() {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    setErrors(newErrors);
+    errors.set(newErrors);
   });
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
 
     // Mark all as touched
-    setTouched({
+    touched.set({
       username: true,
       email: true,
       password: true,
@@ -162,7 +162,7 @@ function RegistrationForm() {
     });
 
     // Check if there are any errors
-    if (Object.values(errors).some(error => error !== null)) {
+    if (Object.values(errors.valueOf()).some(error => error !== null)) {
       return;
     }
 
@@ -179,8 +179,8 @@ function RegistrationForm() {
           id="username"
           type="text"
           value={formData.username}
-          oninput={(e) => setFormData({ ...formData, username: e.target.value })}
-          onblur={() => setTouched({ ...touched, username: true })}
+          oninput={(e) => formData.set({ ...formData.valueOf(), username: e.target.value })}
+          onblur={() => touched.set({ ...touched.valueOf(), username: true })}
         />
         {touched.username && errors.username && (
           <div class="error">{errors.username}</div>
@@ -193,8 +193,8 @@ function RegistrationForm() {
           id="email"
           type="email"
           value={formData.email}
-          oninput={(e) => setFormData({ ...formData, email: e.target.value })}
-          onblur={() => setTouched({ ...touched, email: true })}
+          oninput={(e) => formData.set({ ...formData.valueOf(), email: e.target.value })}
+          onblur={() => touched.set({ ...touched.valueOf(), email: true })}
         />
         {touched.email && errors.email && (
           <div class="error">{errors.email}</div>
@@ -207,8 +207,8 @@ function RegistrationForm() {
           id="password"
           type="password"
           value={formData.password}
-          oninput={(e) => setFormData({ ...formData, password: e.target.value })}
-          onblur={() => setTouched({ ...touched, password: true })}
+          oninput={(e) => formData.set({ ...formData.valueOf(), password: e.target.value })}
+          onblur={() => touched.set({ ...touched.valueOf(), password: true })}
         />
         {touched.password && errors.password && (
           <div class="error">{errors.password}</div>
@@ -221,8 +221,8 @@ function RegistrationForm() {
           id="confirmPassword"
           type="password"
           value={formData.confirmPassword}
-          oninput={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-          onblur={() => setTouched({ ...touched, confirmPassword: true })}
+          oninput={(e) => formData.set({ ...formData.valueOf(), confirmPassword: e.target.value })}
+          onblur={() => touched.set({ ...touched.valueOf(), confirmPassword: true })}
         />
         {touched.confirmPassword && errors.confirmPassword && (
           <div class="error">{errors.confirmPassword}</div>
@@ -263,9 +263,9 @@ function useForm<T extends FormConfig>(config: T) {
     return acc;
   }, {} as any);
 
-  const [formData, setFormData] = state(initialValues);
-  const [errors, setErrors] = state<Record<string, string | null>>({});
-  const [touched, setTouched] = state<Record<string, boolean>>({});
+  const formData = state(initialValues);
+  const errors = state<Record<string, string | null>>({});
+  const touched = state<Record<string, boolean>>({});
 
   // Validate a single field
   const validateField = (fieldName: string) => {
@@ -291,7 +291,7 @@ function useForm<T extends FormConfig>(config: T) {
       if (error) isValid = false;
     }
 
-    setErrors(newErrors);
+    errors.set(newErrors);
     return isValid;
   };
 
@@ -305,21 +305,21 @@ function useForm<T extends FormConfig>(config: T) {
       }
     }
 
-    setErrors(newErrors);
+    errors.set(newErrors);
   });
 
   const setFieldValue = (fieldName: string, value: any) => {
-    setFormData({ ...formData, [fieldName]: value });
+    formData.set({ ...formData.valueOf(), [fieldName]: value });
   };
 
   const setFieldTouched = (fieldName: string) => {
-    setTouched({ ...touched, [fieldName]: true });
+    touched.set({ ...touched.valueOf(), [fieldName]: true });
   };
 
   const reset = () => {
-    setFormData(initialValues);
-    setErrors({});
-    setTouched({});
+    formData.set(initialValues);
+    errors.set({});
+    touched.set({});
   };
 
   return {
@@ -409,44 +409,44 @@ Handle async validation like checking if an email already exists:
 import { state } from 'flexium';
 
 function SignupForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     email: ''
   });
 
-  const [errors, setErrors] = state({
+  const errors = state({
     email: null as string | null
   });
 
-  const [validating, setValidating] = state({
+  const validating = state({
     email: false
   });
 
   const validateEmail = async (email: string) => {
     if (!email) {
-      setErrors({ ...errors, email: 'Email is required' });
+      errors.set({ ...errors.valueOf(), email: 'Email is required' });
       return;
     }
 
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setErrors({ ...errors, email: 'Invalid email format' });
+      errors.set({ ...errors.valueOf(), email: 'Invalid email format' });
       return;
     }
 
-    setValidating({ ...validating, email: true });
+    validating.set({ ...validating.valueOf(), email: true });
 
     try {
       const response = await fetch(`/api/check-email?email=${email}`);
       const data = await response.json();
 
       if (data.exists) {
-        setErrors({ ...errors, email: 'Email already registered' });
+        errors.set({ ...errors.valueOf(), email: 'Email already registered' });
       } else {
-        setErrors({ ...errors, email: null });
+        errors.set({ ...errors.valueOf(), email: null });
       }
     } catch (error) {
-      setErrors({ ...errors, email: 'Failed to validate email' });
+      errors.set({ ...errors.valueOf(), email: 'Failed to validate email' });
     } finally {
-      setValidating({ ...validating, email: false });
+      validating.set({ ...validating.valueOf(), email: false });
     }
   };
 
@@ -473,7 +473,7 @@ function SignupForm() {
           id="email"
           type="email"
           value={formData.email}
-          oninput={(e) => setFormData({ ...formData, email: e.target.value })}
+          oninput={(e) => formData.set({ ...formData.valueOf(), email: e.target.value })}
           onblur={handleEmailBlur}
         />
         {validating.email && <div class="validating">Checking email...</div>}
@@ -496,19 +496,19 @@ Show loading state during form submission:
 import { state } from 'flexium';
 
 function ContactForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     name: '',
     email: '',
     message: ''
   });
 
-  const [submitting, setSubmitting] = state(false);
-  const [submitted, setSubmitted] = state(false);
+  const submitting = state(false);
+  const submitted = state(false);
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
 
-    setSubmitting(true);
+    submitting.set(true);
 
     try {
       await fetch('/api/contact', {
@@ -517,16 +517,16 @@ function ContactForm() {
         body: JSON.stringify(formData)
       });
 
-      setSubmitted(true);
-      setFormData({ name: '', email: '', message: '' });
+      submitted.set(true);
+      formData.set({ name: '', email: '', message: '' });
     } catch (error) {
       console.error('Failed to submit form:', error);
     } finally {
-      setSubmitting(false);
+      submitting.set(false);
     }
   };
 
-  if (submitted) {
+  if (submitted.valueOf()) {
     return <div class="success">Thank you! Your message has been sent.</div>;
   }
 
@@ -538,8 +538,8 @@ function ContactForm() {
           id="name"
           type="text"
           value={formData.name}
-          oninput={(e) => setFormData({ ...formData, name: e.target.value })}
-          disabled={submitting}
+          oninput={(e) => formData.set({ ...formData.valueOf(), name: e.target.value })}
+          disabled={submitting.valueOf()}
         />
       </div>
 
@@ -549,8 +549,8 @@ function ContactForm() {
           id="email"
           type="email"
           value={formData.email}
-          oninput={(e) => setFormData({ ...formData, email: e.target.value })}
-          disabled={submitting}
+          oninput={(e) => formData.set({ ...formData.valueOf(), email: e.target.value })}
+          disabled={submitting.valueOf()}
         />
       </div>
 
@@ -559,13 +559,13 @@ function ContactForm() {
         <textarea
           id="message"
           value={formData.message}
-          oninput={(e) => setFormData({ ...formData, message: e.target.value })}
-          disabled={submitting}
+          oninput={(e) => formData.set({ ...formData.valueOf(), message: e.target.value })}
+          disabled={submitting.valueOf()}
         />
       </div>
 
-      <button type="submit" disabled={submitting}>
-        {submitting ? 'Sending...' : 'Send Message'}
+      <button type="submit" disabled={submitting.valueOf()}>
+        {submitting.valueOf() ? 'Sending...' : 'Send Message'}
       </button>
     </form>
   );

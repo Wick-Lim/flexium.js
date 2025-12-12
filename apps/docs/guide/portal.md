@@ -11,21 +11,21 @@ import { Portal } from 'flexium/dom'
 import { state } from 'flexium/core'
 
 function App() {
-  const [showModal, setShowModal] = state(false)
+  const showModal = state(false)
 
   return (
     <div>
-      <button onClick={() => setShowModal(true)}>
+      <button onClick={() => showModal.set(true)}>
         Open Modal
       </button>
 
-      {showModal && (
+      {showModal.valueOf() && (
         <Portal mount={document.body}>
           <div class="modal-overlay">
             <div class="modal">
               <h2>Modal Title</h2>
               <p>Modal content goes here.</p>
-              <button onClick={() => setShowModal(false)}>
+              <button onClick={() => showModal.set(false)}>
                 Close
               </button>
             </div>
@@ -169,17 +169,17 @@ function Modal(props: ModalProps) {
 
 // Usage
 function App() {
-  const [showModal, setShowModal] = state(false)
+  const showModal = state(false)
 
   return (
     <Column>
-      <Pressable onPress={() => setShowModal(true)}>
+      <Pressable onPress={() => showModal.set(true)}>
         <Text>Open Modal</Text>
       </Pressable>
 
       <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        isOpen={showModal.valueOf()}
+        onClose={() => showModal.set(false)}
         title="Welcome"
       >
         <Text>This is a modal dialog!</Text>
@@ -198,26 +198,26 @@ import { Portal } from 'flexium/dom'
 import { state } from 'flexium/core'
 
 function Tooltip(props: { content: string; children: any }) {
-  const [show, setShow] = state(false)
-  const [position, setPosition] = state({ x: 0, y: 0 })
+  const show = state(false)
+  const position = state({ x: 0, y: 0 })
 
   const handleMouseEnter = (e: MouseEvent) => {
     const rect = (e.target as HTMLElement).getBoundingClientRect()
-    setPosition({
+    position.set({
       x: rect.left + rect.width / 2,
       y: rect.top - 8
     })
-    setShow(true)
+    show.set(true)
   }
 
   return (
     <span
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setShow(false)}
+      onMouseLeave={() => show.set(false)}
     >
       {props.children}
 
-      {show && (
+      {show.valueOf() && (
         <Portal>
           <div
             style={{
@@ -261,14 +261,14 @@ import { Portal } from 'flexium/dom'
 import { state, effect } from 'flexium/core'
 
 function Dropdown(props: { trigger: any; children: any }) {
-  const [open, setOpen] = state(false)
-  const [position, setPosition] = state({ x: 0, y: 0 })
+  const open = state(false)
+  const position = state({ x: 0, y: 0 })
   let triggerRef: HTMLElement | null = null
 
   const updatePosition = () => {
     if (triggerRef) {
       const rect = triggerRef.getBoundingClientRect()
-      setPosition({
+      position.set({
         x: rect.left,
         y: rect.bottom + 4
       })
@@ -277,10 +277,10 @@ function Dropdown(props: { trigger: any; children: any }) {
 
   // Close on outside click
   effect(() => {
-    if (open) {
+    if (open.valueOf()) {
       const handleClick = (e: MouseEvent) => {
         if (!triggerRef?.contains(e.target as Node)) {
-          setOpen(false)
+          open.set(false)
         }
       }
       document.addEventListener('click', handleClick)
@@ -294,13 +294,13 @@ function Dropdown(props: { trigger: any; children: any }) {
         ref={(el) => (triggerRef = el)}
         onClick={() => {
           updatePosition()
-          setOpen((prev) => !prev)
+          open.set((prev) => !prev)
         }}
       >
         {props.trigger}
       </span>
 
-      {open && (
+      {open.valueOf() && (
         <Portal>
           <div
             style={{

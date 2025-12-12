@@ -21,7 +21,7 @@ import TodoDemo from '../../components/TodoDemo.vue'
 ```tsx
 import { state } from 'flexium/core'
 
-const [items] = state(['Apple', 'Banana', 'Cherry'])
+const items = state(['Apple', 'Banana', 'Cherry'])
 
 // Just like React, but with automatic optimization!
 {items.map(item => <li>{item}</li>)}
@@ -44,7 +44,7 @@ In most frameworks, `items.map()` either:
 ### Basic List
 
 ```tsx
-const [items, setItems] = state(['Apple', 'Banana', 'Cherry'])
+const items = state(['Apple', 'Banana', 'Cherry'])
 
 <ul>
   {items.map((item, index) => (
@@ -56,7 +56,7 @@ const [items, setItems] = state(['Apple', 'Banana', 'Cherry'])
 ### Object Array
 
 ```tsx
-const [users, setUsers] = state([
+const users = state([
   { id: 1, name: 'Alice' },
   { id: 2, name: 'Bob' },
   { id: 3, name: 'Charlie' }
@@ -75,7 +75,7 @@ const [users, setUsers] = state([
 ### Nested Lists
 
 ```tsx
-const [categories, setCategories] = state([
+const categories = state([
   { name: 'Fruits', items: ['Apple', 'Banana'] },
   { name: 'Vegetables', items: ['Carrot', 'Broccoli'] }
 ])
@@ -95,7 +95,7 @@ const [categories, setCategories] = state([
 ### Empty State
 
 ```tsx
-const [items, setItems] = state([])
+const items = state([])
 
 {items.length > 0
   ? items.map(item => <div>{item}</div>)
@@ -107,9 +107,9 @@ const [items, setItems] = state([])
 
 ```tsx
 // All updates are reactive and optimized - use setter with callback
-setItems(prev => [...prev, 'New item'])                    // Append
-setItems(prev => prev.filter(item => item !== 'Apple'))    // Remove
-setItems(prev => prev.map(item =>
+items.set(prev => [...prev, 'New item'])                    // Append
+items.set(prev => prev.filter(item => item !== 'Apple'))    // Remove
+items.set(prev => prev.map(item =>
   item === 'Apple' ? 'Green Apple' : item                  // Update
 ))
 ```

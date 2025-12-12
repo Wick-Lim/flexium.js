@@ -35,11 +35,11 @@ import { Canvas, DrawArc } from 'flexium/canvas';
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `x` | `number \| Signal<number>` | Center x-coordinate. |
-| `y` | `number \| Signal<number>` | Center y-coordinate. |
-| `radius` | `number \| Signal<number>` | Arc radius. |
-| `startAngle` | `number \| Signal<number>` | Start angle in radians. |
-| `endAngle` | `number \| Signal<number>` | End angle in radians. |
+| `x` | `number \| StateValue<number>` | Center x-coordinate. |
+| `y` | `number \| StateValue<number>` | Center y-coordinate. |
+| `radius` | `number \| StateValue<number>` | Arc radius. |
+| `startAngle` | `number \| StateValue<number>` | Start angle in radians. |
+| `endAngle` | `number \| StateValue<number>` | End angle in radians. |
 | `counterclockwise` | `boolean` | Draw counter-clockwise. |
-| `stroke` | `string \| Signal<string>` | The stroke color. |
-| `fill` | `string \| Signal<string>` | The fill color (if closing the path). |
+| `stroke` | `string \| StateValue<string>` | The stroke color. |
+| `fill` | `string \| StateValue<string>` | The fill color (if closing the path). |

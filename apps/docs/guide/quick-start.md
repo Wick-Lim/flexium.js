@@ -54,13 +54,13 @@ Create `src/App.tsx`:
 import { state } from 'flexium/core'
 
 export function App() {
-  const [count, setCount] = state(0)
+  const count = state(0)
 
   return (
     <div style={{ padding: '20px' }}>
       <h1>Counter: {count}</h1>
       <button
-        onclick={() => setCount(c => c + 1)}
+        onclick={() => count.set(c => c + 1)}
         style={{ padding: '10px 20px', fontSize: '16px' }}
       >
         Increment
@@ -87,9 +87,9 @@ render(<App />, document.getElementById('app')!)
 ### 1. Local State
 
 ```tsx
-const [count, setCount] = state(0);
+const count = state(0);
 // count -> use directly as value
-// setCount(1) or setCount(c => c + 1) -> set value
+// count.set(1) or count.set(c => c + 1) -> set value
 ```
 
 ### 2. Global State
@@ -98,10 +98,10 @@ Share state between components easily using a unique `key`.
 
 ```tsx
 // In Header.tsx
-const [theme, setTheme] = state('light', { key: 'theme' });
+const theme = state('light', { key: 'theme' });
 
 // In Footer.tsx - Initial value is optional if already initialized
-const [theme, setTheme] = state(undefined, { key: 'theme' });
+const theme = state(undefined, { key: 'theme' });
 ```
 
 ### 3. Async State (Resources)
@@ -110,16 +110,16 @@ Flexium handles loading and error states for you.
 
 ```tsx
 // status: 'idle' | 'loading' | 'success' | 'error'
-const [user, refetch, status, error] = state(async () => {
+const user = state(async () => {
   const res = await fetch('/api/user');
   return res.json();
 });
 
 return (
   <div>
-    {status() === 'loading' && <p>Loading...</p>}
-    {error() && <p>Error: {error().message}</p>}
-    {user() && <p>Welcome, {user().name}</p>}
+    {user.status === 'loading' && <p>Loading...</p>}
+    {user.error && <p>Error: {user.error.message}</p>}
+    {user.valueOf() && <p>Welcome, {user.name}</p>}
   </div>
 );
 ```
@@ -129,8 +129,8 @@ return (
 Pass a function to `state()` to create a value that updates automatically when dependencies change.
 
 ```tsx
-const [count, setCount] = state(0);
-const [double] = state(() => count * 2);  // Use count directly
+const count = state(0);
+const double = state(() => count * 2);  // Use count directly
 ```
 
 ## Next Steps

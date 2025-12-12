@@ -133,19 +133,19 @@ const loop = createLoop({
 
 ```tsx
 function PausableGame() {
-  const [paused, setPaused] = state(false)
+  const paused = state(false)
   const kb = keyboard()
 
   const loop = createLoop({
     onUpdate: (delta) => {
-      if (paused()) return
+      if (paused.valueOf()) return
       updateGame(delta)
     }
   })
 
   effect(() => {
     if (kb.isJustPressed(Keys.Escape)) {
-      setPaused(p => !p)
+      paused.set(p => !p)
     }
   })
 
@@ -162,7 +162,7 @@ function PausableGame() {
 
 ```tsx
 function FPSCounter() {
-  const [fps, setFPS] = state(0)
+  const fps = state(0)
   let frameCount = 0
   let lastTime = performance.now()
 
@@ -172,7 +172,7 @@ function FPSCounter() {
       const now = performance.now()
 
       if (now - lastTime >= 1000) {
-        setFPS(frameCount)
+        fps.set(frameCount)
         frameCount = 0
         lastTime = now
       }
@@ -191,11 +191,11 @@ function FPSCounter() {
 ### State Machine
 
 ```tsx
-const [gameState, setGameState] = state('menu')
+const gameState = state('menu')
 
 const loop = createLoop({
   onUpdate: (delta) => {
-    switch (gameState()) {
+    switch (gameState.valueOf()) {
       case 'menu':
         updateMenu()
         break

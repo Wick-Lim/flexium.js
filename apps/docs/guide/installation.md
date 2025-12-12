@@ -298,16 +298,16 @@ interface CounterProps {
 }
 
 export const Counter = component<CounterProps>(({ initialCount = 0, step = 1, onCountChange }) => {
-  const [count, setCount] = state(initialCount)
+  const count = state(initialCount)
 
   const increment = () => {
-    setCount(c => c + step)
-    onCountChange?.(count())
+    count.set(c => c + step)
+    onCountChange?.(count.valueOf())
   }
 
   return () => (
     <div>
-      <p>Count: {count}</p>
+      <p>Count: {count.valueOf()}</p>
       <button onClick={increment}>Increment</button>
     </div>
   )

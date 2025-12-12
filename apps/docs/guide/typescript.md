@@ -34,8 +34,8 @@ function User(props: Props) {
 `state()` infers types automatically, or you can specify them.
 
 ```tsx
-const [count, setCount] = state<number>(0);
-const [user, setUser] = state<User | null>(null);
+const count = state<number>(0);
+const user = state<User | null>(null);
 ```
 
 ## FNode Children Types

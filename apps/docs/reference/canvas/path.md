@@ -32,8 +32,8 @@ import { Canvas, DrawPath } from 'flexium/canvas';
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `d` | `string \| Signal<string>` | The path data (SVG format). |
-| `fill` | `string \| Signal<string>` | The fill color. |
-| `stroke` | `string \| Signal<string>` | The stroke color. |
-| `strokeWidth` | `number \| Signal<number>` | The width of the stroke. |
-| `opacity` | `number \| Signal<number>` | Opacity (0 to 1). |
+| `d` | `string \| StateValue<string>` | The path data (SVG format). |
+| `fill` | `string \| StateValue<string>` | The fill color. |
+| `stroke` | `string \| StateValue<string>` | The stroke color. |
+| `strokeWidth` | `number \| StateValue<number>` | The width of the stroke. |
+| `opacity` | `number \| StateValue<number>` | Opacity (0 to 1). |

@@ -24,10 +24,10 @@ import { state } from 'flexium'
 
 function Component() {
   // All state needs - one function
-  const [count, setCount] = state(0)                    // local
-  const [doubled] = state(() => count * 2)              // derived
-  const [user] = state(async () => fetchUser())         // async
-  const [theme, setTheme] = state('dark', { key: 'theme' }) // global
+  const count = state(0)                    // local
+  const doubled = state(() => count * 2)              // derived
+  const user = state(async () => fetchUser())         // async
+  const theme = state('dark', { key: 'theme' }) // global
 
   // Use values directly - just like React!
   return <div>{count} × 2 = {doubled}</div>
@@ -86,7 +86,7 @@ This is where Flexium really shines:
 ```jsx [Flexium ✨]
 // React syntax + Svelte performance = Best of both worlds
 function TodoList() {
-  const [todos, setTodos] = state([...])
+  const todos = state([...])
 
   return (
     <ul>
@@ -142,7 +142,7 @@ function TodoList() {
 ::: code-group
 
 ```jsx [Flexium ✨]
-const [count] = state(5)
+const count = state(5)
 
 // Use it exactly like React!
 count               // 5
@@ -185,12 +185,12 @@ count + 10          // 15
 ```jsx [Flexium ✨]
 // Native JavaScript - just like React!
 function Component() {
-  const [show] = state(true)
+  const show = state(true)
 
   return (
     <div>
-      {show() && <Child />}
-      {show() ? <A /> : <B />}
+      {show.valueOf() && <Child />}
+      {show.valueOf() ? <A /> : <B />}
     </div>
   )
 }
@@ -326,10 +326,10 @@ useEffect(() => {
 
 | Svelte 5 | Flexium | Notes |
 |----------|---------|-------|
-| `let x = $state(0)` | `const [x, setX] = state(0)` | |
-| `let y = $derived(x * 2)` | `const [y] = state(() => x * 2)` | Auto-detected |
+| `let x = $state(0)` | `const x = state(0)` | |
+| `let y = $derived(x * 2)` | `const y = state(() => x * 2)` | Auto-detected |
 | `{#each}` | `items.map()` | React syntax! |
-| `{#if}` | `{() => x && ...}` | Native JS |
+| `{#if}` | `{() => x.valueOf() && ...}` | Native JS |
 
 ## When to Choose What
 

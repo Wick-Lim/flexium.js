@@ -64,7 +64,7 @@ document.body.appendChild(text.element);
 import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const [count, setCount] = state(0);
+const count = state(0);
 
 const text = createText({
   as: 'span',
@@ -74,8 +74,8 @@ const text = createText({
 });
 
 // Text automatically updates when state changes
-setCount(1);
-setCount(2);
+count.set(1);
+count.set(2);
 ```
 
 ### With Truncation
@@ -410,7 +410,7 @@ Use `ariaLive` for dynamic content that should be announced:
 import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const [status, setStatus] = state('Loading...');
+const status = state('Loading...');
 
 const statusText = createText({
   as: 'p',
@@ -419,7 +419,7 @@ const statusText = createText({
 });
 
 // Later
-setStatus('Complete!'); // Screen reader will announce "Complete!"
+status.set('Complete!'); // Screen reader will announce "Complete!"
 ```
 
 ### Clickable Text
@@ -489,7 +489,7 @@ Text content can be reactive using signals:
 import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const [username, setUsername] = state('Guest');
+const username = state('Guest');
 
 const greeting = createText({
   as: 'p',
@@ -497,8 +497,8 @@ const greeting = createText({
 });
 
 // Text automatically updates
-setUsername('John'); // Displays "John"
-setUsername('Jane'); // Displays "Jane"
+username.set('John'); // Displays "John"
+username.set('Jane'); // Displays "Jane"
 ```
 
 ### Computed Text
@@ -509,9 +509,9 @@ Combine with computed signals for derived text:
 import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const [firstName, setFirstName] = state('John');
-const [lastName] = state('Doe');
-const [fullName] = state(() => `${firstName} ${lastName}`);
+const firstName = state('John');
+const lastName = state('Doe');
+const fullName = state(() => `${firstName} ${lastName}`);
 
 const nameDisplay = createText({
   as: 'p',
@@ -519,7 +519,7 @@ const nameDisplay = createText({
 });
 
 // Updates automatically when either signal changes
-setFirstName('Jane'); // Displays "Jane Doe"
+firstName.set('Jane'); // Displays "Jane Doe"
 ```
 
 ## Number Formatting
@@ -531,7 +531,7 @@ Numeric values are automatically converted to strings:
 import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const [count, setCount] = state(0);
+const count = state(0);
 
 const counter = createText({
   as: 'span',
@@ -540,8 +540,8 @@ const counter = createText({
   fontWeight: 'bold',
 });
 
-setCount(42); // Displays "42"
-setCount(100); // Displays "100"
+count.set(42); // Displays "42"
+count.set(100); // Displays "100"
 ```
 
 ## Cleanup

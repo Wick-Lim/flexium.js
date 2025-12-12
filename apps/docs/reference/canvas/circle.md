@@ -33,10 +33,10 @@ import { Canvas, DrawCircle } from 'flexium/canvas';
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `x` | `number \| Signal<number>` | The x-coordinate of the center. |
-| `y` | `number \| Signal<number>` | The y-coordinate of the center. |
-| `radius` | `number \| Signal<number>` | The radius of the circle. |
-| `fill` | `string \| Signal<string>` | The fill color. |
-| `stroke` | `string \| Signal<string>` | The stroke color. |
-| `strokeWidth` | `number \| Signal<number>` | The width of the stroke. |
-| `opacity` | `number \| Signal<number>` | Opacity (0 to 1). |
+| `x` | `number \| StateValue<number>` | The x-coordinate of the center. |
+| `y` | `number \| StateValue<number>` | The y-coordinate of the center. |
+| `radius` | `number \| StateValue<number>` | The radius of the circle. |
+| `fill` | `string \| StateValue<string>` | The fill color. |
+| `stroke` | `string \| StateValue<string>` | The stroke color. |
+| `strokeWidth` | `number \| StateValue<number>` | The width of the stroke. |
+| `opacity` | `number \| StateValue<number>` | Opacity (0 to 1). |

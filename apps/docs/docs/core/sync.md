@@ -33,20 +33,20 @@ function sync<T>(fn: () => T): T
 ### Basic Usage
 
 ```tsx
-const [firstName, setFirstName] = state('John')
-const [lastName, setLastName] = state('Doe')
-const [age, setAge] = state(25)
+const firstName = state('John')
+const lastName = state('Doe')
+const age = state(25)
 
 // Without sync: 3 separate updates
-setFirstName('Jane')
-setLastName('Smith')
-setAge(30)
+firstName.set('Jane')
+lastName.set('Smith')
+age.set(30)
 
 // With sync: 1 combined update
 sync(() => {
-  setFirstName('Jane')
-  setLastName('Smith')
-  setAge(30)
+  firstName.set('Jane')
+  lastName.set('Smith')
+  age.set(30)
 })
 ```
 
@@ -54,15 +54,15 @@ sync(() => {
 
 ```tsx
 function UserForm() {
-  const [name, setName] = state('')
-  const [email, setEmail] = state('')
-  const [errors, setErrors] = state({})
+  const name = state('')
+  const email = state('')
+  const errors = state({})
 
   const handleSubmit = () => {
     sync(() => {
-      setName('')
-      setEmail('')
-      setErrors({})
+      name.set('')
+      email.set('')
+      errors.set({})
     })
   }
 
@@ -77,16 +77,16 @@ function UserForm() {
 ### Reset Multiple States
 
 ```tsx
-const [items, setItems] = state([])
-const [filter, setFilter] = state('')
-const [sortBy, setSortBy] = state('name')
-const [page, setPage] = state(1)
+const items = state([])
+const filter = state('')
+const sortBy = state('name')
+const page = state(1)
 
 function resetFilters() {
   sync(() => {
-    setFilter('')
-    setSortBy('name')
-    setPage(1)
+    filter.set('')
+    sortBy.set('name')
+    page.set(1)
   })
 }
 ```
@@ -95,8 +95,8 @@ function resetFilters() {
 
 ```tsx
 const result = sync(() => {
-  setCount(prev => prev + 1)
-  setTotal(prev => prev + 100)
+  count.set(prev => prev + 1)
+  total.set(prev => prev + 100)
   return 'done'
 })
 
@@ -107,14 +107,14 @@ console.log(result) // 'done'
 
 ```tsx
 sync(() => {
-  setA(1)
+  a.set(1)
 
   sync(() => {
-    setB(2)
-    setC(3)
+    b.set(2)
+    c.set(3)
   })
 
-  setD(4)
+  d.set(4)
 })
 // All updates happen together
 ```

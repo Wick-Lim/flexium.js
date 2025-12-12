@@ -14,7 +14,7 @@ Common mistakes and anti-patterns to avoid when using Flexium.
 
 ```tsx
 // ❌ Anti-pattern
-const [count, setCount] = state(0)
+const count = state(0)
 if (count === 5) {  // Always false
   console.log('Count is 5')
 }
@@ -41,7 +41,7 @@ if (+count === 5) {  // number
 
 ```tsx
 // ❌ Anti-pattern
-const [user, setUser] = state<User | null>(null)
+const user = state<User | null>(null)
 if (user) {  // Always true (Proxy is truthy)
   console.log(user.name)  // Error: user may be null
 }
@@ -66,7 +66,7 @@ if (user.peek() !== null) {
 
 ```tsx
 // ❌ Anti-pattern
-const [count, setCount] = state(0)
+const count = state(0)
 const displayCount = count  // Only stores initial value, doesn't track updates
 
 function Component() {
@@ -75,7 +75,7 @@ function Component() {
 
 // ✅ Correct approach
 function Component() {
-  const [count, setCount] = state(0)
+  const count = state(0)
   return <div>{count}</div>  // Automatically tracks updates
 }
 
@@ -95,14 +95,14 @@ effect(() => {
 // ❌ Anti-pattern
 function Modal() {
   // Only used in this component but made global
-  const [isOpen, setIsOpen] = state(false, { key: 'modal:open' })
+  const isOpen = state(false, { key: 'modal:open' })
   return isOpen ? <div>Modal</div> : null
 }
 
 // ✅ Correct approach
 function Modal() {
   // Local state is sufficient
-  const [isOpen, setIsOpen] = state(false)
+  const isOpen = state(false)
   return isOpen ? <div>Modal</div> : null
 }
 ```
@@ -120,17 +120,17 @@ function Modal() {
 
 ```tsx
 // ❌ Anti-pattern
-const [data, setData] = state(null, { key: 'data' })  // Too generic
-const [user, setUser] = state(null, { key: 'user' })  // Collision possible
+const data = state(null, { key: 'data' })  // Too generic
+const user = state(null, { key: 'user' })  // Collision possible
 
 // ✅ Correct approach
 // Use hierarchical keys
-const [user] = state(null, { key: ['auth', 'user'] })
-const [posts] = state([], { key: ['user', userId, 'posts'] })
+const user = state(null, { key: ['auth', 'user'] })
+const posts = state([], { key: ['user', userId, 'posts'] })
 
 // Or clear namespace
-const [user] = state(null, { key: 'app:auth:user' })
-const [posts] = state([], { key: `app:user:${userId}:posts` })
+const user = state(null, { key: 'app:auth:user' })
+const posts = state([], { key: `app:user:${userId}:posts` })
 ```
 
 ---
@@ -143,15 +143,15 @@ const [posts] = state([], { key: `app:user:${userId}:posts` })
 
 ```tsx
 // ❌ Anti-pattern - infinite loop
-const [count, setCount] = state(0)
+const count = state(0)
 effect(() => {
-  setCount(count + 1)  // count changes → effect re-runs → count changes → ...
+  count.set(count + 1)  // count changes → effect re-runs → count changes → ...
 })
 
 // ✅ Correct approach 1: conditional update
 effect(() => {
   if (count < 10) {
-    setCount(count + 1)
+    count.set(count + 1)
   }
 })
 
@@ -159,7 +159,7 @@ effect(() => {
 import { untrack } from 'flexium/core'
 effect(() => {
   untrack(() => {
-    setCount(count + 1)  // Not tracked
+    count.set(count + 1)  // Not tracked
   })
 })
 ```
@@ -172,9 +172,9 @@ effect(() => {
 
 ```tsx
 // ❌ Anti-pattern - memory leak
-const [isActive, setIsActive] = state(false)
+const isActive = state(false)
 effect(() => {
-  if (isActive) {
+  if (isActive.valueOf()) {
     const interval = setInterval(() => {
       console.log('tick')
     }, 1000)
@@ -184,7 +184,7 @@ effect(() => {
 
 // ✅ Correct approach
 effect(() => {
-  if (isActive) {
+  if (isActive.valueOf()) {
     const interval = setInterval(() => {
       console.log('tick')
     }, 1000)
@@ -202,17 +202,17 @@ effect(() => {
 
 ```tsx
 // ❌ Anti-pattern - dependencies not tracked
-const [count, setCount] = state(0)
+const count = state(0)
 effect(() => {
   console.log('Hello')  // Doesn't read count
 })
-setCount(1)  // Effect doesn't re-run
+count.set(1)  // Effect doesn't re-run
 
 // ✅ Correct approach
 effect(() => {
   console.log('Count:', count)  // Must read count to track
 })
-setCount(1)  // Effect re-runs
+count.set(1)  // Effect re-runs
 ```
 
 ---
@@ -225,16 +225,16 @@ setCount(1)  // Effect re-runs
 
 ```tsx
 // ❌ Anti-pattern - new object every time
-const [items] = state([1, 2, 3])
-const [data] = state(() => ({
+const items = state([1, 2, 3])
+const data = state(() => ({
   items: items,
   timestamp: Date.now()  // Different value each time → unnecessary recalculation
 }))
 
 // ✅ Correct approach - stable dependencies
-const [items] = state([1, 2, 3])
-const [timestamp] = state(() => Date.now())  // Manage as separate state
-const [data] = state(() => ({
+const items = state([1, 2, 3])
+const timestamp = state(() => Date.now())  // Manage as separate state
+const data = state(() => ({
   items: items,
   timestamp: timestamp  // Stable dependency
 }))
@@ -248,16 +248,16 @@ const [data] = state(() => ({
 
 ```tsx
 // ❌ Anti-pattern - side effects
-const [count, setCount] = state(0)
-const [doubled] = state(() => {
+const count = state(0)
+const doubled = state(() => {
   console.log('Computing doubled')  // Side effect
   localStorage.setItem('count', String(count))  // Side effect
   return count * 2
 })
 
 // ✅ Correct approach
-const [count, setCount] = state(0)
-const [doubled] = state(() => count * 2)  // Pure function
+const count = state(0)
+const doubled = state(() => count * 2)  // Pure function
 
 // Side effects in effect
 effect(() => {
@@ -276,16 +276,16 @@ effect(() => {
 
 ```tsx
 // ❌ Anti-pattern - multiple re-renders
-setA(1)  // Re-render 1
-setB(2)  // Re-render 2
-setC(3)  // Re-render 3
+a.set(1)  // Re-render 1
+b.set(2)  // Re-render 2
+c.set(3)  // Re-render 3
 
 // ✅ Correct approach - sync updates
 import { sync } from 'flexium/core'
 sync(() => {
-  setA(1)
-  setB(2)
-  setC(3)
+  a.set(1)
+  b.set(2)
+  c.set(3)
 })  // Single re-render
 ```
 
@@ -297,8 +297,8 @@ sync(() => {
 
 ```tsx
 // ❌ Anti-pattern - unnecessary computed
-const [count, setCount] = state(0)
-const [displayCount] = state(() => count)  // Just returns value
+const count = state(0)
+const displayCount = state(() => count)  // Just returns value
 
 // ✅ Correct approach
 const [count, setCount] = state(0)
@@ -336,7 +336,7 @@ const [count, setCount] = state(0)
 
 ```tsx
 // ❌ Anti-pattern - no error handling
-const [data] = state(async () => {
+const data = state(async () => {
   return fetch('/api/data').then(r => r.json())
 })
 
@@ -345,13 +345,13 @@ function Component() {
 }
 
 // ✅ Correct approach
-const [data, refetch, status, error] = state(async () => {
+const data = state(async () => {
   return fetch('/api/data').then(r => r.json())
 })
 
 function Component() {
-  if (String(status) === 'loading') return <Spinner />
-  if (String(status) === 'error') return <Error message={error.message} />
+  if (String(data.status) === 'loading') return <Spinner />
+  if (String(data.status) === 'error') return <Error message={data.error.message} />
   return <div>{data}</div>
 }
 ```
@@ -365,7 +365,7 @@ function Component() {
 ```tsx
 // ❌ Anti-pattern - duplicate requests
 function ComponentA() {
-  const [users] = state(async () => fetch('/api/users'), {
+  const users = state(async () => fetch('/api/users'), {
     key: 'users'
   })
   return <div>...</div>
@@ -373,7 +373,7 @@ function ComponentA() {
 
 function ComponentB() {
   // Same key but new request occurs
-  const [users] = state(async () => fetch('/api/users'), {
+  const users = state(async () => fetch('/api/users'), {
     key: 'users'
   })
   return <div>...</div>
@@ -393,8 +393,8 @@ function ComponentB() {
 
 ```tsx
 // ❌ Anti-pattern - type inference may fail
-const [user, setUser] = state(null)  // user: StateValue<null>
-setUser({ name: 'John' })  // Type error possible
+const user = state(null)  // user: StateValue<null>
+user.set({ name: 'John' })  // Type error possible
 
 // ✅ Correct approach - explicit type specification
 interface User {
@@ -402,8 +402,8 @@ interface User {
   email: string
 }
 
-const [user, setUser] = state<User | null>(null)
-setUser({ name: 'John', email: 'john@example.com' })  // Type safe
+const user = state<User | null>(null)
+user.set({ name: 'John', email: 'john@example.com' })  // Type safe
 ```
 
 ---
@@ -432,7 +432,7 @@ setUser({ name: 'John', email: 'john@example.com' })  // Type safe
 
 ```tsx
 // ❌ Anti-pattern - always renders
-const [user, setUser] = state<User | null>(null)
+const user = state<User | null>(null)
 return user && <UserProfile user={user} />  // Renders even when user is null
 
 // ✅ Correct approach
@@ -452,7 +452,7 @@ return user.peek() !== null && <UserProfile user={user} />
 ```tsx
 // ❌ Anti-pattern - no cleanup
 function Component() {
-  const [data] = state(async () => fetch('/api/data'), {
+  const data = state(async () => fetch('/api/data'), {
     key: 'temp:data'
   })
   // Remains in memory after component unmounts
@@ -462,7 +462,7 @@ function Component() {
 import { state, effect } from 'flexium/core'
 
 function Component() {
-  const [data] = state(async () => fetch('/api/data'), {
+  const data = state(async () => fetch('/api/data'), {
     key: 'temp:data'
   })
   

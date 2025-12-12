@@ -20,22 +20,22 @@ Flexium handles forms using the `state()` API for reactive form state management
 import { state } from 'flexium/core'
 
 function LoginForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     email: '',
     password: '',
   })
 
-  const [errors, setErrors] = state({
+  const errors = state({
     email: '',
     password: '',
   })
 
-  const [touched, setTouched] = state({
+  const touched = state({
     email: false,
     password: false,
   })
 
-  const [isSubmitting, setIsSubmitting] = state(false)
+  const isSubmitting = state(false)
 
   const validateEmail = (email: string) => {
     if (!email) return 'Email is required'
@@ -51,14 +51,14 @@ function LoginForm() {
 
   const handleEmailChange = (e: Event) => {
     const value = (e.target as HTMLInputElement).value
-    setFormData(prev => ({ ...prev, email: value }))
-    setErrors(prev => ({ ...prev, email: validateEmail(value) }))
+    formData.set(prev => ({ ...prev, email: value }))
+    errors.set(prev => ({ ...prev, email: validateEmail(value) }))
   }
 
   const handlePasswordChange = (e: Event) => {
     const value = (e.target as HTMLInputElement).value
-    setFormData(prev => ({ ...prev, password: value }))
-    setErrors(prev => ({ ...prev, password: validatePassword(value) }))
+    formData.set(prev => ({ ...prev, password: value }))
+    errors.set(prev => ({ ...prev, password: validatePassword(value) }))
   }
 
   const handleSubmit = async (e: Event) => {
@@ -67,15 +67,15 @@ function LoginForm() {
     const emailError = validateEmail(formData.email)
     const passwordError = validatePassword(formData.password)
 
-    setErrors({ email: emailError, password: passwordError })
+    errors.set({ email: emailError, password: passwordError })
 
     if (emailError || passwordError) return
 
-    setIsSubmitting(true)
+    isSubmitting.set(true)
     try {
       await login(formData.email, formData.password)
     } finally {
-      setIsSubmitting(false)
+      isSubmitting.set(false)
     }
   }
 
@@ -87,7 +87,7 @@ function LoginForm() {
           type="email"
           value={formData.email}
           onInput={handleEmailChange}
-          onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
+          onBlur={() => touched.set(prev => ({ ...prev, email: true }))}
         />
         {touched.email && errors.email && (
           <span class="error">{errors.email}</span>
@@ -100,15 +100,15 @@ function LoginForm() {
           type="password"
           value={formData.password}
           onInput={handlePasswordChange}
-          onBlur={() => setTouched(prev => ({ ...prev, password: true }))}
+          onBlur={() => touched.set(prev => ({ ...prev, password: true }))}
         />
         {touched.password && errors.password && (
           <span class="error">{errors.password}</span>
         )}
       </div>
 
-      <button type="submit" disabled={!!(errors.email || errors.password) || isSubmitting}>
-        {isSubmitting ? 'Logging in...' : 'Login'}
+      <button type="submit" disabled={!!(errors.email || errors.password) || isSubmitting.valueOf()}>
+        {isSubmitting.valueOf() ? 'Logging in...' : 'Login'}
       </button>
     </form>
   )
@@ -123,28 +123,28 @@ Use Flexium's `state()` API to manage form state reactively.
 
 ```tsx
 // Form data
-const [formData, setFormData] = state({
+const formData = state({
   email: '',
   password: '',
   // ... more fields
 })
 
 // Validation errors
-const [errors, setErrors] = state({
+const errors = state({
   email: '',
   password: '',
   // ... matching field errors
 })
 
 // Field touched state
-const [touched, setTouched] = state({
+const touched = state({
   email: false,
   password: false,
   // ... matching fields
 })
 
 // Submission state
-const [isSubmitting, setIsSubmitting] = state(false)
+const isSubmitting = state(false)
 ```
 
 ## Validation
@@ -175,14 +175,14 @@ const validateRequired = (value: string, fieldName: string) => {
 
 ```tsx
 const handleFieldChange = (field: string, value: string) => {
-  setFormData(prev => ({ ...prev, [field]: value }))
+  formData.set(prev => ({ ...prev, [field]: value }))
 
   // Validate on change
   let error = ''
   if (field === 'email') error = validateEmail(value)
   if (field === 'password') error = validatePassword(value)
 
-  setErrors(prev => ({ ...prev, [field]: error }))
+  errors.set(prev => ({ ...prev, [field]: error }))
 }
 ```
 
@@ -255,24 +255,24 @@ const validateUsername = (username: string) => {
 Perform async validation for server-side checks.
 
 ```tsx
-const [isValidating, setIsValidating] = state(false)
+const isValidating = state(false)
 
 const validateUsernameAsync = async (username: string) => {
   if (!username) return 'Username is required'
 
-  setIsValidating(true)
+  isValidating.set(true)
   try {
     const available = await checkUsernameAvailability(username)
     return available ? '' : 'Username is taken'
   } finally {
-    setIsValidating(false)
+    isValidating.set(false)
   }
 }
 
 const handleUsernameBlur = async () => {
-  setTouched(prev => ({ ...prev, username: true }))
+  touched.set(prev => ({ ...prev, username: true }))
   const error = await validateUsernameAsync(formData.username)
-  setErrors(prev => ({ ...prev, username: error }))
+  errors.set(prev => ({ ...prev, username: error }))
 }
 ```
 
@@ -317,7 +317,7 @@ const handleSubmit = async (e: Event) => {
   e.preventDefault()
 
   // Mark all fields as touched
-  setTouched({
+  touched.set({
     email: true,
     password: true,
   })
@@ -326,7 +326,7 @@ const handleSubmit = async (e: Event) => {
   const emailError = validateEmail(formData.email)
   const passwordError = validatePassword(formData.password)
 
-  setErrors({
+  errors.set({
     email: emailError,
     password: passwordError,
   })
@@ -335,17 +335,17 @@ const handleSubmit = async (e: Event) => {
   if (emailError || passwordError) return
 
   // Submit
-  setIsSubmitting(true)
+  isSubmitting.set(true)
   try {
     await saveData(formData)
   } catch (error) {
     // Handle error
-    setErrors(prev => ({
+    errors.set(prev => ({
       ...prev,
       submit: 'Submission failed. Please try again.'
     }))
   } finally {
-    setIsSubmitting(false)
+    isSubmitting.set(false)
   }
 }
 ```
@@ -359,7 +359,7 @@ const validateAllFields = () => {
     password: validatePassword(formData.password),
   }
 
-  setErrors(newErrors)
+  errors.set(newErrors)
 
   // Check if form is valid
   return !Object.values(newErrors).some(error => error)
@@ -371,11 +371,11 @@ const handleSubmit = async (e: Event) => {
   const isValid = validateAllFields()
   if (!isValid) return
 
-  setIsSubmitting(true)
+  isSubmitting.set(true)
   try {
     await saveData(formData)
   } finally {
-    setIsSubmitting(false)
+    isSubmitting.set(false)
   }
 }
 ```
@@ -399,10 +399,10 @@ const initialTouched = {
 }
 
 const resetForm = () => {
-  setFormData(initialFormData)
-  setErrors(initialErrors)
-  setTouched(initialTouched)
-  setIsSubmitting(false)
+  formData.set(initialFormData)
+  errors.set(initialErrors)
+  touched.set(initialTouched)
+  isSubmitting.set(false)
 }
 
 // Use in component
@@ -417,7 +417,7 @@ const resetForm = () => {
 import { state } from 'flexium/core'
 
 function RegistrationForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     username: '',
     email: '',
     password: '',
@@ -425,7 +425,7 @@ function RegistrationForm() {
     age: '',
   })
 
-  const [errors, setErrors] = state({
+  const errors = state({
     username: '',
     email: '',
     password: '',
@@ -433,7 +433,7 @@ function RegistrationForm() {
     age: '',
   })
 
-  const [touched, setTouched] = state({
+  const touched = state({
     username: false,
     email: false,
     password: false,
@@ -441,7 +441,7 @@ function RegistrationForm() {
     age: false,
   })
 
-  const [isSubmitting, setIsSubmitting] = state(false)
+  const isSubmitting = state(false)
 
   const validateUsername = (username: string) => {
     if (!username) return 'Username is required'
@@ -479,7 +479,7 @@ function RegistrationForm() {
 
   const handleChange = (field: string) => (e: Event) => {
     const value = (e.target as HTMLInputElement).value
-    setFormData(prev => ({ ...prev, [field]: value }))
+    formData.set(prev => ({ ...prev, [field]: value }))
 
     let error = ''
     if (field === 'username') error = validateUsername(value)
@@ -488,11 +488,11 @@ function RegistrationForm() {
     if (field === 'confirmPassword') error = validateConfirmPassword(value)
     if (field === 'age') error = validateAge(value)
 
-    setErrors(prev => ({ ...prev, [field]: error }))
+    errors.set(prev => ({ ...prev, [field]: error }))
   }
 
   const handleBlur = (field: string) => () => {
-    setTouched(prev => ({ ...prev, [field]: true }))
+    touched.set(prev => ({ ...prev, [field]: true }))
   }
 
   const handleSubmit = async (e: Event) => {
@@ -506,8 +506,8 @@ function RegistrationForm() {
       age: validateAge(formData.age),
     }
 
-    setErrors(newErrors)
-    setTouched({
+    errors.set(newErrors)
+    touched.set({
       username: true,
       email: true,
       password: true,
@@ -517,7 +517,7 @@ function RegistrationForm() {
 
     if (Object.values(newErrors).some(error => error)) return
 
-    setIsSubmitting(true)
+    isSubmitting.set(true)
     try {
       await registerUser(formData)
       alert('Registration successful!')
@@ -525,26 +525,26 @@ function RegistrationForm() {
     } catch (error) {
       alert('Registration failed: ' + error.message)
     } finally {
-      setIsSubmitting(false)
+      isSubmitting.set(false)
     }
   }
 
   const resetForm = () => {
-    setFormData({
+    formData.set({
       username: '',
       email: '',
       password: '',
       confirmPassword: '',
       age: '',
     })
-    setErrors({
+    errors.set({
       username: '',
       email: '',
       password: '',
       confirmPassword: '',
       age: '',
     })
-    setTouched({
+    touched.set({
       username: false,
       email: false,
       password: false,
@@ -624,8 +624,8 @@ function RegistrationForm() {
         )}
       </div>
 
-      <button type="submit" disabled={!isFormValid || isSubmitting}>
-        {isSubmitting ? 'Registering...' : 'Register'}
+      <button type="submit" disabled={!isFormValid || isSubmitting.valueOf()}>
+        {isSubmitting.valueOf() ? 'Registering...' : 'Register'}
       </button>
 
       <button type="button" onClick={resetForm}>
@@ -641,8 +641,8 @@ function RegistrationForm() {
 Handle file uploads with state management:
 
 ```tsx
-const [file, setFile] = state<File | null>(null)
-const [fileError, setFileError] = state('')
+const file = state<File | null>(null)
+const fileError = state('')
 
 const validateFile = (file: File | null) => {
   if (!file) return 'Please select a file'
@@ -654,8 +654,8 @@ const validateFile = (file: File | null) => {
 const handleFileChange = (e: Event) => {
   const input = e.target as HTMLInputElement
   const selectedFile = input.files?.[0] || null
-  setFile(selectedFile)
-  setFileError(validateFile(selectedFile))
+  file.set(selectedFile)
+  fileError.set(validateFile(selectedFile))
 }
 
 // In JSX
@@ -683,7 +683,7 @@ Choose when to validate:
   value={formData.email}
   onBlur={() => {
     const error = validateEmail(formData.email)
-    setErrors(prev => ({ ...prev, email: error }))
+    errors.set(prev => ({ ...prev, email: error }))
   }}
 />
 
@@ -721,17 +721,17 @@ interface FormTouched {
   password: boolean
 }
 
-const [formData, setFormData] = state<LoginData>({
+const formData = state<LoginData>({
   email: '',
   password: '',
 })
 
-const [errors, setErrors] = state<FormErrors>({
+const errors = state<FormErrors>({
   email: '',
   password: '',
 })
 
-const [touched, setTouched] = state<FormTouched>({
+const touched = state<FormTouched>({
   email: false,
   password: false,
 })

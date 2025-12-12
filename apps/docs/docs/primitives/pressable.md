@@ -245,18 +245,18 @@ function Button() {
 
 ```tsx
 function PressableButton({ onPress, children }) {
-  const [pressed, setPressed] = useState(false);
+  const pressed = state(false);
 
   return (
     <Pressable
       onPress={onPress}
-      onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}
+      onPressIn={() => pressed.set(true)}
+      onPressOut={() => pressed.set(false)}
       style={{
         padding: 12,
-        backgroundColor: pressed ? '#0056b3' : '#007bff',
+        backgroundColor: pressed.valueOf() ? '#0056b3' : '#007bff',
         borderRadius: 6,
-        transform: pressed ? 'scale(0.98)' : 'scale(1)',
+        transform: pressed.valueOf() ? 'scale(0.98)' : 'scale(1)',
         transition: 'all 0.1s'
       }}
     >
@@ -304,16 +304,16 @@ function PressableButton({ onPress, children }) {
 
 ```tsx
 function RippleButton({ onPress, children }) {
-  const [ripples, setRipples] = useState([]);
+  const ripples = state([]);
 
   const handlePress = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    setRipples([...ripples, { x, y, id: Date.now() }]);
+    ripples.set([...ripples.valueOf(), { x, y, id: Date.now() }]);
     setTimeout(() => {
-      setRipples(r => r.slice(1));
+      ripples.set(r => r.slice(1));
     }, 600);
 
     onPress();
@@ -330,7 +330,7 @@ function RippleButton({ onPress, children }) {
         borderRadius: 6
       }}
     >
-      {ripples.map(ripple => (
+      {ripples.valueOf().map(ripple => (
         <span
           key={ripple.id}
           style={{

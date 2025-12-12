@@ -153,46 +153,46 @@ import { effect, state } from 'flexium/core';
 
 describe('Signal System', () => {
   it('should create a signal with initial value', () => {
-    const [count] = state(0);
-    expect(count()).toBe(0);
+    const count = state(0);
+    expect(count.valueOf()).toBe(0);
   });
 
   it('should update signal value', () => {
-    const [count, setCount] = state(0);
-    setCount(5);
-    expect(count()).toBe(5);
+    const count = state(0);
+    count.set(5);
+    expect(count.valueOf()).toBe(5);
 
-    setCount(10);
-    expect(count()).toBe(10);
+    count.set(10);
+    expect(count.valueOf()).toBe(10);
   });
 
   it('should notify subscribers on change', () => {
-    const [count, setCount] = state(0);
+    const count = state(0);
     const fn = vi.fn();
 
     effect(() => {
-      fn(count());
+      fn(count.valueOf());
     });
 
     expect(fn).toHaveBeenCalledWith(0);
     expect(fn).toHaveBeenCalledTimes(1);
 
-    setCount(5);
+    count.set(5);
     expect(fn).toHaveBeenCalledWith(5);
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should not notify on same value', () => {
-    const [count, setCount] = state(0);
+    const count = state(0);
     const fn = vi.fn();
 
     effect(() => {
-      fn(count());
+      fn(count.valueOf());
     });
 
     expect(fn).toHaveBeenCalledTimes(1);
 
-    setCount(0); // Same value
+    count.set(0); // Same value
     expect(fn).toHaveBeenCalledTimes(1); // Should not trigger
   });
 });
@@ -208,48 +208,48 @@ import { state } from 'flexium/core';
 
 describe('Computed values', () => {
   it('should compute derived value', () => {
-    const [count, setCount] = state(2);
-    const [doubled] = state(() => count() * 2);
+    const count = state(2);
+    const doubled = state(() => count.valueOf() * 2);
 
-    expect(doubled()).toBe(4);
+    expect(doubled.valueOf()).toBe(4);
 
-    setCount(5);
-    expect(doubled()).toBe(10);
+    count.set(5);
+    expect(doubled.valueOf()).toBe(10);
   });
 
   it('should memoize computed values', () => {
-    const [count, setCount] = state(1);
+    const count = state(1);
     const fn = vi.fn((val) => val * 2);
-    const [doubled] = state(() => fn(count()));
+    const doubled = state(() => fn(count.valueOf()));
 
     // First access
-    expect(doubled()).toBe(2);
+    expect(doubled.valueOf()).toBe(2);
     expect(fn).toHaveBeenCalledTimes(1);
 
     // Multiple reads without dependency changes
-    expect(doubled()).toBe(2);
-    expect(doubled()).toBe(2);
+    expect(doubled.valueOf()).toBe(2);
+    expect(doubled.valueOf()).toBe(2);
     expect(fn).toHaveBeenCalledTimes(1); // Still only called once
 
     // After dependency change
-    setCount(5);
-    expect(doubled()).toBe(10);
+    count.set(5);
+    expect(doubled.valueOf()).toBe(10);
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should track nested dependencies', () => {
-    const [a, setA] = state(1);
-    const [b, setB] = state(2);
-    const [sum] = state(() => a() + b());
-    const [doubled] = state(() => sum() * 2);
+    const a = state(1);
+    const b = state(2);
+    const sum = state(() => a.valueOf() + b.valueOf());
+    const doubled = state(() => sum.valueOf() * 2);
 
-    expect(doubled()).toBe(6);
+    expect(doubled.valueOf()).toBe(6);
 
-    setA(3);
-    expect(doubled()).toBe(10); // (3 + 2) * 2
+    a.set(3);
+    expect(doubled.valueOf()).toBe(10); // (3 + 2) * 2
 
-    setB(5);
-    expect(doubled()).toBe(16); // (3 + 5) * 2
+    b.set(5);
+    expect(doubled.valueOf()).toBe(16); // (3 + 5) * 2
   });
 });
 ```
@@ -270,7 +270,7 @@ describe('Effects', () => {
   });
 
   it('should run effect when dependencies change', () => {
-    const [count, setCount] = state(0);
+    const count = state(0);
     const fn = vi.fn();
 
     effect(() => {
@@ -280,13 +280,13 @@ describe('Effects', () => {
     expect(fn).toHaveBeenCalledWith(0);
     expect(fn).toHaveBeenCalledTimes(1);
 
-    setCount(5);
+    count.set(5);
     expect(fn).toHaveBeenCalledWith(5);
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should run cleanup function', () => {
-    const [count, setCount] = state(0);
+    const count = state(0);
     const cleanup = vi.fn();
     const setup = vi.fn(() => cleanup);
 
@@ -295,32 +295,32 @@ describe('Effects', () => {
     expect(setup).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
 
-    setCount(1); // Trigger re-run
+    count.set(1); // Trigger re-run
     expect(cleanup).toHaveBeenCalledTimes(1);
     expect(setup).toHaveBeenCalledTimes(2);
   });
 
   it('should handle conditional dependencies', () => {
-    const [a, setA] = state(1);
-    const [b, setB] = state(2);
+    const a = state(1);
+    const b = state(2);
     const fn = vi.fn();
 
     effect(() => {
-      if (a() > 5) {
-        fn(b());
+      if (a.valueOf() > 5) {
+        fn(b.valueOf());
       }
     });
 
     expect(fn).not.toHaveBeenCalled();
 
-    setB(10); // Should not trigger (a <= 5)
+    b.set(10); // Should not trigger (a <= 5)
     expect(fn).not.toHaveBeenCalled();
 
-    setA(6); // Should trigger (a > 5)
+    a.set(6); // Should trigger (a > 5)
     expect(fn).toHaveBeenCalledWith(10);
     expect(fn).toHaveBeenCalledTimes(1);
 
-    setB(20); // Should trigger now (b is dependency)
+    b.set(20); // Should trigger now (b is dependency)
     expect(fn).toHaveBeenCalledWith(20);
     expect(fn).toHaveBeenCalledTimes(2);
   });
@@ -337,58 +337,58 @@ import { state } from 'flexium/core';
 
 describe('state() API', () => {
   it('should create local state', () => {
-    const [count, setCount] = state(0);
-    expect(count).toBe(0);  // count is now a value-like proxy
+    const count = state(0);
+    expect(count.valueOf()).toBe(0);  // count is now a value-like proxy
 
-    setCount(5);
-    expect(count).toBe(5);
+    count.set(5);
+    expect(count.valueOf()).toBe(5);
 
-    setCount(c => c + 1);
-    expect(count).toBe(6);
+    count.set(c => c + 1);
+    expect(count.valueOf()).toBe(6);
   });
 
   it('should create global state with key', () => {
-    const [count1, setCount1] = state(0, { key: 'global-count' });
-    const [count2, setCount2] = state(0, { key: 'global-count' });
+    const count1 = state(0, { key: 'global-count' });
+    const count2 = state(0, { key: 'global-count' });
 
     // Both reference same state
-    expect(count1).toBe(0);
-    expect(count2).toBe(0);
+    expect(count1.valueOf()).toBe(0);
+    expect(count2.valueOf()).toBe(0);
 
-    setCount1(10);
-    expect(count1).toBe(10);
-    expect(count2).toBe(10); // Updated too!
+    count1.set(10);
+    expect(count1.valueOf()).toBe(10);
+    expect(count2.valueOf()).toBe(10); // Updated too!
 
-    setCount2(20);
-    expect(count1).toBe(20);
-    expect(count2).toBe(20);
+    count2.set(20);
+    expect(count1.valueOf()).toBe(20);
+    expect(count2.valueOf()).toBe(20);
   });
 
   it('should create computed state', () => {
-    const [count, setCount] = state(5);
-    const [doubled] = state(() => count * 2);
+    const count = state(5);
+    const doubled = state(() => count.valueOf() * 2);
 
-    expect(doubled).toBe(10);
+    expect(doubled.valueOf()).toBe(10);
 
-    setCount(10);
-    expect(doubled).toBe(20);
+    count.set(10);
+    expect(doubled.valueOf()).toBe(20);
   });
 
   it('should create async state', async () => {
-    const [data, actions] = state(async () => {
+    const data = state(async () => {
       return new Promise(resolve => {
         setTimeout(() => resolve({ value: 42 }), 10);
       });
     });
 
     expect(data.loading).toBe(true);
-    expect(data).toBeUndefined();
+    expect(data.valueOf()).toBeUndefined();
 
     // Wait for resolution
     await new Promise(resolve => setTimeout(resolve, 20));
 
     expect(data.loading).toBe(false);
-    expect(data).toEqual({ value: 42 });
+    expect(data.valueOf()).toEqual({ value: 42 });
   });
 });
 ```
@@ -417,15 +417,15 @@ describe('Counter Component', () => {
   });
 
   function Counter() {
-    const [count, setCount] = state(0);
+    const count = state(0);
 
     return (
       <div>
         <p data-testid="count">Count: {count}</p>
-        <button data-testid="increment" onclick={() => setCount(c => c + 1)}>
+        <button data-testid="increment" onclick={() => count.set(c => c + 1)}>
           Increment
         </button>
-        <button data-testid="decrement" onclick={() => setCount(c => c - 1)}>
+        <button data-testid="decrement" onclick={() => count.set(c => c - 1)}>
           Decrement
         </button>
       </div>
@@ -490,13 +490,13 @@ describe('TodoList Component', () => {
   });
 
   function TodoList() {
-    const [todos, setTodos] = state<string[]>([]);
-    const [input, setInput] = state('');
+    const todos = state<string[]>([]);
+    const input = state('');
 
     const addTodo = () => {
-      if (input.trim()) {
-        setTodos([...todos, input]);
-        setInput('');
+      if (input.valueOf().trim()) {
+        todos.set([...todos.valueOf(), input.valueOf()]);
+        input.set('');
       }
     };
 
@@ -504,15 +504,15 @@ describe('TodoList Component', () => {
       <div>
         <input
           data-testid="todo-input"
-          value={input}
-          oninput={(e) => setInput(e.target.value)}
+          value={input.valueOf()}
+          oninput={(e) => input.set(e.target.value)}
           placeholder="Add todo..."
         />
         <button data-testid="add-button" onclick={addTodo}>
           Add
         </button>
         <ul data-testid="todo-list">
-          {todos.map((todo, i) => <li key={i}>{todo}</li>)}
+          {todos.valueOf().map((todo, i) => <li key={i}>{todo}</li>)}
         </ul>
       </div>
     );
@@ -716,7 +716,7 @@ describe('UserProfile with mocked data', () => {
   });
 
   function UserProfile({ userId }) {
-    const [user] = state(async () => {
+    const user = state(async () => {
       const res = await fetch(`/api/users/${userId}`);
       return res.json();
     });
@@ -725,7 +725,7 @@ describe('UserProfile with mocked data', () => {
       <div>
         {user.loading && <div data-testid="loading">Loading...</div>}
         {user.error && <div data-testid="error">Error: {user.error.message}</div>}
-        {user && (
+        {user.valueOf() && (
           <div data-testid="user-data">
             <h1>{user.name}</h1>
             <p>{user.email}</p>

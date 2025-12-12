@@ -472,21 +472,21 @@ import { router } from 'flexium/router'
 function TransitionWrapper({ children }) {
   const r = router()
   const location = r.location
-  const [isTransitioning, setIsTransitioning] = state(false)
+  const isTransitioning = state(false)
 
   effect(() => {
     // Trigger transition on location change
-    setIsTransitioning(true)
+    isTransitioning.set(true)
 
     const timeout = setTimeout(() => {
-      setIsTransitioning(false)
+      isTransitioning.set(false)
     }, 300)
 
     return () => clearTimeout(timeout)
   })
 
   return (
-    <div class={() => isTransitioning() ? 'fade-out' : 'fade-in'}>
+    <div class={() => isTransitioning.valueOf() ? 'fade-out' : 'fade-in'}>
       {children}
     </div>
   )
@@ -503,28 +503,28 @@ function TransitionWrapper({ children }) {
 function PageTransition({ children }) {
   const r = router()
   const location = r.location
-  const [currentPath, setCurrentPath] = state('')
-  const [isAnimating, setIsAnimating] = state(false)
+  const currentPath = state('')
+  const isAnimating = state(false)
 
   effect(() => {
     const newPath = location().pathname
 
-    if (currentPath() !== newPath) {
-      setIsAnimating(true)
+    if (currentPath.valueOf() !== newPath) {
+      isAnimating.set(true)
 
       setTimeout(() => {
-        setCurrentPath(newPath)
-        setIsAnimating(false)
+        currentPath.set(newPath)
+        isAnimating.set(false)
       }, 200)
     }
   })
 
   return (
     <div
-      class={() => `page-container ${isAnimating() ? 'transitioning' : ''}`}
+      class={() => `page-container ${isAnimating.valueOf() ? 'transitioning' : ''}`}
       style={{
-        opacity: isAnimating() ? 0 : 1,
-        transform: isAnimating() ? 'translateY(20px)' : 'translateY(0)',
+        opacity: isAnimating.valueOf() ? 0 : 1,
+        transform: isAnimating.valueOf() ? 'translateY(20px)' : 'translateY(0)',
         transition: 'opacity 0.2s, transform 0.2s'
       }}
     >

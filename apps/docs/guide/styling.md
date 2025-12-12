@@ -49,7 +49,7 @@ For dynamic, reactive styling, pass a function that returns a style object. The 
 import { state } from 'flexium/core'
 
 function ThemedButton() {
-  const [isDark, setIsDark] = state(false)
+  const isDark = state(false)
 
   return (
     <button
@@ -61,7 +61,7 @@ function ThemedButton() {
         borderRadius: '4px',
         cursor: 'pointer'
       })}
-      onclick={() => setIsDark(d => !d)}
+      onclick={() => isDark.set(d => !d)}
     >
       Toggle Theme
     </button>
@@ -76,8 +76,8 @@ The style function re-evaluates automatically when any referenced signal changes
 Mix static and reactive properties within the same style object:
 
 ```tsx
-const [size, setSize] = state(16)
-const [color, setColor] = state('#333')
+const size = state(16)
+const color = state('#333')
 
 <div style={{
   fontSize: size + 'px',     // Reactive - coercion works in concatenation
@@ -97,7 +97,7 @@ Use computed values for derived styles:
 import { state } from 'flexium/core'
 
 function ProgressBar() {
-  const [progress, setProgress] = state(0)
+  const progress = state(0)
 
   return (
     <div style={{
@@ -136,8 +136,8 @@ Use the `class` attribute (not `className`) to apply CSS classes.
 Use template literals or helper functions for conditional classes:
 
 ```tsx
-const [isActive, setIsActive] = state(false)
-const [isPrimary, setIsPrimary] = state(true)
+const isActive = state(false)
+const isPrimary = state(true)
 
 // Using template literal
 <button class={`btn ${isActive.valueOf() ? 'active' : ''} ${isPrimary.valueOf() ? 'primary' : 'secondary'}`}>
@@ -163,7 +163,7 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 The `class` attribute can also accept a function for reactive class names:
 
 ```tsx
-const [status, setStatus] = state<'idle' | 'loading' | 'success' | 'error'>('idle')
+const status = state<'idle' | 'loading' | 'success' | 'error'>('idle')
 
 <div class={() => `status-badge ${status}`}>
   {status}
@@ -218,7 +218,7 @@ function Button() {
 import styles from './App.module.css'
 
 function App() {
-  const [isActive, setIsActive] = state(false)
+  const isActive = state(false)
 
   return (
     <div class={() => `${styles.container} ${isActive.valueOf() ? styles.active : ''}`}>
@@ -268,7 +268,7 @@ Update CSS variables reactively for instant theme changes:
 import { state, effect } from 'flexium/core'
 
 function App() {
-  const [theme, setTheme] = state<'light' | 'dark'>('light')
+  const theme = state<'light' | 'dark'>('light')
 
   effect(() => {
     const root = document.documentElement
@@ -289,7 +289,7 @@ function App() {
       color: 'var(--text-color)',
       minHeight: '100vh'
     }}>
-      <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+      <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
         Toggle Theme
       </button>
     </div>
@@ -305,7 +305,7 @@ Create responsive, interactive UIs by deriving styles from application state.
 
 ```tsx
 function StatusIndicator() {
-  const [status, setStatus] = state<'online' | 'offline' | 'away'>('offline')
+  const status = state<'online' | 'offline' | 'away'>('offline')
 
   const statusStyles = {
     online: { background: '#4caf50', color: '#fff' },
@@ -346,9 +346,9 @@ const [isExpanded, setIsExpanded] = state(false)
 
 ```tsx
 function Card() {
-  const [isHovered, setIsHovered] = state(false)
-  const [isSelected, setIsSelected] = state(false)
-  const [isDisabled, setIsDisabled] = state(false)
+  const isHovered = state(false)
+  const isSelected = state(false)
+  const isDisabled = state(false)
 
   return (
     <div
@@ -365,9 +365,9 @@ function Card() {
         transition: 'all 0.2s ease',
         boxShadow: isHovered.valueOf() && !isDisabled.valueOf() ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
       })}
-      onmouseenter={() => !isDisabled.valueOf() && setIsHovered(true)}
-      onmouseleave={() => setIsHovered(false)}
-      onclick={() => !isDisabled.valueOf() && setIsSelected(s => !s)}
+      onmouseenter={() => !isDisabled.valueOf() && isHovered.set(true)}
+      onmouseleave={() => isHovered.set(false)}
+      onclick={() => !isDisabled.valueOf() && isSelected.set(s => !s)}
     >
       Card Content
     </div>
@@ -410,13 +410,13 @@ Use matchMedia API with signals for JavaScript-driven responsive behavior:
 import { state, effect } from 'flexium/core'
 
 function useMediaQuery(query: string) {
-  const [matches, setMatches] = state(false)
+  const matches = state(false)
 
   effect(() => {
     const mediaQuery = window.matchMedia(query)
-    setMatches(mediaQuery.matches)
+    matches.set(mediaQuery.matches)
 
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches)
+    const handler = (e: MediaQueryListEvent) => matches.set(e.matches)
     mediaQuery.addEventListener('change', handler)
 
     return () => mediaQuery.removeEventListener('change', handler)
@@ -473,11 +473,11 @@ Implement light/dark mode and custom themes.
 import { state } from 'flexium/core'
 
 function useTheme() {
-  const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app-theme' })
+  const theme = state<'light' | 'dark'>('light', { key: 'app-theme' })
 
-  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
+  const toggleTheme = () => theme.set(t => t === 'light' ? 'dark' : 'light')
 
-  return { theme, setTheme, toggleTheme }
+  return { theme, setTheme: theme.set, toggleTheme }
 }
 
 function App() {
@@ -533,7 +533,7 @@ Use context to provide theme throughout your app:
 import { state } from 'flexium/core'
 
 // Theme state - shared globally with key
-const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app:theme' })
+const theme = state<'light' | 'dark'>('light', { key: 'app:theme' })
 
 const lightColors = {
   background: '#ffffff',
@@ -549,12 +549,12 @@ const darkColors = {
   secondary: '#2a2a2a'
 }
 
-const [colors] = state(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
-const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
+const colors = state(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
+const toggleTheme = () => theme.set(t => t === 'light' ? 'dark' : 'light')
 
 function ThemedButton() {
-  const [theme] = state('light', { key: 'app:theme' })
-  const [colors] = state(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
+  const theme = state('light', { key: 'app:theme' })
+  const colors = state(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
 
   return (
     <button style={() => ({
@@ -577,7 +577,7 @@ Detect and respect user's system theme preference:
 
 ```tsx
 function useSystemTheme() {
-  const [theme, setTheme] = state<'light' | 'dark'>(() => {
+  const theme = state<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
@@ -587,7 +587,7 @@ function useSystemTheme() {
   effect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = (e: MediaQueryListEvent) => {
-      setTheme(e.matches ? 'dark' : 'light')
+      theme.set(e.matches ? 'dark' : 'light')
     }
 
     mediaQuery.addEventListener('change', handler)
@@ -690,13 +690,13 @@ function mergeStyles(...styles: (StyleObject | undefined)[]): StyleObject {
 }
 
 function withHover(baseStyle: StyleObject, hoverStyle: StyleObject) {
-  const [isHovered, setIsHovered] = state(false)
+  const isHovered = state(false)
 
   return {
     style: () => isHovered.valueOf() ? mergeStyles(baseStyle, hoverStyle) : baseStyle,
     handlers: {
-      onmouseenter: () => setIsHovered(true),
-      onmouseleave: () => setIsHovered(false)
+      onmouseenter: () => isHovered.set(true),
+      onmouseleave: () => isHovered.set(false)
     }
   }
 }
@@ -717,9 +717,9 @@ function InteractiveCard() {
 
 ```tsx
 function InteractiveButton() {
-  const [isHovered, setIsHovered] = state(false)
-  const [isFocused, setIsFocused] = state(false)
-  const [isPressed, setIsPressed] = state(false)
+  const isHovered = state(false)
+  const isFocused = state(false)
+  const isPressed = state(false)
 
   return (
     <button
@@ -736,12 +736,12 @@ function InteractiveButton() {
         boxShadow: isHovered.valueOf() && !isPressed.valueOf() ? '0 4px 8px rgba(0,0,0,0.2)' : 'none',
         transition: 'all 0.2s ease'
       })}
-      onmouseenter={() => setIsHovered(true)}
-      onmouseleave={() => { setIsHovered(false); setIsPressed(false) }}
-      onfocus={() => setIsFocused(true)}
-      onblur={() => setIsFocused(false)}
-      onmousedown={() => setIsPressed(true)}
-      onmouseup={() => setIsPressed(false)}
+      onmouseenter={() => isHovered.set(true)}
+      onmouseleave={() => { isHovered.set(false); isPressed.set(false) }}
+      onfocus={() => isFocused.set(true)}
+      onblur={() => isFocused.set(false)}
+      onmousedown={() => isPressed.set(true)}
+      onmouseup={() => isPressed.set(false)}
     >
       Interactive Button
     </button>

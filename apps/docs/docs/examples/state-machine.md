@@ -14,58 +14,58 @@ import { state } from 'flexium/core'
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
-  const [currentState, setCurrentState] = state<LoadingState>('idle')
-  const [data, setData] = state<any>(null)
-  const [error, setError] = state<Error | null>(null)
+  const currentState = state<LoadingState>('idle')
+  const data = state<any>(null)
+  const error = state<Error | null>(null)
   
   const loadData = async () => {
     // idle -> loading
-    setCurrentState('loading')
-    setError(null)
+    currentState.set('loading')
+    error.set(null)
     
     try {
       const res = await fetch('/api/data')
       if (!res.ok) throw new Error('Failed to fetch')
       
-      const data = await res.json()
-      setData(data)
+      const d = await res.json()
+      data.set(d)
       
       // loading -> success
-      setCurrentState('success')
+      currentState.set('success')
     } catch (err) {
-      setError(err as Error)
+      error.set(err as Error)
       
       // loading -> error
-      setCurrentState('error')
+      currentState.set('error')
     }
   }
   
   const reset = () => {
-    setCurrentState('idle')
-    setData(null)
-    setError(null)
+    currentState.set('idle')
+    data.set(null)
+    error.set(null)
   }
   
   return (
     <div>
-      {currentState === 'idle' && (
+      {currentState.valueOf() === 'idle' && (
         <button onclick={loadData}>Load Data</button>
       )}
       
-      {currentState === 'loading' && (
+      {currentState.valueOf() === 'loading' && (
         <div>Loading...</div>
       )}
       
-      {currentState === 'success' && (
+      {currentState.valueOf() === 'success' && (
         <div>
           <pre>{JSON.stringify(data, null, 2)}</pre>
           <button onclick={reset}>Reset</button>
         </div>
       )}
       
-      {currentState === 'error' && (
+      {currentState.valueOf() === 'error' && (
         <div>
-          <p>Error: {error?.message}</p>
+          <p>Error: {error.valueOf()?.message}</p>
           <button onclick={loadData}>Retry</button>
           <button onclick={reset}>Reset</button>
         </div>
@@ -90,8 +90,8 @@ type FormState =
   | { type: 'error'; message: string }
 
 function ComplexForm() {
-  const [formState, setFormState] = state<FormState>({ type: 'idle' })
-  const [formData, setFormData] = state({
+  const formState = state<FormState>({ type: 'idle' })
+  const formData = state({
     email: '',
     password: ''
   })
@@ -105,17 +105,17 @@ function ComplexForm() {
   
   const handleSubmit = async () => {
     // idle -> validating
-    setFormState({ type: 'validating' })
+    formState.set({ type: 'validating' })
     
     const errors = validateForm(formData)
     if (errors.length > 0) {
       // validating -> error
-      setFormState({ type: 'error', message: errors[0] })
+      formState.set({ type: 'error', message: errors[0] })
       return
     }
     
     // validating -> submitting
-    setFormState({ type: 'submitting' })
+    formState.set({ type: 'submitting' })
     
     try {
       const res = await fetch('/api/submit', {
@@ -129,10 +129,10 @@ function ComplexForm() {
       const data = await res.json()
       
       // submitting -> success
-      setFormState({ type: 'success', data })
+      formState.set({ type: 'success', data })
     } catch (error) {
       // submitting -> error
-      setFormState({ 
+      formState.set({ 
         type: 'error', 
         message: (error as Error).message 
       })
@@ -140,8 +140,8 @@ function ComplexForm() {
   }
   
   const reset = () => {
-    setFormState({ type: 'idle' })
-    setFormData({ email: '', password: '' })
+    formState.set({ type: 'idle' })
+    formData.set({ email: '', password: '' })
   }
   
   return (
@@ -150,13 +150,13 @@ function ComplexForm() {
         <form onsubmit={(e) => { e.preventDefault(); handleSubmit() }}>
           <input
             value={formData.email}
-            oninput={(e) => setFormData({ ...formData, email: e.currentTarget.value })}
+            oninput={(e) => formData.set({ ...formData, email: e.currentTarget.value })}
             placeholder="Email"
           />
           <input
             type="password"
             value={formData.password}
-            oninput={(e) => setFormData({ ...formData, password: e.currentTarget.value })}
+            oninput={(e) => formData.set({ ...formData, password: e.currentTarget.value })}
             placeholder="Password"
           />
           <button type="submit">Submit</button>
@@ -182,7 +182,7 @@ function ComplexForm() {
       {formState.type === 'error' && (
         <div>
           <p>Error: {formState.message}</p>
-          <button onclick={() => setFormState({ type: 'idle' })}>Retry</button>
+          <button onclick={() => formState.set({ type: 'idle' })}>Retry</button>
         </div>
       )}
     </div>
@@ -204,21 +204,21 @@ type GameState =
   | { type: 'gameOver'; score: number; level: number }
 
 function Game() {
-  const [gameState, setGameState] = state<GameState>({ type: 'menu' })
-  const [score, setScore] = state(0)
-  const [level, setLevel] = state(1)
+  const gameState = state<GameState>({ type: 'menu' })
+  const score = state(0)
+  const level = state(1)
   
   const startGame = () => {
     // menu -> playing (guard: always allowed)
-    setGameState({ type: 'playing', score: 0, level: 1 })
-    setScore(0)
-    setLevel(1)
+    gameState.set({ type: 'playing', score: 0, level: 1 })
+    score.set(0)
+    level.set(1)
   }
   
   const pauseGame = () => {
     // playing -> paused (guard: only when playing)
     if (gameState.type === 'playing') {
-      setGameState({ 
+      gameState.set({ 
         type: 'paused', 
         score: gameState.score, 
         level: gameState.level 
@@ -229,7 +229,7 @@ function Game() {
   const resumeGame = () => {
     // paused -> playing (guard: only when paused)
     if (gameState.type === 'paused') {
-      setGameState({ 
+      gameState.set({ 
         type: 'playing', 
         score: gameState.score, 
         level: gameState.level 
@@ -240,7 +240,7 @@ function Game() {
   const endGame = () => {
     // playing/paused -> gameOver (guard: only when playing or paused)
     if (gameState.type === 'playing' || gameState.type === 'paused') {
-      setGameState({ 
+      gameState.set({ 
         type: 'gameOver', 
         score: gameState.score, 
         level: gameState.level 
@@ -252,8 +252,8 @@ function Game() {
     // Only increase score when playing
     if (gameState.type === 'playing') {
       const newScore = gameState.score + points
-      setScore(newScore)
-      setGameState({ 
+      score.set(newScore)
+      gameState.set({ 
         type: 'playing', 
         score: newScore, 
         level: gameState.level 
@@ -324,12 +324,12 @@ type State =
   | { type: 'error'; error: Error }
 
 function ActionBasedStateMachine() {
-  const [state, setState] = state<State>({ type: 'idle' })
+  const machineState = state<State>({ type: 'idle' })
   
   const dispatch = (action: Action) => {
     switch (action.type) {
       case 'LOAD':
-        setState({ type: 'loading' })
+        machineState.set({ type: 'loading' })
         // Execute async action
         fetch('/api/data')
           .then(res => res.json())
@@ -338,39 +338,39 @@ function ActionBasedStateMachine() {
         break
       
       case 'LOAD_SUCCESS':
-        setState({ type: 'success', data: action.data })
+        machineState.set({ type: 'success', data: action.data })
         break
       
       case 'LOAD_ERROR':
-        setState({ type: 'error', error: action.error })
+        machineState.set({ type: 'error', error: action.error })
         break
       
       case 'RESET':
-        setState({ type: 'idle' })
+        machineState.set({ type: 'idle' })
         break
     }
   }
   
   return (
     <div>
-      {state.type === 'idle' && (
+      {machineState.type === 'idle' && (
         <button onclick={() => dispatch({ type: 'LOAD' })}>Load</button>
       )}
       
-      {state.type === 'loading' && (
+      {machineState.type === 'loading' && (
         <div>Loading...</div>
       )}
       
-      {state.type === 'success' && (
+      {machineState.type === 'success' && (
         <div>
-          <pre>{JSON.stringify(state.data, null, 2)}</pre>
+          <pre>{JSON.stringify(machineState.data, null, 2)}</pre>
           <button onclick={() => dispatch({ type: 'RESET' })}>Reset</button>
         </div>
       )}
       
-      {state.type === 'error' && (
+      {machineState.type === 'error' && (
         <div>
-          <p>Error: {state.error.message}</p>
+          <p>Error: {machineState.error.message}</p>
           <button onclick={() => dispatch({ type: 'LOAD' })}>Retry</button>
           <button onclick={() => dispatch({ type: 'RESET' })}>Reset</button>
         </div>
@@ -390,13 +390,13 @@ export function createStateMachine<TState, TAction>(
   initialState: TState,
   reducer: (state: TState, action: TAction) => TState
 ) {
-  const [state, setState] = state(initialState)
+  const machineState = state(initialState)
   
   const dispatch = (action: TAction) => {
-    setState(reducer(state, action))
+    machineState.set(reducer(machineState, action))
   }
   
-  return [state, dispatch] as const
+  return [machineState, dispatch] as const
 }
 
 // Usage example

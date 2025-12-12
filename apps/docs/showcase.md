@@ -89,8 +89,8 @@ import { state } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Counter() {
-  const [count, setCount] = state(0)
-  const [doubled] = state(() => count * 2)  // derived value
+  const count = state(0)
+  const doubled = state(() => count * 2)  // derived value
 
   return (
     <Column gap={16} padding={24}>
@@ -99,13 +99,13 @@ function Counter() {
       </Text>
       <Text>Doubled: {doubled}</Text>
       <Row gap={12}>
-        <Pressable onPress={() => setCount(c => c - 1)}>
+        <Pressable onPress={() => count.set(c => c - 1)}>
           <Text style={buttonStyle}>- Decrement</Text>
         </Pressable>
-        <Pressable onPress={() => setCount(0)}>
+        <Pressable onPress={() => count.set(0)}>
           <Text style={buttonStyle}>Reset</Text>
         </Pressable>
-        <Pressable onPress={() => setCount(c => c + 1)}>
+        <Pressable onPress={() => count.set(c => c + 1)}>
           <Text style={buttonStyle}>+ Increment</Text>
         </Pressable>
       </Row>
@@ -131,24 +131,24 @@ import { state } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function TodoApp() {
-  const [todos, setTodos] = state([
+  const todos = state([
     { id: 1, text: 'Learn Flexium', done: true },
     { id: 2, text: 'Build something awesome', done: false }
   ])
-  const [inputText, setInputText] = state('')
+  const inputText = state('')
 
   const addTodo = () => {
-    if (!inputText.trim()) return
-    setTodos(prev => [...prev, {
+    if (!inputText.valueOf().trim()) return
+    todos.set(prev => [...prev, {
       id: Date.now(),
-      text: inputText,
+      text: inputText.valueOf(),
       done: false
     }])
-    setInputText('')
+    inputText.set('')
   }
 
   const toggleTodo = (id) => {
-    setTodos(prev => prev.map(t =>
+    todos.set(prev => prev.map(t =>
       t.id === id ? { ...t, done: !t.done } : t
     ))
   }
@@ -158,7 +158,7 @@ function TodoApp() {
       <Row gap={8}>
         <input
           value={inputText}
-          oninput={(e) => setInputText(e.target.value)}
+          oninput={(e) => inputText.set(e.target.value)}
           placeholder="Add a new todo..."
         />
         <Pressable onPress={addTodo}>
@@ -202,9 +202,9 @@ import { state, effect } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Stopwatch() {
-  const [seconds, setSeconds] = state(0)
-  const [isRunning, setIsRunning] = state(false)
-  const [laps, setLaps] = state([])
+  const seconds = state(0)
+  const isRunning = state(false)
+  const laps = state([])
 
   // Format time display
   const formatTime = (s) => {
@@ -216,13 +216,13 @@ function Stopwatch() {
 
   let intervalId
   const startStop = () => {
-    if (isRunning) {
+    if (isRunning.valueOf()) {
       clearInterval(intervalId)
-      setIsRunning(false)
+      isRunning.set(false)
     } else {
-      setIsRunning(true)
+      isRunning.set(true)
       intervalId = setInterval(() => {
-        setSeconds(s => s + 0.01)
+        seconds.set(s => s + 0.01)
       }, 10)
     }
   }
@@ -230,19 +230,19 @@ function Stopwatch() {
   return (
     <Column gap={16}>
       <Text style={{ fontSize: '48px', fontFamily: 'monospace' }}>
-        {() => formatTime(seconds)}
+        {() => formatTime(seconds.valueOf())}
       </Text>
 
       <Row gap={8}>
         <Pressable onPress={startStop}>
-          <Text style={{ background: isRunning ? 'red' : 'green' }}>
-            {isRunning ? 'Stop' : 'Start'}
+          <Text style={{ background: isRunning.valueOf() ? 'red' : 'green' }}>
+            {isRunning.valueOf() ? 'Stop' : 'Start'}
           </Text>
         </Pressable>
-        <Pressable onPress={() => setLaps(prev => [seconds, ...prev])}>
+        <Pressable onPress={() => laps.set(prev => [seconds.valueOf(), ...prev])}>
           <Text>Lap</Text>
         </Pressable>
-        <Pressable onPress={() => { setSeconds(0); setLaps([]) }}>
+        <Pressable onPress={() => { seconds.set(0); laps.set([]) }}>
           <Text>Reset</Text>
         </Pressable>
       </Row>
@@ -272,14 +272,14 @@ import { state, effect } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function ParticleCanvas() {
-  const [mouseX, setMouseX] = state(150)
-  const [mouseY, setMouseY] = state(150)
-  const [hue, setHue] = state(0)
-  const [particles, setParticles] = state([])
+  const mouseX = state(150)
+  const mouseY = state(150)
+  const hue = state(0)
+  const particles = state([])
 
   // Animate hue
   effect(() => {
-    const id = setInterval(() => setHue(h => (h + 1) % 360), 16)
+    const id = setInterval(() => hue.set(h => (h + 1) % 360), 16)
     return () => clearInterval(id)
   })
 
@@ -288,9 +288,9 @@ function ParticleCanvas() {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
-    setMouseX(x)
-    setMouseY(y)
-    setParticles(prev => [...prev.slice(-20), { x, y, hue }])
+    mouseX.set(x)
+    mouseY.set(y)
+    particles.set(prev => [...prev.slice(-20), { x, y, hue: hue.valueOf() }])
   }
 
   return (
@@ -341,10 +341,10 @@ import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
 import { keyboard, createLoop, Keys } from 'flexium/interactive'
 
-const [snake, setSnake] = state([{ x: 7, y: 7 }])
-const [direction, setDirection] = state('RIGHT')
-const [food, setFood] = state({ x: 12, y: 7 })
-const [score, setScore] = state(0)
+const snake = state([{ x: 7, y: 7 }])
+const direction = state('RIGHT')
+const food = state({ x: 12, y: 7 })
+const score = state(0)
 
 function SnakeGame() {
   const kb = keyboard()
@@ -394,14 +394,14 @@ import { state } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const [user, setUser] = state(null, { key: 'app:auth:user' })
+  const user = state(null, { key: 'app:auth:user' })
   
   const login = (name: string) => {
-    setUser({ name })
+    user.set({ name })
   }
   
   const logout = () => {
-    setUser(null)
+    user.set(null)
   }
   
   return { user, login, logout }
@@ -409,10 +409,10 @@ function useAuth() {
 
 // Cart state - shared globally
 function useCart() {
-  const [items, setItems] = state<Array<{id: number, name: string, price: number, qty: number}>>([], { key: 'app:cart:items' })
+  const items = state<Array<{id: number, name: string, price: number, qty: number}>>([], { key: 'app:cart:items' })
   
   const addItem = (product: {id: number, name: string, price: number}) => {
-    setItems(items => {
+    items.set(items => {
       const existing = items.find(item => item.id === product.id)
       if (existing) {
         return items.map(item => item.id === product.id ? {...item, qty: item.qty + 1} : item)
@@ -422,26 +422,26 @@ function useCart() {
   }
   
   const removeItem = (id: number) => {
-    setItems(items => items.filter(item => item.id !== id))
+    items.set(items => items.filter(item => item.id !== id))
   }
   
   const updateQty = (id: number, delta: number) => {
-    setItems(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
+    items.set(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
   }
   
-  const [total] = state(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), { key: 'app:cart:total' })
+  const total = state(() => items.valueOf().reduce((sum, item) => sum + item.price * item.qty, 0), { key: 'app:cart:total' })
   
   return { items, addItem, removeItem, updateQty, total }
 }
 
 // Notification state - shared globally
 function useNotifications() {
-  const [notifications, setNotifications] = state<Array<{msg: string, type: string}>>([], { key: 'app:notifications' })
+  const notifications = state<Array<{msg: string, type: string}>>([], { key: 'app:notifications' })
   
   const notify = (msg: string, type: string) => {
-    setNotifications(n => [...n, { msg, type }])
+    notifications.set(n => [...n, { msg, type }])
     setTimeout(() => {
-      setNotifications(n => n.slice(1))
+      notifications.set(n => n.slice(1))
     }, 3000)
   }
   

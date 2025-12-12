@@ -23,13 +23,13 @@ import { Transition } from 'flexium/primitives'
 import { state } from 'flexium/core'
 
 function App() {
-  const [visible, setVisible] = state(false)
+  const visible = state(false)
 
   return (
     <div>
-      <button onclick={() => setVisible(v => !v)}>Toggle</button>
+      <button onclick={() => visible.set(v => !v)}>Toggle</button>
 
-      {visible() && (
+      {visible.valueOf() && (
         <Transition preset="fade">
           <div class="content">
             This content fades in and out
@@ -250,7 +250,7 @@ import { transitions } from 'flexium/primitives'
 
 ```tsx
 // Modal dialog
-{isModalOpen() && (
+{isModalOpen.valueOf() && (
   <Transition {...transitions.modal}>
     <div class="modal">
       <h2>Confirm Action</h2>
@@ -260,7 +260,7 @@ import { transitions } from 'flexium/primitives'
 )}
 
 // Dropdown menu
-{isMenuOpen() && (
+{isMenuOpen.valueOf() && (
   <Transition {...transitions.dropdown}>
     <ul class="menu">
       <li>Profile</li>
@@ -271,7 +271,7 @@ import { transitions } from 'flexium/primitives'
 )}
 
 // Toast notification
-{showToast() && (
+{showToast.valueOf() && (
   <Transition {...transitions.notification}>
     <div class="toast">Changes saved!</div>
   </Transition>
@@ -287,7 +287,7 @@ import { TransitionGroup, Transition } from 'flexium/primitives'
 import { state } from 'flexium/core'
 
 function NotificationList() {
-  const [notifications, setNotifications] = state([
+  const notifications = state([
     { id: 1, text: 'Welcome!' },
     { id: 2, text: 'New message' },
     { id: 3, text: 'Update available' }
@@ -320,7 +320,7 @@ interface TransitionGroupProps {
 
 ```tsx
 function AnimatedList() {
-  const [items] = state([1, 2, 3, 4, 5])
+  const items = state([1, 2, 3, 4, 5])
 
   return (
     <TransitionGroup stagger={100}>
@@ -369,18 +369,18 @@ function TrackedTransition() {
 
 ```tsx
 function ModalWithCallback() {
-  const [isOpen, setIsOpen] = state(false)
-  const [hasExited, setHasExited] = state(false)
+  const isOpen = state(false)
+  const hasExited = state(false)
 
   return (
     <>
-      {isOpen() && (
+      {isOpen.valueOf() && (
         <Transition
           {...transitions.modal}
           onEnterStart={() => document.body.style.overflow = 'hidden'}
           onExitComplete={() => {
             document.body.style.overflow = 'auto'
-            setHasExited(true)
+            hasExited.set(true)
           }}
         >
           <div class="modal">Modal content</div>
@@ -401,13 +401,13 @@ The most common pattern - animate conditional content:
 
 ```tsx
 function ConditionalContent() {
-  const [visible, setVisible] = state(false)
+  const visible = state(false)
 
   return (
     <div>
-      <button onclick={() => setVisible(v => !v)}>Toggle</button>
+      <button onclick={() => visible.set(v => !v)}>Toggle</button>
 
-      {visible() && (
+      {visible.valueOf() && (
         <Transition preset="slide-up">
           <div class="content">Slides up when visible</div>
         </Transition>
@@ -423,17 +423,17 @@ Animate list items as they're added or removed:
 
 ```tsx
 function TodoList() {
-  const [todos, setTodos] = state([
+  const todos = state([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build app' }
   ])
 
   const addTodo = (text) => {
-    setTodos(prev => [...prev, { id: Date.now(), text }])
+    todos.set(prev => [...prev, { id: Date.now(), text }])
   }
 
   const removeTodo = (id) => {
-    setTodos(prev => prev.filter(t => t.id !== id))
+    todos.set(prev => prev.filter(t => t.id !== id))
   }
 
   return (
@@ -461,21 +461,21 @@ Different animations for different states:
 
 ```tsx
 function LoadingState() {
-  const [status, setStatus] = state('loading')
+  const status = state('loading')
 
   return (
     <Switch>
-      <Match when={() => status() === 'loading'}>
+      <Match when={() => status.valueOf() === 'loading'}>
         <Transition preset="fade">
           <div class="spinner">Loading...</div>
         </Transition>
       </Match>
-      <Match when={() => status() === 'success'}>
+      <Match when={() => status.valueOf() === 'success'}>
         <Transition preset="slide-up">
           <div class="success">Success!</div>
         </Transition>
       </Match>
-      <Match when={() => status() === 'error'}>
+      <Match when={() => status.valueOf() === 'error'}>
         <Transition preset="scale-fade">
           <div class="error">Error occurred</div>
         </Transition>
@@ -541,16 +541,16 @@ function Modal({ isOpen, onClose, children }) {
 
 // Usage
 function App() {
-  const [isModalOpen, setIsModalOpen] = state(false)
+  const isModalOpen = state(false)
 
   return (
     <div>
-      <button onclick={() => setIsModalOpen(true)}>Open Modal</button>
+      <button onclick={() => isModalOpen.set(true)}>Open Modal</button>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal isOpen={isModalOpen} onClose={() => isModalOpen.set(false)}>
         <h2>Modal Title</h2>
         <p>Modal content here</p>
-        <button onclick={() => setIsModalOpen(false)}>Close</button>
+        <button onclick={() => isModalOpen.set(false)}>Close</button>
       </Modal>
     </div>
   )
@@ -561,7 +561,7 @@ function App() {
 
 ```tsx
 function Tabs() {
-  const [activeTab, setActiveTab] = state('home')
+  const activeTab = state('home')
 
   const tabs = ['home', 'profile', 'settings']
 
@@ -571,7 +571,7 @@ function Tabs() {
         {tabs.map((tab) => (
           <button
             key={tab}
-            onclick={() => setActiveTab(tab)}
+            onclick={() => activeTab.set(tab)}
             class={activeTab === tab ? 'active' : ''}
           >
             {tab}
@@ -580,19 +580,19 @@ function Tabs() {
       </div>
 
       <div class="tab-content">
-        {activeTab() === 'home' && (
+        {activeTab.valueOf() === 'home' && (
           <Transition preset="fade">
             <div>Home content</div>
           </Transition>
         )}
 
-        {activeTab() === 'profile' && (
+        {activeTab.valueOf() === 'profile' && (
           <Transition preset="fade">
             <div>Profile content</div>
           </Transition>
         )}
 
-        {activeTab() === 'settings' && (
+        {activeTab.valueOf() === 'settings' && (
           <Transition preset="fade">
             <div>Settings content</div>
           </Transition>
@@ -607,7 +607,7 @@ function Tabs() {
 
 ```tsx
 function ImageGrid() {
-  const [images] = state([
+  const images = state([
     { id: 1, url: '/img1.jpg' },
     { id: 2, url: '/img2.jpg' },
     { id: 3, url: '/img3.jpg' },
@@ -645,15 +645,15 @@ function ImageGrid() {
 
 ```tsx
 function NotificationStack() {
-  const [notifications, setNotifications] = state([])
+  const notifications = state([])
 
   const addNotification = (message) => {
     const id = Date.now()
-    setNotifications(prev => [...prev, { id, message }])
+    notifications.set(prev => [...prev, { id, message }])
 
     // Auto-remove after 3 seconds
     setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id))
+      notifications.set(prev => prev.filter(n => n.id !== id))
     }, 3000)
   }
 
@@ -671,7 +671,7 @@ function NotificationStack() {
                 {notification.message}
                 <button
                   onclick={() =>
-                    setNotifications(prev =>
+                    notifications.set(prev =>
                       prev.filter(n => n.id !== notification.id)
                     )
                   }

@@ -56,20 +56,20 @@ Use motion with reactive state:
 import { MotionController } from 'flexium/primitives'
 import { state } from 'flexium/core'
 
-const [isExpanded, setIsExpanded] = state(false)
+const isExpanded = state(false)
 const controller = new MotionController(element)
 
 // Watch state and animate
 const unwatch = state.watch(() => {
   controller.animate({
-    animate: isExpanded
+    animate: isExpanded.valueOf()
       ? { height: 'auto', opacity: 1 }
       : { height: 0, opacity: 0 }
   })
 })
 
 // Toggle animation
-setIsExpanded(true)
+isExpanded.set(true)
 
 // Cleanup
 unwatch()
@@ -113,13 +113,13 @@ import { Transition } from 'flexium/primitives'
 import { state } from 'flexium/core'
 
 function App() {
-  const [visible, setVisible] = state(false)
+  const visible = state(false)
 
   return (
     <div>
-      <button onClick={() => setVisible(v => !v)}>Toggle</button>
+      <button onClick={() => visible.set(v => !v)}>Toggle</button>
 
-      {visible && (
+      {visible.valueOf() && (
         <Transition preset="fade">
           <div class="content">
             This content fades in and out
@@ -232,7 +232,7 @@ import { TransitionGroup, Transition } from 'flexium/primitives'
 import { state } from 'flexium/core'
 
 function NotificationList() {
-  const [notifications] = state([...])
+  const notifications = state([...])
 
   return (
     <TransitionGroup stagger={50}>
@@ -365,17 +365,17 @@ import { TransitionGroup, Transition } from 'flexium/primitives'
 import { state } from 'flexium/core'
 
 function TodoList() {
-  const [todos, setTodos] = state([
+  const todos = state([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build app' }
   ])
 
   const addTodo = (text) => {
-    setTodos(prev => [...prev, { id: Date.now(), text }])
+    todos.set(prev => [...prev, { id: Date.now(), text }])
   }
 
   const removeTodo = (id) => {
-    setTodos(prev => prev.filter(t => t.id !== id))
+    todos.set(prev => prev.filter(t => t.id !== id))
   }
 
   return (

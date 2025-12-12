@@ -25,20 +25,20 @@ Flexium now supports **Automatic Batching** by default. Multiple state updates o
 import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
-const [firstName, setFirstName] = state('John')
-const [lastName, setLastName] = state('Doe')
-const [age, setAge] = state(30)
+const firstName = state('John')
+const lastName = state('Doe')
+const age = state(30)
 
 effect(() => {
-  console.log(`${firstName()} ${lastName()}, age ${age()}`)
+  console.log(`${firstName.valueOf()} ${lastName.valueOf()}, age ${age.valueOf()}`)
 })
 // Logs: "John Doe, age 30"
 
 // These updates are automatically batched!
 setTimeout(() => {
-  setFirstName('Jane')
-  setLastName('Smith')
-  setAge(25)
+  firstName.set('Jane')
+  lastName.set('Smith')
+  age.set(25)
 }, 0)
 // Effect runs only ONCE after the timeout callback finishes.
 // Logs: "Jane Smith, age 25"
@@ -57,8 +57,8 @@ import { sync } from 'flexium/advanced'
 
 // Updates run immediately after this block
 sync(() => {
-  setFirstName('Jane')
-  setLastName('Smith')
+  firstName.set('Jane')
+  lastName.set('Smith')
 })
 // DOM is updated HERE, synchronously.
 ```
@@ -90,15 +90,15 @@ The `sync()` function (without arguments) forces any pending auto-batched effect
 import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
-const [count, setCount] = state(0)
+const count = state(0)
 let effectRan = false
 
 effect(() => {
-  count()
+  count.valueOf()
   effectRan = true
 })
 
-setCount(1)
+count.set(1)
 // Effect is queued (auto-batching)
 
 sync()
@@ -115,17 +115,17 @@ console.log(effectRan) // true
 import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
-const [firstName, setFirstName] = state('John')
-const [lastName, setLastName] = state('Doe')
+const firstName = state('John')
+const lastName = state('Doe')
 let fullName = ''
 
 effect(() => {
-  fullName = `${firstName()} ${lastName()}`
+  fullName = `${firstName.valueOf()} ${lastName.valueOf()}`
 })
 
 sync(() => {
-  setFirstName('Jane')
-  setLastName('Smith')
+  firstName.set('Jane')
+  lastName.set('Smith')
 })
 
 // Effect has already run!
@@ -144,16 +144,16 @@ import { sync } from 'flexium/advanced'
 
 describe('Counter', () => {
   it('should update when count changes', () => {
-    const [count, setCount] = state(0)
+    const count = state(0)
     let displayValue = 0
 
     effect(() => {
-      displayValue = count() * 2
+      displayValue = count.valueOf() * 2
     })
 
     expect(displayValue).toBe(0)
 
-    setCount(5)
+    count.set(5)
     sync() // Force effects to run
 
     expect(displayValue).toBe(10)
@@ -170,11 +170,11 @@ Use `sync()` when you need to measure the DOM immediately after updates:
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [items, setItems] = state(['a', 'b', 'c'])
+const items = state(['a', 'b', 'c'])
 
 function addItemAndMeasure() {
   sync(() => {
-    setItems([...items(), 'd'])
+    items.set([...items.valueOf(), 'd'])
   })
 
   // DOM is now updated, safe to measure
@@ -196,14 +196,14 @@ function addItemAndMeasure() {
 ```tsx
 // sync(fn) - for grouping updates
 sync(() => {
-  setA(1)
-  setB(2)
+  a.set(1)
+  b.set(2)
 })
 // Effects run here, synchronously
 
 // sync() - for forcing queued updates
-setA(1) // Queued by auto-batch
-setB(2) // Queued by auto-batch
+a.set(1) // Queued by auto-batch
+b.set(2) // Queued by auto-batch
 sync()  // Forces all queued effects to run NOW
 ```
 
@@ -225,33 +225,33 @@ Batching provides significant performance improvements by:
 import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
-const [count, setCount] = state(0)
-const [items, setItems] = state([])
-const [loading, setLoading] = state(false)
-const [error, setError] = state(null)
+const count = state(0)
+const items = state([])
+const loading = state(false)
+const error = state(null)
 
 // This effect would run 4 times without syncing
 effect(() => {
   console.log('State updated:', {
-    count: count(),
-    items: items().length,
-    loading: loading(),
-    error: error()
+    count: count.valueOf(),
+    items: items.valueOf().length,
+    loading: loading.valueOf(),
+    error: error.valueOf()
   })
 })
 
 // Without sync: 4 effect executions
-setCount(10)
-setItems([1, 2, 3])
-setLoading(false)
-setError(null)
+count.set(10)
+items.set([1, 2, 3])
+loading.set(false)
+error.set(null)
 
 // With sync: 1 effect execution
 sync(() => {
-  setCount(10)
-  setItems([1, 2, 3])
-  setLoading(false)
-  setError(null)
+  count.set(10)
+  items.set([1, 2, 3])
+  loading.set(false)
+  error.set(null)
 })
 ```
 
@@ -264,13 +264,13 @@ sync(() => {
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [x, setX] = state(0)
-const [y, setY] = state(0)
+const x = state(0)
+const y = state(0)
 
 // Update both coordinates in one sync block
 sync(() => {
-  setX(10)
-  setY(20)
+  x.set(10)
+  y.set(20)
 })
 ```
 
@@ -283,12 +283,12 @@ The `sync()` function returns the value returned by the callback:
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [items, setItems] = state([])
-const [count, setCount] = state(0)
+const items = state([])
+const count = state(0)
 
 const result = sync(() => {
-  setItems([1, 2, 3, 4, 5])
-  setCount(5)
+  items.set([1, 2, 3, 4, 5])
+  count.set(5)
   return 'Updates complete'
 })
 
@@ -304,10 +304,10 @@ import { state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
 function UserForm() {
-  const [firstName, setFirstName] = state('')
-  const [lastName, setLastName] = state('')
-  const [email, setEmail] = state('')
-  const [errors, setErrors] = state({})
+  const firstName = state('')
+  const lastName = state('')
+  const email = state('')
+  const errors = state({})
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -320,7 +320,7 @@ function UserForm() {
       if (!lastName) newErrors.lastName = 'Required'
       if (!email) newErrors.email = 'Required'
 
-      setErrors(newErrors)
+      errors.set(newErrors)
     })
   }
 
@@ -329,7 +329,7 @@ function UserForm() {
       <input
         type="text"
         value={firstName}
-        oninput={(e) => setFirstName(e.target.value)}
+        oninput={(e) => firstName.set(e.target.value)}
         placeholder="First Name"
       />
       {errors.firstName && <span>{errors.firstName}</span>}
@@ -337,7 +337,7 @@ function UserForm() {
       <input
         type="text"
         value={lastName}
-        oninput={(e) => setLastName(e.target.value)}
+        oninput={(e) => lastName.set(e.target.value)}
         placeholder="Last Name"
       />
       {errors.lastName && <span>{errors.lastName}</span>}
@@ -345,7 +345,7 @@ function UserForm() {
       <input
         type="email"
         value={email}
-        oninput={(e) => setEmail(e.target.value)}
+        oninput={(e) => email.set(e.target.value)}
         placeholder="Email"
       />
       {errors.email && <span>{errors.email}</span>}
@@ -365,26 +365,26 @@ Sync blocks can be nested, and effects will only run after the outermost sync co
 import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
-const [count, setCount] = state(0)
+const count = state(0)
 let runCount = 0
 
 effect(() => {
-  console.log('Count:', count())
+  console.log('Count:', count.valueOf())
   runCount++
 })
 
 sync(() => {
-  setCount(1)
+  count.set(1)
 
   sync(() => {
-    setCount(2)
+    count.set(2)
 
     sync(() => {
-      setCount(3)
+      count.set(3)
     })
   })
 
-  setCount(4)
+  count.set(4)
 })
 
 console.log(runCount) // 2 (initial run + 1 sync run)
@@ -413,7 +413,7 @@ import { state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
 function ProfileEditor() {
-  const [form, setForm] = state({
+  const form = state({
     name: '',
     email: '',
     bio: '',
@@ -425,7 +425,7 @@ function ProfileEditor() {
 
     // Update all form fields at once
     sync(() => {
-      setForm({
+      form.set({
         name: user.name,
         email: user.email,
         bio: user.bio,
@@ -438,15 +438,15 @@ function ProfileEditor() {
     <div>
       <input
         value={form.name}
-        oninput={(e) => setForm(f => ({ ...f, name: e.target.value }))}
+        oninput={(e) => form.set(f => ({ ...f, name: e.target.value }))}
       />
       <input
         value={form.email}
-        oninput={(e) => setForm(f => ({ ...f, email: e.target.value }))}
+        oninput={(e) => form.set(f => ({ ...f, email: e.target.value }))}
       />
       <textarea
         value={form.bio}
-        oninput={(e) => setForm(f => ({ ...f, bio: e.target.value }))}
+        oninput={(e) => form.set(f => ({ ...f, bio: e.target.value }))}
       />
     </div>
   )
@@ -462,15 +462,15 @@ Process arrays of updates efficiently:
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [items, setItems] = state([])
-const [count, setCount] = state(0)
-const [total, setTotal] = state(0)
+const items = state([])
+const count = state(0)
+const total = state(0)
 
 const addMultipleItems = (newItems) => {
   sync(() => {
-    setItems([...items(), ...newItems])
-    setCount(count() + newItems.length)
-    setTotal(total() + newItems.reduce((sum, item) => sum + item.price, 0))
+    items.set([...items.valueOf(), ...newItems])
+    count.set(count.valueOf() + newItems.length)
+    total.set(total.valueOf() + newItems.reduce((sum, item) => sum + item.price, 0))
   })
 }
 
@@ -493,10 +493,10 @@ import { state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
 function DataDashboard() {
-  const [users, setUsers] = state([])
-  const [stats, setStats] = state(null)
-  const [loading, setLoading] = state(true)
-  const [error, setError] = state(null)
+  const users = state([])
+  const stats = state(null)
+  const loading = state(true)
+  const error = state(null)
 
   const fetchData = async () => {
     try {
@@ -512,15 +512,15 @@ function DataDashboard() {
 
       // Update all states in one sync block
       sync(() => {
-        setUsers(usersData)
-        setStats(statsData)
-        setLoading(false)
-        setError(null)
+        users.set(usersData)
+        stats.set(statsData)
+        loading.set(false)
+        error.set(null)
       })
     } catch (err) {
       sync(() => {
-        setError(err.message)
-        setLoading(false)
+        error.set(err.message)
+        loading.set(false)
       })
     }
   }
@@ -550,19 +550,19 @@ Batch updates in animation loops:
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [x, setX] = state(0)
-const [y, setY] = state(0)
-const [rotation, setRotation] = state(0)
-const [scale, setScale] = state(1)
+const x = state(0)
+const y = state(0)
+const rotation = state(0)
+const scale = state(1)
 
 const animate = () => {
   requestAnimationFrame(() => {
     // Batch all position/transform updates
     sync(() => {
-      setX(Math.sin(Date.now() / 1000) * 100)
-      setY(Math.cos(Date.now() / 1000) * 100)
-      setRotation((rotation() + 1) % 360)
-      setScale(1 + Math.sin(Date.now() / 500) * 0.2)
+      x.set(Math.sin(Date.now() / 1000) * 100)
+      y.set(Math.cos(Date.now() / 1000) * 100)
+      rotation.set((rotation.valueOf() + 1) % 360)
+      scale.set(1 + Math.sin(Date.now() / 500) * 0.2)
     })
 
     animate()
@@ -581,30 +581,30 @@ Update game state atomically:
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [score, setScore] = state(0)
-const [lives, setLives] = state(3)
-const [level, setLevel] = state(1)
-const [enemies, setEnemies] = state([])
+const score = state(0)
+const lives = state(3)
+const level = state(1)
+const enemies = state([])
 
 const handlePlayerDeath = () => {
   sync(() => {
-    setLives(lives() - 1)
+    lives.set(lives.valueOf() - 1)
 
-    if (lives() <= 0) {
+    if (lives.valueOf() <= 0) {
       // Game over
-      setScore(0)
-      setLives(3)
-      setLevel(1)
-      setEnemies([])
+      score.set(0)
+      lives.set(3)
+      level.set(1)
+      enemies.set([])
     }
   })
 }
 
 const completeLevel = () => {
   sync(() => {
-    setScore(score() + 1000)
-    setLevel(level() + 1)
-    setEnemies(generateEnemies(level()))
+    score.set(score.valueOf() + 1000)
+    level.set(level.valueOf() + 1)
+    enemies.set(generateEnemies(level.valueOf()))
   })
 }
 ```
@@ -618,11 +618,11 @@ Don't batch single signal updates - it adds unnecessary overhead:
 ```tsx
 // Bad - unnecessary syncing
 sync(() => {
-  setCount(1)
+  count.set(1)
 })
 
 // Good - just update directly
-setCount(1)
+count.set(1)
 ```
 
 ### Independent Updates
@@ -631,13 +631,13 @@ Don't batch unrelated updates that don't share effects:
 
 ```tsx
 ```tsx
-const [userCount, setUserCount] = state(0)
-const [themeColor, setThemeColor] = state('blue')
+const userCount = state(0)
+const themeColor = state('blue')
 
 // These are independent - no shared effects
 // Syncing provides no benefit
-setUserCount(10)
-setThemeColor('red')
+userCount.set(10)
+themeColor.set('red')
 ```
 
 ### Already Synced Contexts
@@ -650,8 +650,8 @@ Event handlers are automatically synced in some frameworks. Check if your contex
 
 <button onclick={() => {
   // These run separately without sync()
-  setCount(c => c + 1)
-  setName('Updated')
+  count.set(c => c + 1)
+  name.set('Updated')
 }}>
   Update
 </button>
@@ -659,8 +659,8 @@ Event handlers are automatically synced in some frameworks. Check if your contex
 // Better with explicit sync
 <button onclick={() => {
   sync(() => {
-    setCount(c => c + 1)
-    setName('Updated')
+    count.set(c => c + 1)
+    name.set('Updated')
   })
 }}>
   Update
@@ -683,9 +683,9 @@ setAge(25)            → Effect runs → DOM updates
 **With Sync:**
 ```
 sync(() => {
-  setFirstName('Jane')   → Queued
-  setLastName('Smith')   → Queued
-  setAge(25)             → Queued
+  firstName.set('Jane')   → Queued
+  lastName.set('Smith')   → Queued
+  age.set(25)             → Queued
 })                       → Effect runs once → DOM updates once
 ```
 
@@ -696,21 +696,21 @@ sync(() => {
 import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
-const [a, setA] = state(0)
-const [b, setB] = state(0)
-const [c, setC] = state(0)
+const a = state(0)
+const b = state(0)
+const c = state(0)
 let runCount = 0
 
 effect(() => {
-  a() + b() + c()
+  a.valueOf() + b.valueOf() + c.valueOf()
   runCount++
 })
 
 // Without sync
 console.time('without-sync')
-setA(1)
-setB(2)
-setC(3)
+a.set(1)
+b.set(2)
+c.set(3)
 console.timeEnd('without-sync')
 console.log('Runs:', runCount) // 4 (initial + 3 updates)
 
@@ -719,9 +719,9 @@ runCount = 0
 // With sync
 console.time('with-sync')
 sync(() => {
-  setA(10)
-  setB(20)
-  setC(30)
+  a.set(10)
+  b.set(20)
+  c.set(30)
 })
 console.timeEnd('with-sync')
 console.log('Runs:', runCount) // 1 (synced update)
@@ -736,17 +736,17 @@ import { state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
 function ContactForm() {
-  const [name, setName] = state('')
-  const [email, setEmail] = state('')
-  const [message, setMessage] = state('')
-  const [submitted, setSubmitted] = state(false)
+  const name = state('')
+  const email = state('')
+  const message = state('')
+  const submitted = state(false)
 
   const resetForm = () => {
     sync(() => {
-      setName('')
-      setEmail('')
-      setMessage('')
-      setSubmitted(false)
+      name.set('')
+      email.set('')
+      message.set('')
+      submitted.set(false)
     })
   }
 
@@ -756,7 +756,7 @@ function ContactForm() {
 
     sync(() => {
       resetForm()
-      setSubmitted(true)
+      submitted.set(true)
     })
   }
 
@@ -771,17 +771,17 @@ function ContactForm() {
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [ball1X, setBall1X] = state(0)
-const [ball1Y, setBall1Y] = state(0)
-const [ball2X, setBall2X] = state(100)
-const [ball2Y, setBall2Y] = state(100)
+const ball1X = state(0)
+const ball1Y = state(0)
+const ball2X = state(100)
+const ball2Y = state(100)
 
 const moveBalls = (deltaTime) => {
   sync(() => {
-    setBall1X(ball1X() + deltaTime * 2)
-    setBall1Y(ball1Y() + deltaTime * 1)
-    setBall2X(ball2X() - deltaTime * 1.5)
-    setBall2Y(ball2Y() + deltaTime * 2.5)
+    ball1X.set(ball1X.valueOf() + deltaTime * 2)
+    ball1Y.set(ball1Y.valueOf() + deltaTime * 1)
+    ball2X.set(ball2X.valueOf() - deltaTime * 1.5)
+    ball2Y.set(ball2Y.valueOf() + deltaTime * 2.5)
   })
 }
 ```
@@ -793,9 +793,9 @@ import { state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
 function ShoppingCart() {
-  const [items, setItems] = state([])
-  const [total, setTotal] = state(0)
-  const [itemCount, setItemCount] = state(0)
+  const items = state([])
+  const total = state(0)
+  const itemCount = state(0)
 
   const addItem = (item) => {
     sync(() => {

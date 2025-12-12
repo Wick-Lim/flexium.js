@@ -63,16 +63,16 @@ function ChartComponent() {
 import { state, effect } from 'flexium/core'
 
 function UserProfile(props) {
-  const [user, setUser] = state(null)
+  const user = state(null)
 
   effect(() => {
     // Fetch runs once on mount
     fetch(`/api/users/${props.id}`)
       .then(res => res.json())
-      .then(data => setUser(data))
+      .then(data => user.set(data))
   })
 
-  return user && <div>{user.name}</div>
+  return user.valueOf() && <div>{user.name}</div>
 }
 ```
 
@@ -99,22 +99,22 @@ function KeyboardHandler() {
 import { state, effect } from 'flexium/core'
 
 function WebSocketComponent() {
-  const [messages, setMessages] = state([])
-  const [userId, setUserId] = state(1)
+  const messages = state([])
+  const userId = state(1)
 
   effect(() => {
     // Re-creates WebSocket when userId changes
-    const ws = new WebSocket(`wss://example.com/${userId}`)
+    const ws = new WebSocket(`wss://example.com/${userId.valueOf()}`)
 
     ws.onmessage = (e) => {
-      setMessages(m => [...m, e.data])
+      messages.set(m => [...m, e.data])
     }
 
     // Cleanup before re-run or unmount
     return () => ws.close()
   })
 
-  return <div>{messages.map(msg => <div>{msg}</div>)}</div>
+  return <div>{messages.valueOf().map(msg => <div>{msg}</div>)}</div>
 }
 ```
 
@@ -124,7 +124,7 @@ function WebSocketComponent() {
 import { state, effect } from 'flexium/core'
 
 function SearchResults(props) {
-  const [results, setResults] = state([])
+  const results = state([])
 
   effect(() => {
     const controller = new AbortController()
@@ -133,13 +133,13 @@ function SearchResults(props) {
       signal: controller.signal
     })
       .then(res => res.json())
-      .then(data => setResults(data))
+      .then(data => results.set(data))
 
     // Cancel request if query changes or component unmounts
     return () => controller.abort()
   })
 
-  return <div>{results.map(item => <div>{item.title}</div>)}</div>
+  return <div>{results.valueOf().map(item => <div>{item.title}</div>)}</div>
 }
 ```
 
@@ -149,13 +149,13 @@ function SearchResults(props) {
 import { state, effect } from 'flexium/core'
 
 function Countdown(props) {
-  const [time, setTime] = state(props.seconds)
+  const time = state(props.seconds)
 
   effect(() => {
-    if (time <= 0) return
+    if (time.valueOf() <= 0) return
 
     const timeout = setTimeout(() => {
-      setTime(t => t - 1)
+      time.set(t => t - 1)
     }, 1000)
 
     return () => clearTimeout(timeout)

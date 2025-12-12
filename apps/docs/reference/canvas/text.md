@@ -34,10 +34,10 @@ import { Canvas, DrawText } from 'flexium/canvas';
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `text` | `string \| Signal<string>` | The text content. |
-| `x` | `number \| Signal<number>` | The x-coordinate. |
-| `y` | `number \| Signal<number>` | The y-coordinate. |
-| `fill` | `string \| Signal<string>` | The text color. |
-| `fontSize` | `number \| Signal<number>` | Font size in pixels. |
+| `text` | `string \| StateValue<string>` | The text content. |
+| `x` | `number \| StateValue<number>` | The x-coordinate. |
+| `y` | `number \| StateValue<number>` | The y-coordinate. |
+| `fill` | `string \| StateValue<string>` | The text color. |
+| `fontSize` | `number \| StateValue<number>` | Font size in pixels. |
 | `fontFamily` | `string` | Font family. |
 | `textAlign` | `'left' \| 'center' \| 'right'` | Text alignment. |

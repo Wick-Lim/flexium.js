@@ -26,13 +26,13 @@ import { state } from 'flexium/core'
 import { state } from 'flexium/core'
 
 function LoginForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     email: '',
     password: ''
   })
 
-  const [errors, setErrors] = state({})
-  const [isSubmitting, setIsSubmitting] = state(false)
+  const errors = state({})
+  const isSubmitting = state(false)
 
   const validateEmail = (email) => {
     if (!email) return 'Email is required'
@@ -52,15 +52,15 @@ function LoginForm() {
     const emailError = validateEmail(formData.email)
     const passwordError = validatePassword(formData.password)
 
-    setErrors({
+    errors.set({
       email: emailError,
       password: passwordError
     })
 
     if (!emailError && !passwordError) {
-      setIsSubmitting(true)
+      isSubmitting.set(true)
       await login(formData.email, formData.password)
-      setIsSubmitting(false)
+      isSubmitting.set(false)
     }
   }
 
@@ -70,7 +70,7 @@ function LoginForm() {
         <input
           type="email"
           value={formData.email}
-          onInput={(e) => setFormData({ ...formData, email: e.target.value })}
+          onInput={(e) => formData.set({ ...formData.valueOf(), email: e.target.value })}
         />
         {errors.email && <span class="error">{errors.email}</span>}
       </div>
@@ -79,7 +79,7 @@ function LoginForm() {
         <input
           type="password"
           value={formData.password}
-          onInput={(e) => setFormData({ ...formData, password: e.target.value })}
+          onInput={(e) => formData.set({ ...formData.valueOf(), password: e.target.value })}
         />
         {errors.password && <span class="error">{errors.password}</span>}
       </div>
@@ -122,11 +122,11 @@ const validateUsername = async (username) => {
   return taken ? 'Username is taken' : null
 }
 
-const [usernameError, setUsernameError] = state(null)
+const usernameError = state(null)
 
 const handleUsernameBlur = async () => {
   const error = await validateUsername(formData.username)
-  setErrors({ ...errors, username: error })
+  errors.set({ ...errors, username: error })
 }
 ```
 
@@ -136,7 +136,7 @@ const handleUsernameBlur = async () => {
 
 ```tsx
 function RegistrationForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     name: '',
     email: '',
     password: '',
@@ -144,8 +144,8 @@ function RegistrationForm() {
     acceptTerms: false
   })
 
-  const [errors, setErrors] = state({})
-  const [isSubmitting, setIsSubmitting] = state(false)
+  const errors = state({})
+  const isSubmitting = state(false)
 
   const validate = () => {
     const newErrors = {}
@@ -167,16 +167,16 @@ function RegistrationForm() {
       newErrors.acceptTerms = 'You must accept terms'
     }
 
-    setErrors(newErrors)
+    errors.set(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (validate()) {
-      setIsSubmitting(true)
+      isSubmitting.set(true)
       await registerUser(formData)
-      setIsSubmitting(false)
+      isSubmitting.set(false)
     }
   }
 
@@ -186,7 +186,7 @@ function RegistrationForm() {
         <input
           type="text"
           value={formData.name}
-          onInput={(e) => setFormData({ ...formData, name: e.target.value })}
+          onInput={(e) => formData.set({ ...formData.valueOf(), name: e.target.value })}
           placeholder="Full Name"
         />
         {errors.name && <span class="error">{errors.name}</span>}
@@ -196,7 +196,7 @@ function RegistrationForm() {
         <input
           type="email"
           value={formData.email}
-          onInput={(e) => setFormData({ ...formData, email: e.target.value })}
+          onInput={(e) => formData.set({ ...formData.valueOf(), email: e.target.value })}
           placeholder="Email"
         />
         {errors.email && <span class="error">{errors.email}</span>}
@@ -206,7 +206,7 @@ function RegistrationForm() {
         <input
           type="password"
           value={formData.password}
-          onInput={(e) => setFormData({ ...formData, password: e.target.value })}
+          onInput={(e) => formData.set({ ...formData.valueOf(), password: e.target.value })}
           placeholder="Password"
         />
         {errors.password && <span class="error">{errors.password}</span>}
@@ -216,7 +216,7 @@ function RegistrationForm() {
         <input
           type="password"
           value={formData.confirmPassword}
-          onInput={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+          onInput={(e) => formData.set({ ...formData.valueOf(), confirmPassword: e.target.value })}
           placeholder="Confirm Password"
         />
         {errors.confirmPassword && <span class="error">{errors.confirmPassword}</span>}
@@ -226,7 +226,7 @@ function RegistrationForm() {
         <input
           type="checkbox"
           checked={formData.acceptTerms}
-          onChange={(e) => setFormData({ ...formData, acceptTerms: e.target.checked })}
+          onChange={(e) => formData.set({ ...formData.valueOf(), acceptTerms: e.target.checked })}
         />
         I accept the terms
       </label>
@@ -244,28 +244,28 @@ function RegistrationForm() {
 
 ```tsx
 function DynamicForm() {
-  const [formData, setFormData] = state({
+  const formData = state({
     title: '',
     items: [{ id: 1, name: '' }]
   })
 
   const addField = () => {
-    setFormData({
-      ...formData,
+    formData.set({
+      ...formData.valueOf(),
       items: [...formData.items, { id: Date.now(), name: '' }]
     })
   }
 
   const removeField = (id) => {
-    setFormData({
-      ...formData,
+    formData.set({
+      ...formData.valueOf(),
       items: formData.items.filter(f => f.id !== id)
     })
   }
 
   const updateField = (id, value) => {
-    setFormData({
-      ...formData,
+    formData.set({
+      ...formData.valueOf(),
       items: formData.items.map(f =>
         f.id === id ? { ...f, name: value } : f
       )
@@ -282,7 +282,7 @@ function DynamicForm() {
       <div>
         <input
           value={formData.title}
-          onInput={(e) => setFormData({ ...formData, title: e.target.value })}
+          onInput={(e) => formData.set({ ...formData.valueOf(), title: e.target.value })}
           placeholder="Title"
         />
       </div>
@@ -312,14 +312,14 @@ function DynamicForm() {
 ```tsx
 function EditForm(props) {
   const initialData = props.user
-  const [formData, setFormData] = state(initialData)
+  const formData = state(initialData)
 
   const handleCancel = () => {
-    setFormData(initialData) // Reset to initial values
+    formData.set(initialData) // Reset to initial values
   }
 
   const handleClear = () => {
-    setFormData({ name: '', email: '' }) // Reset to empty values
+    formData.set({ name: '', email: '' }) // Reset to empty values
   }
 
   return (

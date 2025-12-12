@@ -167,13 +167,13 @@ Hydration walks the existing DOM tree and:
 
 ```tsx
 function Counter() {
-  const [count, setCount] = state(0)
+  const count = state(0)
 
   return (
     <div>
       <p>Count: {count}</p>  {/* count works directly, no need for count() */}
       {/* Event handler attached during hydration */}
-      <button onClick={() => setCount(c => c + 1)}>Increment</button>
+      <button onClick={() => count.set(c => c + 1)}>Increment</button>
     </div>
   )
 }
@@ -240,12 +240,12 @@ During hydration, signals become fully reactive:
 
 ```tsx
 function Timer() {
-  const [seconds, setSeconds] = state(0)
+  const seconds = state(0)
 
   // Effect only runs on the client after hydration
   effect(() => {
     const interval = setInterval(() => {
-      setSeconds(s => s + 1)
+      seconds.set(s => s + 1)
     }, 1000)
 
     return () => clearInterval(interval)
@@ -301,13 +301,13 @@ my-app/
 import { state } from 'flexium/core'
 
 export default function App() {
-  const [count, setCount] = state(0)
+  const count = state(0)
 
   return (
     <div>
       <h1>Flexium SSR Example</h1>
       <p>Count: {count}</p>
-      <button onClick={() => setCount(c => c + 1)}>
+      <button onClick={() => count.set(c => c + 1)}>
         Increment
       </button>
     </div>
@@ -448,13 +448,13 @@ Server renders `10:30:15`, client hydrates at `10:30:16` - mismatch!
 
 ```tsx
 function Clock() {
-  const [time, setTime] = state('')
+  const time = state('')
 
   // Only runs on client after hydration
   effect(() => {
-    setTime(new Date().toLocaleTimeString())
+    time.set(new Date().toLocaleTimeString())
     const interval = setInterval(() => {
-      setTime(new Date().toLocaleTimeString())
+      time.set(new Date().toLocaleTimeString())
     }, 1000)
     return () => clearInterval(interval)
   })
@@ -467,13 +467,13 @@ function Clock() {
 
 ```tsx
 function BrowserOnly({ children }) {
-  const [isBrowser, setIsBrowser] = state(false)
+  const isBrowser = state(false)
 
   effect(() => {
-    setIsBrowser(true)
+    isBrowser.set(true)
   })
 
-  return isBrowser ? children : null  // isBrowser works directly
+  return isBrowser.valueOf() ? children : null  // isBrowser works directly
 }
 
 // Usage
@@ -504,10 +504,10 @@ Avoid complex objects that can't be JSON-serialized:
 
 ```tsx
 // GOOD
-const [user, setUser] = state({ name: 'John', id: 123 })
+const user = state({ name: 'John', id: 123 })
 
 // BAD (functions don't serialize)
-const [user, setUser] = state({
+const user = state({
   name: 'John',
   greet: () => 'Hello'
 })
@@ -519,16 +519,16 @@ Side effects should only run on the client:
 
 ```tsx
 function Component() {
-  const [data, setData] = state(null)
+  const data = state(null)
 
   // Runs only on client
   effect(() => {
     fetch('/api/data')
       .then(res => res.json())
-      .then(setData)
+      .then(d => data.set(d))
   })
 
-  return <div>{data ? data.title : 'Loading...'}</div>  {/* data works directly */}
+  return <div>{data.valueOf() ? data.title : 'Loading...'}</div>  {/* data works directly */}
 }
 ```
 
@@ -542,11 +542,11 @@ function Component() {
   // const width = window.innerWidth
 
   // GOOD: Check environment first
-  const [width, setWidth] = state(0)
+  const width = state(0)
 
   effect(() => {
     if (typeof window !== 'undefined') {
-      setWidth(window.innerWidth)
+      width.set(window.innerWidth)
     }
   })
 
@@ -591,7 +591,7 @@ const script = `window.__INITIAL_DATA__ = ${JSON.stringify(initialData)}`
 
 // Client
 function App({ initialData }) {
-  const [data, setData] = state(
+  const data = state(
     typeof window !== 'undefined'
       ? window.__INITIAL_DATA__
       : initialData
@@ -638,14 +638,14 @@ Start with SSR for fast initial load, then enhance with client-side features:
 
 ```tsx
 function SearchBox() {
-  const [query, setQuery] = state('')
-  const [suggestions, setSuggestions] = state([])
+  const query = state('')
+  const suggestions = state([])
 
   // Server: Renders empty search box
   // Client: Adds autocomplete
   effect(() => {
-    if (query.length > 2) {  // query works directly in effect (both query() and query work)
-      fetchSuggestions(query).then(setSuggestions)
+    if (query.valueOf().length > 2) {  // query works directly in effect (both query() and query work)
+      fetchSuggestions(query.valueOf()).then(s => suggestions.set(s))
     }
   })
 
@@ -653,7 +653,7 @@ function SearchBox() {
     <div>
       <input
         value={query}
-        onInput={e => setQuery(e.target.value)}
+        onInput={e => query.set(e.target.value)}
       />
       <ul>
         {suggestions.map(s => <li>{s}</li>)}

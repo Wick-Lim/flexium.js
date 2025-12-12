@@ -200,7 +200,7 @@ function App() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `items` | `() => T[]` | - | **Required.** Reactive array or getter function returning the items to render. |
+| `items` | `StateValue<T[]>` | - | **Required.** Reactive array state to render. |
 | `children` | `(item: T, index: number) => FNode` | - | **Required.** Render function for each item. Receives the item and the index. |
 | `virtual` | `boolean` | `false` | Enable virtualization for large lists. |
 | `height` | `number \| string` | - | Container height. **Required when `virtual` is true.** |
@@ -303,7 +303,7 @@ When updating the items array, sync changes in a single signal update:
 items.set(newItems);
 
 // Less efficient - multiple updates
-newItems.forEach(item => items.update(arr => [...arr, item]));
+newItems.forEach(item => items.set(arr => [...arr, item]));
 ```
 
 ## Accessibility

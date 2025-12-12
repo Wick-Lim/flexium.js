@@ -92,9 +92,9 @@ function UserProfile() {
 
 ```tsx
 function ProtectedRoute(props) {
-  const { user } = context(AuthContext)
+  const auth = context(AuthContext)
 
-  return user ? props.children : <Navigate to="/login" />
+  return auth.user ? props.children : <Navigate to="/login" />
 }
 
 <Route path="/admin" component={() => (

@@ -334,12 +334,15 @@ function App() {
 ### Chat Messages
 
 ```tsx
-<Column style={{ height: '100vh' }}>
-  <ScrollView
-    style={{ flex: 1 }}
-    // Auto-scroll to bottom on new messages
-    ref={scrollRef}
-  >
+  let scrollRef
+  
+  return (
+    <Column style={{ height: '100vh' }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        // Auto-scroll to bottom on new messages
+        ref={scrollRef}
+      >
     <Column gap={12} padding={16}>
       {messages.map(message => (
         <Row
@@ -374,8 +377,8 @@ function App() {
     <Input
       placeholder="Type a message..."
       style={{ flex: 1 }}
-      value={input}
-      onChange={e => setInput(e.target.value)}
+      value={input.valueOf()}
+      onChange={e => input.set(e.target.value)}
     />
     <Button variant="primary" onPress={sendMessage}>Send</Button>
   </Row>
@@ -431,7 +434,7 @@ function App() {
 
 ```tsx
 function InfiniteScrollList({ items, loadMore, hasMore }) {
-  const scrollRef = useRef(null);
+  let scrollRef
 
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
@@ -463,18 +466,18 @@ function InfiniteScrollList({ items, loadMore, hasMore }) {
 
 ```tsx
 function PullToRefreshList({ items, onRefresh }) {
-  const [refreshing, setRefreshing] = useState(false);
+  const refreshing = state(false);
 
   const handleRefresh = async () => {
-    setRefreshing(true);
+    refreshing.set(true);
     await onRefresh();
-    setRefreshing(false);
+    refreshing.set(false);
   };
 
   return (
     <ScrollView style={{ height: 600 }}>
       <Column gap={12} padding={16}>
-        {refreshing && (
+        {refreshing.valueOf() && (
           <Row justify="center" padding={20}>
             <Spinner />
           </Row>
@@ -526,17 +529,17 @@ Maintain focus when scrolling programmatically:
 
 ```tsx
 function ScrollToItem({ items, selectedId }) {
-  const itemRefs = useRef({});
+  const itemRefs = {}
 
-  useEffect(() => {
-    if (selectedId && itemRefs.current[selectedId]) {
-      itemRefs.current[selectedId].scrollIntoView({
+  effect(() => {
+    if (selectedId && itemRefs[selectedId]) {
+      itemRefs[selectedId].scrollIntoView({
         behavior: 'smooth',
         block: 'center'
       });
-      itemRefs.current[selectedId].focus();
+      itemRefs[selectedId].focus();
     }
-  }, [selectedId]);
+  });
 
   return (
     <ScrollView style={{ height: 500 }}>
@@ -544,7 +547,7 @@ function ScrollToItem({ items, selectedId }) {
         {items.map(item => (
           <div
             key={item.id}
-            ref={el => itemRefs.current[item.id] = el}
+            ref={el => itemRefs[item.id] = el}
             tabIndex={-1}
           >
             <Item {...item} />
@@ -731,12 +734,14 @@ Optimize scroll event handlers:
 
 ```tsx
 function ScrollableList() {
-  const handleScroll = useMemo(
-    () => debounce((e) => {
+  // Simple debounce implementation
+  let timeout
+  const handleScroll = (e) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
       console.log('Scrolled', e.currentTarget.scrollTop);
-    }, 100),
-    []
-  );
+    }, 100)
+  }
 
   return (
     <ScrollView onScroll={handleScroll} style={{ height: 500 }}>
@@ -768,11 +773,11 @@ const MemoizedContent = memo(({ items }) => (
 
 ```tsx
 function ScrollToTopButton() {
-  const scrollRef = useRef(null);
+  let scrollRef
 
   const scrollToTop = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    if (scrollRef) {
+      scrollRef.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

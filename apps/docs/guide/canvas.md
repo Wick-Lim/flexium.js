@@ -46,12 +46,12 @@ import { state, effect } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function AnimatedCircle() {
-  const [x, setX] = state(50)
+  const x = state(50)
 
   // Animate
   effect(() => {
     const interval = setInterval(() => {
-      setX(prev => (prev + 1) % 400)
+      x.set(prev => (prev + 1) % 400)
     }, 16)
     return () => clearInterval(interval)
   })
@@ -171,15 +171,15 @@ import { state } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function InteractiveCanvas() {
-  const [mouseX, setMouseX] = state(200)
-  const [mouseY, setMouseY] = state(200)
+  const mouseX = state(200)
+  const mouseY = state(200)
 
   return (
     <div
       onmousemove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect()
-        setMouseX(e.clientX - rect.left)
-        setMouseY(e.clientY - rect.top)
+        mouseX.set(e.clientX - rect.left)
+        mouseY.set(e.clientY - rect.top)
       }}
     >
       <Canvas width={400} height={400}>
@@ -197,12 +197,12 @@ function InteractiveCanvas() {
 Canvas updates are automatically synchronized and debounced with `requestAnimationFrame`:
 
 ```tsx
-const [x, setX] = state(0)
-const [y, setY] = state(0)
+const x = state(0)
+const y = state(0)
 
 // Both changes trigger only ONE canvas redraw
-setX(100)
-setY(200)
+x.set(100)
+y.set(200)
 ```
 
 ### Manual Control
@@ -231,13 +231,13 @@ import { state, effect } from 'flexium/core'
 import { Canvas, DrawLine, DrawCircle, DrawText } from 'flexium/canvas'
 
 function RealtimeChart() {
-  const [dataPoints, setDataPoints] = state([50, 60, 55, 70, 65, 80])
+  const dataPoints = state([50, 60, 55, 70, 65, 80])
 
   // Simulate real-time data
   effect(() => {
     const interval = setInterval(() => {
       const newPoint = 50 + Math.random() * 50
-      setDataPoints(prev => [...prev.slice(1), newPoint])
+      dataPoints.set(prev => [...prev.slice(1), newPoint])
     }, 1000)
 
     return () => clearInterval(interval)
@@ -259,10 +259,10 @@ function RealtimeChart() {
       ))}
 
       {/* Data line */}
-      {dataPoints().map((value, i) => {
+      {dataPoints.valueOf().map((value, i) => {
         if (i === 0) return null
         const x1 = (i - 1) * 100
-        const y1 = 300 - dataPoints()[i - 1] * 2
+        const y1 = 300 - dataPoints.valueOf()[i - 1] * 2
         const x2 = i * 100
         const y2 = 300 - value * 2
 
@@ -280,7 +280,7 @@ function RealtimeChart() {
       })}
 
       {/* Data points */}
-      {dataPoints().map((value, i) => (
+      {dataPoints.valueOf().map((value, i) => (
         <DrawCircle
           key={i}
           x={i * 100}

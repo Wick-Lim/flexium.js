@@ -70,7 +70,7 @@ function Game() {
 function DrawingApp() {
   const canvasRef = ref(null)
   const m = mouse()
-  const [isDrawing, setIsDrawing] = state(false)
+  const isDrawing = state(false)
 
   effect(() => {
     if (m.isLeftPressed()) {
@@ -149,18 +149,18 @@ function CanvasGame() {
 ```tsx
 function Draggable(props) {
   const m = mouse()
-  const [isDragging, setIsDragging] = state(false)
-  const [offset, setOffset] = state({ x: 0, y: 0 })
+  const isDragging = state(false)
+  const offset = state({ x: 0, y: 0 })
 
   effect(() => {
     if (!m.isLeftPressed()) {
-      setIsDragging(false)
+      isDragging.set(false)
     }
   })
 
   const handleMouseDown = (e) => {
-    setIsDragging(true)
-    setOffset({
+    isDragging.set(true)
+    offset.set({
       x: e.clientX - props.x,
       y: e.clientY - props.y
     })
@@ -186,14 +186,14 @@ function Draggable(props) {
 ```tsx
 function ContextMenuArea() {
   const m = mouse()
-  const [menuPos, setMenuPos] = state(null)
+  const menuPos = state(null)
 
   effect(() => {
     if (m.isRightPressed()) {
-      setMenuPos({ x: m.position.x, y: m.position.y })
+      menuPos.set({ x: m.position.x, y: m.position.y })
     }
-    if (m.isLeftPressed() && menuPos()) {
-      setMenuPos(null)
+    if (m.isLeftPressed() && menuPos.valueOf()) {
+      menuPos.set(null)
     }
   })
 

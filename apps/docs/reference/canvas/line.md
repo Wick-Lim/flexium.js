@@ -35,10 +35,10 @@ import { Canvas, DrawLine } from 'flexium/canvas';
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `x1` | `number \| Signal<number>` | Start x-coordinate. |
-| `y1` | `number \| Signal<number>` | Start y-coordinate. |
-| `x2` | `number \| Signal<number>` | End x-coordinate. |
-| `y2` | `number \| Signal<number>` | End y-coordinate. |
-| `stroke` | `string \| Signal<string>` | The line color. |
-| `strokeWidth` | `number \| Signal<number>` | The width of the line. |
-| `opacity` | `number \| Signal<number>` | Opacity (0 to 1). |
+| `x1` | `number \| StateValue<number>` | Start x-coordinate. |
+| `y1` | `number \| StateValue<number>` | Start y-coordinate. |
+| `x2` | `number \| StateValue<number>` | End x-coordinate. |
+| `y2` | `number \| StateValue<number>` | End y-coordinate. |
+| `stroke` | `string \| StateValue<string>` | The line color. |
+| `strokeWidth` | `number \| StateValue<number>` | The width of the line. |
+| `opacity` | `number \| StateValue<number>` | Opacity (0 to 1). |

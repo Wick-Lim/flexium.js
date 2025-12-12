@@ -399,7 +399,7 @@ import { createLocation } from 'flexium/router';
 const [location, navigate] = createLocation();
 
 // Access current location
-console.log(location().pathname);
+console.log(location.pathname);
 
 // Navigate to new path
 navigate('/about');
@@ -1644,16 +1644,21 @@ function PrefetchLink({ to, children }) {
 Style active links based on current route:
 
 ```tsx
-function NavLink({ to, children }) {
+import { state } from 'flexium'; // Assuming state is imported from flexium
+
+function NavLink({ to, children, activeClass = 'active', ...props }) {
   const r = router();
   const location = r.location;
 
+  // Check if current path matches link path
+  // location is a proxy, so accessing pathname is reactive
   const isActive = () => location.pathname === to;
 
   return (
     <Link
       to={to}
-      class={() => `nav-link ${isActive() ? 'active' : ''}`}
+      class={() => `${props.class || ''} ${isActive() ? activeClass : ''}`.trim()}
+      {...props}
     >
       {children}
     </Link>

@@ -13,22 +13,22 @@ A `SignalNode` is the atomic unit of reactivity. It holds a value and notifies s
 import { state } from 'flexium/core'
 
 // Create
-const [count, setCount] = state(0)
+const count = state(0)
 
 // Read (tracks dependency)
-console.log(count())
+console.log(count.valueOf())
 
 // Write (triggers notifications)
-setCount(5)
+count.set(5)
 // OR
-setCount(c => c + 1)
+count.set(c => c + 1)
 ```
 
 ### Methods
 
-- `count()`: Getter. Accessing it tracks the signal in the current effect.
+- `count.valueOf()`: Getter. Accessing it tracks the signal in the current effect.
 - `count.peek()`: Reads the value **without** tracking.
-- `setCount(val)`: Sets the value.
+- `count.set(val)`: Sets the value.
 
 ## The `computed` Primitive
 
@@ -37,13 +37,13 @@ Derived values that automatically update when their dependencies change.
 ```tsx
 import { state } from 'flexium/core'
 
-const [count, setCount] = state(1)
-const [double] = state(() => count() * 2)
+const count = state(1)
+const double = state(() => count.valueOf() * 2)
 
-console.log(double()) // 2
+console.log(double.valueOf()) // 2
 
-setCount(5)
-console.log(double()) // 10
+count.set(5)
+console.log(double.valueOf()) // 10
 ```
 
 - **Lazy**: Computeds are only re-evaluated when read.
@@ -55,10 +55,9 @@ console.log(double()) // 10
 | Feature | `state()` |
 |---------|-----------|
 | **Import** | `flexium/core` |
-| **Interface** | Proxy / Tuple |
+| **Interface** | Proxy |
 | **Ergonomics** | Concise |
 | **JSX** | Supported (`{count}`) |
-| **Use Case** | Apps, Components, Libraries |
 
 ## Manual Subscriptions
 
@@ -67,10 +66,10 @@ If you need to manually listen to a signal outside of an effect (e.g. bridging t
 ```tsx
 import { effect, state } from 'flexium/core'
 
-const [count, setCount] = state(0)
+const count = state(0)
 
 const dispose = effect(() => {
-  console.log('Stream updated:', count())
+  console.log('Stream updated:', count.valueOf())
 })
 
 // later

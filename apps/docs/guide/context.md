@@ -14,21 +14,21 @@ Instead of Context API, use `state()` with a `key` option to share state globall
 import { state } from 'flexium/core'
 
 // Share theme globally - no Provider needed
-const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app:theme' })
+const theme = state<'light' | 'dark'>('light', { key: 'app:theme' })
 
 // In any component - access the same state
 function ThemedButton() {
-  const [theme, setTheme] = state('light', { key: 'app:theme' })
+  const theme = state('light', { key: 'app:theme' })
   
   return (
     <button
-      onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
+      onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}
       style={{
-        background: theme === 'dark' ? '#333' : '#fff',
-        color: theme === 'dark' ? '#fff' : '#333'
+        background: theme.valueOf() === 'dark' ? '#333' : '#fff',
+        color: theme.valueOf() === 'dark' ? '#fff' : '#333'
       }}
     >
-      Current theme: {theme}
+      Current theme: {theme.valueOf()}
     </button>
   )
 }
@@ -41,7 +41,7 @@ import { state } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const [user, setUser] = state<User | null>(null, { key: 'app:auth:user' })
+  const user = state<User | null>(null, { key: 'app:auth:user' })
   
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -49,11 +49,11 @@ function useAuth() {
       body: JSON.stringify({ email, password })
     })
     const userData = await response.json()
-    setUser(userData)
+    user.set(userData)
   }
   
   const logout = () => {
-    setUser(null)
+    user.set(null)
   }
   
   return { user, login, logout }
@@ -65,7 +65,7 @@ function Header() {
   
   return (
     <header>
-      {user ? (
+      {user.valueOf() ? (
         <>
           <span>Welcome, {user.name}</span>
           <button onclick={logout}>Logout</button>
@@ -84,24 +84,24 @@ function Header() {
 import { state } from 'flexium/core'
 
 // Theme state
-const [theme, setTheme] = state('light', { key: 'app:theme' })
+const theme = state('light', { key: 'app:theme' })
 
 // Language state
-const [lang, setLang] = state('en', { key: 'app:language' })
+const lang = state('en', { key: 'app:language' })
 
 // User state
-const [user, setUser] = state(null, { key: 'app:user' })
+const user = state(null, { key: 'app:user' })
 
 // Use in any component
 function ProfileCard() {
-  const [theme] = state('light', { key: 'app:theme' })
-  const [lang] = state('en', { key: 'app:language' })
-  const [user] = state(null, { key: 'app:user' })
+  const theme = state('light', { key: 'app:theme' })
+  const lang = state('en', { key: 'app:language' })
+  const user = state(null, { key: 'app:user' })
   
   return (
-    <div class={`card-${theme}`}>
-      <h2>{lang === 'en' ? 'Profile' : 'Profil'}</h2>
-      <p>{user?.name}</p>
+    <div class={`card-${theme.valueOf()}`}>
+      <h2>{lang.valueOf() === 'en' ? 'Profile' : 'Profil'}</h2>
+      <p>{user.valueOf()?.name}</p>
     </div>
   )
 }
@@ -126,7 +126,7 @@ import { createContext, context } from 'flexium/core'
 const ThemeContext = createContext('light')
 
 function App() {
-  const [theme, setTheme] = state('dark')
+  const theme = state('dark')
   return (
     <ThemeContext.Provider value={theme}>
       <Child />
@@ -144,13 +144,13 @@ import { state } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme, setTheme] = state('dark', { key: 'app:theme' })
+  const theme = state('dark', { key: 'app:theme' })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const [theme] = state('light', { key: 'app:theme' })
+  const theme = state('light', { key: 'app:theme' })
   return <div>{theme}</div>
 }
 ```

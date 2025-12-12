@@ -21,15 +21,15 @@ import { List } from 'flexium/primitives';
 import { state } from 'flexium/core';
 
 // Simple list (renders all items)
-const [items] = state(['Apple', 'Banana', 'Cherry']);
+const items = state(['Apple', 'Banana', 'Cherry']);
 
 <List items={items}>
-  {(item, index) => <div>{index()}: {item}</div>}
+  {(item, index) => <div>{index}: {item}</div>}
 </List>
 
 // Virtual list (for large datasets)
 // Virtual list (for large datasets)
-const [largeItems] = state(Array.from({ length: 10000 }, (_, i) => `Item ${i}`));
+const largeItems = state(Array.from({ length: 10000 }, (_, i) => `Item ${i}`));
 
 <List items={largeItems} virtual height={400} itemSize={50}>
   {(item, index) => <div>{item}</div>}
@@ -40,8 +40,8 @@ const [largeItems] = state(Array.from({ length: 10000 }, (_, i) => `Item ${i}`))
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `items` | `() => T[]` | Required | Data source - reactive getter function |
-| `children` | `(item: T, index: () => number) => FNode` | Required | Render function for each item |
+| `items` | `StateValue<T[]>` | Required | Data source - reactive state array |
+| `children` | `(item: T, index: number) => FNode` | Required | Render function for each item |
 | `virtual` | `boolean` | `false` | Enable virtualization for large lists |
 | `height` | `number \| string` | - | Container height (required when virtual) |
 | `width` | `number \| string` | `'100%'` | Container width |
@@ -75,12 +75,12 @@ interface VariableSizeConfig {
 ### Simple List
 
 ```tsx
-const [fruits] = state(['Apple', 'Banana', 'Cherry', 'Date']);
+const fruits = state(['Apple', 'Banana', 'Cherry', 'Date']);
 
 <List items={fruits} getKey={(item) => item}>
   {(fruit, index) => (
     <div style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-      {index()}: {fruit}
+      {index}: {fruit}
     </div>
   )}
 </List>
@@ -89,7 +89,7 @@ const [fruits] = state(['Apple', 'Banana', 'Cherry', 'Date']);
 ### Virtual List with 10K Items
 
 ```tsx
-const [items] = state(
+const items = state(
   Array.from({ length: 10000 }, (_, i) => ({
     id: i,
     name: `Item ${i}`,

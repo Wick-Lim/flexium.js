@@ -108,13 +108,13 @@ With `autoImport: true`, you can use Flexium primitives without explicit imports
 import { state, effect } from 'flexium/core';
 
 function Counter() {
-  const [count, setCount] = state(0);
+  const count = state(0);
   // ...
 }
 
 // After (with autoImport)
 function Counter() {
-  const [count, setCount] = state(0); // No import needed!
+  const count = state(0); // No import needed!
   // ...
 }
 ```
@@ -151,10 +151,10 @@ The plugin enables HMR for Flexium components automatically. When you save a fil
 import { state } from 'flexium/core';
 
 export function Counter() {
-  const [count, setCount] = state(0);
+  const count = state(0);
 
   return (
-    <button onClick={() => setCount(count + 1)}>
+    <button onClick={() => count.set(count.valueOf() + 1)}>
       Count: {count}
     </button>
   );
@@ -234,8 +234,8 @@ Alternatively, use pragma comments in individual files:
 import { state } from 'flexium/core';
 
 function App() {
-  const [count, setCount] = state(0);
-  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+  const count = state(0);
+  return <button onClick={() => count.set(count.valueOf() + 1)}>{count}</button>;
 }
 ```
 

@@ -34,20 +34,15 @@ function ThemeToggle() {
 import { state } from 'flexium/core'
 
 // Auth state - shared globally
-function useAuth() {
-  const [user, setUser] = state<User | null>(null, { key: 'auth:user' })
+// Share theme across all components
+const theme = state<'light' | 'dark'>('light', { key: 'app:theme' })
+
+// In any component
+function ThemeToggle() {
+  const theme = state('light', { key: 'app:theme' })
   
-  const login = async (credentials: Credentials) => {
-    const user = await api.login(credentials)
-    setUser(user)
-  }
-  
-  const logout = () => {
-    setUser(null)
-  }
-  
-  return { user, login, logout }
-}
+  return (
+    <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
 
 // Use in any component
 function Header() {
@@ -74,19 +69,19 @@ function Header() {
 import { state } from 'flexium/core'
 
 // Theme state
-const [theme, setTheme] = state('light', { key: 'app:theme' })
+const theme = state('light', { key: 'app:theme' })
 
 // Auth state
-const [user, setUser] = state(null, { key: 'app:auth:user' })
+const user = state(null, { key: 'app:auth:user' })
 
 // Cart state
-const [items, setItems] = state([], { key: 'app:cart:items' })
+const items = state([], { key: 'app:cart:items' })
 
 // Use in any component
 function Dashboard() {
-  const [theme] = state('light', { key: 'app:theme' })
-  const [user] = state(null, { key: 'app:auth:user' })
-  const [items] = state([], { key: 'app:cart:items' })
+  const theme = state('light', { key: 'app:theme' })
+  const user = state(null, { key: 'app:auth:user' })
+  const items = state([], { key: 'app:cart:items' })
   
   // Use all states
 }
@@ -111,7 +106,7 @@ import { createContext, context } from 'flexium/core'
 const ThemeContext = createContext('light')
 
 function ThemeProvider(props) {
-  const [theme, setTheme] = state('light')
+  const theme = state('light')
   return (
     <ThemeContext.Provider value={theme}>
       {props.children}
@@ -129,7 +124,7 @@ import { state } from 'flexium/core'
 
 // No Provider needed!
 function Child() {
-  const [theme] = state('light', { key: 'app:theme' })
+  const theme = state('light', { key: 'app:theme' })
   return <div>{theme}</div>
 }
 ```

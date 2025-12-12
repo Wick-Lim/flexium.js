@@ -21,12 +21,12 @@ Flexium State is a **Callable Proxy**. While you can use it directly in arithmet
 We recommend the **Function Call Syntax** `()` for consistency:
 
 ```tsx
-const [count] = state(0);
-const [isVisible] = state(true);
+const count = state(0);
+const isVisible = state(true);
 
 // ✅ Recommended: Function Call Syntax (Safe & Clear)
-if (count() === 5) { ... }
-if (!isVisible()) { ... }
+if (count.valueOf() === 5) { ... }
+if (!isVisible.valueOf()) { ... }
 
 // ⚠️ Arithmetic (Works directly)
 const next = count + 1; // 1
@@ -41,12 +41,11 @@ if (!isVisible) { ... } // false (Proxy is always truthy)
 
 ## The `state()` API
 
-The `state` function returns a tuple of `[value, setter]`, similar to React's `useState`, but with supercharged capabilities. The value is a reactive proxy that can be used directly like a regular value.
-
+The `state` function returns a reactive proxy directly, similar to a signal but with a unified interface.
 ```tsx
 import { state } from 'flexium/core';
 
-const [count, setCount] = state(0);
+const count = state(0);
 
 // Use directly - no getter call needed!
 console.log(count + 1);  // 1
@@ -58,19 +57,19 @@ Local state is isolated to the component where it's created.
 
 ```tsx
 function Counter() {
-  const [count, setCount] = state(0);
+  const count = state(0);
 
   return (
     <div>
       <p>Count: {count}</p>
-      <button onclick={() => setCount(c => c + 1)}>Increment</button>
+      <button onclick={() => count.set(c => c + 1)}>Increment</button>
     </div>
   );
 }
 ```
 
 - **Reading**: Use the value directly in expressions `count + 1` or in JSX `{count}`.
-- **Writing**: Call the setter `setCount(newValue)` or `setCount(prev => prev + 1)`.
+- **Writing**: Call the setter `count.set(newValue)` or `count.set(prev => prev + 1)`.
 
 ### 2. Global State
 
@@ -89,12 +88,12 @@ export const useTheme = () => state('light', { key: 'theme' });
 import { useTheme } from './store/theme';
 
 function Header() {
-  const [theme, setTheme] = useTheme();
+  const theme = useTheme();
 
   return (
     <header class={theme}>
       <h1>My App</h1>
-      <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+      <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
         Toggle Theme
       </button>
     </header>
@@ -106,7 +105,7 @@ import { useTheme } from './store/theme';
 
 function Footer() {
   // Accesses the SAME state because the key 'theme' matches
-  const [theme] = useTheme();
+  const theme = useTheme();
   return <footer class={theme}>...</footer>;
 }
 ```
@@ -120,7 +119,7 @@ Pass an async function (or a function returning a Promise) to `state()` to creat
 ```tsx
 function UserProfile({ id }) {
   // Automatically fetches when component mounts or dependencies change
-  const [user, refetch, status, error] = state(async () => {
+  const user = state(async () => {
     const response = await fetch(`/api/users/${id}`);
     if (!response.ok) throw new Error('Failed to fetch');
     return response.json();
@@ -128,34 +127,34 @@ function UserProfile({ id }) {
 
   // Render based on loading/error state
   // status: 'idle' | 'loading' | 'success' | 'error'
-  if (status() === 'loading') return <div>Loading...</div>;
-  if (error()) return <div>Error: {error().message}</div>;
+  if (user.status === 'loading') return <div>Loading...</div>;
+  if (user.error) return <div>Error: {user.error.message}</div>;
 
   // Data is available - use values directly
   return (
     <div>
       <h1>{user.name}</h1>
-      <button onclick={() => refetch()}>Reload</button>
+      <button onclick={() => user.refetch()}>Reload</button>
     </div>
   );
 }
 ```
 
 - **Automatic Tracking**: If the async function uses other signals, it will auto-refetch when they change.
-- **Return Values**: `[data, refetch, status, error]` - all reactive proxies. Status is `'idle' | 'loading' | 'success' | 'error'`.
+- **Return Values**: The returned proxy has properties `refetch`, `status`, `loading`, `error`.
 
 ### 4. Computed State (Derived)
 
 Pass a synchronous function to derive state from other signals.
 
 ```tsx
-const [count, setCount] = state(1);
+const count = state(1);
 
 // 'double' updates whenever 'count' changes
-const [double] = state(() => count * 2);
+const double = state(() => count * 2);
 
 console.log(double); // 2
-setCount(5);
+count.set(5);
 console.log(double); // 10
 ```
 
@@ -168,7 +167,7 @@ While `state()` manages data, `effect()` handles side effects like DOM manipulat
 ```tsx
 import { state, effect } from 'flexium/core';
 
-const [count, setCount] = state(0);
+const count = state(0);
 
 effect(() => {
   // Automatically runs when 'count' changes
@@ -183,7 +182,7 @@ For detailed usage, automatic tracking, and cleanup, see the **[Effects](/guide/
 For rendering lists efficiently, use familiar `.map()` syntax - just like React:
 
 ```tsx
-const [todos, setTodos] = state([{ id: 1, text: 'Buy milk' }]);
+const todos = state([{ id: 1, text: 'Buy milk' }]);
 
 return (
   <ul>
@@ -202,11 +201,11 @@ Keys can be arrays for hierarchical namespacing - similar to TanStack Query:
 
 ```tsx
 // String key
-const [user] = state(null, { key: 'user' })
+const user = state(null, { key: 'user' })
 
 // Array key - great for dynamic keys
-const [user] = state(null, { key: ['user', 'profile', userId] })
-const [posts] = state([], { key: ['user', 'posts', userId] })
+const userProfile = state(null, { key: ['user', 'profile', userId] })
+const posts = state([], { key: ['user', 'posts', userId] })
 ```
 
 ### 6. Params Option
@@ -215,10 +214,10 @@ Pass explicit parameters to functions for better DX:
 
 ```tsx
 // Implicit dependencies (closure)
-const [user] = state(async () => fetch(`/api/users/${userId}`))
+const user = state(async () => fetch(`/api/users/${userId}`))
 
 // Explicit dependencies (params) - recommended for complex cases
-const [user] = state(
+const userWithParams = state(
   async ({ userId, postId }) => fetch(`/api/users/${userId}/posts/${postId}`),
   {
     key: ['user', 'posts', userId, postId],
@@ -235,8 +234,8 @@ const [user] = state(
 ## Best Practices
 
 1.  **Use `state()` for everything**: It's the universal primitive.
-2.  **Destructure the tuple**: `const [val, setVal] = state(...)` is the standard pattern.
-3.  **Use `()` for Logic/Comparison**: `if (count() === 10)` is safer than implicit coercion.
+2.  **Use `.set()` for updates**: `count.set(1)` or `count.set(prev => prev + 1)`.
+3.  **Use `.valueOf()` for Logic/Comparison**: `if (count.valueOf() === 10)` is safer than implicit coercion.
 4.  **Use values directly**: `count + 1` works automatically thanks to Symbol.toPrimitive.
 5.  **Use array keys for dynamic data**: `['user', userId]` instead of `'user-' + userId`.
 6.  **Use params for explicit dependencies**: Makes code self-documenting.

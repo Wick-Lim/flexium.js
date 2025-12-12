@@ -31,23 +31,23 @@ function effect(fn: () => void | (() => void)): () => void
 ### Basic Usage
 
 ```tsx
-const [count, setCount] = state(0)
+const count = state(0)
 
 effect(() => {
   console.log('Count changed:', count)
 })
 
-setCount(1) // logs: "Count changed: 1"
-setCount(2) // logs: "Count changed: 2"
+count.set(1) // logs: "Count changed: 1"
+count.set(2) // logs: "Count changed: 2"
 ```
 
 ### With Cleanup
 
 ```tsx
-const [isActive, setIsActive] = state(false)
+const isActive = state(false)
 
 effect(() => {
-  if (isActive) {
+  if (isActive.valueOf()) {
     const interval = setInterval(() => {
       console.log('tick')
     }, 1000)
@@ -61,25 +61,25 @@ effect(() => {
 ### DOM Updates
 
 ```tsx
-const [theme, setTheme] = state('light')
+const theme = state('light')
 
 effect(() => {
-  document.body.classList.toggle('dark', String(theme) === 'dark')
+  document.body.classList.toggle('dark', String(theme.valueOf()) === 'dark')
 })
 ```
 
 ### API Calls
 
 ```tsx
-const [userId, setUserId] = state(1)
-const [user, setUser] = state(null)
+const userId = state(1)
+const user = state(null)
 
 effect(() => {
-  const id = userId
+  const id = userId.valueOf()
 
   fetch(`/api/users/${id}`)
     .then(res => res.json())
-    .then(data => setUser(data))
+    .then(data => user.set(data))
 
   return () => {
     // Cancel pending request if userId changes
@@ -90,10 +90,10 @@ effect(() => {
 ### Event Listeners
 
 ```tsx
-const [isListening, setIsListening] = state(true)
+const isListening = state(true)
 
 effect(() => {
-  if (!isListening) return
+  if (!isListening.valueOf()) return
 
   const handler = (e) => console.log('Key:', e.key)
   window.addEventListener('keydown', handler)
@@ -105,12 +105,12 @@ effect(() => {
 ### Multiple Dependencies
 
 ```tsx
-const [a, setA] = state(1)
-const [b, setB] = state(2)
+const a = state(1)
+const b = state(2)
 
 effect(() => {
   // Runs when either a or b changes
-  console.log('Sum:', a + b)
+  console.log('Sum:', a.valueOf() + b.valueOf())
 })
 ```
 
@@ -145,7 +145,7 @@ effect(() => {
 // React to changes + cleanup
 effect(() => {
   const ws = new WebSocket(`wss://api.com/${userId}`)
-  ws.onmessage = (e) => setMessages(m => [...m, e.data])
+  ws.onmessage = (e) => messages.set(m => [...m, e.data])
   return () => ws.close()  // cleanup before re-run or unmount
 })
 ```

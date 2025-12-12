@@ -40,33 +40,33 @@ import { state } from 'flexium/core'
 
 ```tsx
 // Basic state
-const [count, setCount] = state(0)
+const count = state(0)
 
 // Derived state (pass a function)
-const [doubled] = state(() => count * 2)
+const doubled = state(() => count * 2)
 
 // Async state
-const [users, refetch, status, error] = state(async () => fetch('/api'))
+const users = state(async () => fetch('/api'))
 ```
 
 | Input | Returns |
 |-------|---------|
-| `state(value)` | `[value, setter]` |
-| `state(() => T)` | `[value]` |
-| `state(async () => T)` | `[value, refetch, status, error]` |
+| `state(value)` | `StateValue<T>` |
+| `state(() => T)` | `StateValue<T>` |
+| `state(async () => T)` | `StateValue<T>` |
 
 ## Basic State
 
 ```tsx
-const [count, setCount] = state(0)
+const count = state(0)
 
 // Read
 console.log(count + 1)  // 1
 console.log(`Count: ${count}`)
 
 // Write
-setCount(5)
-setCount(prev => prev + 1)
+count.set(5)
+count.set(prev => prev + 1)
 ```
 
 ## Derived State
@@ -78,12 +78,12 @@ Pass a function to create values that auto-update when dependencies change:
 </ClientOnly>
 
 ```tsx
-const [price, setPrice] = state(100)
-const [quantity, setQuantity] = state(2)
+const price = state(100)
+const quantity = state(2)
 
-const [subtotal] = state(() => price * quantity)
-const [tax] = state(() => subtotal * 0.1)
-const [total] = state(() => subtotal + tax)
+const subtotal = state(() => price * quantity)
+const tax = state(() => subtotal * 0.1)
+const total = state(() => subtotal + tax)
 
 console.log(+total)  // 220
 ```
@@ -97,7 +97,7 @@ Pass an async function to handle data fetching with built-in status and error st
 </ClientOnly>
 
 ```tsx
-const [users, refetch, status, error] = state(async () => {
+const users = state(async () => {
   const res = await fetch('/api/users')
   return res.json()
 })
@@ -106,10 +106,10 @@ const [users, refetch, status, error] = state(async () => {
 function UserList() {
   return (
     <div>
-      {String(status) === 'loading' && <Spinner />}
-      {String(status) === 'error' && <Error message={error.message} />}
+      {String(users.status) === 'loading' && <Spinner />}
+      {String(users.status) === 'error' && <Error message={users.error.message} />}
       {users && users.map(u => <User key={u.id} user={u} />)}
-      <button onclick={refetch}>Refresh</button>
+      <button onclick={users.refetch}>Refresh</button>
     </div>
   )
 }
@@ -125,13 +125,13 @@ Use the `key` option to share state across components:
 
 ```tsx
 // In Component A
-const [count, setCount] = state(0, { key: 'app:count' })
+const count = state(0, { key: 'app:count' })
 
 // In Component B - shares the same state
-const [count, setCount] = state(0, { key: 'app:count' })
+const count = state(0, { key: 'app:count' })
 
 // In Component C - read-only access
-const [count] = state(0, { key: 'app:count' })
+const count = state(0, { key: 'app:count' })
 ```
 
 ### Array Keys
@@ -140,11 +140,11 @@ Keys can be arrays for hierarchical namespacing:
 
 ```tsx
 // Array key - great for dynamic keys with IDs
-const [user] = state(null, { key: ['user', 'profile', userId] })
-const [posts] = state([], { key: ['user', 'posts', userId] })
+const user = state(null, { key: ['user', 'profile', userId] })
+const posts = state([], { key: ['user', 'posts', userId] })
 
 // Useful for cache key patterns similar to TanStack Query
-const [data] = state(async () => fetchUser(id), {
+const data = state(async () => fetchUser(id), {
   key: ['users', id]
 })
 ```
@@ -155,12 +155,12 @@ Pass explicit parameters to functions for better DX:
 
 ```tsx
 // Without params - dependencies are implicit in closure
-const [user] = state(async () => {
+const user = state(async () => {
   return fetch(`/api/users/${userId}/posts/${postId}`)
 })
 
 // With params - dependencies are explicit
-const [user] = state(
+const user = state(
   async ({ userId, postId }) => {
     return fetch(`/api/users/${userId}/posts/${postId}`)
   },
@@ -180,14 +180,14 @@ Benefits of explicit params:
 
 ```tsx
 function Counter() {
-  const [count, setCount] = state(0)
-  const [doubled] = state(() => count * 2)
+  const count = state(0)
+  const doubled = state(() => count * 2)
 
   return (
     <div>
       <p>Count: {count}</p>
       <p>Doubled: {doubled}</p>
-      <button onclick={() => setCount(c => c + 1)}>+</button>
+      <button onclick={() => count.set(c => c + 1)}>+</button>
     </div>
   )
 }

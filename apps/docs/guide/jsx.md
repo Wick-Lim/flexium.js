@@ -31,9 +31,9 @@ Flexium uses native JavaScript for control flow - just like React, but with sign
 Use ternary operators and `&&` - exactly like React:
 
 ```tsx
-{isLoggedIn() ? <UserDashboard /> : <button>Login</button>}
+{isLoggedIn.valueOf() ? <UserDashboard /> : <button>Login</button>}
 
-{isLoggedIn() && <UserDashboard />}
+{isLoggedIn.valueOf() && <UserDashboard />}
 ```
 
 ### Lists
@@ -52,9 +52,9 @@ Render one of multiple options.
 
 ```tsx
 <Switch fallback={<p>Not found</p>}>
-  <Match when={status() === 'loading'}>Loading...</Match>  {/* status works directly */}
-  <Match when={status() === 'error'}>Error!</Match>
-  <Match when={status() === 'success'}>Data Loaded</Match>
+  <Match when={status.valueOf() === 'loading'}>Loading...</Match>  {/* status works directly */}
+  <Match when={status.valueOf() === 'error'}>Error!</Match>
+  <Match when={status.valueOf() === 'success'}>Data Loaded</Match>
 </Switch>
 ```
 ## Event Handling

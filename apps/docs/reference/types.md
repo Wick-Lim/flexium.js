@@ -63,38 +63,37 @@ function MyComponent(): FNodeChild {
 
 ## Reactivity Types
 
-### Signal
+### StateValue (Proxy)
 
-Reactive primitive that notifies subscribers on change.
+Reactive primitive that notifies subscribers on change. In Flexium, state is wrapped in a Proxy.
 
 ```typescript
-interface Signal<T> {
-  value: T
-  (): T
+type StateValue<T> = T & {
   set(value: T): void
+  valueOf(): T
   peek(): T
 }
 ```
 
 **Properties:**
-- `value` - Get or set the current value (reactive)
-- `()` - Call as function to get value (reactive)
 - `set(value)` - Update the value
+- `valueOf()` - Get the raw value (useful for primitive comparisons)
 - `peek()` - Read value without tracking dependency
+- `[key]` - Access properties of T directly (reactive)
 
 **Usage:**
 ```tsx
 import { state } from 'flexium/core'
 
-const [count, setCount] = state(0)
+const count = state(0)
 
 // Read value (tracks dependency)
-console.log(+count) // 0
-console.log(count + 1) // 1
+console.log(count.valueOf()) // 0
+console.log(count + 1) // 1 (implicit coercion works in some cases, but .valueOf() is safer)
 
 // Update value
-setCount(c => c + 1)
-setCount(5)
+count.set(count.valueOf() + 1)
+count.set(5)
 
 // Read without tracking
 const current = count.peek()
@@ -104,71 +103,67 @@ const current = count.peek()
 
 ### Computed
 
-Derived signal that automatically recomputes when dependencies change.
+Derived state that automatically recomputes when dependencies change. Returned as a Readonly StateValue.
 
 ```typescript
-interface Computed<T> {
-  readonly value: T
-  (): T
-  peek(): T
-}
+type Computed<T> = Readonly<StateValue<T>>
 ```
 
 **Properties:**
-- `value` - Get the computed value (readonly, reactive)
-- `()` - Call as function to get value (reactive)
+- `valueOf()` - Get the computed value (reactive)
 - `peek()` - Read value without tracking dependency
+- `[key]` - Access properties of T directly (reactive)
 
 **Usage:**
 ```tsx
 import { state } from 'flexium/core'
 
-const [count, setCount] = state(1)
-const [doubled] = state(() => count * 2)
+const count = state(1)
+const doubled = state(() => count.valueOf() * 2)
 
-console.log(+doubled) // 2
-setCount(5)
-console.log(+doubled) // 10
+console.log(doubled.valueOf()) // 2
+count.set(5)
+console.log(doubled.valueOf()) // 10
 ```
 
-**Related:** `Signal`, `state()`
+**Related:** `StateValue`, `state()`
 
 ### Resource
 
-Interface for async data with loading states.
+Interface for async data with loading states. Attached to the StateValue proxy.
 
 ```typescript
-interface Resource<T> extends Signal<T | undefined> {
-  loading: boolean
-  error: any
-  state: 'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'
-  latest: T | undefined
-  read(): T | undefined
+type Resource<T> = StateValue<T | undefined> & {
+  loading: StateValue<boolean>
+  error: StateValue<any>
+  status: StateValue<'unresolved' | 'pending' | 'ready' | 'refreshing' | 'errored'>
+  latest: StateValue<T | undefined>
+  refetch(): Promise<void>
 }
 ```
 
 **Properties:**
-- `value` - Current data (undefined while loading)
-- `loading` - True if currently fetching
-- `error` - Error object if failed
-- `state` - Current resource state
-- `latest` - Latest successfully loaded value
-- `read()` - Read value, throwing Promise if pending (for Suspense)
+- `valueOf()` - Current data (undefined while loading)
+- `loading` - True if currently fetching (reactive)
+- `error` - Error object if failed (reactive)
+- `status` - Current resource state (reactive)
+- `latest` - Latest successfully loaded value (reactive)
+- `refetch()` - Manually trigger a refresh
 
 **Usage:**
 ```tsx
 import { state } from 'flexium/core'
 // state() handles async functions as resources
-const [user, refetch, status, error] = state(async () => fetchUser(userId))
+const user = state(async () => fetchUser(userId))
 
 return () => {
-  if (status() === 'loading') return <div>Loading...</div>
-  if (error()) return <div>Error: {error().message}</div>
-  return <div>{user()?.name}</div>
+  if (user.status.valueOf() === 'loading') return <div>Loading...</div>
+  if (user.error.valueOf()) return <div>Error: {user.error.valueOf().message}</div>
+  return <div>{user.name}</div>
 }
 ```
 
-**Related:** `state()`, `Signal`
+**Related:** `state()`, `StateValue`
 
 ## Component Types
 
@@ -249,10 +244,10 @@ interface Context<T> {
 import { state } from 'flexium/core'
 
 // Share theme globally - no Provider needed
-const [theme, setTheme] = state<'light' | 'dark'>('dark', { key: 'app:theme' })
+const theme = state<'light' | 'dark'>('dark', { key: 'app:theme' })
 
 function ThemedComponent() {
-  const [theme] = state('light', { key: 'app:theme' })
+  const theme = state('light', { key: 'app:theme' })
   return <div>Current theme: {theme}</div>
 }
 ```
@@ -293,10 +288,10 @@ Router context value provided to components.
 
 ```typescript
 interface RouterContext {
-  location: Signal<Location> | Computed<Location>
-  params: Signal<Record<string, string>> | Computed<Record<string, string>>
+  location: StateValue<Location>
+  params: StateValue<Record<string, string>>
   navigate: (path: string) => void
-  matches: Signal<RouteMatch[]> | Computed<RouteMatch[]>
+  matches: StateValue<RouteMatch[]>
 }
 ```
 
@@ -508,8 +503,8 @@ interface DrawRectProps {
 ```tsx
 import { state } from 'flexium/core'
 
-const [x] = state(10)
-const [fill] = state('red')
+const x = state(10)
+const fill = state('red')
 
 <DrawRect
   x={x}

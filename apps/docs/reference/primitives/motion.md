@@ -49,14 +49,15 @@ Creates a new controller for the specified element.
 
 ```tsx
 import { MotionController } from 'flexium/primitives/motion';
+import { state, effect } from 'flexium/core';
 
 function AnimatedBox() {
-  const boxRef = signal<HTMLElement | null>(null);
+  const boxRef = state<HTMLElement | null>(null);
 
   effect(() => {
-    if (!boxRef.value) return;
+    if (!boxRef.valueOf()) return;
 
-    const controller = new MotionController(boxRef.value);
+    const controller = new MotionController(boxRef.valueOf()!);
 
     // Animate on mount
     controller.animate({
@@ -68,7 +69,7 @@ function AnimatedBox() {
     return () => controller.dispose();
   });
 
-  return <div ref={boxRef}>Animated Content</div>;
+  return <div ref={el => boxRef.set(el)}>Animated Content</div>;
 }
 ```
 

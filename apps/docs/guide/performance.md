@@ -24,7 +24,7 @@ Because Flexium uses signals, updates are pinpointed. If a state changes, only t
 import { state } from 'flexium/core';
 
 function Counter() {
-  const [count, setCount] = state(0);
+  const count = state(0);
 
   // When count changes, ONLY the text node updates
   // The button, div, and everything else remain untouched
@@ -32,7 +32,7 @@ function Counter() {
     <div class="container">
       <h1>Counter</h1>
       <p>Count: {count}</p> {/* Only this text updates - count works directly */}
-      <button onclick={() => setCount(c => c + 1)}>Increment</button>
+      <button onclick={() => count.set(c => c + 1)}>Increment</button>
     </div>
   );
 }
@@ -63,22 +63,22 @@ Effects and computed values automatically track only the signals they read. No m
 ```tsx
 import { state, effect } from 'flexium/core';
 
-const [a, setA] = state(1);
-const [b, setB] = state(2);
+const a = state(1);
+const b = state(2);
 
 effect(() => {
-  if (a > 5) {  // Both a() and a work in effects
+  if (a.valueOf() > 5) {  // Both a() and a work in effects
     // Only when a > 5, this effect depends on 'b'
     console.log('b is', b);
   }
 });
 
 // Changing 'b' when a <= 5 won't trigger the effect
-setB(10); // No effect runs
+b.set(10); // No effect runs
 
 // But once a > 5, b becomes a dependency
-setA(6);  // Effect runs
-setB(20); // Effect runs again
+a.set(6);  // Effect runs
+b.set(20); // Effect runs again
 ```
 
 ## Signal Optimization Patterns
@@ -93,23 +93,23 @@ import { state } from 'flexium/core';
 
 // Bad - recalculates on every access
 function TodoList() {
-  const [todos] = state([...]);
+  const todos = state([...]);
 
   return (
     <div>
-      <p>Total: {todos().length}</p>
-      <p>Completed: {todos().filter(t => t.done).length}</p>
-      <p>Active: {todos().filter(t => !t.done).length}</p>
+      <p>Total: {todos.valueOf().length}</p>
+      <p>Completed: {todos.valueOf().filter(t => t.done).length}</p>
+      <p>Active: {todos.valueOf().filter(t => !t.done).length}</p>
     </div>
   );
 }
 
 // Good - computed values memoize results
 function TodoList() {
-  const [todos] = state([...]);
-  const [total] = state(() => todos().length);
-  const [completed] = state(() => todos().filter(t => t.done).length);
-  const [active] = state(() => todos().filter(t => !t.done).length);
+  const todos = state([...]);
+  const total = state(() => todos.valueOf().length);
+  const completed = state(() => todos.valueOf().filter(t => t.done).length);
+  const active = state(() => todos.valueOf().filter(t => !t.done).length);
 
   return (
     <div>
@@ -131,17 +131,17 @@ When you need a derived value, use `computed()` instead of `effect()` with manua
 ```tsx
 import { effect, state } from 'flexium/core';
 
-const [firstName, setFirstName] = state('John');
-const [lastName, setLastName] = state('Doe');
+const firstName = state('John');
+const lastName = state('Doe');
 
 // Bad - uses effect to maintain derived state
-const [fullName, setFullName] = state('');
+const fullName = state('');
 effect(() => {
-  setFullName(`${firstName()} ${lastName()}`);
+  fullName.set(`${firstName.valueOf()} ${lastName.valueOf()}`);
 });
 
 // Good - computed automatically updates
-const [fullName] = state(() => `${firstName()} ${lastName()}`);
+const fullNameComputed = state(() => `${firstName.valueOf()} ${lastName.valueOf()}`);
 ```
 
 Computed is more efficient because it's lazy (only computes when read) and doesn't trigger unnecessary updates.
@@ -154,11 +154,11 @@ Reading signals inside loops or nested structures can create many dependencies:
 ```tsx
 import { state } from 'flexium/core';
 
-const [items, setItems] = state([...]);
+const items = state([...]);
 
 // Bad - creates dependency on every item property
 effect(() => {
-  const list = items();
+  const list = items.valueOf();
   list.forEach(item => {
     console.log(item.name, item.value);
   });
@@ -166,12 +166,12 @@ effect(() => {
 
 // Good - depend only on the array itself
 effect(() => {
-  const list = items();
+  const list = items.valueOf();
   console.log('Items changed:', list.length);
 });
 
 // Or use granular signals for each item
-const itemSignals = items().map(item => state(item));
+const itemSignals = items.valueOf().map(item => state(item));
 ```
 
 ## Computed vs Effect Usage
@@ -189,14 +189,14 @@ Understanding when to use `computed()` vs `effect()` is crucial for performance.
 ```tsx
 import { state } from 'flexium/core';
 
-const [price, setPrice] = state(100);
-const [tax, setTax] = state(0.08);
+const price = state(100);
+const tax = state(0.08);
 
 // Computed - perfect for derived values
-const [total] = state(() => price() * (1 + tax()));
+const total = state(() => price.valueOf() * (1 + tax.valueOf()));
 
 // Used in UI - only recalculates when price or tax changes
-<div>Total: ${total()}</div>
+<div>Total: ${total}</div>
 ```
 
 ### Use Effect When:
@@ -210,11 +210,11 @@ const [total] = state(() => price() * (1 + tax()));
 ```tsx
 import { effect, state } from 'flexium/core';
 
-const [userId, setUserId] = state(null);
+const userId = state(null);
 
 // Effect - perfect for side effects
 effect(() => {
-  const id = userId();  // userId() works in effects
+  const id = userId.valueOf();  // userId() works in effects
   if (id) {
     // Side effect: log to analytics
     analytics.track('user_viewed', { userId: id });
@@ -236,27 +236,27 @@ effect(() => {
 ```tsx
 import { effect, state } from 'flexium/core';
 
-const [count, setCount] = state(0);
+const count = state(0);
 
 // Computed - lazy, memoized
-const [doubled] = state(() => {
+const doubled = state(() => {
   console.log('Computing doubled');
-  return count() * 2;
+  return count.valueOf() * 2;
 });
 
 // Effect - eager, runs on every change
 effect(() => {
   console.log('Effect triggered');
-  const value = count() * 2;
+  const value = count.valueOf() * 2;
 });
 
-setCount(1); // Both run
-doubled();   // Returns cached value, no recomputation
-doubled();   // Still cached
+count.set(1); // Both run
+doubled.valueOf();   // Returns cached value, no recomputation
+doubled.valueOf();   // Still cached
 
-setCount(2); // Effect runs immediately, computed marks stale
+count.set(2); // Effect runs immediately, computed marks stale
 // Computed only recalculates when accessed
-doubled();   // Recomputes now
+doubled.valueOf();   // Recomputes now
 ```
 
 ## Sync Updates
@@ -267,24 +267,24 @@ When making multiple state changes, sync them to avoid intermediate updates:
 import { sync } from 'flexium/advanced';
 import { state } from 'flexium/core';
 
-const [firstName, setFirstName] = state('John');
-const [lastName, setLastName] = state('Doe');
-const [age, setAge] = state(30);
+const firstName = state('John');
+const lastName = state('Doe');
+const age = state(30);
 
 // Bad - triggers 3 separate updates
 function updateUser(user) {
-  setFirstName(user.first);  // Update 1
-  setLastName(user.last);    // Update 2
-  setAge(user.age);          // Update 3
+  firstName.set(user.first);  // Update 1
+  lastName.set(user.last);    // Update 2
+  age.set(user.age);          // Update 3
   // UI re-renders 3 times!
 }
 
 // Good - batches into 1 update
 function updateUser(user) {
   sync(() => {
-    setFirstName(user.first);
-    setLastName(user.last);
-    setAge(user.age);
+    firstName.set(user.first);
+    lastName.set(user.last);
+    age.set(user.age);
   });
   // UI re-renders once!
 }
@@ -302,9 +302,9 @@ Flexium automatically batches updates in event handlers:
 ```tsx
 // Updates are automatically batched in event handlers
 <button onclick={() => {
-  setCount(c => c + 1);
-  setName('Updated');
-  setActive(true);
+  count.set(c => c + 1);
+  name.set('Updated');
+  active.set(true);
   // All 3 updates batched automatically
 }}>
   Update
@@ -313,17 +313,17 @@ Flexium automatically batches updates in event handlers:
 // But not in async callbacks
 setTimeout(() => {
   // These are NOT automatically batched
-  setCount(c => c + 1);
-  setName('Updated');
-  setActive(true);
+  count.set(c => c + 1);
+  name.set('Updated');
+  active.set(true);
 }, 1000);
 
 // Wrap in sync() for async contexts
 setTimeout(() => {
   sync(() => {
-    setCount(c => c + 1);
-    setName('Updated');
-    setActive(true);
+    count.set(c => c + 1);
+    name.set('Updated');
+    active.set(true);
   });
 }, 1000);
 ```
@@ -351,7 +351,7 @@ const [count, setCount] = state(0);
 // Bad - effect never gets cleaned up
 function createWatcher() {
   effect(() => {
-    console.log('Count:', count());
+    console.log('Count:', count.valueOf());
   });
 }
 
@@ -362,7 +362,7 @@ createWatcher(); // Creates another effect - memory leak!
 function createWatcher() {
   return root(dispose => {
     effect(() => {
-      console.log('Count:', count());
+      console.log('Count:', count.valueOf());
     });
 
     return dispose; // Return cleanup function
@@ -383,12 +383,12 @@ In components, effects are automatically cleaned up when the component unmounts:
 
 ```tsx
 function Timer() {
-  const [time, setTime] = state(0);
+  const time = state(0);
 
   // This effect is automatically cleaned up on unmount
   effect(() => {
     const interval = setInterval(() => {
-      setTime(t => t + 1);
+      time.set(t => t + 1);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -406,18 +406,18 @@ Use `untrack()` to read a signal without creating a dependency:
 import { effect, state } from 'flexium/core';
 import { untrack } from 'flexium/advanced';
 
-const [count, setCount] = state(0);
-const [multiplier, setMultiplier] = state(2);
+const count = state(0);
+const multiplier = state(2);
 
 // This effect only tracks 'count', not 'multiplier'
 effect(() => {
-  const c = count();
-  const m = untrack(() => multiplier()); // Read without tracking
+  const c = count.valueOf();
+  const m = untrack(() => multiplier.valueOf()); // Read without tracking
   console.log('Result:', c * m);
 });
 
-setCount(5);      // Effect runs
-setMultiplier(3); // Effect does NOT run
+count.set(5);      // Effect runs
+multiplier.set(3); // Effect does NOT run
 ```
 
 This is useful for:
@@ -432,11 +432,11 @@ Signals also have a `.peek()` method that works like `untrack()`:
 ```tsx
 import { state, effect } from 'flexium/core';
 
-const [count, setCount] = state(0);
+const count = state(0);
 
 effect(() => {
   // Tracked access
-  const current = count();
+  const current = count.valueOf();
 
   // Untracked access
   const initial = count.peek();
@@ -454,7 +454,7 @@ import { List } from 'flexium/primitives';
 import { state } from 'flexium/core';
 
 function BigList() {
-  const [items] = state(
+  const items = state(
     Array.from({ length: 10000 }, (_, i) => ({
       id: i,
       name: `Item ${i}`,
@@ -499,7 +499,7 @@ import { List } from 'flexium/primitives';
 import { state } from 'flexium/core';
 
 function OptimizedList() {
-  const [items] = state([...]); // 100,000 items
+  const items = state([...]); // 100,000 items
 
   // List component automatically optimizes rendering
   return (
@@ -537,8 +537,8 @@ Split your application into smaller chunks that load on demand:
 ```tsx
 // Use dynamic imports with state for code splitting
 function App() {
-  const [route, setRoute] = state('dashboard');
-  const [components, setComponents] = state({
+  const route = state('dashboard');
+  const components = state({
     dashboard: null,
     settings: null,
     profile: null
@@ -546,28 +546,28 @@ function App() {
 
   // Load components on demand
   effect(() => {
-    if (route === 'dashboard' && !components.dashboard) {
-      import('./Dashboard').then(m => setComponents(prev => ({ ...prev, dashboard: m.default })));
+    if (route.valueOf() === 'dashboard' && !components.valueOf().dashboard) {
+      import('./Dashboard').then(m => components.set(prev => ({ ...prev, dashboard: m.default })));
     }
-    if (route === 'settings' && !components.settings) {
-      import('./Settings').then(m => setComponents(prev => ({ ...prev, settings: m.default })));
+    if (route.valueOf() === 'settings' && !components.valueOf().settings) {
+      import('./Settings').then(m => components.set(prev => ({ ...prev, settings: m.default })));
     }
-    if (route === 'profile' && !components.profile) {
-      import('./Profile').then(m => setComponents(prev => ({ ...prev, profile: m.default })));
+    if (route.valueOf() === 'profile' && !components.valueOf().profile) {
+      import('./Profile').then(m => components.set(prev => ({ ...prev, profile: m.default })));
     }
   });
 
   return (
     <div>
       <nav>
-        <button onclick={() => setRoute('dashboard')}>Dashboard</button>
-        <button onclick={() => setRoute('settings')}>Settings</button>
-        <button onclick={() => setRoute('profile')}>Profile</button>
+        <button onclick={() => route.set('dashboard')}>Dashboard</button>
+        <button onclick={() => route.set('settings')}>Settings</button>
+        <button onclick={() => route.set('profile')}>Profile</button>
       </nav>
 
-      {route === 'dashboard' && (components.dashboard ? <components.dashboard /> : <div>Loading...</div>)}
-      {route === 'settings' && (components.settings ? <components.settings /> : <div>Loading...</div>)}
-      {route === 'profile' && (components.profile ? <components.profile /> : <div>Loading...</div>)}
+      {route.valueOf() === 'dashboard' && (components.valueOf().dashboard ? <components.valueOf().dashboard /> : <div>Loading...</div>)}
+      {route.valueOf() === 'settings' && (components.valueOf().settings ? <components.valueOf().settings /> : <div>Loading...</div>)}
+      {route.valueOf() === 'profile' && (components.valueOf().profile ? <components.valueOf().profile /> : <div>Loading...</div>)}
     </div>
   );
 }
@@ -580,14 +580,14 @@ With Flexium Router, automatically split by route:
 ```tsx
 import { Router, Route } from 'flexium/router';
 // Use dynamic imports with state for code splitting
-const [Home, setHome] = state(null);
-const [About, setAbout] = state(null);
-const [Contact, setContact] = state(null);
+const Home = state(null);
+const About = state(null);
+const Contact = state(null);
 
 // Load on demand
-import('./pages/Home').then(m => setHome(m.default));
-import('./pages/About').then(m => setAbout(m.default));
-import('./pages/Contact').then(m => setContact(m.default));
+import('./pages/Home').then(m => Home.set(m.default));
+import('./pages/About').then(m => About.set(m.default));
+import('./pages/Contact').then(m => Contact.set(m.default));
 
 function App() {
   return (
@@ -608,26 +608,26 @@ Load data only when needed:
 import { state, effect } from 'flexium/core';
 
 function UserProfile({ userId }) {
-  const [expanded, setExpanded] = state(false);
-  const [details, setDetails] = state(null);
+  const expanded = state(false);
+  const details = state(null);
 
   // Only fetch when expanded
   effect(() => {
-    if (expanded && !details) {
+    if (expanded.valueOf() && !details.valueOf()) {
       fetch(`/api/users/${userId}/details`)
         .then(res => res.json())
-        .then(data => setDetails(data));
+        .then(data => details.set(data));
     }
   });
 
   return (
     <div>
       <h2>User {userId}</h2>
-      <button onclick={() => setExpanded(e => !e)}>
-        {expanded ? 'Hide' : 'Show'} Details
+      <button onclick={() => expanded.set(e => !e)}>
+        {expanded.valueOf() ? 'Hide' : 'Show'} Details
       </button>
 
-      {expanded && details && (
+      {expanded.valueOf() && details.valueOf() && (
         !details.loading ? (
           <div>{details?.bio}</div>
         ) : (
@@ -734,20 +734,20 @@ For large third-party libraries, use dynamic imports:
 import { state } from 'flexium/core';
 
 function ChartComponent({ data }) {
-  const [Chart, setChart] = state(null);
+  const Chart = state(null);
 
   // Load chart library only when needed
   effect(() => {
-    if (data.length > 0 && !Chart) {
+    if (data.length > 0 && !Chart.valueOf()) {
       import('chart.js').then(module => {
-        setChart(module.default);
+        Chart.set(module.default);
       });
     }
   });
 
   return (
     <div>
-      {Chart ? (
+      {Chart.valueOf() ? (
         <ChartRenderer Chart={Chart} data={data} />
       ) : (
         <div>Loading chart...</div>

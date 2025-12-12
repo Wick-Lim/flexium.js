@@ -10,13 +10,13 @@ Flexium's philosophy is simple: **one `state()` function for all reactive needs*
 import { state } from 'flexium/core'
 
 // Mutable state
-const [count, setCount] = state(0)
+const count = state(0)
 
 // Derived state
-const [doubled] = state(() => count * 2)
+const doubled = state(() => count.valueOf() * 2)
 
 // Async state
-const [users, refetch, status, error] = state(async () => fetch('/api/users'))
+const users = state(async () => fetch('/api/users'))
 ```
 
 ### Why One API?
@@ -31,7 +31,7 @@ Traditional frameworks re-render entire components when state changes. Flexium's
 
 ```tsx
 function Counter() {
-  const [count, setCount] = state(0)
+  const count = state(0)
 
   // Only this text node updates when count changes
   return <p>Count: {count}</p>
@@ -43,14 +43,14 @@ function Counter() {
 ### 1. `state()` - All Reactive State
 
 ```tsx
-// Mutable state → [value, setter]
-const [name, setName] = state('Alice')
+// Mutable state → Proxy
+const name = state('Alice')
 
-// Derived state → [value] (no setter)
-const [greeting] = state(() => `Hello, ${name}!`)
+// Derived state → Proxy (readonly)
+const greeting = state(() => `Hello, ${name.valueOf()}!`)
 
-// Async state → [value, refetch, status, error]
-const [data, refetch, status, error] = state(async () => fetchData())
+// Async state → Proxy (with refetch, status, error properties)
+const data = state(async () => fetchData())
 ```
 
 ### 2. `effect()` - Side Effects
@@ -99,7 +99,7 @@ This results in:
 Use native JavaScript:
 
 ```tsx
-{isLoggedIn() ? <Dashboard /> : <Login />}
+{isLoggedIn.valueOf() ? <Dashboard /> : <Login />}
 ```
 
 ### List Rendering
@@ -126,7 +126,7 @@ When you pass signals as props, reactivity flows through:
 
 ```tsx
 function Parent() {
-  const [count, setCount] = state(0)
+  const count = state(0)
   return <Child count={count} />
 }
 
@@ -142,8 +142,8 @@ State created inside components is local to that component:
 
 ```tsx
 function Counter() {
-  const [count, setCount] = state(0) // Local state
-  return <button onclick={() => setCount(c => c + 1)}>{count}</button>
+  const count = state(0) // Local state
+  return <button onclick={() => count.set(c => c + 1)}>{count}</button>
 }
 ```
 
@@ -214,22 +214,22 @@ effect(() => {
 Handle errors and loading states explicitly with `state(async)`:
 
 ```tsx
-const [data, refetch, status, error] = state(async () => {
+const data = state(async () => {
   const res = await fetch('/api/data')
   if (!res.ok) throw new Error('Failed to fetch')
   return res.json()
 })
 
-// status: 'idle' | 'loading' | 'success' | 'error'
+// data.status: 'idle' | 'loading' | 'success' | 'error'
 function DataView() {
   return (
     <div>
-      {status() === 'loading' ? (
+      {data.status === 'loading' ? (
         <Spinner />
-      ) : status() === 'error' ? (
+      ) : data.status === 'error' ? (
         <div>
-          <p>Error: {error.message}</p>
-          <button onclick={refetch}>Retry</button>
+          <p>Error: {data.error.message}</p>
+          <button onclick={data.refetch}>Retry</button>
         </div>
       ) : (
         <Content data={data} />
@@ -243,8 +243,8 @@ function DataView() {
 
 | Concept | Purpose | Example |
 |---------|---------|---------|
-| `state(value)` | Mutable state | `const [x, setX] = state(0)` |
-| `state(() => T)` | Derived value | `state(() => a + b)` |
+| `state(value)` | Mutable state | `const x = state(0)` |
+| `state(() => T)` | Derived value | `state(() => a.valueOf() + b.valueOf())` |
 | `state(async)` | Async data | `state(async () => fetch(...))` |
 | `effect()` | Side effects | `effect(() => log(x))` |
 | `items.map()` | List render | `items.map(item => <div>{item}</div>)` |

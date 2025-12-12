@@ -21,7 +21,7 @@ import { Location } from './types'
  * ```tsx
  * const [location, navigate, cleanup] = createLocation();
  * // Access current path
- * console.log(location().pathname);
+ * console.log(location.pathname);
  * // Navigate to new path
  * navigate('/users/123');
  * // Cleanup when done (removes popstate listener)
@@ -49,7 +49,7 @@ export function createLocation(): [StateValue<Location>, (path: string) => void,
     }
   }
 
-  const [loc, setLoc] = state<Location>(getLoc())
+  const loc = state<Location>(getLoc())
 
   const navigate = (path: string) => {
     // SSR guard
@@ -61,13 +61,13 @@ export function createLocation(): [StateValue<Location>, (path: string) => void,
       return
     }
     window.history.pushState({}, '', path)
-    setLoc(getLoc())
+    loc.set(getLoc())
   }
 
   // SSR guard for popstate listener
   const handlePopState = () => {
     try {
-      setLoc(getLoc())
+      loc.set(getLoc())
     } catch (error) {
       console.error('[Flexium Router] Error handling popstate:', error)
     }

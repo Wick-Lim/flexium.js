@@ -91,36 +91,36 @@ Prevent direct comparison of `state()` proxy values which always fail.
 #### Bad
 
 ```tsx
-const [count, setCount] = state(0);
-const [isVisible, setVisible] = state(false);
+const count = state(0);
+const isVisible = state(false);
 
 // ❌ Direct comparison always fails
-if (count === 5) {
+if (count.valueOf() === 5) {
   doSomething(); // Never runs!
 }
 
 // ❌ Boolean coercion is unreliable
-if (!isVisible) {
+if (!isVisible.valueOf()) {
   hide(); // Never runs! Proxy is always truthy
 }
 
 // ❌ Direct use in ternary
-const message = count ? 'Has value' : 'Empty'; // Always 'Has value'
+const message = count.valueOf() ? 'Has value' : 'Empty'; // Always 'Has value'
 ```
 
 #### Good
 
 ```tsx
-const [count, setCount] = state(0);
-const [isVisible, setVisible] = state(false);
+const count = state(0);
+const isVisible = state(false);
 
-// ✅ Use function call syntax
-if (count() === 5) {
+// ✅ Use .valueOf() syntax
+if (count.valueOf() === 5) {
   doSomething();
 }
 
-// ✅ Use function call for boolean checks
-if (!isVisible()) {
+// ✅ Use .valueOf() for boolean checks
+if (!isVisible.valueOf()) {
   hide();
 }
 
@@ -151,10 +151,10 @@ Disallow reading signal values outside of reactive contexts.
 #### Bad
 
 ```javascript
-const count = signal(0);
+const count = state(0);
 
 // ❌ Signal read outside reactive context - won't trigger updates
-if (count > 5) {
+if (count.valueOf() > 5) {
   doSomething();
 }
 ```
@@ -162,22 +162,22 @@ if (count > 5) {
 #### Good
 
 ```javascript
-const count = signal(0);
+const count = state(0);
 
 // ✅ Signal read inside effect
 effect(() => {
-  if (count > 5) {
+  if (count.valueOf() > 5) {
     doSomething();
   }
 });
 
 // ✅ Signal read inside computed
-const shouldDoSomething = computed(() => count > 5);
+const shouldDoSomething = state(() => count.valueOf() > 5);
 
 // ✅ Signal read inside JSX
 const App = () => (
   <div>
-    {count > 5 && <div>Count is greater than 5</div>}
+    {count.valueOf() > 5 && <div>Count is greater than 5</div>}
   </div>
 );
 ```
@@ -237,21 +237,21 @@ Disallow side effects in computed functions.
 
 ```javascript
 // ❌ Side effect in computed (console.log)
-const doubled = computed(() => {
+const doubled = state(() => {
   console.log('Computing...');
-  return count * 2;
+  return count.valueOf() * 2;
 });
 
 // ❌ Mutation in computed
-const users = signal([]);
-const sortedUsers = computed(() => {
-  return users.sort(); // Mutates original array!
+const users = state([]);
+const sortedUsers = state(() => {
+  return users.valueOf().sort(); // Mutates original array!
 });
 
 // ❌ DOM manipulation in computed
-const displayText = computed(() => {
-  document.title = String(count); // DOM side effect!
-  return `Count: ${count}`;
+const displayText = state(() => {
+  document.title = String(count.valueOf()); // DOM side effect!
+  return `Count: ${count.valueOf()}`;
 });
 ```
 
@@ -259,7 +259,7 @@ const displayText = computed(() => {
 
 ```javascript
 // ✅ Pure computed
-const doubled = computed(() => count * 2);
+const doubled = state(() => count.valueOf() * 2);
 
 // ✅ Side effect in effect
 effect(() => {
@@ -267,13 +267,13 @@ effect(() => {
 });
 
 // ✅ Non-mutating computed
-const sortedUsers = computed(() => {
-  return [...users].sort(); // Creates new array
+const sortedUsers = state(() => {
+  return [...users.valueOf()].sort(); // Creates new array
 });
 
 // ✅ DOM manipulation in effect
 effect(() => {
-  document.title = String(count);
+  document.title = String(count.valueOf());
 });
 ```
 
@@ -287,16 +287,16 @@ Suggest using `sync()` when multiple signals are updated consecutively.
 
 ```javascript
 // ⚠️ Warning - multiple updates without sync (3 separate re-renders)
-count.value = 1;
-name.value = 'test';
-active.value = true;
+count.set(1);
+name.set('test');
+active.set(true);
 
 // ⚠️ Multiple signal updates in a function
 function updateUser(id: number, data: UserData) {
-  userId.value = id;
-  userName.value = data.name;
-  userEmail.value = data.email;
-  userActive.value = data.active;
+  userId.set(id);
+  userName.set(data.name);
+  userEmail.set(data.email);
+  userActive.set(data.active);
 }
 ```
 
@@ -307,23 +307,23 @@ import { sync } from 'flexium';
 
 // ✅ Synced updates (single re-render)
 sync(() => {
-  count.value = 1;
-  name.value = 'test';
-  active.value = true;
+  count.set(1);
+  name.set('test');
+  active.set(true);
 });
 
 // ✅ Synced function
 function updateUser(id: number, data: UserData) {
   sync(() => {
-    userId.value = id;
-    userName.value = data.name;
-    userEmail.value = data.email;
-    userActive.value = data.active;
+    userId.set(id);
+    userName.set(data.name);
+    userEmail.set(data.email);
+    userActive.set(data.active);
   });
 }
 
 // ✅ Single signal update doesn't need syncing
-count.value = 1;
+count.set(1);
 ```
 
 #### Configuration

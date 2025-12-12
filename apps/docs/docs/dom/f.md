@@ -61,11 +61,11 @@ f(Button, null, 'Click me')
 ### Reactive Values
 
 ```ts
-const [count, setCount] = state(0)
+const count = state(0)
 
 f('div', null,
   f('span', null, count), // Reactive binding
-  f('button', { onclick: () => setCount(c => c + 1) }, '+')
+  f('button', { onclick: () => count.set(c => c + 1) }, '+')
 )
 ```
 
@@ -97,7 +97,7 @@ f('input', {
 
 ```ts
 function Counter() {
-  const [count, setCount] = state(0)
+  const count = state(0)
   const doubled = computed(() => count * 2)
 
   return f('div', { class: 'counter' },
@@ -105,9 +105,9 @@ function Counter() {
     f('p', null, 'Count: ', count),
     f('p', null, 'Doubled: ', doubled),
     f('div', { class: 'buttons' },
-      f('button', { onclick: () => setCount(c => c - 1) }, '-'),
-      f('button', { onclick: () => setCount(0) }, 'Reset'),
-      f('button', { onclick: () => setCount(c => c + 1) }, '+')
+      f('button', { onclick: () => count.set(c => c - 1) }, '-'),
+      f('button', { onclick: () => count.set(0) }, 'Reset'),
+      f('button', { onclick: () => count.set(c => c + 1) }, '+')
     )
   )
 }

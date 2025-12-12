@@ -21,11 +21,11 @@ The `effect` function takes a callback that executes immediately, and then re-ex
 ```tsx
 import { state, effect } from 'flexium/core';
 
-const [count, setCount] = state(0);
+const count = state(0);
 
 effect(() => {
   // Runs immediately, then again when 'count' changes
-  console.log('The count is now', count);
+  console.log('The count is now', count.valueOf());
 });
 ```
 
@@ -50,14 +50,14 @@ effect(() => {
 You don't need to manually specify dependencies. Flexium automatically detects which signals are read during the execution of the effect.
 
 ```tsx
-const [a, setA] = state(1);
-const [b, setB] = state(2);
+const a = state(1);
+const b = state(2);
 
 effect(() => {
-  if (a > 5) {
+  if (a.valueOf() > 5) {
     // If a > 5, we read b. Now 'b' is a dependency.
     // If a <= 5, we don't read b. 'b' is NOT a dependency.
-    console.log(b);
+    console.log(b.valueOf());
   }
 });
 ```
@@ -70,7 +70,7 @@ Effects execute synchronously. If you need to perform async operations, you can 
 
 ```tsx
 effect(async () => {
-  const id = userId; // Tracked
+  const id = userId.valueOf(); // Tracked
   const data = await fetchUser(id);
   // Code after await runs later, dependencies read here might not track
 });

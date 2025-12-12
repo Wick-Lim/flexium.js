@@ -112,12 +112,12 @@ const loop = createLoop({
 ### Pause Menu
 
 ```tsx
-const [paused, setPaused] = state(false)
+const paused = state(false)
 const kb = keyboard()
 
 effect(() => {
   if (kb.isJustPressed(Keys.Escape)) {
-    setPaused(p => !p)
+    paused.set(p => !p)
   }
 })
 ```

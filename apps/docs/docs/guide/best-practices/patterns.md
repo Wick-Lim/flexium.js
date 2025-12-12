@@ -14,13 +14,13 @@ Learn practical patterns commonly used in Flexium.
 import { state } from 'flexium/core'
 
 function LoginForm() {
-  const [form, setForm] = state({
+  const form = state({
     email: '',
     password: ''
   })
   
-  const [errors, setErrors] = state<Record<string, string>>({})
-  const [touched, setTouched] = state<Record<string, boolean>>({})
+  const errors = state<Record<string, string>>({})
+  const touched = state<Record<string, boolean>>({})
   
   const handleSubmit = (e: Event) => {
     e.preventDefault()
@@ -31,12 +31,12 @@ function LoginForm() {
     if (!form.password) newErrors.password = 'Password is required'
     
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
+      errors.set(newErrors)
       return
     }
     
     // Submit
-    submitForm(form)
+    submitForm(form.valueOf())
   }
   
   return (
@@ -44,8 +44,8 @@ function LoginForm() {
       <input
         value={form.email}
         oninput={(e) => {
-          setForm({ ...form, email: e.currentTarget.value })
-          setTouched({ ...touched, email: true })
+          form.set({ ...form.valueOf(), email: e.currentTarget.value })
+          touched.set({ ...touched.valueOf(), email: true })
         }}
       />
       {touched.email && errors.email && <span>{errors.email}</span>}
@@ -54,8 +54,8 @@ function LoginForm() {
         type="password"
         value={form.password}
         oninput={(e) => {
-          setForm({ ...form, password: e.currentTarget.value })
-          setTouched({ ...touched, password: true })
+          form.set({ ...form.valueOf(), password: e.currentTarget.value })
+          touched.set({ ...touched.valueOf(), password: true })
         }}
       />
       {touched.password && errors.password && <span>{errors.password}</span>}
@@ -72,14 +72,14 @@ function LoginForm() {
 
 ```tsx
 function FormWithValidation() {
-  const [form, setForm] = state({
+  const form = state({
     email: '',
     password: '',
     confirmPassword: ''
   })
   
   // Real-time validation
-  const [errors] = state(() => {
+  const errors = state(() => {
     const errs: Record<string, string> = {}
     
     if (form.email && !form.email.includes('@')) {
@@ -101,7 +101,7 @@ function FormWithValidation() {
     <form>
       <input
         value={form.email}
-        oninput={(e) => setForm({ ...form, email: e.currentTarget.value })}
+        oninput={(e) => form.set({ ...form.valueOf(), email: e.currentTarget.value })}
       />
       {errors.email && <span>{errors.email}</span>}
       
@@ -117,27 +117,27 @@ function FormWithValidation() {
 
 ```tsx
 function FormWithAsyncValidation() {
-  const [form, setForm] = state({ email: '' })
-  const [isChecking, setIsChecking] = state(false)
-  const [emailError, setEmailError] = state<string | null>(null)
+  const form = state({ email: '' })
+  const isChecking = state(false)
+  const emailError = state<string | null>(null)
   
   const checkEmailAvailability = async (email: string) => {
     if (!email) return
     
-    setIsChecking(true)
+    isChecking.set(true)
     try {
       const res = await fetch(`/api/check-email?email=${email}`)
       const { available } = await res.json()
       
       if (!available) {
-        setEmailError('Email is already in use')
+        emailError.set('Email is already in use')
       } else {
-        setEmailError(null)
+        emailError.set(null)
       }
     } catch (error) {
-      setEmailError('Error checking email availability')
+      emailError.set('Error checking email availability')
     } finally {
-      setIsChecking(false)
+      isChecking.set(false)
     }
   }
   
@@ -147,7 +147,7 @@ function FormWithAsyncValidation() {
         value={form.email}
         oninput={(e) => {
           const email = e.currentTarget.value
-          setForm({ ...form, email })
+          form.set({ ...form.valueOf(), email })
           checkEmailAvailability(email)
         }}
       />
@@ -166,28 +166,28 @@ function FormWithAsyncValidation() {
 
 ```tsx
 function PostList() {
-  const [posts, refetch, status, error] = state(async () => {
+  const posts = state(async () => {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch')
     return res.json()
   })
   
-  if (String(status) === 'loading') {
+  if (String(posts.status) === 'loading') {
     return <div>Loading...</div>
   }
   
-  if (String(status) === 'error') {
+  if (String(posts.status) === 'error') {
     return (
       <div>
-        <p>Error: {error?.message}</p>
-        <button onclick={refetch}>Retry</button>
+        <p>Error: {posts.error?.message}</p>
+        <button onclick={posts.refetch}>Retry</button>
       </div>
     )
   }
   
   return (
     <div>
-      <button onclick={refetch}>Refresh</button>
+      <button onclick={posts.refetch}>Refresh</button>
       {posts.map(post => (
         <Post key={post.id} {...post} />
       ))}
@@ -202,7 +202,7 @@ function PostList() {
 
 ```tsx
 function UserPosts({ userId }: { userId: number }) {
-  const [posts, refetch, status] = state(async () => {
+  const posts = state(async () => {
     const res = await fetch(`/api/users/${userId}/posts`)
     return res.json()
   }, { key: ['user', userId, 'posts'] })
@@ -210,7 +210,7 @@ function UserPosts({ userId }: { userId: number }) {
   // Automatically refetch when userId changes
   effect(() => {
     const id = userId  // Dependency tracking
-    refetch()
+    posts.refetch()
   })
   
   return <div>...</div>
@@ -223,14 +223,14 @@ function UserPosts({ userId }: { userId: number }) {
 
 ```tsx
 function LikeButton({ postId }: { postId: number }) {
-  const [isLiked, setIsLiked] = state(false)
-  const [isUpdating, setIsUpdating] = state(false)
+  const isLiked = state(false)
+  const isUpdating = state(false)
   
   const toggleLike = async () => {
     // Optimistic update
-    const previousValue = isLiked
-    setIsLiked(!previousValue)
-    setIsUpdating(true)
+    const previousValue = isLiked.valueOf()
+    isLiked.set(!previousValue)
+    isUpdating.set(true)
     
     try {
       await fetch(`/api/posts/${postId}/like`, {
@@ -239,10 +239,10 @@ function LikeButton({ postId }: { postId: number }) {
       })
     } catch (error) {
       // Rollback on failure
-      setIsLiked(previousValue)
+      isLiked.set(previousValue)
       alert('Failed to update like')
     } finally {
-      setIsUpdating(false)
+      isUpdating.set(false)
     }
   }
   
@@ -260,26 +260,26 @@ function LikeButton({ postId }: { postId: number }) {
 
 ```tsx
 function InfiniteScrollList() {
-  const [items, setItems] = state([])
-  const [page, setPage] = state(1)
-  const [hasMore, setHasMore] = state(true)
-  const [isLoading, setIsLoading] = state(false)
+  const items = state([])
+  const page = state(1)
+  const hasMore = state(true)
+  const isLoading = state(false)
   
   const loadMore = async () => {
-    if (isLoading || !hasMore) return
+    if (isLoading.valueOf() || !hasMore.valueOf()) return
     
-    setIsLoading(true)
+    isLoading.set(true)
     try {
-      const res = await fetch(`/api/items?page=${page}`)
+      const res = await fetch(`/api/items?page=${page.valueOf()}`)
       const data = await res.json()
       
-      setItems([...items, ...data.items])
-      setHasMore(data.hasMore)
-      setPage(page + 1)
+      items.set([...items.valueOf(), ...data.items])
+      hasMore.set(data.hasMore)
+      page.set(page.valueOf() + 1)
     } catch (error) {
       console.error('Failed to load more:', error)
     } finally {
-      setIsLoading(false)
+      isLoading.set(false)
     }
   }
   
@@ -314,32 +314,32 @@ function InfiniteScrollList() {
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
-  const [state, setState] = state<LoadingState>('idle')
-  const [data, setData] = state(null)
-  const [error, setError] = state<Error | null>(null)
+  const loadingState = state<LoadingState>('idle')
+  const data = state(null)
+  const error = state<Error | null>(null)
   
   const loadData = async () => {
-    setState('loading')
-    setError(null)
+    loadingState.set('loading')
+    error.set(null)
     
     try {
       const res = await fetch('/api/data')
-      const data = await res.json()
+      const result = await res.json()
       
-      setData(data)
-      setState('success')
+      data.set(result)
+      loadingState.set('success')
     } catch (err) {
-      setError(err as Error)
-      setState('error')
+      error.set(err as Error)
+      loadingState.set('error')
     }
   }
   
   return (
     <div>
-      {state === 'idle' && <button onclick={loadData}>Load</button>}
-      {state === 'loading' && <div>Loading...</div>}
-      {state === 'success' && <div>{JSON.stringify(data)}</div>}
-      {state === 'error' && (
+      {loadingState.valueOf() === 'idle' && <button onclick={loadData}>Load</button>}
+      {loadingState.valueOf() === 'loading' && <div>Loading...</div>}
+      {loadingState.valueOf() === 'success' && <div>{JSON.stringify(data)}</div>}
+      {loadingState.valueOf() === 'error' && (
         <div>
           <p>Error: {error?.message}</p>
           <button onclick={loadData}>Retry</button>
@@ -363,32 +363,32 @@ type FormState =
   | { type: 'error'; message: string }
 
 function ComplexForm() {
-  const [formState, setFormState] = state<FormState>({ type: 'idle' })
-  const [formData, setFormData] = state({ email: '', password: '' })
+  const formState = state<FormState>({ type: 'idle' })
+  const formData = state({ email: '', password: '' })
   
   const handleSubmit = async () => {
     // Validation phase
-    setFormState({ type: 'validating' })
+    formState.set({ type: 'validating' })
     
-    const errors = validateForm(formData)
+    const errors = validateForm(formData.valueOf())
     if (errors.length > 0) {
-      setFormState({ type: 'error', message: errors[0] })
+      formState.set({ type: 'error', message: errors[0] })
       return
     }
     
     // Submission phase
-    setFormState({ type: 'submitting' })
+    formState.set({ type: 'submitting' })
     
     try {
       const res = await fetch('/api/submit', {
         method: 'POST',
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData.valueOf())
       })
       const data = await res.json()
       
-      setFormState({ type: 'success', data })
+      formState.set({ type: 'success', data })
     } catch (error) {
-      setFormState({ 
+      formState.set({ 
         type: 'error', 
         message: (error as Error).message 
       })
@@ -419,20 +419,20 @@ function ComplexForm() {
 
 ```tsx
 function SearchInput() {
-  const [query, setQuery] = state('')
-  const [results, setResults] = state([])
+  const query = state('')
+  const results = state([])
   
   effect(() => {
-    if (!query) {
-      setResults([])
+    if (!query.valueOf()) {
+      results.set([])
       return
     }
     
     // Debouncing: search after 300ms
     const timeoutId = setTimeout(async () => {
-      const res = await fetch(`/api/search?q=${query}`)
+      const res = await fetch(`/api/search?q=${query.valueOf()}`)
       const data = await res.json()
-      setResults(data.results)
+      results.set(data.results)
     }, 300)
     
     return () => clearTimeout(timeoutId)
@@ -442,7 +442,7 @@ function SearchInput() {
     <div>
       <input
         value={query}
-        oninput={(e) => setQuery(e.currentTarget.value)}
+        oninput={(e) => query.set(e.currentTarget.value)}
       />
       <ul>
         {results.map(result => (
@@ -460,16 +460,16 @@ function SearchInput() {
 
 ```tsx
 function ScrollTracker() {
-  const [scrollY, setScrollY] = state(0)
-  const [lastUpdate, setLastUpdate] = state(0)
+  const scrollY = state(0)
+  const lastUpdate = state(0)
   
   effect(() => {
     const handleScroll = () => {
       const now = Date.now()
       // Update only once per 100ms
-      if (now - lastUpdate > 100) {
-        setScrollY(window.scrollY)
-        setLastUpdate(now)
+      if (now - lastUpdate.valueOf() > 100) {
+        scrollY.set(window.scrollY)
+        lastUpdate.set(now)
       }
     }
     
@@ -489,7 +489,7 @@ function ScrollTracker() {
 
 ```tsx
 function PersistentForm() {
-  const [form, setForm] = state(() => {
+  const form = state(() => {
     // Get initial value from local storage
     const saved = localStorage.getItem('form-data')
     return saved ? JSON.parse(saved) : { email: '', name: '' }
@@ -497,14 +497,14 @@ function PersistentForm() {
   
   // Save to local storage on state change
   effect(() => {
-    localStorage.setItem('form-data', JSON.stringify(form))
+    localStorage.setItem('form-data', JSON.stringify(form.valueOf()))
   })
   
   return (
     <form>
       <input
         value={form.email}
-        oninput={(e) => setForm({ ...form, email: e.currentTarget.value })}
+        oninput={(e) => form.set({ ...form.valueOf(), email: e.currentTarget.value })}
       />
       {/* ... */}
     </form>
@@ -520,21 +520,21 @@ function PersistentForm() {
 
 ```tsx
 // app/state.ts
-export const [theme, setTheme] = state<'light' | 'dark'>('light', {
+export const theme = state<'light' | 'dark'>('light', {
   key: 'app:theme'
 })
 
-export const [language, setLanguage] = state('en', {
+export const language = state('en', {
   key: 'app:language'
 })
 
 // components/ThemeToggle.tsx
-import { theme, setTheme } from '../app/state'
+import { theme } from '../app/state'
 
 function ThemeToggle() {
   return (
-    <button onclick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-      {theme === 'light' ? '🌙' : '☀️'}
+    <button onclick={() => theme.set(theme.valueOf() === 'light' ? 'dark' : 'light')}>
+      {theme.valueOf() === 'light' ? '🌙' : '☀️'}
     </button>
   )
 }
@@ -548,25 +548,25 @@ function ThemeToggle() {
 
 ```tsx
 // app/error-handler.ts
-export const [globalError, setGlobalError] = state<Error | null>(null, {
+export const globalError = state<Error | null>(null, {
   key: 'app:error'
 })
 
 export function handleError(error: Error) {
-  setGlobalError(error)
+  globalError.set(error)
   console.error('Global error:', error)
 }
 
 // components/ErrorBoundary.tsx
-import { globalError, setGlobalError } from '../app/error-handler'
+import { globalError } from '../app/error-handler'
 
 function ErrorBoundary({ children }: { children: any }) {
-  if (globalError) {
+  if (globalError.valueOf()) {
     return (
       <div>
         <h2>An error occurred</h2>
         <p>{globalError.message}</p>
-        <button onclick={() => setGlobalError(null)}>Close</button>
+        <button onclick={() => globalError.set(null)}>Close</button>
       </div>
     )
   }

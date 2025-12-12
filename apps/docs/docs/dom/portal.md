@@ -49,18 +49,18 @@ import { Portal } from 'flexium/dom'
 
 ```tsx
 function Modal(props) {
-  const [isOpen, setIsOpen] = state(false)
+  const isOpen = state(false)
 
   return (
     <>
-      <button onclick={() => setIsOpen(true)}>Open Modal</button>
+      <button onclick={() => isOpen.set(true)}>Open Modal</button>
 
       {isOpen && (
         <Portal mount={document.body}>
-          <div class="modal-overlay" onclick={() => setIsOpen(false)}>
+          <div class="modal-overlay" onclick={() => isOpen.set(false)}>
             <div class="modal-content" onclick={(e) => e.stopPropagation()}>
               {props.children}
-              <button onclick={() => setIsOpen(false)}>Close</button>
+              <button onclick={() => isOpen.set(false)}>Close</button>
             </div>
           </div>
         </Portal>
@@ -74,16 +74,16 @@ function Modal(props) {
 
 ```tsx
 function Tooltip(props) {
-  const [visible, setVisible] = state(false)
-  const [position, setPosition] = state({ x: 0, y: 0 })
+  const visible = state(false)
+  const position = state({ x: 0, y: 0 })
 
   const showTooltip = (e) => {
-    setPosition({ x: e.clientX, y: e.clientY })
-    setVisible(true)
+    position.set({ x: e.clientX, y: e.clientY })
+    visible.set(true)
   }
 
   return (
-    <div onmouseenter={showTooltip} onmouseleave={() => setVisible(false)}>
+    <div onmouseenter={showTooltip} onmouseleave={() => visible.set(false)}>
       {props.children}
 
       {visible && (
@@ -126,12 +126,12 @@ function Toast(props) {
 
 ```tsx
 function Dropdown(props) {
-  const [open, setOpen] = state(false)
+  const open = state(false)
   let triggerRef
 
   return (
     <div class="dropdown">
-      <button ref={triggerRef} onclick={() => setOpen(o => !o)}>
+      <button ref={triggerRef} onclick={() => open.set(o => !o)}>
         {props.label}
       </button>
 

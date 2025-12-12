@@ -36,11 +36,11 @@ import { Canvas, DrawRect } from 'flexium/canvas';
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `x` | `number \| Signal<number>` | The x-coordinate of the top-left corner. |
-| `y` | `number \| Signal<number>` | The y-coordinate of the top-left corner. |
-| `width` | `number \| Signal<number>` | The width of the rectangle. |
-| `height` | `number \| Signal<number>` | The height of the rectangle. |
-| `fill` | `string \| Signal<string>` | The fill color. |
-| `stroke` | `string \| Signal<string>` | The stroke color. |
-| `strokeWidth` | `number \| Signal<number>` | The width of the stroke. |
-| `opacity` | `number \| Signal<number>` | Opacity (0 to 1). |
+| `x` | `number \| StateValue<number>` | The x-coordinate of the top-left corner. |
+| `y` | `number \| StateValue<number>` | The y-coordinate of the top-left corner. |
+| `width` | `number \| StateValue<number>` | The width of the rectangle. |
+| `height` | `number \| StateValue<number>` | The height of the rectangle. |
+| `fill` | `string \| StateValue<string>` | The fill color. |
+| `stroke` | `string \| StateValue<string>` | The stroke color. |
+| `strokeWidth` | `number \| StateValue<number>` | The width of the stroke. |
+| `opacity` | `number \| StateValue<number>` | Opacity (0 to 1). |

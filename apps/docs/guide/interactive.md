@@ -269,7 +269,7 @@ const keyboard = keyboard()
 
 // Watch for any key state changes
 effect(() => {
-  const pressedKeys = keyboard.keys.value
+  const pressedKeys = keyboard.keys.valueOf()
   console.log('Pressed keys:', Array.from(pressedKeys))
 })
 ```
@@ -347,7 +347,7 @@ import { mouse, MouseButton } from 'flexium/interactive'
 const mouse = mouse()
 
 // Get current mouse position
-const pos = mouse.position.value
+const pos = mouse.position.valueOf()
 console.log(pos.x, pos.y)
 
 // Check button states
@@ -378,7 +378,7 @@ const m = mouse({ canvas: myCanvas })
 
 // Position is in canvas coordinates
 effect(() => {
-  const pos = mouse.position.value
+  const pos = mouse.position.valueOf()
   console.log(`Mouse at: ${pos.x}, ${pos.y}`)
 })
 ```
@@ -391,7 +391,7 @@ Track mouse movement since last frame:
 const mouse = mouse()
 
 onUpdate: (delta) => {
-  const delta = mouse.delta.value
+  const delta = mouse.delta.valueOf()
 
   // Camera rotation based on mouse movement
   camera.rotateX(delta.y * sensitivity)
@@ -407,7 +407,7 @@ Detect scroll wheel input:
 const mouse = mouse()
 
 onUpdate: () => {
-  const wheel = mouse.wheelDelta.value
+  const wheel = mouse.wheelDelta.valueOf()
 
   if (wheel !== 0) {
     camera.zoom += wheel * zoomSpeed
@@ -434,8 +434,8 @@ function Game() {
       height={600}
     >
       <Circle
-        x={mouse.position.value.x}
-        y={mouse.position.value.y}
+        x={mouse.position.valueOf().x}
+        y={mouse.position.valueOf().y}
         radius={10}
         fill="red"
       />
@@ -484,7 +484,7 @@ import { state } from 'flexium/core'
 
 function TopDownShooter() {
   // Game state
-  const [score, setScore] = state(0)
+  const score = state(0)
   const player = { x: 400, y: 300, radius: 20, speed: 250 }
   const bullets: Array<{ x: number; y: number; vx: number; vy: number }> = []
   const enemies: Array<{ x: number; y: number; radius: 15 }> = []
@@ -525,7 +525,7 @@ function TopDownShooter() {
 
       // Shooting
       if (mouse.isLeftPressed()) {
-        const mousePos = mouse.position.value
+        const mousePos = mouse.position.valueOf()
         const dx = mousePos.x - player.x
         const dy = mousePos.y - player.y
         const len = Math.sqrt(dx * dx + dy * dy)
@@ -590,7 +590,7 @@ function TopDownShooter() {
           if (dist < enemy.radius + 5) {
             bullets.splice(i, 1)
             enemies.splice(j, 1)
-            setScore(s => s + 10)
+            score.set(s => s + 10)
             break
           }
         }
@@ -626,8 +626,8 @@ function TopDownShooter() {
 
       {/* Crosshair at mouse */}
       <Circle
-        x={mouse.position.value.x}
-        y={mouse.position.value.y}
+        x={mouse.position.valueOf().x}
+        y={mouse.position.valueOf().y}
         radius={3}
         stroke="white"
         strokeWidth={1}
@@ -661,7 +661,7 @@ function TopDownShooter() {
       <CanvasText
         x={10}
         y={30}
-        text={`Score: ${score()}`}
+        text={`Score: ${score.valueOf()}`}
         fontSize={24}
         fontWeight="bold"
         fill="white"
@@ -789,7 +789,7 @@ import { Canvas, Circle, Rect } from 'flexium/canvas'
 import { state } from 'flexium/core'
 
 function GameExample() {
-  const [entities, setEntities] = state([
+  const entities = state([
     { x: 100, y: 100, color: 'red' },
     { x: 200, y: 150, color: 'blue' }
   ])
@@ -797,7 +797,7 @@ function GameExample() {
   createLoop({
     onUpdate: (delta) => {
       // Update entity positions
-      setEntities(prev => prev.map(e => ({
+      entities.set(prev => prev.map(e => ({
         ...e,
         x: e.x + Math.sin(Date.now() / 1000) * 100 * delta
       })))

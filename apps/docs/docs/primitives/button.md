@@ -58,12 +58,12 @@ import { state } from 'flexium/core'
 import { Button } from 'flexium/primitives'
 
 function SubmitButton() {
-  const [isLoading, setIsLoading] = state(false)
+  const isLoading = state(false)
 
   const handleSubmit = async () => {
-    setIsLoading(true)
+    isLoading.set(true)
     await submitForm()
-    setIsLoading(false)
+    isLoading.set(false)
   }
 
   return (

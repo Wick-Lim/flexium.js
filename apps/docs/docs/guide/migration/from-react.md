@@ -27,7 +27,7 @@ Flexium provides a React-like API but with some important differences:
 | `useCallback` | Unnecessary | Auto-optimized |
 | `useRef` | `ref` | Same |
 | `useContext` | `context` | Same |
-| `useReducer` | `state` + setter | Implement directly |
+| `useReducer` | `state` + methods | Implement directly |
 | `React.memo` | Unnecessary | Auto-optimized |
 | `React Router` | `flexium/router` | Similar API |
 
@@ -78,12 +78,12 @@ function Counter() {
 import { state } from 'flexium/core'
 
 function Counter() {
-  const [count, setCount] = state(0)
+  const count = state(0)
   
   return (
     <div>
       <p>Count: {count}</p>
-      <button onclick={() => setCount(count + 1)}>+</button>
+      <button onclick={() => count.set(count.valueOf() + 1)}>+</button>
     </div>
   )
 }
@@ -115,10 +115,10 @@ function Calculator() {
 import { state } from 'flexium/core'
 
 function Calculator() {
-  const [price, setPrice] = state(100)
-  const [quantity, setQuantity] = state(2)
+  const price = state(100)
+  const quantity = state(2)
   
-  const [total] = state(() => price * quantity)  // Automatic dependency tracking
+  const total = state(() => price * quantity)  // Automatic dependency tracking
   
   return <div>Total: {total}</div>
 }
@@ -154,11 +154,11 @@ function Timer() {
 import { state, effect } from 'flexium/core'
 
 function Timer() {
-  const [count, setCount] = state(0)
+  const count = state(0)
   
   effect(() => {
     const interval = setInterval(() => {
-      setCount(c => c + 1)
+      count.set(c => c + 1)
     }, 1000)
     
     return () => clearInterval(interval)  // Cleanup same
@@ -197,13 +197,13 @@ function UserProfile({ userId }) {
 import { state, effect } from 'flexium/core'
 
 function UserProfile({ userId }) {
-  const [user, setUser] = state(null)
+  const user = state(null)
   
   effect(() => {
     const id = userId  // Reading automatically tracks
     fetch(`/api/users/${id}`)
       .then(res => res.json())
-      .then(data => setUser(data))
+      .then(data => user.set(data))
   })
   
   return user ? <div>{user.name}</div> : <div>Loading...</div>
@@ -235,11 +235,11 @@ function Parent() {
 import { state } from 'flexium/core'
 
 function Parent() {
-  const [count, setCount] = state(0)
+  const count = state(0)
   
   // useCallback unnecessary - auto-optimized
   const handleClick = () => {
-    setCount(c => c + 1)
+    count.set(c => c + 1)
   }
   
   return <Child onclick={handleClick} />
@@ -313,13 +313,13 @@ import { state } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme, setTheme] = state('dark', { key: 'app:theme' })
+  const theme = state('dark', { key: 'app:theme' })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const [theme] = state('light', { key: 'app:theme' })
+  const theme = state('light', { key: 'app:theme' })
   return <div>Theme: {theme}</div>
 }
 ```
@@ -331,7 +331,7 @@ function Child() {
 
 ---
 
-#### useReducer → state + setter
+#### useReducer → state + methods
 
 ```tsx
 // ❌ Before (React)
@@ -364,14 +364,14 @@ function Counter() {
 import { state } from 'flexium/core'
 
 function Counter() {
-  const [state, setState] = state({ count: 0 })
+  const counterState = state({ count: 0 })
   
-  const increment = () => setState(s => ({ ...s, count: s.count + 1 }))
-  const decrement = () => setState(s => ({ ...s, count: s.count - 1 }))
+  const increment = () => counterState.set(s => ({ ...s, count: s.count + 1 }))
+  const decrement = () => counterState.set(s => ({ ...s, count: s.count - 1 }))
   
   return (
     <div>
-      <p>Count: {state.count}</p>
+      <p>Count: {counterState.count}</p>
       <button onclick={increment}>+</button>
       <button onclick={decrement}>-</button>
     </div>
@@ -380,7 +380,7 @@ function Counter() {
 ```
 
 **Changes**:
-- `useReducer` → `state` + setter function
+- `useReducer` → `state` + helper functions
 - Convert reducer logic to regular functions
 
 ---
@@ -539,7 +539,7 @@ function UserDetail() {
 
 ```tsx
 // ❌ Wrong approach
-const [count, setCount] = state(0)
+const count = state(0)
 if (count === 5) { ... }  // Always false
 
 // ✅ Correct approach
@@ -679,37 +679,37 @@ interface Todo {
 }
 
 function TodoApp() {
-  const [todos, setTodos] = state<Todo[]>([])
-  const [filter, setFilter] = state<'all' | 'active' | 'completed'>('all')
+  const todos = state<Todo[]>([])
+  const filter = state<'all' | 'active' | 'completed'>('all')
   
   // Load from local storage
   effect(() => {
     const saved = localStorage.getItem('todos')
     if (saved) {
-      setTodos(JSON.parse(saved))
+      todos.set(JSON.parse(saved))
     }
   })
   
   // Save to local storage
   effect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos))
+    localStorage.setItem('todos', JSON.stringify(todos.valueOf()))
   })
   
   const addTodo = (text: string) => {
-    setTodos([...todos, { id: Date.now(), text, completed: false }])
+    todos.set([...todos.valueOf(), { id: Date.now(), text, completed: false }])
   }
   
   const toggleTodo = (id: number) => {
-    setTodos(todos.map(t => 
+    todos.set(todos.valueOf().map(t => 
       t.id === id ? { ...t, completed: !t.completed } : t
     ))
   }
   
   // Filtering with computed state
-  const [filteredTodos] = state(() => {
-    if (filter === 'active') return todos.filter(t => !t.completed)
-    if (filter === 'completed') return todos.filter(t => t.completed)
-    return todos
+  const filteredTodos = state(() => {
+    if (filter.valueOf() === 'active') return todos.filter(t => !t.completed)
+    if (filter.valueOf() === 'completed') return todos.filter(t => t.completed)
+    return todos.valueOf()
   })
   
   return (
@@ -723,9 +723,9 @@ function TodoApp() {
         }}
       />
       <div>
-        <button onclick={() => setFilter('all')}>All</button>
-        <button onclick={() => setFilter('active')}>Active</button>
-        <button onclick={() => setFilter('completed')}>Completed</button>
+        <button onclick={() => filter.set('all')}>All</button>
+        <button onclick={() => filter.set('active')}>Active</button>
+        <button onclick={() => filter.set('completed')}>Completed</button>
       </div>
       <ul>
         {filteredTodos.map(todo => (
@@ -771,16 +771,16 @@ if (equals(count, 5)) { ... }
 
 ```tsx
 // ❌ Problem: Multiple state updates cause duplicate execution
-setA(1)
-setB(2)
-setC(3)  // Effect runs 3 times
+a.set(1)
+b.set(2)
+c.set(3)  // Effect runs 3 times
 
 // ✅ Solution: Use sync()
 import { sync } from 'flexium/advanced'
 sync(() => {
-  setA(1)
-  setB(2)
-  setC(3)  // Effect runs only once
+  a.set(1)
+  b.set(2)
+  c.set(3)  // Effect runs only once
 })
 ```
 
@@ -788,8 +788,8 @@ sync(() => {
 
 ```tsx
 // ✅ Explicit type specification
-const [user, setUser] = state<User | null>(null)
-const [count, setCount] = state<number>(0)
+const user = state<User | null>(null)
+const count = state<number>(0)
 ```
 
 ---

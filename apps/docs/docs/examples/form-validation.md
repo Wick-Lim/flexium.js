@@ -26,20 +26,20 @@ interface FormErrors {
 }
 
 function RegistrationForm() {
-  const [form, setForm] = state<FormData>({
+  const form = state<FormData>({
     email: '',
     password: '',
     confirmPassword: '',
     name: ''
   })
   
-  const [touched, setTouched] = state<Record<string, boolean>>({})
-  const [isSubmitting, setIsSubmitting] = state(false)
-  const [submitError, setSubmitError] = state<string | null>(null)
-  const [isCheckingEmail, setIsCheckingEmail] = state(false)
+  const touched = state<Record<string, boolean>>({})
+  const isSubmitting = state(false)
+  const submitError = state<string | null>(null)
+  const isCheckingEmail = state(false)
   
   // Real-time validation
-  const [errors] = state<FormErrors>(() => {
+  const errors = state<FormErrors>(() => {
     const errs: FormErrors = {}
     
     // Email validation
@@ -89,25 +89,25 @@ function RegistrationForm() {
       return
     }
     
-    setIsCheckingEmail(true)
+    isCheckingEmail.set(true)
     try {
       const res = await fetch(`/api/check-email?email=${email}`)
       const { available } = await res.json()
       
       if (!available) {
-        setForm({ ...form })  // Update state to show error
+        form.set({ ...form.valueOf() })  // Update state to show error
         // In practice, using a separate error state is better
       }
     } catch (error) {
       console.error('Email check failed:', error)
     } finally {
-      setIsCheckingEmail(false)
+      isCheckingEmail.set(false)
     }
   }
   
   const handleFieldChange = (field: keyof FormData, value: string) => {
-    setForm({ ...form, [field]: value })
-    setTouched({ ...touched, [field]: true })
+    form.set({ ...form.valueOf(), [field]: value })
+    touched.set({ ...touched.valueOf(), [field]: true })
     
     // Check email availability when email changes
     if (field === 'email') {
@@ -119,7 +119,7 @@ function RegistrationForm() {
     e.preventDefault()
     
     // Mark all fields as touched
-    setTouched({
+    touched.set({
       email: true,
       password: true,
       confirmPassword: true,
@@ -127,12 +127,12 @@ function RegistrationForm() {
     })
     
     // Stop submission if validation fails
-    if (Object.keys(errors).length > 0) {
+    if (Object.keys(errors.valueOf()).length > 0) {
       return
     }
     
-    setIsSubmitting(true)
-    setSubmitError(null)
+    isSubmitting.set(true)
+    submitError.set(null)
     
     try {
       const res = await fetch('/api/register', {
@@ -150,13 +150,13 @@ function RegistrationForm() {
       alert('Registration completed!')
       
     } catch (error) {
-      setSubmitError((error as Error).message)
+      submitError.set((error as Error).message)
     } finally {
-      setIsSubmitting(false)
+      isSubmitting.set(false)
     }
   }
   
-  const isFormValid = Object.keys(errors).length === 0
+  const isFormValid = Object.keys(errors.valueOf()).length === 0
   
   return (
     <form onsubmit={handleSubmit}>

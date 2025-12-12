@@ -45,21 +45,21 @@ Creates an isolated reactive scope. Useful for managing cleanup of effects.
 import { effect, state } from 'flexium/core'
 import { root } from 'flexium/advanced'
 
-const [count, setCount] = state(0)
+const count = state(0)
 
 const dispose = root((dispose) => {
   effect(() => {
-    console.log('Count:', count())
+    console.log('Count:', count.valueOf())
   })
 
   return dispose
 })
 
-setCount(1)  // Logs: "Count: 1"
+count.set(1)  // Logs: "Count: 1"
 
 dispose()  // Cleanup - effect stops running
 
-setCount(2)  // No log - effect was disposed
+count.set(2)  // No log - effect was disposed
 ```
 
 ## untrack()
@@ -71,17 +71,17 @@ Reads reactive values without creating dependencies. Useful when you need to acc
 import { effect, state } from 'flexium/core'
 import { untrack } from 'flexium/advanced'
 
-const [count, setCount] = state(0)
-const [multiplier, setMultiplier] = state(2)
+const count = state(0)
+const multiplier = state(2)
 
 // Only re-runs when 'count' changes, not 'multiplier'
 effect(() => {
-  const result = count() * untrack(() => multiplier())
+  const result = count.valueOf() * untrack(() => multiplier.valueOf())
   console.log('Result:', result)
 })
 
-setCount(5)      // Logs: "Result: 10"
-setMultiplier(10)  // No log - multiplier is untracked
+count.set(5)      // Logs: "Result: 10"
+multiplier.set(10)  // No log - multiplier is untracked
 ```
 
 ## Example: Custom Store
@@ -93,17 +93,17 @@ Here's an example of building a custom store using advanced primitives:
 import { effect, state } from 'flexium/core'
 
 function createStore<T extends object>(initialState: T) {
-  const [storeState, setStoreState] = state(initialState)
+  const storeState = state(initialState)
 
   return {
-    get: () => storeState(),
+    get: () => storeState.valueOf(),
     set: (updater: T | ((s: T) => T)) => {
-      setStoreState(updater)
+      storeState.set(updater)
     },
 
     // Subscribe to changes
     subscribe(callback: (s: T) => void) {
-      return effect(() => callback(storeState()))
+      return effect(() => callback(storeState.valueOf()))
     }
   }
 }

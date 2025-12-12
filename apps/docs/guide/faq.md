@@ -30,16 +30,8 @@ Yes! Flexium is written in TypeScript and provides full type definitions. See th
 
 ### When should I use `signal()` vs `state()`?
 
-- Use `signal()` for standalone reactive values
-- Use `state()` for React-like tuple syntax `[getter, setter]`
-
-```tsx
-// signal() - access via .value
-const count = signal(0)
-count.value
-
 // state() - direct value access
-const [count, setCount] = state(0)
+const count = state(0)
 count // use directly
 ```
 
@@ -49,10 +41,10 @@ Use global state with a key:
 
 ```tsx
 // In any component
-const [user, setUser] = state(null, { key: 'currentUser' })
+const user = state(null, { key: 'currentUser' })
 
 // In another component - same state!
-const [user, setUser] = state(null, { key: 'currentUser' })
+const user = state(null, { key: 'currentUser' })
 ```
 
 Or use Context API:
@@ -62,13 +54,13 @@ import { state } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme, setTheme] = state('dark', { key: 'app:theme' })
+  const theme = state('dark', { key: 'app:theme' })
   return <MyComponent />
 }
 
 function MyComponent() {
   // Access theme from anywhere
-  const [theme] = state('light', { key: 'app:theme' })
+  const theme = state('light', { key: 'app:theme' })
   return <div>Theme: {theme}</div>
 }
 ```
@@ -83,16 +75,16 @@ Common causes:
    let count = 0
 
    // Will update
-   const [count, setCount] = state(0)
+   const count = state(0)
    ```
 
 2. **Mutating objects directly** - Create new references
    ```tsx
    // Won't update
-   user.value.name = 'Bob'
+   user.name = 'Bob'
 
    // Will update
-   user.set({ ...user.value, name: 'Bob' })
+   user.set({ ...user.valueOf(), name: 'Bob' })
    ```
 
 3. **Reading outside reactive context** - Use in JSX or effects
@@ -111,9 +103,9 @@ Common causes:
 Use native JavaScript - just like React:
 
 ```tsx
-{isLoggedIn && <Dashboard />}
+{isLoggedIn.valueOf() && <Dashboard />}
 
-{isLoggedIn ? <Dashboard /> : <Login />}
+{isLoggedIn.valueOf() ? <Dashboard /> : <Login />}
 ```
 
 ### How do I render lists?
@@ -132,13 +124,13 @@ Use `<Switch>` and `<Match>`:
 
 ```tsx
 <Switch>
-  <Match when={status === 'loading'}>
+  <Match when={status.valueOf() === 'loading'}>
     <Spinner />
   </Match>
-  <Match when={status === 'error'}>
+  <Match when={status.valueOf() === 'error'}>
     <Error />
   </Match>
-  <Match when={status === 'success'}>
+  <Match when={status.valueOf() === 'success'}>
     <Content />
   </Match>
 </Switch>
@@ -248,8 +240,8 @@ Use `state()` for form handling:
 import { state } from 'flexium/core'
 
 function LoginForm() {
-  const [formData, setFormData] = state({ email: '', password: '' })
-  const [errors, setErrors] = state({})
+  const formData = state({ email: '', password: '' })
+  const errors = state({})
 
   const validate = () => {
     const newErrors = {}
@@ -259,7 +251,7 @@ function LoginForm() {
     if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters'
     }
-    setErrors(newErrors)
+    errors.set(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
@@ -274,14 +266,14 @@ function LoginForm() {
     <form onSubmit={handleSubmit}>
       <input
         value={formData.email}
-        onInput={(e) => setFormData({ ...formData, email: e.target.value })}
+        onInput={(e) => formData.set({ ...formData.valueOf(), email: e.target.value })}
       />
       {errors.email && <span>{errors.email}</span>}
 
       <input
         type="password"
         value={formData.password}
-        onInput={(e) => setFormData({ ...formData, password: e.target.value })}
+        onInput={(e) => formData.set({ ...formData.valueOf(), password: e.target.value })}
       />
       {errors.password && <span>{errors.password}</span>}
 
@@ -315,11 +307,11 @@ Usually caused by updating a signal inside an effect that reads it:
 ```tsx
 // Bad - infinite loop
 effect(() => {
-  setCount(count + 1)
+  count.set(c => c + 1)
 })
 
 // Good - use previous value in setter
-setCount(prev => prev + 1)
+count.set(prev => prev + 1)
 ```
 
 ## Migration
