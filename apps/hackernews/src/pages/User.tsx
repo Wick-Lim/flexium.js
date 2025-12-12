@@ -7,7 +7,7 @@ export default function User(props: { params?: { id?: string } } = {}) {
     const [user, setUser] = state<any>(undefined)
 
     effect(() => {
-        const params = r.params.value
+        const params = r.params()
         const idStr = params.id || props.params?.id;
 
         if (!idStr) {

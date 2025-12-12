@@ -21,20 +21,20 @@ let globalVersion = 0
 interface ReactiveMetadata {
   // Value storage
   _value: unknown
-  
+
   // Graph state
   subsHead: Link | undefined
   depsHead: Link | undefined
   version: number
-  
+
   // Node type
   nodeType: NodeType
-  
+
   // Computed state (for computed proxies)
   computeFn?: () => unknown
   flags?: SubscriberFlags
   lastCleanEpoch?: number
-  
+
   // Key for registry tracking
   key?: string
 }
@@ -74,12 +74,12 @@ interface ReactiveTarget extends Function {
   version: number
   nodeType: NodeType
   notify(): void
-  
+
   // ISubscriber properties (for computed)
   depsHead?: Link | undefined
   flags?: SubscriberFlags
   execute(): void
-  
+
   // Proxy methods
   peek(): unknown
   set?(value: unknown | ((prev: unknown) => unknown)): void
@@ -100,25 +100,32 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
     lastCleanEpoch: 0,
     key
   }
-  
+
   // Create callable function target
   // We need to create the function first, then add properties
-  const targetFn = function() {
+  const targetFn = function () {
     const meta = proxyMetadata.get(targetFn as any)!
+
+    // Track dependency if in effect/computed
+    const activeEffect = getActiveEffect()
+    if (activeEffect && activeEffect !== (targetFn as any)) {
+      Graph.connect(targetFn as any as IObservable, activeEffect)
+    }
+
     if (meta.computeFn) {
       // Computed: lazy evaluation
       return getComputedValue(meta, targetFn as any as ReactiveTarget)
     }
     return meta._value
   } as unknown as ReactiveTarget
-  
+
   const target = targetFn
-  
+
   proxyMetadata.set(target as any, metadata)
   if (key) {
     signalToKeyMap.set(target as any, key)
   }
-  
+
   // Make target implement IObservable/ISubscriber
   // Use non-enumerable properties to avoid issues with object spread
   Object.defineProperty(target, 'subsHead', {
@@ -149,7 +156,7 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
     enumerable: false,
     configurable: true
   })
-  
+
   // Add methods
   target.peek = () => {
     const meta = proxyMetadata.get(target as any)!
@@ -158,7 +165,7 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
     }
     return meta._value
   }
-  
+
   if (!computeFn) {
     target.set = (newValue: T | ((prev: T) => T)) => {
       const meta = proxyMetadata.get(target as any)!
@@ -171,7 +178,7 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
       }
     }
   }
-  
+
   target.execute = () => {
     const meta = proxyMetadata.get(target as any)!
     if (meta.computeFn) {
@@ -179,27 +186,27 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
       notifySubscribers(target, meta)
     }
   }
-  
+
   // Add notify method for IObservable
   target.notify = () => {
     const meta = proxyMetadata.get(target as any)!
     notifySubscribers(target, meta)
   }
-  
+
   const proxy = new Proxy(target, signalProxyHandlers) as any
   return proxy
 }
 
 function getComputedValue(meta: ReactiveMetadata, target: ReactiveTarget, force = false): unknown {
   if (!meta.computeFn) return meta._value
-  
+
   const flags = meta.flags || 0
   const dirtyOrStale = flags & (SubscriberFlags.Dirty | SubscriberFlags.Stale)
-  
+
   if (!force && dirtyOrStale === 0) {
     return meta._value
   }
-  
+
   // Check if dependencies changed
   if ((flags & SubscriberFlags.Dirty) === 0 && (flags & SubscriberFlags.Stale) !== 0) {
     if (!needsRefetch(meta, target)) {
@@ -207,14 +214,14 @@ function getComputedValue(meta: ReactiveMetadata, target: ReactiveTarget, force 
       return meta._value
     }
   }
-  
+
   // Re-compute
   meta.flags = flags & ~(SubscriberFlags.Dirty | SubscriberFlags.Stale)
   Graph.disconnectDependencies(target as ISubscriber)
-  
+
   const prevEffect = getActiveEffect()
   setActiveEffect(target as ISubscriber)
-  
+
   try {
     const newValue = meta.computeFn()
     if (meta._value !== newValue) {
@@ -225,13 +232,13 @@ function getComputedValue(meta: ReactiveMetadata, target: ReactiveTarget, force 
   } finally {
     setActiveEffect(prevEffect)
   }
-  
+
   return meta._value
 }
 
 function needsRefetch(meta: ReactiveMetadata, target: ReactiveTarget): boolean {
   if (!meta.depsHead) return true
-  
+
   let link: Link | undefined = meta.depsHead
   while (link) {
     const dep = link.dep!
@@ -259,7 +266,7 @@ function notifySubscribers(target: ReactiveTarget, meta: ReactiveMetadata): void
     if (meta.subsHead) {
       let hasScheduled = false
       let link: Link | undefined = meta.subsHead
-      
+
       while (link) {
         const sub = link.sub!
         if (sub.nodeType === NodeType.Computed) {
@@ -289,37 +296,37 @@ function notifySubscribers(target: ReactiveTarget, meta: ReactiveMetadata): void
 const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
   get(target, prop) {
     const meta = proxyMetadata.get(target as any)!
-    
+
     // Direct access to underlying proxy
     if (prop === STATE_SIGNAL) return target
-    
+
     // Access Tracking
     if (meta.key) updateStateMetadata(meta.key)
-    
+
     // Expose peek method
     if (prop === 'peek') {
       return target.peek
     }
-    
+
     // Expose set method for writable signals
     if (prop === 'set' && !meta.computeFn) {
       return target.set
     }
-    
+
     // Get the current value (track dependency)
     const innerValue = meta.computeFn ? getComputedValue(meta, target as any) : meta._value
-    
+
     // Track dependency if in effect/computed (before property access checks)
     const activeEffect = getActiveEffect()
     if (activeEffect && activeEffect !== (target as any)) {
       Graph.connect(target as IObservable, activeEffect)
     }
-    
+
     // Enable primitive coercion (arithmetic operations)
     if (prop === Symbol.toPrimitive || prop === 'valueOf') {
       return () => innerValue
     }
-    
+
     // Enable iteration (for arrays)
     if (prop === Symbol.iterator) {
       if (Array.isArray(innerValue)) {
@@ -328,7 +335,7 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
         return (innerValue as any)[Symbol.iterator].bind(innerValue)
       }
     }
-    
+
     // For function-specific properties on the target function itself, hide them
     // This ensures object spread only includes innerValue properties
     // Note: 'length' is NOT a function property - it's an array property, so we handle it separately
@@ -345,12 +352,12 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
       }
       // If innerValue is an object, continue to property access below
     }
-    
+
     // Recursive Forwarding for object properties
     if (innerValue !== null && typeof innerValue === 'object') {
       // Get the property value from innerValue
       const val = Reflect.get(innerValue, prop)
-      
+
       if (typeof val === 'function') {
         // Special handling for Array mutation methods
         if (Array.isArray(innerValue) && ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'].includes(prop as string)) {
@@ -371,12 +378,12 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
         }
         return (innerValue as any)[prop].bind(innerValue)
       }
-      
+
       // Track property access for reactivity (this creates/get a signal for the property)
       // Call the signal to track dependency
       const depSignal = getDep(innerValue, prop, val)
       depSignal() // Track dependency - this returns the signal's value
-      
+
       // Create nested proxy for nested objects
       if (val !== null && typeof val === 'object') {
         return createNestedProxy(val)
@@ -385,18 +392,18 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
       // The signal is only for tracking, we return the actual value
       return val
     }
-    
+
     // Primitive property access (for primitives like numbers, strings)
     const val = (innerValue as any)[prop]
     return typeof val === 'function' ? val.bind(innerValue) : val
   },
-  
+
   set(target, prop, newValue) {
     const meta = proxyMetadata.get(target as any)!
     if (meta.computeFn) {
       throw new Error('Cannot set computed signal')
     }
-    
+
     const innerValue = meta._value
     if (innerValue !== null && typeof innerValue === 'object') {
       const success = Reflect.set(innerValue, prop, newValue)
@@ -407,7 +414,7 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
     }
     return false
   },
-  
+
   has(target, prop) {
     if (prop === STATE_SIGNAL) return true
     const meta = proxyMetadata.get(target as any)!
@@ -418,23 +425,23 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
     }
     return false
   },
-  
+
   ownKeys(target) {
     const meta = proxyMetadata.get(target as any)!
     const innerValue = meta.computeFn ? getComputedValue(meta, target as any) : meta._value
-    
+
     if (innerValue === null || typeof innerValue !== 'object') {
       // For primitives, return empty array (no own keys)
       return []
     }
-    
+
     if (Array.isArray(innerValue)) {
       getDep(innerValue, 'length')()
       getDep(innerValue, 'iterate')()
     } else {
       getDep(innerValue, 'iterate')()
     }
-    
+
     // Return keys of innerValue (not target function)
     // This ensures object spread only includes innerValue properties
     // Note: Proxy spec requires ownKeys to match getOwnPropertyDescriptor
@@ -458,27 +465,27 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
     }
     return result
   },
-  
+
   getPrototypeOf(target) {
     const meta = proxyMetadata.get(target as any)!
     const innerValue = meta.computeFn ? getComputedValue(meta, target as any) : meta._value
-    
+
     if (innerValue !== null && typeof innerValue === 'object') {
       return Reflect.getPrototypeOf(innerValue)
     }
-    
+
     // For primitives, return Object.prototype
     return Object.prototype
   },
-  
+
   getOwnPropertyDescriptor(target, prop) {
     if (prop === STATE_SIGNAL) {
       return { configurable: true, enumerable: false, value: target }
     }
-    
+
     const meta = proxyMetadata.get(target as any)!
     const innerValue = meta.computeFn ? getComputedValue(meta, target as any) : meta._value
-    
+
     // Hide function-specific properties (prototype, name, etc.) from target function
     // Only expose properties from innerValue
     // This is critical: target is a function, but we want to expose innerValue's properties
@@ -523,12 +530,12 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
       // For other function properties, return undefined to hide function properties
       return undefined
     }
-    
+
     if (innerValue === null || typeof innerValue !== 'object') {
       // For primitives, return undefined (no own properties)
       return undefined
     }
-    
+
     // Return descriptor from innerValue (not from target function)
     // This ensures object spread works correctly
     const desc = Reflect.getOwnPropertyDescriptor(innerValue, prop)
@@ -540,7 +547,7 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
         enumerable: true
       }
     }
-    
+
     // For properties that don't exist on innerValue, return undefined
     return undefined
   }
@@ -592,7 +599,7 @@ export function createSignalProxy<T>(initialValue: T, key?: string): import('./s
     reactiveProxyCache.set(initialValue, proxy)
     return proxy as unknown as import('./state').StateValue<T>
   }
-  
+
   // Primitives: always create new proxy (no caching)
   return createReactiveProxy(initialValue, undefined, key) as unknown as import('./state').StateValue<T>
 }

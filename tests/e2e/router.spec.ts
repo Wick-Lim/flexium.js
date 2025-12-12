@@ -149,7 +149,7 @@ test.describe('Flexium Router', () => {
           console.log('Browser console:', text)
         }
       })
-      
+
       await page.goto('/item/123')
 
       // Wait for content to load
@@ -167,7 +167,7 @@ test.describe('Flexium Router', () => {
           console.log('Browser console:', text)
         }
       })
-      
+
       await page.goto('/user/testuser')
 
       // Wait for content to load
@@ -234,7 +234,7 @@ test.describe('Flexium Router', () => {
           console.log('Browser console:', text)
         }
       })
-      
+
       await page.goto('/item/42')
       await page.waitForTimeout(2000)
       await expect(page.locator('body')).toContainText('Test Story 42')
@@ -248,7 +248,7 @@ test.describe('Flexium Router', () => {
           console.log('Browser console:', text)
         }
       })
-      
+
       await page.goto('/user/johndoe')
       await page.waitForTimeout(2000)
       await expect(page.locator('body')).toContainText('johndoe')

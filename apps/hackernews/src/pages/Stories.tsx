@@ -9,12 +9,11 @@ function StoryItem(props: { id: number; index: number }) {
     // Use function-based return to enable reactivity in the renderer
     // This allows the loading state to switch dynamically
     return () => {
-        // Safe access because we know the Signal wraps a value, 
-        // and we handled the potential undefined access in state.ts safely now.
-        // But story itself is a Proxy, so we access properties.
+        // Safe access: check if the value exists first
+        const s = story();
 
-        // Check if data is loaded (indicated by presence of required field, e.g. title)
-        if (!story.title) {
+        // Check if data is loaded
+        if (!s || !s.title) {
             return <li class="news-item">Loading...</li>
         }
 
@@ -69,16 +68,18 @@ export default function Stories(props: { type: string }) {
         });
     });
 
-    return (
-        <div class="view">
-            <h1 class="visually-hidden">{props.type.charAt(0).toUpperCase() + props.type.slice(1)} Stories</h1>
-            <div class="item-list-nav">
-                {+loading && <span>Loading...</span>}
-            </div>
+    return () => {
+        return (
+            <div class="view">
+                <h1 class="visually-hidden">{props.type.charAt(0).toUpperCase() + props.type.slice(1)} Stories</h1>
+                <div class="item-list-nav">
+                    {+loading && <span>Loading...</span>}
+                </div>
 
-            <ul class="news-list">
-                {list.map((id: number, index: number) => <StoryItem id={id} index={index + 1} />)}
-            </ul>
-        </div>
-    )
+                <ul class="news-list">
+                    {list.map((id: number, index: number) => <StoryItem id={id} index={index + 1} />)}
+                </ul>
+            </div>
+        )
+    }
 }

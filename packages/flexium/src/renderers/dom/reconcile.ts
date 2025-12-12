@@ -269,6 +269,7 @@ function patchNode(oldFNode: FNode, newFNode: FNode) {
   // Only patch element nodes (not components)
   if (typeof newFNode.type !== 'string') return
 
+
   // Update props
   domRenderer.updateNode(node, oldFNode.props, newFNode.props)
 
