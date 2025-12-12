@@ -296,6 +296,15 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
       return val
     }
 
+    // Check if property exists on proxy itself (e.g., refetch, status, error for async state)
+    const proxyTarget = target as any
+    if (prop in proxyTarget) {
+      const innerIsObject = innerValue !== null && typeof innerValue === 'object'
+      if (!innerIsObject || !(prop in innerValue)) {
+        return (proxyTarget as any)[prop]
+      }
+    }
+
     return (innerValue as any)[prop]
   },
 
@@ -332,7 +341,15 @@ const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
       getDep(innerValue, 'length')()
       getDep(innerValue, 'iterate')()
     }
-    return Reflect.ownKeys(innerValue)
+    const keys = Reflect.ownKeys(innerValue)
+    // Proxy spec requires 'prototype' to be included for objects
+    // Also need to include internal properties that might be accessed (e.g., subsHead, depsHead)
+    // These are always present on reactive proxies, so always include them
+    const allKeys = new Set(keys)
+    allKeys.add('prototype')
+    allKeys.add('subsHead')
+    allKeys.add('depsHead')
+    return Array.from(allKeys)
   },
 
   getPrototypeOf(target) {

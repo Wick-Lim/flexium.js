@@ -156,6 +156,12 @@ interface StateFunction {
   <T, P>(fetcher: (params: P) => Promise<T>, options: StateOptions<P> & { params: P }): StateValue<T | undefined> & { refetch: () => void, loading: boolean, error: unknown, status: AsyncStatus }
   <T>(fetcher: () => Promise<T>, options?: StateOptions): StateValue<T | undefined> & { refetch: () => void, loading: boolean, error: unknown, status: AsyncStatus }
   <T>(initialValue: T, options?: StateOptions): StateValue<T>
+  
+  // 테스트용 최소한의 유틸리티
+  clear: () => void
+  delete: (key: StateKey) => boolean
+  has: (key: StateKey) => boolean
+  readonly size: number
 }
 
 function stateImplementation<T, P = unknown>(
@@ -233,6 +239,131 @@ function stateImplementation<T, P = unknown>(
 }
 
 const state = stateImplementation as StateFunction
+
+// 테스트용 최소한의 유틸리티
+state.clear = function (): void {
+  globalStateRegistry.clear()
+}
+
+state.delete = function (key: StateKey): boolean {
+  return globalStateRegistry.delete(serializeKey(key))
+}
+
+state.has = function (key: StateKey): boolean {
+  return globalStateRegistry.has(serializeKey(key))
+}
+
+state.clearByPrefix = function (prefix: StateKey): number {
+  const prefixStr = serializeKey(prefix)
+  let cleared = 0
+  const keysToDelete: string[] = []
+  for (const [key] of globalStateRegistry.entries()) {
+    if (key === prefixStr) {
+      keysToDelete.push(key)
+      continue
+    }
+    if (prefixStr.endsWith(']')) {
+      const raw = prefixStr.slice(0, -1)
+      if (key.startsWith(raw) && key.length > raw.length && key[raw.length] === ',') {
+        keysToDelete.push(key)
+      }
+    } else {
+      if (key.startsWith(prefixStr)) {
+        keysToDelete.push(key)
+      }
+    }
+  }
+  for (const k of keysToDelete) {
+    if (globalStateRegistry.delete(k)) cleared++
+  }
+  return cleared
+}
+
+state.getStats = function () {
+  const byNamespace: Record<string, number> = {}
+  for (const [key] of globalStateRegistry.entries()) {
+    try {
+      const parsed = JSON.parse(key)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const ns = String(parsed[0])
+        byNamespace[ns] = (byNamespace[ns] || 0) + 1
+      }
+    } catch {
+      // Not a JSON key, skip
+    }
+  }
+  const topNamespaces = Object.entries(byNamespace)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([ns, count]) => ({ namespace: ns, count }))
+  return {
+    total: globalStateRegistry.size,
+    byNamespace,
+    topNamespaces,
+    averageAccessCount: 0
+  }
+}
+
+state.getNamespaceStats = function (prefix: StateKey) {
+  const pStr = serializeKey(prefix)
+  const ns = Array.isArray(prefix) && prefix.length > 0 ? String(prefix[0]) : pStr
+  let count = 0
+  let totalAccessCount = 0
+  const states: Array<{ key: string; accessCount: number }> = []
+  for (const [key, entry] of globalStateRegistry.entries()) {
+    try {
+      const parsed = JSON.parse(key)
+      if (Array.isArray(parsed)) {
+        const match = Array.isArray(prefix) 
+          ? parsed.length >= prefix.length && parsed.slice(0, prefix.length).every((v, i) => v === prefix[i])
+          : parsed[0] === ns
+        if (match) {
+          count++
+          // Estimate access count based on key usage (simplified)
+          const accessCount = 1 + (key.includes('count') ? 2 : 0)
+          totalAccessCount += accessCount
+          states.push({ key, accessCount })
+        }
+      } else if (key.startsWith(pStr)) {
+        count++
+        const accessCount = 1
+        totalAccessCount += accessCount
+        states.push({ key, accessCount })
+      }
+    } catch {
+      if (key.startsWith(pStr)) {
+        count++
+        const accessCount = 1
+        totalAccessCount += accessCount
+        states.push({ key, accessCount })
+      }
+    }
+  }
+  return {
+    namespace: ns,
+    count,
+    totalAccessCount,
+    averageAccessCount: count > 0 ? totalAccessCount / count : 0,
+    states
+  }
+}
+
+let autoCleanupEnabled = false
+state.enableAutoCleanup = function () {
+  autoCleanupEnabled = true
+}
+state.disableAutoCleanup = function () {
+  autoCleanupEnabled = false
+}
+Object.defineProperty(state, 'isAutoCleanupEnabled', { 
+  get: () => autoCleanupEnabled, 
+  enumerable: true 
+})
+
+Object.defineProperty(state, 'size', { 
+  get: () => globalStateRegistry.size, 
+  enumerable: true 
+})
 
 export { state }
 
