@@ -1,4 +1,4 @@
-import { ISubscriber } from './graph'
+import { ISubscriber, type IObservable, NodeType } from './graph'
 
 // Batching state
 let batchDepth = 0
@@ -44,6 +44,39 @@ export function addToBatch(sub: ISubscriber): void {
 
 export function getBatchDepth(): number {
     return batchDepth
+}
+
+/**
+ * Notify subscribers of a reactive value change
+ * 핵심: 구독자 알림은 배칭 시스템의 일부
+ */
+export function notifySubscribers(observable: IObservable): void {
+  if (batchDepth === 0) {
+    if (observable.subsHead) {
+      let hasScheduled = false
+      let link: any = observable.subsHead
+
+      while (link) {
+        const sub = link.sub!
+        if (sub.nodeType === NodeType.Computed) {
+          if (sub.execute) sub.execute()
+        } else {
+          addToAutoBatch(sub)
+          if (!hasScheduled) {
+            hasScheduled = true
+            scheduleAutoBatch()
+          }
+        }
+        link = link.nextSub
+      }
+    }
+  } else {
+    let link = observable.subsHead
+    while (link) {
+      if (link.sub) addToBatch(link.sub)
+      link = link.nextSub
+    }
+  }
 }
 
 /**

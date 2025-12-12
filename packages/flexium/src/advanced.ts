@@ -14,7 +14,8 @@
 export type { StateValue as Signal, StateValue as Computed } from './core/state'
 
 // Advanced control primitives
-export { root, untrack } from './core/owner'
+export { root } from './core/owner'
+export { untrack } from './core/proxy'
 export { sync } from './core/sync'
 
 // DevTools

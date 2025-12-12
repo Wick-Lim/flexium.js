@@ -2,15 +2,40 @@
  * Proxy-Centric Signaling Architecture
  * 
  * 핵심: Proxy.get()에서 의존성 추적, Proxy.set()에서 구독자 알림
+ * 
+ * 모든 반응성의 중심: Proxy가 의존성 추적과 구독자 알림을 모두 담당
  */
 
 import { Graph, type ISubscriber, type IObservable, SubscriberFlags, NodeType } from './graph'
-import { getActiveEffect, setActiveEffect } from './owner'
-import { scheduleAutoBatch, addToAutoBatch, addToBatch, getBatchDepth } from './sync'
+import { notifySubscribers } from './sync'
 
 export const STATE_SIGNAL = Symbol.for('flexium.stateSignal')
 
 let globalVersion = 0
+
+// Active Effect 관리 - 의존성 추적의 핵심
+let activeEffect: ISubscriber | null = null
+
+export function getActiveEffect(): ISubscriber | null {
+  return activeEffect
+}
+
+export function setActiveEffect(effect: ISubscriber | null): void {
+  activeEffect = effect
+}
+
+/**
+ * Execute a function without tracking signal dependencies.
+ */
+export function untrack<T>(fn: () => T): T {
+  const prev = activeEffect
+  activeEffect = null
+  try {
+    return fn()
+  } finally {
+    activeEffect = prev
+  }
+}
 
 interface ReactiveMetadata {
   _value: unknown
@@ -121,7 +146,7 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
       if (meta._value !== value) {
         meta._value = value
         meta.version = ++globalVersion
-        notifySubscribers(meta)
+        notifySubscribers(targetFn as any as IObservable)
       }
     }
   } else {
@@ -134,13 +159,12 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
     const meta = proxyMetadata.get(targetFn as any)!
     if (meta.computeFn) {
       meta.flags = (meta.flags || 0) | SubscriberFlags.Dirty | SubscriberFlags.Stale
-      notifySubscribers(meta)
+      notifySubscribers(targetFn as any as IObservable)
     }
   }
 
   targetFn.notify = () => {
-    const meta = proxyMetadata.get(targetFn as any)!
-    notifySubscribers(meta)
+    notifySubscribers(targetFn as any as IObservable)
   }
 
   return new Proxy(targetFn, signalProxyHandlers) as any
@@ -208,36 +232,7 @@ function needsRefetch(meta: ReactiveMetadata): boolean {
   return false
 }
 
-function notifySubscribers(meta: ReactiveMetadata): void {
-  if (getBatchDepth() === 0) {
-    if (meta.subsHead) {
-      let hasScheduled = false
-      let link: any = meta.subsHead
-
-      while (link) {
-        const sub = link.sub!
-        if (sub.nodeType === NodeType.Computed) {
-          if (sub.execute) sub.execute()
-        } else {
-          addToAutoBatch(sub)
-          if (!hasScheduled) {
-            hasScheduled = true
-            scheduleAutoBatch()
-          }
-        }
-        link = link.nextSub
-      }
-    }
-  } else {
-    let link = meta.subsHead
-    while (link) {
-      if (link.sub) addToBatch(link.sub)
-      link = link.nextSub
-    }
-  }
-}
-
-// 핵심: get()에서 의존성 추적, set()에서 구독자 알림
+// 핵심: get()에서 의존성 추적, set()에서 구독자 알림 (notifySubscribers는 sync.ts에 있음)
 const signalProxyHandlers: ProxyHandler<ReactiveTarget> = {
   get(target, prop) {
     const meta = proxyMetadata.get(target as any)!

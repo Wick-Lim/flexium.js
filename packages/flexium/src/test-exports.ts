@@ -15,7 +15,8 @@ export {
   createResource,
 } from './core/state'
 export { effect } from './core/effect'
-export { root, untrack } from './core/owner'
+export { root } from './core/owner'
+export { untrack } from './core/proxy'
 export { sync } from './core/sync'
 
 export { state } from './core/state'

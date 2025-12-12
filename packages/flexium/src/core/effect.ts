@@ -10,10 +10,12 @@ import {
 import {
     Owner,
     getOwner,
-    setOwner,
+    setOwner
+} from './owner'
+import {
     getActiveEffect,
     setActiveEffect
-} from './owner'
+} from './proxy'
 
 export class EffectNode implements ISubscriber {
     depsHead: Link | undefined
