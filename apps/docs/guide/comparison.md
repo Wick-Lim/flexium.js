@@ -6,7 +6,7 @@ How does Flexium compare to React and Svelte? This guide helps you understand th
 
 | Feature | Flexium | React | Svelte |
 |---------|---------|-------|--------|
-| **Reactivity** | Signals (Proxy) | Virtual DOM | Compiler |
+| **Reactivity** | Signals (Proxy) | Virtual DOM | Signals (Runes) |
 | **API Philosophy** | Unified (`state()`) | Hooks (multiple) | Syntax (`let`, `$`) |
 | **Re-rendering** | Fine-grained | Component tree | Fine-grained |
 | **List Rendering** | `items.map()` works | `items.map()` works | `{#each}` block |
@@ -52,14 +52,15 @@ function Component() {
 
 
 
-```html [Svelte]
+```html [Svelte 5]
 <script>
-  import { theme } from './stores.js'; // Global state needs separate file
+  // Global state still often separate, but Runes work anywhere
+  import { theme } from './stores.js'; 
 
   let count = $state(0);
   let doubled = $derived(count * 2);
   
-  // Async state usually handled in template
+  // Async state handling
   let userPromise = fetchUser();
 </script>
 
@@ -120,8 +121,7 @@ function TodoList() {
 
 
 
-```html [Svelte]
-<!-- Must use template syntax -->
+```html [Svelte 5]
 <script>
   let todos = $state([...]);
 </script>
@@ -131,7 +131,7 @@ function TodoList() {
     <li>{todo.text}</li>
   {/each}
 </ul>
-<!-- ❌ New template syntax to learn -->
+<!-- ❌ Template syntax for loops -->
 <!-- ✅ Optimized -->
 ```
 
@@ -163,12 +163,12 @@ count + 10          // 15
 // Familiar, but re-renders entire component
 ```
 
-```html [Svelte]
+```html [Svelte 5]
 <script>
   let count = $state(5);
   
-  // Script: Direct access (Svelte 5)
-  console.log(count);     // 5
+  // Script: Direct access (Runes)
+  console.log(count);      // 5
   console.log(count + 10); // 15
 </script>
 
@@ -214,7 +214,7 @@ function Component() {
 // ❌ Re-renders entire component
 ```
 
-```html [Svelte]
+```html [Svelte 5]
 <script>
   let show = $state(true);
 </script>
@@ -230,7 +230,7 @@ function Component() {
     <B />
   {/if}
 </div>
-<!-- ❌ Custom template syntax -->
+<!-- ❌ Template syntax for conditionals -->
 <!-- ✅ Fine-grained updates -->
 ```
 
@@ -268,7 +268,7 @@ useEffect(() => {
 }, []) // Forgot to add count!
 ```
 
-```html [Svelte]
+```html [Svelte 5]
 <script>
   $effect(() => {
     console.log('Count:', count);
@@ -294,12 +294,12 @@ useEffect(() => {
 
 ### Why the Performance Difference?
 
-| Aspect | Flexium / Svelte | React |
-|--------|------------------|-------|
+| Aspect | Flexium / Svelte 5 | React |
+|--------|--------------------|-------|
 | Update Strategy | Direct DOM updates | Virtual DOM diffing |
 | Granularity | Only affected nodes | Entire component tree |
 | Optimization | Fast by default | Needs memo, useMemo, useCallback |
-| Bundle Size | ~8KB (Full Ecosystem) | ~42KB (React only) + Libs |
+| Bundle Size | ~10KB (Flexium) / ~2KB (Svelte) | ~42KB (React only) + Libs |
 
 ## Learning Curve
 
@@ -322,12 +322,12 @@ useEffect(() => {
 | Recoil/Jotai | `state(x, { key })` | Built-in |
 | `items.map()` | `items.map()` | Same! But optimized |
 
-### From Svelte to Flexium
+### From Svelte 5 to Flexium
 
-| Svelte | Flexium | Notes |
-|--------|---------|-------|
+| Svelte 5 | Flexium | Notes |
+|----------|---------|-------|
 | `let x = $state(0)` | `const [x, setX] = state(0)` | |
-| `$derived(x * 2)` | `state(() => x * 2)` | Auto-detected |
+| `let y = $derived(x * 2)` | `const [y] = state(() => x * 2)` | Auto-detected |
 | `{#each}` | `items.map()` | React syntax! |
 | `{#if}` | `{() => x && ...}` | Native JS |
 

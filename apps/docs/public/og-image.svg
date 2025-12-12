@@ -22,5 +22,5 @@
   <text x="600" y="460" text-anchor="middle" fill="#a1a1aa" font-family="system-ui, -apple-system, sans-serif" font-size="28">Fine-grained Reactive UI Framework</text>
 
   <!-- Features -->
-  <text x="600" y="520" text-anchor="middle" fill="#646cff" font-family="system-ui, -apple-system, sans-serif" font-size="20">Signals • No VDOM • ~3KB • Cross-Platform</text>
+  <text x="600" y="520" text-anchor="middle" fill="#646cff" font-family="system-ui, -apple-system, sans-serif" font-size="20">Signals • No VDOM • ~10KB • Cross-Platform</text>
 </svg>
