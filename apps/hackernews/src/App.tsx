@@ -8,8 +8,7 @@ function Nav() {
         <header class="header">
             <nav class="inner">
                 <Link to="/" class="logo">
-                    <img src="/logo.svg" alt="Flexium Logo" class="logo-icon" />
-                    <strong>Flexium HN</strong>
+                    <strong>Hacker News</strong>
                 </Link>
                 <Link to="/top">Top</Link>
                 <Link to="/new">New</Link>
