@@ -59,7 +59,7 @@ function App() {
     <List items={items}>
       {(item, index) => (
         <div style={{ padding: '10px' }}>
-          {index()}: {item.name}
+          {index}: {item.name}
         </div>
       )}
     </List>
@@ -90,7 +90,7 @@ function App() {
     >
       {(item, index) => (
         <div style={{ padding: '10px' }}>
-          {index()}: {item.name}
+          {index}: {item.name}
         </div>
       )}
     </List>
@@ -201,7 +201,7 @@ function App() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `items` | `() => T[]` | - | **Required.** Reactive array or getter function returning the items to render. |
-| `children` | `(item: T, index: () => number) => FNode` | - | **Required.** Render function for each item. Receives the item and a reactive index getter. |
+| `children` | `(item: T, index: number) => FNode` | - | **Required.** Render function for each item. Receives the item and the index. |
 | `virtual` | `boolean` | `false` | Enable virtualization for large lists. |
 | `height` | `number \| string` | - | Container height. **Required when `virtual` is true.** |
 | `itemSize` | `number \| SizeConfig` | - | Height of each item. **Required when `virtual` is true.** |
@@ -252,21 +252,16 @@ itemSize={{
 The `children` prop is a render function that receives two parameters:
 
 ```tsx
-(item: T, index: () => number) => FNode
+(item: T, index: number) => FNode
 ```
 
 - **item**: The data item to render
-- **index**: A reactive getter function that returns the current index
+- **index**: The current index of the item
 
-**Important:** The index is a getter function (reactive signal) to support efficient re-ordering without re-rendering all items.
+**Note:** In virtual lists, the index matches the item's position in the original array.
 
 ```tsx
 // Correct usage
-{(item, index) => (
-  <div>{index()}: {item.name}</div>
-)}
-
-// Incorrect - index is a function, not a number
 {(item, index) => (
   <div>{index}: {item.name}</div>
 )}
