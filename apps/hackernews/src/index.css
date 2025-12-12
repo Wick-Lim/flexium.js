@@ -50,12 +50,25 @@ body {
   margin: 2px;
   display: inline-block;
   line-height: 0;
+  text-decoration: none;
 }
 
-.logo-icon {
+.logo-y {
+  display: block;
   width: 18px;
   height: 18px;
-  display: block;
+  background-color: transparent;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  line-height: 18px;
+  font-size: 10pt;
+}
+
+.site-name {
+  text-decoration: none;
+  color: black;
+  margin-right: 10px;
 }
 
 .header strong {
@@ -67,10 +80,17 @@ body {
 .header a {
   color: #000000;
   text-decoration: none;
-  margin-right: 5px;
 }
 
-.header a:not(.logo):hover {
+.links {
+  font-size: 10pt;
+}
+
+.links a {
+  margin: 0 2px;
+}
+
+.links a:hover {
   color: #ffffff;
 }
 

@@ -8,13 +8,21 @@ function Nav() {
         <header class="header">
             <nav class="inner">
                 <Link to="/" class="logo">
+                    <span class="logo-y">Y</span>
+                </Link>
+                <Link to="/" class="site-name">
                     <strong>Hacker News</strong>
                 </Link>
-                <Link to="/top">Top</Link>
-                <Link to="/new">New</Link>
-                <Link to="/show">Show</Link>
-                <Link to="/ask">Ask</Link>
-                <Link to="/job">Jobs</Link>
+                <span class="links">
+                    <Link to="/new">new</Link> |{' '}
+                    <Link to="/threads">threads</Link> |{' '}
+                    <Link to="/past">past</Link> |{' '}
+                    <Link to="/comments">comments</Link> |{' '}
+                    <Link to="/ask">ask</Link> |{' '}
+                    <Link to="/show">show</Link> |{' '}
+                    <Link to="/jobs">jobs</Link> |{' '}
+                    <Link to="/submit">submit</Link>
+                </span>
             </nav>
         </header>
     )
