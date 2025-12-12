@@ -99,7 +99,7 @@ This results in:
 Use native JavaScript:
 
 ```tsx
-{isLoggedIn ? <Dashboard /> : <Login />}
+{isLoggedIn() ? <Dashboard /> : <Login />}
 ```
 
 ### List Rendering
@@ -224,9 +224,9 @@ const [data, refetch, status, error] = state(async () => {
 function DataView() {
   return (
     <div>
-      {status === 'loading' ? (
+      {status() === 'loading' ? (
         <Spinner />
-      ) : status === 'error' ? (
+      ) : status() === 'error' ? (
         <div>
           <p>Error: {error.message}</p>
           <button onclick={refetch}>Retry</button>

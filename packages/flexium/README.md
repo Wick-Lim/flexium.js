@@ -138,18 +138,18 @@ Use native JavaScript for control flow - no special components needed:
 
 ```tsx
 // Conditional rendering
-{isLoggedIn ? <Dashboard /> : <Login />}
+{isLoggedIn() ? <Dashboard /> : <Login />}
 
 // Short-circuit for simple conditions
-{isAdmin && <AdminPanel />}
+{isAdmin() && <AdminPanel />}
 
 // List rendering with optimized reconciliation
 {items.map(item => <Item key={item.id} data={item} />)}
 
 // Pattern matching with ternary chains
-{status === 'loading' ? <Loading /> :
- status === 'error' ? <Error /> :
- status === 'success' ? <Success /> :
+{status() === 'loading' ? <Loading /> :
+ status() === 'error' ? <Error /> :
+ status() === 'success' ? <Success /> :
  <Default />}
 ```
 

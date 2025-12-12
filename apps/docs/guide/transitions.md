@@ -29,7 +29,7 @@ function App() {
     <div>
       <button onclick={() => setVisible(v => !v)}>Toggle</button>
 
-      {visible && (
+      {visible() && (
         <Transition preset="fade">
           <div class="content">
             This content fades in and out
@@ -250,7 +250,7 @@ import { transitions } from 'flexium/primitives'
 
 ```tsx
 // Modal dialog
-{isModalOpen && (
+{isModalOpen() && (
   <Transition {...transitions.modal}>
     <div class="modal">
       <h2>Confirm Action</h2>
@@ -260,7 +260,7 @@ import { transitions } from 'flexium/primitives'
 )}
 
 // Dropdown menu
-{isMenuOpen && (
+{isMenuOpen() && (
   <Transition {...transitions.dropdown}>
     <ul class="menu">
       <li>Profile</li>
@@ -271,7 +271,7 @@ import { transitions } from 'flexium/primitives'
 )}
 
 // Toast notification
-{showToast && (
+{showToast() && (
   <Transition {...transitions.notification}>
     <div class="toast">Changes saved!</div>
   </Transition>
@@ -374,7 +374,7 @@ function ModalWithCallback() {
 
   return (
     <>
-      {isOpen && (
+      {isOpen() && (
         <Transition
           {...transitions.modal}
           onEnterStart={() => document.body.style.overflow = 'hidden'}
@@ -407,7 +407,7 @@ function ConditionalContent() {
     <div>
       <button onclick={() => setVisible(v => !v)}>Toggle</button>
 
-      {visible && (
+      {visible() && (
         <Transition preset="slide-up">
           <div class="content">Slides up when visible</div>
         </Transition>
@@ -465,17 +465,17 @@ function LoadingState() {
 
   return (
     <Switch>
-      <Match when={() => status === 'loading'}>
+      <Match when={() => status() === 'loading'}>
         <Transition preset="fade">
           <div class="spinner">Loading...</div>
         </Transition>
       </Match>
-      <Match when={() => status === 'success'}>
+      <Match when={() => status() === 'success'}>
         <Transition preset="slide-up">
           <div class="success">Success!</div>
         </Transition>
       </Match>
-      <Match when={() => status === 'error'}>
+      <Match when={() => status() === 'error'}>
         <Transition preset="scale-fade">
           <div class="error">Error occurred</div>
         </Transition>
@@ -580,19 +580,19 @@ function Tabs() {
       </div>
 
       <div class="tab-content">
-        {activeTab === 'home' && (
+        {activeTab() === 'home' && (
           <Transition preset="fade">
             <div>Home content</div>
           </Transition>
         )}
 
-        {activeTab === 'profile' && (
+        {activeTab() === 'profile' && (
           <Transition preset="fade">
             <div>Profile content</div>
           </Transition>
         )}
 
-        {activeTab === 'settings' && (
+        {activeTab() === 'settings' && (
           <Transition preset="fade">
             <div>Settings content</div>
           </Transition>

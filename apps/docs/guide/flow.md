@@ -101,7 +101,7 @@ function LoginButton() {
 
   return (
     <div>
-      {isLoggedIn
+      {isLoggedIn()
         ? <button onClick={() => setIsLoggedIn(false)}>Logout</button>
         : <button onClick={() => setIsLoggedIn(true)}>Login</button>
       }
@@ -122,7 +122,7 @@ function UserGreeting() {
 
   return (
     <div>
-      {user && <span>Welcome, {user.name}!</span>}
+      {user() && <span>Welcome, {user().name}!</span>}
     </div>
   );
 }
@@ -137,9 +137,9 @@ function StatusDisplay() {
   const [status, setStatus] = state('loading');
 
   const renderStatus = () => {
-    if (status === 'loading') return <p>Loading...</p>;
-    if (status === 'error') return <p style={{ color: 'red' }}>Error!</p>;
-    if (status === 'success') return <p>Success!</p>;
+    if (status() === 'loading') return <p>Loading...</p>;
+    if (status() === 'error') return <p style={{ color: 'red' }}>Error!</p>;
+    if (status() === 'success') return <p>Success!</p>;
     return <p>Unknown state</p>;
   };
 
@@ -155,9 +155,9 @@ function StatusDisplay() {
 
   return (
     <div>
-      {status === 'loading' ? <p>Loading...</p> :
-       status === 'error' ? <p style={{ color: 'red' }}>Error!</p> :
-       status === 'success' ? <p>Success!</p> :
+      {status() === 'loading' ? <p>Loading...</p> :
+       status() === 'error' ? <p style={{ color: 'red' }}>Error!</p> :
+       status() === 'success' ? <p>Success!</p> :
        <p>Unknown state</p>}
     </div>
   );
