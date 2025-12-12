@@ -16,7 +16,6 @@ import {
   namespaceRegistry,
   stateMetadata,
   serializeKey,
-  registerStateInNamespace,
   unregisterStateFromNamespace,
   updateStateMetadata,
   performAutoCleanup,
@@ -27,7 +26,6 @@ import {
   setAutoCleanupInterval,
   setDeleteStateCallback,
   autoCleanupConfig,
-  type RegistryEntry,
   type AutoCleanupConfig
 } from './registry'
 

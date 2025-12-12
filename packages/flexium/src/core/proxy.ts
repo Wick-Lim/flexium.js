@@ -174,7 +174,7 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
       if (meta._value !== value) {
         meta._value = value
         meta.version = ++globalVersion
-        notifySubscribers(target as any, meta)
+        notifySubscribers(meta)
       }
     }
   }
@@ -183,14 +183,14 @@ function createReactiveProxy<T>(initialValue: T, computeFn?: () => T, key?: stri
     const meta = proxyMetadata.get(target as any)!
     if (meta.computeFn) {
       meta.flags = (meta.flags || 0) | SubscriberFlags.Dirty | SubscriberFlags.Stale
-      notifySubscribers(target, meta)
+      notifySubscribers(meta)
     }
   }
 
   // Add notify method for IObservable
   target.notify = () => {
     const meta = proxyMetadata.get(target as any)!
-    notifySubscribers(target, meta)
+    notifySubscribers(meta)
   }
 
   const proxy = new Proxy(target, signalProxyHandlers) as any
@@ -209,7 +209,7 @@ function getComputedValue(meta: ReactiveMetadata, target: ReactiveTarget, force 
 
   // Check if dependencies changed
   if ((flags & SubscriberFlags.Dirty) === 0 && (flags & SubscriberFlags.Stale) !== 0) {
-    if (!needsRefetch(meta, target)) {
+    if (!needsRefetch(meta)) {
       meta.flags = flags & ~SubscriberFlags.Stale
       return meta._value
     }
@@ -236,7 +236,7 @@ function getComputedValue(meta: ReactiveMetadata, target: ReactiveTarget, force 
   return meta._value
 }
 
-function needsRefetch(meta: ReactiveMetadata, target: ReactiveTarget): boolean {
+function needsRefetch(meta: ReactiveMetadata): boolean {
   if (!meta.depsHead) return true
 
   let link: Link | undefined = meta.depsHead
@@ -261,7 +261,7 @@ function needsRefetch(meta: ReactiveMetadata, target: ReactiveTarget): boolean {
   return false
 }
 
-function notifySubscribers(target: ReactiveTarget, meta: ReactiveMetadata): void {
+function notifySubscribers(meta: ReactiveMetadata): void {
   if (getBatchDepth() === 0) {
     if (meta.subsHead) {
       let hasScheduled = false
