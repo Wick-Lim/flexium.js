@@ -88,27 +88,28 @@ setB(20); // Effect runs again
 Instead of recalculating values in JSX, use `computed()` to memoize derived values:
 
 ```tsx
-import { signal, computed } from 'flexium/advanced';
+```tsx
+import { state } from 'flexium/core';
 
 // Bad - recalculates on every access
 function TodoList() {
-  const todos = signal([...]);
+  const [todos] = state([...]);
 
   return (
     <div>
-      <p>Total: {todos.value.length}</p>
-      <p>Completed: {todos.value.filter(t => t.done).length}</p>
-      <p>Active: {todos.value.filter(t => !t.done).length}</p>
+      <p>Total: {todos().length}</p>
+      <p>Completed: {todos().filter(t => t.done).length}</p>
+      <p>Active: {todos().filter(t => !t.done).length}</p>
     </div>
   );
 }
 
 // Good - computed values memoize results
 function TodoList() {
-  const todos = signal([...]);
-  const total = computed(() => todos.value.length);
-  const completed = computed(() => todos.value.filter(t => t.done).length);
-  const active = computed(() => todos.value.filter(t => !t.done).length);
+  const [todos] = state([...]);
+  const [total] = state(() => todos().length);
+  const [completed] = state(() => todos().filter(t => t.done).length);
+  const [active] = state(() => todos().filter(t => !t.done).length);
 
   return (
     <div>
@@ -127,20 +128,20 @@ Computed values only recalculate when their dependencies change, and they cache 
 When you need a derived value, use `computed()` instead of `effect()` with manual state updates:
 
 ```tsx
-import { effect } from 'flexium/core';
-import { signal, computed } from 'flexium/advanced';
+```tsx
+import { effect, state } from 'flexium/core';
 
-const [firstName, setFirstName] = signal('John');
-const [lastName, setLastName] = signal('Doe');
+const [firstName, setFirstName] = state('John');
+const [lastName, setLastName] = state('Doe');
 
 // Bad - uses effect to maintain derived state
-const [fullName, setFullName] = signal('');
+const [fullName, setFullName] = state('');
 effect(() => {
-  setFullName(`${firstName.value} ${lastName.value}`);
+  setFullName(`${firstName()} ${lastName()}`);
 });
 
 // Good - computed automatically updates
-const fullName = computed(() => `${firstName.value} ${lastName.value}`);
+const [fullName] = state(() => `${firstName()} ${lastName()}`);
 ```
 
 Computed is more efficient because it's lazy (only computes when read) and doesn't trigger unnecessary updates.
@@ -150,13 +151,14 @@ Computed is more efficient because it's lazy (only computes when read) and doesn
 Reading signals inside loops or nested structures can create many dependencies:
 
 ```tsx
-import { signal } from 'flexium/advanced';
+```tsx
+import { state } from 'flexium/core';
 
-const [items, setItems] = signal([...]);
+const [items, setItems] = state([...]);
 
 // Bad - creates dependency on every item property
 effect(() => {
-  const list = items;
+  const list = items();
   list.forEach(item => {
     console.log(item.name, item.value);
   });
@@ -164,12 +166,12 @@ effect(() => {
 
 // Good - depend only on the array itself
 effect(() => {
-  const list = items;
+  const list = items();
   console.log('Items changed:', list.length);
 });
 
 // Or use granular signals for each item
-const itemSignals = items.map(item => signal(item));
+const itemSignals = items().map(item => state(item));
 ```
 
 ## Computed vs Effect Usage
@@ -184,13 +186,14 @@ Understanding when to use `computed()` vs `effect()` is crucial for performance.
 - **You need memoization**
 
 ```tsx
-import { signal, computed } from 'flexium/advanced';
+```tsx
+import { state } from 'flexium/core';
 
-const [price, setPrice] = signal(100);
-const [tax, setTax] = signal(0.08);
+const [price, setPrice] = state(100);
+const [tax, setTax] = state(0.08);
 
 // Computed - perfect for derived values
-const total = computed(() => price.value * (1 + tax.value));
+const [total] = state(() => price() * (1 + tax()));
 
 // Used in UI - only recalculates when price or tax changes
 <div>Total: ${total()}</div>
@@ -204,14 +207,14 @@ const total = computed(() => price.value * (1 + tax.value));
 - **Setting up subscriptions or event listeners**
 
 ```tsx
-import { effect } from 'flexium/core';
-import { signal } from 'flexium/advanced';
+```tsx
+import { effect, state } from 'flexium/core';
 
-const [userId, setUserId] = signal(null);
+const [userId, setUserId] = state(null);
 
 // Effect - perfect for side effects
 effect(() => {
-  const id = userId.value;  // userId.value works in effects
+  const id = userId();  // userId() works in effects
   if (id) {
     // Side effect: log to analytics
     analytics.track('user_viewed', { userId: id });
@@ -230,30 +233,30 @@ effect(() => {
 ### Performance Comparison
 
 ```tsx
-import { effect } from 'flexium/core';
-import { signal, computed } from 'flexium/advanced';
+```tsx
+import { effect, state } from 'flexium/core';
 
-const [count, setCount] = signal(0);
+const [count, setCount] = state(0);
 
 // Computed - lazy, memoized
-const doubled = computed(() => {
+const [doubled] = state(() => {
   console.log('Computing doubled');
-  return count.value * 2;
+  return count() * 2;
 });
 
 // Effect - eager, runs on every change
 effect(() => {
   console.log('Effect triggered');
-  const value = count.value * 2;
+  const value = count() * 2;
 });
 
 setCount(1); // Both run
-doubled.value;   // Returns cached value, no recomputation
-doubled.value;   // Still cached
+doubled();   // Returns cached value, no recomputation
+doubled();   // Still cached
 
 setCount(2); // Effect runs immediately, computed marks stale
 // Computed only recalculates when accessed
-doubled.value;   // Recomputes now
+doubled();   // Recomputes now
 ```
 
 ## Sync Updates
@@ -262,11 +265,11 @@ When making multiple state changes, sync them to avoid intermediate updates:
 
 ```tsx
 import { sync } from 'flexium/advanced';
-import { signal } from 'flexium/advanced';
+import { state } from 'flexium/core';
 
-const [firstName, setFirstName] = signal('John');
-const [lastName, setLastName] = signal('Doe');
-const [age, setAge] = signal(30);
+const [firstName, setFirstName] = state('John');
+const [lastName, setLastName] = state('Doe');
+const [age, setAge] = state(30);
 
 // Bad - triggers 3 separate updates
 function updateUser(user) {
@@ -340,16 +343,15 @@ Flexium uses efficient event delegation for all standard events. Listeners are a
 Use `root()` to create disposal scopes for effects and computations:
 
 ```tsx
-import { effect } from 'flexium/core';
+import { effect, state } from 'flexium/core';
 import { root } from 'flexium/advanced';
-import { signal } from 'flexium/advanced';
 
-const [count, setCount] = signal(0);
+const [count, setCount] = state(0);
 
 // Bad - effect never gets cleaned up
 function createWatcher() {
   effect(() => {
-    console.log('Count:', count.value);
+    console.log('Count:', count());
   });
 }
 
@@ -360,7 +362,7 @@ createWatcher(); // Creates another effect - memory leak!
 function createWatcher() {
   return root(dispose => {
     effect(() => {
-      console.log('Count:', count);
+      console.log('Count:', count());
     });
 
     return dispose; // Return cleanup function
@@ -401,17 +403,16 @@ function Timer() {
 Use `untrack()` to read a signal without creating a dependency:
 
 ```tsx
-import { effect } from 'flexium/core';
+import { effect, state } from 'flexium/core';
 import { untrack } from 'flexium/advanced';
-import { signal } from 'flexium/advanced';
 
-const [count, setCount] = signal(0);
-const [multiplier, setMultiplier] = signal(2);
+const [count, setCount] = state(0);
+const [multiplier, setMultiplier] = state(2);
 
 // This effect only tracks 'count', not 'multiplier'
 effect(() => {
-  const c = count.value;
-  const m = untrack(() => multiplier.value); // Read without tracking
+  const c = count();
+  const m = untrack(() => multiplier()); // Read without tracking
   console.log('Result:', c * m);
 });
 
@@ -429,13 +430,13 @@ This is useful for:
 Signals also have a `.peek()` method that works like `untrack()`:
 
 ```tsx
-import { signal } from 'flexium/advanced';
+import { state, effect } from 'flexium/core';
 
-const [count, setCount] = signal(0);
+const [count, setCount] = state(0);
 
 effect(() => {
   // Tracked access
-  const current = count.value;
+  const current = count();
 
   // Untracked access
   const initial = count.peek();
@@ -694,7 +695,6 @@ import { Column, Row, Text } from 'flexium/primitives';
 
 // Advanced APIs
 import { root, untrack } from 'flexium/advanced';
-import { signal, computed } from 'flexium/advanced';
 
 // Router
 import { Router, Route, Link } from 'flexium/router';
@@ -817,12 +817,12 @@ function Dashboard() {
 For expensive calculations, memoize outside the render:
 
 ```tsx
+```tsx
 import { state } from 'flexium/core';
-import { computed } from 'flexium/advanced';
 
 function DataTable({ rawData }) {
   // Expensive computation - do it once
-  const processedData = computed(() => {
+  const [processedData] = state(() => {
     return rawData  // rawData works directly
       .filter(item => item.active)
       .map(item => ({
@@ -834,7 +834,7 @@ function DataTable({ rawData }) {
 
   return (
     <table>
-      {processedData.map((row) => <TableRow key={row.id} data={row} />)}
+      {processedData().map((row) => <TableRow key={row.id} data={row} />)}
     </table>
   );
 }

@@ -149,51 +149,50 @@ Test signal creation, updates, and reactivity:
 
 ```ts
 import { describe, it, expect, vi } from 'vitest';
-import { effect } from 'flexium/core';
-import { signal, computed } from 'flexium/advanced';
+import { effect, state } from 'flexium/core';
 
 describe('Signal System', () => {
   it('should create a signal with initial value', () => {
-    const count = signal(0);
-    expect(count.value).toBe(0);
+    const [count] = state(0);
+    expect(count()).toBe(0);
   });
 
   it('should update signal value', () => {
-    const count = signal(0);
-    count.value = 5;
-    expect(count.value).toBe(5);
+    const [count, setCount] = state(0);
+    setCount(5);
+    expect(count()).toBe(5);
 
-    count.set(10);
-    expect(count.value).toBe(10);
+    setCount(10);
+    expect(count()).toBe(10);
   });
 
   it('should notify subscribers on change', () => {
-    const count = signal(0);
+    const [count, setCount] = state(0);
     const fn = vi.fn();
 
     effect(() => {
-      fn(count.value);
+      fn(count());
     });
 
     expect(fn).toHaveBeenCalledWith(0);
     expect(fn).toHaveBeenCalledTimes(1);
 
-    count.value = 5;
+    setCount(5);
     expect(fn).toHaveBeenCalledWith(5);
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should not notify on same value', () => {
-    const count = signal(0);
+    const [count, setCount] = state(0);
     const fn = vi.fn();
 
     effect(() => {
-      fn(count.value);
+      fn(count());
     });
 
     expect(fn).toHaveBeenCalledTimes(1);
 
-    count.value = 0; // Same value
+    setCount(0); // Same value
     expect(fn).toHaveBeenCalledTimes(1); // Should not trigger
   });
 });
@@ -205,52 +204,52 @@ Test derived state and memoization:
 
 ```ts
 import { describe, it, expect, vi } from 'vitest';
-import { signal, computed } from 'flexium/advanced';
+import { state } from 'flexium/core';
 
 describe('Computed values', () => {
   it('should compute derived value', () => {
-    const count = signal(2);
-    const doubled = computed(() => count.value * 2);
+    const [count, setCount] = state(2);
+    const [doubled] = state(() => count() * 2);
 
-    expect(doubled.value).toBe(4);
+    expect(doubled()).toBe(4);
 
-    count.value = 5;
-    expect(doubled.value).toBe(10);
+    setCount(5);
+    expect(doubled()).toBe(10);
   });
 
   it('should memoize computed values', () => {
-    const count = signal(1);
+    const [count, setCount] = state(1);
     const fn = vi.fn((val) => val * 2);
-    const doubled = computed(() => fn(count.value));
+    const [doubled] = state(() => fn(count()));
 
     // First access
-    expect(doubled.value).toBe(2);
+    expect(doubled()).toBe(2);
     expect(fn).toHaveBeenCalledTimes(1);
 
     // Multiple reads without dependency changes
-    expect(doubled.value).toBe(2);
-    expect(doubled.value).toBe(2);
+    expect(doubled()).toBe(2);
+    expect(doubled()).toBe(2);
     expect(fn).toHaveBeenCalledTimes(1); // Still only called once
 
     // After dependency change
-    count.value = 5;
-    expect(doubled.value).toBe(10);
+    setCount(5);
+    expect(doubled()).toBe(10);
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should track nested dependencies', () => {
-    const a = signal(1);
-    const b = signal(2);
-    const sum = computed(() => a.value + b.value);
-    const doubled = computed(() => sum.value * 2);
+    const [a, setA] = state(1);
+    const [b, setB] = state(2);
+    const [sum] = state(() => a() + b());
+    const [doubled] = state(() => sum() * 2);
 
-    expect(doubled.value).toBe(6);
+    expect(doubled()).toBe(6);
 
-    a.value = 3;
-    expect(doubled.value).toBe(10); // (3 + 2) * 2
+    setA(3);
+    expect(doubled()).toBe(10); // (3 + 2) * 2
 
-    b.value = 5;
-    expect(doubled.value).toBe(16); // (3 + 5) * 2
+    setB(5);
+    expect(doubled()).toBe(16); // (3 + 5) * 2
   });
 });
 ```
@@ -261,8 +260,7 @@ Test side effects and cleanup:
 
 ```ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { effect } from 'flexium/core';
-import { signal } from 'flexium/advanced';
+import { effect, state } from 'flexium/core';
 
 describe('Effects', () => {
   it('should run effect immediately', () => {
@@ -272,23 +270,23 @@ describe('Effects', () => {
   });
 
   it('should run effect when dependencies change', () => {
-    const count = signal(0);
+    const [count, setCount] = state(0);
     const fn = vi.fn();
 
     effect(() => {
-      fn(count.value);
+      fn(count());
     });
 
     expect(fn).toHaveBeenCalledWith(0);
     expect(fn).toHaveBeenCalledTimes(1);
 
-    count.value = 5;
+    setCount(5);
     expect(fn).toHaveBeenCalledWith(5);
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should run cleanup function', () => {
-    const count = signal(0);
+    const [count, setCount] = state(0);
     const cleanup = vi.fn();
     const setup = vi.fn(() => cleanup);
 
@@ -297,32 +295,32 @@ describe('Effects', () => {
     expect(setup).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
 
-    count.value = 1; // Trigger re-run
+    setCount(1); // Trigger re-run
     expect(cleanup).toHaveBeenCalledTimes(1);
     expect(setup).toHaveBeenCalledTimes(2);
   });
 
   it('should handle conditional dependencies', () => {
-    const a = signal(1);
-    const b = signal(2);
+    const [a, setA] = state(1);
+    const [b, setB] = state(2);
     const fn = vi.fn();
 
     effect(() => {
-      if (a.value > 5) {
-        fn(b.value);
+      if (a() > 5) {
+        fn(b());
       }
     });
 
     expect(fn).not.toHaveBeenCalled();
 
-    b.value = 10; // Should not trigger (a <= 5)
+    setB(10); // Should not trigger (a <= 5)
     expect(fn).not.toHaveBeenCalled();
 
-    a.value = 6; // Should trigger (a > 5)
+    setA(6); // Should trigger (a > 5)
     expect(fn).toHaveBeenCalledWith(10);
     expect(fn).toHaveBeenCalledTimes(1);
 
-    b.value = 20; // Should trigger now (b is dependency)
+    setB(20); // Should trigger now (b is dependency)
     expect(fn).toHaveBeenCalledWith(20);
     expect(fn).toHaveBeenCalledTimes(2);
   });

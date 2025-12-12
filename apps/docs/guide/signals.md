@@ -2,7 +2,7 @@
 
 ::: info Recommended API
 For most application development, we recommend using the unified **[state()](/guide/state)** API. 
-`signal` and `computed` are low-level primitives available in `flexium/advanced` that power `state()`. They are useful for library authors or building custom reactivity abstractions.
+The low-level `signal` and `computed` primitives have been unified into `state()`.
 :::
 
 ## The `signal` Primitive
@@ -10,41 +10,40 @@ For most application development, we recommend using the unified **[state()](/gu
 A `SignalNode` is the atomic unit of reactivity. It holds a value and notifies subscribers when it changes.
 
 ```tsx
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
 // Create
-const count = signal(0)
+const [count, setCount] = state(0)
 
 // Read (tracks dependency)
-console.log(count.value)
+console.log(count())
 
 // Write (triggers notifications)
-count.set(5)
+setCount(5)
 // OR
-count.value = 5
+setCount(c => c + 1)
 ```
 
 ### Methods
 
-- `.value`: Getter/Setter for the value. Accessing it tracks the signal in the current effect.
-- `.peek()`: Reads the value **without** tracking.
-- `.set(val)`: Sets the value.
-- `.subscribe(fn)`: Manually subscribe to changes (rarely needed, use `effect`).
+- `count()`: Getter. Accessing it tracks the signal in the current effect.
+- `count.peek()`: Reads the value **without** tracking.
+- `setCount(val)`: Sets the value.
 
 ## The `computed` Primitive
 
 Derived values that automatically update when their dependencies change.
 
 ```tsx
-import { computed } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const count = signal(1)
-const double = computed(() => count.value * 2)
+const [count, setCount] = state(1)
+const [double] = state(() => count() * 2)
 
-console.log(double.value) // 2
+console.log(double()) // 2
 
-count.set(5)
-console.log(double.value) // 10
+setCount(5)
+console.log(double()) // 10
 ```
 
 - **Lazy**: Computeds are only re-evaluated when read.
@@ -53,25 +52,27 @@ console.log(double.value) // 10
 
 ## Comparison with `state()`
 
-| Feature | `signal()` (Low-level) | `state()` (High-level) |
-|---------|------------------------|------------------------|
-| **Import** | `flexium/advanced` | `flexium/core` |
-| **Interface** | Object (`.value`) | Proxy / Tuple |
-| **Ergonomics** | Verbose | Concise |
-| **JSX** | Supported (`{count}`) | Supported (`{count}`) |
-| **Use Case** | Libraries, Primitives | Apps, Components |
+| Feature | `state()` |
+|---------|-----------|
+| **Import** | `flexium/core` |
+| **Interface** | Proxy / Tuple |
+| **Ergonomics** | Concise |
+| **JSX** | Supported (`{count}`) |
+| **Use Case** | Apps, Components, Libraries |
 
 ## Manual Subscriptions
 
 If you need to manually listen to a signal outside of an effect (e.g. bridging to another library):
 
 ```tsx
-const count = signal(0)
+import { effect, state } from 'flexium/core'
 
-const unsubscribe = count.subscribe((newValue) => {
-  console.log('Stream updated:', newValue)
+const [count, setCount] = state(0)
+
+const dispose = effect(() => {
+  console.log('Stream updated:', count())
 })
 
 // later
-unsubscribe()
+dispose()
 ```

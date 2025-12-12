@@ -21,24 +21,24 @@ Flexium now supports **Automatic Batching** by default. Multiple state updates o
 ### Example
 
 ```tsx
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
-const firstName = signal('John')
-const lastName = signal('Doe')
-const age = signal(30)
+const [firstName, setFirstName] = state('John')
+const [lastName, setLastName] = state('Doe')
+const [age, setAge] = state(30)
 
 effect(() => {
-  console.log(`${firstName} ${lastName}, age ${age}`)
+  console.log(`${firstName()} ${lastName()}, age ${age()}`)
 })
 // Logs: "John Doe, age 30"
 
 // These updates are automatically batched!
 setTimeout(() => {
-  firstName.set('Jane')
-  lastName.set('Smith')
-  age.set(25)
+  setFirstName('Jane')
+  setLastName('Smith')
+  setAge(25)
 }, 0)
 // Effect runs only ONCE after the timeout callback finishes.
 // Logs: "Jane Smith, age 25"
@@ -49,16 +49,16 @@ setTimeout(() => {
 The `sync()` API is available for scenarios where you want **Synchronous Updates**. When you use `sync()`, effects run immediately after the callback completes, rather than waiting for the next microtask. This is also useful when you need to measure the DOM immediately after a set of updates.
 
 ```tsx
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
 // ... signals ...
 
 // Updates run immediately after this block
 sync(() => {
-  firstName.set('Jane')
-  lastName.set('Smith')
+  setFirstName('Jane')
+  setLastName('Smith')
 })
 // DOM is updated HERE, synchronously.
 ```
@@ -86,19 +86,19 @@ The `sync()` function (without arguments) forces any pending auto-batched effect
 ### Basic Usage
 
 ```tsx
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
-const count = signal(0)
+const [count, setCount] = state(0)
 let effectRan = false
 
 effect(() => {
-  count.value
+  count()
   effectRan = true
 })
 
-count.value = 1
+setCount(1)
 // Effect is queued (auto-batching)
 
 sync()
@@ -111,21 +111,21 @@ console.log(effectRan) // true
 `sync()` optionally accepts a callback. Updates inside the callback are batched, and all effects run before `sync()` returns:
 
 ```tsx
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
-const firstName = signal('John')
-const lastName = signal('Doe')
+const [firstName, setFirstName] = state('John')
+const [lastName, setLastName] = state('Doe')
 let fullName = ''
 
 effect(() => {
-  fullName = `${firstName.value} ${lastName.value}`
+  fullName = `${firstName()} ${lastName()}`
 })
 
 sync(() => {
-  firstName.value = 'Jane'
-  lastName.value = 'Smith'
+  setFirstName('Jane')
+  setLastName('Smith')
 })
 
 // Effect has already run!
@@ -137,23 +137,23 @@ console.log(fullName) // "Jane Smith"
 `sync()` is essential for testing reactive code:
 
 ```tsx
+```tsx
 import { describe, it, expect } from 'vitest'
-import { effect } from 'flexium/core'
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
 describe('Counter', () => {
   it('should update when count changes', () => {
-    const count = signal(0)
+    const [count, setCount] = state(0)
     let displayValue = 0
 
     effect(() => {
-      displayValue = count.value * 2
+      displayValue = count() * 2
     })
 
     expect(displayValue).toBe(0)
 
-    count.value = 5
+    setCount(5)
     sync() // Force effects to run
 
     expect(displayValue).toBe(10)
@@ -166,14 +166,15 @@ describe('Counter', () => {
 Use `sync()` when you need to measure the DOM immediately after updates:
 
 ```tsx
+```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const items = signal(['a', 'b', 'c'])
+const [items, setItems] = state(['a', 'b', 'c'])
 
 function addItemAndMeasure() {
   sync(() => {
-    items.value = [...items.value, 'd']
+    setItems([...items(), 'd'])
   })
 
   // DOM is now updated, safe to measure
@@ -192,16 +193,17 @@ function addItemAndMeasure() {
 | Auto-batch aware | N/A | Flushes auto-batch queue |
 
 ```tsx
+```tsx
 // sync(fn) - for grouping updates
 sync(() => {
-  a.value = 1
-  b.value = 2
+  setA(1)
+  setB(2)
 })
 // Effects run here, synchronously
 
 // sync() - for forcing queued updates
-a.value = 1 // Queued by auto-batch
-b.value = 2 // Queued by auto-batch
+setA(1) // Queued by auto-batch
+setB(2) // Queued by auto-batch
 sync()  // Forces all queued effects to run NOW
 ```
 
@@ -219,22 +221,22 @@ Batching provides significant performance improvements by:
 ### Performance Impact Example
 
 ```tsx
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
-const [count, setCount] = signal(0)
-const [items, setItems] = signal([])
-const [loading, setLoading] = signal(false)
-const [error, setError] = signal(null)
+const [count, setCount] = state(0)
+const [items, setItems] = state([])
+const [loading, setLoading] = state(false)
+const [error, setError] = state(null)
 
 // This effect would run 4 times without syncing
 effect(() => {
   console.log('State updated:', {
-    count: count,
-    items: items.length,
-    loading: loading,
-    error: error
+    count: count(),
+    items: items().length,
+    loading: loading(),
+    error: error()
   })
 })
 
@@ -258,16 +260,17 @@ sync(() => {
 ### Simple Batching
 
 ```tsx
+```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const x = signal(0)
-const y = signal(0)
+const [x, setX] = state(0)
+const [y, setY] = state(0)
 
 // Update both coordinates in one sync block
 sync(() => {
-  x.set(10)
-  y.set(20)
+  setX(10)
+  setY(20)
 })
 ```
 
@@ -276,15 +279,16 @@ sync(() => {
 The `sync()` function returns the value returned by the callback:
 
 ```tsx
+```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const items = signal([])
-const count = signal(0)
+const [items, setItems] = state([])
+const [count, setCount] = state(0)
 
 const result = sync(() => {
-  items.set([1, 2, 3, 4, 5])
-  count.set(5)
+  setItems([1, 2, 3, 4, 5])
+  setCount(5)
   return 'Updates complete'
 })
 
@@ -357,30 +361,30 @@ function UserForm() {
 Sync blocks can be nested, and effects will only run after the outermost sync completes:
 
 ```tsx
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
-const count = signal(0)
+const [count, setCount] = state(0)
 let runCount = 0
 
 effect(() => {
-  console.log('Count:', count)
+  console.log('Count:', count())
   runCount++
 })
 
 sync(() => {
-  count.set(1)
+  setCount(1)
 
   sync(() => {
-    count.set(2)
+    setCount(2)
 
     sync(() => {
-      count.set(3)
+      setCount(3)
     })
   })
 
-  count.set(4)
+  setCount(4)
 })
 
 console.log(runCount) // 2 (initial run + 1 sync run)
@@ -454,18 +458,19 @@ function ProfileEditor() {
 Process arrays of updates efficiently:
 
 ```tsx
+```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const items = signal([])
-const count = signal(0)
-const total = signal(0)
+const [items, setItems] = state([])
+const [count, setCount] = state(0)
+const [total, setTotal] = state(0)
 
 const addMultipleItems = (newItems) => {
   sync(() => {
-    items.set([...items.peek(), ...newItems])
-    count.set(count.peek() + newItems.length)
-    total.set(total.peek() + newItems.reduce((sum, item) => sum + item.price, 0))
+    setItems([...items(), ...newItems])
+    setCount(count() + newItems.length)
+    setTotal(total() + newItems.reduce((sum, item) => sum + item.price, 0))
   })
 }
 
@@ -541,22 +546,23 @@ function DataDashboard() {
 Batch updates in animation loops:
 
 ```tsx
+```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const x = signal(0)
-const y = signal(0)
-const rotation = signal(0)
-const scale = signal(1)
+const [x, setX] = state(0)
+const [y, setY] = state(0)
+const [rotation, setRotation] = state(0)
+const [scale, setScale] = state(1)
 
 const animate = () => {
   requestAnimationFrame(() => {
     // Batch all position/transform updates
     sync(() => {
-      x.set(Math.sin(Date.now() / 1000) * 100)
-      y.set(Math.cos(Date.now() / 1000) * 100)
-      rotation.set((rotation + 1) % 360)
-      scale.set(1 + Math.sin(Date.now() / 500) * 0.2)
+      setX(Math.sin(Date.now() / 1000) * 100)
+      setY(Math.cos(Date.now() / 1000) * 100)
+      setRotation((rotation() + 1) % 360)
+      setScale(1 + Math.sin(Date.now() / 500) * 0.2)
     })
 
     animate()
@@ -571,33 +577,34 @@ animate()
 Update game state atomically:
 
 ```tsx
+```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const score = signal(0)
-const lives = signal(3)
-const level = signal(1)
-const enemies = signal([])
+const [score, setScore] = state(0)
+const [lives, setLives] = state(3)
+const [level, setLevel] = state(1)
+const [enemies, setEnemies] = state([])
 
 const handlePlayerDeath = () => {
   sync(() => {
-    lives.set(lives - 1)
+    setLives(lives() - 1)
 
-    if (+lives <= 0) {
+    if (lives() <= 0) {
       // Game over
-      score.set(0)
-      lives.set(3)
-      level.set(1)
-      enemies.set([])
+      setScore(0)
+      setLives(3)
+      setLevel(1)
+      setEnemies([])
     }
   })
 }
 
 const completeLevel = () => {
   sync(() => {
-    score.set(score + 1000)
-    level.set(level + 1)
-    enemies.set(generateEnemies(+level))
+    setScore(score() + 1000)
+    setLevel(level() + 1)
+    setEnemies(generateEnemies(level()))
   })
 }
 ```
@@ -611,11 +618,11 @@ Don't batch single signal updates - it adds unnecessary overhead:
 ```tsx
 // Bad - unnecessary syncing
 sync(() => {
-  count.set(1)
+  setCount(1)
 })
 
 // Good - just update directly
-count.set(1)
+setCount(1)
 ```
 
 ### Independent Updates
@@ -623,13 +630,14 @@ count.set(1)
 Don't batch unrelated updates that don't share effects:
 
 ```tsx
-const userCount = signal(0)
-const themeColor = signal('blue')
+```tsx
+const [userCount, setUserCount] = state(0)
+const [themeColor, setThemeColor] = state('blue')
 
 // These are independent - no shared effects
 // Syncing provides no benefit
-userCount.set(10)
-themeColor.set('red')
+setUserCount(10)
+setThemeColor('red')
 ```
 
 ### Already Synced Contexts
@@ -684,25 +692,25 @@ sync(() => {
 ### Performance Metrics
 
 ```tsx
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
-const a = signal(0)
-const b = signal(0)
-const c = signal(0)
+const [a, setA] = state(0)
+const [b, setB] = state(0)
+const [c, setC] = state(0)
 let runCount = 0
 
 effect(() => {
-  a + b + c
+  a() + b() + c()
   runCount++
 })
 
 // Without sync
 console.time('without-sync')
-a.set(1)
-b.set(2)
-c.set(3)
+setA(1)
+setB(2)
+setC(3)
 console.timeEnd('without-sync')
 console.log('Runs:', runCount) // 4 (initial + 3 updates)
 
@@ -711,9 +719,9 @@ runCount = 0
 // With sync
 console.time('with-sync')
 sync(() => {
-  a.set(10)
-  b.set(20)
-  c.set(30)
+  setA(10)
+  setB(20)
+  setC(30)
 })
 console.timeEnd('with-sync')
 console.log('Runs:', runCount) // 1 (synced update)
@@ -759,20 +767,21 @@ function ContactForm() {
 ### 2. Synchronized Animations
 
 ```tsx
+```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const ball1X = signal(0)
-const ball1Y = signal(0)
-const ball2X = signal(100)
-const ball2Y = signal(100)
+const [ball1X, setBall1X] = state(0)
+const [ball1Y, setBall1Y] = state(0)
+const [ball2X, setBall2X] = state(100)
+const [ball2Y, setBall2Y] = state(100)
 
 const moveBalls = (deltaTime) => {
   sync(() => {
-    ball1X.set(ball1X + deltaTime * 2)
-    ball1Y.set(ball1Y + deltaTime * 1)
-    ball2X.set(ball2X - deltaTime * 1.5)
-    ball2Y.set(ball2Y + deltaTime * 2.5)
+    setBall1X(ball1X() + deltaTime * 2)
+    setBall1Y(ball1Y() + deltaTime * 1)
+    setBall2X(ball2X() - deltaTime * 1.5)
+    setBall2Y(ball2Y() + deltaTime * 2.5)
   })
 }
 ```
@@ -828,20 +837,20 @@ function ShoppingCart() {
 
 ```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const temperature = signal(20)
-const humidity = signal(50)
-const pressure = signal(1013)
-const timestamp = signal(Date.now())
+const [temperature, setTemperature] = state(20)
+const [humidity, setHumidity] = state(50)
+const [pressure, setPressure] = state(1013)
+const [timestamp, setTimestamp] = state(Date.now())
 
 // WebSocket updates multiple sensor values
 websocket.on('sensor-data', (data) => {
   sync(() => {
-    temperature.set(data.temp)
-    humidity.set(data.humidity)
-    pressure.set(data.pressure)
-    timestamp.set(Date.now())
+    setTemperature(data.temp)
+    setHumidity(data.humidity)
+    setPressure(data.pressure)
+    setTimestamp(Date.now())
   })
 })
 ```
@@ -873,20 +882,19 @@ When reading current values inside a sync block, use `peek()` to avoid creating 
 
 ```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const count = signal(0)
+const [count, setCount] = state(0)
 
-// Good - uses peek()
+// Good - uses functional update
 sync(() => {
-  const current = count.peek()
-  count.set(current + 1)
+  setCount(c => c + 1)
 })
 
-// Also okay - direct value access
+// Also okay - direct value access (auto-untracked in setter)
 sync(() => {
-  const current = +count
-  count.set(current + 1)
+  const current = count()
+  setCount(current + 1)
 })
 ```
 
@@ -896,19 +904,20 @@ Use the return value for operations that need confirmation:
 
 ```tsx
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
+import { state } from 'flexium/core'
 
-const inventory = signal([])
-const soldItems = signal([])
+const [inventory, setInventory] = state([])
+const [soldItems, setSoldItems] = state([])
 
 const sellItem = (itemId) => {
   return sync(() => {
-    const item = inventory.find(i => i.id === itemId)
+    const currentInventory = inventory()
+    const item = currentInventory.find(i => i.id === itemId)
 
     if (!item) return false
 
-    inventory.set(inventory.filter(i => i.id !== itemId))
-    soldItems.set([...soldItems, item])
+    setInventory(currentInventory.filter(i => i.id !== itemId))
+    setSoldItems([...soldItems(), item])
 
     return true
   })
@@ -963,22 +972,21 @@ sync(() => {
 You can track when sync blocks are active:
 
 ```tsx
-import { effect } from 'flexium/core'
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
-const count = signal(0)
+const [count, setCount] = state(0)
 
 effect(() => {
-  console.log('Effect running, count:', count)
+  console.log('Effect running, count:', count())
 })
 
 console.log('Before sync')
 sync(() => {
   console.log('Inside sync')
-  count.set(1)
+  setCount(1)
   console.log('Still inside sync')
-  count.set(2)
+  setCount(2)
   console.log('Sync ending')
 })
 console.log('After sync')
@@ -998,25 +1006,24 @@ console.log('After sync')
 Measure the performance benefit of syncing:
 
 ```tsx
-import { effect } from 'flexium/core'
+import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
-import { signal } from 'flexium/advanced'
 
-const signals = Array.from({ length: 100 }, () => signal(0))
+const signals = Array.from({ length: 100 }, () => state(0))
 
 effect(() => {
-  signals.forEach(s => +s)
+  signals.forEach(([s]) => s())
 })
 
 // Without sync
 console.time('no-sync')
-signals.forEach((s, i) => s.set(i))
+signals.forEach(([_, set], i) => set(i))
 console.timeEnd('no-sync')
 
 // With sync
 console.time('with-sync')
 sync(() => {
-  signals.forEach((s, i) => s.set(i + 100))
+  signals.forEach(([_, set], i) => set(i + 100))
 })
 console.timeEnd('with-sync')
 ```

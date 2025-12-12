@@ -95,7 +95,6 @@ Use computed values for derived styles:
 
 ```tsx
 import { state } from 'flexium/core'
-import { computed } from 'flexium/advanced'
 
 function ProgressBar() {
   const [progress, setProgress] = state(0)

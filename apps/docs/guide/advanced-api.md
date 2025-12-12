@@ -24,75 +24,42 @@ Most applications should use the `state()` API from `flexium/core`. The advanced
 ## Import
 
 ```tsx
-import { signal, computed } from 'flexium/advanced'
-import { root, untrack } from 'flexium/advanced'
+import { root, untrack, sync } from 'flexium/advanced'
 ```
 
 ## API Overview
 
 | Export | Source | Description |
 |--------|--------|-------------|
-| `signal(value)` | `flexium/advanced` | Create a raw reactive signal |
-| `computed(fn)` | `flexium/advanced` | Create a computed signal |
 | `root(fn)` | `flexium/advanced` | Create an isolated reactive scope |
 | `untrack(fn)` | `flexium/advanced` | Read values without creating dependencies |
+| `sync(fn)` | `flexium/advanced` | Batch updates synchronously |
 
-## signal()
-
-Creates a raw reactive signal. Unlike `state()`, this returns a signal object with `.value` getter/setter and `.peek()` method.
-
-```tsx
-import { signal } from 'flexium/advanced'
-
-const count = signal(0)
-
-// Read value (creates dependency)
-console.log(count.value)  // 0
-
-// Read without tracking
-console.log(count.peek())  // 0
-
-// Set value
-count.value = 1
-
-// Set with updater function
-count.set(prev => prev + 1)
-```
-
-### signal vs state
-
-| Feature | `state()` | `signal()` |
-|---------|-----------|------------|
-| Return type | `[StateValue, setter]` | Signal object |
-| Global state | Built-in with `key` option | Manual implementation |
-| Async support | Built-in | Manual implementation |
-| Derived values | Built-in via function argument | Manual implementation |
-| DX | Optimized for ease of use | Low-level control |
 
 ## root()
 
 Creates an isolated reactive scope. Useful for managing cleanup of effects.
 
 ```tsx
-import { signal } from 'flexium/advanced'
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { root } from 'flexium/advanced'
 
-const count = signal(0)
+const [count, setCount] = state(0)
 
 const dispose = root((dispose) => {
   effect(() => {
-    console.log('Count:', count.value)
+    console.log('Count:', count())
   })
 
   return dispose
 })
 
-count.value = 1  // Logs: "Count: 1"
+setCount(1)  // Logs: "Count: 1"
 
 dispose()  // Cleanup - effect stops running
 
-count.value = 2  // No log - effect was disposed
+setCount(2)  // No log - effect was disposed
 ```
 
 ## untrack()
@@ -100,21 +67,21 @@ count.value = 2  // No log - effect was disposed
 Reads reactive values without creating dependencies. Useful when you need to access a value but don't want updates to that value to trigger re-computation.
 
 ```tsx
-import { signal } from 'flexium/advanced'
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 import { untrack } from 'flexium/advanced'
 
-const count = signal(0)
-const multiplier = signal(2)
+const [count, setCount] = state(0)
+const [multiplier, setMultiplier] = state(2)
 
 // Only re-runs when 'count' changes, not 'multiplier'
 effect(() => {
-  const result = count.value * untrack(() => multiplier.value)
+  const result = count() * untrack(() => multiplier())
   console.log('Result:', result)
 })
 
-count.value = 5      // Logs: "Result: 10"
-multiplier.value = 10  // No log - multiplier is untracked
+setCount(5)      // Logs: "Result: 10"
+setMultiplier(10)  // No log - multiplier is untracked
 ```
 
 ## Example: Custom Store
@@ -122,23 +89,21 @@ multiplier.value = 10  // No log - multiplier is untracked
 Here's an example of building a custom store using advanced primitives:
 
 ```tsx
-import { signal } from 'flexium/advanced'
-import { effect } from 'flexium/core'
+```tsx
+import { effect, state } from 'flexium/core'
 
 function createStore<T extends object>(initialState: T) {
-  const state = signal(initialState)
+  const [storeState, setStoreState] = state(initialState)
 
   return {
-    get: () => state.value,
+    get: () => storeState(),
     set: (updater: T | ((s: T) => T)) => {
-      state.value = typeof updater === 'function'
-        ? (updater as Function)(state.value)
-        : updater
+      setStoreState(updater)
     },
 
     // Subscribe to changes
     subscribe(callback: (s: T) => void) {
-      return effect(() => callback(state.value))
+      return effect(() => callback(storeState()))
     }
   }
 }
@@ -158,9 +123,9 @@ console.log(store.get().count)  // 1
 - Building application components
 - Normal state management needs
 - When you want the simplest API
+- Building custom reactive libraries (using `state` primitives)
 
-### Use `signal()` / advanced
-- Building custom reactive libraries
-- Need direct signal object access
-- Performance-critical manual optimizations
-- Porting code from other signal-based libraries
+### Use `advanced` API
+- `root()`: Managing disposal scopes manually
+- `untrack()`: Reading signals without tracking dependencies
+- `sync()`: Batching updates manually

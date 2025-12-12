@@ -46,10 +46,10 @@ The `List` component renders lists efficiently. By default, it renders all items
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { signal } from 'flexium/signal';
+import { state } from 'flexium/core';
 
 function App() {
-  const items = signal([
+  const items = state([
     { id: 1, name: 'Item 1' },
     { id: 2, name: 'Item 2' },
     { id: 3, name: 'Item 3' },
@@ -71,10 +71,10 @@ function App() {
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { signal } from 'flexium/signal';
+import { state } from 'flexium/core';
 
 function App() {
-  const items = signal(
+  const items = state(
     Array.from({ length: 10000 }, (_, i) => ({
       id: i,
       name: `Item ${i}`
@@ -102,10 +102,10 @@ function App() {
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { signal } from 'flexium/signal';
+import { state } from 'flexium/core';
 
 function App() {
-  const items = signal(
+  const items = state(
     Array.from({ length: 5000 }, (_, i) => `Item ${i}`)
   );
 
@@ -135,10 +135,10 @@ function App() {
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { signal } from 'flexium/signal';
+import { state } from 'flexium/core';
 
 function App() {
-  const items = signal([
+  const items = state([
     { id: 'a1', name: 'Alice' },
     { id: 'b2', name: 'Bob' },
     { id: 'c3', name: 'Charlie' },
@@ -168,10 +168,10 @@ function App() {
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { signal } from 'flexium/signal';
+import { state } from 'flexium/core';
 
 function App() {
-  const items = signal(Array.from({ length: 10000 }, (_, i) => i));
+  const items = state(Array.from({ length: 10000 }, (_, i) => i));
 
   const handleScroll = (scrollTop: number) => {
     console.log('Current scroll position:', scrollTop);

@@ -280,10 +280,10 @@ Returns a `RouterContext` object with the following properties:
 
 | Property | Type | Description |
 | --- | --- | --- |
-| `location` | `Signal<Location>` | Reactive signal containing current location information. |
-| `params` | `Computed<Record<string, string>>` | Reactive computed signal containing route parameters from the current match. |
+| `location` | `StateValue<Location>` | Reactive signal containing current location information. |
+| `params` | `StateValue<Record<string, string>>` | Reactive computed signal containing route parameters from the current match. |
 | `navigate` | `(path: string) => void` | Function to navigate to a new path. |
-| `matches` | `Computed<RouteMatch[]>` | Reactive computed signal containing all matched routes (from root to leaf). |
+| `matches` | `StateValue<RouteMatch[]>` | Reactive computed signal containing all matched routes (from root to leaf). |
 
 #### Location Object
 
@@ -407,7 +407,7 @@ navigate('/about');
 
 #### Return Value
 
-Returns a tuple `[Signal<Location>, (path: string) => void]`:
+Returns a tuple `[StateValue<Location>, (path: string) => void]`:
 - `location` - Reactive signal that updates when the URL changes
 - `navigate` - Function to navigate to a new path
 
@@ -1073,21 +1073,21 @@ Create smooth animations when navigating between routes.
 #### Basic Fade Transition
 
 ```tsx
-import { effect } from 'flexium/core';
-import { signal } from 'flexium/advanced';
+```tsx
+import { effect, state } from 'flexium/core';
 import { router } from 'flexium/router';
 
 function TransitionWrapper({ children }) {
   const r = router();
   const location = r.location();
-  const isTransitioning = signal(false);
+  const [isTransitioning, setIsTransitioning] = state(false);
 
   effect(() => {
     // Trigger transition on location change
-    isTransitioning.value = true;
+    setIsTransitioning(true);
 
     const timeout = setTimeout(() => {
-      isTransitioning.value = false;
+      setIsTransitioning(false);
     }, 300);
 
     return () => clearTimeout(timeout);
@@ -1095,9 +1095,9 @@ function TransitionWrapper({ children }) {
 
   return (
     <div
-      class={() => isTransitioning.value ? 'fade-out' : 'fade-in'}
+      class={() => isTransitioning() ? 'fade-out' : 'fade-in'}
       style={{
-        opacity: isTransitioning.value ? 0 : 1,
+        opacity: isTransitioning() ? 0 : 1,
         transition: 'opacity 0.3s ease-in-out'
       }}
     >
@@ -1125,14 +1125,14 @@ function App() {
 function SlideTransition({ children }) {
   const r = router();
   const location = r.location;
-  const isAnimating = signal(false);
-  const direction = signal<'left' | 'right'>('right');
+  const [isAnimating, setIsAnimating] = state(false);
+  const [direction, setDirection] = state<'left' | 'right'>('right');
 
   effect(() => {
-    isAnimating.value = true;
+    setIsAnimating(true);
 
     setTimeout(() => {
-      isAnimating.value = false;
+      setIsAnimating(false);
     }, 400);
   });
 
@@ -1140,10 +1140,10 @@ function SlideTransition({ children }) {
     <div
       class="slide-container"
       style={{
-        transform: isAnimating.value
-          ? `translateX(${direction.value === 'right' ? '100%' : '-100%'})`
+        transform: isAnimating()
+          ? `translateX(${direction() === 'right' ? '100%' : '-100%'})`
           : 'translateX(0)',
-        opacity: isAnimating.value ? 0 : 1,
+        opacity: isAnimating() ? 0 : 1,
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
       }}
     >
@@ -1159,14 +1159,14 @@ function SlideTransition({ children }) {
 function PageTransition({ children }) {
   const r = router();
   const location = r.location;
-  const isLoading = signal(true);
+  const [isLoading, setIsLoading] = state(true);
 
   effect(() => {
-    isLoading.value = true;
+    setIsLoading(true);
 
     // Simulate page load
     const timeout = setTimeout(() => {
-      isLoading.value = false;
+      setIsLoading(false);
     }, 150);
 
     return () => clearTimeout(timeout);
@@ -1174,7 +1174,7 @@ function PageTransition({ children }) {
 
   return (
     <>
-      {isLoading.value && (
+      {isLoading() && (
         <div class="page-loader">
           <div class="spinner" />
         </div>
@@ -1183,8 +1183,8 @@ function PageTransition({ children }) {
       <div
         class="page-content"
         style={{
-          opacity: isLoading.value ? 0 : 1,
-          transform: isLoading.value ? 'translateY(20px)' : 'translateY(0)',
+          opacity: isLoading() ? 0 : 1,
+          transform: isLoading() ? 'translateY(20px)' : 'translateY(0)',
           transition: 'opacity 0.2s, transform 0.2s'
         }}
       >
@@ -1200,14 +1200,15 @@ function PageTransition({ children }) {
 Apply different transitions based on routes:
 
 ```tsx
+```tsx
 function RouteTransition({ children }) {
   const r = router();
   const location = r.location;
-  const previousPath = signal('');
+  const [previousPath, setPreviousPath] = state('');
 
   const getTransitionType = () => {
-    const current = location.pathname;
-    const previous = previousPath.value;
+    const current = location().pathname;
+    const previous = previousPath();
 
     // Different transitions for different route patterns
     if (current.startsWith('/admin')) return 'slide-left';
@@ -1218,7 +1219,7 @@ function RouteTransition({ children }) {
   };
 
   effect(() => {
-    previousPath.value = location().pathname;
+    setPreviousPath(location().pathname);
   });
 
   const transitionClass = getTransitionType();
@@ -1533,23 +1534,24 @@ Organize routes hierarchically for maintainability:
 Show loading indicators during navigation:
 
 ```tsx
+```tsx
 function App() {
-  const isLoading = signal(false);
+  const [isLoading, setIsLoading] = state(false);
 
   return (
     <Router>
-      {isLoading.value && <LoadingBar />}
+      {isLoading() && <LoadingBar />}
 
       <Route
         path="/data/:id"
         component={DataPage}
         beforeEnter={async (params) => {
-          isLoading.value = true;
+          setIsLoading(true);
           try {
             await preloadData(params.id);
             return true;
           } finally {
-            isLoading.value = false;
+            setIsLoading(false);
           }
         }}
       />
@@ -1563,19 +1565,20 @@ function App() {
 Wrap routes in error boundaries:
 
 ```tsx
+```tsx
 function RouteErrorBoundary({ children }) {
-  const hasError = signal(false);
-  const error = signal<Error | null>(null);
+  const [hasError, setHasError] = state(false);
+  const [error, setError] = state<Error | null>(null);
 
   try {
     return children;
   } catch (e) {
-    hasError.value = true;
-    error.value = e as Error;
+    setHasError(true);
+    setError(e as Error);
     return (
       <div class="error-page">
         <h1>Something went wrong</h1>
-        <p>{error.value?.message}</p>
+        <p>{error()?.message}</p>
         <Link to="/">Go Home</Link>
       </div>
     );

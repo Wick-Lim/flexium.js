@@ -107,7 +107,7 @@ const clamped = createText({
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `as` | `TextVariant` | `'p'` | HTML element to render. |
-| `children` | `string \| number \| HTMLElement \| HTMLElement[] \| Signal<string \| number>` | - | Text content. |
+| `children` | `string \| number \| HTMLElement \| HTMLElement[] \| StateValue<string \| number>` | - | Text content. |
 
 #### Typography
 
@@ -406,10 +406,11 @@ createHeading(3, { children: 'Subsection' }); // Skipped h2
 Use `ariaLive` for dynamic content that should be announced:
 
 ```typescript
-import { signal } from 'flexium/advanced';
+```typescript
+import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
-const status = signal('Loading...');
+const [status, setStatus] = state('Loading...');
 
 const statusText = createText({
   as: 'p',
@@ -418,7 +419,7 @@ const statusText = createText({
 });
 
 // Later
-status.set('Complete!'); // Screen reader will announce "Complete!"
+setStatus('Complete!'); // Screen reader will announce "Complete!"
 ```
 
 ### Clickable Text
@@ -526,7 +527,8 @@ setFirstName('Jane'); // Displays "Jane Doe"
 Numeric values are automatically converted to strings:
 
 ```typescript
-import { signal } from 'flexium/advanced';
+```typescript
+import { state } from 'flexium/core';
 import { createText } from 'flexium/primitives/ui';
 
 const [count, setCount] = state(0);

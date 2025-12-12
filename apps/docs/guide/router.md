@@ -466,28 +466,27 @@ Create smooth transitions between routes using CSS and Flexium's reactive system
 ### Basic Fade Transition
 
 ```tsx
-import { effect } from 'flexium/core'
-import { signal } from 'flexium/advanced'
+import { effect, state } from 'flexium/core'
 import { router } from 'flexium/router'
 
 function TransitionWrapper({ children }) {
   const r = router()
   const location = r.location
-  const isTransitioning = signal(false)
+  const [isTransitioning, setIsTransitioning] = state(false)
 
   effect(() => {
     // Trigger transition on location change
-    isTransitioning.value = true
+    setIsTransitioning(true)
 
     const timeout = setTimeout(() => {
-      isTransitioning.value = false
+      setIsTransitioning(false)
     }, 300)
 
     return () => clearTimeout(timeout)
   })
 
   return (
-    <div class={() => isTransitioning.value ? 'fade-out' : 'fade-in'}>
+    <div class={() => isTransitioning() ? 'fade-out' : 'fade-in'}>
       {children}
     </div>
   )
@@ -504,28 +503,28 @@ function TransitionWrapper({ children }) {
 function PageTransition({ children }) {
   const r = router()
   const location = r.location
-  const currentPath = signal('')
-  const isAnimating = signal(false)
+  const [currentPath, setCurrentPath] = state('')
+  const [isAnimating, setIsAnimating] = state(false)
 
   effect(() => {
     const newPath = location().pathname
 
-    if (currentPath.value !== newPath) {
-      isAnimating.value = true
+    if (currentPath() !== newPath) {
+      setIsAnimating(true)
 
       setTimeout(() => {
-        currentPath.value = newPath
-        isAnimating.value = false
+        setCurrentPath(newPath)
+        setIsAnimating(false)
       }, 200)
     }
   })
 
   return (
     <div
-      class={() => `page-container ${isAnimating.value ? 'transitioning' : ''}`}
+      class={() => `page-container ${isAnimating() ? 'transitioning' : ''}`}
       style={{
-        opacity: isAnimating.value ? 0 : 1,
-        transform: isAnimating.value ? 'translateY(20px)' : 'translateY(0)',
+        opacity: isAnimating() ? 0 : 1,
+        transform: isAnimating() ? 'translateY(20px)' : 'translateY(0)',
         transition: 'opacity 0.2s, transform 0.2s'
       }}
     >
