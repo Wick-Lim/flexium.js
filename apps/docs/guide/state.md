@@ -128,8 +128,8 @@ function UserProfile({ id }) {
 
   // Render based on loading/error state
   // status: 'idle' | 'loading' | 'success' | 'error'
-  if (String(status) === 'loading') return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (status() === 'loading') return <div>Loading...</div>;
+  if (error()) return <div>Error: {error().message}</div>;
 
   // Data is available - use values directly
   return (

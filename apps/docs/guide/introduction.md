@@ -125,7 +125,7 @@ function UserProfile() {
     return res.json();
   });
 
-  return <div>{status === 'loading' ? 'Loading...' : user?.name}</div>;
+  return <div>{status() === 'loading' ? 'Loading...' : user()?.name}</div>;
 }
 ```
 
@@ -378,12 +378,12 @@ function Dashboard() {
     <div>
       <h1>{greeting}</h1>
 
-      {todosLoading ? <div>Loading todos...</div> : null}
-      {todosError ? <div>Error: {todosError.message}</div> : null}
+      {todosLoading() ? <div>Loading todos...</div> : null}
+      {todosError() ? <div>Error: {todosError().message}</div> : null}
 
-      {filteredTodos.length > 0 && (
+      {filteredTodos().length > 0 && (
         <ul>
-          {filteredTodos.map(todo => (
+          {filteredTodos().map(todo => (
             <li key={todo.id}>{todo.text}</li>
           ))}
         </ul>
@@ -522,8 +522,8 @@ function SearchResults() {
 
   // Automatically re-runs when query OR category changes
   effect(async () => {
-    const q = query;
-    const cat = category;
+    const q = query();
+    const cat = category();
 
     if (!q) {
       setResults([]);

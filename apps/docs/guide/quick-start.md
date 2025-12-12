@@ -117,9 +117,9 @@ const [user, refetch, status, error] = state(async () => {
 
 return (
   <div>
-    {String(status) === 'loading' && <p>Loading...</p>}
-    {error && <p>Error: {error.message}</p>}
-    {user && <p>Welcome, {user.name}</p>}
+    {status() === 'loading' && <p>Loading...</p>}
+    {error() && <p>Error: {error().message}</p>}
+    {user() && <p>Welcome, {user().name}</p>}
   </div>
 );
 ```
