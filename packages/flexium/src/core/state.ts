@@ -1,7 +1,22 @@
 /**
- * Main State API
+ * State API
  * 
- * 핵심: state() 함수 하나로 모든 상태 패턴 처리
+ * 이 파일의 역할:
+ * 1. state() 함수 - 통합 상태 관리 API
+ * 2. createResource() - 비동기 리소스 생성 (내부 함수)
+ * 3. 상태 타입 체크 (isStateValue, isSignal)
+ * 4. 상태 유틸리티 (equals, isTruthy, ref)
+ * 
+ * 핵심 원리:
+ * - state() 하나로 모든 상태 패턴 처리 (local, global, async, computed)
+ * - key 기반 전역 상태 레지스트리 사용
+ * - Hook 시스템으로 컴포넌트별 상태 관리
+ * 
+ * 다른 파일과의 관계:
+ * - proxy.ts: createSignalProxy(), createComputedProxy() 사용
+ * - component.ts: Hook 시스템 사용
+ * - registry.ts: 전역 상태 레지스트리 사용
+ * - effect.ts: createResource()에서 사용
  */
 
 import { createSignalProxy, createComputedProxy, getProxyFromStateValue, STATE_SIGNAL } from './proxy'

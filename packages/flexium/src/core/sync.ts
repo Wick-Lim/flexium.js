@@ -1,3 +1,20 @@
+/**
+ * Batching & Notification System
+ * 
+ * 이 파일의 역할:
+ * 1. 배칭 시스템 (auto-batch, manual batch)
+ * 2. 구독자 알림 (notifySubscribers)
+ * 3. sync() 함수 제공
+ * 
+ * 핵심 원리:
+ * - 여러 상태 변경을 배칭하여 한 번에 처리
+ * - 구독자 알림을 배칭 큐에 추가하여 효율적으로 처리
+ * 
+ * 다른 파일과의 관계:
+ * - proxy.ts: notifySubscribers() 호출 (상태 변경 시)
+ * - graph.ts: ISubscriber, IObservable 타입 사용
+ */
+
 import { ISubscriber, type IObservable, NodeType } from './graph'
 
 // Batching state

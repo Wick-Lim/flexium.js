@@ -1,9 +1,20 @@
 /**
  * Proxy-Centric Signaling Architecture
  * 
- * 핵심: Proxy.get()에서 의존성 추적, Proxy.set()에서 구독자 알림
+ * 이 파일의 역할:
+ * 1. Proxy 기반 반응성 구현 (createSignalProxy, createComputedProxy)
+ * 2. 의존성 추적 관리 (activeEffect 관리)
+ * 3. Proxy.get() 트랩에서 의존성 자동 추적 (Graph.connect)
+ * 4. Proxy.set() 트랩에서 구독자 알림 호출 (notifySubscribers)
  * 
- * 모든 반응성의 중심: Proxy가 의존성 추적과 구독자 알림을 모두 담당
+ * 핵심 원리:
+ * - Proxy.get() 호출 시 → activeEffect가 있으면 Graph.connect()로 의존성 연결
+ * - Proxy.set() 호출 시 → notifySubscribers()로 구독자들에게 알림
+ * 
+ * 다른 파일과의 관계:
+ * - graph.ts: Graph.connect() 사용 (의존성 그래프 연결)
+ * - sync.ts: notifySubscribers() 사용 (구독자 알림)
+ * - effect.ts: getActiveEffect() 사용 (현재 실행 중인 effect 확인)
  */
 
 import { Graph, type ISubscriber, type IObservable, SubscriberFlags, NodeType } from './graph'

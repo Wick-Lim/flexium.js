@@ -1,3 +1,23 @@
+/**
+ * Effect System
+ * 
+ * 이 파일의 역할:
+ * 1. EffectNode 클래스 (사이드 이펙트 실행)
+ * 2. effect() 함수 (이펙트 생성)
+ * 3. onCleanup() 함수 (정리 함수 등록)
+ * 
+ * 핵심 원리:
+ * - EffectNode가 실행될 때 activeEffect로 설정됨
+ * - Proxy.get() 호출 시 자동으로 의존성 추적됨
+ * - 의존성이 변경되면 자동으로 재실행됨
+ * 
+ * 다른 파일과의 관계:
+ * - proxy.ts: getActiveEffect(), setActiveEffect() 사용
+ * - owner.ts: getOwner(), setOwner() 사용 (스코프 관리)
+ * - graph.ts: Graph.disconnectDependencies() 사용 (의존성 해제)
+ * - errors.ts: 에러 로깅
+ */
+
 import { ErrorCodes, logError, logWarning } from './errors'
 import {
     Graph,

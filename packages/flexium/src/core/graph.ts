@@ -1,11 +1,21 @@
 /**
- * Graph.ts
- *
- * Core Graph Data Structures & Algorithms
- * Implements the "Hardcore" Doubly Linked List for dependency tracking.
- *
- * This module is purely internal and has NO dependencies on other core modules
- * to avoid circular references.
+ * Dependency Graph Data Structures
+ * 
+ * 이 파일의 역할:
+ * 1. 의존성 그래프 데이터 구조 정의 (Link, ISubscriber, IObservable)
+ * 2. Graph.connect() - 의존성 연결
+ * 3. Graph.disconnectDependencies() - 의존성 해제
+ * 4. LinkPool - 메모리 최적화를 위한 객체 풀링
+ * 
+ * 핵심 원리:
+ * - Doubly Linked List로 의존성 그래프 구현
+ * - O(1) 연결/해제 연산
+ * - Link 풀링으로 GC 압력 감소
+ * 
+ * 다른 파일과의 관계:
+ * - proxy.ts: Graph.connect() 사용 (의존성 추적 시)
+ * - effect.ts: Graph.disconnectDependencies() 사용 (의존성 해제 시)
+ * - 순환 참조 방지를 위해 다른 core 모듈에 의존하지 않음
  */
 
 // ==================================================================================

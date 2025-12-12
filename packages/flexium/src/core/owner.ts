@@ -1,9 +1,22 @@
 /**
- * Owner.ts
- *
- * Managing reactive scopes and cleanup contexts.
+ * Owner & Scope Management
  * 
- * Note: activeEffect 관리는 proxy.ts로 이동 (의존성 추적의 핵심)
+ * 이 파일의 역할:
+ * 1. Owner 스코프 관리 (getOwner, setOwner)
+ * 2. Cleanup 관리 (cleanups 배열)
+ * 3. Context 관리 (context 객체)
+ * 4. root() 함수 (새로운 스코프 생성)
+ * 
+ * 핵심 원리:
+ * - Owner는 반응성 스코프를 나타냄
+ * - Owner가 dispose되면 모든 cleanup 함수 실행
+ * - Context는 Owner 체인을 통해 전파됨
+ * 
+ * 다른 파일과의 관계:
+ * - effect.ts: getOwner() 사용 (EffectNode가 Owner에 등록)
+ * - context.ts: getOwner() 사용 (Context 값 조회)
+ * 
+ * Note: activeEffect 관리는 proxy.ts에 있음 (의존성 추적의 핵심)
  */
 
 // ==================================================================================
