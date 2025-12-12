@@ -128,6 +128,10 @@ async function deploy(type) {
     process.exit(1);
   }
 
+  // 6.5. Update lockfile
+  console.log('\n🔒 Updating lockfile...');
+  run('pnpm i');
+
   // 7. Git commit and tag
   console.log('\n📝 Creating git commit and tag...');
   run(`git add -A`);
