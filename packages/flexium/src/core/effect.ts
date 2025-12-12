@@ -110,13 +110,13 @@ export class EffectNode implements ISubscriber {
  *
  * @example
  * ```ts
- * const [count, setCount] = state(0);
+ * const count = state(0);
  * 
  * effect(() => {
  *   console.log(count());
  * });
  * 
- * setCount(1); // logs: 1
+ * count.set(1); // logs: 1
  * ```
  */
 export function effect(

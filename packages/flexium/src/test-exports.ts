@@ -13,7 +13,7 @@ export {
 } from './core/effect'
 export {
   createResource,
-} from './core/resource'
+} from './core/state'
 export { effect } from './core/effect'
 export { root, untrack } from './core/owner'
 export { sync } from './core/sync'

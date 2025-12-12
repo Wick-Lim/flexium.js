@@ -34,7 +34,7 @@ describe('State API', () => {
 
   describe('Local Value State', () => {
     it('should create state with initial value', () => {
-      const [count] = state(0)
+      const count = state(0)
       expect(val(count)).toBe(0)
       // Also verify arithmetic works
       expect(+count).toBe(0)
@@ -45,11 +45,11 @@ describe('State API', () => {
       let currentCount = 0
 
       effect(() => {
-        const [count, setCount] = state(0, { key: 'counter1' })
+        const count = state(0, { key: 'counter1' })
         currentCount = +count
 
         if (+count === 0) {
-          setCount(5)
+          count.set(5)
         }
       })
 
@@ -62,11 +62,11 @@ describe('State API', () => {
       let currentCount = 0
 
       effect(() => {
-        const [count, setCount] = state(10, { key: 'counter2' })
+        const count = state(10, { key: 'counter2' })
         currentCount = +count
 
         if (+count === 10) {
-          setCount((prev) => prev + 5)
+          count.set((prev) => prev + 5)
         }
       })
 
@@ -76,13 +76,13 @@ describe('State API', () => {
     })
 
     it('should handle string values', () => {
-      const [name] = state('Alice')
+      const name = state('Alice')
       expect(String(name)).toBe('Alice')
       expect(`Hello ${name}`).toBe('Hello Alice')
     })
 
     it('should handle object values', () => {
-      const [user] = state({ name: 'Alice', age: 25 })
+      const user = state({ name: 'Alice', age: 25 })
       expect(val(user)).toEqual({ name: 'Alice', age: 25 })
       // Proxy allows property access
       expect(user.name).toBe('Alice')
@@ -90,26 +90,26 @@ describe('State API', () => {
     })
 
     it('should handle array values', () => {
-      const [items] = state(['a', 'b', 'c'])
+      const items = state(['a', 'b', 'c'])
       expect(val(items)).toEqual(['a', 'b', 'c'])
       expect(items.length).toBe(3)
       expect(items[0]).toBe('a')
     })
 
     it('should handle null and undefined', () => {
-      const [value] = state<string | null>(null)
+      const value = state<string | null>(null)
       expect(val(value)).toBeNull()
     })
 
     it('should handle boolean values', () => {
-      const [flag] = state(false)
+      const flag = state(false)
       expect(val(flag)).toBe(false)
     })
   })
 
   describe('Global Keyed State', () => {
     it('should create global state with key', () => {
-      const [theme] = state('light', { key: 'theme' })
+      const theme = state('light', { key: 'theme' })
       expect(String(theme)).toBe('light')
     })
 
@@ -117,11 +117,11 @@ describe('State API', () => {
       let theme1Val = ''
 
       effect(() => {
-        const [theme1, setTheme1] = state('light', { key: 'shared-theme' })
+        const theme1 = state('light', { key: 'shared-theme' })
         theme1Val = String(theme1)
 
         if (String(theme1) === 'light') {
-          setTheme1('dark')
+          theme1.set('dark')
         }
       })
 
@@ -129,15 +129,15 @@ describe('State API', () => {
       await tick()
 
       // Second access should get updated value
-      const [theme2] = state('light', { key: 'shared-theme' })
+      const theme2 = state('light', { key: 'shared-theme' })
 
       expect(theme1Val).toBe('dark')
       expect(String(theme2)).toBe('dark')
     })
 
     it('should not share state with different keys', () => {
-      const [count1] = state(5, { key: 'count-a' })
-      const [count2] = state(10, { key: 'count-b' })
+      const count1 = state(5, { key: 'count-a' })
+      const count2 = state(10, { key: 'count-b' })
 
       expect(+count1).toBe(5)
       expect(+count2).toBe(10)
@@ -145,43 +145,43 @@ describe('State API', () => {
 
     it('should persist value across multiple accesses', async () => {
       effect(() => {
-        const [, setCounter] = state(0, { key: 'persistent-counter' })
-        setCounter(42)
+        const counter = state(0, { key: 'persistent-counter' })
+        counter.set(42)
       })
 
       await tick()
 
-      const [counter2] = state(0, { key: 'persistent-counter' })
+      const counter2 = state(0, { key: 'persistent-counter' })
       expect(+counter2).toBe(42)
     })
 
     it('should clear global state registry', async () => {
       effect(() => {
-        const [, setCount] = state(100, { key: 'clear-test' })
-        setCount(100)
+        const count = state(100, { key: 'clear-test' })
+        count.set(100)
       })
 
       await tick()
       state.clear()
 
-      const [count2] = state(0, { key: 'clear-test' })
+      const count2 = state(0, { key: 'clear-test' })
       expect(+count2).toBe(0)
     })
   })
 
   describe('Setter Function', () => {
-    it('should return a setter function', () => {
-      const [, setCount] = state(0)
-      expect(typeof setCount).toBe('function')
+    it('should return a setter function on proxy', () => {
+      const count = state(0)
+      expect(typeof count.set).toBe('function')
     })
 
     it('should accept direct value', async () => {
       let currentVal = 0
 
       effect(() => {
-        const [v, setVal] = state(0, { key: 'direct-val' })
+        const v = state(0, { key: 'direct-val' })
         currentVal = +v
-        if (+v === 0) setVal(42)
+        if (+v === 0) v.set(42)
       })
 
       await tick()
@@ -193,9 +193,9 @@ describe('State API', () => {
       let currentVal = 0
 
       effect(() => {
-        const [v, setVal] = state(10, { key: 'updater-fn' })
+        const v = state(10, { key: 'updater-fn' })
         currentVal = +v
-        if (+v === 10) setVal((prev) => prev * 2)
+        if (+v === 10) v.set((prev) => prev * 2)
       })
 
       await tick()
@@ -209,73 +209,68 @@ describe('State API', () => {
       const result = state(async () => {
         return 'fetched data'
       })
-      // Runtime returns 4 elements for async, but TS can't infer this
-      const [, refetch, status] = result as unknown as [unknown, () => void, unknown, unknown]
 
-      expect(typeof refetch).toBe('function')
-      // status is now a callable proxy (function type) returning AsyncStatus
-      expect(typeof status).toBe('function')
-      expect(val(status)).toBe('loading') // Initially loading
+      expect(typeof result.refetch).toBe('function')
+      // status is now a property on the proxy
+      expect(typeof result.status).toBe('function') // It's a computed proxy
+      expect(val(result.status)).toBe('loading') // Initially loading
     })
 
     it('should return refetch function', () => {
       const result = state(async () => 'data')
-      const [, refetch] = result as unknown as [unknown, () => void, unknown, unknown]
-      expect(typeof refetch).toBe('function')
+      expect(typeof result.refetch).toBe('function')
     })
 
     it('should return status proxy', () => {
       const result = state(async () => 'data')
-      const [, , status] = result as unknown as [unknown, unknown, unknown, unknown]
       // status is a callable proxy (function type)
-      expect(typeof status).toBe('function')
+      expect(typeof result.status).toBe('function')
       // status should be 'idle' | 'loading' | 'success' | 'error'
-      expect(['idle', 'loading', 'success', 'error']).toContain(val(status))
+      expect(['idle', 'loading', 'success', 'error']).toContain(val(result.status))
     })
 
     it('should return error proxy', () => {
       const result = state(async () => 'data')
-      const [, , , error] = result as unknown as [unknown, unknown, unknown, unknown]
-      expect(val(error)).toBeUndefined()
+      expect(val(result.error)).toBeUndefined()
     })
 
     it('should resolve async data', async () => {
-      const [data] = state(async () => {
+      const data = state(async () => {
         await sleep(10)
         return 'resolved'
       }, { key: 'async-resolve' })
 
       await sleep(50)
 
-      const [data2] = state(async () => 'resolved', { key: 'async-resolve' })
+      const data2 = state(async () => 'resolved', { key: 'async-resolve' })
       expect(val(data2)).toBe('resolved')
     })
   })
 
   describe('StateProxy Features', () => {
     it('should work with arithmetic operations', () => {
-      const [count] = state(5)
+      const count = state(5)
       expect(count + 10).toBe(15)
       expect(count * 2).toBe(10)
       expect(count - 3).toBe(2)
     })
 
     it('should work with template literals', () => {
-      const [name] = state('World')
+      const name = state('World')
       expect(`Hello, ${name}!`).toBe('Hello, World!')
     })
 
     it('should work with loose equality', () => {
-      const [count] = state(5)
+      const count = state(5)
       expect(count == 5).toBe(true)
       expect(count == '5').toBe(true)
     })
 
     it('should update proxy value when signal changes', async () => {
-      const [count, setCount] = state(0, { key: 'update-test' })
+      const count = state<number>(0, { key: 'update-test' })
       expect(+count).toBe(0)
 
-      setCount(10)
+      count.set(10)
       await tick()
 
       // Same proxy should now return updated value
@@ -283,7 +278,7 @@ describe('State API', () => {
     })
 
     it('should support object spread syntax', () => {
-      const [user] = state({ name: 'Alice', age: 30 })
+      const user = state({ name: 'Alice', age: 30 })
       const spread = { ...user }
 
       expect(spread).toEqual({ name: 'Alice', age: 30 })
@@ -291,7 +286,7 @@ describe('State API', () => {
     })
 
     it('should allow direct peek access without tracking', () => {
-      const [count, setCount] = state(0)
+      const count = state<number>(0)
       let executionCount = 0
 
       effect(() => {
@@ -302,7 +297,7 @@ describe('State API', () => {
 
       expect(executionCount).toBe(1)
 
-      setCount(1)
+      count.set(1)
       // Should NOT re-run because we only peeked
       expect(executionCount).toBe(1)
       expect(count.peek()).toBe(1)
@@ -311,7 +306,7 @@ describe('State API', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty key string', () => {
-      const [count] = state(5, { key: '' })
+      const count = state(5, { key: '' })
       expect(+count).toBe(5)
     })
 
@@ -320,12 +315,12 @@ describe('State API', () => {
       let iterations = 0
 
       effect(() => {
-        const [count, setCount] = state(0, { key: 'rapid-update' })
+        const count = state<number>(0, { key: 'rapid-update' })
         finalCount = +count
         iterations++
 
         if (+count < 5 && iterations < 10) {
-          setCount(+count + 1)
+          count.set(+count + 1)
         }
       })
 
@@ -335,7 +330,7 @@ describe('State API', () => {
     })
 
     it('should handle nested object values', () => {
-      const [data] = state({
+      const data = state({
         user: { name: 'Alice', settings: { theme: 'light' } },
       })
 
@@ -347,7 +342,7 @@ describe('State API', () => {
     })
 
     it('should handle array of objects', () => {
-      const [todos] = state([
+      const todos = state([
         { id: 1, text: 'Learn Flexium', done: false },
       ])
 
@@ -356,7 +351,7 @@ describe('State API', () => {
     })
 
     it('should support array methods', () => {
-      const [items] = state([1, 2, 3])
+      const items = state([1, 2, 3])
       // .map() returns a regular array, reconciliation happens at render layer
       expect(items.map((x: number) => x * 2)).toEqual([2, 4, 6])
       expect(items.filter((x: number) => x > 1)).toEqual([2, 3])
@@ -365,36 +360,36 @@ describe('State API', () => {
 
   describe('Array Keys', () => {
     it('should support array key', () => {
-      const [user] = state({ name: 'Alice' }, { key: ['user', 'profile', 123] })
+      const user = state({ name: 'Alice' }, { key: ['user', 'profile', 123] })
       expect(user.name).toBe('Alice')
     })
 
     it('should share state with same array key', async () => {
-      const [, setUser] = state({ name: 'Alice' }, { key: ['user', 'profile', 123] })
-      setUser({ name: 'Bob' })
+      const user = state({ name: 'Alice' }, { key: ['user', 'profile', 123] })
+      user.set({ name: 'Bob' })
       await tick()
 
-      const [user2] = state({ name: 'Default' }, { key: ['user', 'profile', 123] })
+      const user2 = state({ name: 'Default' }, { key: ['user', 'profile', 123] })
       expect(user2.name).toBe('Bob')
     })
 
     it('should not share state with different array keys', () => {
-      const [user1] = state({ name: 'Alice' }, { key: ['user', 123] })
-      const [user2] = state({ name: 'Bob' }, { key: ['user', 456] })
+      const user1 = state({ name: 'Alice' }, { key: ['user', 123] })
+      const user2 = state({ name: 'Bob' }, { key: ['user', 456] })
 
       expect(user1.name).toBe('Alice')
       expect(user2.name).toBe('Bob')
     })
 
     it('should handle array key with various types', () => {
-      const [data] = state('value', { key: ['app', 'user', 42, true, null] })
+      const data = state('value', { key: ['app', 'user', 42, true, null] })
       expect(String(data)).toBe('value')
     })
   })
 
   describe('Params Option', () => {
     it('should pass params to sync function', () => {
-      const [doubled] = state(
+      const doubled = state(
         (p: { value: number }) => p.value * 2,
         { params: { value: 5 } }
       )
@@ -414,7 +409,7 @@ describe('State API', () => {
       await sleep(50)
 
       // Re-fetch from cache
-      const [user2] = state(
+      const user2 = state(
         async (p: { id: number }) => ({ id: p.id, name: `User ${p.id}` }),
         { key: ['user', 999], params: { id: 999 } }
       )
@@ -424,7 +419,7 @@ describe('State API', () => {
 
     it('should work with params and array key together', () => {
       const userId = 42
-      const [user] = state(
+      const user = state(
         (p: { id: number }) => ({ id: p.id, name: `User ${p.id}` }),
         { key: ['user', userId], params: { id: userId } }
       )
@@ -658,7 +653,7 @@ describe('State API', () => {
     })
 
     it('should register state in namespace via array key', () => {
-      const [theme] = state('light', { key: ['ui', 'theme'] })
+      const theme = state('light', { key: ['ui', 'theme'] })
       expect(val(theme)).toBe('light')
       expect(state.has(['ui', 'theme'])).toBe(true)
 
@@ -722,12 +717,12 @@ describe('State API', () => {
     })
 
     it('should update metadata on state access', () => {
-      const [count, setCount] = state(0, { key: ['app', 'count'] })
+      const count = state<number>(0, { key: ['app', 'count'] })
 
       // Access state multiple times
       val(count)
       val(count)
-      setCount(1)
+      count.set(1)
       val(count)
 
       const stats = state.getNamespaceStats(['app'])
@@ -784,10 +779,10 @@ describe('State API', () => {
     })
 
     it('should track access count in metadata', () => {
-      const [count] = state(0, { key: ['app', 'count'] })
+      const count = state(0, { key: ['app', 'count'] })
 
       // Access state through state() API (which triggers metadata update)
-      const [count2] = state(undefined, { key: ['app', 'count'] })
+      const count2 = state(undefined, { key: ['app', 'count'] })
       val(count2) // This triggers updateStateMetadata
 
       const stats1 = state.getNamespaceStats(['app'])
@@ -802,8 +797,8 @@ describe('State API', () => {
     })
 
     it('should handle computed state with namespace', () => {
-      const [base] = state(10, { key: ['calc', 'base'] })
-      const [doubled] = state(() => +base * 2, { key: ['calc', 'doubled'] })
+      const base = state(10, { key: ['calc', 'base'] })
+      const doubled = state(() => +base * 2, { key: ['calc', 'doubled'] })
 
       expect(val(doubled)).toBe(20)
 
@@ -812,7 +807,7 @@ describe('State API', () => {
     })
 
     it('should handle async state with namespace', async () => {
-      const [data] = state(
+      const data = state(
         async () => ({ id: 1 }),
         { key: ['api', 'data'] }
       )
@@ -883,7 +878,7 @@ describe('State API', () => {
     })
 
     it('should not clean up states that are still referenced', async () => {
-      const [count] = state(0, { key: 'count' })
+      const count = state(0, { key: 'count' })
 
       state.enableAutoCleanup({
         maxIdleTime: 50,
