@@ -12,7 +12,7 @@ export interface Loop {
   getFps: () => number
 }
 
-export function createLoop(callbacks: LoopCallbacks): Loop {
+export function loop(callbacks: LoopCallbacks): Loop {
   const { fixedFps = 60, onUpdate, onFixedUpdate, onRender } = callbacks
 
   const fixedDelta = 1 / fixedFps
