@@ -7,16 +7,16 @@ export default function CreatePost() {
 
   function handleSubmit(e: Event) {
     e.preventDefault()
-    if (!content.trim()) return
+    if (!content().trim()) return
 
-    createPost(content.trim())
+    createPost(content().trim())
     setContent('')
   }
 
   return (
     <form class="create-post" onsubmit={handleSubmit}>
       <div class="create-post-header">
-        <div class="avatar">{currentUser.avatar}</div>
+        <div class="avatar">{currentUser().avatar}</div>
         <input
           type="text"
           class="post-input"
@@ -25,7 +25,7 @@ export default function CreatePost() {
           oninput={(e: any) => setContent(e.target.value)}
         />
       </div>
-      <button type="submit" class="post-btn" disabled={!content.trim()}>
+      <button type="submit" class="post-btn" disabled={!content().trim()}>
         Post
       </button>
     </form>

@@ -75,54 +75,10 @@ export function matchRoutes(routes: RouteDef[], locationPathname: string): Route
     // Let's implement simple param matching: /user/:id
 
     const routePath = route.path
-    const isParam = routePath.includes(':')
 
-    let match = false
-    let params: Record<string, string> = {}
-    let matchedPath = ''
-    let remainingPath = locationPathname
-
-    if (routePath === '/' || routePath === '') {
-      // Root Match?
-      if (locationPathname === '/') {
-        match = true
-        matchedPath = '/'
-        remainingPath = ''
-      } else if (locationPathname.startsWith('/')) {
-        // Non-exact match for root? usually root / matches everything as prefix if we talk about nesting.
-        // But typically / matches exact or it's a layout.
-        // Let's assume / is valid prefix.
-        match = true
-        matchedPath = '/'
-        // remainingPath stays same? No, remove /
-      }
-    } else {
-      // Regex match for params
-      // Convert /user/:id to ^/user/([^/]+)
-      const paramNames: string[] = []
-      const regexPath = routePath.replace(/:([^/]+)/g, (_, key) => {
-        paramNames.push(key)
-        return '([^/]+)'
-      })
-
-      // We match against startDate of remainingPath?
-      // This DFS is getting complex for a pure function without improved tree structure.
-      // Let's simplify: Standard React Router v6 style matching is complex.
-      // Let's do simple flat matching for Hackernews (mostly flat or 1 level depth).
-      // Actually, we can use a recursive matcher.
-
-      // Current implementation assumption:
-      // paths are absolute or relative?
-      // Let's assume simplified recursive checker.
-
-      const matchResult = matchPath(routePath, locationPathname)
-      if (matchResult) {
-        return [{ route, params: matchResult.params, pathname: matchResult.path }]
-        // What about children?
-        // If we match /user/:id, and we have children...
-        // But HackerNews routes in App.tsx are siblings: /news/:page, /item/:id
-        // So flat matching is enough for now.
-      }
+    const matchResult = matchPath(routePath, locationPathname)
+    if (matchResult) {
+      return [{ route, params: matchResult.params, pathname: matchResult.path }]
     }
   }
   return null

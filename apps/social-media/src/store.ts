@@ -86,11 +86,11 @@ const mockPosts: Post[] = [
 ]
 
 export function useCurrentUser() {
-  return state<User>(currentUser, { key: 'currentUser' })
+  return state<User>(currentUser, { key: ['currentUser'] })
 }
 
 export function usePosts() {
-  return state<Post[]>(mockPosts, { key: 'posts' })
+  return state<Post[]>(mockPosts, { key: ['posts'] })
 }
 
 let nextPostId = Math.max(...mockPosts.map(p => p.id)) + 1
@@ -99,10 +99,10 @@ let nextCommentId = Math.max(...mockPosts.flatMap(p => p.comments.map(c => c.id)
 export function createPost(content: string, image?: string) {
   const [posts, setPosts] = usePosts()
   const [currentUser] = useCurrentUser()
-  
+
   const newPost: Post = {
     id: nextPostId++,
-    author: currentUser,
+    author: currentUser(),
     content,
     image,
     likes: 0,
@@ -110,24 +110,24 @@ export function createPost(content: string, image?: string) {
     comments: [],
     createdAt: Date.now()
   }
-  
-  setPosts([newPost, ...posts])
+
+  setPosts([newPost, ...posts()])
 }
 
 export function toggleLike(postId: number) {
   const [posts, setPosts] = usePosts()
   const [currentUser] = useCurrentUser()
-  
-  setPosts(posts.map(post => {
+
+  setPosts(posts().map(post => {
     if (post.id !== postId) return post
-    
-    const isLiked = post.likedBy.includes(currentUser.id)
+
+    const isLiked = post.likedBy.includes(currentUser().id)
     return {
       ...post,
       likes: isLiked ? post.likes - 1 : post.likes + 1,
       likedBy: isLiked
-        ? post.likedBy.filter(id => id !== currentUser.id)
-        : [...post.likedBy, currentUser.id]
+        ? post.likedBy.filter(id => id !== currentUser().id)
+        : [...post.likedBy, currentUser().id]
     }
   }))
 }
@@ -135,15 +135,15 @@ export function toggleLike(postId: number) {
 export function addComment(postId: number, content: string) {
   const [posts, setPosts] = usePosts()
   const [currentUser] = useCurrentUser()
-  
+
   const newComment: Comment = {
     id: nextCommentId++,
-    author: currentUser,
+    author: currentUser(),
     content,
     createdAt: Date.now()
   }
-  
-  setPosts(posts.map(post =>
+
+  setPosts(posts().map(post =>
     post.id === postId
       ? { ...post, comments: [...post.comments, newComment] }
       : post

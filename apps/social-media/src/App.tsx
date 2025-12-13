@@ -12,7 +12,7 @@ function Nav() {
         <Link to="/" class="logo">📱 Flexium Social</Link>
         <nav class="nav-links">
           <Link to="/">Feed</Link>
-          <Link to={`/profile/${currentUser.id}`}>Profile</Link>
+          <Link to={`/profile/${currentUser().id}`}>Profile</Link>
         </nav>
       </div>
     </header>

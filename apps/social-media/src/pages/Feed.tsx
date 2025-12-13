@@ -12,20 +12,20 @@ export default function Feed() {
     <div class="container">
       <CreatePost />
       <div>
-        {posts.length === 0 ? (
+        {posts().length === 0 ? (
           <div class="empty-feed">
             <h2>No posts yet</h2>
             <p>Be the first to share something!</p>
           </div>
         ) : (
-          posts.map(post => (
+          posts().map(post => (
             <PostCard
               post={post}
-              currentUser={currentUser}
-              showComments={showComments[post.id] || false}
+              currentUser={currentUser()}
+              showComments={showComments()[post.id] || false}
               onToggleComments={() => setShowComments({
-                ...showComments,
-                [post.id]: !showComments[post.id]
+                ...showComments(),
+                [post.id]: !showComments()[post.id]
               })}
             />
           ))

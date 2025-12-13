@@ -8,8 +8,8 @@ const contextMap = new Map<symbol, any>()
 
 export function createContext<T>(defaultValue: T): Context<T> {
     const id = Symbol('context')
-    const Provider = (props: { value: T; children: any }) => props.children
-        (Provider as any)._contextId = id
+    const Provider = (props: { value: T; children: any }) => props.children;
+    (Provider as any)._contextId = id
     return { Provider, id, defaultValue }
 }
 
