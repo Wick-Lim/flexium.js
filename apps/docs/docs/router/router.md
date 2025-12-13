@@ -1,45 +1,66 @@
 ---
-title: Router - Client-Side Routing
+title: Routes - Client-Side Routing
 ---
 
-# &lt;Router /&gt;
+# &lt;Routes /&gt;
 
-Root component that enables client-side routing.
+Root component that enables client-side routing, handling both context and route matching.
 
 ## Import
 
 ```tsx
-import { Router } from 'flexium/router'
+import { Routes, Route } from 'flexium/router'
 ```
 
 ## Signature
 
 ```tsx
-<Router>
-  {routes}
-</Router>
+<Routes>
+  <Nav />
+  {route definitions}
+</Routes>
 ```
 
 ## Props
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `children` | `JSX.Element` | Route definitions |
+| `children` | `JSX.Element \| Route[]` | App content and route definitions |
 
 ## Usage
 
 ### Basic Setup
 
 ```tsx
-import { Router, Route } from 'flexium/router'
+import { Routes, Route } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
-    </Router>
+    </Routes>
+  )
+}
+```
+
+### With Navigation
+
+```tsx
+import { Routes, Route, Link } from 'flexium/router'
+
+function App() {
+  return (
+    <Routes>
+      <nav>
+        <Link to="/">Home</Link>
+        <Link to="/about">About</Link>
+      </nav>
+
+      <Route path="/" component={Home} />
+      <Route path="/about" component={About} />
+    </Routes>
   )
 }
 ```
@@ -49,22 +70,12 @@ function App() {
 ```tsx
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Route path="/" component={Home} />
-        <Route path="/dashboard" component={Dashboard} />
-      </Layout>
-    </Router>
-  )
-}
-
-function Layout(props) {
-  return (
-    <div class="app">
+    <Routes>
       <Header />
-      <main>{props.children}</main>
+      <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
       <Footer />
-    </div>
+    </Routes>
   )
 }
 ```
@@ -72,48 +83,29 @@ function Layout(props) {
 ### Nested Routes
 
 ```tsx
-<Router>
+<Routes>
   <Route path="/" component={Home} />
   <Route path="/users" component={Users}>
     <Route path="/" component={UserList} />
     <Route path="/:id" component={UserDetail} />
     <Route path="/:id/edit" component={UserEdit} />
   </Route>
-</Router>
-```
-
-### With Navigation
-
-```tsx
-import { Router, Route, Link } from 'flexium/router'
-
-function App() {
-  return (
-    <Router>
-      <nav>
-        <Link href="/">Home</Link>
-        <Link href="/about">About</Link>
-      </nav>
-
-      <Route path="/" component={Home} />
-      <Route path="/about" component={About} />
-    </Router>
-  )
-}
+</Routes>
 ```
 
 ## Behavior
 
 - Uses **History API** for navigation
-- Supports **hash routing** option
 - Handles **browser back/forward**
-- Provides **route context** to children
+- Provides **route context** to all children
+- Non-Route children (like Nav) are rendered alongside matched routes
 
 ## Notes
 
-- Only one Router should be at the root of your app
-- Wrap your entire app for global routing
+- Only one Routes component should be at the root of your app
+- All children have access to router context via `router()` hook
 - Combine with Link for navigation
+- Route and non-Route children can be mixed freely
 
 ## Demo
 
@@ -125,6 +117,7 @@ import RouterDemo from '../../components/RouterDemo.vue'
 
 ## See Also
 
-- [&lt;Route /&gt;](/docs/router/route)
-- [&lt;Link /&gt;](/docs/router/link)
-- [router()](/docs/router/router-hook)
+- [&lt;Route /&gt;](/docs/router/route) - Define route patterns
+- [&lt;Link /&gt;](/docs/router/link) - Navigate between routes
+- [&lt;Outlet /&gt;](/docs/router/outlet) - Render nested routes
+- [router()](/docs/router/router-hook) - Access router context

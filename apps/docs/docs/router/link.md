@@ -15,7 +15,7 @@ import { Link } from 'flexium/router'
 ## Signature
 
 ```tsx
-<Link href={path} class={className}>
+<Link to={path} class={className}>
   {children}
 </Link>
 ```
@@ -24,10 +24,10 @@ import { Link } from 'flexium/router'
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `href` | `string` | Target path to navigate to |
+| `to` | `string` | Target path to navigate to |
 | `class` | `string` | CSS class names |
-| `activeClass` | `string` | Class added when route is active |
-| `replace` | `boolean` | Replace history instead of push |
+| `activeClass` | `string` | Class added when route is active (optional) |
+| `replace` | `boolean` | Replace history instead of push (optional) |
 | `children` | `JSX.Element` | Link content |
 
 ## Usage
@@ -35,13 +35,13 @@ import { Link } from 'flexium/router'
 ### Basic Link
 
 ```tsx
-<Link href="/about">About Us</Link>
+<Link to="/about">About Us</Link>
 ```
 
 ### With Active Styling
 
 ```tsx
-<Link href="/dashboard" activeClass="active">
+<Link to="/dashboard" activeClass="active">
   Dashboard
 </Link>
 ```
@@ -52,10 +52,10 @@ import { Link } from 'flexium/router'
 function Nav() {
   return (
     <nav>
-      <Link href="/" activeClass="active">Home</Link>
-      <Link href="/products" activeClass="active">Products</Link>
-      <Link href="/about" activeClass="active">About</Link>
-      <Link href="/contact" activeClass="active">Contact</Link>
+      <Link to="/" activeClass="active">Home</Link>
+      <Link to="/products" activeClass="active">Products</Link>
+      <Link to="/about" activeClass="active">About</Link>
+      <Link to="/contact" activeClass="active">Contact</Link>
     </nav>
   )
 }
@@ -64,7 +64,7 @@ function Nav() {
 ### With Query Parameters
 
 ```tsx
-<Link href="/search?q=hello&page=1">
+<Link to="/search?q=hello&page=1">
   Search for "hello"
 </Link>
 ```
@@ -76,7 +76,7 @@ function ProductCard({ product }) {
   return (
     <div class="card">
       <h3>{product.name}</h3>
-      <Link href={`/products/${product.id}`}>
+      <Link to={`/products/${product.id}`}>
         View Details
       </Link>
     </div>
@@ -88,7 +88,7 @@ function ProductCard({ product }) {
 
 ```tsx
 // Won't add to history stack
-<Link href="/login" replace>
+<Link to="/login" replace>
   Login
 </Link>
 ```
@@ -102,14 +102,14 @@ function ProductCard({ product }) {
 </a>
 
 // Internal links use router
-<Link href="/internal">Internal Page</Link>
+<Link to="/internal">Internal Page</Link>
 ```
 
 ### Styled Links
 
 ```tsx
 <Link
-  href="/premium"
+  to="/premium"
   class="btn btn-primary"
   activeClass="btn-active"
 >
@@ -124,8 +124,8 @@ function Breadcrumbs({ items }) {
   return (
     <nav class="breadcrumbs">
       {items.map((item, index) => (
-        <span key={item.href}>
-          <Link href={item.href}>{item.label}</Link>
+        <span key={item.to}>
+          <Link to={item.to}>{item.label}</Link>
           {index < items.length - 1 && <span>/</span>}
         </span>
       ))}

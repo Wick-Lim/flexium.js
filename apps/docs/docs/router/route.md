@@ -56,11 +56,11 @@ import { Route } from 'flexium/router'
 ### Basic Routes
 
 ```tsx
-<Router>
+<Routes>
   <Route path="/" component={Home} />
   <Route path="/about" component={About} />
   <Route path="*" component={NotFound} />
-</Router>
+</Routes>
 ```
 
 ### Accessing Parameters
@@ -145,6 +145,6 @@ import RouteDemo from '../../components/RouteDemo.vue'
 
 ## See Also
 
-- [&lt;Router /&gt;](/docs/router/router)
-- [&lt;Link /&gt;](/docs/router/link)
-- [router()](/docs/router/router-hook)
+- [&lt;Routes /&gt;](/docs/router/router) - Root routing component
+- [&lt;Link /&gt;](/docs/router/link) - Navigate between routes
+- [router()](/docs/router/router-hook) - Access router context

@@ -162,8 +162,8 @@ function Pagination() {
 
 ## Notes
 
-- Must be used within a `Router` component
-- All return values are reactive signals
+- Must be used within a `Routes` component
+- All return values are reactive
 - Use effects to react to route changes
 
 ## Demo
@@ -176,6 +176,6 @@ import UseRouterDemo from '../../components/UseRouterDemo.vue'
 
 ## See Also
 
-- [&lt;Router /&gt;](/docs/router/router)
-- [&lt;Route /&gt;](/docs/router/route)
-- [&lt;Link /&gt;](/docs/router/link)
+- [&lt;Routes /&gt;](/docs/router/router) - Root routing component
+- [&lt;Route /&gt;](/docs/router/route) - Route definitions
+- [&lt;Link /&gt;](/docs/router/link) - Navigation links

@@ -59,14 +59,12 @@ function location(): [Location, (path: string) => void] {
 
     const navigate = (path: string) => {
         if (typeof window === 'undefined') return
-        console.log('[Router] Navigate to:', path)
         if (isUnsafePath(path)) {
             console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
             return
         }
         window.history.pushState({}, '', path)
         const newLoc = getLoc()
-        console.log('[Router] Setting new location:', newLoc)
         updateLocation(newLoc)
     }
 
@@ -93,109 +91,95 @@ function isFNode(node: any): node is FNode {
 export function router(): RouterContext {
     const ctx = context(RouterCtx)
     if (!ctx) {
-        throw new Error('router() must be called within a <Router> component')
+        throw new Error('router() must be called within a <Routes> component')
     }
     return ctx
 }
 
-export function Router(props: { children: FNodeChild }) {
+// Routes provides routing context and handles route matching/rendering
+export function Routes(props: { children: FNodeChild }) {
     const [loc, navigate] = location()
 
-    // Parse children to find <Route> definitions
+    // Parse children to find <Route> definitions and other content
     let childrenList: any[] = Array.isArray(props.children) ? props.children : [props.children]
 
-    // Note: We need to filter FNodes to valid Route components
-    const routeDefs = createRoutesFromChildren(childrenList.filter(c => isFNode(c) && c.type === Route))
+    // Separate routes from other children (like Nav components)
+    const routeNodes = childrenList.filter(c => isFNode(c) && c.type === Route)
+    const otherChildren = childrenList.filter(c => !isFNode(c) || c.type !== Route)
 
-    // Render
-    return () => {
-        console.log('[Router] Rendering...')
+    // Create route definitions
+    const routeDefs = createRoutesFromChildren(routeNodes)
 
-        // Compute matches inside render to track loc.pathname dependency
-        const currentPath = loc.pathname
-        console.log('[Router] Current path:', currentPath)
-        const matches = matchRoutes(routeDefs, currentPath) || []
-        console.log('[Router] Matched:', matches)
+    // Compute current matches based on location
+    const currentPath = loc.pathname
+    const matches = matchRoutes(routeDefs, currentPath) || []
+    const params = matches.length > 0 ? matches[matches.length - 1].params : {}
 
-        const params = matches.length > 0 ? matches[matches.length - 1].params : {}
+    const routerContext: RouterContext = {
+        location: loc,
+        navigate,
+        matches: matches,
+        params: params
+    }
 
-        // Create routerContext inside render to get latest reactive values
-        const routerContext: RouterContext = {
-            location: loc,
-            navigate,
-            matches: matches,
-            params: params
-        }
+    // Render matched component
+    let matchedContent: FNodeChild = null
 
-        // 1. Matched Content
-        let matchedContent: FNodeChild = null
+    if (matches.length > 0) {
+        const rootMatch = matches[0]
+        const Component = rootMatch.route.component
 
-        if (matches.length > 0) {
-            const rootMatch = matches[0]
-            const Component = rootMatch.route.component
-
-            // Guard Check
-            let canRender = true
-            if (rootMatch.route.beforeEnter) {
-                const res = rootMatch.route.beforeEnter(rootMatch.params)
-                if (res === false) canRender = false
-            }
-
-            if (canRender) {
-                // We render the Root matched component.
+        // Guard Check
+        if (rootMatch.route.beforeEnter) {
+            const res = rootMatch.route.beforeEnter(rootMatch.params)
+            if (res !== false) {
                 matchedContent = f(RouteDepthCtx.Provider, {
                     value: 1,
-                    children: [
-                        f(Component, { params: rootMatch.params })
-                    ]
+                    children: f(Component, { params: rootMatch.params })
                 })
             }
+        } else {
+            matchedContent = f(RouteDepthCtx.Provider, {
+                value: 1,
+                children: f(Component, { params: rootMatch.params })
+            })
         }
-
-        const renderedChildren = childrenList.map(child => {
-            // Render non-Route children (Nav etc)
-            // <Route> components return null naturally
-            return child
-        })
-
-        return f(RouterCtx.Provider, {
-            value: routerContext,
-            children: [
-                ...renderedChildren,
-                matchedContent
-            ]
-        })
     }
+
+    return f(RouterCtx.Provider, {
+        value: routerContext,
+        children: [...otherChildren, matchedContent]
+    })
 }
+
+// Keep Router as alias for backward compatibility (deprecated)
+export const Router = Routes
 
 export function Route(_props: RouteProps) {
     return null
 }
 
 export function Outlet() {
-    const ctx = router() // Get router context
+    const ctx = router()
     const depth = (context(RouteDepthCtx) as number) || 0
 
-    return () => {
-        const ms = ctx.matches
-        if (depth >= ms.length) return null
+    const [matches] = state(() => ctx.matches)
 
-        const match = ms[depth]
-        const Component = match.route.component
+    if (depth >= matches.length) return null
 
-        // Guard
-        if (match.route.beforeEnter) {
-            if (match.route.beforeEnter(match.params) === false) return null
-        }
+    const match = matches[depth]
+    const Component = match.route.component
 
-        // Render next level
-        return f(RouteDepthCtx.Provider, {
-            value: depth + 1,
-            children: [
-                f(Component, { params: match.params })
-            ]
-        })
+    // Guard
+    if (match.route.beforeEnter) {
+        if (match.route.beforeEnter(match.params) === false) return null
     }
+
+    // Render next level
+    return f(RouteDepthCtx.Provider, {
+        value: depth + 1,
+        children: f(Component, { params: match.params })
+    })
 }
 
 export function Link(props: LinkProps) {

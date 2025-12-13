@@ -1,4 +1,4 @@
-import { Router, Route, Link } from 'flexium/router'
+import { Routes, Route, Link } from 'flexium/router'
 import Stories from './pages/Stories'
 import Item from './pages/Item'
 import User from './pages/User'
@@ -30,7 +30,7 @@ function Nav() {
 
 export default function App() {
     return (
-        <Router>
+        <Routes>
             <a href="#main" class="skip-link">Skip to main content</a>
             <Nav />
             <Route path="/" component={() => <Stories type="top" />} />
@@ -41,6 +41,6 @@ export default function App() {
             <Route path="/job" component={() => <Stories type="job" />} />
             <Route path="/item/:id" component={Item} />
             <Route path="/user/:id" component={User} />
-        </Router>
+        </Routes>
     )
 }

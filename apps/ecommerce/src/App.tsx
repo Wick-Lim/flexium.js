@@ -1,4 +1,4 @@
-import { Router, Route, Link } from 'flexium/router'
+import { Routes, Route, Link } from 'flexium/router'
 import Products from './pages/Products'
 import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
@@ -25,11 +25,11 @@ function Nav() {
 
 export default function App() {
   return (
-    <Router>
+    <Routes>
       <Nav />
       <Route path="/" component={Products} />
       <Route path="/product/:id" component={ProductDetail} />
       <Route path="/cart" component={Cart} />
-    </Router>
+    </Routes>
   )
 }

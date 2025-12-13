@@ -1,4 +1,4 @@
-import { Router, Route, Link } from 'flexium/router'
+import { Routes, Route, Link } from 'flexium/router'
 import Feed from './pages/Feed'
 import Profile from './pages/Profile'
 import { useCurrentUser } from './store'
@@ -20,10 +20,10 @@ function Nav() {
 
 export default function App() {
   return (
-    <Router>
+    <Routes>
       <Nav />
       <Route path="/" component={Feed} />
       <Route path="/profile/:id" component={Profile} />
-    </Router>
+    </Routes>
   )
 }

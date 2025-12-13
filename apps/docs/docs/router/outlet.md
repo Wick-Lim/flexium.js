@@ -19,17 +19,17 @@ import { Outlet } from 'flexium/router'
 ### Basic Layout
 
 ```tsx
-import { Router, Route, Outlet } from 'flexium/router'
+import { Routes, Route, Outlet } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Layout}>
         <Route path="/" component={Home} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
       </Route>
-    </Router>
+    </Routes>
   )
 }
 
@@ -49,7 +49,7 @@ function Layout() {
 ### Nested Routes
 
 ```tsx
-<Router>
+<Routes>
   <Route path="/dashboard" component={DashboardLayout}>
     <Route path="/" component={DashboardHome} />
     <Route path="/analytics" component={Analytics} />
@@ -59,7 +59,7 @@ function Layout() {
       <Route path="/security" component={SettingsSecurity} />
     </Route>
   </Route>
-</Router>
+</Routes>
 
 function DashboardLayout() {
   return (
@@ -105,19 +105,19 @@ function ProtectedLayout() {
 }
 
 // Routes
-<Router>
+<Routes>
   <Route path="/login" component={Login} />
   <Route path="/app" component={ProtectedLayout}>
     <Route path="/" component={Dashboard} />
     <Route path="/profile" component={Profile} />
   </Route>
-</Router>
+</Routes>
 ```
 
 ### Multiple Layouts
 
 ```tsx
-<Router>
+<Routes>
   {/* Public layout */}
   <Route path="/" component={PublicLayout}>
     <Route path="/" component={Home} />
@@ -135,7 +135,7 @@ function ProtectedLayout() {
     <Route path="/login" component={Login} />
     <Route path="/register" component={Register} />
   </Route>
-</Router>
+</Routes>
 ```
 
 ## Behavior
@@ -245,7 +245,7 @@ function LoadingLayout() {
 
 ## See Also
 
-- [&lt;Router /&gt;](/docs/router/router) - Root routing component
+- [&lt;Routes /&gt;](/docs/router/router) - Root routing component
 - [&lt;Route /&gt;](/docs/router/route) - Route definitions
 - [&lt;Link /&gt;](/docs/router/link) - Navigation links
 - [router()](/docs/router/router-hook) - Access router context
