@@ -48,12 +48,15 @@ function location(): [StateGetter<Location>, (path: string) => void] {
 
     const navigate = (path: string) => {
         if (typeof window === 'undefined') return
+        console.log('[Router] Navigate to:', path)
         if (isUnsafePath(path)) {
             console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
             return
         }
         window.history.pushState({}, '', path)
-        setLoc(getLoc())
+        const newLoc = getLoc()
+        console.log('[Router] Setting new location:', newLoc)
+        setLoc(newLoc)
     }
 
     // Listen to popstate
@@ -94,7 +97,11 @@ export function Router(props: { children: FNodeChild }) {
     const routeDefs = createRoutesFromChildren(childrenList.filter(c => isFNode(c) && c.type === Route))
 
     const [matches] = state<RouteMatch[]>(() => {
-        return matchRoutes(routeDefs, loc().pathname) || []
+        const p = loc().pathname
+        console.log('[Router] Computing matches for:', p)
+        const m = matchRoutes(routeDefs, p) || []
+        console.log('[Router] Matched:', m)
+        return m
     })
 
     const [params] = state<Record<string, string>>(() => {
@@ -114,6 +121,7 @@ export function Router(props: { children: FNodeChild }) {
 
     // Render
     return () => {
+        console.log('[Router] Rendering...')
         // 1. Matched Content
         let matchedContent: FNodeChild = null
         const currentMatches = matches()

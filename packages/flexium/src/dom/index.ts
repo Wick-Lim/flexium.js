@@ -31,32 +31,44 @@ function createNode(fnode: FNodeChild): Node {
     // Function -> Reactive Text Binding (if returns primitive) or Component (if returns FNode?)
     // This ambiguity is tricky. For now, assume functions in children array are signals/computations.
     if (typeof fnode === 'function') {
-        const placeholder = document.createTextNode('')
-        let currentDom: Node = placeholder
+        const marker = document.createTextNode('')
+        let currentNodes: Node[] = []
 
         effect(() => {
             const val = fnode()
+            const newNode = createNode(val)
 
-            // If function returns primitives, update text
-            if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || val === null || val === undefined) {
-                if (currentDom.nodeType === Node.TEXT_NODE) {
-                    currentDom.textContent = String(val ?? '')
-                } else {
-                    const newText = document.createTextNode(String(val ?? ''))
-                    currentDom.parentNode?.replaceChild(newText, currentDom)
-                    currentDom = newText
-                }
+            // Capture new nodes before they are inserted (if Fragment, children disappear)
+            let newNodes: Node[]
+            if (newNode instanceof DocumentFragment) {
+                newNodes = Array.from(newNode.childNodes)
             } else {
-                // If function returns an FNode (Dynamic Component), Re-render
-                // NOTE: This is a Full Replacement strategy (Inefficient but correct for now)
-                const newNode = createNode(val)
-                if (currentDom.parentNode) {
-                    currentDom.parentNode.replaceChild(newNode, currentDom)
-                }
-                currentDom = newNode
+                newNodes = [newNode]
+            }
+
+            if (marker.parentNode) {
+                // Update: Remove old nodes, Insert new nodes
+                currentNodes.forEach(node => {
+                    if (node.parentNode) node.parentNode.removeChild(node)
+                })
+
+                // Insert new nodes before marker
+                // Note: If newNode is Fragment, insertBefore handles it correctly
+                marker.parentNode.insertBefore(newNode, marker)
+
+                currentNodes = newNodes
+            } else {
+                // Initial Render: We can't insert yet since we are not in DOM
+                // We rely on the return value being used by the caller
+                currentNodes = newNodes
             }
         })
-        return currentDom
+
+        // Return a Fragment containing the content + marker
+        const frag = document.createDocumentFragment()
+        currentNodes.forEach(node => frag.appendChild(node))
+        frag.appendChild(marker)
+        return frag
     }
 
     // FNode
