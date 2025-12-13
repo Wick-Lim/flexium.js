@@ -1,7 +1,7 @@
 import { RouteDef, RouteMatch } from './types'
 
-// Simple query parser (native URLSearchParams fallback)
-export function parseQuery(search: string): Record<string, string> {
+// Simple query parser (native URLSearchParams fallback) - internal use only
+function parseQuery(search: string): Record<string, string> {
   if (!search) return {}
   if (typeof URLSearchParams !== 'undefined') {
     const params = new URLSearchParams(search)
@@ -19,7 +19,7 @@ export function parseQuery(search: string): Record<string, string> {
     }, {} as Record<string, string>)
 }
 
-export function isUnsafePath(path: string): boolean {
+function isUnsafePath(path: string): boolean {
   // Prevent prototype pollution or massive strings
   if (path.length > 2048) return true
   if (path.includes('__proto__') || path.includes('constructor')) return true
@@ -28,8 +28,8 @@ export function isUnsafePath(path: string): boolean {
   return false
 }
 
-// Convert children FNodes to RouteDefs
-export function createRoutesFromChildren(children: any[]): RouteDef[] {
+// Convert children FNodes to RouteDefs - internal use only
+function createRoutesFromChildren(children: any[]): RouteDef[] {
   const routes: RouteDef[] = []
 
   children.forEach(child => {
@@ -65,8 +65,8 @@ export function createRoutesFromChildren(children: any[]): RouteDef[] {
   return routes
 }
 
-// Simple Matcher
-export function matchRoutes(routes: RouteDef[], locationPathname: string): RouteMatch[] | null {
+// Simple Matcher - internal use only
+function matchRoutes(routes: RouteDef[], locationPathname: string): RouteMatch[] | null {
   // We want to find the best matching branch
 
   for (const route of routes) {
@@ -107,3 +107,6 @@ function matchPath(routePath: string, locationPath: string) {
 
   return { params, path: locationPath }
 }
+
+// Export only what's needed by other router files
+export { parseQuery, isUnsafePath, createRoutesFromChildren, matchRoutes }
