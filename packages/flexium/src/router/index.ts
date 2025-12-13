@@ -5,7 +5,7 @@ export * from './types'
 export { router } from './router'
 
 // Export components
-export { Routes } from './Routes'
-export { Route } from './Route'
-export { Outlet } from './Outlet'
-export { Link } from './Link'
+export { Routes } from './dom/Routes'
+export { Route } from './dom/Route'
+export { Outlet } from './dom/Outlet'
+export { Link } from './dom/Link'

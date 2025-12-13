@@ -6,15 +6,15 @@ export interface Location {
   query: Record<string, string>
 }
 
-export interface RouteDef {
+export interface RouteDefinition {
   path: string
   component: any // Component function
-  children?: RouteDef[]
+  children?: RouteDefinition[]
   beforeEnter?: (params: Record<string, string>) => boolean | void
 }
 
 export interface RouteMatch {
-  route: RouteDef
+  route: RouteDefinition
   params: Record<string, string>
   pathname: string // Matched part
 }

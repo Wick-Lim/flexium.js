@@ -1,7 +1,7 @@
-import { jsx as f } from '../jsx-runtime'
-import type { FNode, FNodeChild } from '../dom'
-import { RouterCtx, RouteDepthCtx, location } from './router'
-import { createRoutesFromChildren, matchRoutes } from './utils'
+import { jsx as f } from '../../jsx-runtime'
+import type { FNode, FNodeChild } from '../../dom'
+import { RouterCtx, RouteDepthCtx, location } from '../router'
+import { createRoutesFromChildren, matchRoutes } from '../utils'
 import { Route } from './Route'
 
 function isFNode(node: any): node is FNode {
@@ -9,25 +9,25 @@ function isFNode(node: any): node is FNode {
 }
 
 export function Routes(props: { children: FNodeChild }) {
-    const [loc, navigate] = location()
+    const [currentLocation, navigate] = location()
 
     // Parse children to find <Route> definitions and other content
     let childrenList: any[] = Array.isArray(props.children) ? props.children : [props.children]
 
     // Separate routes from other children (like Nav components)
-    const routeNodes = childrenList.filter(c => isFNode(c) && c.type === Route)
-    const otherChildren = childrenList.filter(c => !isFNode(c) || c.type !== Route)
+    const routeNodes = childrenList.filter(child => isFNode(child) && child.type === Route)
+    const otherChildren = childrenList.filter(child => !isFNode(child) || child.type !== Route)
 
     // Create route definitions
-    const routeDefs = createRoutesFromChildren(routeNodes)
+    const routeDefinitions = createRoutesFromChildren(routeNodes)
 
     // Compute current matches based on location
-    const currentPath = loc.pathname
-    const matches = matchRoutes(routeDefs, currentPath) || []
+    const currentPath = currentLocation.pathname
+    const matches = matchRoutes(routeDefinitions, currentPath) || []
     const params = matches.length > 0 ? matches[matches.length - 1].params : {}
 
     const routerContext = {
-        location: loc,
+        location: currentLocation,
         navigate,
         matches: matches,
         params: params
@@ -42,8 +42,8 @@ export function Routes(props: { children: FNodeChild }) {
 
         // Guard Check
         if (rootMatch.route.beforeEnter) {
-            const res = rootMatch.route.beforeEnter(rootMatch.params)
-            if (res !== false) {
+            const result = rootMatch.route.beforeEnter(rootMatch.params)
+            if (result !== false) {
                 matchedContent = f(RouteDepthCtx.Provider, {
                     value: 1,
                     children: f(Component, { params: rootMatch.params })

@@ -44,7 +44,7 @@ export class ReactiveEffectLike {
 
 export type ReactiveEffect = ReactiveEffectLike
 
-export function effect(fn: () => void, options: { scheduler?: () => void } = {}) {
+export function unsafeEffect(fn: () => void, options: { scheduler?: () => void } = {}) {
     const _effect = new ReactiveEffectLike(fn, options.scheduler)
     _effect.run()
 
@@ -64,7 +64,7 @@ const queue = new Set<ReactiveEffect>()
 let isFlushPending = false
 let isBatching = false
 
-function queueJob(effect: ReactiveEffect) {
+export function queueJob(effect: ReactiveEffect) {
     if (!queue.has(effect)) {
         queue.add(effect)
         if (!isFlushPending && !isBatching) {
@@ -74,7 +74,7 @@ function queueJob(effect: ReactiveEffect) {
     }
 }
 
-function flush() {
+export function flush() {
     isFlushPending = false
     const effects = [...queue]
     queue.clear()
@@ -85,23 +85,8 @@ function flush() {
     }
 }
 
-/**
- * Unified sync API
- * - sync(): Force refresh (flush pending effects)
- * - sync(fn): Batch updates (run fn then flush)
- */
-export function sync(fn?: () => void) {
-    if (fn) {
-        isBatching = true
-        try {
-            fn()
-        } finally {
-            isBatching = false
-            flush()
-        }
-    } else {
-        flush()
-    }
+export function setBatching(value: boolean) {
+    isBatching = value
 }
 
 export function triggerEffects(dep: Set<ReactiveEffect>) {
@@ -115,8 +100,4 @@ export function triggerEffects(dep: Set<ReactiveEffect>) {
             }
         }
     }
-}
-
-export function batch(fn: () => void) {
-    sync(fn)
 }

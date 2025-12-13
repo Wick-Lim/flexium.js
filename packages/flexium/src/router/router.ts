@@ -9,16 +9,16 @@ export const RouteDepthCtx = createContext<number>(0)
 
 // Create location state and navigation
 export function location(): [Location, (path: string) => void] {
-    const getDefaultLoc = (): Location => ({
+    const getDefaultLocation = (): Location => ({
         pathname: '/',
         search: '',
         hash: '',
         query: {},
     })
 
-    const getLoc = (): Location => {
+    const getCurrentLocation = (): Location => {
         if (typeof window === 'undefined') {
-            return getDefaultLoc()
+            return getDefaultLocation()
         }
         return {
             pathname: window.location.pathname,
@@ -29,13 +29,13 @@ export function location(): [Location, (path: string) => void] {
     }
 
     // Create a reactive location object
-    const location = reactive<Location>(getLoc())
+    const location = reactive<Location>(getCurrentLocation())
 
-    const updateLocation = (newLoc: Location) => {
-        location.pathname = newLoc.pathname
-        location.search = newLoc.search
-        location.hash = newLoc.hash
-        location.query = newLoc.query
+    const updateLocation = (newLocation: Location) => {
+        location.pathname = newLocation.pathname
+        location.search = newLocation.search
+        location.hash = newLocation.hash
+        location.query = newLocation.query
     }
 
     const navigate = (path: string) => {
@@ -45,13 +45,13 @@ export function location(): [Location, (path: string) => void] {
             return
         }
         window.history.pushState({}, '', path)
-        const newLoc = getLoc()
-        updateLocation(newLoc)
+        const newLocation = getCurrentLocation()
+        updateLocation(newLocation)
     }
 
     // Listen to popstate
     const handlePopState = () => {
-        updateLocation(getLoc())
+        updateLocation(getCurrentLocation())
     }
 
     if (typeof window !== 'undefined') {
@@ -63,9 +63,9 @@ export function location(): [Location, (path: string) => void] {
 
 // Router hook
 export function router(): RouterContext {
-    const ctx = context(RouterCtx)
-    if (!ctx) {
+    const routerContext = context(RouterCtx)
+    if (!routerContext) {
         throw new Error('router() must be called within a <Routes> component')
     }
-    return ctx
+    return routerContext
 }

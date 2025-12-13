@@ -1,13 +1,13 @@
-import { state } from '../core/state'
-import { context } from '../core/context'
-import { jsx as f } from '../jsx-runtime'
-import { RouteDepthCtx, router } from './router'
+import { state } from '../../core/state'
+import { context } from '../../core/context'
+import { jsx as f } from '../../jsx-runtime'
+import { RouteDepthCtx, router } from '../router'
 
 export function Outlet() {
-    const ctx = router()
+    const routerContext = router()
     const depth = (context(RouteDepthCtx) as number) || 0
 
-    const [matches] = state(() => ctx.matches)
+    const [matches] = state(() => routerContext.matches)
 
     if (depth >= matches.length) return null
 

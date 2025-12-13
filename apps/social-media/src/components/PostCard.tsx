@@ -23,9 +23,9 @@ export default function PostCard({
 
   function handleCommentSubmit(e: Event) {
     e.preventDefault()
-    if (!commentText().trim()) return
+    if (!commentText.trim()) return
 
-    addComment(post.id, commentText().trim())
+    addComment(post.id, commentText.trim())
     setCommentText('')
   }
 
@@ -73,7 +73,7 @@ export default function PostCard({
         <Comments
           post={post}
           currentUser={currentUser}
-          commentText={commentText()}
+          commentText={commentText}
           setCommentText={setCommentText}
           onCommentSubmit={handleCommentSubmit}
         />

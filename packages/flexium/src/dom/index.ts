@@ -1,5 +1,5 @@
 
-import { effect } from '../core/effect'
+import { unsafeEffect } from '../core/effect'
 import { pushContext, popContext, snapshotContext, runWithContext } from '../core/context'
 import { runWithComponent, ComponentInstance } from '../core/hook'
 
@@ -38,7 +38,7 @@ function createNode(fnode: FNodeChild): Node {
         // Capture context at creation time
         const ctxSnapshot = snapshotContext()
 
-        effect(() => {
+        unsafeEffect(() => {
             runWithContext(ctxSnapshot, () => {
                 const val = fnode()
                 const newNode = createNode(val)
@@ -105,7 +105,7 @@ function createNode(fnode: FNodeChild): Node {
                         el.addEventListener(event, value)
                     } else if (typeof value === 'function') {
                         // Dynamic Prop
-                        effect(() => {
+                        unsafeEffect(() => {
                             setAttribute(el, key, value())
                         })
                     } else {
@@ -154,7 +154,7 @@ function createNode(fnode: FNodeChild): Node {
             // Capture context snapshot for async updates inside the component effect
             const ctxSnapshot = snapshotContext()
 
-            effect(() => {
+            unsafeEffect(() => {
                 runWithContext(ctxSnapshot, () => {
                     runWithComponent(componentInstance, () => {
                         const result = type({ ...props, children })

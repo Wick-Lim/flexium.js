@@ -1,4 +1,4 @@
-import type { RouteProps } from './types'
+import type { RouteProps } from '../types'
 
 export function Route(_props: RouteProps) {
     return null

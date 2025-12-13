@@ -1,7 +1,7 @@
 import { hook } from './hook'
-import { effect as rawEffect, ReactiveEffect } from './effect'
+import { ReactiveEffect, flush, setBatching } from './effect'
 
-export function effectHook(fn: () => (void | (() => void)), deps?: any[]) {
+export function effect(fn: () => (void | (() => void)), deps?: any[]) {
     // Use hook to store state across renders
     const state = hook(() => {
         // Initial State of the Hook (Runs once)
@@ -42,7 +42,7 @@ export function effectHook(fn: () => (void | (() => void)), deps?: any[]) {
     // Cleanup on component unmount logic is handled by the renderer via ComponentInstance context
 }
 
-export function memoHook<T>(factory: () => T, deps?: any[]): T {
+export function memo<T>(factory: () => T, deps?: any[]): T {
     const state = hook(() => ({
         value: undefined as undefined | T,
         deps: undefined as undefined | any[],
@@ -61,4 +61,27 @@ export function memoHook<T>(factory: () => T, deps?: any[]): T {
     }
 
     return state.value as T
+}
+
+/**
+ * Unified sync API
+ * - sync(): Force refresh (flush pending effects)
+ * - sync(fn): Batch updates (run fn then flush)
+ */
+export function sync(fn?: () => void) {
+    if (fn) {
+        setBatching(true)
+        try {
+            fn()
+        } finally {
+            setBatching(false)
+            flush()
+        }
+    } else {
+        flush()
+    }
+}
+
+export function batch(fn: () => void) {
+    sync(fn)
 }

@@ -1,21 +1,21 @@
-import { RouteDef, RouteMatch } from './types'
+import { RouteDefinition, RouteMatch } from './types'
 
 // Simple query parser (native URLSearchParams fallback) - internal use only
 function parseQuery(search: string): Record<string, string> {
   if (!search) return {}
   if (typeof URLSearchParams !== 'undefined') {
     const params = new URLSearchParams(search)
-    const res: Record<string, string> = {}
-    params.forEach((v, k) => res[k] = v)
-    return res
+    const result: Record<string, string> = {}
+    params.forEach((value, key) => result[key] = value)
+    return result
   }
   return search
     .substring(1)
     .split('&')
-    .reduce((acc, part) => {
+    .reduce((accumulator, part) => {
       const [key, value] = part.split('=')
-      if (key) acc[decodeURIComponent(key)] = decodeURIComponent(value || '')
-      return acc
+      if (key) accumulator[decodeURIComponent(key)] = decodeURIComponent(value || '')
+      return accumulator
     }, {} as Record<string, string>)
 }
 
@@ -28,9 +28,9 @@ function isUnsafePath(path: string): boolean {
   return false
 }
 
-// Convert children FNodes to RouteDefs - internal use only
-function createRoutesFromChildren(children: any[]): RouteDef[] {
-  const routes: RouteDef[] = []
+// Convert children FNodes to RouteDefinitions - internal use only
+function createRoutesFromChildren(children: any[]): RouteDefinition[] {
+  const routes: RouteDefinition[] = []
 
   children.forEach(child => {
     if (!child) return
@@ -41,7 +41,7 @@ function createRoutesFromChildren(children: any[]): RouteDef[] {
 
     const { path, component, children: subChildren, beforeEnter } = child.props || {}
 
-    const route: RouteDef = {
+    const route: RouteDefinition = {
       path: path || '/',
       component: component,
       beforeEnter
@@ -49,10 +49,10 @@ function createRoutesFromChildren(children: any[]): RouteDef[] {
 
     if (subChildren) {
       // If subChildren is array
-      const kids = Array.isArray(subChildren) ? subChildren : [subChildren]
+      const nestedChildren = Array.isArray(subChildren) ? subChildren : [subChildren]
       // We expect the children of a Route to be other Routes
       // However, the 'children' prop in JSX might be the Route components themselves.
-      route.children = createRoutesFromChildren(kids)
+      route.children = createRoutesFromChildren(nestedChildren)
     }
 
     // Also check child.children if props.children is empty (direct FNode structure)
@@ -66,7 +66,7 @@ function createRoutesFromChildren(children: any[]): RouteDef[] {
 }
 
 // Simple Matcher - internal use only
-function matchRoutes(routes: RouteDef[], locationPathname: string): RouteMatch[] | null {
+function matchRoutes(routes: RouteDefinition[], locationPathname: string): RouteMatch[] | null {
   // We want to find the best matching branch
 
   for (const route of routes) {
@@ -86,21 +86,21 @@ function matchRoutes(routes: RouteDef[], locationPathname: string): RouteMatch[]
 
 function matchPath(routePath: string, locationPath: string) {
   // 1. Split into segments
-  const routeSegs = routePath.split('/').filter(Boolean)
-  const locSegs = locationPath.split('/').filter(Boolean)
+  const routeSegments = routePath.split('/').filter(Boolean)
+  const locationSegments = locationPath.split('/').filter(Boolean)
 
-  if (routeSegs.length !== locSegs.length) return null
+  if (routeSegments.length !== locationSegments.length) return null
 
   const params: Record<string, string> = {}
 
-  for (let i = 0; i < routeSegs.length; i++) {
-    const r = routeSegs[i]
-    const l = locSegs[i]
+  for (let i = 0; i < routeSegments.length; i++) {
+    const routeSegment = routeSegments[i]
+    const locationSegment = locationSegments[i]
 
-    if (r.startsWith(':')) {
-      const key = r.slice(1)
-      params[key] = l
-    } else if (r !== l) {
+    if (routeSegment.startsWith(':')) {
+      const key = routeSegment.slice(1)
+      params[key] = locationSegment
+    } else if (routeSegment !== locationSegment) {
       return null
     }
   }

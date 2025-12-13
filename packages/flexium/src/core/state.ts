@@ -1,6 +1,6 @@
 
 import { reactive } from './reactive'
-import { effect } from './effect'
+import { unsafeEffect } from './effect'
 import { hook } from './hook'
 
 export type StateSetter<T> = (newValue: T) => void
@@ -95,7 +95,7 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
       state.run = run
 
       // Make it reactive!
-      effect(run)
+      unsafeEffect(run)
 
       newContainer = state
 
