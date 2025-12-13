@@ -29,53 +29,6 @@ function createNode(fnode: FNodeChild): Node {
         return document.createTextNode(String(fnode))
     }
 
-    // Function -> Reactive Text Binding (if returns primitive) or Component (if returns FNode?)
-    // This ambiguity is tricky. For now, assume functions in children array are signals/computations.
-    if (typeof fnode === 'function') {
-        const marker = document.createTextNode('')
-        let currentNodes: Node[] = []
-
-        // Capture context at creation time
-        const ctxSnapshot = snapshotContext()
-
-        unsafeEffect(() => {
-            runWithContext(ctxSnapshot, () => {
-                const val = fnode()
-                const newNode = createNode(val)
-
-                // Capture new nodes before they are inserted (if Fragment, children disappear)
-                let newNodes: Node[]
-                if (newNode instanceof DocumentFragment) {
-                    newNodes = Array.from(newNode.childNodes)
-                } else {
-                    newNodes = [newNode]
-                }
-
-                if (marker.parentNode) {
-                    // Update: Remove old nodes, Insert new nodes
-                    currentNodes.forEach(node => {
-                        if (node.parentNode) node.parentNode.removeChild(node)
-                    })
-
-                    // Insert new nodes before marker
-                    // Note: If newNode is Fragment, insertBefore handles it correctly
-                    marker.parentNode.insertBefore(newNode, marker)
-
-                    currentNodes = newNodes
-                } else {
-                    // Initial Render: We can't insert yet since we are not in DOM
-                    // We rely on the return value being used by the caller
-                    currentNodes = newNodes
-                }
-            })
-        })
-
-        // Return a Fragment containing the content + marker
-        const frag = document.createDocumentFragment()
-        currentNodes.forEach(node => frag.appendChild(node))
-        frag.appendChild(marker)
-        return frag
-    }
 
     // FNode
     if (typeof fnode === 'object') {
@@ -160,7 +113,7 @@ function createNode(fnode: FNodeChild): Node {
                         const result = type({ ...props, children })
                         const newNode = createNode(result)
 
-                        // Reconciliation Logic (Same as Function Child)
+                        // Get new nodes from result
                         let newNodes: Node[]
                         if (newNode instanceof DocumentFragment) {
                             newNodes = Array.from(newNode.childNodes)
@@ -169,11 +122,8 @@ function createNode(fnode: FNodeChild): Node {
                         }
 
                         if (marker.parentNode) {
-                            currentNodes.forEach(node => {
-                                if (node.parentNode) node.parentNode.removeChild(node)
-                            })
-                            marker.parentNode.insertBefore(newNode, marker)
-                            currentNodes = newNodes
+                            // Use reconciliation instead of removing all nodes
+                            currentNodes = reconcile(currentNodes, newNodes, marker.parentNode, marker)
                         } else {
                             currentNodes = newNodes
                         }
@@ -206,6 +156,136 @@ function setAttribute(el: Element, key: string, value: any) {
     if (value === null || value === undefined) {
         el.removeAttribute(key)
     } else {
-        el.setAttribute(key, String(value))
+        // Special handling for form element value property
+        if (key === 'value' && (
+            el instanceof HTMLInputElement ||
+            el instanceof HTMLTextAreaElement ||
+            el instanceof HTMLSelectElement
+        )) {
+            (el as any).value = value
+        } else if (key === 'checked' && el instanceof HTMLInputElement) {
+            el.checked = !!value
+        } else {
+            el.setAttribute(key, String(value))
+        }
     }
+}
+
+// Reconciliation helpers
+function canReuse(oldNode: Node, newNode: Node): boolean {
+    if (oldNode.nodeType !== newNode.nodeType) return false
+    if (oldNode.nodeType === Node.ELEMENT_NODE && newNode.nodeType === Node.ELEMENT_NODE) {
+        return (oldNode as Element).tagName === (newNode as Element).tagName
+    }
+    return true
+}
+
+function updateAttributes(oldEl: Element, newEl: Element): void {
+    // Remove old attributes
+    const oldAttrs = Array.from(oldEl.attributes)
+    oldAttrs.forEach(attr => {
+        // Skip event listeners (they were set via addEventListener)
+        if (attr.name.startsWith('on')) return
+        if (!newEl.hasAttribute(attr.name)) {
+            oldEl.removeAttribute(attr.name)
+        }
+    })
+
+    // Set/update new attributes
+    const newAttrs = Array.from(newEl.attributes)
+    newAttrs.forEach(attr => {
+        // Skip event listeners
+        if (attr.name.startsWith('on')) return
+        if (oldEl.getAttribute(attr.name) !== attr.value) {
+            oldEl.setAttribute(attr.name, attr.value)
+        }
+    })
+
+    // Special handling for form input values
+    if (oldEl instanceof HTMLInputElement && newEl instanceof HTMLInputElement) {
+        if (oldEl.value !== newEl.value) {
+            oldEl.value = newEl.value
+        }
+        if (oldEl.checked !== newEl.checked) {
+            oldEl.checked = newEl.checked
+        }
+    }
+    if (oldEl instanceof HTMLTextAreaElement && newEl instanceof HTMLTextAreaElement) {
+        if (oldEl.value !== newEl.value) {
+            oldEl.value = newEl.value
+        }
+    }
+    if (oldEl instanceof HTMLSelectElement && newEl instanceof HTMLSelectElement) {
+        if (oldEl.value !== newEl.value) {
+            oldEl.value = newEl.value
+        }
+    }
+}
+
+function reconcileChildren(oldEl: Element, newEl: Element): void {
+    const oldChildren = Array.from(oldEl.childNodes)
+    const newChildren = Array.from(newEl.childNodes)
+    const maxLen = Math.max(oldChildren.length, newChildren.length)
+
+    for (let i = 0; i < maxLen; i++) {
+        const oldChild = oldChildren[i]
+        const newChild = newChildren[i]
+
+        if (!oldChild && newChild) {
+            // Add new child
+            oldEl.appendChild(newChild)
+        } else if (oldChild && !newChild) {
+            // Remove old child
+            oldEl.removeChild(oldChild)
+        } else if (oldChild && newChild) {
+            // Patch child
+            patchNode(oldChild, newChild, oldEl)
+        }
+    }
+}
+
+function patchNode(oldNode: Node, newNode: Node, parent: Element): void {
+    if (canReuse(oldNode, newNode)) {
+        // Reuse node
+        if (oldNode.nodeType === Node.TEXT_NODE) {
+            // Update text content
+            if (oldNode.nodeValue !== newNode.nodeValue) {
+                oldNode.nodeValue = newNode.nodeValue
+            }
+        } else if (oldNode.nodeType === Node.ELEMENT_NODE) {
+            // Update element
+            updateAttributes(oldNode as Element, newNode as Element)
+            reconcileChildren(oldNode as Element, newNode as Element)
+        }
+    } else {
+        // Different type, replace
+        parent.replaceChild(newNode, oldNode)
+    }
+}
+
+function reconcile(oldNodes: Node[], newNodes: Node[], parent: Node, beforeMarker: Node): Node[] {
+    const maxLen = Math.max(oldNodes.length, newNodes.length)
+    const resultNodes: Node[] = []
+
+    for (let i = 0; i < maxLen; i++) {
+        const oldNode = oldNodes[i]
+        const newNode = newNodes[i]
+
+        if (!oldNode && newNode) {
+            // Add new node
+            parent.insertBefore(newNode, beforeMarker)
+            resultNodes.push(newNode)
+        } else if (oldNode && !newNode) {
+            // Remove old node
+            if (oldNode.parentNode) {
+                parent.removeChild(oldNode)
+            }
+        } else if (oldNode && newNode) {
+            // Patch node
+            patchNode(oldNode, newNode, parent as Element)
+            resultNodes.push(oldNode)
+        }
+    }
+
+    return resultNodes
 }
