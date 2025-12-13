@@ -65,12 +65,12 @@ Check out these full applications built with Flexium:
 ---
 
 <script setup>
-import ShowcaseDemo from './components/ShowcaseDemo.vue'
-import TodoDemo from './components/TodoDemo.vue'
-import CanvasDemo from './components/CanvasDemo.vue'
-import TimerDemo from './components/TimerDemo.vue'
-import SnakeGameDemo from './components/SnakeGameDemo.vue'
-import ContextDemo from './components/ContextDemo.vue'
+import ShowcaseDemo from '../components/ShowcaseDemo.vue'
+import TodoDemo from '../components/TodoDemo.vue'
+import CanvasDemo from '../components/CanvasDemo.vue'
+import TimerDemo from '../components/TimerDemo.vue'
+import SnakeGameDemo from '../components/SnakeGameDemo.vue'
+import ContextDemo from '../components/ContextDemo.vue'
 </script>
 
 ---
