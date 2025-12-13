@@ -13,6 +13,7 @@ function CanvasDemo() {
 
   let canvasRef = null
   let frameId = null
+  let cleanupAnimation = null
 
   const handleMouseMove = (e) => {
     const rect = canvasRef.getBoundingClientRect()
@@ -61,13 +62,10 @@ function CanvasDemo() {
     frameId = requestAnimationFrame(animate)
   }
 
-  // Start animation loop on mount
+  // Cleanup on component unmount
   effect(() => {
-    if (canvasRef) {
-      frameId = requestAnimationFrame(animate)
-    }
     return () => {
-      if (frameId) cancelAnimationFrame(frameId)
+      if (cleanupAnimation) cleanupAnimation()
     }
   }, [])
 
@@ -89,6 +87,11 @@ function CanvasDemo() {
         canvasRef = el
         if (el) {
           el.addEventListener('mousemove', handleMouseMove)
+          // Start animation loop when canvas is created
+          frameId = requestAnimationFrame(animate)
+          cleanupAnimation = () => {
+            if (frameId) cancelAnimationFrame(frameId)
+          }
         }
       },
       width: 300,

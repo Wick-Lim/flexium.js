@@ -25,6 +25,7 @@ function SnakeGame() {
   let canvasRef = null
   let animationId = null
   let lastTime = 0
+  let cleanupAnimation = null
 
   const generateFood = () => {
     let newFood
@@ -113,14 +114,11 @@ function SnakeGame() {
     }
   }
 
-  // Start game loop and keyboard listener on mount
+  // Setup keyboard listener and cleanup on mount
   effect(() => {
     document.addEventListener('keydown', handleKeydown)
-    if (canvasRef) {
-      animationId = requestAnimationFrame(gameLoop)
-    }
     return () => {
-      if (animationId) cancelAnimationFrame(animationId)
+      if (cleanupAnimation) cleanupAnimation()
       document.removeEventListener('keydown', handleKeydown)
     }
   }, [])
@@ -292,6 +290,13 @@ function SnakeGame() {
     f('canvas', {
       ref: (el) => {
         canvasRef = el
+        if (el) {
+          // Start game loop when canvas is created
+          animationId = requestAnimationFrame(gameLoop)
+          cleanupAnimation = () => {
+            if (animationId) cancelAnimationFrame(animationId)
+          }
+        }
       },
       width: CANVAS_WIDTH,
       height: CANVAS_HEIGHT,
