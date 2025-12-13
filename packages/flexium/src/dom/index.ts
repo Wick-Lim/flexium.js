@@ -157,10 +157,12 @@ function createNode(fnode: FNodeChild): Node {
 }
 
 export function render(app: any, container: HTMLElement) {
-    // If app is a function (Component), execute it to get the FNode
-    const node = typeof app === 'function' ? app() : app
-
     container.innerHTML = ''
+
+    // If app is a function (Component), wrap it in an FNode so it gets processed as a Function Component
+    // This ensures the component runs inside an effect and can track dependencies
+    const node = typeof app === 'function' ? f(app, {}) : app
+
     const dom = createNode(node)
     if (dom) {
         container.appendChild(dom)
