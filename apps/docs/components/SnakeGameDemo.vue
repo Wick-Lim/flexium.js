@@ -341,7 +341,7 @@ function SnakeGame() {
 
 onMounted(() => {
   if (container.value) {
-    render(SnakeGame, container.value)
+    render(() => SnakeGame(), container.value)
   }
 })
 
