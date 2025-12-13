@@ -183,9 +183,6 @@ function DisplayC() {
 }
 
 function GlobalDemo() {
-  // Reset global state on mount
-  state.clear()
-
   const containerNode = f('div', {
     style: {
       display: 'flex',
