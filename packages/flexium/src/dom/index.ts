@@ -1,6 +1,7 @@
-import { effect } from '../core/effect'
 
-import { pushContext, popContext } from '../core/context'
+import { effect } from '../core/effect'
+import { pushContext, popContext, snapshotContext, runWithContext } from '../core/context'
+import { runWithComponent, ComponentInstance } from '../core/hook'
 
 // Types
 export type FNodeChild = string | number | boolean | null | undefined | FNode | (() => FNodeChild) | FNodeChild[]
@@ -34,34 +35,39 @@ function createNode(fnode: FNodeChild): Node {
         const marker = document.createTextNode('')
         let currentNodes: Node[] = []
 
+        // Capture context at creation time
+        const ctxSnapshot = snapshotContext()
+
         effect(() => {
-            const val = fnode()
-            const newNode = createNode(val)
+            runWithContext(ctxSnapshot, () => {
+                const val = fnode()
+                const newNode = createNode(val)
 
-            // Capture new nodes before they are inserted (if Fragment, children disappear)
-            let newNodes: Node[]
-            if (newNode instanceof DocumentFragment) {
-                newNodes = Array.from(newNode.childNodes)
-            } else {
-                newNodes = [newNode]
-            }
+                // Capture new nodes before they are inserted (if Fragment, children disappear)
+                let newNodes: Node[]
+                if (newNode instanceof DocumentFragment) {
+                    newNodes = Array.from(newNode.childNodes)
+                } else {
+                    newNodes = [newNode]
+                }
 
-            if (marker.parentNode) {
-                // Update: Remove old nodes, Insert new nodes
-                currentNodes.forEach(node => {
-                    if (node.parentNode) node.parentNode.removeChild(node)
-                })
+                if (marker.parentNode) {
+                    // Update: Remove old nodes, Insert new nodes
+                    currentNodes.forEach(node => {
+                        if (node.parentNode) node.parentNode.removeChild(node)
+                    })
 
-                // Insert new nodes before marker
-                // Note: If newNode is Fragment, insertBefore handles it correctly
-                marker.parentNode.insertBefore(newNode, marker)
+                    // Insert new nodes before marker
+                    // Note: If newNode is Fragment, insertBefore handles it correctly
+                    marker.parentNode.insertBefore(newNode, marker)
 
-                currentNodes = newNodes
-            } else {
-                // Initial Render: We can't insert yet since we are not in DOM
-                // We rely on the return value being used by the caller
-                currentNodes = newNodes
-            }
+                    currentNodes = newNodes
+                } else {
+                    // Initial Render: We can't insert yet since we are not in DOM
+                    // We rely on the return value being used by the caller
+                    currentNodes = newNodes
+                }
+            })
         })
 
         // Return a Fragment containing the content + marker
@@ -133,9 +139,52 @@ function createNode(fnode: FNodeChild): Node {
                 }
             }
 
-            // Execute component function
-            const result = type({ ...props, children })
-            return createNode(result)
+            // Normal Component
+            // Support React-style Components with Hooks
+
+            const marker = document.createTextNode('')
+            let currentNodes: Node[] = []
+
+            // Create a persistent component instance for hooks
+            const componentInstance: ComponentInstance = {
+                hooks: [],
+                hookIndex: 0
+            }
+
+            // Capture context snapshot for async updates inside the component effect
+            const ctxSnapshot = snapshotContext()
+
+            effect(() => {
+                runWithContext(ctxSnapshot, () => {
+                    runWithComponent(componentInstance, () => {
+                        const result = type({ ...props, children })
+                        const newNode = createNode(result)
+
+                        // Reconciliation Logic (Same as Function Child)
+                        let newNodes: Node[]
+                        if (newNode instanceof DocumentFragment) {
+                            newNodes = Array.from(newNode.childNodes)
+                        } else {
+                            newNodes = [newNode]
+                        }
+
+                        if (marker.parentNode) {
+                            currentNodes.forEach(node => {
+                                if (node.parentNode) node.parentNode.removeChild(node)
+                            })
+                            marker.parentNode.insertBefore(newNode, marker)
+                            currentNodes = newNodes
+                        } else {
+                            currentNodes = newNodes
+                        }
+                    })
+                })
+            })
+
+            const frag = document.createDocumentFragment()
+            currentNodes.forEach(node => frag.appendChild(node))
+            frag.appendChild(marker)
+            return frag
         }
     }
 

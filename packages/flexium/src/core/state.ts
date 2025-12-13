@@ -1,9 +1,11 @@
+
 import { reactive } from './reactive'
 import { effect } from './effect'
+import { useHook } from './hook'
 
 export type StateGetter<T> = () => T
 export type StateSetter<T> = (newValue: T) => void
-export type AsyncStateControl = {
+export type FnStateControl = {
   refetch: () => Promise<void>
   loading: boolean
   error: unknown
@@ -22,9 +24,9 @@ function serializeKey(key: unknown[]): string {
 }
 
 // Overloads
+export function state<T>(fn: () => Promise<T>, options?: StateOptions): [StateGetter<T | undefined>, FnStateControl]
+export function state<T>(fn: () => T, options?: StateOptions): [StateGetter<T>, FnStateControl]
 export function state<T>(initialValue: T, options?: StateOptions): [StateGetter<T>, StateSetter<T>]
-export function state<T>(fn: () => Promise<T>, options?: StateOptions): [StateGetter<T | undefined>, AsyncStateControl]
-export function state<T>(fn: () => T, options?: StateOptions): [StateGetter<T>, AsyncStateControl] // Computed shares shape but simplified
 export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: StateOptions): any {
   // 0. Global Registry Check
   let serializedKey: string | undefined
@@ -38,99 +40,83 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
     }
   }
 
-  let result: any
+  // Hook Wrapper
+  return useHook(() => {
+    let result: any
 
-  // 1. Function (Computed or Resource)
-  if (typeof input === 'function') {
-    const fn = input as Function
+    // 1. Function (Computed or Resource)
+    if (typeof input === 'function') {
+      const fn = input as Function
 
-    // Check if Async (Resource) - Simple constructor check
-    const isAsync = fn.constructor.name === 'AsyncFunction'
-
-    if (isAsync) {
       const state = reactive({
         value: undefined as T | undefined,
         loading: true,
         error: null as any,
-        status: 'loading' as 'idle' | 'loading' | 'success' | 'error'
+        status: 'idle' as 'idle' | 'loading' | 'success' | 'error'
       })
 
-      const fetcher = fn as () => Promise<T>
-
-      const load = async () => {
-        state.loading = true
-        state.status = 'loading'
-        state.error = null
+      const run = () => {
         try {
-          const data = await fetcher()
-          state.value = data
-          state.status = 'success'
+          const result = fn()
+
+          if (result instanceof Promise) {
+            state.loading = true
+            state.status = 'loading'
+            state.error = null
+
+            result
+              .then(data => {
+                state.value = data
+                state.status = 'success'
+                state.loading = false
+              })
+              .catch(err => {
+                state.error = err
+                state.status = 'error'
+                state.loading = false
+              })
+          } else {
+            state.value = result
+            state.status = 'success'
+            state.loading = false
+            state.error = null
+          }
         } catch (err) {
           state.error = err
           state.status = 'error'
-        } finally {
           state.loading = false
         }
       }
 
-      // Initial load
-      // In a real implementation we might want this tracked or lazy
-      load()
+      // Make it reactive!
+      effect(run)
 
       const getter = () => state.value
-      // Control object (reactive)
-      // We expose the reactive state properties directly on the control object
+
       const control = {
-        refetch: load,
+        refetch: async () => { run() },
         get loading() { return state.loading },
         get error() { return state.error },
         get status() { return state.status }
       }
 
       result = [getter, control]
+
     } else {
-      // Synchronous Function (Computed)
-      const computed = reactive({ value: undefined as any })
+      // 2. Value (Signal)
+      const container = reactive({ value: input })
 
-      effect(() => {
-        computed.value = fn()
-      })
+      const getter = () => container.value
+      const setter = (newValue: T) => { container.value = newValue }
 
-      const getter = () => computed.value
-      // Computed has no controls really, but we match the shape or return empty object
-      // User said: "fn or async fn... covers it"
-      // We can return a read-only metadata object if needed, or just empty
-      const control = {
-        refetch: async () => { }, // No-op for computed
-        loading: false,
-        error: null,
-        status: 'success'
-      }
-
-      result = [getter, control]
-    }
-  } else {
-    // 2. Value (Signal)
-    // Wrap in a reactive container to allow "replacing" the value
-    const container = reactive({ value: input })
-
-    const getter = () => {
-      // If input was an object, container.value is a proxy.
-      // access to container.value tracks dependency on 'value'.
-      return container.value
+      result = [getter, setter]
     }
 
-    const setter = (newValue: T) => {
-      container.value = newValue
+    // Store in global registry if key provided
+    if (serializedKey) {
+      globalRegistry.set(serializedKey, result)
     }
 
-    result = [getter, setter]
-  }
-
-  // Store in registry if key provided
-  if (serializedKey) {
-    globalRegistry.set(serializedKey, result)
-  }
-
-  return result
+    return result
+  })
 }
