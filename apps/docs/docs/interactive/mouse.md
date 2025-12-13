@@ -89,7 +89,7 @@ function DrawingApp() {
 ```tsx
 const m = mouse()
 
-const loop = createLoop({
+const gameLoop = loop({
   onUpdate: () => {
     if (m.isLeftPressed()) {
       handleClick(m.position.x, m.position.y)
@@ -214,7 +214,7 @@ function ContextMenuArea() {
 
 ## Notes
 
-- Use with `createLoop` for interactive input
+- Use with `loop` for interactive input
 - Position is relative to viewport by default
 - Prevent default context menu for right-click handling
 
@@ -229,4 +229,4 @@ import UseMouseDemo from '../../components/UseMouseDemo.vue'
 ## See Also
 
 - [keyboard()](/docs/interactive/keyboard)
-- [createLoop()](/docs/interactive/loop)
+- [loop()](/docs/interactive/loop)

@@ -270,7 +270,7 @@ export default defineConfig({
           items: [
             { text: 'keyboard()', link: '/docs/interactive/keyboard' },
             { text: 'mouse()', link: '/docs/interactive/mouse' },
-            { text: 'createLoop()', link: '/docs/interactive/loop' }
+            { text: 'loop()', link: '/docs/interactive/loop' }
           ]
         },
         {
@@ -375,7 +375,7 @@ export default defineConfig({
           items: [
             { text: 'keyboard()', link: '/docs/interactive/keyboard' },
             { text: 'mouse()', link: '/docs/interactive/mouse' },
-            { text: 'createLoop()', link: '/docs/interactive/loop' }
+            { text: 'loop()', link: '/docs/interactive/loop' }
           ]
         },
         {
@@ -473,7 +473,7 @@ export default defineConfig({
           items: [
             { text: 'keyboard()', link: '/docs/interactive/keyboard' },
             { text: 'mouse()', link: '/docs/interactive/mouse' },
-            { text: 'createLoop()', link: '/docs/interactive/loop' }
+            { text: 'loop()', link: '/docs/interactive/loop' }
           ]
         },
         {

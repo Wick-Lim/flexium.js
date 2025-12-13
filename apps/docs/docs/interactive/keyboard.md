@@ -56,7 +56,7 @@ Keys.Alt
 function Game() {
   const kb = keyboard()
 
-  const loop = createLoop({
+  const gameLoop = loop({
     onUpdate: () => {
       if (kb.isPressed(Keys.ArrowUp)) {
         moveUp()
@@ -99,7 +99,7 @@ function PlayerController() {
 ```tsx
 const kb = keyboard()
 
-const loop = createLoop({
+const gameLoop = loop({
   onUpdate: () => {
     // Only jump on initial press, not while held
     if (kb.isJustPressed(Keys.Space)) {
@@ -175,4 +175,4 @@ import UseKeyboardDemo from '../../components/UseKeyboardDemo.vue'
 ## See Also
 
 - [mouse()](/docs/interactive/mouse)
-- [createLoop()](/docs/interactive/loop)
+- [loop()](/docs/interactive/loop)

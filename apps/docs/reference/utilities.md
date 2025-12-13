@@ -344,14 +344,14 @@ function PlayerController() {
 #### Game Loop Integration
 
 ```tsx
-import { keyboard, Keys, createLoop } from 'flexium/interactive';
+import { keyboard, Keys, loop } from 'flexium/interactive';
 import { state } from 'flexium/core';
 
 function Game() {
   const keyboard = keyboard();
   const player = state({ x: 100, y: 100, jumping: false });
 
-  createLoop((dt) => {
+  loop((dt) => {
     const pos = { ...player.valueOf() };
 
     // Check for jump
@@ -545,14 +545,14 @@ function DrawingCanvas() {
 #### Game Loop Integration
 
 ```tsx
-import { mouse, createLoop } from 'flexium/interactive';
+import { mouse, loop } from 'flexium/interactive';
 
 function ShootingGame() {
   const mouse = mouse();
   const crosshair = state({ x: 0, y: 0 });
   const projectiles = state<Array<{ x: number, y: number }>>([]);
 
-  createLoop((dt) => {
+  loop((dt) => {
     // Update crosshair position
     const pos = mouse.position();
     crosshair.set({ x: pos.x, y: pos.y });
