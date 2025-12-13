@@ -316,7 +316,7 @@ function UseMouseDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(UseMouseDemo(), container.value)
+    render(UseMouseDemo, container.value)
   }
 })
 

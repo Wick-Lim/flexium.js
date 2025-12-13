@@ -169,7 +169,7 @@ function RouterDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(RouterDemo(), container.value)
+    render(RouterDemo, container.value)
   }
 })
 

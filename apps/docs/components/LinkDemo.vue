@@ -159,7 +159,7 @@ function LinkDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(LinkDemo(), container.value)
+    render(LinkDemo, container.value)
   }
 })
 

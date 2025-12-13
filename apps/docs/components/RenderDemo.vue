@@ -256,7 +256,7 @@ function RenderDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(RenderDemo(), container.value)
+    render(RenderDemo, container.value)
   }
 })
 

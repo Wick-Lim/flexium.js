@@ -369,7 +369,7 @@ f('input', {
 
 onMounted(() => {
   if (container.value) {
-    render(FDemo(), container.value)
+    render(FDemo, container.value)
   }
 })
 

@@ -412,7 +412,7 @@ function PortalDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(PortalDemo(), container.value)
+    render(PortalDemo, container.value)
   }
 })
 

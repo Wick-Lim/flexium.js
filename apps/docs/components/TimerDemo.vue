@@ -160,7 +160,7 @@ function TimerDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(TimerDemo(), container.value)
+    render(TimerDemo, container.value)
   }
 })
 

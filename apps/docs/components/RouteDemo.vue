@@ -197,7 +197,7 @@ function RouteDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(RouteDemo(), container.value)
+    render(RouteDemo, container.value)
   }
 })
 

@@ -150,7 +150,7 @@ function ThemeDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(ThemeDemo(), container.value)
+    render(ThemeDemo, container.value)
   }
 })
 

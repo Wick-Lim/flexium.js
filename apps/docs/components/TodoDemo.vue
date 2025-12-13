@@ -123,7 +123,7 @@ function TodoDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(TodoDemo(), container.value)
+    render(TodoDemo, container.value)
   }
 })
 
