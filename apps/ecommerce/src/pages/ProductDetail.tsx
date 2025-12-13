@@ -1,16 +1,14 @@
-import { state, effect } from 'flexium/core'
+import { state } from 'flexium/core'
 import { Link, router } from 'flexium/router'
 import { useProducts, addToCart, type Product } from '../store'
 
 export default function ProductDetail() {
   const r = router()
-  const productId = parseInt(r.params().id)
+  const [productId] = state(() => parseInt(r.params.id))
   const [products] = useProducts()
-  const [product, setProduct] = state<Product | null>(null)
-
-  effect(() => {
+  const [product] = state<Product | null>(() => {
     const found = products.find(p => p.id === productId)
-    setProduct(found || null)
+    return found || null
   })
 
   if (!product) {

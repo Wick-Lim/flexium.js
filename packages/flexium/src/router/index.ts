@@ -1,5 +1,6 @@
 
 import { state } from '../core/state'
+import { reactive } from '../core/reactive'
 import { createContext, context } from '../core/context'
 import { jsx as f } from '../jsx-runtime'
 import type { FNode, FNodeChild } from '../dom'
@@ -46,8 +47,15 @@ function location(): [Location, (path: string) => void] {
         }
     }
 
-    // Reactive state for location
-    const [location, setLoc] = state<Location>(getLoc()) as [Location, (v: Location) => void]
+    // Create a reactive location object
+    const location = reactive<Location>(getLoc())
+
+    const updateLocation = (newLoc: Location) => {
+        location.pathname = newLoc.pathname
+        location.search = newLoc.search
+        location.hash = newLoc.hash
+        location.query = newLoc.query
+    }
 
     const navigate = (path: string) => {
         if (typeof window === 'undefined') return
@@ -59,12 +67,12 @@ function location(): [Location, (path: string) => void] {
         window.history.pushState({}, '', path)
         const newLoc = getLoc()
         console.log('[Router] Setting new location:', newLoc)
-        setLoc(newLoc)
+        updateLocation(newLoc)
     }
 
     // Listen to popstate
     const handlePopState = () => {
-        setLoc(getLoc())
+        updateLocation(getLoc())
     }
 
     if (typeof window !== 'undefined') {
@@ -96,41 +104,34 @@ export function Router(props: { children: FNodeChild }) {
     // Parse children to find <Route> definitions
     let childrenList: any[] = Array.isArray(props.children) ? props.children : [props.children]
 
-    // Note: We need to filter FNodes to valid Route components 
+    // Note: We need to filter FNodes to valid Route components
     const routeDefs = createRoutesFromChildren(childrenList.filter(c => isFNode(c) && c.type === Route))
-
-    const [matches] = state<RouteMatch[]>(() => {
-        const p = loc.pathname
-        console.log('[Router] Computing matches for:', p)
-        const m = matchRoutes(routeDefs, p) || []
-        console.log('[Router] Matched:', m)
-        return m
-    })
-
-    const [params] = state<Record<string, string>>(() => {
-        const list = matches
-        if (list.length > 0) {
-            return list[list.length - 1].params
-        }
-        return {}
-    })
-
-    const routerContext: RouterContext = {
-        location: loc,
-        navigate,
-        matches,
-        params
-    }
 
     // Render
     return () => {
         console.log('[Router] Rendering...')
+
+        // Compute matches inside render to track loc.pathname dependency
+        const currentPath = loc.pathname
+        console.log('[Router] Current path:', currentPath)
+        const matches = matchRoutes(routeDefs, currentPath) || []
+        console.log('[Router] Matched:', matches)
+
+        const params = matches.length > 0 ? matches[matches.length - 1].params : {}
+
+        // Create routerContext inside render to get latest reactive values
+        const routerContext: RouterContext = {
+            location: loc,
+            navigate,
+            matches: matches,
+            params: params
+        }
+
         // 1. Matched Content
         let matchedContent: FNodeChild = null
-        const currentMatches = matches
 
-        if (currentMatches.length > 0) {
-            const rootMatch = currentMatches[0]
+        if (matches.length > 0) {
+            const rootMatch = matches[0]
             const Component = rootMatch.route.component
 
             // Guard Check

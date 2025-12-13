@@ -31,32 +31,21 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
   let serializedKey: string | undefined
   if (options?.key) {
     if (!Array.isArray(options.key)) {
-      throw new Error('State key must be an array')
+      throw new Error('State key must be an array') // User requested array check
     }
     serializedKey = serializeKey(options.key)
-    if (globalRegistry.has(serializedKey)) {
-      // If global, we assume it's a reactive container stored in registry
-      const container: any = globalRegistry.get(serializedKey)
-      // We must track dependency here too!
-      const value = container.value
-
-      if (container.type === 'signal') {
-        return [value, (v: any) => container.value = v]
-      } else {
-        // Computed/Resource
-        const control = {
-          refetch: async () => { container.run() },
-          get loading() { return container.loading },
-          get error() { return container.error },
-          get status() { return container.status }
-        }
-        return [value, control]
-      }
-    }
   }
 
   // Hook Wrapper: Returns the REACTIVE CONTAINER (stable object)
+  // ALWAYS call hook() to ensure component hook index is maintained
   const container = hook(() => {
+    // Check Registry FIRST inside the factory (only runs once per component instance)
+    if (serializedKey && globalRegistry.has(serializedKey)) {
+      return globalRegistry.get(serializedKey)
+    }
+
+    let newContainer: any
+
     // 1. Function (Computed or Resource)
     if (typeof input === 'function') {
       const fn = input as Function
@@ -108,22 +97,24 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
       // Make it reactive!
       effect(run)
 
-      return state
+      newContainer = state
 
     } else {
       // 2. Value (Signal)
       // We return the reactive proxy itself as the container
-      return reactive({
+      newContainer = reactive({
         type: 'signal',
         value: input
       })
     }
-  }) as any
 
-  // Store in global registry if key provided (Store the container!)
-  if (serializedKey && !globalRegistry.has(serializedKey)) {
-    globalRegistry.set(serializedKey, container)
-  }
+    // Register in global registry if needed
+    if (serializedKey) {
+      globalRegistry.set(serializedKey, newContainer)
+    }
+
+    return newContainer
+  }) as any
 
   // --- RETURN LOGIC ---
   // This runs EVERY RENDER.

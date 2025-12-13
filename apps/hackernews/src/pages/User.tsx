@@ -4,29 +4,24 @@ import { loadUser, useUser } from '../store'
 
 export default function User(props: { params?: { id?: string } } = {}) {
     const r = router()
-    const [user, setUser] = state<any>(undefined)
-
-    effect(() => {
-        const params = r.params()
-        const idStr = params.id || props.params?.id;
-
-        if (!idStr) {
-            setUser(undefined)
-            return
+    const [userId] = state(() => r.params.id || props.params?.id)
+    const [user] = state(() => {
+        if (!userId) {
+            return undefined
         }
 
-        // Load user data (async) - no await needed, reactive system will handle updates
-        loadUser(idStr);
+        const [globalUser] = useUser(userId);
+        return globalUser
+    })
 
-        // Track the global user state reactively - this will update when loadUser completes
-        const [globalUser] = useUser(idStr);
-        // Reading globalUser.value here tracks the signal, so when loadUser sets it, this effect will re-run
-        const currentUser = globalUser();
-        setUser(currentUser);
-    });
+    effect(() => {
+        if (userId) {
+            loadUser(userId);
+        }
+    }, [userId])
 
     // Use proxy directly
-    const u = user();
+    const u = user;
     if (!u) return <div class="view user-view"><div>Loading...</div></div>
 
     const userValue = u

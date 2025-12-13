@@ -1,19 +1,17 @@
-import { state, effect } from 'flexium/core'
+import { state } from 'flexium/core'
 import { useTasks, type Task, type TaskStatus, type Priority } from '../store'
 import TaskCard from './TaskCard'
 
 function Column({ status, title, icon, filter }: { status: TaskStatus, title: string, icon: string, filter: Priority | 'all' }) {
   const [tasks] = useTasks()
-  const [filteredTasks, setFilteredTasks] = state<Task[]>([])
-
-  effect(() => {
+  const [filteredTasks] = state<Task[]>(() => {
     let filtered = tasks?.filter(task => task.status === status)
 
     if (filter !== 'all') {
       filtered = filtered?.filter(task => task.priority === filter)
     }
 
-    setFilteredTasks(filtered ?? [])
+    return filtered ?? []
   })
 
   const count = filteredTasks.length

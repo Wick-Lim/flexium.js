@@ -6,12 +6,16 @@ function Comment(props: { id: number }) {
     const [comment] = useItem(props.id);
 
     // Load comment data if missing
-    effect(() => {
-        loadItem(props.id);
-    });
+    // Load comment data if missing
+    if (!comment) {
+        // Use effect to load data
+        effect(() => {
+            loadItem(props.id);
+        }, [props.id]);
+    }
 
     // Use proxy directly - no function wrapper needed
-    const c = comment();
+    const c = comment;
     if (!c || c.type !== 'comment' || !c.text) return null
 
     return (
@@ -34,35 +38,29 @@ function Comment(props: { id: number }) {
 
 export default function Item(props: { params?: { id?: string } } = {}) {
     const r = router()
-    const [item, setItem] = state<any>(undefined)
+    const [itemId] = state(() => {
+        const idStr = r.params.id || props.params?.id;
+        return idStr ? parseInt(idStr) : undefined
+    })
+
+    const [item] = state(() => {
+        if (!itemId) {
+            return undefined
+        }
+
+        // Access global state
+        const [globalItem] = useItem(itemId);
+        return globalItem
+    })
 
     effect(() => {
-        const params = r.params()
-        const idStr = params.id || props.params?.id;
-
-        if (!idStr) {
-            setItem(undefined)
-            return
+        if (itemId) {
+            loadItem(itemId)
         }
-
-        const parsedId = parseInt(idStr);
-        if (!parsedId) {
-            setItem(undefined)
-            return
-        }
-
-        // Load item data (async) - no await needed, reactive system will handle updates
-        loadItem(parsedId);
-
-        // Track the global item state reactively - this will update when loadItem completes
-        const [globalItem] = useItem(parsedId);
-        // Reading globalItem.value here tracks the signal, so when loadItem sets it, this effect will re-run
-        const currentItem = globalItem();
-        setItem(currentItem);
-    });
+    }, [itemId])
 
     // Use proxy directly
-    const i = item();
+    const i = item;
     if (!i) return <div class="view item-view"><div>Loading...</div></div>
 
     const itemValue = i
