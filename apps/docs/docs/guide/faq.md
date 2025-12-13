@@ -323,15 +323,15 @@ sync(() => {
 **A**: Use `Router` and `Route` components.
 
 ```tsx
-import { Router, Route } from 'flexium/router'
+import { Routes, Route } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/users/:id" component={UserDetail} />
-    </Router>
+    </Routes>
   )
 }
 ```

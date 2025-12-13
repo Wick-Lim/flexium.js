@@ -578,7 +578,7 @@ function App() {
 With Flexium Router, automatically split by route:
 
 ```tsx
-import { Router, Route } from 'flexium/router';
+import { Routes, Route } from 'flexium/router';
 // Use dynamic imports with state for code splitting
 const Home = state(null);
 const About = state(null);
@@ -591,11 +591,11 @@ import('./pages/Contact').then(m => Contact.set(m.default));
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
-    </Router>
+    </Routes>
   );
 }
 ```
@@ -697,7 +697,7 @@ import { Column, Row, Text } from 'flexium/primitives';
 import { root, untrack } from 'flexium/advanced';
 
 // Router
-import { Router, Route, Link } from 'flexium/router';
+import { Routes, Route, Link } from 'flexium/router';
 
 // Canvas
 import { Canvas } from 'flexium/canvas';

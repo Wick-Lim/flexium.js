@@ -410,11 +410,11 @@ function App() {
 }
 
 // ✅ After (Flexium Router)
-import { Router, Route, Link } from 'flexium/router'
+import { Routes, Route, Link } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <nav>
         <Link to="/">Home</Link>
         <Link to="/about">About</Link>
@@ -422,7 +422,7 @@ function App() {
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/users/:id" component={UserDetail} />
-    </Router>
+    </Routes>
   )
 }
 ```

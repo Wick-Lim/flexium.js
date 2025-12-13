@@ -17,11 +17,11 @@ Flexium includes a built-in router for building Single Page Applications (SPA). 
 ## Quick Start
 
 ```tsx
-import { Router, Route, Link } from 'flexium/router'
+import { Routes, Route, Link } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <nav>
         <Link to="/">Home</Link>
         <Link to="/about">About</Link>
@@ -29,7 +29,7 @@ function App() {
 
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
-    </Router>
+    </Routes>
   )
 }
 ```
@@ -41,11 +41,11 @@ function App() {
 The router uses three main components to define your application's routes:
 
 ```tsx
-import { Router, Route, Link, router } from 'flexium/router'
+import { Routes, Route, Link, router } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <nav>
         <Link to="/">Home</Link>
         <Link to="/about">About</Link>
@@ -55,7 +55,7 @@ function App() {
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/users/:id" component={UserProfile} />
-    </Router>
+    </Routes>
   )
 }
 
@@ -99,17 +99,17 @@ Nested routes allow you to create complex layouts where parent components wrap c
 ### Basic Nested Routes
 
 ```tsx
-import { Router, Route, Outlet, Link } from 'flexium/router'
+import { Routes, Route, Outlet, Link } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/dashboard" component={DashboardLayout}>
         <Route index component={DashboardHome} />
         <Route path="/dashboard/profile" component={Profile} />
         <Route path="/dashboard/settings" component={Settings} />
       </Route>
-    </Router>
+    </Routes>
   )
 }
 
@@ -141,7 +141,7 @@ function DashboardHome() {
 You can nest routes multiple levels deep:
 
 ```tsx
-<Router>
+<Routes>
   <Route path="/" component={RootLayout}>
     <Route index component={HomePage} />
 
@@ -154,7 +154,7 @@ You can nest routes multiple levels deep:
       </Route>
     </Route>
   </Route>
-</Router>
+</Routes>
 ```
 
 ### Index Routes
@@ -180,7 +180,7 @@ Protect routes using the `beforeEnter` guard. This function runs before the rout
 ```tsx
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
 
@@ -197,7 +197,7 @@ function App() {
           return true
         }}
       />
-    </Router>
+    </Routes>
   )
 }
 ```
@@ -543,14 +543,14 @@ Handle unmatched routes to create a 404 Not Found page.
 ```tsx
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/users/:id" component={UserProfile} />
 
       {/* This will render when no other route matches */}
       <Route path="*" component={NotFound} />
-    </Router>
+    </Routes>
   )
 }
 
@@ -607,7 +607,7 @@ function NotFound() {
 Handle 404s at different route levels:
 
 ```tsx
-<Router>
+<Routes>
   <Route path="/" component={RootLayout}>
     <Route index component={Home} />
 
@@ -622,7 +622,7 @@ Handle 404s at different route levels:
     {/* Global 404 */}
     <Route path="*" component={NotFound} />
   </Route>
-</Router>
+</Routes>
 ```
 
 ## Security Features
@@ -772,7 +772,7 @@ location / {
 
 ## Components
 
-### `<Router>`
+### `<Routes>`
 The root component that provides the routing context. It manages the history and current location.
 
 ### `<Route>`
@@ -823,11 +823,11 @@ console.log(matches.length)
 ### Blog Application
 
 ```tsx
-import { Router, Route, Link, Outlet, router } from 'flexium/router'
+import { Routes, Route, Link, Outlet, router } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={BlogLayout}>
         <Route index component={PostList} />
         <Route path="/posts/:slug" component={PostDetail} />
@@ -835,7 +835,7 @@ function App() {
         <Route path="/authors/:id" component={AuthorProfile} />
         <Route path="*" component={NotFound} />
       </Route>
-    </Router>
+    </Routes>
   )
 }
 
@@ -858,7 +858,7 @@ function BlogLayout() {
 ```tsx
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={MainLayout}>
         <Route index component={HomePage} />
 
@@ -885,7 +885,7 @@ function App() {
           <Route path="/account/settings" component={Settings} />
         </Route>
       </Route>
-    </Router>
+    </Routes>
   )
 }
 ```

@@ -23,14 +23,14 @@ The root routing component that provides routing context to the application. It 
 #### Usage
 
 ```tsx
-import { Router, Route } from 'flexium/router';
+import { Routes, Route } from 'flexium/router';
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
-    </Router>
+    </Routes>
   );
 }
 ```
@@ -58,11 +58,11 @@ A route configuration component that defines a path pattern and the component to
 #### Usage
 
 ```tsx
-import { Router, Route } from 'flexium/router';
+import { Routes, Route } from 'flexium/router';
 
 function App() {
   return (
-    <Router>
+    <Routes>
       {/* Basic route */}
       <Route path="/" component={Home} />
 
@@ -84,7 +84,7 @@ function App() {
           return checkAuth();
         }}
       />
-    </Router>
+    </Routes>
   );
 }
 ```
@@ -209,12 +209,12 @@ function DashboardLayout() {
 }
 
 // Route configuration
-<Router>
+<Routes>
   <Route path="/dashboard" component={DashboardLayout}>
     <Route index component={DashboardHome} />
     <Route path="/dashboard/settings" component={Settings} />
   </Route>
-</Router>
+</Routes>
 ```
 
 #### Props
@@ -312,10 +312,10 @@ interface RouteMatch {
 
 #### Error Handling
 
-Throws an error if used outside of a `<Router>` component:
+Throws an error if used outside of a `<Routes>` component:
 
 ```
-Error: router() must be called within a <Router> component
+Error: router() must be called within a <Routes> component
 ```
 
 ---
@@ -365,7 +365,7 @@ Returns `RouteMatch[] | null`:
 
 ### createRoutesFromChildren
 
-Parses FNode children into a route configuration tree. Used internally by the `<Router>` component.
+Parses FNode children into a route configuration tree. Used internally by the `<Routes>` component.
 
 #### Usage
 
@@ -389,7 +389,7 @@ Returns `RouteDef[]` - an array of route definitions extracted from the FNode tr
 
 ### createLocation
 
-Creates a reactive location signal and navigation function. Used internally by the `<Router>` component.
+Creates a reactive location signal and navigation function. Used internally by the `<Routes>` component.
 
 #### Usage
 
@@ -464,7 +464,7 @@ Create complex layouts with nested routes using `<Outlet>`:
 ```tsx
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={RootLayout}>
         <Route index component={Home} />
 
@@ -476,7 +476,7 @@ function App() {
 
         <Route path="/users/:id" component={UserProfile} />
       </Route>
-    </Router>
+    </Routes>
   );
 }
 
@@ -507,7 +507,7 @@ function DashboardLayout() {
 Routes can be nested to any depth:
 
 ```tsx
-<Router>
+<Routes>
   <Route path="/" component={RootLayout}>
     <Route path="/admin" component={AdminLayout}>
       <Route path="/admin/users" component={UsersLayout}>
@@ -520,7 +520,7 @@ Routes can be nested to any depth:
       </Route>
     </Route>
   </Route>
-</Router>
+</Routes>
 ```
 
 ### Programmatic Navigation
@@ -603,7 +603,7 @@ Protect routes with `beforeEnter` guards. Guards run before the route renders an
 ```tsx
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
 
@@ -621,7 +621,7 @@ function App() {
           return true;
         }}
       />
-    </Router>
+    </Routes>
   );
 }
 ```
@@ -918,13 +918,13 @@ Handle unmatched routes by using a wildcard path pattern.
 ```tsx
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
 
       {/* Catch-all route for 404 */}
       <Route path="*" component={NotFound} />
-    </Router>
+    </Routes>
   );
 }
 
@@ -993,7 +993,7 @@ function NotFound() {
 Handle 404s at different levels of your route hierarchy:
 
 ```tsx
-<Router>
+<Routes>
   <Route path="/" component={RootLayout}>
     <Route index component={Home} />
 
@@ -1017,7 +1017,7 @@ Handle 404s at different levels of your route hierarchy:
     {/* Global 404 - must be last */}
     <Route path="*" component={NotFound} />
   </Route>
-</Router>
+</Routes>
 ```
 
 #### Smart 404 with Search
@@ -1109,12 +1109,12 @@ function TransitionWrapper({ children }) {
 // Usage
 function App() {
   return (
-    <Router>
+    <Routes>
       <TransitionWrapper>
         <Route path="/" component={Home} />
         <Route path="/about" component={About} />
       </TransitionWrapper>
-    </Router>
+    </Routes>
   );
 }
 ```
@@ -1332,10 +1332,10 @@ const basePath = '/my-app';
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path={`${basePath}/`} component={Home} />
       <Route path={`${basePath}/about`} component={About} />
-    </Router>
+    </Routes>
   );
 }
 
@@ -1420,11 +1420,11 @@ interface RouteDef {
 ### Basic Single Page App
 
 ```tsx
-import { Router, Route, Link } from 'flexium/router';
+import { Routes, Route, Link } from 'flexium/router';
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <nav>
         <Link to="/">Home</Link>
         <Link to="/about">About</Link>
@@ -1434,7 +1434,7 @@ function App() {
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
-    </Router>
+    </Routes>
   );
 }
 ```
@@ -1442,17 +1442,17 @@ function App() {
 ### Blog with Dynamic Routes
 
 ```tsx
-import { Router, Route, Link, router } from 'flexium/router';
+import { Routes, Route, Link, router } from 'flexium/router';
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/" component={BlogLayout}>
         <Route index component={PostList} />
         <Route path="/posts/:slug" component={PostDetail} />
         <Route path="/categories/:category" component={CategoryPosts} />
       </Route>
-    </Router>
+    </Routes>
   );
 }
 
@@ -1467,18 +1467,18 @@ function PostDetail() {
 ### Dashboard with Nested Routes
 
 ```tsx
-import { Router, Route, Outlet, Link } from 'flexium/router';
+import { Routes, Route, Outlet, Link } from 'flexium/router';
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/dashboard" component={DashboardLayout}>
         <Route index component={Overview} />
         <Route path="/dashboard/analytics" component={Analytics} />
         <Route path="/dashboard/users" component={UserManagement} />
         <Route path="/dashboard/settings" component={Settings} />
       </Route>
-    </Router>
+    </Routes>
   );
 }
 
@@ -1509,7 +1509,7 @@ Organize routes hierarchically for maintainability:
 
 ```tsx
 // Good: Hierarchical organization
-<Router>
+<Routes>
   <Route path="/" component={RootLayout}>
     <Route index component={Home} />
 
@@ -1526,7 +1526,7 @@ Organize routes hierarchically for maintainability:
       <Route path="/admin/settings" component={AdminSettings} />
     </Route>
   </Route>
-</Router>
+</Routes>
 ```
 
 ### Loading States
@@ -1539,7 +1539,7 @@ function App() {
   const [isLoading, setIsLoading] = state(false);
 
   return (
-    <Router>
+    <Routes>
       {isLoading() && <LoadingBar />}
 
       <Route
@@ -1555,7 +1555,7 @@ function App() {
           }
         }}
       />
-    </Router>
+    </Routes>
   );
 }
 ```
@@ -1688,11 +1688,11 @@ function ScrollManager() {
 }
 
 // Usage
-<Router>
+<Routes>
   <ScrollManager />
   <Route path="/" component={Home} />
   {/* other routes */}
-</Router>
+</Routes>
 ```
 
 ### Route Meta Information

@@ -198,11 +198,11 @@ effect(() => {
 ### How do I set up routing?
 
 ```tsx
-import { Router, Route, Link } from 'flexium/router'
+import { Routes, Route, Link } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <nav>
         <Link href="/">Home</Link>
         <Link href="/about">About</Link>
@@ -210,7 +210,7 @@ function App() {
 
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
-    </Router>
+    </Routes>
   )
 }
 ```

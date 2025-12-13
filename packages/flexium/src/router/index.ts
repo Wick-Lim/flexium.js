@@ -152,9 +152,6 @@ export function Routes(props: { children: FNodeChild }) {
     })
 }
 
-// Keep Router as alias for backward compatibility (deprecated)
-export const Router = Routes
-
 export function Route(_props: RouteProps) {
     return null
 }

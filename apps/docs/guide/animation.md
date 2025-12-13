@@ -397,11 +397,11 @@ function TodoList() {
 
 ```tsx
 import { Transition, transitions } from 'flexium/primitives'
-import { Router, Route } from 'flexium/router'
+import { Routes, Route } from 'flexium/router'
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <Route path="/">
         <Transition {...transitions.page}>
           <HomePage />
@@ -412,7 +412,7 @@ function App() {
           <AboutPage />
         </Transition>
       </Route>
-    </Router>
+    </Routes>
   )
 }
 ```

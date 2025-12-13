@@ -258,10 +258,10 @@ function ProtectedAction() {
 
 #### Error Handling
 
-Throws an error if used outside a `<Router>` component:
+Throws an error if used outside a `<Routes>` component:
 
 ```
-Error: router() must be called within a <Router> component
+Error: router() must be called within a <Routes> component
 ```
 
 For complete routing documentation, see the [Router API Reference](/reference/router).
