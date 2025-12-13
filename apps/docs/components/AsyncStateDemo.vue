@@ -23,10 +23,7 @@ function fakeUserApi() {
 }
 
 function AsyncDemo() {
-  const users = state(async () => fakeUserApi())
-  const refetch = users.refetch
-  const status = users.status
-  const error = users.error
+  const [users, { refetch, status, error }] = state(async () => fakeUserApi())
 
 
   const containerNode = f('div', {
@@ -72,22 +69,22 @@ function AsyncDemo() {
       }
     }, [
       f('div', {
-        style: () => ({
+        style: {
           width: '12px',
           height: '12px',
           borderRadius: '50%',
           background: status === 'loading' ? '#f59e0b' : '#10b981',
           transition: 'background 0.2s'
-        })
+        }
       }),
       f('span', {
         style: {
           fontSize: '14px',
           color: '#374151'
         }
-      }, [() => status === 'loading' ? 'Loading...' : 'Ready']),
+      }, [status === 'loading' ? 'Loading...' : 'Ready']),
       f('button', {
-        onclick: refetch,
+        onclick: () => refetch(),
         style: {
           marginLeft: 'auto',
           padding: '8px 16px',
@@ -110,87 +107,71 @@ function AsyncDemo() {
         gap: '8px'
       }
     }, [
-      () => {
-        if (status === 'loading') {
-          return f('div', {
-            style: {
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px'
-            }
-          }, [
-            f('div', { style: { height: '60px', background: '#e5e7eb', borderRadius: '8px', animation: 'pulse 1.5s infinite' } }),
-            f('div', { style: { height: '60px', background: '#e5e7eb', borderRadius: '8px', animation: 'pulse 1.5s infinite', animationDelay: '0.2s' } }),
-          ])
+      status === 'loading' ? f('div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
         }
-
-        const currentError = error
-        if (currentError) {
-          return f('div', {
-            style: {
-              padding: '16px',
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '8px',
-              color: '#dc2626'
-            }
-          }, ['Error: ' + currentError.message])
+      }, [
+        f('div', { style: { height: '60px', background: '#e5e7eb', borderRadius: '8px', animation: 'pulse 1.5s infinite' } }),
+        f('div', { style: { height: '60px', background: '#e5e7eb', borderRadius: '8px', animation: 'pulse 1.5s infinite', animationDelay: '0.2s' } }),
+      ]) : error ? f('div', {
+        style: {
+          padding: '16px',
+          background: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          color: '#dc2626'
         }
-
-        // users는 바로 배열처럼 사용 가능 (proxy가 속성 접근을 포워딩)
-        if (!users.length) {
-          return f('div', {
-            style: {
-              padding: '16px',
-              textAlign: 'center',
-              color: '#6b7280'
-            }
-          }, ['No users found'])
+      }, ['Error: ' + error.message]) : !users.length ? f('div', {
+        style: {
+          padding: '16px',
+          textAlign: 'center',
+          color: '#9ca3af'
         }
-
-        return f('div', {
+      }, ['No users found']) : f('div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
+        }
+      }, users.map(user =>
+        f('div', {
           style: {
             display: 'flex',
-            flexDirection: 'column',
-            gap: '8px'
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 16px',
+            background: 'white',
+            borderRadius: '8px',
+            border: '1px solid #e5e7eb'
           }
-        }, users.map(user =>
+        }, [
           f('div', {
             style: {
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: '#6366f1',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              padding: '12px 16px',
-              background: 'white',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb'
+              justifyContent: 'center',
+              color: 'white',
+              fontWeight: '600',
+              fontSize: '16px'
             }
-          }, [
+          }, [user.name[0]]),
+          f('div', {}, [
             f('div', {
-              style: {
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                background: '#6366f1',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: '600',
-                fontSize: '16px'
-              }
-            }, [user.name[0]]),
-            f('div', {}, [
-              f('div', {
-                style: { fontWeight: '600', color: '#111' }
-              }, [user.name]),
-              f('div', {
-                style: { fontSize: '13px', color: '#6b7280' }
-              }, [user.role])
-            ])
+              style: { fontWeight: '600', color: '#111' }
+            }, [user.name]),
+            f('div', {
+              style: { fontSize: '13px', color: '#6b7280' }
+            }, [user.role])
           ])
-        ))
-      }
+        ])
+      ))
     ]),
 
     // Code hint
@@ -204,7 +185,7 @@ function AsyncDemo() {
         color: '#e5e7eb',
         overflowX: 'auto'
       }
-    }, ['const [users, refetch, status, error] = state(async () => fetch(...))'])
+    }, ['const [users, { refetch, status, error }] = state(async () => fetch(...))'])
   ])
 
   return containerNode

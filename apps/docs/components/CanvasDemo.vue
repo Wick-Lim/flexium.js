@@ -1,62 +1,38 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
 import { state } from 'flexium/core'
+import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 let frameId = null
 
-onMounted(() => {
-  if (!container.value) return
+function CanvasDemo() {
+  const [mouseX, setMouseX] = state(150)
+  const [mouseY, setMouseY] = state(150)
+  const [hue, setHue] = state(0)
+  const [particles, setParticles] = state([])
 
-  // State
-  const mouseX = state(150)
-  const mouseY = state(150)
-  const hue = state(0)
-  const particles = state([])
+  let canvasRef = null
 
-  // Build DOM directly (Vue handles the wrapper)
-  const wrapper = document.createElement('div')
-  wrapper.style.cssText = 'padding: 24px; background: #f9fafb; border-radius: 12px; width: 100%; max-width: 100%; box-sizing: border-box; text-align: center;'
-
-  const title = document.createElement('h3')
-  title.textContent = 'Canvas Animation'
-  title.style.cssText = 'margin: 0 0 16px; color: #374151;'
-
-  const desc = document.createElement('p')
-  desc.textContent = 'Move your mouse over the canvas'
-  desc.style.cssText = 'margin: 0 0 16px; color: #6b7280; font-size: 14px;'
-
-  const canvas = document.createElement('canvas')
-  canvas.width = 300
-  canvas.height = 300
-  canvas.style.cssText = 'background: #1a1a2e; border-radius: 12px; cursor: crosshair; display: block; margin: 0 auto;'
-
-  wrapper.appendChild(title)
-  wrapper.appendChild(desc)
-  wrapper.appendChild(canvas)
-  container.value.appendChild(wrapper)
-
-  const ctx = canvas.getContext('2d')
-
-  canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect()
+  const handleMouseMove = (e) => {
+    const rect = canvasRef.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    mouseX.set(x)
-    mouseY.set(y)
+    setMouseX(x)
+    setMouseY(y)
 
-    particles.set([...particles.slice(-20), {
+    setParticles([...particles.slice(-20), {
       x, y,
       size: Math.random() * 10 + 5,
       hue: hue
     }])
-  })
+  }
 
-  // Animation loop
   const animate = () => {
-    hue.set((hue + 1) % 360)
+    setHue((hue + 1) % 360)
 
-    if (ctx) {
+    if (canvasRef) {
+      const ctx = canvasRef.getContext('2d')
       ctx.fillStyle = 'rgba(26, 26, 46, 0.1)'
       ctx.fillRect(0, 0, 300, 300)
 
@@ -85,7 +61,44 @@ onMounted(() => {
     frameId = requestAnimationFrame(animate)
   }
 
-  animate()
+  return f('div', {
+    style: {
+      padding: '24px',
+      background: '#f9fafb',
+      borderRadius: '12px',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
+      textAlign: 'center'
+    }
+  }, [
+    f('h3', { style: { margin: '0 0 16px', color: '#374151' } }, ['Canvas Animation']),
+    f('p', { style: { margin: '0 0 16px', color: '#6b7280', fontSize: '14px' } }, ['Move your mouse over the canvas']),
+    f('canvas', {
+      ref: (el) => {
+        canvasRef = el
+        if (el) {
+          el.addEventListener('mousemove', handleMouseMove)
+          animate()
+        }
+      },
+      width: 300,
+      height: 300,
+      style: {
+        background: '#1a1a2e',
+        borderRadius: '12px',
+        cursor: 'crosshair',
+        display: 'block',
+        margin: '0 auto'
+      }
+    })
+  ])
+}
+
+onMounted(() => {
+  if (container.value) {
+    render(CanvasDemo, container.value)
+  }
 })
 
 onUnmounted(() => {

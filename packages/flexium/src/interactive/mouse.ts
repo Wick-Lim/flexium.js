@@ -12,9 +12,11 @@ export interface MouseOptions {
 }
 
 export interface MouseState {
-  position: { valueOf: () => { x: number; y: number } }
-  delta: { valueOf: () => { x: number; y: number } }
-  wheelDelta: { valueOf: () => number }
+  x: number | null
+  y: number | null
+  deltaX: number
+  deltaY: number
+  wheelDelta: number
   isPressed: (button: MouseButton) => boolean
   isLeftPressed: () => boolean
   isRightPressed: () => boolean
@@ -27,10 +29,10 @@ export function mouse(options: MouseOptions = {}): MouseState {
   const target = options.target || window
   const canvasGetter = typeof options.canvas === 'function' ? options.canvas : () => options.canvas as HTMLCanvasElement | undefined
 
-  const [position, setPosition] = state({ x: 0, y: 0 }, { key: ['mouse', 'position'] })
-  const [delta, setDelta] = state({ x: 0, y: 0 }, { key: ['mouse', 'delta'] })
-  const [wheelDelta, setWheelDelta] = state(0, { key: ['mouse', 'wheel'] })
-  const [buttons, setButtons] = state<Set<number>>(new Set<number>(), { key: ['mouse', 'buttons'] })
+  const position = state({ x: 0, y: 0 }, { key: ['mouse', 'position'] })
+  const delta = state({ x: 0, y: 0 }, { key: ['mouse', 'delta'] })
+  const wheelDelta = state(0, { key: ['mouse', 'wheel'] })
+  const buttons = state<Set<number>>(new Set<number>(), { key: ['mouse', 'buttons'] })
 
   let lastX = 0
   let lastY = 0
@@ -49,29 +51,31 @@ export function mouse(options: MouseOptions = {}): MouseState {
       y = me.clientY - rect.top
     }
 
-    setPosition({ x, y })
-    setDelta({ x: x - lastX, y: y - lastY })
+    position.set({ x, y })
+    delta.set({ x: x - lastX, y: y - lastY })
     lastX = x
     lastY = y
   }
 
   const handleMouseDown = (e: Event) => {
     const button = (e as MouseEvent).button
-    const newButtons = new Set(buttons)
+    const currentButtons = buttons as Set<number>
+    const newButtons = new Set(currentButtons)
     newButtons.add(button)
-    setButtons(newButtons)
+    buttons.set(newButtons)
   }
 
   const handleMouseUp = (e: Event) => {
     const button = (e as MouseEvent).button
-    const newButtons = new Set(buttons)
+    const currentButtons = buttons as Set<number>
+    const newButtons = new Set(currentButtons)
     newButtons.delete(button)
-    setButtons(newButtons)
+    buttons.set(newButtons)
   }
 
   const handleWheel = (e: Event) => {
     const we = e as WheelEvent
-    setWheelDelta(we.deltaY)
+    wheelDelta.set(we.deltaY)
   }
 
   target.addEventListener('mousemove', handleMouseMove)
@@ -79,30 +83,29 @@ export function mouse(options: MouseOptions = {}): MouseState {
   target.addEventListener('mouseup', handleMouseUp)
   target.addEventListener('wheel', handleWheel)
 
+  const currentButtons = buttons as Set<number>
+  const currentPosition = position as { x: number; y: number }
+  const currentDelta = delta as { x: number; y: number }
+  const currentWheelDelta = wheelDelta as number
+
   return {
-    position: {
-      valueOf: () => position
-    },
+    get x() { return currentPosition.x },
+    get y() { return currentPosition.y },
+    get deltaX() { return currentDelta.x },
+    get deltaY() { return currentDelta.y },
+    get wheelDelta() { return currentWheelDelta },
 
-    delta: {
-      valueOf: () => delta
-    },
+    isPressed: (button: MouseButton) => currentButtons?.has(button) || false,
 
-    wheelDelta: {
-      valueOf: () => wheelDelta
-    },
+    isLeftPressed: () => currentButtons?.has(MouseButton.Left) || false,
 
-    isPressed: (button: MouseButton) => buttons?.has(button) || false,
+    isRightPressed: () => currentButtons?.has(MouseButton.Right) || false,
 
-    isLeftPressed: () => buttons?.has(MouseButton.Left) || false,
-
-    isRightPressed: () => buttons?.has(MouseButton.Right) || false,
-
-    isMiddlePressed: () => buttons?.has(MouseButton.Middle) || false,
+    isMiddlePressed: () => currentButtons?.has(MouseButton.Middle) || false,
 
     clearFrameState: () => {
-      setDelta({ x: 0, y: 0 })
-      setWheelDelta(0)
+      delta.set({ x: 0, y: 0 })
+      wheelDelta.set(0)
     },
 
     dispose: () => {

@@ -6,13 +6,13 @@ import { f, render } from 'flexium/dom'
 const container = ref(null)
 
 function ComputedCalculator() {
-  const num1 = state(10)
-  const num2 = state(5)
+  const [num1, setNum1] = state(10)
+  const [num2, setNum2] = state(5)
 
-  const sum = state(() => num1 + num2)
-  const difference = state(() => num1 - num2)
-  const product = state(() => num1 * num2)
-  const average = state(() => (num1 + num2) / 2)
+  const [sum] = state(() => num1 + num2)
+  const [difference] = state(() => num1 - num2)
+  const [product] = state(() => num1 * num2)
+  const [average] = state(() => (num1 + num2) / 2)
 
   const containerNode = f('div', {
     style: {
@@ -77,7 +77,7 @@ function ComputedCalculator() {
         f('input', {
           type: 'number',
           value: num1,
-          oninput: (e) => num1.set(parseFloat(e.target.value) || 0),
+          oninput: (e) => setNum1(parseFloat(e.target.value) || 0),
           style: {
             width: '100%',
             padding: '10px 12px',
@@ -116,7 +116,7 @@ function ComputedCalculator() {
         f('input', {
           type: 'number',
           value: num2,
-          oninput: (e) => num2.set(parseFloat(e.target.value) || 0),
+          oninput: (e) => setNum2(parseFloat(e.target.value) || 0),
           style: {
             width: '100%',
             padding: '10px 12px',

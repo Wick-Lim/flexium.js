@@ -9,10 +9,10 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const scale = state(1)
-  const rotation = state(0)
-  const selectedPath = state('star')
-  const time = state(0)
+  const [scale, setScale] = state(1)
+  const [rotation, setRotation] = state(0)
+  const [selectedPath, setSelectedPath] = state('star')
+  const [time, setTime] = state(0)
 
   // SVG Path definitions
   const paths = {
@@ -110,7 +110,7 @@ onMounted(() => {
       `
 
       btn.addEventListener('click', () => {
-        selectedPath.set(option.value)
+        setSelectedPath(option.value)
         // Update all button styles
         Array.from(div.children).forEach((b, i) => {
           b.style.background = shapeOptions[i].value === option.value ? '#3b82f6' : '#ffffff'
@@ -126,8 +126,8 @@ onMounted(() => {
 
   const sliderContainer = document.createElement('div')
   sliderContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 12px;'
-  sliderContainer.appendChild(createSlider('Scale', scale, 0.5, 3, 0.1, (val) => scale.set(val)))
-  sliderContainer.appendChild(createSlider('Rotation', rotation, 0, 360, 1, (val) => rotation.set(val)))
+  sliderContainer.appendChild(createSlider('Scale', scale, 0.5, 3, 0.1, (val) => setScale(val)))
+  sliderContainer.appendChild(createSlider('Rotation', rotation, 0, 360, 1, (val) => setRotation(val)))
 
   const shapeButtons = createShapeButtons()
 
@@ -160,7 +160,7 @@ onMounted(() => {
 
   // Animation loop
   const animate = () => {
-    time.set(t => t + 0.02)
+    setTime(t => t + 0.02)
 
     if (ctx) {
       // Clear canvas

@@ -7,9 +7,9 @@ const container = ref(null)
 let timerInterval = null
 
 function TimerDemo() {
-  const seconds = state(0)
-  const isRunning = state(false)
-  const laps = state([])
+  const [seconds, setSeconds] = state(0)
+  const [isRunning, setIsRunning] = state(false)
+  const [laps, setLaps] = state([])
 
   // Format time as mm:ss.ms
   const formatTime = (totalSeconds) => {
@@ -26,12 +26,12 @@ function TimerDemo() {
         clearInterval(timerInterval)
         timerInterval = null
       }
-      isRunning.set(false)
+      setIsRunning(false)
     } else {
       // Start
-      isRunning.set(true)
+      setIsRunning(true)
       timerInterval = setInterval(() => {
-        seconds.set(s => s + 0.01)
+        setSeconds(s => s + 0.01)
       }, 10)
     }
   }
@@ -41,14 +41,14 @@ function TimerDemo() {
       clearInterval(timerInterval)
       timerInterval = null
     }
-    isRunning.set(false)
-    seconds.set(0)
-    laps.set([])
+    setIsRunning(false)
+    setSeconds(0)
+    setLaps([])
   }
 
   const addLap = () => {
     if (isRunning) {
-      laps.set(prev => [seconds, ...prev])
+      setLaps(prev => [seconds, ...prev])
     }
   }
 
@@ -78,12 +78,12 @@ function TimerDemo() {
         borderRadius: '8px',
         border: '1px solid #e5e7eb'
       }
-    }, [() => formatTime(seconds)]),
+    }, [formatTime(seconds)]),
 
     // Buttons
     f('div', { style: { display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' } }, [
       // Start/Stop button - use a function to render reactively
-      () => f('button', {
+      f('button', {
         onclick: startStop,
         style: {
           padding: '12px 24px',
@@ -136,28 +136,24 @@ function TimerDemo() {
         textAlign: 'left'
       }
     }, [
-      () => {
-        const lapList = laps
-        if (lapList.length === 0) return null
-        return f('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
-          lapList.map((lap, i) =>
-            f('div', {
-              style: {
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '8px 12px',
-                background: 'white',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontFamily: 'monospace'
-              }
-            }, [
-              f('span', { style: { color: '#6b7280' } }, [`Lap ${lapList.length - i}`]),
-              f('span', { style: { fontWeight: '600' } }, [formatTime(lap)])
-            ])
-          )
+      laps.length === 0 ? null : f('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
+        laps.map((lap, i) =>
+          f('div', {
+            style: {
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '8px 12px',
+              background: 'white',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontFamily: 'monospace'
+            }
+          }, [
+            f('span', { style: { color: '#6b7280' } }, [`Lap ${laps.length - i}`]),
+            f('span', { style: { fontWeight: '600' } }, [formatTime(lap)])
+          ])
         )
-      }
+      )
     ])
   ])
 }

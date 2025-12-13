@@ -65,12 +65,12 @@ Check out these full applications built with Flexium:
 ---
 
 <script setup>
-import ShowcaseDemo from '../components/ShowcaseDemo.vue'
-import TodoDemo from '../components/TodoDemo.vue'
-import CanvasDemo from '../components/CanvasDemo.vue'
-import TimerDemo from '../components/TimerDemo.vue'
-import SnakeGameDemo from '../components/SnakeGameDemo.vue'
-import ContextDemo from '../components/ContextDemo.vue'
+import ShowcaseDemo from './components/ShowcaseDemo.vue'
+import TodoDemo from './components/TodoDemo.vue'
+import CanvasDemo from './components/CanvasDemo.vue'
+import TimerDemo from './components/TimerDemo.vue'
+import SnakeGameDemo from './components/SnakeGameDemo.vue'
+import ContextDemo from './components/ContextDemo.vue'
 </script>
 
 ---
@@ -138,10 +138,10 @@ function TodoApp() {
   const inputText = state('')
 
   const addTodo = () => {
-    if (!inputText.trim()) return
+    if (!inputText.valueOf().trim()) return
     todos.set(prev => [...prev, {
       id: Date.now(),
-      text: inputText,
+      text: inputText.valueOf(),
       done: false
     }])
     inputText.set('')
@@ -216,7 +216,7 @@ function Stopwatch() {
 
   let intervalId
   const startStop = () => {
-    if (isRunning) {
+    if (isRunning.valueOf()) {
       clearInterval(intervalId)
       isRunning.set(false)
     } else {
@@ -230,16 +230,16 @@ function Stopwatch() {
   return (
     <Column gap={16}>
       <Text style={{ fontSize: '48px', fontFamily: 'monospace' }}>
-        {formatTime(seconds)}
+        {formatTime(seconds.valueOf())}
       </Text>
 
       <Row gap={8}>
         <Pressable onPress={startStop}>
-          <Text style={{ background: isRunning ? 'red' : 'green' }}>
-            {isRunning ? 'Stop' : 'Start'}
+          <Text style={{ background: isRunning.valueOf() ? 'red' : 'green' }}>
+            {isRunning.valueOf() ? 'Stop' : 'Start'}
           </Text>
         </Pressable>
-        <Pressable onPress={() => laps.set(prev => [seconds, ...prev])}>
+        <Pressable onPress={laps.set(prev => [seconds.valueOf(), ...prev])}>
           <Text>Lap</Text>
         </Pressable>
         <Pressable onPress={() => { seconds.set(0); laps.set([]) }}>
@@ -290,7 +290,7 @@ function ParticleCanvas() {
 
     mouseX.set(x)
     mouseY.set(y)
-    particles.set(prev => [...prev.slice(-20), { x, y, hue: hue }])
+    particles.set(prev => [...prev.slice(-20), { x, y, hue: hue.valueOf() }])
   }
 
   return (
@@ -429,7 +429,7 @@ function useCart() {
     items.set(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
   }
   
-  const total = state(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), { key: ['app', 'cart', 'total'] })
+  const total = state(() => items.valueOf().reduce((sum, item) => sum + item.price * item.qty, 0), { key: ['app', 'cart', 'total'] })
   
   return { items, addItem, removeItem, updateQty, total }
 }

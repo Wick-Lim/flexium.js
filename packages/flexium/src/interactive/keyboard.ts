@@ -56,51 +56,67 @@ export interface KeyboardState {
 }
 
 export function keyboard(target: EventTarget = window): KeyboardState {
-  const [pressedKeys, setPressedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'pressed'] })
-  const [justPressedKeys, setJustPressedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justPressed'] })
-  const [justReleasedKeys, setJustReleasedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justReleased'] })
+  const pressedKeys = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'pressed'] })
+  const justPressedKeys = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justPressed'] })
+  const justReleasedKeys = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justReleased'] })
 
   const handleKeyDown = (e: Event) => {
     const key = (e as KeyboardEvent).code
+    const currentPressed = pressedKeys as Set<string>
 
-    if (!pressedKeys.has(key)) {
-      const newPressed = new Set(pressedKeys)
+    if (!currentPressed.has(key)) {
+      const newPressed = new Set(currentPressed)
       newPressed.add(key)
-      setPressedKeys(newPressed)
+      pressedKeys.set(newPressed)
 
-      const newJustPressed = new Set(justPressedKeys)
+      const currentJustPressed = justPressedKeys as Set<string>
+      const newJustPressed = new Set(currentJustPressed)
       newJustPressed.add(key)
-      setJustPressedKeys(newJustPressed)
+      justPressedKeys.set(newJustPressed)
     }
   }
 
   const handleKeyUp = (e: Event) => {
     const key = (e as KeyboardEvent).code
+    const currentPressed = pressedKeys as Set<string>
 
-    const newPressed = new Set(pressedKeys)
+    const newPressed = new Set(currentPressed)
     newPressed.delete(key)
-    setPressedKeys(newPressed)
+    pressedKeys.set(newPressed)
 
-    const newJustReleased = new Set(justReleasedKeys)
+    const currentJustReleased = justReleasedKeys as Set<string>
+    const newJustReleased = new Set(currentJustReleased)
     newJustReleased.add(key)
-    setJustReleasedKeys(newJustReleased)
+    justReleasedKeys.set(newJustReleased)
   }
 
   target.addEventListener('keydown', handleKeyDown)
   target.addEventListener('keyup', handleKeyUp)
 
   return {
-    isPressed: (key: string) => pressedKeys?.has(key) || false,
+    isPressed: (key: string) => {
+      const current = pressedKeys as Set<string>
+      return current?.has(key) || false
+    },
 
-    isJustPressed: (key: string) => justPressedKeys?.has(key) || false,
+    isJustPressed: (key: string) => {
+      const current = justPressedKeys as Set<string>
+      return current?.has(key) || false
+    },
 
-    isJustReleased: (key: string) => justReleasedKeys?.has(key) || false,
+    isJustReleased: (key: string) => {
+      const current = justReleasedKeys as Set<string>
+      return current?.has(key) || false
+    },
 
-    getPressedKeys: () => Array.from(pressedKeys || []),
+    getPressedKeys: () => {
+      const current = pressedKeys as Set<string>
+      return Array.from(current || [])
+    },
 
     clearFrameState: () => {
-      setJustPressedKeys(new Set<string>())
-      setJustReleasedKeys(new Set<string>())
+      justPressedKeys.set(new Set<string>())
+      justReleasedKeys.set(new Set<string>())
     },
 
     dispose: () => {

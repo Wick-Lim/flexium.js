@@ -7,10 +7,10 @@ const container = ref(null)
 
 // Simulated Router Demo
 function RouterDemo() {
-  const currentRoute = state('/')
+  const [currentRoute, setCurrentRoute] = state('/')
 
   const navigate = (path) => {
-    currentRoute.set(path)
+    setCurrentRoute(path)
   }
 
   // Navigation component

@@ -9,12 +9,12 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const centerX = state(200)
-  const centerY = state(150)
-  const radius = state(50)
-  const strokeWidth = state(3)
-  const ripples = state([])
-  const time = state(0)
+  const [centerX, setCenterX] = state(200)
+  const [centerY, setCenterY] = state(150)
+  const [radius, setRadius] = state(50)
+  const [strokeWidth, setStrokeWidth] = state(3)
+  const [ripples, setRipples] = state([])
+  const [time, setTime] = state(0)
 
   // Build DOM
   const wrapper = document.createElement('div')
@@ -73,10 +73,10 @@ onMounted(() => {
     return div
   }
 
-  controls.appendChild(createControl('Center X', centerX, 50, 350, 1, (val) => centerX.set(val)))
-  controls.appendChild(createControl('Center Y', centerY, 50, 250, 1, (val) => centerY.set(val)))
-  controls.appendChild(createControl('Radius', radius, 20, 120, 1, (val) => radius.set(val)))
-  controls.appendChild(createControl('Stroke Width', strokeWidth, 1, 10, 0.5, (val) => strokeWidth.set(val)))
+  controls.appendChild(createControl('Center X', centerX, 50, 350, 1, (val) => setCenterX(val)))
+  controls.appendChild(createControl('Center Y', centerY, 50, 250, 1, (val) => setCenterY(val)))
+  controls.appendChild(createControl('Radius', radius, 20, 120, 1, (val) => setRadius(val)))
+  controls.appendChild(createControl('Stroke Width', strokeWidth, 1, 10, 0.5, (val) => setStrokeWidth(val)))
 
   wrapper.appendChild(title)
   wrapper.appendChild(desc)
@@ -92,7 +92,7 @@ onMounted(() => {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
-    ripples.set(prev => [...prev, {
+    setRipples(prev => [...prev, {
       x,
       y,
       radius: 0,
@@ -104,7 +104,7 @@ onMounted(() => {
 
   // Animation loop
   const animate = () => {
-    time.set(t => t + 0.02)
+    setTime(t => t + 0.02)
 
     if (ctx) {
       // Clear canvas
@@ -120,7 +120,7 @@ onMounted(() => {
         }))
         .filter(r => r.radius < r.maxRadius)
 
-      ripples.set(updatedRipples)
+      setRipples(updatedRipples)
 
       updatedRipples.forEach(ripple => {
         const alpha = 1 - (ripple.radius / ripple.maxRadius)

@@ -6,8 +6,8 @@ import { f, render } from 'flexium/dom'
 const container = ref(null)
 
 function ThemeDemo() {
-  const isDark = state(false)
-  const primaryColor = state('#4f46e5')
+  const [isDark, setIsDark] = state(false)
+  const [primaryColor, setPrimaryColor] = state('#4f46e5')
 
   const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
@@ -50,7 +50,7 @@ function ThemeDemo() {
         })
       }, ['Dark Mode']),
       f('button', {
-        onclick: () => isDark.set(d => !d),
+        onclick: () => setIsDark(d => !d),
         style: () => ({
           width: '56px',
           height: '28px',
@@ -91,7 +91,7 @@ function ThemeDemo() {
       f('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } },
         colors.map(color =>
           f('button', {
-            onclick: () => primaryColor.set(color),
+            onclick: () => setPrimaryColor(color),
             style: () => ({
               width: '36px',
               height: '36px',

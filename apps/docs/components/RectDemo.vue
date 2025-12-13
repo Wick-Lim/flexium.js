@@ -9,12 +9,12 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const x = state(50)
-  const y = state(50)
-  const width = state(100)
-  const height = state(60)
-  const rotation = state(0)
-  const hue = state(200)
+  const [x, setX] = state(50)
+  const [y, setY] = state(50)
+  const [width, setWidth] = state(100)
+  const [height, setHeight] = state(60)
+  const [rotation, setRotation] = state(0)
+  const [hue, setHue] = state(200)
 
   // Build DOM
   const wrapper = document.createElement('div')
@@ -73,12 +73,12 @@ onMounted(() => {
     return div
   }
 
-  controls.appendChild(createControl('X Position', x, 0, 300, 1, (val) => x.set(val)))
-  controls.appendChild(createControl('Y Position', y, 0, 240, 1, (val) => y.set(val)))
-  controls.appendChild(createControl('Width', width, 20, 300, 1, (val) => width.set(val)))
-  controls.appendChild(createControl('Height', height, 20, 200, 1, (val) => height.set(val)))
-  controls.appendChild(createControl('Rotation', rotation, 0, 360, 1, (val) => rotation.set(val)))
-  controls.appendChild(createControl('Color (Hue)', hue, 0, 360, 1, (val) => hue.set(val)))
+  controls.appendChild(createControl('X Position', x, 0, 300, 1, (val) => setX(val)))
+  controls.appendChild(createControl('Y Position', y, 0, 240, 1, (val) => setY(val)))
+  controls.appendChild(createControl('Width', width, 20, 300, 1, (val) => setWidth(val)))
+  controls.appendChild(createControl('Height', height, 20, 200, 1, (val) => setHeight(val)))
+  controls.appendChild(createControl('Rotation', rotation, 0, 360, 1, (val) => setRotation(val)))
+  controls.appendChild(createControl('Color (Hue)', hue, 0, 360, 1, (val) => setHue(val)))
 
   wrapper.appendChild(title)
   wrapper.appendChild(desc)
@@ -117,8 +117,8 @@ onMounted(() => {
       const mouseX = e.clientX - rect.left
       const mouseY = e.clientY - rect.top
 
-      x.set(Math.max(0, Math.min(300, mouseX - dragOffsetX)))
-      y.set(Math.max(0, Math.min(240, mouseY - dragOffsetY)))
+      setX(Math.max(0, Math.min(300, mouseX - dragOffsetX)))
+      setY(Math.max(0, Math.min(240, mouseY - dragOffsetY)))
     }
   })
 

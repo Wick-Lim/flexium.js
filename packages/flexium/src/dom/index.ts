@@ -60,6 +60,9 @@ function createNode(fnode: FNodeChild): Node {
                         const event = key.toLowerCase().slice(2)
                         el.addEventListener(event, value)
                         eventHandlers[event] = value
+                    } else if (key === 'ref' && typeof value === 'function') {
+                        // Handle ref callback
+                        value(el)
                     } else if (typeof value === 'function') {
                         // Dynamic Prop
                         unsafeEffect(() => {
@@ -178,19 +181,19 @@ export function f(
 function setAttribute(el: Element, key: string, value: any) {
     if (value === null || value === undefined) {
         el.removeAttribute(key)
+    } else if (key === 'style' && typeof value === 'object') {
+        // Handle style object
+        Object.assign((el as HTMLElement).style, value)
+    } else if (key === 'value' && (
+        el instanceof HTMLInputElement ||
+        el instanceof HTMLTextAreaElement ||
+        el instanceof HTMLSelectElement
+    )) {
+        (el as any).value = value
+    } else if (key === 'checked' && el instanceof HTMLInputElement) {
+        el.checked = !!value
     } else {
-        // Special handling for form element value property
-        if (key === 'value' && (
-            el instanceof HTMLInputElement ||
-            el instanceof HTMLTextAreaElement ||
-            el instanceof HTMLSelectElement
-        )) {
-            (el as any).value = value
-        } else if (key === 'checked' && el instanceof HTMLInputElement) {
-            el.checked = !!value
-        } else {
-            el.setAttribute(key, String(value))
-        }
+        el.setAttribute(key, String(value))
     }
 }
 

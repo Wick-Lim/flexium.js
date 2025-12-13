@@ -8,8 +8,8 @@ let cleanup = null
 
 // Flexium Counter Component Logic
 function Counter() {
-  const count = state(0)
-  const doubled = state(() => count * 2)
+  const [count, setCount] = state(0)
+  const [doubled] = state(() => count * 2)
 
   const containerNode = f('div', {
     style: {
@@ -94,7 +94,7 @@ function Counter() {
       }
     }, [
       f('button', {
-        onclick: () => { count.set(c => c - 1) },
+        onclick: () => { setCount(c => c - 1) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',
@@ -110,7 +110,7 @@ function Counter() {
       }, ['- Decrement']),
 
       f('button', {
-        onclick: () => { count.set(0) },
+        onclick: () => { setCount(0) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',
@@ -125,7 +125,7 @@ function Counter() {
       }, ['Reset']),
 
       f('button', {
-        onclick: () => { count.set(c => c + 1) },
+        onclick: () => { setCount(c => c + 1) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',
@@ -156,9 +156,7 @@ function Counter() {
 onMounted(() => {
   if (container.value) {
     // Render Flexium app into the Vue ref container
-    const app = Counter()
-    // Simple render mount
-    render(app, container.value)
+    render(Counter, container.value)
   }
 })
 
