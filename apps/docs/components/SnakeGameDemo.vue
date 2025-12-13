@@ -1,12 +1,9 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
-let animationId = null
-let lastTime = 0
-let handleKeydown = null
 
 const GRID_SIZE = 15
 const CELL_SIZE = 24
@@ -26,6 +23,8 @@ function SnakeGame() {
 
   let moveTimer = 0
   let canvasRef = null
+  let animationId = null
+  let lastTime = 0
 
   const generateFood = () => {
     let newFood
@@ -87,7 +86,7 @@ function SnakeGame() {
     setSnake(newSnake)
   }
 
-  handleKeydown = (e) => {
+  const handleKeydown = (e) => {
     const tag = e.target.tagName
     if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) {
       return
@@ -113,6 +112,18 @@ function SnakeGame() {
       e.preventDefault()
     }
   }
+
+  // Start game loop and keyboard listener on mount
+  effect(() => {
+    document.addEventListener('keydown', handleKeydown)
+    if (canvasRef) {
+      animationId = requestAnimationFrame(gameLoop)
+    }
+    return () => {
+      if (animationId) cancelAnimationFrame(animationId)
+      document.removeEventListener('keydown', handleKeydown)
+    }
+  }, [])
 
   const renderGame = (ctx) => {
     // Background gradient
@@ -281,10 +292,6 @@ function SnakeGame() {
     f('canvas', {
       ref: (el) => {
         canvasRef = el
-        if (el) {
-          document.addEventListener('keydown', handleKeydown)
-          animationId = requestAnimationFrame(gameLoop)
-        }
       },
       width: CANVAS_WIDTH,
       height: CANVAS_HEIGHT,
@@ -334,8 +341,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (animationId) cancelAnimationFrame(animationId)
-  document.removeEventListener('keydown', handleKeydown)
   if (container.value) {
     container.value.innerHTML = ''
   }

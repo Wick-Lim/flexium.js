@@ -1,10 +1,9 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { state, effect } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
-let frameId = null
 
 function CanvasDemo() {
   const [mouseX, setMouseX] = state(150)
@@ -13,6 +12,7 @@ function CanvasDemo() {
   const [particles, setParticles] = state([])
 
   let canvasRef = null
+  let frameId = null
 
   const handleMouseMove = (e) => {
     const rect = canvasRef.getBoundingClientRect()
@@ -61,6 +61,16 @@ function CanvasDemo() {
     frameId = requestAnimationFrame(animate)
   }
 
+  // Start animation loop on mount
+  effect(() => {
+    if (canvasRef) {
+      frameId = requestAnimationFrame(animate)
+    }
+    return () => {
+      if (frameId) cancelAnimationFrame(frameId)
+    }
+  }, [])
+
   return f('div', {
     style: {
       padding: '24px',
@@ -79,7 +89,6 @@ function CanvasDemo() {
         canvasRef = el
         if (el) {
           el.addEventListener('mousemove', handleMouseMove)
-          animate()
         }
       },
       width: 300,
@@ -102,7 +111,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (frameId) cancelAnimationFrame(frameId)
   if (container.value) {
     container.value.innerHTML = ''
   }
