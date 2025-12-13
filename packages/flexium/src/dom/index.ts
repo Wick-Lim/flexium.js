@@ -161,6 +161,20 @@ export function render(app: any, container: HTMLElement) {
     }
 }
 
+// f() - Create FNodes without JSX
+export function f(
+    type: string | Function,
+    props?: FNodeProps | null,
+    ...children: FNodeChild[]
+): FNode {
+    return {
+        type,
+        props: props || {},
+        children,
+        key: props?.key
+    }
+}
+
 function setAttribute(el: Element, key: string, value: any) {
     if (value === null || value === undefined) {
         el.removeAttribute(key)
