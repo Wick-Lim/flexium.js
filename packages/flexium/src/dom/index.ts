@@ -189,15 +189,15 @@ function setAttribute(el: Element, key: string, value: any) {
     } else if (key === 'style' && typeof value === 'object') {
         // Handle style object
         Object.assign((el as HTMLElement).style, value)
-    } else if (key === 'value' && (
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLTextAreaElement ||
-        el instanceof HTMLSelectElement
-    )) {
-        (el as any).value = value
-    } else if (key === 'checked' && el instanceof HTMLInputElement) {
-        el.checked = !!value
+    } else if (key === 'class') {
+        // Handle class specially (className property)
+        el.className = String(value)
+    } else if (key in el && typeof (el as any)[key] !== 'function') {
+        // Property-first approach: use DOM property if available
+        // This automatically handles: disabled, checked, value, readonly, etc.
+        (el as any)[key] = value
     } else {
+        // Fallback to setAttribute for custom/data attributes
         el.setAttribute(key, String(value))
     }
 }

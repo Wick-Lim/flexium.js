@@ -6,10 +6,10 @@ import { f, render } from 'flexium/dom'
 const container = ref(null)
 
 function ContextDemo() {
-  // Global state using keys
-  const [user, setUser] = state(null, { key: ['demo', 'auth', 'user'] })
-  const [cart, setCart] = state([], { key: ['demo', 'cart', 'items'] })
-  const [notifications, setNotifications] = state([], { key: ['demo', 'notifications'] })
+  // Local state (global state keys cause reactivity issues)
+  const [user, setUser] = state(null)
+  const [cart, setCart] = state([])
+  const [notifications, setNotifications] = state([])
 
   const products = [
     { id: 1, name: 'Flexium Pro', price: 99, emoji: '⚡' },
