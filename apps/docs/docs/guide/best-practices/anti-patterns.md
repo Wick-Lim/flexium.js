@@ -95,7 +95,7 @@ effect(() => {
 // ❌ Anti-pattern
 function Modal() {
   // Only used in this component but made global
-  const isOpen = state(false, { key: 'modal:open' })
+  const isOpen = state(false, { key: ['modal', 'open'] })
   return isOpen ? <div>Modal</div> : null
 }
 
@@ -126,11 +126,11 @@ const user = state(null, { key: 'user' })  // Collision possible
 // ✅ Correct approach
 // Use hierarchical keys
 const user = state(null, { key: ['auth', 'user'] })
-const posts = state([], { key: ['user', userId, 'posts'] })
+const posts = state([], { key: ['user', userId, 'posts'] })  // Dynamic segments
 
 // Or clear namespace
-const user = state(null, { key: 'app:auth:user' })
-const posts = state([], { key: `app:user:${userId}:posts` })
+const user = state(null, { key: ['app', 'auth', 'user'] })
+const posts = state([], { key: ['app', 'user', userId, 'posts'] })
 ```
 
 ---
@@ -366,7 +366,7 @@ function Component() {
 // ❌ Anti-pattern - duplicate requests
 function ComponentA() {
   const users = state(async () => fetch('/api/users'), {
-    key: 'users'
+    key: ['users']
   })
   return <div>...</div>
 }
@@ -374,7 +374,7 @@ function ComponentA() {
 function ComponentB() {
   // Same key but new request occurs
   const users = state(async () => fetch('/api/users'), {
-    key: 'users'
+    key: ['users']
   })
   return <div>...</div>
 }
@@ -469,7 +469,7 @@ function Component() {
   effect(() => {
     // Effect runs on mount
     return () => {
-    state.delete('temp:data')  // Cleanup
+    state.delete(['temp', 'data'])  // Cleanup
   })
 }
 ```

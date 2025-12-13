@@ -45,7 +45,7 @@ Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchie
 import { state } from 'flexium/core';
 
 // Share theme globally - no Provider needed
-const theme = state<'light' | 'dark'>('light', { key: 'app:theme' });
+const theme = state<'light' | 'dark'>('light', { key: ['app', 'theme'] });
 
 function ThemedButton() {
   const theme = state('light', { key: 'app:theme' });
@@ -71,7 +71,7 @@ interface User {
 
 // Auth state - shared globally
 function useAuth() {
-  const user = state<User | null>(null, { key: 'app:auth:user' });
+  const user = state<User | null>(null, { key: ['app', 'auth', 'user'] });
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -128,8 +128,8 @@ const user = state(null, { key: 'app:user' });
 
 function ProfileCard() {
   const theme = state('light', { key: 'app:theme' });
-  const lang = state('en', { key: 'app:language' });
-  const user = state(null, { key: 'app:user' });
+  const lang = state('en', { key: ['app', 'language'] });
+  const user = state(null, { key: ['app', 'user'] });
 
   return (
     <div class={`card-${theme.valueOf()}`}>
@@ -962,7 +962,7 @@ interface AppState {
 });
 
 function Component() {
-  const [appState] = state({ key: 'app:state' });
+  const [appState] = state({ key: ['app', 'state'] });
   // TypeScript ensures correct usage
 }
 ```

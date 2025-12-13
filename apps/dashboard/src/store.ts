@@ -64,7 +64,7 @@ function generateChartData(): ChartData[] {
 function generateActivities(): Activity[] {
   const types: Activity['type'][] = ['user', 'order', 'alert']
   const activities: Activity[] = []
-  
+
   for (let i = 0; i < 10; i++) {
     activities.push({
       id: i + 1,
@@ -73,25 +73,25 @@ function generateActivities(): Activity[] {
       time: `${generateRandomValue(1, 60)} minutes ago`
     })
   }
-  
+
   return activities
 }
 
 // Global state
 export function useStats() {
-  return state<Stat[]>(generateStats(), { key: 'dashboard/stats' })
+  return state<Stat[]>(generateStats(), { key: ['dashboard', 'stats'] })
 }
 
 export function useSalesChart() {
-  return state<ChartData[]>(generateChartData(), { key: 'dashboard/sales-chart' })
+  return state<ChartData[]>(generateChartData(), { key: ['dashboard', 'sales-chart'] })
 }
 
 export function useTrafficChart() {
-  return state<ChartData[]>(generateChartData(), { key: 'dashboard/traffic-chart' })
+  return state<ChartData[]>(generateChartData(), { key: ['dashboard', 'traffic-chart'] })
 }
 
 export function useActivities() {
-  return state<Activity[]>(generateActivities(), { key: 'dashboard/activities' })
+  return state<Activity[]>(generateActivities(), { key: ['dashboard', 'activities'] })
 }
 
 // Real-time updates
@@ -100,17 +100,17 @@ let updateInterval: number | null = null
 export function startRealTimeUpdates() {
   // Prevent multiple intervals
   if (updateInterval !== null) return
-  
+
   updateInterval = setInterval(() => {
     const [, setStats] = useStats()
     setStats(generateStats())
-    
+
     const [, setSalesChart] = useSalesChart()
     setSalesChart(generateChartData())
-    
+
     const [, setTrafficChart] = useTrafficChart()
     setTrafficChart(generateChartData())
-    
+
     const [, setActivities] = useActivities()
     const current = useActivities()[0]
     const newActivity: Activity = {

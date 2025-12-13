@@ -394,7 +394,7 @@ import { state } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const user = state(null, { key: 'app:auth:user' })
+  const user = state(null, { key: ['app', 'auth', 'user'] })
   
   const login = (name: string) => {
     user.set({ name })
@@ -409,7 +409,7 @@ function useAuth() {
 
 // Cart state - shared globally
 function useCart() {
-  const items = state<Array<{id: number, name: string, price: number, qty: number}>>([], { key: 'app:cart:items' })
+  const items = state<Array<{id: number, name: string, price: number, qty: number}>>([], { key: ['app', 'cart', 'items'] })
   
   const addItem = (product: {id: number, name: string, price: number}) => {
     items.set(items => {
@@ -429,14 +429,14 @@ function useCart() {
     items.set(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
   }
   
-  const total = state(() => items.valueOf().reduce((sum, item) => sum + item.price * item.qty, 0), { key: 'app:cart:total' })
+  const total = state(() => items.valueOf().reduce((sum, item) => sum + item.price * item.qty, 0), { key: ['app', 'cart', 'total'] })
   
   return { items, addItem, removeItem, updateQty, total }
 }
 
 // Notification state - shared globally
 function useNotifications() {
-  const notifications = state<Array<{msg: string, type: string}>>([], { key: 'app:notifications' })
+  const notifications = state<Array<{msg: string, type: string}>>([], { key: ['app', 'notifications'] })
   
   const notify = (msg: string, type: string) => {
     notifications.set(n => [...n, { msg, type }])

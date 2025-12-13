@@ -7,13 +7,13 @@ function Column({ status, title, icon, filter }: { status: TaskStatus, title: st
   const [filteredTasks, setFilteredTasks] = state<Task[]>([])
 
   effect(() => {
-    let filtered = tasks.filter(task => task.status === status)
-    
+    let filtered = tasks?.filter(task => task.status === status)
+
     if (filter !== 'all') {
-      filtered = filtered.filter(task => task.priority === filter)
+      filtered = filtered?.filter(task => task.priority === filter)
     }
-    
-    setFilteredTasks(filtered)
+
+    setFilteredTasks(filtered ?? [])
   })
 
   const count = filteredTasks.length

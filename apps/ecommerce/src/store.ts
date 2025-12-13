@@ -114,19 +114,19 @@ const mockProducts: Product[] = [
 
 // Global cart state
 export function useCart() {
-  return state<CartItem[]>([], { key: 'cart' })
+  return state<CartItem[]>([], { key: ['cart'] })
 }
 
 // Global products state
 export function useProducts() {
-  return state<Product[]>(mockProducts, { key: 'products' })
+  return state<Product[]>(mockProducts, { key: ['products'] })
 }
 
 // Cart actions
 export function addToCart(product: Product) {
   const [cart, setCart] = useCart()
   const existingItem = cart.find(item => item.product.id === product.id)
-  
+
   if (existingItem) {
     setCart(cart.map(item =>
       item.product.id === product.id
