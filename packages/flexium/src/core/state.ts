@@ -67,7 +67,7 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
         loading: true,
         error: null as any,
         status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
-        run: () => { } // placeholder
+        run: () => { }
       })
 
       const run = () => {

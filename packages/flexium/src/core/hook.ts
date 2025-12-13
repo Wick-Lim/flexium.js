@@ -22,22 +22,12 @@ export function runWithComponent<T>(component: ComponentInstance, fn: () => T): 
 }
 
 export function hook<T>(factory: () => T): T {
-    // The new implementation uses `activeComponent` which is not defined in the original document.
-    // Assuming `activeComponent` is intended to be `currentComponent` or a similar global state,
-    // but to faithfully apply the provided code edit, `activeComponent` is used as written.
-    // This might lead to a `ReferenceError` if `activeComponent` is not defined elsewhere.
-    const activeComponent = currentComponent // Assuming activeComponent refers to currentComponent for compilation purposes.
-    // If activeComponent is a different concept, this line should be adjusted by the user.
-
-    if (!activeComponent) {
+    if (!currentComponent) {
         // Outside component: just run factory
         return factory()
     }
 
-    // The new implementation expects activeComponent to have an 'instance' property.
-    // The original `ComponentInstance` is directly the instance.
-    // Adjusting to match the original `ComponentInstance` structure.
-    const instance = activeComponent
+    const instance = currentComponent
     const { hooks, hookIndex } = instance
 
     if (hookIndex < hooks.length) {

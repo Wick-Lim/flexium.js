@@ -102,7 +102,7 @@ export function createPost(content: string, image?: string) {
 
   const newPost: Post = {
     id: nextPostId++,
-    author: currentUser(),
+    author: currentUser,
     content,
     image,
     likes: 0,
@@ -138,7 +138,7 @@ export function addComment(postId: number, content: string) {
 
   const newComment: Comment = {
     id: nextCommentId++,
-    author: currentUser(),
+    author: currentUser,
     content,
     createdAt: Date.now()
   }
