@@ -1,21 +1,8 @@
-import { state } from 'flexium/core'
-import { useTasks, type Task, type TaskStatus, type Priority } from '../store'
+import { memo, state } from 'flexium/core'
+import { type Task, type TaskStatus, type Priority, useTasks } from '../store'
 import TaskCard from './TaskCard'
 
-function Column({ status, title, icon, filter }: { status: TaskStatus, title: string, icon: string, filter: Priority | 'all' }) {
-  const [tasks] = useTasks()
-  const [filteredTasks] = state<Task[]>(() => {
-    let filtered = tasks?.filter(task => task.status === status)
-
-    if (filter !== 'all') {
-      filtered = filtered?.filter(task => task.priority === filter)
-    }
-
-    return filtered ?? []
-  })
-
-  const count = filteredTasks.length
-
+function Column({ tasks, status, title, icon }: { tasks: Task[], status: TaskStatus, title: string, icon: string }) {
   return (
     <div class="column">
       <div class="column-header">
@@ -23,13 +10,13 @@ function Column({ status, title, icon, filter }: { status: TaskStatus, title: st
           <span>{icon}</span>
           <span>{title}</span>
         </div>
-        <span class="task-count">{count}</span>
+        <span class="task-count">{tasks.length}</span>
       </div>
       <div class="task-list">
-        {filteredTasks.length === 0 ? (
+        {tasks.length === 0 ? (
           <div class="empty-column">No tasks</div>
         ) : (
-          filteredTasks.map(task => (
+          tasks.map(task => (
             <TaskCard task={task} />
           ))
         )}
@@ -38,12 +25,18 @@ function Column({ status, title, icon, filter }: { status: TaskStatus, title: st
   )
 }
 
-export default function KanbanBoard({ filter }: { filter: Priority | 'all' }) {
+export default function KanbanBoard() {
+  const [tasks] = useTasks()
+
+  const todo = memo(() => tasks.filter(task => task.status === 'todo'), [tasks]);
+  const inProgress = memo(() => tasks.filter(task => task.status === 'in-progress'), [tasks]);
+  const done = memo(() => tasks.filter(task => task.status === 'done'), [tasks]);
+
   return (
     <div class="kanban-board">
-      <Column status="todo" title="To Do" icon="📝" filter={filter} />
-      <Column status="in-progress" title="In Progress" icon="⚡" filter={filter} />
-      <Column status="done" title="Done" icon="✅" filter={filter} />
+      <Column tasks={todo} status="todo" title="To Do" icon="📝" />
+      <Column tasks={inProgress} status="in-progress" title="In Progress" icon="⚡" />
+      <Column tasks={done} status="done" title="Done" icon="✅" />
     </div>
   )
 }

@@ -17,7 +17,7 @@ export default function App() {
       <div class="container">
         <AddTaskForm />
         <Filters filter={filter} setFilter={setFilter} />
-        <KanbanBoard filter={filter} />
+        <KanbanBoard />
       </div>
     </div>
   )

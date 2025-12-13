@@ -50,12 +50,16 @@ function createNode(fnode: FNodeChild): Node {
 
             // Props
             if (props) {
+                // Store event handlers for reconciliation
+                const eventHandlers: Record<string, any> = {}
+
                 Object.keys(props).forEach(key => {
                     const value = props[key]
 
                     if (key.startsWith('on') && typeof value === 'function') {
                         const event = key.toLowerCase().slice(2)
                         el.addEventListener(event, value)
+                        eventHandlers[event] = value
                     } else if (typeof value === 'function') {
                         // Dynamic Prop
                         unsafeEffect(() => {
@@ -66,6 +70,11 @@ function createNode(fnode: FNodeChild): Node {
                         setAttribute(el, key, value)
                     }
                 })
+
+                // Store handlers on element for reconciliation
+                if (Object.keys(eventHandlers).length > 0) {
+                    (el as any).__eventHandlers = eventHandlers
+                }
             }
 
             // Children
@@ -184,8 +193,6 @@ function updateAttributes(oldEl: Element, newEl: Element): void {
     // Remove old attributes
     const oldAttrs = Array.from(oldEl.attributes)
     oldAttrs.forEach(attr => {
-        // Skip event listeners (they were set via addEventListener)
-        if (attr.name.startsWith('on')) return
         if (!newEl.hasAttribute(attr.name)) {
             oldEl.removeAttribute(attr.name)
         }
@@ -194,12 +201,38 @@ function updateAttributes(oldEl: Element, newEl: Element): void {
     // Set/update new attributes
     const newAttrs = Array.from(newEl.attributes)
     newAttrs.forEach(attr => {
-        // Skip event listeners
-        if (attr.name.startsWith('on')) return
         if (oldEl.getAttribute(attr.name) !== attr.value) {
             oldEl.setAttribute(attr.name, attr.value)
         }
     })
+
+    // Update event handlers
+    const oldHandlers = (oldEl as any).__eventHandlers || {}
+    const newHandlers = (newEl as any).__eventHandlers || {}
+
+    // Remove old handlers
+    Object.keys(oldHandlers).forEach(event => {
+        if (!newHandlers[event]) {
+            oldEl.removeEventListener(event, oldHandlers[event])
+        }
+    })
+
+    // Add/update new handlers
+    Object.keys(newHandlers).forEach(event => {
+        if (oldHandlers[event] !== newHandlers[event]) {
+            if (oldHandlers[event]) {
+                oldEl.removeEventListener(event, oldHandlers[event])
+            }
+            oldEl.addEventListener(event, newHandlers[event])
+        }
+    })
+
+    // Update stored handlers
+    if (Object.keys(newHandlers).length > 0) {
+        (oldEl as any).__eventHandlers = newHandlers
+    } else {
+        delete (oldEl as any).__eventHandlers
+    }
 
     // Special handling for form input values
     if (oldEl instanceof HTMLInputElement && newEl instanceof HTMLInputElement) {
