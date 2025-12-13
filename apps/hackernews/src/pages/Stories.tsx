@@ -19,20 +19,20 @@ function StoryItem(props: { id: number; index: number }) {
 
         return (
             <li class="news-item">
-                <span class="score">{story.points}</span>
+                <span class="score">{s.points}</span>
                 <span class="title">
-                    <a href={story.url} target="_blank" rel="noreferrer">{story.title}</a>
-                    <span class="host"> ({story.domain || '...'})</span>
+                    <a href={s.url} target="_blank" rel="noreferrer">{s.title}</a>
+                    <span class="host"> ({s.domain || '...'})</span>
                 </span>
                 <br />
                 <span class="meta">
                     <span class="by">
-                        by <Link to={`/user/${story.by}`}>{story.by}</Link>
+                        by <Link to={`/user/${s.by}`}>{s.by}</Link>
                     </span>
-                    <span class="time"> {new Date(story.time * 1000).toLocaleString()}</span>
+                    <span class="time"> {new Date(s.time * 1000).toLocaleString()}</span>
                     <span class="comments-link">
                         {' | '}
-                        <Link to={`/item/${story.id}`}>{story.comments_count} comments</Link>
+                        <Link to={`/item/${s.id}`}>{s.comments_count} comments</Link>
                     </span>
                 </span>
             </li>
@@ -53,8 +53,8 @@ export default function Stories(props: { type: string }) {
         const [globalList] = useList(type);
 
         // If already have data, use it
-        if (globalList.length > 0) {
-            setList([...globalList]);
+        if (globalList().length > 0) {
+            setList([...globalList()]);
             setLoading(false);
             return;
         }
@@ -63,7 +63,7 @@ export default function Stories(props: { type: string }) {
         setLoading(true);
         loadStories(type).then(() => {
             const [updatedList] = useList(type);
-            setList([...updatedList]);
+            setList([...updatedList()]);
             setLoading(false);
         });
     });
@@ -77,7 +77,7 @@ export default function Stories(props: { type: string }) {
                 </div>
 
                 <ul class="news-list">
-                    {list.map((id: number, index: number) => <StoryItem id={id} index={index + 1} />)}
+                    {list().map((id: number, index: number) => <StoryItem id={id} index={index + 1} />)}
                 </ul>
             </div>
         )

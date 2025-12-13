@@ -21,14 +21,15 @@ export default function User(props: { params?: { id?: string } } = {}) {
         // Track the global user state reactively - this will update when loadUser completes
         const [globalUser] = useUser(idStr);
         // Reading globalUser.value here tracks the signal, so when loadUser sets it, this effect will re-run
-        const currentUser = globalUser.valueOf();
+        const currentUser = globalUser();
         setUser(currentUser);
     });
 
     // Use proxy directly
-    if (!user) return <div class="view user-view"><div>Loading...</div></div>
+    const u = user();
+    if (!u) return <div class="view user-view"><div>Loading...</div></div>
 
-    const userValue = user.valueOf()
+    const userValue = u
 
     return (
         <div class="view user-view">

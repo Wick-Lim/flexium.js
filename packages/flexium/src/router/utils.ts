@@ -1,148 +1,153 @@
 import { RouteDef, RouteMatch } from './types'
-import type { FNodeChild } from '../core/renderer'
-import { isFNode } from '../renderers/dom/f'
 
-/**
- * Flatten the children of <Router> or <Route> into a route configuration tree.
- * Note: This assumes `children` are FNodes representing <Route> components.
- */
-export function createRoutesFromChildren(children: FNodeChild): RouteDef[] {
+// Simple query parser (native URLSearchParams fallback)
+export function parseQuery(search: string): Record<string, string> {
+  if (!search) return {}
+  if (typeof URLSearchParams !== 'undefined') {
+    const params = new URLSearchParams(search)
+    const res: Record<string, string> = {}
+    params.forEach((v, k) => res[k] = v)
+    return res
+  }
+  return search
+    .substring(1)
+    .split('&')
+    .reduce((acc, part) => {
+      const [key, value] = part.split('=')
+      if (key) acc[decodeURIComponent(key)] = decodeURIComponent(value || '')
+      return acc
+    }, {} as Record<string, string>)
+}
+
+export function isUnsafePath(path: string): boolean {
+  // Prevent prototype pollution or massive strings
+  if (path.length > 2048) return true
+  if (path.includes('__proto__') || path.includes('constructor')) return true
+  // Basic XSS check for javascript: protocol
+  if (/^\s*javascript:/i.test(path)) return true
+  return false
+}
+
+// Convert children FNodes to RouteDefs
+export function createRoutesFromChildren(children: any[]): RouteDef[] {
   const routes: RouteDef[] = []
 
-  const childArray = Array.isArray(children) ? children : [children]
+  children.forEach(child => {
+    if (!child) return
 
-  for (const child of childArray) {
-    if (!isFNode(child)) {
-      continue
-    }
+    // Assuming child is an FNode-like object (config)
+    // In Flexium, Route component returns null, but 'createNode' isn't called here.
+    // We are traversing the props passed to Router.
 
-    const { path, index, component, beforeEnter } = child.props as {
-      path?: string
-      index?: boolean
-      component?: Function
-      beforeEnter?: (
-        params: Record<string, string>
-      ) => boolean | Promise<boolean>
-    }
-    const nestedChildren = child.children
-
-    // Skip routes without a component (unless they have children as layout routes)
-    if (!component && !nestedChildren) {
-      console.warn(
-        `[Flexium Router] Route "${path || '(index)'}" has no component and no children. Skipping.`
-      )
-      continue
-    }
+    const { path, component, children: subChildren, beforeEnter } = child.props || {}
 
     const route: RouteDef = {
-      path: path || '',
-      index: !!index,
-      component: component || (() => null),
-      children: nestedChildren ? createRoutesFromChildren(nestedChildren) : [],
-      beforeEnter,
+      path: path || '/',
+      component: component,
+      beforeEnter
+    }
+
+    if (subChildren) {
+      // If subChildren is array
+      const kids = Array.isArray(subChildren) ? subChildren : [subChildren]
+      // We expect the children of a Route to be other Routes
+      // However, the 'children' prop in JSX might be the Route components themselves.
+      route.children = createRoutesFromChildren(kids)
+    }
+
+    // Also check child.children if props.children is empty (direct FNode structure)
+    if (!route.children && child.children && child.children.length > 0) {
+      route.children = createRoutesFromChildren(child.children)
     }
 
     routes.push(route)
-  }
-
+  })
   return routes
 }
 
-/**
- * Match a URL against a route tree.
- * Returns an array of matches (from root to leaf).
- */
-export function matchRoutes(
-  routes: RouteDef[],
-  location: string
-): RouteMatch[] | null {
+// Simple Matcher
+export function matchRoutes(routes: RouteDef[], locationPathname: string): RouteMatch[] | null {
+  // We want to find the best matching branch
+
   for (const route of routes) {
-    const result = matchRouteBranch(route, location, '')
-    if (result) return result
+    // 1. Match current segment
+    // Simple exact match or parameter match logic needed?
+    // Let's implement simple param matching: /user/:id
+
+    const routePath = route.path
+    const isParam = routePath.includes(':')
+
+    let match = false
+    let params: Record<string, string> = {}
+    let matchedPath = ''
+    let remainingPath = locationPathname
+
+    if (routePath === '/' || routePath === '') {
+      // Root Match?
+      if (locationPathname === '/') {
+        match = true
+        matchedPath = '/'
+        remainingPath = ''
+      } else if (locationPathname.startsWith('/')) {
+        // Non-exact match for root? usually root / matches everything as prefix if we talk about nesting.
+        // But typically / matches exact or it's a layout.
+        // Let's assume / is valid prefix.
+        match = true
+        matchedPath = '/'
+        // remainingPath stays same? No, remove /
+      }
+    } else {
+      // Regex match for params
+      // Convert /user/:id to ^/user/([^/]+)
+      const paramNames: string[] = []
+      const regexPath = routePath.replace(/:([^/]+)/g, (_, key) => {
+        paramNames.push(key)
+        return '([^/]+)'
+      })
+
+      // We match against startDate of remainingPath?
+      // This DFS is getting complex for a pure function without improved tree structure.
+      // Let's simplify: Standard React Router v6 style matching is complex.
+      // Let's do simple flat matching for Hackernews (mostly flat or 1 level depth).
+      // Actually, we can use a recursive matcher.
+
+      // Current implementation assumption:
+      // paths are absolute or relative?
+      // Let's assume simplified recursive checker.
+
+      const matchResult = matchPath(routePath, locationPathname)
+      if (matchResult) {
+        return [{ route, params: matchResult.params, pathname: matchResult.path }]
+        // What about children?
+        // If we match /user/:id, and we have children...
+        // But HackerNews routes in App.tsx are siblings: /news/:page, /item/:id
+        // So flat matching is enough for now.
+      }
+    }
   }
   return null
 }
 
-function matchRouteBranch(
-  route: RouteDef,
-  location: string,
-  parentPath: string
-): RouteMatch[] | null {
-  let fullPath = parentPath
-  if (route.path) {
-    fullPath =
-      parentPath.replace(/\/$/, '') + '/' + route.path.replace(/^\//, '')
-  }
+function matchPath(routePath: string, locationPath: string) {
+  // 1. Split into segments
+  const routeSegs = routePath.split('/').filter(Boolean)
+  const locSegs = locationPath.split('/').filter(Boolean)
 
-  const isLeaf = route.children.length === 0
-  const matcher = compilePath(fullPath, !isLeaf)
-  const match = location.match(matcher)
+  if (routeSegs.length !== locSegs.length) return null
 
-  if (match) {
-    const [matchedPath, ...paramValues] = match
-    const paramsObj = extractParams(fullPath, paramValues)
+  const params: Record<string, string> = {}
 
-    const currentMatch: RouteMatch = {
-      route,
-      params: paramsObj,
-      pathname: matchedPath,
-    }
+  for (let i = 0; i < routeSegs.length; i++) {
+    const r = routeSegs[i]
+    const l = locSegs[i]
 
-    if (isLeaf) {
-      // Exact match required for leaf
-      if (matchedPath === location) return [currentMatch]
+    if (r.startsWith(':')) {
+      const key = r.slice(1)
+      params[key] = l
+    } else if (r !== l) {
       return null
     }
-
-    // Has children: try to match one of them
-    // If no children match, and this route is an index route?
-    // Or if this route matches partially, maybe an index child matches the rest?
-
-    for (const child of route.children) {
-      const childMatches = matchRouteBranch(child, location, fullPath)
-      if (childMatches) {
-        return [currentMatch, ...childMatches]
-      }
-    }
-
-    // If no children matched, but we matched exactly this layout route?
-    // E.g. /users matches /users layout, and maybe it renders index?
-    if (matchedPath === location) {
-      // Check for index route
-      const indexRoute = route.children.find((c) => c.index)
-      if (indexRoute) {
-        return [
-          currentMatch,
-          { route: indexRoute, params: {}, pathname: matchedPath },
-        ]
-      }
-      // Just the layout? Maybe.
-      return [currentMatch]
-    }
   }
 
-  return null
-}
-
-function compilePath(path: string, prefix: boolean): RegExp {
-  const regexPath = path.replace(/:([^/]+)/g, () => '([^/]+)')
-
-  // If path is exactly "/", and we want prefix matching, it should match everything
-  if (regexPath === '/' && prefix) {
-    return new RegExp('^')
-  }
-
-  // If prefix matching allowed, ensure we match segment boundary
-  return new RegExp(`^${regexPath}${prefix ? '(?:/|$)' : '$'}`)
-}
-
-function extractParams(path: string, values: string[]): Record<string, string> {
-  const params: Record<string, string> = {}
-  let i = 0
-  // Re-parse to find param names... inefficient but works
-  path.replace(/:([^/]+)/g, (_, paramName) => {
-    params[paramName] = values[i++]
-    return ''
-  })
-  return params
+  return { params, path: locationPath }
 }

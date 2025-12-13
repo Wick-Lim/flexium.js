@@ -23,17 +23,17 @@ interface Story {
 
 // 1. Lists (Top, New, etc.)
 export function useList(type: string) {
-    return state<number[]>([], { key: `list/${type}` });
+    return state<number[]>([], { key: ['list', type] });
 }
 
 // 2. Items (Stories, Comments)
 export function useItem(id: number) {
-    return state<Story | undefined>(undefined, { key: `item/${id}` });
+    return state<Story | undefined>(undefined, { key: ['item', id] });
 }
 
 // 3. Users
 export function useUser(id: string) {
-    return state<any>(undefined, { key: `user/${id}` });
+    return state<any>(undefined, { key: ['user', id] });
 }
 
 // Fetch Actions
@@ -42,7 +42,7 @@ export async function loadStories(type: string) {
         const [list, setList] = useList(type);
 
         // If already loaded, skip (basic cache)
-        if (list.length > 0) return;
+        if (list().length > 0) return;
 
         const ids = await fetchIds(type);
 
@@ -75,7 +75,7 @@ export async function loadStories(type: string) {
 export async function loadItem(id: number) {
     try {
         const [item, setItem] = useItem(id);
-        if (item.valueOf()) return; // Already loaded
+        if (item()) return; // Already loaded
 
         const data = await fetchItem(id);
         if (data) {
@@ -91,7 +91,7 @@ export async function loadItem(id: number) {
 export async function loadUser(id: string) {
     try {
         const [user, setUser] = useUser(id);
-        if (user.valueOf()) return; // Already loaded
+        if (user()) return; // Already loaded
 
         const data = await fetchUser(id);
         if (data) {

@@ -1,5 +1,4 @@
-import type { StateValue } from '../core/state'
-import type { FNodeChild } from '../core/renderer'
+import { StateGetter } from '../core/state'
 
 export interface Location {
   pathname: string
@@ -8,39 +7,35 @@ export interface Location {
   query: Record<string, string>
 }
 
-export interface RouterContext {
-  location: StateValue<Location>
-  params: StateValue<Record<string, string>>
-  navigate: (path: string) => void
-  // Matches for the current URL (ordered by depth)
-  matches: StateValue<RouteMatch[]>
-}
-export interface RouteProps {
-  path?: string // path can be optional for layout routes or index
-  index?: boolean
-  component: Function
-  children?: FNodeChild // Nested routes
-  beforeEnter?: (params: Record<string, string>) => boolean | Promise<boolean>
+export interface RouteDef {
+  path: string
+  component: any // Component function
+  children?: RouteDef[]
+  beforeEnter?: (params: Record<string, string>) => boolean | void
 }
 
 export interface RouteMatch {
   route: RouteDef
   params: Record<string, string>
-  pathname: string // Matched portion of the URL
+  pathname: string // Matched part
 }
 
-// Internal definition of a route
-export interface RouteDef {
+export interface RouterContext {
+  location: StateGetter<Location>
+  navigate: (path: string) => void
+  matches: StateGetter<RouteMatch[]>
+  params: StateGetter<Record<string, string>>
+}
+
+export interface RouteProps {
   path: string
-  index: boolean
-  component: Function
-  children: RouteDef[]
-  beforeEnter?: (params: Record<string, string>) => boolean | Promise<boolean>
-  // We might need the original FNode props if we want to support other props
+  component: any
+  children?: any
+  beforeEnter?: (params: Record<string, string>) => boolean | void
 }
 
 export interface LinkProps {
   to: string
   class?: string
-  children?: FNodeChild
+  children?: any
 }

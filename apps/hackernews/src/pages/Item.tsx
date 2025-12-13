@@ -11,20 +11,21 @@ function Comment(props: { id: number }) {
     });
 
     // Use proxy directly - no function wrapper needed
-    if (!comment || comment.type !== 'comment' || !comment.text) return null
+    const c = comment();
+    if (!c || c.type !== 'comment' || !c.text) return null
 
     return (
         <li class="comment">
             <div class="comment-header">
                 <span class="by">
-                    <Link to={`/user/${comment.by}`}>{comment.by}</Link>
+                    <Link to={`/user/${c.by}`}>{c.by}</Link>
                 </span>
-                <span class="time"> {new Date(comment.time * 1000).toLocaleString()}</span>
+                <span class="time"> {new Date(c.time * 1000).toLocaleString()}</span>
             </div>
-            <div class="comment-text" innerHTML={comment.text} />
-            {comment.kids && comment.kids.length > 0 && (
+            <div class="comment-text" innerHTML={c.text} />
+            {c.kids && c.kids.length > 0 && (
                 <ul class="comment-children" style={{ paddingLeft: '20px' }}>
-                    {comment.kids.map((kidId: number) => <Comment id={kidId} />)}
+                    {c.kids.map((kidId: number) => <Comment id={kidId} />)}
                 </ul>
             )}
         </li>
@@ -56,14 +57,15 @@ export default function Item(props: { params?: { id?: string } } = {}) {
         // Track the global item state reactively - this will update when loadItem completes
         const [globalItem] = useItem(parsedId);
         // Reading globalItem.value here tracks the signal, so when loadItem sets it, this effect will re-run
-        const currentItem = globalItem.valueOf();
+        const currentItem = globalItem();
         setItem(currentItem);
     });
 
     // Use proxy directly
-    if (!item) return <div class="view item-view"><div>Loading...</div></div>
+    const i = item();
+    if (!i) return <div class="view item-view"><div>Loading...</div></div>
 
-    const itemValue = item.valueOf()
+    const itemValue = i
 
     return (
         <div class="view item-view">

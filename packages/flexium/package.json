@@ -20,50 +20,15 @@
       "import": "./dist/core.mjs",
       "require": "./dist/core.js"
     },
-    "./advanced": {
-      "types": "./dist/advanced.d.ts",
-      "import": "./dist/advanced.mjs",
-      "require": "./dist/advanced.js"
-    },
     "./dom": {
       "types": "./dist/dom.d.ts",
       "import": "./dist/dom.mjs",
       "require": "./dist/dom.js"
     },
-    "./canvas": {
-      "types": "./dist/canvas.d.ts",
-      "import": "./dist/canvas.mjs",
-      "require": "./dist/canvas.js"
-    },
-    "./interactive": {
-      "types": "./dist/interactive.d.ts",
-      "import": "./dist/interactive.mjs",
-      "require": "./dist/interactive.js"
-    },
-    "./primitives": {
-      "types": "./dist/primitives.d.ts",
-      "import": "./dist/primitives.mjs",
-      "require": "./dist/primitives.js"
-    },
-    "./primitives/motion": {
-      "types": "./dist/primitives/motion.d.ts",
-      "import": "./dist/primitives/motion.mjs",
-      "require": "./dist/primitives/motion.js"
-    },
-    "./primitives/form": {
-      "types": "./dist/primitives/form.d.ts",
-      "import": "./dist/primitives/form.mjs",
-      "require": "./dist/primitives/form.js"
-    },
-    "./primitives/ui": {
-      "types": "./dist/primitives/ui.d.ts",
-      "import": "./dist/primitives/ui.mjs",
-      "require": "./dist/primitives/ui.js"
-    },
-    "./primitives/layout": {
-      "types": "./dist/primitives/layout.d.ts",
-      "import": "./dist/primitives/layout.mjs",
-      "require": "./dist/primitives/layout.js"
+    "./router": {
+      "types": "./dist/router.d.ts",
+      "import": "./dist/router.mjs",
+      "require": "./dist/router.js"
     },
     "./jsx-runtime": {
       "types": "./dist/jsx-runtime.d.ts",
@@ -74,21 +39,6 @@
       "types": "./dist/jsx-dev-runtime.d.ts",
       "import": "./dist/jsx-dev-runtime.mjs",
       "require": "./dist/jsx-dev-runtime.js"
-    },
-    "./server": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.mjs",
-      "require": "./dist/server.js"
-    },
-    "./router": {
-      "types": "./dist/router.d.ts",
-      "import": "./dist/router.mjs",
-      "require": "./dist/router.js"
-    },
-    "./test-exports": {
-      "types": "./dist/test-exports.d.ts",
-      "import": "./dist/test-exports.mjs",
-      "require": "./dist/test-exports.js"
     }
   },
   "files": [
