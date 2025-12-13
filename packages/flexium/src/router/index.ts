@@ -7,9 +7,6 @@ export * from './utils'
 // Export context
 export { RouterCtx, RouteDepthCtx } from './context'
 
-// Export location creator
-export { createLocation } from './location'
-
 // Export router hook
 export { router } from './router'
 

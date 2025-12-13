@@ -2,7 +2,7 @@ import { jsx as f } from '../jsx-runtime'
 import type { FNode, FNodeChild } from '../dom'
 import type { RouteMatch } from './types'
 import { RouterCtx, RouteDepthCtx } from './context'
-import { createLocation } from './location'
+import { location } from './location'
 import { createRoutesFromChildren, matchRoutes } from './utils'
 import { Route } from './Route'
 
@@ -11,7 +11,7 @@ function isFNode(node: any): node is FNode {
 }
 
 export function Routes(props: { children: FNodeChild }) {
-    const [loc, navigate] = createLocation()
+    const [loc, navigate] = location()
 
     // Parse children to find <Route> definitions and other content
     let childrenList: any[] = Array.isArray(props.children) ? props.children : [props.children]

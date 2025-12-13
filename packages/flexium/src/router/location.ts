@@ -2,7 +2,7 @@ import { reactive } from '../core/reactive'
 import type { Location } from './types'
 import { parseQuery, isUnsafePath } from './utils'
 
-export function createLocation(): [Location, (path: string) => void] {
+export function location(): [Location, (path: string) => void] {
     const getDefaultLoc = (): Location => ({
         pathname: '/',
         search: '',
