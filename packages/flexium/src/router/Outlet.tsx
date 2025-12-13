@@ -1,8 +1,7 @@
 import { state } from '../core/state'
 import { context } from '../core/context'
 import { jsx as f } from '../jsx-runtime'
-import { RouteDepthCtx } from './context'
-import { router } from './router'
+import { RouteDepthCtx, router } from './router'
 
 export function Outlet() {
     const ctx = router()

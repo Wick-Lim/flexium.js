@@ -4,11 +4,8 @@ export * from './types'
 // Export utilities
 export * from './utils'
 
-// Export context
-export { RouterCtx, RouteDepthCtx } from './context'
-
-// Export router hook
-export { router } from './router'
+// Export router core (contexts, hooks, location)
+export { RouterCtx, RouteDepthCtx, router } from './router'
 
 // Export components
 export { Routes } from './Routes'

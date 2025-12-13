@@ -1,8 +1,6 @@
 import { jsx as f } from '../jsx-runtime'
 import type { FNode, FNodeChild } from '../dom'
-import type { RouteMatch } from './types'
-import { RouterCtx, RouteDepthCtx } from './context'
-import { location } from './location'
+import { RouterCtx, RouteDepthCtx, location } from './router'
 import { createRoutesFromChildren, matchRoutes } from './utils'
 import { Route } from './Route'
 
