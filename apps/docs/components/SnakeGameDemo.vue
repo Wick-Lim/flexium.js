@@ -11,21 +11,21 @@ const CANVAS_WIDTH = GRID_SIZE * CELL_SIZE
 const CANVAS_HEIGHT = GRID_SIZE * CELL_SIZE
 
 function SnakeGame() {
-  // Game state
-  const [score, setScore] = state(0)
-  const [highScore, setHighScore] = state(0)
-  const [gameOver, setGameOver] = state(false)
-  const [paused, setPaused] = state(false)
-  const [snake, setSnake] = state([{ x: 7, y: 7 }])
-  const [direction, setDirection] = state('RIGHT')
-  const [nextDirection, setNextDirection] = state('RIGHT')
-  const [food, setFood] = state({ x: 12, y: 7 })
-
-  let moveTimer = 0
   let canvasRef = null
   let animationId = null
   let lastTime = 0
   let cleanupAnimation = null
+
+  // Use plain variables instead of state for game values
+  let score = 0
+  let highScore = 0
+  let gameOver = false
+  let paused = false
+  let snake = [{ x: 7, y: 7 }]
+  let direction = 'RIGHT'
+  let nextDirection = 'RIGHT'
+  let food = { x: 12, y: 7 }
+  let moveTimer = 0
 
   const generateFood = () => {
     let newFood
@@ -39,14 +39,14 @@ function SnakeGame() {
   }
 
   const resetGame = () => {
-    if (score > highScore) setHighScore(score)
-    setScore(0)
-    setGameOver(false)
-    setPaused(false)
-    setSnake([{ x: 7, y: 7 }])
-    setDirection('RIGHT')
-    setNextDirection('RIGHT')
-    setFood(generateFood())
+    if (score > highScore) highScore = score
+    score = 0
+    gameOver = false
+    paused = false
+    snake = [{ x: 7, y: 7 }]
+    direction = 'RIGHT'
+    nextDirection = 'RIGHT'
+    food = generateFood()
     moveTimer = 0
   }
 
@@ -55,7 +55,7 @@ function SnakeGame() {
 
     const opposites = { UP: 'DOWN', DOWN: 'UP', LEFT: 'RIGHT', RIGHT: 'LEFT' }
     if (nextDirection !== opposites[direction]) {
-      setDirection(nextDirection)
+      direction = nextDirection
     }
 
     const head = snake[0]
@@ -69,22 +69,22 @@ function SnakeGame() {
 
     // Collision check
     if (newHead.x < 0 || newHead.x >= GRID_SIZE || newHead.y < 0 || newHead.y >= GRID_SIZE) {
-      setGameOver(true)
+      gameOver = true
       return
     }
     if (snake.slice(1).some(s => s.x === newHead.x && s.y === newHead.y)) {
-      setGameOver(true)
+      gameOver = true
       return
     }
 
     const newSnake = [newHead, ...snake]
     if (newHead.x === food.x && newHead.y === food.y) {
-      setScore(score + 1)
-      setFood(generateFood())
+      score = score + 1
+      food = generateFood()
     } else {
       newSnake.pop()
     }
-    setSnake(newSnake)
+    snake = newSnake
   }
 
   const handleKeydown = (e) => {
@@ -100,12 +100,12 @@ function SnakeGame() {
       ArrowRight: 'RIGHT', d: 'RIGHT', D: 'RIGHT'
     }
     if (keyMap[e.key]) {
-      setNextDirection(keyMap[e.key])
+      nextDirection = keyMap[e.key]
       e.preventDefault()
     }
     if (e.key === ' ') {
       if (gameOver) resetGame()
-      else setPaused(!paused)
+      else paused = !paused
       e.preventDefault()
     }
     if (e.key === 'Enter' && gameOver) {
@@ -310,7 +310,7 @@ function SnakeGame() {
     f('div', { style: { display: 'flex', gap: '8px' } }, [
       f('button', {
         onclick: () => {
-          if (!gameOver) setPaused(!paused)
+          if (!gameOver) paused = !paused
         },
         style: {
           padding: '8px 20px',

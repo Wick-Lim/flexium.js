@@ -6,31 +6,31 @@ import { f, render } from 'flexium/dom'
 const container = ref(null)
 
 function CanvasDemo() {
-  const [mouseX, setMouseX] = state(150)
-  const [mouseY, setMouseY] = state(150)
-  const [hue, setHue] = state(0)
-  const [particles, setParticles] = state([])
-
   let canvasRef = null
   let frameId = null
   let cleanupAnimation = null
 
+  // Use plain variables instead of state for animation values
+  let mouseX = 150
+  let mouseY = 150
+  let hue = 0
+  let particles = []
+
   const handleMouseMove = (e) => {
     const rect = canvasRef.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    setMouseX(x)
-    setMouseY(y)
+    mouseX = e.clientX - rect.left
+    mouseY = e.clientY - rect.top
 
-    setParticles([...particles.slice(-20), {
-      x, y,
+    particles = [...particles.slice(-20), {
+      x: mouseX,
+      y: mouseY,
       size: Math.random() * 10 + 5,
       hue: hue
-    }])
+    }]
   }
 
   const animate = () => {
-    setHue((hue + 1) % 360)
+    hue = (hue + 1) % 360
 
     if (canvasRef) {
       const ctx = canvasRef.getContext('2d')
