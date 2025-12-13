@@ -109,6 +109,96 @@ const mockProducts: Product[] = [
     category: "Accessories",
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
     rating: { rate: 4.3, count: 76 }
+  },
+  {
+    id: 11,
+    title: "Portable SSD 1TB",
+    price: 149.99,
+    description: "Ultra-fast portable SSD with USB-C connectivity",
+    category: "Electronics",
+    image: "https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=400",
+    rating: { rate: 4.7, count: 234 }
+  },
+  {
+    id: 12,
+    title: "Wireless Charger",
+    price: 34.99,
+    description: "Fast wireless charging pad for smartphones",
+    category: "Electronics",
+    image: "https://images.unsplash.com/photo-1591290619762-0cccd7c0fb02?w=400",
+    rating: { rate: 4.4, count: 158 }
+  },
+  {
+    id: 13,
+    title: "Ergonomic Office Chair",
+    price: 299.99,
+    description: "Premium mesh office chair with lumbar support",
+    category: "Furniture",
+    image: "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=400",
+    rating: { rate: 4.6, count: 312 }
+  },
+  {
+    id: 14,
+    title: "LED Desk Lamp",
+    price: 44.99,
+    description: "Adjustable LED desk lamp with touch control",
+    category: "Lighting",
+    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400",
+    rating: { rate: 4.5, count: 187 }
+  },
+  {
+    id: 15,
+    title: "Bluetooth Speaker",
+    price: 69.99,
+    description: "Portable waterproof Bluetooth speaker with 12-hour battery",
+    category: "Electronics",
+    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400",
+    rating: { rate: 4.6, count: 276 }
+  },
+  {
+    id: 16,
+    title: "Mechanical Pencil Set",
+    price: 12.99,
+    description: "Professional mechanical pencil set for drawing and writing",
+    category: "Stationery",
+    image: "https://images.unsplash.com/photo-1590143869540-8c18b7d8c33b?w=400",
+    rating: { rate: 4.3, count: 92 }
+  },
+  {
+    id: 17,
+    title: "Smart Watch",
+    price: 249.99,
+    description: "Fitness tracking smartwatch with heart rate monitor",
+    category: "Electronics",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
+    rating: { rate: 4.5, count: 428 }
+  },
+  {
+    id: 18,
+    title: "Notebook Set",
+    price: 18.99,
+    description: "Premium hardcover notebook set with dotted pages",
+    category: "Stationery",
+    image: "https://images.unsplash.com/photo-1517971129774-8a2b38fa128e?w=400",
+    rating: { rate: 4.7, count: 145 }
+  },
+  {
+    id: 19,
+    title: "Webcam Cover",
+    price: 7.99,
+    description: "Privacy webcam cover for laptop and desktop",
+    category: "Accessories",
+    image: "https://images.unsplash.com/photo-1585076800883-5f05d7d18c82?w=400",
+    rating: { rate: 4.2, count: 63 }
+  },
+  {
+    id: 20,
+    title: "Monitor Light Bar",
+    price: 79.99,
+    description: "LED monitor light bar with auto-dimming",
+    category: "Lighting",
+    image: "https://images.unsplash.com/photo-1545486332-9e0999c535b2?w=400",
+    rating: { rate: 4.8, count: 201 }
   }
 ]
 

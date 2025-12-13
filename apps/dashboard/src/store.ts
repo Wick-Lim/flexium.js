@@ -62,14 +62,51 @@ function generateChartData(): ChartData[] {
 }
 
 function generateActivities(): Activity[] {
-  const types: Activity['type'][] = ['user', 'order', 'alert']
+  const userActivities = [
+    'New user registration: john.doe@example.com',
+    'User profile updated: sarah.smith@example.com',
+    'New user registration: mike.johnson@example.com',
+    'Password reset request: emma.wilson@example.com',
+    'User logged in: alex.brown@example.com'
+  ]
+
+  const orderActivities = [
+    'New order #1234 - $299.99',
+    'Order #1235 shipped to New York',
+    'New order #1236 - $149.50',
+    'Order #1237 delivered successfully',
+    'Order #1238 cancelled by customer',
+    'New order #1239 - $599.00'
+  ]
+
+  const alertActivities = [
+    'Server CPU usage exceeded 80%',
+    'Database backup completed',
+    'Security: Failed login attempts detected',
+    'Payment gateway integration error',
+    'Low inventory alert: Product SKU-12345',
+    'API rate limit warning'
+  ]
+
   const activities: Activity[] = []
 
   for (let i = 0; i < 10; i++) {
+    const typeIndex = Math.floor(Math.random() * 3)
+    const type: Activity['type'] = ['user', 'order', 'alert'][typeIndex] as Activity['type']
+
+    let title = ''
+    if (type === 'user') {
+      title = userActivities[Math.floor(Math.random() * userActivities.length)]
+    } else if (type === 'order') {
+      title = orderActivities[Math.floor(Math.random() * orderActivities.length)]
+    } else {
+      title = alertActivities[Math.floor(Math.random() * alertActivities.length)]
+    }
+
     activities.push({
       id: i + 1,
-      type: types[Math.floor(Math.random() * types.length)],
-      title: `Activity ${i + 1}`,
+      type,
+      title,
       time: `${generateRandomValue(1, 60)} minutes ago`
     })
   }
@@ -113,10 +150,27 @@ export function startRealTimeUpdates() {
 
     const [, setActivities] = useActivities()
     const current = useActivities()[0]
+
+    const typeIndex = Math.floor(Math.random() * 3)
+    const type: Activity['type'] = ['user', 'order', 'alert'][typeIndex] as Activity['type']
+
+    const realtimeUserActivities = ['New user signed up', 'User updated profile', 'Password reset', 'User logged in']
+    const realtimeOrderActivities = [`New order #${generateRandomValue(1000, 9999)}`, 'Order shipped', 'Order delivered', 'Order cancelled']
+    const realtimeAlertActivities = ['High CPU usage', 'Backup completed', 'Security alert', 'API warning']
+
+    let title = ''
+    if (type === 'user') {
+      title = realtimeUserActivities[Math.floor(Math.random() * realtimeUserActivities.length)]
+    } else if (type === 'order') {
+      title = realtimeOrderActivities[Math.floor(Math.random() * realtimeOrderActivities.length)]
+    } else {
+      title = realtimeAlertActivities[Math.floor(Math.random() * realtimeAlertActivities.length)]
+    }
+
     const newActivity: Activity = {
       id: Date.now(),
-      type: ['user', 'order', 'alert'][Math.floor(Math.random() * 3)] as Activity['type'],
-      title: `New ${['user', 'order', 'alert'][Math.floor(Math.random() * 3)]} activity`,
+      type,
+      title,
       time: 'Just now'
     }
     setActivities([newActivity, ...current.slice(0, 9)])
