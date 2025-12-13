@@ -109,7 +109,7 @@ function CanvasDemo() {
 
 onMounted(() => {
   if (container.value) {
-    render(() => CanvasDemo(), container.value)
+    render(CanvasDemo, container.value)
   }
 })
 
