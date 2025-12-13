@@ -65,7 +65,7 @@ function Counter() {
           fontVariantNumeric: 'tabular-nums',
           lineHeight: '1'
         }
-      }, [count]) // Direct signal binding (getter function is reactive)
+      }, [count])
     ]),
 
     // Doubled display
@@ -82,7 +82,7 @@ function Counter() {
       'Doubled: ',
       f('span', {
         style: { fontWeight: 'bold', color: '#2563eb' }
-      }, [doubled]) // Direct computed binding
+      }, [doubled])
     ]),
 
     // Buttons

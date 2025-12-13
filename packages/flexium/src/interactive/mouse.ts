@@ -29,10 +29,10 @@ export function mouse(options: MouseOptions = {}): MouseState {
   const target = options.target || window
   const canvasGetter = typeof options.canvas === 'function' ? options.canvas : () => options.canvas as HTMLCanvasElement | undefined
 
-  const position = state({ x: 0, y: 0 }, { key: ['mouse', 'position'] })
-  const delta = state({ x: 0, y: 0 }, { key: ['mouse', 'delta'] })
-  const wheelDelta = state(0, { key: ['mouse', 'wheel'] })
-  const buttons = state<Set<number>>(new Set<number>(), { key: ['mouse', 'buttons'] })
+  const [position, setPosition] = state({ x: 0, y: 0 }, { key: ['mouse', 'position'] })
+  const [delta, setDelta] = state({ x: 0, y: 0 }, { key: ['mouse', 'delta'] })
+  const [wheelDelta, setWheelDelta] = state(0, { key: ['mouse', 'wheel'] })
+  const [buttons, setButtons] = state<Set<number>>(new Set<number>(), { key: ['mouse', 'buttons'] })
 
   let lastX = 0
   let lastY = 0
@@ -51,8 +51,8 @@ export function mouse(options: MouseOptions = {}): MouseState {
       y = me.clientY - rect.top
     }
 
-    position.set({ x, y })
-    delta.set({ x: x - lastX, y: y - lastY })
+    setPosition({ x, y })
+    setDelta({ x: x - lastX, y: y - lastY })
     lastX = x
     lastY = y
   }
@@ -62,7 +62,7 @@ export function mouse(options: MouseOptions = {}): MouseState {
     const currentButtons = buttons as Set<number>
     const newButtons = new Set(currentButtons)
     newButtons.add(button)
-    buttons.set(newButtons)
+    setButtons(newButtons)
   }
 
   const handleMouseUp = (e: Event) => {
@@ -70,12 +70,12 @@ export function mouse(options: MouseOptions = {}): MouseState {
     const currentButtons = buttons as Set<number>
     const newButtons = new Set(currentButtons)
     newButtons.delete(button)
-    buttons.set(newButtons)
+    setButtons(newButtons)
   }
 
   const handleWheel = (e: Event) => {
     const we = e as WheelEvent
-    wheelDelta.set(we.deltaY)
+    setWheelDelta(we.deltaY)
   }
 
   target.addEventListener('mousemove', handleMouseMove)
@@ -104,8 +104,8 @@ export function mouse(options: MouseOptions = {}): MouseState {
     isMiddlePressed: () => currentButtons?.has(MouseButton.Middle) || false,
 
     clearFrameState: () => {
-      delta.set({ x: 0, y: 0 })
-      wheelDelta.set(0)
+      setDelta({ x: 0, y: 0 })
+      setWheelDelta(0)
     },
 
     dispose: () => {

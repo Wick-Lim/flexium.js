@@ -216,7 +216,7 @@ function ContextDemo() {
             fontSize: '14px'
           }
         }, [itemCount > 0 ? `🛒 Cart (${itemCount})` : '🛒 Cart']),
-        total > 0 ? f('span', {
+        () => total > 0 ? f('span', {
           style: {
             fontWeight: '700',
             color: '#6366f1',

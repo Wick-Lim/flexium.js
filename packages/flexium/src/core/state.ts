@@ -117,13 +117,17 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
   }) as any
 
   // --- RETURN LOGIC ---
-  // This runs EVERY RENDER.
-  // We access container.value here to TRACK DEPENDENCY in the Component's Effect.
-
+  // Access container.value to track dependency in the component's effect
   const currentValue = container.value
 
   if (container.type === 'signal') {
-    const setter = (newValue: T) => { container.value = newValue }
+    const setter = (newValue: T | ((prev: T) => T)) => {
+      if (typeof newValue === 'function') {
+        container.value = (newValue as Function)(container.value)
+      } else {
+        container.value = newValue
+      }
+    }
     return [currentValue, setter]
   } else {
     // Resource / Computed

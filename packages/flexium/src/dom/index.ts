@@ -121,6 +121,9 @@ function createNode(fnode: FNodeChild): Node {
 
             unsafeEffect(() => {
                 runWithContext(ctxSnapshot, () => {
+                    // Reset hook index before each render
+                    componentInstance.hookIndex = 0
+
                     runWithComponent(componentInstance, () => {
                         const result = type({ ...props, children })
                         const newNode = createNode(result)

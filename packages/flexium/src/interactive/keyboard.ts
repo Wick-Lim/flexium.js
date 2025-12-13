@@ -56,9 +56,9 @@ export interface KeyboardState {
 }
 
 export function keyboard(target: EventTarget = window): KeyboardState {
-  const pressedKeys = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'pressed'] })
-  const justPressedKeys = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justPressed'] })
-  const justReleasedKeys = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justReleased'] })
+  const [pressedKeys, setPressedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'pressed'] })
+  const [justPressedKeys, setJustPressedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justPressed'] })
+  const [justReleasedKeys, setJustReleasedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justReleased'] })
 
   const handleKeyDown = (e: Event) => {
     const key = (e as KeyboardEvent).code
@@ -67,12 +67,12 @@ export function keyboard(target: EventTarget = window): KeyboardState {
     if (!currentPressed.has(key)) {
       const newPressed = new Set(currentPressed)
       newPressed.add(key)
-      pressedKeys.set(newPressed)
+      setPressedKeys(newPressed)
 
       const currentJustPressed = justPressedKeys as Set<string>
       const newJustPressed = new Set(currentJustPressed)
       newJustPressed.add(key)
-      justPressedKeys.set(newJustPressed)
+      setJustPressedKeys(newJustPressed)
     }
   }
 
@@ -82,12 +82,12 @@ export function keyboard(target: EventTarget = window): KeyboardState {
 
     const newPressed = new Set(currentPressed)
     newPressed.delete(key)
-    pressedKeys.set(newPressed)
+    setPressedKeys(newPressed)
 
     const currentJustReleased = justReleasedKeys as Set<string>
     const newJustReleased = new Set(currentJustReleased)
     newJustReleased.add(key)
-    justReleasedKeys.set(newJustReleased)
+    setJustReleasedKeys(newJustReleased)
   }
 
   target.addEventListener('keydown', handleKeyDown)
@@ -115,8 +115,8 @@ export function keyboard(target: EventTarget = window): KeyboardState {
     },
 
     clearFrameState: () => {
-      justPressedKeys.set(new Set<string>())
-      justReleasedKeys.set(new Set<string>())
+      setJustPressedKeys(new Set<string>())
+      setJustReleasedKeys(new Set<string>())
     },
 
     dispose: () => {
