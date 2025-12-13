@@ -22,12 +22,12 @@ export default function User(props: { params?: { id?: string } } = {}) {
 
     // Use proxy directly
     const u = user;
-    if (!u) return <div class="view user-view"><div>Loading...</div></div>
+    if (!u) return <main class="view user-view" id="main"><div>Loading...</div></main>
 
     const userValue = u
 
     return (
-        <div class="view user-view">
+        <main class="view user-view" id="main">
             <div>
                 <h1>User : {userValue.id}</h1>
                 <ul class="meta">
@@ -40,6 +40,6 @@ export default function User(props: { params?: { id?: string } } = {}) {
                     <a href={`https://news.ycombinator.com/threads?id=${userValue.id}`}>comments</a>
                 </p>
             </div>
-        </div>
+        </main>
     )
 }

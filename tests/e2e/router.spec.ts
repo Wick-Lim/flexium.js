@@ -89,38 +89,32 @@ test.describe('Flexium Router', () => {
       await expect(page).toHaveTitle(/Flexium Hacker News/)
     })
 
-    test('should navigate to /top', async ({ page }) => {
-      await page.goto('/')
-      await page.click('a:has-text("Top")')
-      await expect(page).toHaveURL('/top')
-    })
-
     test('should navigate to /new', async ({ page }) => {
       await page.goto('/')
-      await page.click('a:has-text("New")')
+      await page.click('nav .links a:has-text("new")')
       await expect(page).toHaveURL('/new')
     })
 
     test('should navigate to /show', async ({ page }) => {
       await page.goto('/')
-      await page.click('a:has-text("Show")')
+      await page.click('nav a:has-text("show")')
       await expect(page).toHaveURL('/show')
     })
 
     test('should navigate to /ask', async ({ page }) => {
       await page.goto('/')
-      await page.click('a:has-text("Ask")')
+      await page.click('nav a:has-text("ask")')
       await expect(page).toHaveURL('/ask')
     })
 
-    test('should navigate to /job', async ({ page }) => {
+    test('should navigate to /jobs', async ({ page }) => {
       await page.goto('/')
-      await page.click('a:has-text("Jobs")')
-      await expect(page).toHaveURL('/job')
+      await page.click('nav a:has-text("jobs")')
+      await expect(page).toHaveURL('/jobs')
     })
 
     test('should navigate back to home via logo', async ({ page }) => {
-      await page.goto('/top')
+      await page.goto('/new')
       await page.click('a.logo')
       await expect(page).toHaveURL('/')
     })
@@ -182,14 +176,14 @@ test.describe('Flexium Router', () => {
     test('should support browser back button', async ({ page }) => {
       await page.goto('/')
 
-      await page.click('nav a:has-text("Top")', { force: true })
-      await expect(page).toHaveURL('/top')
+      await page.click('nav .links a:has-text("show")', { force: true })
+      await expect(page).toHaveURL('/show')
 
-      await page.click('nav a:has-text("New")', { force: true })
+      await page.click('nav .links a:has-text("new")', { force: true })
       await expect(page).toHaveURL('/new')
 
       await page.goBack()
-      await expect(page).toHaveURL('/top')
+      await expect(page).toHaveURL('/show')
 
       await page.goBack()
       await expect(page).toHaveURL('/')
@@ -198,15 +192,15 @@ test.describe('Flexium Router', () => {
     test('should support browser forward button', async ({ page }) => {
       await page.goto('/')
 
-      await page.click('nav a:has-text("Top")', { force: true })
-      await page.click('nav a:has-text("New")', { force: true })
+      await page.click('nav .links a:has-text("show")', { force: true })
+      await page.click('nav .links a:has-text("new")', { force: true })
 
       await page.goBack()
       await page.goBack()
       await expect(page).toHaveURL('/')
 
       await page.goForward()
-      await expect(page).toHaveURL('/top')
+      await expect(page).toHaveURL('/show')
 
       await page.goForward()
       await expect(page).toHaveURL('/new')
@@ -214,16 +208,16 @@ test.describe('Flexium Router', () => {
   })
 
   test.describe('Direct URL Access', () => {
-    test('should handle direct navigation to /top', async ({ page }) => {
-      await page.goto('/top')
-      await expect(page.locator('#app')).toBeVisible()
-      await expect(page.locator('li.news-item')).toHaveCount(5, { timeout: 10000 })
-    })
-
     test('should handle direct navigation to /new', async ({ page }) => {
       await page.goto('/new')
       await expect(page.locator('#app')).toBeVisible()
       await expect(page.locator('li.news-item')).toHaveCount(3, { timeout: 10000 })
+    })
+
+    test('should handle direct navigation to /show', async ({ page }) => {
+      await page.goto('/show')
+      await expect(page.locator('#app')).toBeVisible()
+      await expect(page.locator('li.news-item')).toHaveCount(2, { timeout: 10000 })
     })
 
     test('should handle direct navigation to /item/:id', async ({ page }) => {
@@ -265,7 +259,7 @@ test.describe('Flexium Router', () => {
         fullReloadOccurred = true
       })
 
-      await page.click('a:has-text("Top")')
+      await page.click('nav .links a:has-text("new")')
 
       // Wait a bit to ensure no full reload
       await page.waitForTimeout(500)
@@ -278,18 +272,18 @@ test.describe('Flexium Router', () => {
     test('should set href attribute correctly', async ({ page }) => {
       await page.goto('/')
 
-      const topLink = page.locator('a:has-text("Top")').first()
-      await expect(topLink).toHaveAttribute('href', '/top')
-
-      const newLink = page.locator('a:has-text("New")').first()
+      const newLink = page.locator('nav .links a:has-text("new")')
       await expect(newLink).toHaveAttribute('href', '/new')
+
+      const showLink = page.locator('nav a:has-text("show")').first()
+      await expect(showLink).toHaveAttribute('href', '/show')
     })
   })
 
   test.describe('Route Rendering', () => {
     test('should render different content for different routes', async ({ page }) => {
-      // Check /top has 5 items
-      await page.goto('/top')
+      // Check / (top) has 5 items
+      await page.goto('/')
       await expect(page.locator('li.news-item')).toHaveCount(5, { timeout: 10000 })
 
       // Check /new has 3 items
@@ -303,13 +297,13 @@ test.describe('Flexium Router', () => {
 
     // Test: Route navigation should update list content correctly
     test('should update content when navigating between routes', async ({ page }) => {
-      await page.goto('/top')
+      await page.goto('/')
       await expect(page.locator('li.news-item')).toHaveCount(5, { timeout: 10000 })
 
-      await page.click('nav a:has-text("New")', { force: true })
+      await page.click('nav .links a:has-text("new")', { force: true })
       await expect(page.locator('li.news-item')).toHaveCount(3, { timeout: 10000 })
 
-      await page.click('nav a:has-text("Ask")', { force: true })
+      await page.click('nav .links a:has-text("ask")', { force: true })
       await expect(page.locator('li.news-item')).toHaveCount(1, { timeout: 10000 })
     })
   })
@@ -321,13 +315,13 @@ test.describe('Flexium Router', () => {
 
       const start = Date.now()
 
-      await page.click('nav a:has-text("Top")')
+      await page.click('nav .links a:has-text("new")')
       await page.waitForSelector('li.news-item')
 
-      await page.click('nav a:has-text("New")')
+      await page.click('nav .links a:has-text("show")')
       await page.waitForSelector('li.news-item')
 
-      await page.click('nav a:has-text("Show")')
+      await page.click('nav .links a:has-text("ask")')
       await page.waitForSelector('li.news-item')
 
       const duration = Date.now() - start
@@ -374,14 +368,14 @@ test.describe('Flexium Router', () => {
       await page.goto('/')
 
       // Focus on a link
-      await page.locator('a:has-text("Top")').focus()
-      await expect(page.locator('a:has-text("Top")')).toBeFocused()
+      await page.locator('nav .links a:has-text("new")').focus()
+      await expect(page.locator('nav .links a:has-text("new")')).toBeFocused()
 
       // Navigate
       await page.keyboard.press('Enter')
 
       // Wait for navigation
-      await page.waitForURL('/top')
+      await page.waitForURL('/new')
 
       // Focus should be managed appropriately
       // (typically moves to main content or stays on navigation)

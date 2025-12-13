@@ -38,21 +38,21 @@ export default function Stories(props: { type: string }) {
 
     if (status !== 'success') {
         return (
-            <div class="view">
+            <main class="view" id="main">
                 <h1 class="visually-hidden">{props.type.charAt(0).toUpperCase() + props.type.slice(1)} Stories</h1>
                 <div class="item-list-nav">
                     <span>Loading...</span>
                 </div>
-            </div>
+            </main>
         )
     }
 
     return (
-        <div class="view">
+        <main class="view" id="main">
             <h1 class="visually-hidden">{props.type.charAt(0).toUpperCase() + props.type.slice(1)} Stories</h1>
             <ul class="news-list">
                 {list?.map((id: number, index: number) => <StoryItem id={id} index={index + 1} />)}
             </ul>
-        </div>
+        </main>
     )
 }

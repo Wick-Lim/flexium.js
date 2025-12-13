@@ -61,12 +61,12 @@ export default function Item(props: { params?: { id?: string } } = {}) {
 
     // Use proxy directly
     const i = item;
-    if (!i) return <div class="view item-view"><div>Loading...</div></div>
+    if (!i) return <main class="view item-view" id="main"><div>Loading...</div></main>
 
     const itemValue = i
 
     return (
-        <div class="view item-view">
+        <main class="view item-view" id="main">
             <div>
                 <div class="item-view-header">
                     <h1><a href={itemValue.url} target="_blank">{itemValue.title}</a></h1>
@@ -84,6 +84,6 @@ export default function Item(props: { params?: { id?: string } } = {}) {
                     </ul>
                 </div>
             </div>
-        </div>
+        </main>
     )
 }

@@ -38,7 +38,7 @@ export default function App() {
             <Route path="/new" component={() => <Stories type="new" />} />
             <Route path="/show" component={() => <Stories type="show" />} />
             <Route path="/ask" component={() => <Stories type="ask" />} />
-            <Route path="/job" component={() => <Stories type="job" />} />
+            <Route path="/jobs" component={() => <Stories type="job" />} />
             <Route path="/item/:id" component={Item} />
             <Route path="/user/:id" component={User} />
         </Routes>
