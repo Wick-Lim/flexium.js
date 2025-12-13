@@ -9,12 +9,12 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [centerX, setCenterX] = state(200)
-  const [centerY, setCenterY] = state(150)
-  const [radius, setRadius] = state(50)
-  const [strokeWidth, setStrokeWidth] = state(3)
-  const [ripples, setRipples] = state([])
-  const [time, setTime] = state(0)
+  const centerX = state(200)
+  const centerY = state(150)
+  const radius = state(50)
+  const strokeWidth = state(3)
+  const ripples = state([])
+  const time = state(0)
 
   // Build DOM
   const wrapper = document.createElement('div')
@@ -73,10 +73,10 @@ onMounted(() => {
     return div
   }
 
-  controls.appendChild(createControl('Center X', centerX(), 50, 350, 1, setCenterX))
-  controls.appendChild(createControl('Center Y', centerY(), 50, 250, 1, setCenterY))
-  controls.appendChild(createControl('Radius', radius(), 20, 120, 1, setRadius))
-  controls.appendChild(createControl('Stroke Width', strokeWidth(), 1, 10, 0.5, setStrokeWidth))
+  controls.appendChild(createControl('Center X', centerX, 50, 350, 1, (val) => centerX.set(val)))
+  controls.appendChild(createControl('Center Y', centerY, 50, 250, 1, (val) => centerY.set(val)))
+  controls.appendChild(createControl('Radius', radius, 20, 120, 1, (val) => radius.set(val)))
+  controls.appendChild(createControl('Stroke Width', strokeWidth, 1, 10, 0.5, (val) => strokeWidth.set(val)))
 
   wrapper.appendChild(title)
   wrapper.appendChild(desc)
@@ -92,7 +92,7 @@ onMounted(() => {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
-    setRipples(prev => [...prev, {
+    ripples.set(prev => [...prev, {
       x,
       y,
       radius: 0,
@@ -104,7 +104,7 @@ onMounted(() => {
 
   // Animation loop
   const animate = () => {
-    setTime(t => t + 0.02)
+    time.set(t => t + 0.02)
 
     if (ctx) {
       // Clear canvas
@@ -112,7 +112,7 @@ onMounted(() => {
       ctx.fillRect(0, 0, 400, 300)
 
       // Update and draw ripples
-      const currentRipples = ripples()
+      const currentRipples = ripples
       const updatedRipples = currentRipples
         .map(r => ({
           ...r,
@@ -120,7 +120,7 @@ onMounted(() => {
         }))
         .filter(r => r.radius < r.maxRadius)
 
-      setRipples(updatedRipples)
+      ripples.set(updatedRipples)
 
       updatedRipples.forEach(ripple => {
         const alpha = 1 - (ripple.radius / ripple.maxRadius)
@@ -132,10 +132,10 @@ onMounted(() => {
       })
 
       // Draw orbiting circles
-      const currentTime = time()
-      const currentCenterX = centerX()
-      const currentCenterY = centerY()
-      const currentRadius = radius()
+      const currentTime = time
+      const currentCenterX = centerX
+      const currentCenterY = centerY
+      const currentRadius = radius
 
       for (let i = 0; i < 3; i++) {
         const angle = currentTime + (i * Math.PI * 2 / 3)
@@ -178,7 +178,7 @@ onMounted(() => {
 
       // Main circle stroke
       ctx.strokeStyle = 'hsl(280, 70%, 80%)'
-      ctx.lineWidth = strokeWidth()
+      ctx.lineWidth = strokeWidth
       ctx.stroke()
 
       // Inner circle

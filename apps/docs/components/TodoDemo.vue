@@ -6,28 +6,28 @@ import { f, render } from 'flexium/dom'
 const container = ref(null)
 
 function TodoDemo() {
-  const [todos, setTodos] = state([
+  const todos = state([
     { id: 1, text: 'Learn Flexium', done: true },
     { id: 2, text: 'Build something awesome', done: false },
     { id: 3, text: 'Share with the world', done: false }
   ])
-  const [inputValue, setInputValue] = state('')
-  const [nextId, setNextId] = state(4)
+  const inputValue = state('')
+  const nextId = state(4)
 
   const addTodo = () => {
-    const text = inputValue().trim()
+    const text = inputValue.trim()
     if (!text) return
-    setTodos(prev => [...prev, { id: nextId(), text, done: false }])
-    setNextId(id => id + 1)
-    setInputValue('')
+    todos.set(prev => [...prev, { id: nextId, text, done: false }])
+    nextId.set(id => id + 1)
+    inputValue.set('')
   }
 
   const toggleTodo = (id) => {
-    setTodos(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t))
+    todos.set(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t))
   }
 
   const deleteTodo = (id) => {
-    setTodos(prev => prev.filter(t => t.id !== id))
+    todos.set(prev => prev.filter(t => t.id !== id))
   }
 
   return f('div', {
@@ -48,7 +48,7 @@ function TodoDemo() {
         type: 'text',
         placeholder: 'Add a new todo...',
         value: inputValue,
-        oninput: (e) => setInputValue(e.target.value),
+        oninput: (e) => inputValue.set(e.target.value),
         onkeydown: (e) => {
           e.stopPropagation()
           if (e.key === 'Enter') addTodo()

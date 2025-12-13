@@ -9,10 +9,10 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [scale, setScale] = state(1)
-  const [rotation, setRotation] = state(0)
-  const [selectedPath, setSelectedPath] = state('star')
-  const [time, setTime] = state(0)
+  const scale = state(1)
+  const rotation = state(0)
+  const selectedPath = state('star')
+  const time = state(0)
 
   // SVG Path definitions
   const paths = {
@@ -110,7 +110,7 @@ onMounted(() => {
       `
 
       btn.addEventListener('click', () => {
-        setSelectedPath(option.value)
+        selectedPath.set(option.value)
         // Update all button styles
         Array.from(div.children).forEach((b, i) => {
           b.style.background = shapeOptions[i].value === option.value ? '#3b82f6' : '#ffffff'
@@ -126,8 +126,8 @@ onMounted(() => {
 
   const sliderContainer = document.createElement('div')
   sliderContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 12px;'
-  sliderContainer.appendChild(createSlider('Scale', scale(), 0.5, 3, 0.1, setScale))
-  sliderContainer.appendChild(createSlider('Rotation', rotation(), 0, 360, 1, setRotation))
+  sliderContainer.appendChild(createSlider('Scale', scale, 0.5, 3, 0.1, (val) => scale.set(val)))
+  sliderContainer.appendChild(createSlider('Rotation', rotation, 0, 360, 1, (val) => rotation.set(val)))
 
   const shapeButtons = createShapeButtons()
 
@@ -160,17 +160,17 @@ onMounted(() => {
 
   // Animation loop
   const animate = () => {
-    setTime(t => t + 0.02)
+    time.set(t => t + 0.02)
 
     if (ctx) {
       // Clear canvas
       ctx.fillStyle = '#1a1a2e'
       ctx.fillRect(0, 0, 400, 300)
 
-      const currentTime = time()
-      const currentScale = scale()
-      const currentRotation = rotation()
-      const currentPath = paths[selectedPath()]
+      const currentTime = time
+      const currentScale = scale
+      const currentRotation = rotation
+      const currentPath = paths[selectedPath]
 
       // Draw decorative background paths
       Object.entries(paths).forEach(([key, pathData], i) => {
@@ -210,7 +210,7 @@ onMounted(() => {
 
       examplePaths.forEach(([key, pathData], i) => {
         const x = startX + i * 60
-        const isSelected = key === selectedPath()
+        const isSelected = key === selectedPath
 
         ctx.globalAlpha = isSelected ? 1 : 0.4
         ctx.fillStyle = isSelected ? '#3b82f6' : '#6b7280'

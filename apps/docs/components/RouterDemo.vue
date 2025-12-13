@@ -7,10 +7,10 @@ const container = ref(null)
 
 // Simulated Router Demo
 function RouterDemo() {
-  const [currentRoute, setCurrentRoute] = state('/')
+  const currentRoute = state('/')
 
   const navigate = (path) => {
-    setCurrentRoute(path)
+    currentRoute.set(path)
   }
 
   // Navigation component
@@ -32,8 +32,8 @@ function RouterDemo() {
           borderRadius: '6px',
           border: 'none',
           cursor: 'pointer',
-          background: () => currentRoute() === '/' ? '#4f46e5' : '#e5e7eb',
-          color: () => currentRoute() === '/' ? 'white' : '#374151',
+          background: () => currentRoute === '/' ? '#4f46e5' : '#e5e7eb',
+          color: () => currentRoute === '/' ? 'white' : '#374151',
           fontWeight: '500',
           transition: 'all 0.2s'
         }
@@ -45,8 +45,8 @@ function RouterDemo() {
           borderRadius: '6px',
           border: 'none',
           cursor: 'pointer',
-          background: () => currentRoute() === '/about' ? '#4f46e5' : '#e5e7eb',
-          color: () => currentRoute() === '/about' ? 'white' : '#374151',
+          background: () => currentRoute === '/about' ? '#4f46e5' : '#e5e7eb',
+          color: () => currentRoute === '/about' ? 'white' : '#374151',
           fontWeight: '500',
           transition: 'all 0.2s'
         }
@@ -58,8 +58,8 @@ function RouterDemo() {
           borderRadius: '6px',
           border: 'none',
           cursor: 'pointer',
-          background: () => currentRoute() === '/contact' ? '#4f46e5' : '#e5e7eb',
-          color: () => currentRoute() === '/contact' ? 'white' : '#374151',
+          background: () => currentRoute === '/contact' ? '#4f46e5' : '#e5e7eb',
+          color: () => currentRoute === '/contact' ? 'white' : '#374151',
           fontWeight: '500',
           transition: 'all 0.2s'
         }
@@ -104,7 +104,7 @@ function RouterDemo() {
   // Router simulation
   const Router = () => {
     const getPage = () => {
-      const route = currentRoute()
+      const route = currentRoute
       if (route === '/') return HomePage()
       if (route === '/about') return AboutPage()
       if (route === '/contact') return ContactPage()

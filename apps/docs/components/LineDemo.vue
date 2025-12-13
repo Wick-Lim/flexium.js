@@ -9,11 +9,11 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [strokeWidth, setStrokeWidth] = state(3)
-  const [lineCap, setLineCap] = state('round')
-  const [points, setPoints] = state([])
-  const [time, setTime] = state(0)
-  const [isDrawing, setIsDrawing] = state(false)
+  const strokeWidth = state(3)
+  const lineCap = state('round')
+  const points = state([])
+  const time = state(0)
+  const isDrawing = state(false)
 
   // Build DOM
   const wrapper = document.createElement('div')
@@ -98,7 +98,7 @@ onMounted(() => {
       `
 
       btn.addEventListener('click', () => {
-        setLineCap(option.value)
+        lineCap.set(option.value)
         // Update all button styles
         Array.from(div.children).forEach((b, i) => {
           b.style.background = capOptions[i].value === option.value ? '#3b82f6' : '#ffffff'
@@ -122,14 +122,14 @@ onMounted(() => {
       font-weight: 500;
       margin-left: auto;
     `
-    clearBtn.addEventListener('click', () => setPoints([]))
+    clearBtn.addEventListener('click', () => points.set([]))
     div.appendChild(clearBtn)
 
     return div
   }
 
   const sliderDiv = document.createElement('div')
-  sliderDiv.appendChild(createSlider('Line Width', strokeWidth(), 1, 20, 0.5, setStrokeWidth))
+  sliderDiv.appendChild(createSlider('Line Width', strokeWidth, 1, 20, 0.5, (val) => strokeWidth.set(val)))
 
   const buttonDiv = createButtonGroup()
 
@@ -146,37 +146,37 @@ onMounted(() => {
 
   // Drawing interaction
   canvas.addEventListener('mousedown', (e) => {
-    setIsDrawing(true)
+    isDrawing.set(true)
     const rect = canvas.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    setPoints([[x, y]])
+    points.set([[x, y]])
   })
 
   canvas.addEventListener('mousemove', (e) => {
-    if (isDrawing()) {
+    if (isDrawing) {
       const rect = canvas.getBoundingClientRect()
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
-      setPoints(prev => [...prev, [x, y]])
+      points.set(prev => [...prev, [x, y]])
     }
   })
 
-  canvas.addEventListener('mouseup', () => setIsDrawing(false))
-  canvas.addEventListener('mouseleave', () => setIsDrawing(false))
+  canvas.addEventListener('mouseup', () => isDrawing.set(false))
+  canvas.addEventListener('mouseleave', () => isDrawing.set(false))
 
   // Animation loop
   const animate = () => {
-    setTime(t => t + 0.02)
+    time.set(t => t + 0.02)
 
     if (ctx) {
       // Clear canvas
       ctx.fillStyle = '#1a1a2e'
       ctx.fillRect(0, 0, 400, 300)
 
-      const currentTime = time()
-      const currentStrokeWidth = strokeWidth()
-      const currentLineCap = lineCap()
+      const currentTime = time
+      const currentStrokeWidth = strokeWidth
+      const currentLineCap = lineCap
 
       // Draw animated wave pattern
       ctx.strokeStyle = 'rgba(59, 130, 246, 0.3)'
@@ -234,7 +234,7 @@ onMounted(() => {
       })
 
       // Draw user-drawn lines
-      const currentPoints = points()
+      const currentPoints = points
       if (currentPoints.length > 1) {
         ctx.lineCap = currentLineCap
         ctx.lineWidth = currentStrokeWidth

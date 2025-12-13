@@ -9,11 +9,11 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [text, setText] = state('FLEXIUM')
-  const [fontSize, setFontSize] = state(48)
-  const [fontFamily, setFontFamily] = state('sans-serif')
-  const [textAlign, setTextAlign] = state('center')
-  const [time, setTime] = state(0)
+  const text = state('FLEXIUM')
+  const fontSize = state(48)
+  const fontFamily = state('sans-serif')
+  const textAlign = state('center')
+  const time = state(0)
 
   // Build DOM
   const wrapper = document.createElement('div')
@@ -50,9 +50,9 @@ onMounted(() => {
 
   const textInput = document.createElement('input')
   textInput.type = 'text'
-  textInput.value = text()
+  textInput.value = text
   textInput.style.cssText = 'padding: 8px 12px; border: 2px solid #d1d5db; border-radius: 6px; font-size: 14px;'
-  textInput.addEventListener('input', (e) => setText(e.target.value || 'FLEXIUM'))
+  textInput.addEventListener('input', (e) => text.set(e.target.value || 'FLEXIUM'))
 
   textInputDiv.appendChild(textLabel)
   textInputDiv.appendChild(textInput)
@@ -118,7 +118,7 @@ onMounted(() => {
       `
 
       btn.addEventListener('click', () => {
-        setFontFamily(font.value)
+        fontFamily.set(font.value)
         Array.from(div.children).forEach((b, i) => {
           b.style.background = fonts[i].value === font.value ? '#3b82f6' : '#ffffff'
           b.style.color = fonts[i].value === font.value ? '#ffffff' : '#374151'
@@ -157,7 +157,7 @@ onMounted(() => {
       `
 
       btn.addEventListener('click', () => {
-        setTextAlign(align.value)
+        textAlign.set(align.value)
         Array.from(div.children).forEach((b, i) => {
           b.style.background = aligns[i].value === align.value ? '#3b82f6' : '#ffffff'
           b.style.color = aligns[i].value === align.value ? '#ffffff' : '#374151'
@@ -170,7 +170,7 @@ onMounted(() => {
     return div
   }
 
-  const fontSizeSlider = createSlider('Font Size', fontSize(), 12, 80, 1, setFontSize)
+  const fontSizeSlider = createSlider('Font Size', fontSize, 12, 80, 1, (val) => fontSize.set(val))
   const fontButtons = createFontButtons()
   const alignButtons = createAlignButtons()
 
@@ -199,18 +199,18 @@ onMounted(() => {
 
   // Animation loop
   const animate = () => {
-    setTime(t => t + 0.03)
+    time.set(t => t + 0.03)
 
     if (ctx) {
       // Clear canvas
       ctx.fillStyle = '#1a1a2e'
       ctx.fillRect(0, 0, 400, 300)
 
-      const currentTime = time()
-      const currentText = text()
-      const currentFontSize = fontSize()
-      const currentFontFamily = fontFamily()
-      const currentAlign = textAlign()
+      const currentTime = time
+      const currentText = text
+      const currentFontSize = fontSize
+      const currentFontFamily = fontFamily
+      const currentAlign = textAlign
 
       // Calculate base X position based on alignment
       let baseX = 200

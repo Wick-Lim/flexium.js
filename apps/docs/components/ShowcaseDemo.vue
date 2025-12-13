@@ -8,8 +8,8 @@ let cleanup = null
 
 // Flexium Counter Component Logic
 function Counter() {
-  const [count, setCount] = state(0)
-  const [doubled] = state(() => count * 2)
+  const count = state(0)
+  const doubled = state(() => count * 2)
 
   const containerNode = f('div', {
     style: {
@@ -94,7 +94,7 @@ function Counter() {
       }
     }, [
       f('button', {
-        onclick: () => { setCount(c => c - 1) },
+        onclick: () => { count.set(c => c - 1) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',
@@ -110,7 +110,7 @@ function Counter() {
       }, ['- Decrement']),
 
       f('button', {
-        onclick: () => { setCount(0) },
+        onclick: () => { count.set(0) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',
@@ -125,7 +125,7 @@ function Counter() {
       }, ['Reset']),
 
       f('button', {
-        onclick: () => { setCount(c => c + 1) },
+        onclick: () => { count.set(c => c + 1) },
         style: {
           padding: '12px 24px',
           borderRadius: '8px',

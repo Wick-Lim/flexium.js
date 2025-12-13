@@ -9,12 +9,12 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [x, setX] = state(50)
-  const [y, setY] = state(50)
-  const [width, setWidth] = state(100)
-  const [height, setHeight] = state(60)
-  const [rotation, setRotation] = state(0)
-  const [hue, setHue] = state(200)
+  const x = state(50)
+  const y = state(50)
+  const width = state(100)
+  const height = state(60)
+  const rotation = state(0)
+  const hue = state(200)
 
   // Build DOM
   const wrapper = document.createElement('div')
@@ -73,12 +73,12 @@ onMounted(() => {
     return div
   }
 
-  controls.appendChild(createControl('X Position', x(), 0, 300, 1, setX))
-  controls.appendChild(createControl('Y Position', y(), 0, 240, 1, setY))
-  controls.appendChild(createControl('Width', width(), 20, 300, 1, setWidth))
-  controls.appendChild(createControl('Height', height(), 20, 200, 1, setHeight))
-  controls.appendChild(createControl('Rotation', rotation(), 0, 360, 1, setRotation))
-  controls.appendChild(createControl('Color (Hue)', hue(), 0, 360, 1, setHue))
+  controls.appendChild(createControl('X Position', x, 0, 300, 1, (val) => x.set(val)))
+  controls.appendChild(createControl('Y Position', y, 0, 240, 1, (val) => y.set(val)))
+  controls.appendChild(createControl('Width', width, 20, 300, 1, (val) => width.set(val)))
+  controls.appendChild(createControl('Height', height, 20, 200, 1, (val) => height.set(val)))
+  controls.appendChild(createControl('Rotation', rotation, 0, 360, 1, (val) => rotation.set(val)))
+  controls.appendChild(createControl('Color (Hue)', hue, 0, 360, 1, (val) => hue.set(val)))
 
   wrapper.appendChild(title)
   wrapper.appendChild(desc)
@@ -98,10 +98,10 @@ onMounted(() => {
     const mouseX = e.clientX - rect.left
     const mouseY = e.clientY - rect.top
 
-    const currentX = x()
-    const currentY = y()
-    const currentWidth = width()
-    const currentHeight = height()
+    const currentX = x
+    const currentY = y
+    const currentWidth = width
+    const currentHeight = height
 
     if (mouseX >= currentX && mouseX <= currentX + currentWidth &&
         mouseY >= currentY && mouseY <= currentY + currentHeight) {
@@ -117,8 +117,8 @@ onMounted(() => {
       const mouseX = e.clientX - rect.left
       const mouseY = e.clientY - rect.top
 
-      setX(Math.max(0, Math.min(300, mouseX - dragOffsetX)))
-      setY(Math.max(0, Math.min(240, mouseY - dragOffsetY)))
+      x.set(Math.max(0, Math.min(300, mouseX - dragOffsetX)))
+      y.set(Math.max(0, Math.min(240, mouseY - dragOffsetY)))
     }
   })
 
@@ -154,12 +154,12 @@ onMounted(() => {
       }
 
       // Draw rectangles with different styles
-      const currentX = x()
-      const currentY = y()
-      const currentWidth = width()
-      const currentHeight = height()
-      const currentRotation = rotation()
-      const currentHue = hue()
+      const currentX = x
+      const currentY = y
+      const currentWidth = width
+      const currentHeight = height
+      const currentRotation = rotation
+      const currentHue = hue
 
       // Shadow rectangle
       ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'

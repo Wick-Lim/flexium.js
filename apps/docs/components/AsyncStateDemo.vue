@@ -23,7 +23,10 @@ function fakeUserApi() {
 }
 
 function AsyncDemo() {
-  const [users, refetch, status, error] = state(async () => fakeUserApi())
+  const users = state(async () => fakeUserApi())
+  const refetch = users.refetch
+  const status = users.status
+  const error = users.error
 
 
   const containerNode = f('div', {
@@ -73,7 +76,7 @@ function AsyncDemo() {
           width: '12px',
           height: '12px',
           borderRadius: '50%',
-          background: status.toString() === 'loading' ? '#f59e0b' : '#10b981',
+          background: status === 'loading' ? '#f59e0b' : '#10b981',
           transition: 'background 0.2s'
         })
       }),
@@ -82,7 +85,7 @@ function AsyncDemo() {
           fontSize: '14px',
           color: '#374151'
         }
-      }, [() => status.toString() === 'loading' ? 'Loading...' : 'Ready']),
+      }, [() => status === 'loading' ? 'Loading...' : 'Ready']),
       f('button', {
         onclick: refetch,
         style: {
@@ -108,7 +111,7 @@ function AsyncDemo() {
       }
     }, [
       () => {
-        if (status.toString() === 'loading') {
+        if (status === 'loading') {
           return f('div', {
             style: {
               display: 'flex',
@@ -121,7 +124,7 @@ function AsyncDemo() {
           ])
         }
 
-        const currentError = error()
+        const currentError = error
         if (currentError) {
           return f('div', {
             style: {

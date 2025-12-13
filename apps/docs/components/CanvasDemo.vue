@@ -9,10 +9,10 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [mouseX, setMouseX] = state(150)
-  const [mouseY, setMouseY] = state(150)
-  const [hue, setHue] = state(0)
-  const [particles, setParticles] = state([])
+  const mouseX = state(150)
+  const mouseY = state(150)
+  const hue = state(0)
+  const particles = state([])
 
   // Build DOM directly (Vue handles the wrapper)
   const wrapper = document.createElement('div')
@@ -42,28 +42,27 @@ onMounted(() => {
     const rect = canvas.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    setMouseX(x)
-    setMouseY(y)
+    mouseX.set(x)
+    mouseY.set(y)
 
-    setParticles(prev => [...prev.slice(-20), {
+    particles.set([...particles.slice(-20), {
       x, y,
       size: Math.random() * 10 + 5,
-      hue: hue()
+      hue: hue
     }])
   })
 
   // Animation loop
   const animate = () => {
-    setHue(h => (h + 1) % 360)
+    hue.set((hue + 1) % 360)
 
     if (ctx) {
       ctx.fillStyle = 'rgba(26, 26, 46, 0.1)'
       ctx.fillRect(0, 0, 300, 300)
 
       // Draw particles
-      const pts = particles()
-      pts.forEach((p, i) => {
-        const alpha = (i + 1) / pts.length
+      particles.forEach((p, i) => {
+        const alpha = (i + 1) / particles.length
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2)
         ctx.fillStyle = `hsla(${p.hue}, 70%, 60%, ${alpha})`
@@ -72,13 +71,13 @@ onMounted(() => {
 
       // Draw main circle
       ctx.beginPath()
-      ctx.arc(mouseX(), mouseY(), 20, 0, Math.PI * 2)
-      ctx.fillStyle = `hsl(${hue()}, 70%, 60%)`
+      ctx.arc(mouseX, mouseY, 20, 0, Math.PI * 2)
+      ctx.fillStyle = `hsl(${hue}, 70%, 60%)`
       ctx.fill()
 
       ctx.beginPath()
-      ctx.arc(mouseX(), mouseY(), 30, 0, Math.PI * 2)
-      ctx.strokeStyle = `hsla(${hue()}, 70%, 60%, 0.5)`
+      ctx.arc(mouseX, mouseY, 30, 0, Math.PI * 2)
+      ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.5)`
       ctx.lineWidth = 3
       ctx.stroke()
     }

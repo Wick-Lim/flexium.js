@@ -7,9 +7,9 @@ const container = ref(null)
 let timerInterval = null
 
 function TimerDemo() {
-  const [seconds, setSeconds] = state(0)
-  const [isRunning, setIsRunning] = state(false)
-  const [laps, setLaps] = state([])
+  const seconds = state(0)
+  const isRunning = state(false)
+  const laps = state([])
 
   // Format time as mm:ss.ms
   const formatTime = (totalSeconds) => {
@@ -20,18 +20,18 @@ function TimerDemo() {
   }
 
   const startStop = () => {
-    if (isRunning()) {
+    if (isRunning) {
       // Stop
       if (timerInterval) {
         clearInterval(timerInterval)
         timerInterval = null
       }
-      setIsRunning(false)
+      isRunning.set(false)
     } else {
       // Start
-      setIsRunning(true)
+      isRunning.set(true)
       timerInterval = setInterval(() => {
-        setSeconds(s => s + 0.01)
+        seconds.set(s => s + 0.01)
       }, 10)
     }
   }
@@ -41,14 +41,14 @@ function TimerDemo() {
       clearInterval(timerInterval)
       timerInterval = null
     }
-    setIsRunning(false)
-    setSeconds(0)
-    setLaps([])
+    isRunning.set(false)
+    seconds.set(0)
+    laps.set([])
   }
 
   const addLap = () => {
-    if (isRunning()) {
-      setLaps(prev => [seconds(), ...prev])
+    if (isRunning) {
+      laps.set(prev => [seconds, ...prev])
     }
   }
 
@@ -78,7 +78,7 @@ function TimerDemo() {
         borderRadius: '8px',
         border: '1px solid #e5e7eb'
       }
-    }, [() => formatTime(seconds())]),
+    }, [() => formatTime(seconds)]),
 
     // Buttons
     f('div', { style: { display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' } }, [
@@ -87,7 +87,7 @@ function TimerDemo() {
         onclick: startStop,
         style: {
           padding: '12px 24px',
-          background: isRunning() ? '#ef4444' : '#10b981',
+          background: isRunning ? '#ef4444' : '#10b981',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
@@ -97,7 +97,7 @@ function TimerDemo() {
           minWidth: '100px',
           transition: 'background 0.2s'
         }
-      }, [isRunning() ? 'Stop' : 'Start']),
+      }, [isRunning ? 'Stop' : 'Start']),
 
       f('button', {
         onclick: addLap,
@@ -137,7 +137,7 @@ function TimerDemo() {
       }
     }, [
       () => {
-        const lapList = laps()
+        const lapList = laps
         if (lapList.length === 0) return null
         return f('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
           lapList.map((lap, i) =>
