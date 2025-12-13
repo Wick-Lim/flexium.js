@@ -1,10 +1,8 @@
 
 import { reactive } from './reactive'
 import { effect } from './effect'
-import { useHook } from './hook'
+import { hook } from './hook'
 
-// Smart Getter Type: Function that returns T but also exposes properties of T
-export type StateGetter<T> = (() => T) & T
 export type StateSetter<T> = (newValue: T) => void
 export type FnStateControl = {
   refetch: () => Promise<void>
@@ -24,42 +22,10 @@ function serializeKey(key: unknown[]): string {
   return JSON.stringify(key)
 }
 
-// Helper to create "Smart Getters"
-function createSmartGetter<T>(getter: () => T): StateGetter<T> {
-  return new Proxy(getter, {
-    get(target, prop, receiver) {
-      // If prop is a known symbol or part of function prototype, return it
-      if (prop === Symbol.toPrimitive || prop === 'valueOf') {
-        return () => target()
-      }
-
-      // Allow accessing Function properties (call, apply, etc.)
-      const value = Reflect.get(target, prop, receiver)
-      if (value !== undefined && Object.prototype.hasOwnProperty.call(Function.prototype, prop)) {
-        return value
-      }
-
-      // Otherwise forward to the current state value
-      const stateValue = target() as any
-      if (stateValue === undefined || stateValue === null) {
-        return undefined
-      }
-
-      // If the property is a function (e.g. array.map), bind it to the value
-      const propValue = stateValue[prop]
-      if (typeof propValue === 'function') {
-        return propValue.bind(stateValue)
-      }
-
-      return propValue
-    }
-  }) as StateGetter<T>
-}
-
 // Overloads
-export function state<T>(fn: () => Promise<T>, options?: StateOptions): [StateGetter<T | undefined>, FnStateControl]
-export function state<T>(fn: () => T, options?: StateOptions): [StateGetter<T>, FnStateControl]
-export function state<T>(initialValue: T, options?: StateOptions): [StateGetter<T>, StateSetter<T>]
+export function state<T>(fn: () => Promise<T>, options?: StateOptions): [T | undefined, FnStateControl]
+export function state<T>(fn: () => T, options?: StateOptions): [T, FnStateControl]
+export function state<T>(initialValue: T, options?: StateOptions): [T, StateSetter<T>]
 export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: StateOptions): any {
   // 0. Global Registry Check
   let serializedKey: string | undefined
@@ -69,23 +35,39 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
     }
     serializedKey = serializeKey(options.key)
     if (globalRegistry.has(serializedKey)) {
-      return globalRegistry.get(serializedKey)
+      // If global, we assume it's a reactive container stored in registry
+      const container: any = globalRegistry.get(serializedKey)
+      // We must track dependency here too!
+      const value = container.value
+
+      if (container.type === 'signal') {
+        return [value, (v: any) => container.value = v]
+      } else {
+        // Computed/Resource
+        const control = {
+          refetch: async () => { container.run() },
+          get loading() { return container.loading },
+          get error() { return container.error },
+          get status() { return container.status }
+        }
+        return [value, control]
+      }
     }
   }
 
-  // Hook Wrapper
-  return useHook(() => {
-    let result: any
-
+  // Hook Wrapper: Returns the REACTIVE CONTAINER (stable object)
+  const container = hook(() => {
     // 1. Function (Computed or Resource)
     if (typeof input === 'function') {
       const fn = input as Function
 
       const state = reactive({
+        type: 'resource',
         value: undefined as T | undefined,
         loading: true,
         error: null as any,
-        status: 'idle' as 'idle' | 'loading' | 'success' | 'error'
+        status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
+        run: () => { } // placeholder
       })
 
       const run = () => {
@@ -121,35 +103,45 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
         }
       }
 
+      state.run = run
+
       // Make it reactive!
       effect(run)
 
-      const getter = createSmartGetter(() => state.value)
-
-      const control = {
-        refetch: async () => { run() },
-        get loading() { return state.loading },
-        get error() { return state.error },
-        get status() { return state.status }
-      }
-
-      result = [getter, control]
+      return state
 
     } else {
       // 2. Value (Signal)
-      const container = reactive({ value: input })
-
-      const getter = createSmartGetter(() => container.value)
-      const setter = (newValue: T) => { container.value = newValue }
-
-      result = [getter, setter]
+      // We return the reactive proxy itself as the container
+      return reactive({
+        type: 'signal',
+        value: input
+      })
     }
+  }) as any
 
-    // Store in global registry if key provided
-    if (serializedKey) {
-      globalRegistry.set(serializedKey, result)
+  // Store in global registry if key provided (Store the container!)
+  if (serializedKey && !globalRegistry.has(serializedKey)) {
+    globalRegistry.set(serializedKey, container)
+  }
+
+  // --- RETURN LOGIC ---
+  // This runs EVERY RENDER.
+  // We access container.value here to TRACK DEPENDENCY in the Component's Effect.
+
+  const currentValue = container.value
+
+  if (container.type === 'signal') {
+    const setter = (newValue: T) => { container.value = newValue }
+    return [currentValue, setter]
+  } else {
+    // Resource / Computed
+    const control = {
+      refetch: async () => { container.run() },
+      get loading() { return container.loading },
+      get error() { return container.error },
+      get status() { return container.status }
     }
-
-    return result
-  })
+    return [currentValue, control]
+  }
 }

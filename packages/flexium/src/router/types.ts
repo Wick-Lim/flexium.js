@@ -1,4 +1,3 @@
-import { StateGetter } from '../core/state'
 
 export interface Location {
   pathname: string
@@ -21,10 +20,10 @@ export interface RouteMatch {
 }
 
 export interface RouterContext {
-  location: StateGetter<Location>
+  location: Location
   navigate: (path: string) => void
-  matches: StateGetter<RouteMatch[]>
-  params: StateGetter<Record<string, string>>
+  matches: RouteMatch[]
+  params: Record<string, string>
 }
 
 export interface RouteProps {

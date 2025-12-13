@@ -60,7 +60,7 @@ export async function loadItem(id: number) {
 export async function loadUser(id: string) {
     try {
         const [user, setUser] = useUser(id);
-        if (user()) return; // Already loaded
+        if (user) return; // Already loaded
 
         const data = await fetchUser(id);
         if (data) {

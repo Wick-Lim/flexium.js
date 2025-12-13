@@ -1,5 +1,5 @@
 
-import { state, type StateGetter } from '../core/state'
+import { state } from '../core/state'
 import { createContext, context } from '../core/context'
 import { jsx as f } from '../jsx-runtime'
 import type { FNode, FNodeChild } from '../dom'
@@ -23,7 +23,10 @@ export const RouteDepthCtx = createContext<number>(0)
 // Core Logic (createLocation)
 // -----------------------------------------------------------------------------
 
-function location(): [StateGetter<Location>, (path: string) => void] {
+// Core Logic (createLocation)
+// -----------------------------------------------------------------------------
+
+function location(): [Location, (path: string) => void] {
     const getDefaultLoc = (): Location => ({
         pathname: '/',
         search: '',
@@ -44,7 +47,7 @@ function location(): [StateGetter<Location>, (path: string) => void] {
     }
 
     // Reactive state for location
-    const [location, setLoc] = state<Location>(getLoc())
+    const [location, setLoc] = state<Location>(getLoc()) as [Location, (v: Location) => void]
 
     const navigate = (path: string) => {
         if (typeof window === 'undefined') return
@@ -97,7 +100,7 @@ export function Router(props: { children: FNodeChild }) {
     const routeDefs = createRoutesFromChildren(childrenList.filter(c => isFNode(c) && c.type === Route))
 
     const [matches] = state<RouteMatch[]>(() => {
-        const p = loc().pathname
+        const p = loc.pathname
         console.log('[Router] Computing matches for:', p)
         const m = matchRoutes(routeDefs, p) || []
         console.log('[Router] Matched:', m)
@@ -105,7 +108,7 @@ export function Router(props: { children: FNodeChild }) {
     })
 
     const [params] = state<Record<string, string>>(() => {
-        const list = matches()
+        const list = matches
         if (list.length > 0) {
             return list[list.length - 1].params
         }
@@ -124,7 +127,7 @@ export function Router(props: { children: FNodeChild }) {
         console.log('[Router] Rendering...')
         // 1. Matched Content
         let matchedContent: FNodeChild = null
-        const currentMatches = matches()
+        const currentMatches = matches
 
         if (currentMatches.length > 0) {
             const rootMatch = currentMatches[0]
@@ -173,7 +176,7 @@ export function Outlet() {
     const depth = (context(RouteDepthCtx) as number) || 0
 
     return () => {
-        const ms = ctx.matches()
+        const ms = ctx.matches
         if (depth >= ms.length) return null
 
         const match = ms[depth]

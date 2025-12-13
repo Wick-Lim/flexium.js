@@ -111,23 +111,23 @@ export function createPost(content: string, image?: string) {
     createdAt: Date.now()
   }
 
-  setPosts([newPost, ...posts()])
+  setPosts([newPost, ...posts])
 }
 
 export function toggleLike(postId: number) {
   const [posts, setPosts] = usePosts()
   const [currentUser] = useCurrentUser()
 
-  setPosts(posts().map(post => {
+  setPosts(posts.map(post => {
     if (post.id !== postId) return post
 
-    const isLiked = post.likedBy.includes(currentUser().id)
+    const isLiked = post.likedBy.includes(currentUser.id)
     return {
       ...post,
       likes: isLiked ? post.likes - 1 : post.likes + 1,
       likedBy: isLiked
-        ? post.likedBy.filter(id => id !== currentUser().id)
-        : [...post.likedBy, currentUser().id]
+        ? post.likedBy.filter(id => id !== currentUser.id)
+        : [...post.likedBy, currentUser.id]
     }
   }))
 }
@@ -143,7 +143,7 @@ export function addComment(postId: number, content: string) {
     createdAt: Date.now()
   }
 
-  setPosts(posts().map(post =>
+  setPosts(posts.map(post =>
     post.id === postId
       ? { ...post, comments: [...post.comments, newComment] }
       : post

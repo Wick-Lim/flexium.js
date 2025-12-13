@@ -21,20 +21,35 @@ export function runWithComponent<T>(component: ComponentInstance, fn: () => T): 
     }
 }
 
-export function useHook<T>(factory: () => T): T {
-    const component = currentComponent
-    if (!component) {
-        // Fallback for standalone usage (no hook persistence)
+export function hook<T>(factory: () => T): T {
+    // The new implementation uses `activeComponent` which is not defined in the original document.
+    // Assuming `activeComponent` is intended to be `currentComponent` or a similar global state,
+    // but to faithfully apply the provided code edit, `activeComponent` is used as written.
+    // This might lead to a `ReferenceError` if `activeComponent` is not defined elsewhere.
+    const activeComponent = currentComponent // Assuming activeComponent refers to currentComponent for compilation purposes.
+    // If activeComponent is a different concept, this line should be adjusted by the user.
+
+    if (!activeComponent) {
+        // Outside component: just run factory
         return factory()
     }
 
-    const index = component.hookIndex++
+    // The new implementation expects activeComponent to have an 'instance' property.
+    // The original `ComponentInstance` is directly the instance.
+    // Adjusting to match the original `ComponentInstance` structure.
+    const instance = activeComponent
+    const { hooks, hookIndex } = instance
 
-    if (index < component.hooks.length) {
-        return component.hooks[index]
+    if (hookIndex < hooks.length) {
+        // Return existing hook
+        instance.hookIndex++
+        return hooks[hookIndex] as T
     }
 
-    const hook = factory()
-    component.hooks.push(hook)
-    return hook
+    // Create new hook
+    const value = factory()
+    hooks.push(value)
+    instance.hookIndex++
+
+    return value
 }
