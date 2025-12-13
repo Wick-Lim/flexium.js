@@ -42,18 +42,6 @@ function createSmartGetter<T>(getter: () => T): StateGetter<T> {
       // Otherwise forward to the current state value
       const stateValue = target() as any
       if (stateValue === undefined || stateValue === null) {
-        // Safe fallback for Array methods to avoid crash on "list.map" when loading
-        if (['map', 'filter', 'slice', 'reduce', 'flat', 'flatMap'].includes(prop as string)) {
-          return () => []
-        }
-        if (['find', 'some', 'every'].includes(prop as string)) {
-          return () => undefined
-        }
-        if (['forEach'].includes(prop as string)) {
-          return () => { }
-        }
-        if (prop === 'length') return 0;
-
         return undefined
       }
 
