@@ -19,7 +19,7 @@ Flexium includes a built-in DevTools integration for inspecting signals, effects
 Enable DevTools in your application entry point (development mode only):
 
 ```typescript
-import { enableDevTools } from 'flexium/advanced';
+import { enableDevTools } from 'flexium/core';
 
 if (process.env.NODE_ENV !== 'production') {
   enableDevTools();
@@ -162,7 +162,7 @@ unsubscribe();
 Disable DevTools at runtime:
 
 ```typescript
-import { disableDevTools } from 'flexium/advanced';
+import { disableDevTools } from 'flexium/core';
 
 disableDevTools();
 ```

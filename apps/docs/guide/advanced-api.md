@@ -12,7 +12,7 @@ head:
 
 # Advanced API
 
-Flexium provides low-level reactive primitives through the `flexium/advanced` subpath for users who need fine-grained control over reactivity.
+Flexium provides low-level reactive primitives through the `flexium/core` subpath for users who need fine-grained control over reactivity.
 
 ::: tip When to Use
 Most applications should use the `state()` API from `flexium/core`. The advanced API is for:
@@ -24,16 +24,16 @@ Most applications should use the `state()` API from `flexium/core`. The advanced
 ## Import
 
 ```tsx
-import { root, untrack, sync } from 'flexium/advanced'
+import { root, untrack, sync } from 'flexium/core'
 ```
 
 ## API Overview
 
 | Export | Source | Description |
 |--------|--------|-------------|
-| `root(fn)` | `flexium/advanced` | Create an isolated reactive scope |
-| `untrack(fn)` | `flexium/advanced` | Read values without creating dependencies |
-| `sync(fn)` | `flexium/advanced` | Batch updates synchronously |
+| `root(fn)` | `flexium/core` | Create an isolated reactive scope |
+| `untrack(fn)` | `flexium/core` | Read values without creating dependencies |
+| `sync(fn)` | `flexium/core` | Batch updates synchronously |
 
 
 ## root()
@@ -43,7 +43,7 @@ Creates an isolated reactive scope. Useful for managing cleanup of effects.
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { root } from 'flexium/advanced'
+import { root } from 'flexium/core'
 
 const count = state(0)
 
@@ -69,7 +69,7 @@ Reads reactive values without creating dependencies. Useful when you need to acc
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { untrack } from 'flexium/advanced'
+import { untrack } from 'flexium/core'
 
 const count = state(0)
 const multiplier = state(2)
@@ -125,7 +125,7 @@ console.log(store.get().count)  // 1
 - When you want the simplest API
 - Building custom reactive libraries (using `state` primitives)
 
-### Use `advanced` API
+### Use advanced APIs from `flexium/core`
 - `root()`: Managing disposal scopes manually
 - `untrack()`: Reading signals without tracking dependencies
 - `sync()`: Batching updates manually

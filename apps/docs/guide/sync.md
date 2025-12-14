@@ -23,7 +23,7 @@ Flexium now supports **Automatic Batching** by default. Multiple state updates o
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const firstName = state('John')
 const lastName = state('Doe')
@@ -51,7 +51,7 @@ The `sync()` API is available for scenarios where you want **Synchronous Updates
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 // ... signals ...
 
@@ -68,11 +68,8 @@ sync(() => {
 The `sync()` function is available from multiple import paths:
 
 ```tsx
-// From advanced API
-import { sync } from 'flexium/advanced'
-
-// From core (for convenience)
-import { sync } from 'flexium/advanced'
+// From core API
+import { sync } from 'flexium/core'
 ```
 
 ## Force Sync
@@ -88,7 +85,7 @@ The `sync()` function (without arguments) forces any pending auto-batched effect
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const count = state(0)
 let effectRan = false
@@ -113,7 +110,7 @@ console.log(effectRan) // true
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const firstName = state('John')
 const lastName = state('Doe')
@@ -140,7 +137,7 @@ console.log(fullName) // "Jane Smith"
 ```tsx
 import { describe, it, expect } from 'vitest'
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 describe('Counter', () => {
   it('should update when count changes', () => {
@@ -167,7 +164,7 @@ Use `sync()` when you need to measure the DOM immediately after updates:
 
 ```tsx
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const items = state(['a', 'b', 'c'])
@@ -223,7 +220,7 @@ Batching provides significant performance improvements by:
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const count = state(0)
 const items = state([])
@@ -261,7 +258,7 @@ sync(() => {
 
 ```tsx
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const x = state(0)
@@ -280,7 +277,7 @@ The `sync()` function returns the value returned by the callback:
 
 ```tsx
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const items = state([])
@@ -301,7 +298,7 @@ Batch multiple state changes triggered by user interactions:
 
 ```tsx
 import { state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 function UserForm() {
   const firstName = state('')
@@ -363,7 +360,7 @@ Sync blocks can be nested, and effects will only run after the outermost sync co
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const count = state(0)
 let runCount = 0
@@ -410,7 +407,7 @@ Batch multiple form field updates:
 
 ```tsx
 import { state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 function ProfileEditor() {
   const form = state({
@@ -459,7 +456,7 @@ Process arrays of updates efficiently:
 
 ```tsx
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const items = state([])
@@ -490,7 +487,7 @@ Update multiple states from API responses:
 
 ```tsx
 import { state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 function DataDashboard() {
   const users = state([])
@@ -547,7 +544,7 @@ Batch updates in animation loops:
 
 ```tsx
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const x = state(0)
@@ -578,7 +575,7 @@ Update game state atomically:
 
 ```tsx
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const score = state(0)
@@ -646,7 +643,7 @@ Event handlers are automatically synced in some frameworks. Check if your contex
 
 ```tsx
 import { state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const count = state(0)
 const name = state('')
@@ -700,7 +697,7 @@ sync(() => {
 ```tsx
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const a = state(0)
 const b = state(0)
@@ -739,7 +736,7 @@ console.log('Runs:', runCount) // 1 (synced update)
 
 ```tsx
 import { state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 function ContactForm() {
   const name = state('')
@@ -774,7 +771,7 @@ function ContactForm() {
 
 ```tsx
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const ball1X = state(0)
@@ -796,7 +793,7 @@ const moveBalls = (deltaTime) => {
 
 ```tsx
 import { state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 function ShoppingCart() {
   const items = state([])
@@ -842,7 +839,7 @@ function ShoppingCart() {
 ### 4. Real-time Data Synchronization
 
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const temperature = state(20)
@@ -887,7 +884,7 @@ sync(() => {
 When reading current values inside a sync block, use `peek()` to avoid creating dependencies:
 
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const count = state(0)
@@ -909,7 +906,7 @@ sync(() => {
 Use the return value for operations that need confirmation:
 
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 import { state } from 'flexium/core'
 
 const inventory = state([])
@@ -979,7 +976,7 @@ You can track when sync blocks are active:
 
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const count = state(0)
 
@@ -1013,7 +1010,7 @@ Measure the performance benefit of syncing:
 
 ```tsx
 import { effect, state } from 'flexium/core'
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 const signals = Array.from({ length: 100 }, () => state(0))
 

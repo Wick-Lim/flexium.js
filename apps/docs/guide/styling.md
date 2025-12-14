@@ -940,7 +940,7 @@ function updateTheme() {
 }
 
 // Good: Synced updates (advanced API)
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 function updateTheme() {
   sync(() => {

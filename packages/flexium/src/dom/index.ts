@@ -106,22 +106,6 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
         // Update props (non-reactive) - we'll trigger re-render manually
         const newProps = mergeProps(fnode)
 
-        // Check if meaningful props changed
-        // Exclude: children (always new objects), functions (event handlers change every render)
-        const filterProps = (props: any) => {
-            const filtered: any = {}
-            for (const key in props) {
-                if (key !== 'children' && typeof props[key] !== 'function') {
-                    filtered[key] = props[key]
-                }
-            }
-            return filtered
-        }
-
-        const oldFiltered = filterProps(instance.props)
-        const newFiltered = filterProps(newProps)
-        const propsChanged = JSON.stringify(oldFiltered) !== JSON.stringify(newFiltered)
-
         // Always update props (including children)
         instance.props = newProps
 

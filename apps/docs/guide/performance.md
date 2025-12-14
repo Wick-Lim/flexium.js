@@ -264,7 +264,7 @@ doubled.valueOf();   // Recomputes now
 When making multiple state changes, sync them to avoid intermediate updates:
 
 ```tsx
-import { sync } from 'flexium/advanced';
+import { sync } from 'flexium/core';
 import { state } from 'flexium/core';
 
 const firstName = state('John');
@@ -344,7 +344,7 @@ Use `root()` to create disposal scopes for effects and computations:
 
 ```tsx
 import { effect, state } from 'flexium/core';
-import { root } from 'flexium/advanced';
+import { root } from 'flexium/core';
 
 const [count, setCount] = state(0);
 
@@ -404,7 +404,7 @@ Use `untrack()` to read a signal without creating a dependency:
 
 ```tsx
 import { effect, state } from 'flexium/core';
-import { untrack } from 'flexium/advanced';
+import { untrack } from 'flexium/core';
 
 const count = state(0);
 const multiplier = state(2);
@@ -694,7 +694,7 @@ import { render } from 'flexium/dom';
 import { Column, Row, Text } from 'flexium/primitives';
 
 // Advanced APIs
-import { root, untrack } from 'flexium/advanced';
+import { root, untrack } from 'flexium/core';
 
 // Router
 import { Routes, Route, Link } from 'flexium/router';

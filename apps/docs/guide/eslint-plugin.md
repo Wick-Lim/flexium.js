@@ -303,7 +303,7 @@ function updateUser(id: number, data: UserData) {
 #### Good
 
 ```javascript
-import { sync } from 'flexium/advanced';
+import { sync } from 'flexium/core';
 
 // ✅ Synced updates (single re-render)
 sync(() => {

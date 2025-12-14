@@ -184,7 +184,7 @@ Use the `virtual` prop on `<List>`:
 Use `untrack()` to read without creating dependencies:
 
 ```tsx
-import { untrack } from 'flexium/advanced'
+import { untrack } from 'flexium/core'
 
 effect(() => {
   const value = trigger
@@ -290,7 +290,7 @@ function LoginForm() {
 Enable DevTools:
 
 ```tsx
-import { enableDevTools } from 'flexium/advanced'
+import { enableDevTools } from 'flexium/core'
 
 if (process.env.NODE_ENV === 'development') {
   enableDevTools()

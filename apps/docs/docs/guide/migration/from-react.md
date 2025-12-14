@@ -776,7 +776,7 @@ b.set(2)
 c.set(3)  // Effect runs 3 times
 
 // ✅ Solution: Use sync()
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 sync(() => {
   a.set(1)
   b.set(2)
@@ -799,7 +799,7 @@ const count = state<number>(0)
 ### 1. Use Sync Updates
 
 ```tsx
-import { sync } from 'flexium/advanced'
+import { sync } from 'flexium/core'
 
 // Multiple state updates at once
 sync(() => {

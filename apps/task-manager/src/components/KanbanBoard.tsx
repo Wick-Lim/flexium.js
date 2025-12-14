@@ -1,5 +1,5 @@
-import { memo, state } from 'flexium/core'
-import { type Task, type TaskStatus, type Priority, useTasks } from '../store'
+import { memo } from 'flexium/core'
+import { type Task, type TaskStatus, useTasks } from '../store'
 import TaskCard from './TaskCard'
 
 function Column({ tasks, status, title, icon }: { tasks: Task[], status: TaskStatus, title: string, icon: string }) {
