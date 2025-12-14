@@ -19,10 +19,44 @@ interface DOMComponentInstance extends ComponentInstance {
     parent: HTMLElement
     vnode: any
     props: any
+    key?: any
+    renderFn?: () => void  // Store render function for manual updates
+    children: Set<DOMComponentInstance>  // Track child component instances
+    parentInstance?: DOMComponentInstance  // Track parent component instance
+}
+
+// Registry to store component instances by parent and key
+const instanceRegistry = new WeakMap<HTMLElement, Map<any, DOMComponentInstance>>()
+
+// Current rendering component instance (for tracking parent-child relationships)
+let currentRenderingInstance: DOMComponentInstance | null = null
+
+// Recursively remove component instance and all its children
+function removeComponentInstance(instance: DOMComponentInstance): void {
+    // First, recursively remove all child instances
+    instance.children.forEach(child => {
+        removeComponentInstance(child)
+    })
+
+    // Remove DOM nodes created by this instance
+    instance.nodes.forEach(node => {
+        if (node.parentNode) {
+            node.parentNode.removeChild(node)
+        }
+    })
+
+    // Clear the children set
+    instance.children.clear()
+
+    // Remove from parent's children set
+    if (instance.parentInstance) {
+        instance.parentInstance.children.delete(instance)
+    }
 }
 
 // Render a function component with reactive re-rendering
-function renderComponent(fnode: any, parent: HTMLElement): Node[] {
+function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLElement): Node[] {
+    const effectiveRegistryParent = registryParent || parent
     // Merge props with children
     const mergeProps = (node: any) => {
         const props = { ...node.props }
@@ -34,27 +68,120 @@ function renderComponent(fnode: any, parent: HTMLElement): Node[] {
         return props
     }
 
-    // Create component instance with current props
+    // Generate key for this component
+    // Use explicit key if provided, otherwise generate auto-key based on render order
+    const hasExplicitKey = fnode.key !== undefined
+
+    // Get or create registry for this parent
+    // Always use the effectiveRegistryParent for registry, not a temp container
+    if (!instanceRegistry.has(effectiveRegistryParent)) {
+        instanceRegistry.set(effectiveRegistryParent, new Map())
+    }
+    const parentRegistry = instanceRegistry.get(effectiveRegistryParent)!
+
+    // Generate key: explicit key, or auto-increment based on component type
+    let key: any
+    if (hasExplicitKey) {
+        key = fnode.key
+    } else {
+        // Auto-generate unique key: componentType + instance number
+        // Count how many instances of this type already exist
+        let instanceCount = 0
+        const componentName = fnode.type.name || 'anonymous'
+        parentRegistry.forEach((_, k) => {
+            if (typeof k === 'string' && k.startsWith(`__auto_${componentName}_`)) {
+                instanceCount++
+            }
+        })
+        key = `__auto_${componentName}_${instanceCount}`
+    }
+
+    // Try to reuse existing instance with same key
+    if (parentRegistry.has(key)) {
+        const instance = parentRegistry.get(key)!
+
+        // Update vnode
+        instance.vnode = fnode
+
+        // Update props (non-reactive) - we'll trigger re-render manually
+        const newProps = mergeProps(fnode)
+
+        // Check if meaningful props changed
+        // Exclude: children (always new objects), functions (event handlers change every render)
+        const filterProps = (props: any) => {
+            const filtered: any = {}
+            for (const key in props) {
+                if (key !== 'children' && typeof props[key] !== 'function') {
+                    filtered[key] = props[key]
+                }
+            }
+            return filtered
+        }
+
+        const oldFiltered = filterProps(instance.props)
+        const newFiltered = filterProps(newProps)
+        const propsChanged = JSON.stringify(oldFiltered) !== JSON.stringify(newFiltered)
+
+        // Always update props (including children)
+        instance.props = newProps
+
+        // Always clear old children before re-rendering (they will be re-added during render)
+        // This must be done BEFORE renderFn is called
+        instance.children.clear()
+
+        // Manually trigger re-render by calling renderFn
+        if (instance.renderFn) {
+            instance.renderFn()
+        }
+
+        return instance.nodes
+    }
+
+    // Create component instance with regular props (not reactive)
     const instance: DOMComponentInstance = {
         hooks: [],
         hookIndex: 0,
         nodes: [],
         parent,
         vnode: fnode,
-        props: mergeProps(fnode)
+        props: mergeProps(fnode),  // Regular props, we handle updates manually
+        key,
+        children: new Set(),
+        parentInstance: currentRenderingInstance || undefined
     }
+
+    // Register this instance as a child of the current rendering instance
+    if (currentRenderingInstance) {
+        currentRenderingInstance.children.add(instance)
+    }
+
+    // Store instance in registry
+    parentRegistry.set(key, instance)
 
     // Track if this is the first render
     let isFirstRender = true
 
     // Function to render the component
     const renderFn = () => {
-        // Update props before rendering (in case fnode.props changed)
-        instance.props = mergeProps(fnode)
+        const currentVnode = instance.vnode
+        const currentProps = instance.props
+
+        // Check if this is a Context Provider
+        const isProvider = (currentVnode.type as any)._contextId !== undefined
+        if (isProvider) {
+            // Set context value before rendering
+            pushContext((currentVnode.type as any)._contextId, currentProps.value)
+        }
+
+        // Set this instance as the current rendering instance
+        const previousRenderingInstance = currentRenderingInstance
+        currentRenderingInstance = instance
 
         // Render component with hook context
-        // Note: Context is already available from Provider rendering
-        const result = runWithComponent(instance, () => fnode.type(instance.props))
+        const result = runWithComponent(instance, () => currentVnode.type(currentProps))
+
+        // DON'T restore currentRenderingInstance yet - we need it for renderNode calls below
+        // It will be restored at the end of this function
 
         if (isFirstRender) {
             // First render: create new DOM nodes
@@ -63,14 +190,23 @@ function renderComponent(fnode: any, parent: HTMLElement): Node[] {
             isFirstRender = false
         } else {
             // Re-render: reconcile with existing DOM
-            if (instance.nodes.length === 0) return
+            // Don't early return if nodes is empty - component might render other components
+            if (instance.nodes.length === 0) {
+                // Component has no DOM nodes yet, might be rendering other components
+                // Just re-render without reconciliation
+                const newNodes = renderNode(result, parent)
+                instance.nodes = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
+                // Restore previous rendering instance before returning
+                currentRenderingInstance = previousRenderingInstance
+                return
+            }
 
-            // For simple case: just replace the content
-            // This avoids the tempContainer issue
             const firstNode = instance.nodes[0]
-            const nodeParent = firstNode.parentNode
+            const nodeParent = firstNode.parentNode as HTMLElement
 
             if (!nodeParent) {
+                // Restore previous rendering instance before returning
+                currentRenderingInstance = previousRenderingInstance
                 return
             }
 
@@ -85,22 +221,30 @@ function renderComponent(fnode: any, parent: HTMLElement): Node[] {
                 }
             })
 
-            // Render new nodes before marker
-            const tempParent = marker.parentNode as HTMLElement
-            const newNodes = renderNode(result, tempParent)
+            // Create temporary container for collecting new nodes
+            const tempContainer = document.createElement('div')
+
+            // Render into temp container, but use actual parent for registry
+            const newNodes = renderNode(result, tempContainer, nodeParent)
             const newNodesArray = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
 
-            // Move nodes before marker
+            // Move nodes from temp container to actual parent before marker
             newNodesArray.forEach(node => {
-                tempParent.insertBefore(node, marker)
+                nodeParent.insertBefore(node, marker)
             })
 
             // Remove marker
-            tempParent.removeChild(marker)
+            nodeParent.removeChild(marker)
 
             instance.nodes = newNodesArray
         }
+
+        // Restore previous rendering instance after all renderNode calls are done
+        currentRenderingInstance = previousRenderingInstance
     }
+
+    // Store renderFn for manual updates
+    instance.renderFn = renderFn
 
     // Wrap in effect for reactive re-rendering
     unsafeEffect(renderFn)
@@ -108,7 +252,9 @@ function renderComponent(fnode: any, parent: HTMLElement): Node[] {
     return instance.nodes
 }
 
-function renderNode(fnode: any, parent: HTMLElement): Node | Node[] | null {
+function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElement): Node | Node[] | null {
+    // Use registryParent for instance lookups if provided, otherwise use parent
+    const effectiveRegistryParent = registryParent || parent
     // 1. null/undefined/boolean -> empty text
     if (fnode === null || fnode === undefined || typeof fnode === 'boolean') {
         const node = document.createTextNode('');
@@ -123,11 +269,19 @@ function renderNode(fnode: any, parent: HTMLElement): Node | Node[] | null {
         return node;
     }
 
-    // 3. Array -> render each item
+    // 3. Array -> render each item with key-based reconciliation
     if (Array.isArray(fnode)) {
+        // Store old registry keys before rendering
+        const oldKeysSet = new Set<any>()
+        if (instanceRegistry.has(effectiveRegistryParent)) {
+            const parentRegistry = instanceRegistry.get(effectiveRegistryParent)!
+            parentRegistry.forEach((_, key) => oldKeysSet.add(key))
+        }
+
+        // Render all children
         const nodes: Node[] = [];
-        fnode.forEach(child => {
-            const result = renderNode(child, parent);
+        fnode.forEach((child) => {
+            const result = renderNode(child, parent, registryParent);
             if (result) {
                 if (Array.isArray(result)) {
                     nodes.push(...result);
@@ -136,6 +290,34 @@ function renderNode(fnode: any, parent: HTMLElement): Node | Node[] | null {
                 }
             }
         });
+
+        // After rendering, check which keys are still in the registry (= were reused or created)
+        const newKeysSet = new Set<any>()
+        if (instanceRegistry.has(effectiveRegistryParent)) {
+            const parentRegistry = instanceRegistry.get(effectiveRegistryParent)!
+            parentRegistry.forEach((_, key) => newKeysSet.add(key))
+        }
+
+        // Remove instances that existed before but don't exist now
+        if (instanceRegistry.has(effectiveRegistryParent)) {
+            const parentRegistry = instanceRegistry.get(effectiveRegistryParent)!
+            const keysToRemove: any[] = []
+
+            oldKeysSet.forEach(key => {
+                if (!newKeysSet.has(key)) {
+                    const instance = parentRegistry.get(key)
+                    if (instance) {
+                        // Recursively remove component instance and all its children
+                        removeComponentInstance(instance)
+                        keysToRemove.push(key)
+                    }
+                }
+            })
+
+            // Clean up registry
+            keysToRemove.forEach(key => parentRegistry.delete(key))
+        }
+
         return nodes;
     }
 
@@ -182,25 +364,12 @@ function renderNode(fnode: any, parent: HTMLElement): Node | Node[] | null {
             const isProvider = (fnode.type as any)._contextId !== undefined;
 
             if (isProvider) {
-                // Context Provider: set context permanently (no pop for now)
-                // This allows child components rendered in effects to access context
-                const contextId = (fnode.type as any)._contextId;
-                const props = { ...fnode.props };
-                if (fnode.children && fnode.children.length > 0) {
-                    props.children = fnode.children.length === 1
-                        ? fnode.children[0]
-                        : fnode.children;
-                }
-
-                // Set context value (permanently for this render tree)
-                pushContext(contextId, props.value);
-
-                // Render children with context available
-                const result = fnode.type(props);
-                return renderNode(result, parent);
+                // Context Provider: treat like regular component for reactivity
+                // This ensures providers re-render when their children change
+                return renderComponent(fnode, parent, registryParent);
             } else {
                 // Regular component: use reactive rendering
-                return renderComponent(fnode, parent);
+                return renderComponent(fnode, parent, registryParent);
             }
         }
     }
