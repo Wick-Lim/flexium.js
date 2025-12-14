@@ -34,12 +34,9 @@ function StoryItem(props: { id: number; index: number }) {
 }
 
 export default function Stories(props: { type: string }) {
-    console.log('[Stories] Rendering with type:', props.type)
     const [list, control] = state(() => loadStories(props.type), { key: [props.type] })
-    console.log('[Stories] State:', { status: control.status, listLength: list?.length })
 
     if (control.status !== 'success') {
-        console.log('[Stories] Showing loading state')
         return (
             <main class="view" id="main">
                 <h1 class="visually-hidden">{props.type.charAt(0).toUpperCase() + props.type.slice(1)} Stories</h1>
@@ -49,8 +46,6 @@ export default function Stories(props: { type: string }) {
             </main>
         )
     }
-
-    console.log('[Stories] Showing list with', list?.length, 'items')
 
     return (
         <main class="view" id="main">

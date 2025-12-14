@@ -50,15 +50,8 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
   // Check if key has changed by comparing serialized strings
   const keyChanged = serializedKey !== stateRef.serializedKey
 
-  console.log('[state] Key check:', {
-    currentSerialized: serializedKey,
-    prevSerialized: stateRef.serializedKey,
-    keyChanged
-  })
-
   // If key changed or first time, get/create container
   if (!stateRef.container || keyChanged) {
-    console.log('[state] Getting/creating container for key:', currentKey)
     stateRef.serializedKey = serializedKey
 
     // Check Registry FIRST
@@ -82,25 +75,20 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
 
         const run = () => {
           try {
-            console.log('[state.run] Calling function')
             const result = fn()
-            console.log('[state.run] Result is Promise?', result instanceof Promise)
 
             if (result instanceof Promise) {
               state.loading = true
               state.status = 'loading'
               state.error = null
 
-              console.log('[state.run] Attaching then/catch')
               result
                 .then(data => {
-                  console.log('[state] Promise resolved, data:', data)
                   state.value = data
                   state.status = 'success'
                   state.loading = false
                 })
                 .catch(err => {
-                  console.log('[state] Promise rejected:', err)
                   state.error = err
                   state.status = 'error'
                   state.loading = false

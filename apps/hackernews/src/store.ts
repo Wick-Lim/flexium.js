@@ -38,17 +38,11 @@ export function useUser(id: string) {
 
 // Fetch Actions
 export async function loadStories(type: string) {
-    console.log('[loadStories] Loading:', type)
     try {
         const ids = await fetchIds(type);
-        console.log('[loadStories] Got ids:', ids?.length)
-        const result = ids.slice(0, 30);
-        console.log('[loadStories] Returning:', result.length)
-        return result;
+        return ids.slice(0, 30);
     } catch (error) {
         console.error(`Error loading ${type} stories:`, error);
-        // Ensure UI doesn't hang in loading state infinitely if convenient,
-        // but simple error logging is fine for now.
         return [];
     }
 }

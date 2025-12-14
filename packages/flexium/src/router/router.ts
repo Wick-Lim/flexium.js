@@ -56,10 +56,8 @@ export function location(): [Location, (path: string) => void] {
             console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
             return
         }
-        console.log('[navigate] Navigating to:', path)
         window.history.pushState({}, '', path)
         const newLocation = getCurrentLocation()
-        console.log('[navigate] Updating location:', newLocation.pathname)
         updateLocation(newLocation)
     }
 

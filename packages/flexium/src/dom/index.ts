@@ -58,14 +58,11 @@ function renderComponent(fnode: any, parent: HTMLElement): Node[] {
 
         if (isFirstRender) {
             // First render: create new DOM nodes
-            console.log('[renderComponent] First render, parent:', parent.tagName, parent.className)
             const newNodes = renderNode(result, parent)
             instance.nodes = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
-            console.log('[renderComponent] Created nodes:', instance.nodes.map(n => n.nodeName))
             isFirstRender = false
         } else {
             // Re-render: reconcile with existing DOM
-            console.log('[renderComponent] Re-render, nodes:', instance.nodes.length)
             if (instance.nodes.length === 0) return
 
             // For simple case: just replace the content
@@ -74,7 +71,6 @@ function renderComponent(fnode: any, parent: HTMLElement): Node[] {
             const nodeParent = firstNode.parentNode
 
             if (!nodeParent) {
-                console.warn('[renderComponent] No parent node found for re-render')
                 return
             }
 
@@ -103,7 +99,6 @@ function renderComponent(fnode: any, parent: HTMLElement): Node[] {
             tempParent.removeChild(marker)
 
             instance.nodes = newNodesArray
-            console.log('[renderComponent] Re-rendered with', instance.nodes.length, 'nodes')
         }
     }
 
@@ -351,24 +346,20 @@ function reconcileChildren(oldEl: Element, newEl: Element): void {
 }
 
 function patchNode(oldNode: Node, newNode: Node, parent: Element): void {
-    console.log('[patchNode] Patching:', oldNode.nodeName, '->', newNode.nodeName)
     if (canReuse(oldNode, newNode)) {
         // Reuse node
         if (oldNode.nodeType === Node.TEXT_NODE) {
             // Update text content
-            console.log('[patchNode] Text:', oldNode.nodeValue, '->', newNode.nodeValue)
             if (oldNode.nodeValue !== newNode.nodeValue) {
                 oldNode.nodeValue = newNode.nodeValue
             }
         } else if (oldNode.nodeType === Node.ELEMENT_NODE) {
             // Update element
-            console.log('[patchNode] Element, children:', (oldNode as Element).childNodes.length, '->', (newNode as Element).childNodes.length)
             updateAttributes(oldNode as Element, newNode as Element)
             reconcileChildren(oldNode as Element, newNode as Element)
         }
     } else {
         // Different type, replace
-        console.log('[patchNode] Replacing node')
         parent.replaceChild(newNode, oldNode)
     }
 }
