@@ -39,7 +39,8 @@ function Comment(props: { id: number }) {
 export default function Item(props: { params?: { id?: string } } = {}) {
     const r = router()
     const [itemId] = state(() => {
-        const idStr = r.params.id || props.params?.id;
+        const params = typeof r.params === 'function' ? r.params() : r.params
+        const idStr = params.id || props.params?.id;
         return idStr ? parseInt(idStr) : undefined
     })
 

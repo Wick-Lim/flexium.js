@@ -21,7 +21,8 @@ export function Routes(props: { children: FNodeChild }) {
     // Create route definitions
     const routeDefinitions = createRoutesFromChildren(routeNodes)
 
-    // Compute current matches based on location
+    // DIRECT access to currentLocation.pathname
+    // This should trigger reactive tracking in the component's effect context
     const currentPath = currentLocation.pathname
     const matches = matchRoutes(routeDefinitions, currentPath) || []
     const params = matches.length > 0 ? matches[matches.length - 1].params : {}

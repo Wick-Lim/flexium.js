@@ -5,14 +5,14 @@ import { hook } from './hook'
 
 export type StateSetter<T> = (newValue: T | ((prev: T) => T)) => void
 
-export type ResourceControl<T> = {
+export type ResourceControl = {
   refetch: () => Promise<void>
   readonly loading: boolean
   readonly error: unknown
   readonly status: 'idle' | 'loading' | 'success' | 'error'
 }
 
-export type StateAction<T> = StateSetter<T> | ResourceControl<T>
+export type StateAction<T> = StateSetter<T> | ResourceControl
 
 export interface StateOptions {
   key?: unknown[]
@@ -26,8 +26,8 @@ function serializeKey(key: unknown[]): string {
 }
 
 // Overloads
-export function state<T>(fn: () => Promise<T>, options?: StateOptions): [T | undefined, ResourceControl<T>]
-export function state<T>(fn: () => T, options?: StateOptions): [T, ResourceControl<T>]
+export function state<T>(fn: () => Promise<T>, options?: StateOptions): [T | undefined, ResourceControl]
+export function state<T>(fn: () => T, options?: StateOptions): [T, ResourceControl]
 export function state<T>(initialValue: T extends Function ? never : T, options?: StateOptions): [T, StateSetter<T>]
 export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: StateOptions): any {
   // 0. Global Registry Check

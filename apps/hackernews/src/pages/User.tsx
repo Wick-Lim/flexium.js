@@ -4,7 +4,10 @@ import { loadUser, useUser } from '../store'
 
 export default function User(props: { params?: { id?: string } } = {}) {
     const r = router()
-    const [userId] = state(() => r.params.id || props.params?.id)
+    const [userId] = state(() => {
+        const params = typeof r.params === 'function' ? r.params() : r.params
+        return params.id || props.params?.id
+    })
     const [user] = state(() => {
         if (!userId) {
             return undefined

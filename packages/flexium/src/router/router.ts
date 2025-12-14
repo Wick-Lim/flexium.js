@@ -7,38 +7,50 @@ import { parseQuery, isUnsafePath } from './utils'
 export const RouterCtx = createContext<RouterContext>(null as any)
 export const RouteDepthCtx = createContext<number>(0)
 
-// Create location state and navigation
-export function location(): [Location, (path: string) => void] {
-    const getDefaultLocation = (): Location => ({
-        pathname: '/',
-        search: '',
-        hash: '',
-        query: {},
-    })
+// Helper functions
+const getDefaultLocation = (): Location => ({
+    pathname: '/',
+    search: '',
+    hash: '',
+    query: {},
+})
 
-    const getCurrentLocation = (): Location => {
-        if (typeof window === 'undefined') {
-            return getDefaultLocation()
-        }
-        return {
-            pathname: window.location.pathname,
-            search: window.location.search,
-            hash: window.location.hash,
-            query: parseQuery(window.location.search),
-        }
+const getCurrentLocation = (): Location => {
+    if (typeof window === 'undefined') {
+        return getDefaultLocation()
+    }
+    return {
+        pathname: window.location.pathname,
+        search: window.location.search,
+        hash: window.location.hash,
+        query: parseQuery(window.location.search),
+    }
+}
+
+// Global singleton location state
+let globalLocation: Location | null = null
+let globalNavigate: ((path: string) => void) | null = null
+let popstateListenerAttached = false
+
+// Create location state and navigation (singleton pattern)
+export function location(): [Location, (path: string) => void] {
+    // Return existing singleton if already created
+    if (globalLocation && globalNavigate) {
+        return [globalLocation, globalNavigate]
     }
 
-    // Create a reactive location object
-    const location = reactive<Location>(getCurrentLocation())
+    // Create a reactive location object (only once)
+    globalLocation = reactive<Location>(getCurrentLocation())
 
     const updateLocation = (newLocation: Location) => {
-        location.pathname = newLocation.pathname
-        location.search = newLocation.search
-        location.hash = newLocation.hash
-        location.query = newLocation.query
+        if (!globalLocation) return
+        globalLocation.pathname = newLocation.pathname
+        globalLocation.search = newLocation.search
+        globalLocation.hash = newLocation.hash
+        globalLocation.query = newLocation.query
     }
 
-    const navigate = (path: string) => {
+    globalNavigate = (path: string) => {
         if (typeof window === 'undefined') return
         if (isUnsafePath(path)) {
             console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
@@ -49,16 +61,15 @@ export function location(): [Location, (path: string) => void] {
         updateLocation(newLocation)
     }
 
-    // Listen to popstate
-    const handlePopState = () => {
-        updateLocation(getCurrentLocation())
+    // Listen to popstate (only once)
+    if (typeof window !== 'undefined' && !popstateListenerAttached) {
+        window.addEventListener('popstate', () => {
+            updateLocation(getCurrentLocation())
+        })
+        popstateListenerAttached = true
     }
 
-    if (typeof window !== 'undefined') {
-        window.addEventListener('popstate', handlePopState)
-    }
-
-    return [location, navigate]
+    return [globalLocation, globalNavigate]
 }
 
 // Router hook

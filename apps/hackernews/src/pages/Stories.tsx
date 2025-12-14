@@ -34,7 +34,7 @@ function StoryItem(props: { id: number; index: number }) {
 }
 
 export default function Stories(props: { type: string }) {
-    const [list, { status }] = state(() => loadStories(props.type))
+    const [list, { status }] = state(() => loadStories(props.type), { key: [props.type] })
 
     if (status !== 'success') {
         return (
