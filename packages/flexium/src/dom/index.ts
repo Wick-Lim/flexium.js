@@ -214,6 +214,12 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
             const marker = document.createComment('flexium-marker')
             nodeParent.insertBefore(marker, firstNode)
 
+            // Remove all child instances recursively before re-rendering
+            instance.children.forEach(child => {
+                removeComponentInstance(child)
+            })
+            instance.children.clear()
+
             // Remove old nodes
             instance.nodes.forEach(node => {
                 if (node.parentNode) {

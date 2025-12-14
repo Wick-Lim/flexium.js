@@ -53,7 +53,7 @@ function Breadcrumb() {
 function UserProfile() {
   const { params } = router()
 
-  return <div>User ID: {params.valueOf().id}</div>
+  return <div>User ID: {params.id}</div>
 }
 ```
 

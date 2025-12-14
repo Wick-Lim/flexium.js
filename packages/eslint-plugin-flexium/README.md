@@ -28,7 +28,7 @@ Or configure rules individually:
     "flexium/no-state-outside-reactive": "warn",
     "flexium/effect-cleanup": "warn",
     "flexium/no-side-effect-in-computed": "error",
-    "flexium/prefer-sync": "off",
+    "flexium/prefer-batch": "off",
     "flexium/no-state-mutation": "warn",
     "flexium/no-effect-in-render": "error",
     "flexium/no-circular-dependency": "error",
@@ -114,24 +114,26 @@ effect(() => {
 });
 ```
 
-### `flexium/prefer-sync`
+### `flexium/prefer-batch`
 
-Suggest using `sync()` when multiple state updates occur consecutively.
+Suggest using `batch()` when multiple state updates occur consecutively.
 
-**Why?** Multiple state updates without syncing can cause unnecessary re-renders.
+**Why?** Multiple state updates without batching can cause unnecessary re-renders.
 
 ```javascript
+import { state, batch } from 'flexium/core';
+
 const [count, setCount] = state(0);
 const [name, setName] = state('');
 const [active, setActive] = state(false);
 
-// ⚠️ Warning - multiple updates without sync
+// ⚠️ Warning - multiple updates without batching
 setCount(1);
 setName('test');
 setActive(true);
 
-// ✅ Good - synced updates
-sync(() => {
+// ✅ Good - batched updates
+batch(() => {
   setCount(1);
   setName('test');
   setActive(true);
@@ -142,7 +144,7 @@ sync(() => {
 
 ```json
 {
-  "flexium/prefer-sync": ["warn", { "threshold": 2 }]
+  "flexium/prefer-batch": ["warn", { "threshold": 2 }]
 }
 ```
 

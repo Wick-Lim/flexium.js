@@ -20,7 +20,7 @@ How does Flexium compare to React and Svelte? This guide helps you understand th
 ::: code-group
 
 ```jsx [Flexium ✨]
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 
 function Component() {
   // All state needs - one function
@@ -241,7 +241,7 @@ function Component() {
 ::: code-group
 
 ```jsx [Flexium ✨]
-import { effect } from 'flexium'
+import { effect } from 'flexium/core'
 
 // Auto-tracking - no dependency array!
 effect(() => {

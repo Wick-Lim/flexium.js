@@ -17,7 +17,7 @@ Flexium includes a built-in router for building Single Page Applications (SPA). 
 ## Quick Start
 
 ```tsx
-import { Routes, Route, Link } from 'flexium/router'
+import { Routes, Route, Link } from 'flexium/router/dom'
 
 function App() {
   return (
@@ -41,7 +41,8 @@ function App() {
 The router uses three main components to define your application's routes:
 
 ```tsx
-import { Routes, Route, Link, router } from 'flexium/router'
+import { Routes, Route, Link } from 'flexium/router/dom'
+import { router } from 'flexium/router'
 
 function App() {
   return (
@@ -99,7 +100,7 @@ Nested routes allow you to create complex layouts where parent components wrap c
 ### Basic Nested Routes
 
 ```tsx
-import { Routes, Route, Outlet, Link } from 'flexium/router'
+import { Routes, Route, Outlet, Link } from 'flexium/router/dom'
 
 function App() {
   return (
@@ -823,7 +824,7 @@ console.log(matches.length)
 ### Blog Application
 
 ```tsx
-import { Routes, Route, Link, Outlet, router } from 'flexium/router'
+import { Routes, Route, Link, Outlet } from 'flexium/router/dom'
 
 function App() {
   return (

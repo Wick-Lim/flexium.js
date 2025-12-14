@@ -95,7 +95,7 @@ function RegistrationForm() {
       const { available } = await res.json()
       
       if (!available) {
-        form.set({ ...form.valueOf() })  // Update state to show error
+        form.set(prev => ({ ...prev }))  // Update state to show error
         // In practice, using a separate error state is better
       }
     } catch (error) {
@@ -106,9 +106,9 @@ function RegistrationForm() {
   }
   
   const handleFieldChange = (field: keyof FormData, value: string) => {
-    form.set({ ...form.valueOf(), [field]: value })
-    touched.set({ ...touched.valueOf(), [field]: true })
-    
+    form.set(prev => ({ ...prev, [field]: value }))
+    touched.set(prev => ({ ...prev, [field]: true }))
+
     // Check email availability when email changes
     if (field === 'email') {
       checkEmailAvailability(value)

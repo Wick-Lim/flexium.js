@@ -1,10 +1,15 @@
-import { state } from 'flexium/core';
+import { state, effect } from 'flexium/core';
 import { Link } from 'flexium/router';
-import { loadItem, loadStories } from '../store';
+import { loadItem, loadStories, useItem } from '../store';
 
-function StoryItem(props: { id: number; index: number }) {
+function StoryItem(props: { id: number; index: number; key?: number }) {
+    // Load item data
+    effect(() => {
+        loadItem(props.id);
+    }, [props.id]);
+
     // Subscribe to item state
-    const [story] = state(() => loadItem(props.id));
+    const [story] = useItem(props.id);
 
     // Check if data is loaded
     if (!story?.title) {
@@ -51,7 +56,7 @@ export default function Stories(props: { type: string }) {
         <main class="view" id="main">
             <h1 class="visually-hidden">{props.type.charAt(0).toUpperCase() + props.type.slice(1)} Stories</h1>
             <ul class="news-list">
-                {list?.map((id: number, index: number) => <StoryItem id={id} index={index + 1} />)}
+                {list?.map((id: number, index: number) => <StoryItem key={id} id={id} index={index + 1} />)}
             </ul>
         </main>
     )

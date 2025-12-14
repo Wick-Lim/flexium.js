@@ -98,10 +98,11 @@ Or use pragma comments:
 
 ```tsx
 /** @jsxImportSource flexium */
+import { state } from 'flexium/core';
 
 function App() {
   const [count, setCount] = state(0);
-  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+  return <button onclick={() => setCount(c => c + 1)}>{count}</button>;
 }
 ```
 

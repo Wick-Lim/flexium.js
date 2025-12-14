@@ -171,9 +171,9 @@ function SidebarLayout() {
     <Row style={{ minHeight: '100vh' }}>
       <Column width={240} padding={16}>
         <Nav>
-          <Link href="/app">Dashboard</Link>
-          <Link href="/app/projects">Projects</Link>
-          <Link href="/app/settings">Settings</Link>
+          <Link to="/app">Dashboard</Link>
+          <Link to="/app/projects">Projects</Link>
+          <Link to="/app/settings">Settings</Link>
         </Nav>
       </Column>
       <Column flex={1} padding={24}>

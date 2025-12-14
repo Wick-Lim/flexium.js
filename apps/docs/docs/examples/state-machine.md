@@ -150,13 +150,13 @@ function ComplexForm() {
         <form onsubmit={(e) => { e.preventDefault(); handleSubmit() }}>
           <input
             value={formData.email}
-            oninput={(e) => formData.set({ ...formData, email: e.currentTarget.value })}
+            oninput={(e) => formData.set(prev => ({ ...prev, email: e.currentTarget.value }))}
             placeholder="Email"
           />
           <input
             type="password"
             value={formData.password}
-            oninput={(e) => formData.set({ ...formData, password: e.currentTarget.value })}
+            oninput={(e) => formData.set(prev => ({ ...prev, password: e.currentTarget.value }))}
             placeholder="Password"
           />
           <button type="submit">Submit</button>

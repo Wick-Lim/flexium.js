@@ -49,7 +49,15 @@ export async function loadStories(type: string) {
 
 export async function loadItem(id: number) {
     try {
-        return await fetchItem(id);
+        const [item, setItem] = useItem(id);
+        if (item) return; // Already loaded
+
+        const data = await fetchItem(id);
+        if (data) {
+            setItem(data);
+        } else {
+            console.warn(`No data returned for item ${id}`);
+        }
     } catch (error) {
         console.error(`Error loading item ${id}:`, error);
     }

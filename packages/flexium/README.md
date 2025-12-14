@@ -193,19 +193,19 @@ function App() {
 ## Routing
 
 ```tsx
-import { Router, Route, Link } from 'flexium/router';
+import { Routes, Route, Link } from 'flexium/router';
 
 function App() {
   return (
-    <Router>
+    <Routes>
       <nav>
-        <Link href="/">Home</Link>
-        <Link href="/about">About</Link>
+        <Link to="/">Home</Link>
+        <Link to="/about">About</Link>
       </nav>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/users/:id" component={UserProfile} />
-    </Router>
+    </Routes>
   );
 }
 
@@ -214,13 +214,13 @@ function UserProfile({ params }) {
   return <h1>User: {params.id}</h1>;
 }
 
-// Or use the hook
-import { useRouter } from 'flexium/router';
+// Or use the router hook
+import { router } from 'flexium/router';
 
 function UserProfileHook() {
-  const router = useRouter();
-  // router.params is a signal
-  return <h1>User: {router.params.value.id}</h1>;
+  const r = router();
+  // Access params directly from router context
+  return <h1>User: {r.params.id}</h1>;
 }
 ```
 

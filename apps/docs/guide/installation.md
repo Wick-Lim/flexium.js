@@ -289,7 +289,7 @@ npm install -D @types/node
 Example of a fully typed Flexium component:
 
 ```ts
-import { component, state } from 'flexium'
+import { state } from 'flexium/core'
 
 interface CounterProps {
   initialCount?: number
@@ -297,7 +297,7 @@ interface CounterProps {
   onCountChange?: (count: number) => void
 }
 
-export const Counter = component<CounterProps>(({ initialCount = 0, step = 1, onCountChange }) => {
+export function Counter({ initialCount = 0, step = 1, onCountChange }: CounterProps) {
   const count = state(initialCount)
 
   const increment = () => {
@@ -305,13 +305,13 @@ export const Counter = component<CounterProps>(({ initialCount = 0, step = 1, on
     onCountChange?.(count.valueOf())
   }
 
-  return () => (
+  return (
     <div>
       <p>Count: {count.valueOf()}</p>
-      <button onClick={increment}>Increment</button>
+      <button onclick={increment}>Increment</button>
     </div>
   )
-})
+}
 ```
 
 ## IDE Setup

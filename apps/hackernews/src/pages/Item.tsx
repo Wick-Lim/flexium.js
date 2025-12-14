@@ -43,21 +43,15 @@ export default function Item(props: { params?: { id?: string } } = {}) {
         return idStr ? parseInt(idStr) : undefined
     })
 
-    const [item] = state(() => {
-        if (!itemId) {
-            return undefined
-        }
-
-        // Access global state
-        const [globalItem] = useItem(itemId);
-        return globalItem
-    })
-
+    // Load item data when itemId changes
     effect(() => {
         if (itemId) {
             loadItem(itemId)
         }
     }, [itemId])
+
+    // Use item from global state - this will be reactive
+    const [item] = itemId ? useItem(itemId) : [undefined]
 
     // Use proxy directly
     const i = item;

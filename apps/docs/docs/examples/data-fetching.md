@@ -100,12 +100,12 @@ function InfiniteScrollList() {
     try {
       const res = await fetch(`/api/items?page=${page}&limit=20`)
       if (!res.ok) throw new Error('Failed to load')
-      
+
       const data = await res.json()
-      
-      items.set([...items.valueOf(), ...data.items])
+
+      items.set(prev => [...prev, ...data.items])
       hasMore.set(data.hasMore)
-      page.set(page.valueOf() + 1)
+      page.set(prev => prev + 1)
     } catch (err) {
       error.set(err as Error)
     } finally {
@@ -171,11 +171,11 @@ function LikeButton({ postId }: { postId: number }) {
   const toggleLike = async () => {
     const previousLiked = isLiked.valueOf()
     const previousCount = likeCount.valueOf()
-    
+
     // Optimistic update
     sync(() => {
-      isLiked.set(!previousLiked)
-      likeCount.set(previousLiked ? previousCount - 1 : previousCount + 1)
+      isLiked.set(prev => !prev)
+      likeCount.set(prev => previousLiked ? prev - 1 : prev + 1)
       isUpdating.set(true)
     })
     
@@ -237,7 +237,7 @@ function DataWithRetry() {
   
   const handleRetry = () => {
     if (retryCount.valueOf() < maxRetries) {
-      retryCount.set(retryCount.valueOf() + 1)
+      retryCount.set(prev => prev + 1)
       data.refetch()
     }
   }
@@ -289,7 +289,7 @@ function DataWithAutoRetry() {
       const delay = Math.min(1000 * Math.pow(2, retryCount.valueOf()), 10000) // Exponential backoff
       
       const timeoutId = setTimeout(() => {
-        retryCount.set(retryCount.valueOf() + 1)
+        retryCount.set(prev => prev + 1)
         data.refetch()
       }, delay)
       
@@ -352,7 +352,7 @@ function PollingData({ interval = 5000 }: { interval?: number }) {
   return (
     <div>
       <div>
-        <button onclick={() => isPolling.set(!isPolling.valueOf())}>
+        <button onclick={() => isPolling.set(prev => !prev)}>
           {isPolling ? 'Stop Polling' : 'Start Polling'}
         </button>
         <button onclick={data.refetch}>Manual Refresh</button>

@@ -80,14 +80,14 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onsubmit={handleSubmit}>
       <div>
         <label>Email</label>
         <input
           type="email"
           value={formData.email}
-          onInput={handleEmailChange}
-          onBlur={() => touched.set(prev => ({ ...prev, email: true }))}
+          oninput={handleEmailChange}
+          onblur={() => touched.set(prev => ({ ...prev, email: true }))}
         />
         {touched.email && errors.email && (
           <span class="error">{errors.email}</span>
@@ -99,8 +99,8 @@ function LoginForm() {
         <input
           type="password"
           value={formData.password}
-          onInput={handlePasswordChange}
-          onBlur={() => touched.set(prev => ({ ...prev, password: true }))}
+          oninput={handlePasswordChange}
+          onblur={() => touched.set(prev => ({ ...prev, password: true }))}
         />
         {touched.password && errors.password && (
           <span class="error">{errors.password}</span>
@@ -556,7 +556,7 @@ function RegistrationForm() {
   const isFormValid = !Object.values(errors).some(error => error)
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onsubmit={handleSubmit}>
       <h2>Register</h2>
 
       <div>
@@ -564,8 +564,8 @@ function RegistrationForm() {
         <input
           type="text"
           value={formData.username}
-          onInput={handleChange('username')}
-          onBlur={handleBlur('username')}
+          oninput={handleChange('username')}
+          onblur={handleBlur('username')}
         />
         {touched.username && errors.username && (
           <span class="error">{errors.username}</span>
@@ -577,8 +577,8 @@ function RegistrationForm() {
         <input
           type="email"
           value={formData.email}
-          onInput={handleChange('email')}
-          onBlur={handleBlur('email')}
+          oninput={handleChange('email')}
+          onblur={handleBlur('email')}
         />
         {touched.email && errors.email && (
           <span class="error">{errors.email}</span>
@@ -590,8 +590,8 @@ function RegistrationForm() {
         <input
           type="password"
           value={formData.password}
-          onInput={handleChange('password')}
-          onBlur={handleBlur('password')}
+          oninput={handleChange('password')}
+          onblur={handleBlur('password')}
         />
         {touched.password && errors.password && (
           <span class="error">{errors.password}</span>
@@ -603,8 +603,8 @@ function RegistrationForm() {
         <input
           type="password"
           value={formData.confirmPassword}
-          onInput={handleChange('confirmPassword')}
-          onBlur={handleBlur('confirmPassword')}
+          oninput={handleChange('confirmPassword')}
+          onblur={handleBlur('confirmPassword')}
         />
         {touched.confirmPassword && errors.confirmPassword && (
           <span class="error">{errors.confirmPassword}</span>
@@ -616,8 +616,8 @@ function RegistrationForm() {
         <input
           type="number"
           value={formData.age}
-          onInput={handleChange('age')}
-          onBlur={handleBlur('age')}
+          oninput={handleChange('age')}
+          onblur={handleBlur('age')}
         />
         {touched.age && errors.age && (
           <span class="error">{errors.age}</span>
@@ -628,7 +628,7 @@ function RegistrationForm() {
         {isSubmitting.valueOf() ? 'Registering...' : 'Register'}
       </button>
 
-      <button type="button" onClick={resetForm}>
+      <button type="button" onclick={resetForm}>
         Reset
       </button>
     </form>
@@ -662,7 +662,7 @@ const handleFileChange = (e: Event) => {
 <input
   type="file"
   accept="image/*"
-  onChange={handleFileChange}
+  onchange={handleFileChange}
 />
 {fileError && <span class="error">{fileError}</span>}
 ```
@@ -675,13 +675,13 @@ Choose when to validate:
 // Validate on change (as user types)
 <input
   value={formData.email}
-  onInput={handleChange('email')}
+  oninput={handleChange('email')}
 />
 
 // Validate on blur (when field loses focus)
 <input
   value={formData.email}
-  onBlur={() => {
+  onblur={() => {
     const error = validateEmail(formData.email)
     errors.set(prev => ({ ...prev, email: error }))
   }}

@@ -316,9 +316,9 @@ function UserForm() {
     sync(() => {
       const newErrors = {}
 
-      if (!firstName) newErrors.firstName = 'Required'
-      if (!lastName) newErrors.lastName = 'Required'
-      if (!email) newErrors.email = 'Required'
+      if (!firstName.valueOf()) newErrors.firstName = 'Required'
+      if (!lastName.valueOf()) newErrors.lastName = 'Required'
+      if (!email.valueOf()) newErrors.email = 'Required'
 
       errors.set(newErrors)
     })
@@ -468,9 +468,9 @@ const total = state(0)
 
 const addMultipleItems = (newItems) => {
   sync(() => {
-    items.set([...items.valueOf(), ...newItems])
-    count.set(count.valueOf() + newItems.length)
-    total.set(total.valueOf() + newItems.reduce((sum, item) => sum + item.price, 0))
+    items.set(prev => [...prev, ...newItems])
+    count.set(c => c + newItems.length)
+    total.set(t => t + newItems.reduce((sum, item) => sum + item.price, 0))
   })
 }
 
@@ -561,7 +561,7 @@ const animate = () => {
     sync(() => {
       x.set(Math.sin(Date.now() / 1000) * 100)
       y.set(Math.cos(Date.now() / 1000) * 100)
-      rotation.set((rotation.valueOf() + 1) % 360)
+      rotation.set(r => (r + 1) % 360)
       scale.set(1 + Math.sin(Date.now() / 500) * 0.2)
     })
 
@@ -588,7 +588,7 @@ const enemies = state([])
 
 const handlePlayerDeath = () => {
   sync(() => {
-    lives.set(lives.valueOf() - 1)
+    lives.set(l => l - 1)
 
     if (lives.valueOf() <= 0) {
       // Game over
@@ -602,9 +602,9 @@ const handlePlayerDeath = () => {
 
 const completeLevel = () => {
   sync(() => {
-    score.set(score.valueOf() + 1000)
-    level.set(level.valueOf() + 1)
-    enemies.set(generateEnemies(level.valueOf()))
+    score.set(s => s + 1000)
+    level.set(l => l + 1)
+    enemies.set(generateEnemies(level.valueOf() + 1))
   })
 }
 ```
@@ -645,6 +645,12 @@ themeColor.set('red')
 Event handlers are automatically synced in some frameworks. Check if your context already provides syncing:
 
 ```tsx
+import { state } from 'flexium/core'
+import { sync } from 'flexium/advanced'
+
+const count = state(0)
+const name = state('')
+
 // In Flexium event handlers, updates are NOT automatically synced
 // So you should use sync() when updating multiple signals
 
@@ -778,10 +784,10 @@ const ball2Y = state(100)
 
 const moveBalls = (deltaTime) => {
   sync(() => {
-    ball1X.set(ball1X.valueOf() + deltaTime * 2)
-    ball1Y.set(ball1Y.valueOf() + deltaTime * 1)
-    ball2X.set(ball2X.valueOf() - deltaTime * 1.5)
-    ball2Y.set(ball2Y.valueOf() + deltaTime * 2.5)
+    ball1X.set(x => x + deltaTime * 2)
+    ball1Y.set(y => y + deltaTime * 1)
+    ball2X.set(x => x - deltaTime * 1.5)
+    ball2Y.set(y => y + deltaTime * 2.5)
   })
 }
 ```
@@ -799,27 +805,27 @@ function ShoppingCart() {
 
   const addItem = (item) => {
     sync(() => {
-      setItems([...items, item])
-      setTotal(total + item.price)
-      setItemCount(itemCount + 1)
+      items.set(prev => [...prev, item])
+      total.set(t => t + item.price)
+      itemCount.set(c => c + 1)
     })
   }
 
   const removeItem = (itemId) => {
-    const item = items.find(i => i.id === itemId)
+    const item = items.valueOf().find(i => i.id === itemId)
 
     sync(() => {
-      setItems(items.filter(i => i.id !== itemId))
-      setTotal(total - item.price)
-      setItemCount(itemCount - 1)
+      items.set(prev => prev.filter(i => i.id !== itemId))
+      total.set(t => t - item.price)
+      itemCount.set(c => c - 1)
     })
   }
 
   const clearCart = () => {
     sync(() => {
-      setItems([])
-      setTotal(0)
-      setItemCount(0)
+      items.set([])
+      total.set(0)
+      itemCount.set(0)
     })
   }
 
@@ -839,18 +845,18 @@ function ShoppingCart() {
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [temperature, setTemperature] = state(20)
-const [humidity, setHumidity] = state(50)
-const [pressure, setPressure] = state(1013)
-const [timestamp, setTimestamp] = state(Date.now())
+const temperature = state(20)
+const humidity = state(50)
+const pressure = state(1013)
+const timestamp = state(Date.now())
 
 // WebSocket updates multiple sensor values
 websocket.on('sensor-data', (data) => {
   sync(() => {
-    setTemperature(data.temp)
-    setHumidity(data.humidity)
-    setPressure(data.pressure)
-    setTimestamp(Date.now())
+    temperature.set(data.temp)
+    humidity.set(data.humidity)
+    pressure.set(data.pressure)
+    timestamp.set(Date.now())
   })
 })
 ```
@@ -864,15 +870,15 @@ Always sync updates that are logically related:
 ```tsx
 // Good - related updates synced together
 sync(() => {
-  setUser(newUser)
-  setPermissions(newUser.permissions)
-  setLastLogin(Date.now())
+  user.set(newUser)
+  permissions.set(newUser.permissions)
+  lastLogin.set(Date.now())
 })
 
 // Bad - unrelated updates synced
 sync(() => {
-  setUser(newUser)
-  setThemeColor('blue') // Unrelated!
+  user.set(newUser)
+  themeColor.set('blue') // Unrelated!
 })
 ```
 
@@ -884,17 +890,17 @@ When reading current values inside a sync block, use `peek()` to avoid creating 
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [count, setCount] = state(0)
+const count = state(0)
 
 // Good - uses functional update
 sync(() => {
-  setCount(c => c + 1)
+  count.set(c => c + 1)
 })
 
 // Also okay - direct value access (auto-untracked in setter)
 sync(() => {
-  const current = count()
-  setCount(current + 1)
+  const current = count.valueOf()
+  count.set(current + 1)
 })
 ```
 
@@ -906,18 +912,18 @@ Use the return value for operations that need confirmation:
 import { sync } from 'flexium/advanced'
 import { state } from 'flexium/core'
 
-const [inventory, setInventory] = state([])
-const [soldItems, setSoldItems] = state([])
+const inventory = state([])
+const soldItems = state([])
 
 const sellItem = (itemId) => {
   return sync(() => {
-    const currentInventory = inventory()
+    const currentInventory = inventory.valueOf()
     const item = currentInventory.find(i => i.id === itemId)
 
     if (!item) return false
 
-    setInventory(currentInventory.filter(i => i.id !== itemId))
-    setSoldItems([...soldItems(), item])
+    inventory.set(currentInventory.filter(i => i.id !== itemId))
+    soldItems.set(prev => [...prev, item])
 
     return true
   })
@@ -935,16 +941,16 @@ Keep sync blocks focused on state updates only:
 ```tsx
 // Bad - mixing side effects with syncing
 sync(() => {
-  setLoading(false)
-  setData(newData)
+  loading.set(false)
+  data.set(newData)
   console.log('Data loaded') // Side effect
   trackAnalytics('data-loaded') // Side effect
 })
 
 // Good - separate concerns
 sync(() => {
-  setLoading(false)
-  setData(newData)
+  loading.set(false)
+  data.set(newData)
 })
 
 console.log('Data loaded')
@@ -959,9 +965,9 @@ Add comments explaining why updates are synced together:
 // Sync all cart state updates to ensure UI consistency
 // and prevent intermediate states where count doesn't match items array
 sync(() => {
-  setCartItems(newItems)
-  setCartCount(newItems.length)
-  setCartTotal(calculateTotal(newItems))
+  cartItems.set(newItems)
+  cartCount.set(newItems.length)
+  cartTotal.set(calculateTotal(newItems))
 })
 ```
 
@@ -975,18 +981,18 @@ You can track when sync blocks are active:
 import { effect, state } from 'flexium/core'
 import { sync } from 'flexium/advanced'
 
-const [count, setCount] = state(0)
+const count = state(0)
 
 effect(() => {
-  console.log('Effect running, count:', count())
+  console.log('Effect running, count:', count.valueOf())
 })
 
 console.log('Before sync')
 sync(() => {
   console.log('Inside sync')
-  setCount(1)
+  count.set(1)
   console.log('Still inside sync')
-  setCount(2)
+  count.set(2)
   console.log('Sync ending')
 })
 console.log('After sync')
@@ -1012,18 +1018,18 @@ import { sync } from 'flexium/advanced'
 const signals = Array.from({ length: 100 }, () => state(0))
 
 effect(() => {
-  signals.forEach(([s]) => s())
+  signals.forEach(s => s.valueOf())
 })
 
 // Without sync
 console.time('no-sync')
-signals.forEach(([_, set], i) => set(i))
+signals.forEach((s, i) => s.set(i))
 console.timeEnd('no-sync')
 
 // With sync
 console.time('with-sync')
 sync(() => {
-  signals.forEach(([_, set], i) => set(i + 100))
+  signals.forEach((s, i) => s.set(i + 100))
 })
 console.timeEnd('with-sync')
 ```

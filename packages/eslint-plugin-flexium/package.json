@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-flexium",
-  "version": "0.12.0",
+  "version": "0.12.6",
   "description": "ESLint plugin for Flexium with rules for best practices",
   "publishConfig": {
     "access": "public"

@@ -41,19 +41,24 @@ export function Routes(props: { children: FNodeChild }) {
         const rootMatch = matches[0]
         const Component = rootMatch.route.component
 
+        // Use pathname as key to force re-mount on route change
+        const routeKey = currentPath
+
         // Guard Check
         if (rootMatch.route.beforeEnter) {
             const result = rootMatch.route.beforeEnter(rootMatch.params)
             if (result !== false) {
                 matchedContent = f(RouteDepthCtx.Provider, {
                     value: 1,
-                    children: f(Component, { params: rootMatch.params })
+                    key: routeKey,
+                    children: f(Component, { params: rootMatch.params, key: routeKey })
                 })
             }
         } else {
             matchedContent = f(RouteDepthCtx.Provider, {
                 value: 1,
-                children: f(Component, { params: rootMatch.params })
+                key: routeKey,
+                children: f(Component, { params: rootMatch.params, key: routeKey })
             })
         }
     }

@@ -14,14 +14,14 @@ Instead of Context API, use `state()` with a `key` option:
 import { state } from 'flexium/core'
 
 // Share theme across all components
-const [theme, setTheme] = state<'light' | 'dark'>('light', { key: 'app:theme' })
+const theme = state<'light' | 'dark'>('light', { key: 'app:theme' })
 
 // In any component
 function ThemeToggle() {
-  const [theme, setTheme] = state('light', { key: 'app:theme' })
-  
+  const theme = state('light', { key: 'app:theme' })
+
   return (
-    <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+    <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
       Current: {theme}
     </button>
   )

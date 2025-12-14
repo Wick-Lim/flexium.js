@@ -57,11 +57,10 @@ features:
 import { state } from 'flexium/core'
 
 function Counter() {
-  // Local state with unified API
-  const [count, setCount] = state(0)
+  const count = state(0)
 
   return (
-    <button onclick={() => setCount(c => c + 1)}>
+    <button onclick={() => count.set(c => c + 1)}>
       Count: {count}
     </button>
   )

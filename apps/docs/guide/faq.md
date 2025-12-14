@@ -204,8 +204,8 @@ function App() {
   return (
     <Routes>
       <nav>
-        <Link href="/">Home</Link>
-        <Link href="/about">About</Link>
+        <Link to="/">Home</Link>
+        <Link to="/about">About</Link>
       </nav>
 
       <Route path="/" component={Home} />
