@@ -30,94 +30,120 @@ export function state<T>(fn: () => Promise<T>, options?: StateOptions): [T | und
 export function state<T>(fn: () => T, options?: StateOptions): [T, ResourceControl]
 export function state<T>(initialValue: T extends Function ? never : T, options?: StateOptions): [T, StateSetter<T>]
 export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: StateOptions): any {
-  // 0. Global Registry Check
-  let serializedKey: string | undefined
-  if (options?.key) {
-    if (!Array.isArray(options.key)) {
-      throw new Error('State key must be an array') // User requested array check
-    }
-    serializedKey = serializeKey(options.key)
+  // 0. Validate key if provided
+  if (options?.key && !Array.isArray(options.key)) {
+    throw new Error('State key must be an array')
   }
 
-  // Hook Wrapper: Returns the REACTIVE CONTAINER (stable object)
-  // ALWAYS call hook() to ensure component hook index is maintained
-  const container = hook(() => {
-    // Check Registry FIRST inside the factory (only runs once per component instance)
+  // Hook Wrapper: Store container reference and track key
+  const stateRef = hook(() => {
+    return reactive({
+      container: undefined as any,
+      serializedKey: undefined as any
+    })
+  })
+
+  // Compute serialized key
+  const currentKey = options?.key
+  const serializedKey = currentKey ? serializeKey(currentKey) : undefined
+
+  // Check if key has changed by comparing serialized strings
+  const keyChanged = serializedKey !== stateRef.serializedKey
+
+  console.log('[state] Key check:', {
+    currentSerialized: serializedKey,
+    prevSerialized: stateRef.serializedKey,
+    keyChanged
+  })
+
+  // If key changed or first time, get/create container
+  if (!stateRef.container || keyChanged) {
+    console.log('[state] Getting/creating container for key:', currentKey)
+    stateRef.serializedKey = serializedKey
+
+    // Check Registry FIRST
     if (serializedKey && globalRegistry.has(serializedKey)) {
-      return globalRegistry.get(serializedKey)
-    }
+      stateRef.container = globalRegistry.get(serializedKey)
+    } else {
+      let newContainer: any
 
-    let newContainer: any
+      // 1. Function (Computed or Resource)
+      if (typeof input === 'function') {
+        const fn = input as Function
 
-    // 1. Function (Computed or Resource)
-    if (typeof input === 'function') {
-      const fn = input as Function
+        const state = reactive({
+          type: 'resource',
+          value: undefined as T | undefined,
+          loading: true,
+          error: null as any,
+          status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
+          run: () => { }
+        })
 
-      const state = reactive({
-        type: 'resource',
-        value: undefined as T | undefined,
-        loading: true,
-        error: null as any,
-        status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
-        run: () => { }
-      })
+        const run = () => {
+          try {
+            console.log('[state.run] Calling function')
+            const result = fn()
+            console.log('[state.run] Result is Promise?', result instanceof Promise)
 
-      const run = () => {
-        try {
-          const result = fn()
+            if (result instanceof Promise) {
+              state.loading = true
+              state.status = 'loading'
+              state.error = null
 
-          if (result instanceof Promise) {
-            state.loading = true
-            state.status = 'loading'
-            state.error = null
-
-            result
-              .then(data => {
-                state.value = data
-                state.status = 'success'
-                state.loading = false
-              })
-              .catch(err => {
-                state.error = err
-                state.status = 'error'
-                state.loading = false
-              })
-          } else {
-            state.value = result
-            state.status = 'success'
+              console.log('[state.run] Attaching then/catch')
+              result
+                .then(data => {
+                  console.log('[state] Promise resolved, data:', data)
+                  state.value = data
+                  state.status = 'success'
+                  state.loading = false
+                })
+                .catch(err => {
+                  console.log('[state] Promise rejected:', err)
+                  state.error = err
+                  state.status = 'error'
+                  state.loading = false
+                })
+            } else {
+              state.value = result
+              state.status = 'success'
+              state.loading = false
+              state.error = null
+            }
+          } catch (err) {
+            state.error = err
+            state.status = 'error'
             state.loading = false
-            state.error = null
           }
-        } catch (err) {
-          state.error = err
-          state.status = 'error'
-          state.loading = false
         }
+
+        state.run = run
+
+        // Make it reactive!
+        unsafeEffect(run)
+
+        newContainer = state
+
+      } else {
+        // 2. Value (Signal)
+        // We return the reactive proxy itself as the container
+        newContainer = reactive({
+          type: 'signal',
+          value: input
+        })
       }
 
-      state.run = run
+      // Register in global registry if needed
+      if (serializedKey) {
+        globalRegistry.set(serializedKey, newContainer)
+      }
 
-      // Make it reactive!
-      unsafeEffect(run)
-
-      newContainer = state
-
-    } else {
-      // 2. Value (Signal)
-      // We return the reactive proxy itself as the container
-      newContainer = reactive({
-        type: 'signal',
-        value: input
-      })
+      stateRef.container = newContainer
     }
+  }
 
-    // Register in global registry if needed
-    if (serializedKey) {
-      globalRegistry.set(serializedKey, newContainer)
-    }
-
-    return newContainer
-  }) as any
+  const container = stateRef.container
 
   // --- RETURN LOGIC ---
   // Access container.value to track dependency in the component's effect

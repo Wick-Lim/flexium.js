@@ -1,13 +1,16 @@
 const API_ROOT = 'https://hacker-news.firebaseio.com/v0'
 
 export async function fetchIds(type: string): Promise<number[]> {
+    console.log('[fetchIds] Fetching:', type)
     try {
         const res = await fetch(`${API_ROOT}/${type}stories.json`)
+        console.log('[fetchIds] Response status:', res.status)
         if (!res.ok) {
             console.error(`Failed to fetch ${type} story IDs: ${res.status} ${res.statusText}`)
             return []
         }
         const data = await res.json()
+        console.log('[fetchIds] Got data, length:', data?.length)
         return Array.isArray(data) ? data : []
     } catch (error) {
         console.error(`Error fetching ${type} story IDs:`, error)

@@ -15,13 +15,9 @@ function Nav() {
                 </Link>
                 <span class="links">
                     <Link to="/new">new</Link> |{' '}
-                    <Link to="/threads">threads</Link> |{' '}
-                    <Link to="/past">past</Link> |{' '}
-                    <Link to="/comments">comments</Link> |{' '}
-                    <Link to="/ask">ask</Link> |{' '}
                     <Link to="/show">show</Link> |{' '}
-                    <Link to="/jobs">jobs</Link> |{' '}
-                    <Link to="/submit">submit</Link>
+                    <Link to="/ask">ask</Link> |{' '}
+                    <Link to="/jobs">jobs</Link>
                 </span>
             </nav>
         </header>
@@ -34,7 +30,6 @@ export default function App() {
             <a href="#main" class="skip-link">Skip to main content</a>
             <Nav />
             <Route path="/" component={() => <Stories type="top" />} />
-            <Route path="/top" component={() => <Stories type="top" />} />
             <Route path="/new" component={() => <Stories type="new" />} />
             <Route path="/show" component={() => <Stories type="show" />} />
             <Route path="/ask" component={() => <Stories type="ask" />} />

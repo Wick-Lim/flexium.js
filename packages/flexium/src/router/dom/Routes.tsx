@@ -24,8 +24,10 @@ export function Routes(props: { children: FNodeChild }) {
     // DIRECT access to currentLocation.pathname
     // This should trigger reactive tracking in the component's effect context
     const currentPath = currentLocation.pathname
+    console.log('[Routes] Rendering with path:', currentPath)
     const matches = matchRoutes(routeDefinitions, currentPath) || []
     const params = matches.length > 0 ? matches[matches.length - 1].params : {}
+    console.log('[Routes] Matches:', matches.length > 0 ? matches[0].route.path : 'none')
 
     const routerContext = {
         location: currentLocation,
