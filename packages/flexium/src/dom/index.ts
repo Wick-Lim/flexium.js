@@ -171,6 +171,13 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
             // First render: create new DOM nodes
             const newNodes = renderNode(result, parent)
             instance.nodes = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
+            // Mark nodes as owned by this instance (for reconciliation)
+            // Only set ownership if not already owned (child components set ownership first)
+            instance.nodes.forEach(node => {
+                if (!(node as any).__ownerInstance) {
+                    (node as any).__ownerInstance = instance
+                }
+            })
             isFirstRender = false
         } else {
             // Re-render: reconcile with existing DOM
@@ -203,10 +210,8 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
                 nodeParent.appendChild(marker)
             }
 
-            // Remove all child instances recursively before re-rendering
-            instance.children.forEach(child => {
-                removeComponentInstance(child)
-            })
+            // Clear children references - actual cleanup happens via key-based registry
+            // Don't call removeComponentInstance here as it removes DOM nodes that reconcile needs
             instance.children.clear()
 
             // Create temporary container for collecting new nodes
@@ -316,10 +321,7 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
             // Set props/attributes
             if (fnode.props) {
                 Object.entries(fnode.props).forEach(([key, value]) => {
-                    if (key === 'ref' && typeof value === 'function') {
-                        // ref callback - call with the DOM element
-                        value(dom);
-                    } else if (key.startsWith('on') && typeof value === 'function') {
+                    if (key.startsWith('on') && typeof value === 'function') {
                         // Event handler: onClick -> click
                         const eventName = key.slice(2).toLowerCase();
                         dom.addEventListener(eventName, value as EventListener);
@@ -329,8 +331,8 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
                             (dom as any).__eventHandlers = {};
                         }
                         (dom as any).__eventHandlers[eventName] = value;
-                    } else if (key !== 'ref') {
-                        // Regular attribute (skip ref if not a function)
+                    } else {
+                        // Regular attribute
                         setAttribute(dom, key, value);
                     }
                 });
@@ -517,6 +519,17 @@ function reconcileChildren(oldEl: Element, newEl: Element): void {
 
 function patchNode(oldNode: Node, newNode: Node, parent: Element): void {
     if (canReuse(oldNode, newNode)) {
+        // Transfer component instance ownership from newNode to oldNode
+        // This ensures component instances reference actual DOM nodes after reconciliation
+        const ownerInstance = (newNode as any).__ownerInstance as DOMComponentInstance | undefined
+        if (ownerInstance) {
+            const idx = ownerInstance.nodes.indexOf(newNode)
+            if (idx !== -1) {
+                ownerInstance.nodes[idx] = oldNode
+            }
+            ;(oldNode as any).__ownerInstance = ownerInstance
+            delete (newNode as any).__ownerInstance
+        }
         // Reuse node
         if (oldNode.nodeType === Node.TEXT_NODE) {
             // Update text content
