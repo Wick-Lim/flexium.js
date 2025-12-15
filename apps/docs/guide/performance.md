@@ -814,27 +814,26 @@ function Dashboard() {
 
 ### Memoize Expensive Computations
 
-For expensive calculations, memoize outside the render:
+For expensive calculations, use `state()` with the `deps` option to control when recomputation occurs:
 
-```tsx
 ```tsx
 import { state } from 'flexium/core';
 
-function DataTable({ rawData }) {
-  // Expensive computation - do it once
+function DataTable({ rawData, filterStatus }) {
+  // Expensive computation - only re-runs when deps change
   const [processedData] = state(() => {
-    return rawData  // rawData works directly
-      .filter(item => item.active)
+    return rawData
+      .filter(item => filterStatus === 'all' || item.status === filterStatus)
       .map(item => ({
         ...item,
         score: calculateComplexScore(item)
       }))
       .sort((a, b) => b.score - a.score);
-  });
+  }, { deps: [rawData, filterStatus] });
 
   return (
     <table>
-      {processedData().map((row) => <TableRow key={row.id} data={row} />)}
+      {processedData.map((row) => <TableRow key={row.id} data={row} />)}
     </table>
   );
 }

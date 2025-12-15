@@ -105,28 +105,38 @@ import { useState, useMemo } from 'react'
 function Calculator() {
   const [price, setPrice] = useState(100)
   const [quantity, setQuantity] = useState(2)
-  
+
   const total = useMemo(() => price * quantity, [price, quantity])
-  
+
   return <div>Total: {total}</div>
 }
 
-// ✅ After (Flexium)
+// ✅ After (Flexium) - Option 1: Automatic tracking
 import { state } from 'flexium/core'
 
 function Calculator() {
   const price = state(100)
   const quantity = state(2)
-  
+
   const total = state(() => price * quantity)  // Automatic dependency tracking
-  
+
+  return <div>Total: {total}</div>
+}
+
+// ✅ After (Flexium) - Option 2: Explicit deps (like useMemo)
+function Calculator() {
+  const [price, setPrice] = state(100)
+  const [quantity, setQuantity] = state(2)
+
+  const [total] = state(() => price * quantity, { deps: [price, quantity] })
+
   return <div>Total: {total}</div>
 }
 ```
 
 **Changes**:
-- `useMemo` → `state(() => ...)`
-- No dependency array needed (automatic tracking)
+- `useMemo` → `state(() => ...)` with automatic tracking, OR
+- `useMemo` → `state(() => ..., { deps: [...] })` for explicit dependencies
 
 ---
 

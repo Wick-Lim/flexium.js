@@ -16,6 +16,7 @@ export type StateAction<T> = StateSetter<T> | ResourceControl
 
 export interface StateOptions {
   key?: unknown[]
+  deps?: any[]
 }
 
 // Global State Registry
@@ -64,54 +65,88 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
       if (typeof input === 'function') {
         const fn = input as Function
 
-        const state = reactive({
-          type: 'resource',
-          value: undefined as T | undefined,
-          loading: true,
-          error: null as any,
-          status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
-          run: () => { }
-        })
+        // DEPS MODE: Manual dependency tracking (memo behavior)
+        if (options?.deps !== undefined) {
+          const memoState = hook(() => ({
+            value: undefined as T | undefined,
+            prevDeps: undefined as any[] | undefined,
+            hasRun: false
+          }))
 
-        const run = () => {
-          try {
-            const result = fn()
-
-            if (result instanceof Promise) {
-              state.loading = true
-              state.status = 'loading'
-              state.error = null
-
-              result
-                .then(data => {
-                  state.value = data
-                  state.status = 'success'
-                  state.loading = false
-                })
-                .catch(err => {
-                  state.error = err
-                  state.status = 'error'
-                  state.loading = false
-                })
-            } else {
-              state.value = result
-              state.status = 'success'
-              state.loading = false
-              state.error = null
-            }
-          } catch (err) {
-            state.error = err
-            state.status = 'error'
-            state.loading = false
+          let hasChanged = true
+          if (memoState.hasRun && memoState.prevDeps) {
+            hasChanged = options.deps.some((d, i) => d !== memoState.prevDeps![i])
           }
+
+          if (hasChanged) {
+            const result = fn()
+            if (result instanceof Promise) {
+              throw new Error('deps option is not supported with async functions')
+            }
+            memoState.value = result
+            memoState.prevDeps = options.deps
+            memoState.hasRun = true
+          }
+
+          newContainer = reactive({
+            type: 'computed',
+            value: memoState.value,
+            loading: false,
+            error: null,
+            status: 'success' as 'idle' | 'loading' | 'success' | 'error',
+            run: () => { }
+          })
+        } else {
+          // REACTIVE MODE: Automatic tracking (existing behavior)
+          const state = reactive({
+            type: 'resource',
+            value: undefined as T | undefined,
+            loading: true,
+            error: null as any,
+            status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
+            run: () => { }
+          })
+
+          const run = () => {
+            try {
+              const result = fn()
+
+              if (result instanceof Promise) {
+                state.loading = true
+                state.status = 'loading'
+                state.error = null
+
+                result
+                  .then(data => {
+                    state.value = data
+                    state.status = 'success'
+                    state.loading = false
+                  })
+                  .catch(err => {
+                    state.error = err
+                    state.status = 'error'
+                    state.loading = false
+                  })
+              } else {
+                state.value = result
+                state.status = 'success'
+                state.loading = false
+                state.error = null
+              }
+            } catch (err) {
+              state.error = err
+              state.status = 'error'
+              state.loading = false
+            }
+          }
+
+          state.run = run
+
+          // Make it reactive!
+          unsafeEffect(run)
+
+          newContainer = state
         }
-
-        state.run = run
-
-        // Make it reactive!
-        unsafeEffect(run)
-
-        newContainer = state
 
       } else {
         // 2. Value (Signal)

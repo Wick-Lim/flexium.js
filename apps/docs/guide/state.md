@@ -160,6 +160,57 @@ console.log(double); // 10
 
 Computed state is read-only by default (the setter is no-op or throws, depending on config).
 
+### 5. Memoized Computed (with deps)
+
+For expensive computations that should only re-run when specific dependencies change, use the `deps` option:
+
+```tsx
+const items = state([...]);
+const filter = state('all');
+
+// Only recomputes when items or filter changes
+const [filteredItems] = state(() => {
+  return items.filter(item =>
+    filter === 'all' ? true : item.status === filter
+  );
+}, { deps: [items, filter] });
+```
+
+**When to use `deps`:**
+- Expensive calculations (sorting, filtering large lists)
+- When you need explicit control over recomputation
+- Migrating from React's `useMemo`
+
+**Difference from automatic computed:**
+| Computed | With `deps` |
+|----------|-------------|
+| `state(() => ...)` | `state(() => ..., { deps: [...] })` |
+| Auto-tracks reactive dependencies | Manual dependency array |
+| Re-runs on any accessed signal change | Re-runs only when deps change |
+
+```tsx
+// Example: Kanban board with memoized columns
+function KanbanBoard() {
+  const [tasks] = useTasks();
+
+  const [todo] = state(() => tasks.filter(t => t.status === 'todo'), { deps: [tasks] });
+  const [inProgress] = state(() => tasks.filter(t => t.status === 'in-progress'), { deps: [tasks] });
+  const [done] = state(() => tasks.filter(t => t.status === 'done'), { deps: [tasks] });
+
+  return (
+    <div class="kanban">
+      <Column tasks={todo} title="To Do" />
+      <Column tasks={inProgress} title="In Progress" />
+      <Column tasks={done} title="Done" />
+    </div>
+  );
+}
+```
+
+::: warning
+The `deps` option is not supported with async functions. Use automatic tracking or the `key` option for async state.
+:::
+
 ## Effects & Side Effects
 
 While `state()` manages data, `effect()` handles side effects like DOM manipulation, logging, or subscriptions.
@@ -195,7 +246,7 @@ return (
 
 Flexium automatically optimizes list rendering with O(1) append/prepend and DOM node caching.
 
-### 5. Array Keys
+### 6. Array Keys
 
 Keys can be arrays for hierarchical namespacing - similar to TanStack Query:
 
@@ -208,7 +259,7 @@ const userProfile = state(null, { key: ['user', 'profile', userId] })
 const posts = state([], { key: ['user', 'posts', userId] })
 ```
 
-### 6. Params Option
+### 7. Params Option
 
 Pass explicit parameters to functions for better DX:
 

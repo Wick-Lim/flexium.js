@@ -1,4 +1,4 @@
-import { state, memo } from 'flexium/core'
+import { state } from 'flexium/core'
 import { Link } from 'flexium/router'
 import { useProducts, addToCart, type Product } from '../store'
 
@@ -34,7 +34,7 @@ export default function Products() {
   const categories = ['all', ...new Set(products.map(p => p.category))]
 
   // Filter and sort products
-  const filteredProducts = memo(() => {
+  const [filteredProducts] = state(() => {
     let filtered = [...products]
 
     // Filter by search query
@@ -60,7 +60,7 @@ export default function Products() {
     }
 
     return filtered
-  }, [products, searchQuery, selectedCategory, sortBy])
+  }, { deps: [products, searchQuery, selectedCategory, sortBy] })
 
   return (
     <div class="container">

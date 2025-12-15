@@ -42,27 +42,6 @@ export function effect(fn: () => (void | (() => void)), deps?: any[]) {
     // Cleanup on component unmount logic is handled by the renderer via ComponentInstance context
 }
 
-export function memo<T>(factory: () => T, deps?: any[]): T {
-    const state = hook(() => ({
-        value: undefined as undefined | T,
-        deps: undefined as undefined | any[],
-        hasRun: false
-    }))
-
-    let hasChanged = true
-    if (state.hasRun && deps && state.deps) {
-        hasChanged = deps.some((d, i) => d !== state.deps![i])
-    }
-
-    if (hasChanged) {
-        state.value = factory()
-        state.deps = deps
-        state.hasRun = true
-    }
-
-    return state.value as T
-}
-
 /**
  * Unified sync API
  * - sync(): Force refresh (flush pending effects)

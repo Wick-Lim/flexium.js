@@ -1,4 +1,4 @@
-import { memo } from 'flexium/core'
+import { state } from 'flexium/core'
 import { type Task, type TaskStatus, useTasks } from '../store'
 import TaskCard from './TaskCard'
 
@@ -28,9 +28,9 @@ function Column({ tasks, status, title, icon }: { tasks: Task[], status: TaskSta
 export default function KanbanBoard() {
   const [tasks] = useTasks()
 
-  const todo = memo(() => tasks.filter(task => task.status === 'todo'), [tasks]);
-  const inProgress = memo(() => tasks.filter(task => task.status === 'in-progress'), [tasks]);
-  const done = memo(() => tasks.filter(task => task.status === 'done'), [tasks]);
+  const [todo] = state(() => tasks.filter(task => task.status === 'todo'), { deps: [tasks] });
+  const [inProgress] = state(() => tasks.filter(task => task.status === 'in-progress'), { deps: [tasks] });
+  const [done] = state(() => tasks.filter(task => task.status === 'done'), { deps: [tasks] });
 
   return (
     <div class="kanban-board">
