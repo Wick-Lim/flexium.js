@@ -16,9 +16,6 @@ Flexium is a next-generation UI framework built for performance, simplicity, and
 
 At its core, Flexium aims to solve the complexity and performance issues that plague modern web development. By leveraging signals for fine-grained reactivity, eliminating the Virtual DOM overhead, and providing a unified API for all state management needs, Flexium delivers exceptional performance while maintaining an intuitive developer experience.
 
-::: tip New in v0.10: Enhanced Proxy Architecture
-Flexium v0.10 strengthens the internal Proxy implementation with `Symbol.toPrimitive`, `valueOf`, and `Symbol.iterator` support, enabling state values to be used directly in JSX, arithmetic operations (`count + 1`), and array iterations without `.value` accessors. The public API remains identical to v0.9, but the underlying Proxy architecture provides a more seamless developer experience.
-:::
 
 ## Why Flexium?
 
@@ -26,9 +23,8 @@ Flexium stands out from other frameworks through several key innovations:
 
 - **Unified State**: One function (`state()`) handles local, global, and async state, eliminating the need for multiple APIs.
 - **Fine-Grained Reactivity**: No Virtual DOM overhead. Updates are surgical and precise, updating only what changed.
-- **Cross-Platform**: Write once using universal primitives (`Row`, `Column`, `Text`) and run on Web and Canvas. Native support coming soon.
 - **Type Safety**: Built with TypeScript for a superior developer experience with full type inference.
-- **Tiny Bundle Size**: Core package is ~10KB gzipped, 70% smaller than React.
+- **Tiny Bundle Size**: Core + DOM is ~2.5KB gzipped, full bundle ~6KB - 85% smaller than React.
 - **Zero Configuration**: Works out of the box with Vite, no complex setup required.
 
 ## Framework Comparison
@@ -88,7 +84,7 @@ function Counter() {
 | Reactivity | Virtual DOM + Reconciliation | Fine-grained Signals |
 | State API | useState, useReducer, useContext | Unified `state()` |
 | Updates | Re-render entire component tree | Surgical DOM updates |
-| Bundle Size | ~45kb gzipped | ~10KB gzipped |
+| Bundle Size | ~45kb gzipped | ~6KB gzipped |
 | Performance | Good with optimization | Excellent by default |
 | Dependency Tracking | Manual arrays | Explicit arrays (same pattern) |
 | Learning Curve | Moderate (hooks rules) | Low (simple mental model) |
@@ -137,10 +133,8 @@ function UserProfile() {
 | Async Data | createResource (separate) | Built into `state()` |
 | Global State | Context or stores | `state()` with key option |
 | List Rendering | Must use `<For>` component | `items.map()` works with auto-optimization |
-| Bundle Size | ~7kb gzipped | ~10KB gzipped |
+| Bundle Size | ~7kb gzipped | ~6KB gzipped |
 | Cross-Platform | Web-focused | Web + Canvas (Native: coming soon) |
-| Primitives | HTML tags | Universal primitives (Row, Column, Text) |
-
 > **Unique to Flexium**: `items.map()` syntax works reactively with automatic optimization (O(1) append, DOM caching).
 
 ### Flexium vs Vue 3
@@ -186,7 +180,7 @@ function Counter() {
 | Reactivity | Proxy-based | Signal-based |
 | Template Syntax | SFC templates or JSX | JSX |
 | State Creation | ref, reactive | Unified `state()` |
-| Bundle Size | ~30kb gzipped | ~10KB gzipped |
+| Bundle Size | ~30kb gzipped | ~6KB gzipped |
 | TypeScript | Good (improved in v3) | Excellent (built-in) |
 | Ecosystem | Large, mature | Growing |
 
@@ -290,36 +284,7 @@ const user = state(async () => ({
 const name = user.name; // ✓ string | undefined
 ```
 
-### 4. Cross-Platform Abstraction
-
-::: tip 🚧 Native Support Coming Soon
-Currently Flexium runs on **Web** and **Canvas**. Native (iOS/Android) support is under development.
-:::
-
-Flexium's architecture is similar to React Native, but simpler. By using universal primitives instead of platform-specific tags, your code can run anywhere:
-
-```tsx
-import { Column, Row, Text, Pressable } from 'flexium/primitives';
-
-// This code works on Web and Canvas today
-function Card() {
-  return (
-    <Column padding={20} gap={10}>
-      <Row justify="between" align="center">
-        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Title</Text>
-        <Pressable onPress={() => console.log('Pressed')}>
-          <Text style={{ color: 'blue' }}>Action</Text>
-        </Pressable>
-      </Row>
-      <Text>Description goes here</Text>
-    </Column>
-  );
-}
-```
-
-On the web, this renders to DOM. Native iOS/Android support is planned for a future release.
-
-### 5. Progressive Enhancement
+### 4. Progressive Enhancement
 
 Start simple and add complexity only when needed:
 
@@ -428,82 +393,6 @@ function Example() {
       <button onclick={() => firstName.set('Jane')}>Change Name</button>
       <button onclick={() => age.set(a => a + 1)}>Increment Age</button>
     </div>
-  );
-}
-```
-
-### Universal Primitives
-
-Build cross-platform UIs with consistent components:
-
-```tsx
-import { Column, Row, Text, Image, Pressable, ScrollView } from 'flexium/primitives';
-import { state } from 'flexium/core';
-
-function ProductCard({ product }) {
-  const quantity = state(1);
-
-  return (
-    <Column
-      padding={16}
-      gap={12}
-      style={{
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}
-    >
-      <Image
-        src={product.image}
-        width="100%"
-        height={200}
-        style={{ borderRadius: 4 }}
-      />
-
-      <Column gap={8}>
-        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-          {product.name}
-        </Text>
-
-        <Text style={{ color: '#666' }}>
-          {product.description}
-        </Text>
-
-        <Row justify="between" align="center">
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0066cc' }}>
-            ${product.price}
-          </Text>
-
-          <Row gap={8} align="center">
-            <Pressable onPress={() => quantity.set(q => Math.max(1, q - 1))}>
-              <Text style={{ fontSize: 20, padding: '4px 12px' }}>-</Text>
-            </Pressable>
-
-            <Text style={{ fontSize: 16, minWidth: 30, textAlign: 'center' }}>
-              {quantity}
-            </Text>
-
-            <Pressable onPress={() => quantity.set(q => q + 1)}>
-              <Text style={{ fontSize: 20, padding: '4px 12px' }}>+</Text>
-            </Pressable>
-          </Row>
-        </Row>
-
-        <Pressable
-          onPress={() => console.log('Add to cart:', quantity)}
-          style={{
-            backgroundColor: '#0066cc',
-            padding: 12,
-            borderRadius: 4,
-            marginTop: 8
-          }}
-        >
-          <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>
-            Add to Cart
-          </Text>
-        </Pressable>
-      </Column>
-    </Column>
   );
 }
 ```
@@ -731,12 +620,7 @@ function LargeList() {
    - Try computed values
    - Experiment with effects
 
-3. **Learn Primitives** (1 hour)
-   - Use Row and Column for layouts
-   - Add Text and Image components
-   - Make things interactive with Pressable
-
-4. **Build a Small Project** (4 hours)
+3. **Build a Small Project** (4 hours)
    - Todo app or counter
    - Practice state patterns
    - Get comfortable with JSX
@@ -831,51 +715,6 @@ While newer than React or Vue, Flexium's ecosystem is growing:
 - ESLint plugin for code quality
 - TypeScript support out of the box
 
-## Flexium Native Philosophy
-
-::: info 🚧 Native Support Status
-**Currently available**: Web (DOM) and Canvas renderers
-**Coming soon**: Native iOS/Android renderer
-:::
-
-Flexium adopts a "Flexium Native" approach, similar to React Native but simpler. We avoid HTML-specific tags like `div`, `span`, or `h1` in favor of universal components:
-
-- **Layout**: Use `Row` and `Column` for 99% of your layout needs. They map to Flexbox containers.
-- **Text**: Use `Text` for all text rendering.
-- **Interaction**: Use `Pressable` for touch and click handling.
-
-This abstraction allows your Flexium code to run on the Web (rendering to DOM) and Canvas today. Native platform support is under development.
-
-### Benefits of Universal Primitives
-
-1. **Write Once, Run Anywhere**: Same code works on web, canvas, and native (when released)
-2. **Consistent API**: No platform-specific quirks to remember
-3. **Better Abstraction**: Focus on UI logic, not platform details
-4. **Easier Testing**: Test once, works everywhere
-5. **Future-Proof**: New platforms just need new renderers
-
-```tsx
-// This code works on web and canvas today (native coming soon)
-import { Column, Row, Text, Pressable } from 'flexium/primitives';
-
-function UniversalButton({ onPress, children }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        backgroundColor: '#0066cc',
-        padding: 12,
-        borderRadius: 8
-      }}
-    >
-      <Text style={{ color: '#fff', fontWeight: 'bold' }}>
-        {children}
-      </Text>
-    </Pressable>
-  );
-}
-```
-
 ## Getting Started
 
 Ready to build with Flexium? Check out the [Quick Start](/guide/quick-start) guide to create your first Flexium app in under 5 minutes.
@@ -886,7 +725,6 @@ After reading this introduction, explore:
 
 - [Quick Start](/guide/quick-start) - Build your first app
 - [State Management](/guide/state) - Master the `state()` API
-- [Core Primitives](/guide/primitives) - Learn universal components
 - [Performance Guide](/guide/performance) - Optimize your applications
 - [TypeScript Guide](/guide/typescript) - Leverage full type safety
 
