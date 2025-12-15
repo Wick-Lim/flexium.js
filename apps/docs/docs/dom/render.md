@@ -96,4 +96,3 @@ import RenderDemo from '../../components/RenderDemo.vue'
 ## See Also
 
 - [f()](/docs/dom/f)
-- [&lt;Portal /&gt;](/docs/dom/portal)

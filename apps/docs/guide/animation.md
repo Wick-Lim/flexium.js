@@ -336,12 +336,11 @@ controller.disableLayoutAnimation()
 
 ```tsx
 import { Transition, transitions } from 'flexium/primitives'
-import { Portal } from 'flexium/dom'
 import { state } from 'flexium/core'
 
 function Modal({ isOpen, onClose, children }) {
   return isOpen ? (
-    <Portal>
+    <div class="modal-overlay">
       {/* Backdrop */}
       <Transition preset="fade">
         <div class="backdrop" onClick={onClose} />
@@ -353,7 +352,7 @@ function Modal({ isOpen, onClose, children }) {
           {children}
         </div>
       </Transition>
-    </Portal>
+    </div>
   ) : null
 }
 ```

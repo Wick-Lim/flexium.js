@@ -188,7 +188,6 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: 'Effects', link: '/guide/effects' },
-            { text: 'Portal', link: '/guide/portal' },
             { text: 'Motion', link: '/guide/motion' }
           ]
         },
@@ -216,8 +215,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'render()', link: '/docs/dom/render' },
-            { text: 'f()', link: '/docs/dom/f' },
-            { text: '&lt;Portal /&gt;', link: '/docs/dom/portal' }
+            { text: 'f()', link: '/docs/dom/f' }
           ]
         },
         {
@@ -302,8 +300,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'render()', link: '/docs/dom/render' },
-            { text: 'f()', link: '/docs/dom/f' },
-            { text: '&lt;Portal /&gt;', link: '/docs/dom/portal' }
+            { text: 'f()', link: '/docs/dom/f' }
           ]
         },
         {
@@ -381,8 +378,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'render()', link: '/docs/dom/render' },
-            { text: 'f()', link: '/docs/dom/f' },
-            { text: '&lt;Portal /&gt;', link: '/docs/dom/portal' }
+            { text: 'f()', link: '/docs/dom/f' }
           ]
         },
         {
