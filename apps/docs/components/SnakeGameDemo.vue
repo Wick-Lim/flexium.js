@@ -121,7 +121,7 @@ function SnakeGame() {
       if (cleanupAnimation) cleanupAnimation()
       document.removeEventListener('keydown', handleKeydown)
     }
-  })
+  }, [])
 
   const renderGame = (ctx) => {
     // Background gradient

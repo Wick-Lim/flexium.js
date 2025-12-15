@@ -316,7 +316,10 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
             // Set props/attributes
             if (fnode.props) {
                 Object.entries(fnode.props).forEach(([key, value]) => {
-                    if (key.startsWith('on') && typeof value === 'function') {
+                    if (key === 'ref' && typeof value === 'function') {
+                        // ref callback - call with the DOM element
+                        value(dom);
+                    } else if (key.startsWith('on') && typeof value === 'function') {
                         // Event handler: onClick -> click
                         const eventName = key.slice(2).toLowerCase();
                         dom.addEventListener(eventName, value as EventListener);
@@ -326,8 +329,8 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
                             (dom as any).__eventHandlers = {};
                         }
                         (dom as any).__eventHandlers[eventName] = value;
-                    } else {
-                        // Regular attribute
+                    } else if (key !== 'ref') {
+                        // Regular attribute (skip ref if not a function)
                         setAttribute(dom, key, value);
                     }
                 });
