@@ -8,65 +8,13 @@ Common mistakes and anti-patterns to avoid when using Flexium.
 
 ## State Management
 
-### ❌ Direct Proxy Comparison
-
-**Problem**: StateValue is a Proxy object, so direct comparison always fails.
-
-```tsx
-// ❌ Anti-pattern
-const count = state(0)
-if (count === 5) {  // Always false
-  console.log('Count is 5')
-}
-
-// ✅ Correct approach
-import { equals } from 'flexium/core'
-if (equals(count, 5)) {
-  console.log('Count is 5')
-}
-
-// Or explicit conversion
-if (+count === 5) {  // number
-  console.log('Count is 5')
-}
-```
-
-**See**: [equals() helper function](/docs/core/state#helper-functions)
-
----
-
-### ❌ Direct Proxy Boolean Check
-
-**Problem**: Proxy objects are always truthy, so direct boolean checks don't work.
-
-```tsx
-// ❌ Anti-pattern
-const user = state<User | null>(null)
-if (user) {  // Always true (Proxy is truthy)
-  console.log(user.name)  // Error: user may be null
-}
-
-// ✅ Correct approach
-import { isTruthy } from 'flexium/core'
-if (isTruthy(user)) {
-  console.log(user.name)
-}
-
-// Or explicit check
-if (user.peek() !== null) {
-  console.log(user.name)
-}
-```
-
----
-
 ### ❌ Reading State Outside Reactive Context
 
 **Problem**: State read outside reactive context doesn't track updates.
 
 ```tsx
 // ❌ Anti-pattern
-const count = state(0)
+const [count] = state(0)
 const displayCount = count  // Only stores initial value, doesn't track updates
 
 function Component() {
@@ -75,7 +23,7 @@ function Component() {
 
 // ✅ Correct approach
 function Component() {
-  const count = state(0)
+  const [count, setCount] = state(0)
   return <div>{count}</div>  // Automatically tracks updates
 }
 
@@ -95,14 +43,14 @@ effect(() => {
 // ❌ Anti-pattern
 function Modal() {
   // Only used in this component but made global
-  const isOpen = state(false, { key: ['modal', 'open'] })
+  const [isOpen, setIsOpen] = state(false, { key: ['modal', 'open'] })
   return isOpen ? <div>Modal</div> : null
 }
 
 // ✅ Correct approach
 function Modal() {
   // Local state is sufficient
-  const isOpen = state(false)
+  const [isOpen, setIsOpen] = state(false)
   return isOpen ? <div>Modal</div> : null
 }
 ```
@@ -120,17 +68,17 @@ function Modal() {
 
 ```tsx
 // ❌ Anti-pattern
-const data = state(null, { key: 'data' })  // Too generic
-const user = state(null, { key: 'user' })  // Collision possible
+const [data, setData] = state(null, { key: ['data'] })  // Too generic
+const [user, setUser] = state(null, { key: ['user'] })  // Collision possible
 
 // ✅ Correct approach
 // Use hierarchical keys
-const user = state(null, { key: ['auth', 'user'] })
-const posts = state([], { key: ['user', userId, 'posts'] })  // Dynamic segments
+const [user, setUser] = state(null, { key: ['auth', 'user'] })
+const [posts, setPosts] = state([], { key: ['user', userId, 'posts'] })  // Dynamic segments
 
 // Or clear namespace
-const user = state(null, { key: ['app', 'auth', 'user'] })
-const posts = state([], { key: ['app', 'user', userId, 'posts'] })
+const [user, setUser] = state(null, { key: ['app', 'auth', 'user'] })
+const [posts, setPosts] = state([], { key: ['app', 'user', userId, 'posts'] })
 ```
 
 ---
@@ -143,15 +91,15 @@ const posts = state([], { key: ['app', 'user', userId, 'posts'] })
 
 ```tsx
 // ❌ Anti-pattern - infinite loop
-const count = state(0)
+const [count, setCount] = state(0)
 effect(() => {
-  count.set(count + 1)  // count changes → effect re-runs → count changes → ...
+  setCount(count + 1)  // count changes → effect re-runs → count changes → ...
 })
 
 // ✅ Correct approach 1: conditional update
 effect(() => {
   if (count < 10) {
-    count.set(count + 1)
+    setCount(count + 1)
   }
 })
 
@@ -159,7 +107,7 @@ effect(() => {
 import { untrack } from 'flexium/core'
 effect(() => {
   untrack(() => {
-    count.set(count + 1)  // Not tracked
+    setCount(count + 1)  // Not tracked
   })
 })
 ```
@@ -172,9 +120,9 @@ effect(() => {
 
 ```tsx
 // ❌ Anti-pattern - memory leak
-const isActive = state(false)
+const [isActive] = state(false)
 effect(() => {
-  if (isActive.valueOf()) {
+  if (isActive) {
     const interval = setInterval(() => {
       console.log('tick')
     }, 1000)
@@ -184,11 +132,11 @@ effect(() => {
 
 // ✅ Correct approach
 effect(() => {
-  if (isActive.valueOf()) {
+  if (isActive) {
     const interval = setInterval(() => {
       console.log('tick')
     }, 1000)
-    
+
     return () => clearInterval(interval)  // Cleanup required
   }
 })
@@ -202,17 +150,17 @@ effect(() => {
 
 ```tsx
 // ❌ Anti-pattern - dependencies not tracked
-const count = state(0)
+const [count, setCount] = state(0)
 effect(() => {
   console.log('Hello')  // Doesn't read count
 })
-count.set(1)  // Effect doesn't re-run
+setCount(1)  // Effect doesn't re-run
 
 // ✅ Correct approach
 effect(() => {
   console.log('Count:', count)  // Must read count to track
 })
-count.set(1)  // Effect re-runs
+setCount(1)  // Effect re-runs
 ```
 
 ---
@@ -225,19 +173,19 @@ count.set(1)  // Effect re-runs
 
 ```tsx
 // ❌ Anti-pattern - new object every time
-const items = state([1, 2, 3])
-const data = state(() => ({
+const [items] = state([1, 2, 3])
+const [data] = state(() => ({
   items: items,
   timestamp: Date.now()  // Different value each time → unnecessary recalculation
-}))
+}), { deps: [items] })
 
 // ✅ Correct approach - stable dependencies
-const items = state([1, 2, 3])
-const timestamp = state(() => Date.now())  // Manage as separate state
-const data = state(() => ({
+const [items] = state([1, 2, 3])
+const [timestamp] = state(() => Date.now(), { deps: [] })  // Manage as separate state
+const [data] = state(() => ({
   items: items,
   timestamp: timestamp  // Stable dependency
-}))
+}), { deps: [items, timestamp] })
 ```
 
 ---
@@ -248,16 +196,16 @@ const data = state(() => ({
 
 ```tsx
 // ❌ Anti-pattern - side effects
-const count = state(0)
-const doubled = state(() => {
+const [count, setCount] = state(0)
+const [doubled] = state(() => {
   console.log('Computing doubled')  // Side effect
   localStorage.setItem('count', String(count))  // Side effect
   return count * 2
-})
+}, { deps: [count] })
 
 // ✅ Correct approach
-const count = state(0)
-const doubled = state(() => count * 2)  // Pure function
+const [count, setCount] = state(0)
+const [doubled] = state(() => count * 2, { deps: [count] })  // Pure function
 
 // Side effects in effect
 effect(() => {
@@ -276,16 +224,16 @@ effect(() => {
 
 ```tsx
 // ❌ Anti-pattern - multiple re-renders
-a.set(1)  // Re-render 1
-b.set(2)  // Re-render 2
-c.set(3)  // Re-render 3
+setA(1)  // Re-render 1
+setB(2)  // Re-render 2
+setC(3)  // Re-render 3
 
 // ✅ Correct approach - sync updates
 import { sync } from 'flexium/core'
 sync(() => {
-  a.set(1)
-  b.set(2)
-  c.set(3)
+  setA(1)
+  setB(2)
+  setC(3)
 })  // Single re-render
 ```
 
@@ -297,8 +245,8 @@ sync(() => {
 
 ```tsx
 // ❌ Anti-pattern - unnecessary computed
-const count = state(0)
-const displayCount = state(() => count)  // Just returns value
+const [count, setCount] = state(0)
+const [displayCount] = state(() => count, { deps: [count] })  // Just returns value
 
 // ✅ Correct approach
 const [count, setCount] = state(0)
@@ -336,7 +284,7 @@ const [count, setCount] = state(0)
 
 ```tsx
 // ❌ Anti-pattern - no error handling
-const data = state(async () => {
+const [data, control] = state(async () => {
   return fetch('/api/data').then(r => r.json())
 })
 
@@ -345,13 +293,13 @@ function Component() {
 }
 
 // ✅ Correct approach
-const data = state(async () => {
+const [data, control] = state(async () => {
   return fetch('/api/data').then(r => r.json())
 })
 
 function Component() {
-  if (String(data.status) === 'loading') return <Spinner />
-  if (String(data.status) === 'error') return <Error message={data.error.message} />
+  if (control.loading) return <Spinner />
+  if (control.error) return <Error message={control.error.message} />
   return <div>{data}</div>
 }
 ```
@@ -365,7 +313,7 @@ function Component() {
 ```tsx
 // ❌ Anti-pattern - duplicate requests
 function ComponentA() {
-  const users = state(async () => fetch('/api/users'), {
+  const [users, control] = state(async () => fetch('/api/users'), {
     key: ['users']
   })
   return <div>...</div>
@@ -373,7 +321,7 @@ function ComponentA() {
 
 function ComponentB() {
   // Same key but new request occurs
-  const users = state(async () => fetch('/api/users'), {
+  const [users, control] = state(async () => fetch('/api/users'), {
     key: ['users']
   })
   return <div>...</div>
@@ -393,8 +341,8 @@ function ComponentB() {
 
 ```tsx
 // ❌ Anti-pattern - type inference may fail
-const user = state(null)  // user: StateValue<null>
-user.set({ name: 'John' })  // Type error possible
+const [user, setUser] = state(null)
+setUser({ name: 'John' })  // Type error possible
 
 // ✅ Correct approach - explicit type specification
 interface User {
@@ -402,8 +350,8 @@ interface User {
   email: string
 }
 
-const user = state<User | null>(null)
-user.set({ name: 'John', email: 'john@example.com' })  // Type safe
+const [user, setUser] = state<User | null>(null)
+setUser({ name: 'John', email: 'john@example.com' })  // Type safe
 ```
 
 ---
@@ -426,25 +374,6 @@ user.set({ name: 'John', email: 'john@example.com' })  // Type safe
 
 ---
 
-### ❌ Proxy Check Mistake in Conditional Rendering
-
-**Problem**: Proxy is always truthy, so conditional rendering doesn't work.
-
-```tsx
-// ❌ Anti-pattern - always renders
-const user = state<User | null>(null)
-return user && <UserProfile user={user} />  // Renders even when user is null
-
-// ✅ Correct approach
-import { isTruthy } from 'flexium/core'
-return isTruthy(user) && <UserProfile user={user} />
-
-// Or
-return user.peek() !== null && <UserProfile user={user} />
-```
-
----
-
 ### ❌ Not Cleaning Up Global State
 
 **Problem**: Not cleaning up unused global state causes memory leaks.
@@ -452,8 +381,8 @@ return user.peek() !== null && <UserProfile user={user} />
 ```tsx
 // ❌ Anti-pattern - no cleanup
 function Component() {
-  const data = state(async () => fetch('/api/data'), {
-    key: 'temp:data'
+  const [data, control] = state(async () => fetch('/api/data'), {
+    key: ['temp', 'data']
   })
   // Remains in memory after component unmounts
 }
@@ -462,14 +391,15 @@ function Component() {
 import { state, effect } from 'flexium/core'
 
 function Component() {
-  const data = state(async () => fetch('/api/data'), {
-    key: 'temp:data'
+  const [data, control] = state(async () => fetch('/api/data'), {
+    key: ['temp', 'data']
   })
-  
+
   effect(() => {
     // Effect runs on mount
     return () => {
-    state.delete(['temp', 'data'])  // Cleanup
+      // Manual cleanup if needed
+    }
   })
 }
 ```
@@ -480,29 +410,24 @@ function Component() {
 
 ### Things to Avoid
 
-1. ❌ Direct Proxy comparison (`count === 5`)
-2. ❌ Direct Proxy boolean check (`if (user)`)
-3. ❌ Reading state outside reactive context
-4. ❌ Unnecessary Global State
-5. ❌ Updating state inside effect (infinite loop)
-6. ❌ Missing cleanup functions
-7. ❌ Creating new object/array every time
-8. ❌ Side effects inside computed
-9. ❌ Not batching updates
-10. ❌ Missing error handling
+1. ❌ Reading state outside reactive context
+2. ❌ Unnecessary Global State
+3. ❌ Updating state inside effect (infinite loop)
+4. ❌ Missing cleanup functions
+5. ❌ Creating new object/array every time
+6. ❌ Side effects inside computed
+7. ❌ Not batching updates
+8. ❌ Missing error handling
 
 ### Recommendations
 
-1. ✅ Use `equals()` helper
-2. ✅ Use `isTruthy()` helper
-3. ✅ Read state inside JSX or effect
-4. ✅ Don't use global if local is sufficient
-5. ✅ Sync updates with `sync()`
-6. ✅ Optimize lists with `For` component
-7. ✅ Always return cleanup functions
-8. ✅ Specify types explicitly
-9. ✅ Check error states
-10. ✅ Clean up Global State
+1. ✅ Read state inside JSX or effect
+2. ✅ Don't use global if local is sufficient
+3. ✅ Sync updates with `sync()`
+4. ✅ Use `deps` option for derived state
+5. ✅ Always return cleanup functions
+6. ✅ Specify types explicitly
+7. ✅ Check error states with `control.loading` and `control.error`
 
 ---
 

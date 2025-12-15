@@ -79,69 +79,6 @@ Configure rules individually to match your project's needs:
 
 ## Rules
 
-### `flexium/no-state-comparison`
-
-Prevent direct comparison of `state()` proxy values which always fail.
-
-**Why?** State values returned by `state()` are Proxy objects. Direct comparison with `===` or boolean coercion always fails because:
-- `stateValue === 5` is always `false` (Proxy !== primitive)
-- `if (stateValue)` is always `true` (Proxy objects are always truthy)
-- `if (!stateValue)` is always `false`
-
-#### Bad
-
-```tsx
-const count = state(0);
-const isVisible = state(false);
-
-// ❌ Direct comparison always fails
-if (count.valueOf() === 5) {
-  doSomething(); // Never runs!
-}
-
-// ❌ Boolean coercion is unreliable
-if (!isVisible.valueOf()) {
-  hide(); // Never runs! Proxy is always truthy
-}
-
-// ❌ Direct use in ternary
-const message = count.valueOf() ? 'Has value' : 'Empty'; // Always 'Has value'
-```
-
-#### Good
-
-```tsx
-const count = state(0);
-const isVisible = state(false);
-
-// ✅ Use .valueOf() syntax
-if (count.valueOf() === 5) {
-  doSomething();
-}
-
-// ✅ Use .valueOf() for boolean checks
-if (!isVisible.valueOf()) {
-  hide();
-}
-
-// ✅ Use unary plus for number comparison
-if (+count === 5) {
-  doSomething();
-}
-
-// ✅ Use String() for string comparison
-if (String(name) === 'Alice') {
-  greet();
-}
-
-// ✅ Direct property access is fine
-if (user.id === 1) {
-  // Works because we're comparing the property, not the proxy
-}
-```
-
----
-
 ### `flexium/no-signal-outside-reactive`
 
 Disallow reading signal values outside of reactive contexts.
@@ -151,10 +88,10 @@ Disallow reading signal values outside of reactive contexts.
 #### Bad
 
 ```javascript
-const count = state(0);
+const [count, setCount] = state(0);
 
 // ❌ Signal read outside reactive context - won't trigger updates
-if (count.valueOf() > 5) {
+if (count > 5) {
   doSomething();
 }
 ```
@@ -162,22 +99,22 @@ if (count.valueOf() > 5) {
 #### Good
 
 ```javascript
-const count = state(0);
+const [count, setCount] = state(0);
 
 // ✅ Signal read inside effect
 effect(() => {
-  if (count.valueOf() > 5) {
+  if (count > 5) {
     doSomething();
   }
 });
 
 // ✅ Signal read inside computed
-const shouldDoSomething = state(() => count.valueOf() > 5);
+const [shouldDoSomething] = state(() => count > 5, { deps: [count] });
 
 // ✅ Signal read inside JSX
 const App = () => (
   <div>
-    {count.valueOf() > 5 && <div>Count is greater than 5</div>}
+    {count > 5 && <div>Count is greater than 5</div>}
   </div>
 );
 ```
@@ -237,29 +174,29 @@ Disallow side effects in computed functions.
 
 ```javascript
 // ❌ Side effect in computed (console.log)
-const doubled = state(() => {
+const [doubled] = state(() => {
   console.log('Computing...');
-  return count.valueOf() * 2;
+  return count * 2;
 });
 
 // ❌ Mutation in computed
-const users = state([]);
-const sortedUsers = state(() => {
-  return users.valueOf().sort(); // Mutates original array!
-});
+const [users] = state([]);
+const [sortedUsers] = state(() => {
+  return users.sort(); // Mutates original array!
+}, { deps: [users] });
 
 // ❌ DOM manipulation in computed
-const displayText = state(() => {
-  document.title = String(count.valueOf()); // DOM side effect!
-  return `Count: ${count.valueOf()}`;
-});
+const [displayText] = state(() => {
+  document.title = String(count); // DOM side effect!
+  return `Count: ${count}`;
+}, { deps: [count] });
 ```
 
 #### Good
 
 ```javascript
 // ✅ Pure computed
-const doubled = state(() => count.valueOf() * 2);
+const [doubled] = state(() => count * 2, { deps: [count] });
 
 // ✅ Side effect in effect
 effect(() => {
@@ -267,13 +204,13 @@ effect(() => {
 });
 
 // ✅ Non-mutating computed
-const sortedUsers = state(() => {
-  return [...users.valueOf()].sort(); // Creates new array
-});
+const [sortedUsers] = state(() => {
+  return [...users].sort(); // Creates new array
+}, { deps: [users] });
 
 // ✅ DOM manipulation in effect
 effect(() => {
-  document.title = String(count.valueOf());
+  document.title = String(count);
 });
 ```
 
@@ -287,16 +224,16 @@ Suggest using `sync()` when multiple signals are updated consecutively.
 
 ```javascript
 // ⚠️ Warning - multiple updates without sync (3 separate re-renders)
-count.set(1);
-name.set('test');
-active.set(true);
+setCount(1);
+setName('test');
+setActive(true);
 
 // ⚠️ Multiple signal updates in a function
 function updateUser(id: number, data: UserData) {
-  userId.set(id);
-  userName.set(data.name);
-  userEmail.set(data.email);
-  userActive.set(data.active);
+  setUserId(id);
+  setUserName(data.name);
+  setUserEmail(data.email);
+  setUserActive(data.active);
 }
 ```
 
@@ -307,23 +244,23 @@ import { sync } from 'flexium/core';
 
 // ✅ Synced updates (single re-render)
 sync(() => {
-  count.set(1);
-  name.set('test');
-  active.set(true);
+  setCount(1);
+  setName('test');
+  setActive(true);
 });
 
 // ✅ Synced function
 function updateUser(id: number, data: UserData) {
   sync(() => {
-    userId.set(id);
-    userName.set(data.name);
-    userEmail.set(data.email);
-    userActive.set(data.active);
+    setUserId(id);
+    setUserName(data.name);
+    setUserEmail(data.email);
+    setUserActive(data.active);
   });
 }
 
 // ✅ Single signal update doesn't need syncing
-count.set(1);
+setCount(1);
 ```
 
 #### Configuration

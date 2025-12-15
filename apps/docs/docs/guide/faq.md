@@ -8,29 +8,6 @@ Frequently asked questions and answers.
 
 ## State Management
 
-### Q: Proxy comparison doesn't work
-
-**A**: The value returned by `state()` is a Proxy object. Direct comparison (`===`) always fails.
-
-```tsx
-// ❌ Wrong approach
-const [count, setCount] = state(0)
-if (count === 5) { ... }  // Always false
-
-// ✅ Correct approach 1: Use equals() helper
-import { equals } from 'flexium/core'
-if (equals(count, 5)) { ... }
-
-// ✅ Correct approach 2: Explicit conversion
-if (+count === 5) { ... }           // number
-if (String(name) === 'Alice') { }   // string
-if (user.id === 1) { ... }          // Compare properties directly
-```
-
-**See**: Check the "Proxy Comparison" section in [state() documentation](/docs/core/state).
-
----
-
 ### Q: State doesn't update
 
 **A**: State must be read within a reactive context.
@@ -403,17 +380,13 @@ function Component() {
 
 ### Q: Many ESLint warnings appear
 
-**A**: Check and fix `eslint-plugin-flexium` rules.
+**A**: Check and fix `eslint-plugin-flexium` rules. Common warnings include:
 
-```tsx
-// ❌ ESLint warning
-if (count === 5) { ... }  // no-state-comparison
+- `no-signal-outside-reactive` - Reading state outside reactive context
+- `effect-cleanup` - Missing cleanup function in effects
+- `no-side-effect-in-computed` - Side effects in computed functions
 
-// ✅ Fixed
-if (equals(count, 5)) { ... }
-```
-
-**See**: Check ESLint plugin documentation.
+**See**: Check [ESLint plugin documentation](/guide/eslint-plugin).
 
 ---
 

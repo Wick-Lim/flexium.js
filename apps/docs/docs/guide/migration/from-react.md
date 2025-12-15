@@ -536,26 +536,7 @@ function UserDetail() {
 
 ## Key Differences
 
-### 1. Proxy Comparison Warning
-
-```tsx
-// ❌ Wrong approach
-const count = state(0)
-if (count === 5) { ... }  // Always false
-
-// ✅ Correct approach
-import { equals } from 'flexium/core'
-if (equals(count, 5)) { ... }
-
-// Or
-if (+count === 5) { ... }  // Explicit conversion
-```
-
-**See**: [FAQ - Proxy Comparison](/docs/guide/faq#q-proxy-comparison-doesnt-work)
-
----
-
-### 2. No Dependency Arrays Needed
+### 1. No Dependency Arrays Needed
 
 ```tsx
 // React: Dependency array required
@@ -571,7 +552,7 @@ effect(() => {
 
 ---
 
-### 3. No Virtual DOM
+### 2. No Virtual DOM
 
 Flexium doesn't use Virtual DOM, so:
 - Faster rendering

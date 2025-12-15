@@ -2,20 +2,6 @@
 
 One API for all reactive state.
 
-::: danger Important: Value Comparison
-When comparing state values with `===`, you **must cast to primitive** first:
-```tsx
-const [count, setCount] = state(0)
-
-// ❌ WRONG - Direct comparison may fail
-if (count === 5) { ... }
-
-// ✅ CORRECT - Cast to primitive
-if (+count === 5) { ... }           // number (use +)
-if (String(name) === 'Alice') { }   // string (use String())
-```
-:::
-
 <script setup>
 import ShowcaseDemo from '../../components/ShowcaseDemo.vue'
 import ComputedDemo from '../../components/ComputedDemo.vue'
@@ -87,7 +73,7 @@ const [subtotal] = state(() => price * quantity, { deps: [price, quantity] })
 const [tax] = state(() => subtotal * 0.1, { deps: [subtotal] })
 const [total] = state(() => subtotal + tax, { deps: [subtotal, tax] })
 
-console.log(+total)  // 220
+console.log(total)  // 220
 ```
 
 ### deps Option

@@ -15,21 +15,6 @@ head:
 `state()` is the single, unified API for all state management in Flexium.
 It handles local state, shared global state, async data fetching, and derived values.
 
-::: danger Important: Value Comparison
-When comparing state values, cast to primitive first:
-
-```tsx
-const [count, setCount] = state(0)
-
-// ✅ Cast to primitive for comparison
-if (+count === 5) { ... }           // number
-if (String(name) === 'Alice') { }   // string
-
-// ❌ Direct comparison may fail
-if (count === 5) { ... }
-```
-:::
-
 ## The `state()` API
 
 The `state()` function always returns a **tuple**:
@@ -272,6 +257,5 @@ const [userWithParams, control] = state(
 
 1. **Destructure the tuple**: `const [value, setter] = state(initial)`
 2. **Use setter for updates**: `setter(newValue)` or `setter(prev => prev + 1)`
-3. **Cast for comparison**: `+count === 5` or `String(name) === 'Alice'`
-4. **Use deps for expensive computations**: `state(() => ..., { deps: [...] })`
-5. **Use array keys for dynamic data**: `['user', userId]` instead of `'user-' + userId`
+3. **Use deps for expensive computations**: `state(() => ..., { deps: [...] })`
+4. **Use array keys for dynamic data**: `['user', userId]` instead of `'user-' + userId`
