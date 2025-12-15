@@ -64,8 +64,8 @@ function ContextDemo() {
     ))
   }
 
-  const [total] = state(() => cart.reduce((sum, item) => sum + item.price * item.qty, 0))
-  const [itemCount] = state(() => cart.reduce((sum, item) => sum + item.qty, 0))
+  const [total] = state(() => cart.reduce((sum, item) => sum + item.price * item.qty, 0), { deps: [cart] })
+  const [itemCount] = state(() => cart.reduce((sum, item) => sum + item.qty, 0), { deps: [cart] })
 
   return f('div', {
     style: {

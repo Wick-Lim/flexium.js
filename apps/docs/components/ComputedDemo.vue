@@ -9,10 +9,10 @@ function ComputedCalculator() {
   const [num1, setNum1] = state(10)
   const [num2, setNum2] = state(5)
 
-  const [sum] = state(() => num1 + num2)
-  const [difference] = state(() => num1 - num2)
-  const [product] = state(() => num1 * num2)
-  const [average] = state(() => (num1 + num2) / 2)
+  const [sum] = state(() => num1 + num2, { deps: [num1, num2] })
+  const [difference] = state(() => num1 - num2, { deps: [num1, num2] })
+  const [product] = state(() => num1 * num2, { deps: [num1, num2] })
+  const [average] = state(() => (num1 + num2) / 2, { deps: [num1, num2] })
 
   const containerNode = f('div', {
     style: {

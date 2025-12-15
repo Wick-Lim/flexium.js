@@ -14,9 +14,10 @@ function SyncExample() {
   // Track renders using an effect
   effect(() => {
     // Read all counters to track when they change
-    counter1()
-    counter2()
-    counter3()
+    // Access values to track dependencies
+    void counter1
+    void counter2
+    void counter3
     // Increment render count
     setRenderCount(c => c + 1)
   })

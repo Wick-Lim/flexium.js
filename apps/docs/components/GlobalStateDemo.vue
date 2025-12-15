@@ -76,7 +76,7 @@ function CounterA() {
 // Component B - shares the same global state
 function CounterB() {
   const [count, setCount] = state(0, { key: ['app', 'count'] })
-  const [doubled] = state(() => count * 2)
+  const [doubled] = state(() => count * 2, { deps: [count] })
 
   return f('div', {
     style: {
@@ -253,7 +253,6 @@ onMounted(() => {
 onUnmounted(() => {
   if (container.value) {
     container.value.innerHTML = ''
-    state.clear()
   }
 })
 </script>
