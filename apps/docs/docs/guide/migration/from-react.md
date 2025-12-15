@@ -111,23 +111,14 @@ function Calculator() {
   return <div>Total: {total}</div>
 }
 
-// ✅ After (Flexium) - Option 1: Automatic tracking
+// ✅ After (Flexium)
 import { state } from 'flexium/core'
 
-function Calculator() {
-  const price = state(100)
-  const quantity = state(2)
-
-  const total = state(() => price * quantity)  // Automatic dependency tracking
-
-  return <div>Total: {total}</div>
-}
-
-// ✅ After (Flexium) - Option 2: Explicit deps (like useMemo)
 function Calculator() {
   const [price, setPrice] = state(100)
   const [quantity, setQuantity] = state(2)
 
+  // Use deps to specify dependencies (like useMemo)
   const [total] = state(() => price * quantity, { deps: [price, quantity] })
 
   return <div>Total: {total}</div>
@@ -135,8 +126,8 @@ function Calculator() {
 ```
 
 **Changes**:
-- `useMemo` → `state(() => ...)` with automatic tracking, OR
-- `useMemo` → `state(() => ..., { deps: [...] })` for explicit dependencies
+- `useMemo(() => ..., [deps])` → `state(() => ..., { deps: [...] })`
+- Returns a tuple: `const [value] = state(...)`
 
 ---
 

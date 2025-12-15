@@ -85,31 +85,30 @@ b.set(20); // Effect runs again
 
 ### Use Computed for Derived State
 
-Instead of recalculating values in JSX, use `computed()` to memoize derived values:
+Instead of recalculating values in JSX, use `state()` with `deps` to memoize derived values:
 
-```tsx
 ```tsx
 import { state } from 'flexium/core';
 
 // Bad - recalculates on every access
 function TodoList() {
-  const todos = state([...]);
+  const [todos, setTodos] = state([...]);
 
   return (
     <div>
-      <p>Total: {todos.valueOf().length}</p>
-      <p>Completed: {todos.valueOf().filter(t => t.done).length}</p>
-      <p>Active: {todos.valueOf().filter(t => !t.done).length}</p>
+      <p>Total: {todos.length}</p>
+      <p>Completed: {todos.filter(t => t.done).length}</p>
+      <p>Active: {todos.filter(t => !t.done).length}</p>
     </div>
   );
 }
 
-// Good - computed values memoize results
+// Good - computed values with deps
 function TodoList() {
-  const todos = state([...]);
-  const total = state(() => todos.valueOf().length);
-  const completed = state(() => todos.valueOf().filter(t => t.done).length);
-  const active = state(() => todos.valueOf().filter(t => !t.done).length);
+  const [todos, setTodos] = state([...]);
+  const [total] = state(() => todos.length, { deps: [todos] });
+  const [completed] = state(() => todos.filter(t => t.done).length, { deps: [todos] });
+  const [active] = state(() => todos.filter(t => !t.done).length, { deps: [todos] });
 
   return (
     <div>
@@ -121,7 +120,7 @@ function TodoList() {
 }
 ```
 
-Computed values only recalculate when their dependencies change, and they cache the result for multiple reads.
+Computed values only recalculate when their dependencies change.
 
 ### Prefer Computed Over Effect
 
