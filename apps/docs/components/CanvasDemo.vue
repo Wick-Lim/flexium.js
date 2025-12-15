@@ -67,7 +67,7 @@ function CanvasDemo() {
     return () => {
       if (cleanupAnimation) cleanupAnimation()
     }
-  }, [])
+  })
 
   return f('div', {
     style: {
