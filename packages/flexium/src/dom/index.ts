@@ -194,22 +194,20 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
                 return
             }
 
-            // Create marker to know where to insert
+            // Create marker to know where to insert new nodes
             const marker = document.createComment('flexium-marker')
-            nodeParent.insertBefore(marker, firstNode)
+            const lastNode = instance.nodes[instance.nodes.length - 1]
+            if (lastNode.nextSibling) {
+                nodeParent.insertBefore(marker, lastNode.nextSibling)
+            } else {
+                nodeParent.appendChild(marker)
+            }
 
             // Remove all child instances recursively before re-rendering
             instance.children.forEach(child => {
                 removeComponentInstance(child)
             })
             instance.children.clear()
-
-            // Remove old nodes
-            instance.nodes.forEach(node => {
-                if (node.parentNode) {
-                    node.parentNode.removeChild(node)
-                }
-            })
 
             // Create temporary container for collecting new nodes
             const tempContainer = document.createElement('div')
@@ -218,15 +216,13 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
             const newNodes = renderNode(result, tempContainer, nodeParent)
             const newNodesArray = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
 
-            // Move nodes from temp container to actual parent before marker
-            newNodesArray.forEach(node => {
-                nodeParent.insertBefore(node, marker)
-            })
+            // Use reconcile to patch existing nodes instead of replacing
+            const reconciledNodes = reconcile(instance.nodes, newNodesArray, nodeParent, marker)
 
             // Remove marker
             nodeParent.removeChild(marker)
 
-            instance.nodes = newNodesArray
+            instance.nodes = reconciledNodes
         }
 
         // Restore previous rendering instance after all renderNode calls are done
@@ -371,6 +367,11 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
 export function render(app: any, container: HTMLElement) {
     container.innerHTML = ''
 
+    // Handle raw function components by wrapping them in an FNode
+    if (typeof app === 'function') {
+        app = { type: app, props: {}, children: [], key: undefined }
+    }
+
     renderNode(app, container);
 }
 
@@ -429,7 +430,14 @@ function updateAttributes(oldEl: Element, newEl: Element): void {
     const newAttrs = Array.from(newEl.attributes)
     newAttrs.forEach(attr => {
         if (oldEl.getAttribute(attr.name) !== attr.value) {
-            oldEl.setAttribute(attr.name, attr.value)
+            // Use DOM property for value/checked to preserve focus
+            if (attr.name === 'value' && 'value' in oldEl) {
+                (oldEl as HTMLInputElement).value = attr.value
+            } else if (attr.name === 'checked' && 'checked' in oldEl) {
+                (oldEl as HTMLInputElement).checked = attr.value === 'true' || attr.value === ''
+            } else {
+                oldEl.setAttribute(attr.name, attr.value)
+            }
         }
     })
 

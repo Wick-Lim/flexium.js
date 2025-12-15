@@ -337,8 +337,7 @@ function SyncExample() {
 
 onMounted(() => {
   if (container.value) {
-    const app = SyncExample()
-    render(app, container.value)
+    render(SyncExample, container.value)
   }
 })
 

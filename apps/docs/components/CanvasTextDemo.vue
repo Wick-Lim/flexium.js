@@ -108,8 +108,8 @@ onMounted(() => {
       btn.style.cssText = `
         padding: 8px 16px;
         border: 2px solid #d1d5db;
-        background: ${font.value === fontFamily() ? '#3b82f6' : '#ffffff'};
-        color: ${font.value === fontFamily() ? '#ffffff' : '#374151'};
+        background: ${font.value === fontFamily ? '#3b82f6' : '#ffffff'};
+        color: ${font.value === fontFamily ? '#ffffff' : '#374151'};
         border-radius: 6px;
         cursor: pointer;
         font-size: 13px;
@@ -148,8 +148,8 @@ onMounted(() => {
       btn.style.cssText = `
         padding: 8px 16px;
         border: 2px solid #d1d5db;
-        background: ${align.value === textAlign() ? '#3b82f6' : '#ffffff'};
-        color: ${align.value === textAlign() ? '#ffffff' : '#374151'};
+        background: ${align.value === textAlign ? '#3b82f6' : '#ffffff'};
+        color: ${align.value === textAlign ? '#ffffff' : '#374151'};
         border-radius: 6px;
         cursor: pointer;
         font-size: 13px;

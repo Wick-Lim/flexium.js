@@ -193,8 +193,7 @@ function AsyncDemo() {
 
 onMounted(() => {
   if (container.value) {
-    const app = AsyncDemo()
-    render(app, container.value)
+    render(AsyncDemo, container.value)
   }
 })
 

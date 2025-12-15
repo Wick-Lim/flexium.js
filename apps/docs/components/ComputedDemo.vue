@@ -276,8 +276,7 @@ function ComputedCalculator() {
 
 onMounted(() => {
   if (container.value) {
-    const app = ComputedCalculator()
-    render(app, container.value)
+    render(ComputedCalculator, container.value)
   }
 })
 

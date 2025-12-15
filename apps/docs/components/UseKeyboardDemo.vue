@@ -190,11 +190,10 @@ function UseKeyboardDemo() {
           color: '#374151'
         }
       }, () => {
-        const log = keyLog()
-        if (log.length === 0) {
+        if (keyLog.length === 0) {
           return f('div', { style: { color: '#9ca3af' } }, 'No events yet')
         }
-        return log.slice().reverse().map((event, i) =>
+        return keyLog.slice().reverse().map((event, i) =>
           f('div', {
             style: {
               padding: '4px 8px',

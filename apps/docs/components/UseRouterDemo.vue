@@ -45,9 +45,8 @@ function RouterDemo() {
     }
 
     const back = () => {
-      const h = history()
-      if (h.length > 1) {
-        const newHistory = h.slice(0, -1)
+      if (history.length > 1) {
+        const newHistory = history.slice(0, -1)
         setHistory(newHistory)
         navigate(newHistory[newHistory.length - 1], { replace: true })
       }
@@ -58,9 +57,6 @@ function RouterDemo() {
     }
 
     return {
-      path: () => path(),
-      params: () => params(),
-      query: () => query(),
       navigate,
       back,
       forward
@@ -204,16 +200,16 @@ function RouterDemo() {
       }, [
         f('button', {
           onclick: () => r.back(),
-          disabled: () => history().length <= 1,
+          disabled: () => history.length <= 1,
           style: {
             padding: '8px 16px',
             borderRadius: '6px',
             border: 'none',
-            background: () => history().length <= 1 ? '#d1d5db' : '#6b7280',
+            background: () => history.length <= 1 ? '#d1d5db' : '#6b7280',
             color: 'white',
             fontSize: '14px',
             fontWeight: '500',
-            cursor: () => history().length <= 1 ? 'not-allowed' : 'pointer',
+            cursor: () => history.length <= 1 ? 'not-allowed' : 'pointer',
             transition: 'all 0.2s'
           }
         }, '← Back'),
@@ -288,7 +284,7 @@ function RouterDemo() {
             borderRadius: '4px',
             fontWeight: '600'
           }
-        }, [() => JSON.stringify(params())])
+        }, [() => JSON.stringify(params)])
       ]),
 
       // Query
@@ -306,7 +302,7 @@ function RouterDemo() {
             borderRadius: '4px',
             fontWeight: '600'
           }
-        }, [() => JSON.stringify(query())])
+        }, [() => JSON.stringify(query)])
       ])
     ]),
 
@@ -321,7 +317,7 @@ function RouterDemo() {
       }
     }, [
       f('strong', {}, 'History: '),
-      () => history().map((h, i) =>
+      () => history.map((h, i) =>
         f('span', {
           style: {
             display: 'inline-block',
@@ -333,10 +329,10 @@ function RouterDemo() {
               background: '#dbeafe',
               padding: '2px 6px',
               borderRadius: '4px',
-              fontWeight: i === history().length - 1 ? '700' : '500'
+              fontWeight: i === history.length - 1 ? '700' : '500'
             }
           }, h),
-          i < history().length - 1 ? ' → ' : ''
+          i < history.length - 1 ? ' → ' : ''
         ])
       )
     ])

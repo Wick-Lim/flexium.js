@@ -55,31 +55,33 @@ function RouteDemo() {
 
   // Render a single route row
   const RouteRow = (route) => {
-    const result = () => matchRoute(route.pattern, testPath())
-    const isMatch = () => result().match
-    const params = () => result().params
-
     return f('div', {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: '12px',
-        marginBottom: '8px',
-        borderRadius: '6px',
-        background: () => isMatch() ? '#dcfce7' : '#f9fafb',
-        border: () => isMatch() ? '2px solid #16a34a' : '1px solid #e5e7eb',
-        transition: 'all 0.2s'
+      style: () => {
+        const result = matchRoute(route.pattern, testPath)
+        return {
+          display: 'flex',
+          alignItems: 'center',
+          padding: '12px',
+          marginBottom: '8px',
+          borderRadius: '6px',
+          background: result.match ? '#dcfce7' : '#f9fafb',
+          border: result.match ? '2px solid #16a34a' : '1px solid #e5e7eb',
+          transition: 'all 0.2s'
+        }
       }
     }, [
       f('div', { style: { flex: '1' } }, [
         f('code', {
-          style: {
-            fontSize: '14px',
-            fontWeight: '600',
-            color: () => isMatch() ? '#15803d' : '#374151',
-            background: () => isMatch() ? '#bbf7d0' : '#e5e7eb',
-            padding: '4px 8px',
-            borderRadius: '4px'
+          style: () => {
+            const result = matchRoute(route.pattern, testPath)
+            return {
+              fontSize: '14px',
+              fontWeight: '600',
+              color: result.match ? '#15803d' : '#374151',
+              background: result.match ? '#bbf7d0' : '#e5e7eb',
+              padding: '4px 8px',
+              borderRadius: '4px'
+            }
           }
         }, route.pattern),
         f('div', {
@@ -91,16 +93,19 @@ function RouteDemo() {
         }, route.description)
       ]),
       f('div', {
-        style: {
-          fontSize: '13px',
-          fontWeight: '600',
-          color: () => isMatch() ? '#15803d' : '#9ca3af'
+        style: () => {
+          const result = matchRoute(route.pattern, testPath)
+          return {
+            fontSize: '13px',
+            fontWeight: '600',
+            color: result.match ? '#15803d' : '#9ca3af'
+          }
         }
       }, () => {
-        if (!isMatch()) return 'No match'
-        const p = params()
-        if (Object.keys(p).length === 0) return 'Match'
-        return `Match: ${JSON.stringify(p)}`
+        const result = matchRoute(route.pattern, testPath)
+        if (!result.match) return 'No match'
+        if (Object.keys(result.params).length === 0) return 'Match'
+        return `Match: ${JSON.stringify(result.params)}`
       })
     ])
   }

@@ -29,12 +29,12 @@ function UseMouseDemo() {
     e.preventDefault()
     if (e.button === 0) {
       setLeftPressed(true)
-      setClickLog(log => [...log.slice(-9), { type: 'left press', x: mouseX(), y: mouseY(), time: Date.now() }])
+      setClickLog(log => [...log.slice(-9), { type: 'left press', x: mouseX, y: mouseY, time: Date.now() }])
     }
     if (e.button === 1) setMiddlePressed(true)
     if (e.button === 2) {
       setRightPressed(true)
-      setClickLog(log => [...log.slice(-9), { type: 'right press', x: mouseX(), y: mouseY(), time: Date.now() }])
+      setClickLog(log => [...log.slice(-9), { type: 'right press', x: mouseX, y: mouseY, time: Date.now() }])
     }
   }
 
@@ -89,7 +89,7 @@ function UseMouseDemo() {
         position: 'relative',
         height: '300px',
         marginBottom: '20px',
-        background: () => isInside() ? '#f9fafb' : '#f3f4f6',
+        background: () => isInside ? '#f9fafb' : '#f3f4f6',
         border: '2px dashed #d1d5db',
         borderRadius: '8px',
         cursor: 'crosshair',
@@ -115,17 +115,17 @@ function UseMouseDemo() {
       ]),
 
       // Mouse Cursor
-      () => isInside() ? f('div', {
+      () => isInside ? f('div', {
         style: {
           position: 'absolute',
-          left: `${mouseX()}px`,
-          top: `${mouseY()}px`,
+          left: `${mouseX}px`,
+          top: `${mouseY}px`,
           width: '20px',
           height: '20px',
           marginLeft: '-10px',
           marginTop: '-10px',
           borderRadius: '50%',
-          background: () => leftPressed() || rightPressed() ? '#ef4444' : '#3b82f6',
+          background: () => leftPressed || rightPressed ? '#ef4444' : '#3b82f6',
           border: '3px solid white',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
           pointerEvents: 'none',
@@ -134,17 +134,17 @@ function UseMouseDemo() {
       }) : null,
 
       // Trail effect
-      () => isInside() && (leftPressed() || rightPressed()) ? f('div', {
+      () => isInside && (leftPressed || rightPressed) ? f('div', {
         style: {
           position: 'absolute',
-          left: `${mouseX()}px`,
-          top: `${mouseY()}px`,
+          left: `${mouseX}px`,
+          top: `${mouseY}px`,
           width: '40px',
           height: '40px',
           marginLeft: '-20px',
           marginTop: '-20px',
           borderRadius: '50%',
-          background: () => leftPressed() ? 'rgba(59, 130, 246, 0.3)' : 'rgba(239, 68, 68, 0.3)',
+          background: () => leftPressed ? 'rgba(59, 130, 246, 0.3)' : 'rgba(239, 68, 68, 0.3)',
           pointerEvents: 'none'
         }
       }) : null
@@ -183,7 +183,7 @@ function UseMouseDemo() {
             fontFamily: 'monospace'
           }
         }, [
-          () => `${Math.round(mouseX())}, ${Math.round(mouseY())}`
+          () => `${Math.round(mouseX)}, ${Math.round(mouseY)}`
         ])
       ]),
 
@@ -215,8 +215,8 @@ function UseMouseDemo() {
               borderRadius: '4px',
               fontSize: '12px',
               fontWeight: '600',
-              background: () => leftPressed() ? '#3b82f6' : '#e5e7eb',
-              color: () => leftPressed() ? 'white' : '#6b7280',
+              background: () => leftPressed ? '#3b82f6' : '#e5e7eb',
+              color: () => leftPressed ? 'white' : '#6b7280',
               transition: 'all 0.1s'
             }
           }, 'Left'),
@@ -226,8 +226,8 @@ function UseMouseDemo() {
               borderRadius: '4px',
               fontSize: '12px',
               fontWeight: '600',
-              background: () => middlePressed() ? '#8b5cf6' : '#e5e7eb',
-              color: () => middlePressed() ? 'white' : '#6b7280',
+              background: () => middlePressed ? '#8b5cf6' : '#e5e7eb',
+              color: () => middlePressed ? 'white' : '#6b7280',
               transition: 'all 0.1s'
             }
           }, 'Middle'),
@@ -237,8 +237,8 @@ function UseMouseDemo() {
               borderRadius: '4px',
               fontSize: '12px',
               fontWeight: '600',
-              background: () => rightPressed() ? '#ef4444' : '#e5e7eb',
-              color: () => rightPressed() ? 'white' : '#6b7280',
+              background: () => rightPressed ? '#ef4444' : '#e5e7eb',
+              color: () => rightPressed ? 'white' : '#6b7280',
               transition: 'all 0.1s'
             }
           }, 'Right')
@@ -271,11 +271,10 @@ function UseMouseDemo() {
           overflowY: 'auto'
         }
       }, () => {
-        const log = clickLog()
-        if (log.length === 0) {
+        if (clickLog.length === 0) {
           return f('div', { style: { color: '#9ca3af' } }, 'No clicks yet')
         }
-        return log.slice().reverse().map((event, i) =>
+        return clickLog.slice().reverse().map((event, i) =>
           f('div', {
             style: {
               padding: '4px 8px',

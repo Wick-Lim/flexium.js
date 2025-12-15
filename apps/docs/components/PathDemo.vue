@@ -100,8 +100,8 @@ onMounted(() => {
       btn.style.cssText = `
         padding: 8px 16px;
         border: 2px solid #d1d5db;
-        background: ${option.value === selectedPath() ? '#3b82f6' : '#ffffff'};
-        color: ${option.value === selectedPath() ? '#ffffff' : '#374151'};
+        background: ${option.value === selectedPath ? '#3b82f6' : '#ffffff'};
+        color: ${option.value === selectedPath ? '#ffffff' : '#374151'};
         border-radius: 6px;
         cursor: pointer;
         font-size: 13px;

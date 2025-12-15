@@ -322,7 +322,7 @@ f('input', {
           fontFamily: 'monospace',
           lineHeight: '1.6'
         }
-      }, [() => currentExample().code])
+      }, [() => currentExample.code])
     ]),
 
     // Live output
@@ -347,7 +347,7 @@ f('input', {
           borderRadius: '8px'
         }
       }, [
-        () => currentExample().render()
+        () => currentExample.render()
       ])
     ]),
 

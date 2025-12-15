@@ -245,8 +245,7 @@ function GlobalDemo() {
 
 onMounted(() => {
   if (container.value) {
-    const app = GlobalDemo()
-    render(app, container.value)
+    render(GlobalDemo, container.value)
   }
 })
 

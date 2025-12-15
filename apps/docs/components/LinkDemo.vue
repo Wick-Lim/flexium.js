@@ -11,27 +11,28 @@ function LinkDemo() {
 
   // Simulated Link component
   const Link = (props) => {
-    const isActive = () => currentPath() === props.href
-
     return f('a', {
       href: props.href,
       onclick: (e) => {
         e.preventDefault()
         setCurrentPath(props.href)
       },
-      style: {
-        display: 'inline-block',
-        padding: '8px 16px',
-        marginRight: '8px',
-        textDecoration: 'none',
-        borderRadius: '6px',
-        fontWeight: '500',
-        transition: 'all 0.2s',
-        background: () => isActive() ? '#4f46e5' : '#e5e7eb',
-        color: () => isActive() ? 'white' : '#374151',
-        border: () => isActive() ? '2px solid #4338ca' : '2px solid transparent'
+      style: () => {
+        const isActive = currentPath === props.href
+        return {
+          display: 'inline-block',
+          padding: '8px 16px',
+          marginRight: '8px',
+          textDecoration: 'none',
+          borderRadius: '6px',
+          fontWeight: '500',
+          transition: 'all 0.2s',
+          background: isActive ? '#4f46e5' : '#e5e7eb',
+          color: isActive ? 'white' : '#374151',
+          border: isActive ? '2px solid #4338ca' : '2px solid transparent'
+        }
       },
-      class: () => isActive() ? 'active' : ''
+      class: () => currentPath === props.href ? 'active' : ''
     }, props.children)
   }
 
@@ -104,11 +105,10 @@ function LinkDemo() {
           color: '#111827'
         }
       }, () => {
-        const path = currentPath()
-        if (path === '/') return 'Home Page'
-        if (path === '/products') return 'Products Page'
-        if (path === '/about') return 'About Page'
-        if (path === '/contact') return 'Contact Page'
+        if (currentPath === '/') return 'Home Page'
+        if (currentPath === '/products') return 'Products Page'
+        if (currentPath === '/about') return 'About Page'
+        if (currentPath === '/contact') return 'Contact Page'
         return 'Page'
       }),
       f('p', {
@@ -118,11 +118,10 @@ function LinkDemo() {
           fontSize: '14px'
         }
       }, () => {
-        const path = currentPath()
-        if (path === '/') return 'Welcome to our website!'
-        if (path === '/products') return 'Browse our amazing products.'
-        if (path === '/about') return 'Learn more about our company.'
-        if (path === '/contact') return 'Get in touch with us!'
+        if (currentPath === '/') return 'Welcome to our website!'
+        if (currentPath === '/products') return 'Browse our amazing products.'
+        if (currentPath === '/about') return 'Learn more about our company.'
+        if (currentPath === '/contact') return 'Get in touch with us!'
         return 'Content goes here'
       })
     ]),

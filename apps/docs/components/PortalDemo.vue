@@ -46,7 +46,7 @@ function PortalDemo() {
 
   // Modal Component
   const Modal = () => {
-    if (!showModal()) return null
+    if (!showModal) return null
 
     const content = f('div', {
       style: {
@@ -116,13 +116,13 @@ function PortalDemo() {
 
   // Tooltip Component
   const Tooltip = () => {
-    if (!showTooltip()) return null
+    if (!showTooltip) return null
 
     const content = f('div', {
       style: {
         position: 'fixed',
-        left: `${tooltipPos().x}px`,
-        top: `${tooltipPos().y + 10}px`,
+        left: `${tooltipPos.x}px`,
+        top: `${tooltipPos.y + 10}px`,
         background: '#1f2937',
         color: 'white',
         padding: '8px 12px',
@@ -146,7 +146,7 @@ function PortalDemo() {
 
   // Notification Component
   const Notification = () => {
-    if (!showNotification()) return null
+    if (!showNotification) return null
 
     const content = f('div', {
       style: {

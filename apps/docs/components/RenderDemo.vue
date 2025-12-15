@@ -97,14 +97,13 @@ function RenderDemo() {
 
   // Unmount the last app
   const unmountLastApp = () => {
-    const apps = mountedApps()
-    if (apps.length === 0) return
+    if (mountedApps.length === 0) return
 
-    const lastApp = apps[apps.length - 1]
+    const lastApp = mountedApps[mountedApps.length - 1]
     lastApp.dispose()
     lastApp.container.remove()
 
-    setMountedApps(apps.slice(0, -1))
+    setMountedApps(mountedApps.slice(0, -1))
   }
 
   return f('div', {
@@ -166,16 +165,16 @@ function RenderDemo() {
         }, '+ Mount New App'),
         f('button', {
           onclick: unmountLastApp,
-          disabled: () => mountedApps().length === 0,
+          disabled: () => mountedApps.length === 0,
           style: {
             padding: '10px 20px',
             borderRadius: '6px',
             border: 'none',
-            background: () => mountedApps().length === 0 ? '#d1d5db' : '#ef4444',
+            background: () => mountedApps.length === 0 ? '#d1d5db' : '#ef4444',
             color: 'white',
             fontSize: '14px',
             fontWeight: '600',
-            cursor: () => mountedApps().length === 0 ? 'not-allowed' : 'pointer',
+            cursor: () => mountedApps.length === 0 ? 'not-allowed' : 'pointer',
             transition: 'all 0.2s'
           }
         }, '- Unmount Last')
@@ -192,7 +191,7 @@ function RenderDemo() {
             color: '#111827',
             fontSize: '18px'
           }
-        }, [() => mountedApps().length.toString()])
+        }, [() => mountedApps.length.toString()])
       ])
     ]),
 
@@ -204,7 +203,7 @@ function RenderDemo() {
         marginBottom: '16px'
       }
     }, [
-      () => mountedApps().length === 0 ? f('div', {
+      () => mountedApps.length === 0 ? f('div', {
         style: {
           padding: '40px',
           textAlign: 'center',
