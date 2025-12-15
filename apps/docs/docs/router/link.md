@@ -157,6 +157,6 @@ import LinkDemo from '../../components/LinkDemo.vue'
 
 ## See Also
 
-- [&lt;Router /&gt;](/docs/router/router)
+- [&lt;Routes /&gt;](/docs/router/routes)
 - [&lt;Route /&gt;](/docs/router/route)
 - [router()](/docs/router/router-hook)

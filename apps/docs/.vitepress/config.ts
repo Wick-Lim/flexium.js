@@ -237,11 +237,11 @@ export default defineConfig({
           text: 'flexium/router',
           collapsed: false,
           items: [
-            { text: '&lt;Router /&gt;', link: '/docs/router/router' },
+            { text: '&lt;Routes /&gt;', link: '/docs/router/routes' },
             { text: '&lt;Route /&gt;', link: '/docs/router/route' },
             { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
             { text: '&lt;Link /&gt;', link: '/docs/router/link' },
-            { text: 'router()', link: '/docs/router/router-hook' }
+            { text: 'router()', link: '/docs/router/routes-hook' }
           ]
         },
         {
@@ -323,11 +323,11 @@ export default defineConfig({
           text: 'flexium/router',
           collapsed: false,
           items: [
-            { text: '&lt;Router /&gt;', link: '/docs/router/router' },
+            { text: '&lt;Routes /&gt;', link: '/docs/router/routes' },
             { text: '&lt;Route /&gt;', link: '/docs/router/route' },
             { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
             { text: '&lt;Link /&gt;', link: '/docs/router/link' },
-            { text: 'router()', link: '/docs/router/router-hook' }
+            { text: 'router()', link: '/docs/router/routes-hook' }
           ]
         },
         {
@@ -402,11 +402,11 @@ export default defineConfig({
           text: 'flexium/router',
           collapsed: false,
           items: [
-            { text: '&lt;Router /&gt;', link: '/docs/router/router' },
+            { text: '&lt;Routes /&gt;', link: '/docs/router/routes' },
             { text: '&lt;Route /&gt;', link: '/docs/router/route' },
             { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
             { text: '&lt;Link /&gt;', link: '/docs/router/link' },
-            { text: 'router()', link: '/docs/router/router-hook' }
+            { text: 'router()', link: '/docs/router/routes-hook' }
           ]
         },
         {

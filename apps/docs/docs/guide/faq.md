@@ -313,7 +313,7 @@ function App() {
 }
 ```
 
-**See**: Check [router documentation](/docs/router/router).
+**See**: Check [Routes documentation](/docs/router/routes).
 
 ---
 

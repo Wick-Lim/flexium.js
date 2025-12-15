@@ -245,7 +245,7 @@ function LoadingLayout() {
 
 ## See Also
 
-- [&lt;Routes /&gt;](/docs/router/router) - Root routing component
+- [&lt;Routes /&gt;](/docs/router/routes) - Root routing component
 - [&lt;Route /&gt;](/docs/router/route) - Route definitions
 - [&lt;Link /&gt;](/docs/router/link) - Navigation links
 - [router()](/docs/router/router-hook) - Access router context

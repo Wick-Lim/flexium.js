@@ -522,7 +522,7 @@ Each documentation page now includes live demos. Here are some highlights:
 
 <div class="example-grid">
 
-<a href="/docs/router/router" class="example-card">
+<a href="/docs/router/routes" class="example-card">
   <div class="example-icon">🧭</div>
   <div class="example-content">
     <h3>Router</h3>

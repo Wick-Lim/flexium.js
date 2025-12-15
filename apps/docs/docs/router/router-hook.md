@@ -176,6 +176,6 @@ import UseRouterDemo from '../../components/UseRouterDemo.vue'
 
 ## See Also
 
-- [&lt;Routes /&gt;](/docs/router/router) - Root routing component
+- [&lt;Routes /&gt;](/docs/router/routes) - Root routing component
 - [&lt;Route /&gt;](/docs/router/route) - Route definitions
 - [&lt;Link /&gt;](/docs/router/link) - Navigation links
