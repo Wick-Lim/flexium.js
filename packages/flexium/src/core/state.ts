@@ -51,6 +51,40 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
   // Check if key has changed by comparing serialized strings
   const keyChanged = serializedKey !== stateRef.serializedKey
 
+  // DEPS MODE: Handle separately - always check deps on every render
+  if (typeof input === 'function' && options?.deps !== undefined) {
+    const fn = input as Function
+    const memoState = hook(() => ({
+      value: undefined as T | undefined,
+      prevDeps: undefined as any[] | undefined,
+      hasRun: false
+    }))
+
+    let hasChanged = true
+    if (memoState.hasRun && memoState.prevDeps) {
+      hasChanged = options.deps.length !== memoState.prevDeps.length ||
+        options.deps.some((d, i) => d !== memoState.prevDeps![i])
+    }
+
+    if (hasChanged) {
+      const result = fn()
+      if (result instanceof Promise) {
+        throw new Error('deps option is not supported with async functions')
+      }
+      memoState.value = result
+      memoState.prevDeps = [...options.deps]
+      memoState.hasRun = true
+    }
+
+    const control: ResourceControl = {
+      refetch: async () => { },
+      get loading() { return false },
+      get error() { return null },
+      get status() { return 'success' as const }
+    }
+    return [memoState.value, control]
+  }
+
   // If key changed or first time, get/create container
   if (!stateRef.container || keyChanged) {
     stateRef.serializedKey = serializedKey
@@ -61,93 +95,59 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
     } else {
       let newContainer: any
 
-      // 1. Function (Computed or Resource)
+      // 1. Function (Computed or Resource) - only async functions reach here now
       if (typeof input === 'function') {
         const fn = input as Function
 
-        // DEPS MODE: Manual dependency tracking (memo behavior)
-        if (options?.deps !== undefined) {
-          const memoState = hook(() => ({
-            value: undefined as T | undefined,
-            prevDeps: undefined as any[] | undefined,
-            hasRun: false
-          }))
+        // REACTIVE MODE: Automatic tracking for async functions
+        const state = reactive({
+          type: 'resource',
+          value: undefined as T | undefined,
+          loading: true,
+          error: null as any,
+          status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
+          run: () => { }
+        })
 
-          let hasChanged = true
-          if (memoState.hasRun && memoState.prevDeps) {
-            hasChanged = options.deps.some((d, i) => d !== memoState.prevDeps![i])
-          }
-
-          if (hasChanged) {
+        const run = () => {
+          try {
             const result = fn()
+
             if (result instanceof Promise) {
-              throw new Error('deps option is not supported with async functions')
-            }
-            memoState.value = result
-            memoState.prevDeps = options.deps
-            memoState.hasRun = true
-          }
+              state.loading = true
+              state.status = 'loading'
+              state.error = null
 
-          newContainer = reactive({
-            type: 'computed',
-            value: memoState.value,
-            loading: false,
-            error: null,
-            status: 'success' as 'idle' | 'loading' | 'success' | 'error',
-            run: () => { }
-          })
-        } else {
-          // REACTIVE MODE: Automatic tracking (existing behavior)
-          const state = reactive({
-            type: 'resource',
-            value: undefined as T | undefined,
-            loading: true,
-            error: null as any,
-            status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
-            run: () => { }
-          })
-
-          const run = () => {
-            try {
-              const result = fn()
-
-              if (result instanceof Promise) {
-                state.loading = true
-                state.status = 'loading'
-                state.error = null
-
-                result
-                  .then(data => {
-                    state.value = data
-                    state.status = 'success'
-                    state.loading = false
-                  })
-                  .catch(err => {
-                    state.error = err
-                    state.status = 'error'
-                    state.loading = false
-                  })
-              } else {
-                state.value = result
-                state.status = 'success'
-                state.loading = false
-                state.error = null
-              }
-            } catch (err) {
-              state.error = err
-              state.status = 'error'
+              result
+                .then(data => {
+                  state.value = data
+                  state.status = 'success'
+                  state.loading = false
+                })
+                .catch(err => {
+                  state.error = err
+                  state.status = 'error'
+                  state.loading = false
+                })
+            } else {
+              state.value = result
+              state.status = 'success'
               state.loading = false
+              state.error = null
             }
+          } catch (err) {
+            state.error = err
+            state.status = 'error'
+            state.loading = false
           }
-
-          state.run = run
-
-          // Make it reactive!
-          unsafeEffect(run)
-
-          newContainer = state
         }
 
+        state.run = run
+
+        // Make it reactive!
+        unsafeEffect(run)
+
+        newContainer = state
       } else {
         // 2. Value (Signal)
         // We return the reactive proxy itself as the container

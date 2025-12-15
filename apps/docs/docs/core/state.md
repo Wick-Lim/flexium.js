@@ -30,7 +30,7 @@ import { state } from 'flexium/core'
 const [count, setCount] = state(0)
 
 // Derived state - returns [value, control]
-const [doubled] = state(() => count * 2)
+const [doubled] = state(() => count * 2, { deps: [count] })
 
 // Async state - returns [value, control]
 const [users, control] = state(async () => fetch('/api'))
@@ -173,7 +173,7 @@ const [data, control] = state(async () => fetchUser(id), {
 ```tsx
 function Counter() {
   const [count, setCount] = state(0)
-  const [doubled] = state(() => count * 2)
+  const [doubled] = state(() => count * 2, { deps: [count] })
 
   return (
     <div>
