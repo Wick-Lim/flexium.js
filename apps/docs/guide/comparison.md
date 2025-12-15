@@ -23,13 +23,12 @@ How does Flexium compare to React and Svelte? This guide helps you understand th
 import { state } from 'flexium/core'
 
 function Component() {
-  // All state needs - one function
-  const count = state(0)                    // local
-  const doubled = state(() => count * 2)              // derived
-  const user = state(async () => fetchUser())         // async
-  const theme = state('dark', { key: 'theme' }) // global
+  // All state needs - one function, tuple return
+  const [count, setCount] = state(0)                          // local
+  const [doubled] = state(() => count * 2, { deps: [count] }) // derived
+  const [user] = state(async () => fetchUser())               // async
+  const [theme, setTheme] = state('dark', { key: 'theme' })   // global
 
-  // Use values directly - just like React!
   return <div>{count} × 2 = {doubled}</div>
 }
 ```
@@ -86,7 +85,7 @@ This is where Flexium really shines:
 ```jsx [Flexium ✨]
 // React syntax + Svelte performance = Best of both worlds
 function TodoList() {
-  const todos = state([...])
+  const [todos, setTodos] = state([...])
 
   return (
     <ul>
@@ -142,31 +141,33 @@ function TodoList() {
 ::: code-group
 
 ```jsx [Flexium ✨]
-const count = state(5)
+const [count, setCount] = state(5)
 
-// Use it exactly like React!
+// Tuple-based access like React
 count               // 5
 count + 10          // 15
 `Value: ${count}`   // "Value: 5"
 
-// Same syntax as React, but with signal performance
+// Update with setter
+setCount(10)
+setCount(c => c + 1)
 ```
 
 ```jsx [React]
-const [count] = useState(5)
+const [count, setCount] = useState(5)
 
-// Direct access
+// Tuple-based access
 count               // 5
 count + 10          // 15
 `Value: ${count}`   // "Value: 5"
 
-// Familiar, but re-renders entire component
+// Re-renders entire component on update
 ```
 
 ```html [Svelte 5]
 <script>
   let count = $state(5);
-  
+
   // Script: Direct access (Runes)
   console.log(count);      // 5
   console.log(count + 10); // 15
@@ -185,12 +186,12 @@ count + 10          // 15
 ```jsx [Flexium ✨]
 // Native JavaScript - just like React!
 function Component() {
-  const show = state(true)
+  const [show, setShow] = state(true)
 
   return (
     <div>
-      {show.valueOf() && <Child />}
-      {show.valueOf() ? <A /> : <B />}
+      {show && <Child />}
+      {show ? <A /> : <B />}
     </div>
   )
 }
@@ -243,24 +244,24 @@ function Component() {
 ```jsx [Flexium ✨]
 import { effect } from 'flexium/core'
 
-// Auto-tracking - no dependency array!
+// Dependency array like React
 effect(() => {
   console.log('Count:', count)
   console.log('Name:', name)
-})
-// ✅ Looks like React
-// ✅ Auto dependency tracking (unlike React)
-// ✅ No stale closures
+}, [count, name])
+// ✅ Familiar React pattern
+// ✅ Explicit dependencies
+// ✅ Fine-grained updates (only this effect re-runs)
 ```
 
 ```jsx [React]
 import { useEffect } from 'react'
 
-// Manual dependency array - error prone!
+// Manual dependency array
 useEffect(() => {
   console.log('Count:', count)
   console.log('Name:', name)
-}, [count, name]) // Must list all deps manually!
+}, [count, name])
 
 // Common bugs:
 useEffect(() => {
@@ -314,10 +315,10 @@ useEffect(() => {
 
 | React | Flexium | Notes |
 |-------|---------|-------|
-| `useState(x)` | `state(x)` | Same pattern |
-| `useMemo(() => x, [deps])` | `state(() => x)` | No deps needed! |
+| `useState(x)` | `state(x)` | Returns `[value, setter]` tuple |
+| `useMemo(() => x, [deps])` | `state(() => x, { deps })` | Computed with deps |
 | `useCallback(fn, [deps])` | Just use `fn` | No wrapper needed |
-| `useEffect(() => {}, [deps])` | `effect(() => {})` | Auto-tracks deps |
+| `useEffect(() => {}, [deps])` | `effect(() => {}, [deps])` | Same pattern |
 | React Query | `state(async () => ...)` | Built-in |
 | Recoil/Jotai | `state(x, { key })` | Built-in |
 | `items.map()` | `items.map()` | Same! But optimized |

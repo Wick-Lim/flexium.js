@@ -17,7 +17,7 @@ export interface FNode {
 interface DOMComponentInstance extends ComponentInstance {
     nodes: Node[]
     parent: HTMLElement
-    vnode: any
+    fnode: any
     props: any
     key?: any
     renderFn?: () => void  // Store render function for manual updates
@@ -100,8 +100,8 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
     if (parentRegistry.has(key)) {
         const instance = parentRegistry.get(key)!
 
-        // Update vnode
-        instance.vnode = fnode
+        // Update fnode
+        instance.fnode = fnode
 
         // Update props (non-reactive) - we'll trigger re-render manually
         const newProps = mergeProps(fnode)
@@ -127,7 +127,7 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
         hookIndex: 0,
         nodes: [],
         parent,
-        vnode: fnode,
+        fnode: fnode,
         props: mergeProps(fnode),  // Regular props, we handle updates manually
         key,
         children: new Set(),
@@ -147,14 +147,14 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
 
     // Function to render the component
     const renderFn = () => {
-        const currentVnode = instance.vnode
+        const currentFnode = instance.fnode
         const currentProps = instance.props
 
         // Check if this is a Context Provider
-        const isProvider = (currentVnode.type as any)._contextId !== undefined
+        const isProvider = (currentFnode.type as any)._contextId !== undefined
         if (isProvider) {
             // Set context value before rendering
-            pushContext((currentVnode.type as any)._contextId, currentProps.value)
+            pushContext((currentFnode.type as any)._contextId, currentProps.value)
         }
 
         // Set this instance as the current rendering instance
@@ -162,7 +162,7 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
         currentRenderingInstance = instance
 
         // Render component with hook context
-        const result = runWithComponent(instance, () => currentVnode.type(currentProps))
+        const result = runWithComponent(instance, () => currentFnode.type(currentProps))
 
         // DON'T restore currentRenderingInstance yet - we need it for renderNode calls below
         // It will be restored at the end of this function
@@ -312,7 +312,7 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
         return nodes;
     }
 
-    // 4. Object (VNode)
+    // 4. Object (FNode)
     if (typeof fnode === 'object') {
         // 4a. HTML Element (intrinsic)
         if (typeof fnode.type === 'string') {

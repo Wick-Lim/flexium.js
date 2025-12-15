@@ -12,21 +12,21 @@ head:
 
 # effect()
 
-`effect()` runs a function automatically whenever its reactive dependencies change. It is the bridge between the reactive state and the outside world (DOM updates, API calls, subscriptions, etc.).
+`effect()` runs a function when specified dependencies change. It is the bridge between the reactive state and the outside world (DOM updates, API calls, subscriptions, etc.).
 
 ## Usage
 
-The `effect` function takes a callback that executes immediately, and then re-executes whenever any tracked signal within it updates.
+The `effect` function takes a callback and a dependency array. It executes immediately, and then re-executes whenever any dependency in the array changes.
 
 ```tsx
 import { state, effect } from 'flexium/core';
 
-const count = state(0);
+const [count, setCount] = state(0);
 
 effect(() => {
   // Runs immediately, then again when 'count' changes
-  console.log('The count is now', count.valueOf());
-});
+  console.log('The count is now', count);
+}, [count]);  // Explicit dependency array
 ```
 
 ## Cleanup
@@ -42,38 +42,45 @@ effect(() => {
   return () => {
     window.removeEventListener('resize', handler);
   };
-});
+}, []);  // Empty deps = run once on mount
 ```
 
-## Automatic Dependency Tracking
+## Dependency Array
 
-You don't need to manually specify dependencies. Flexium automatically detects which signals are read during the execution of the effect.
+Like React's `useEffect`, you must specify which values the effect depends on.
 
 ```tsx
-const a = state(1);
-const b = state(2);
+const [a, setA] = state(1);
+const [b, setB] = state(2);
 
+// Runs when 'a' changes
 effect(() => {
-  if (a.valueOf() > 5) {
-    // If a > 5, we read b. Now 'b' is a dependency.
-    // If a <= 5, we don't read b. 'b' is NOT a dependency.
-    console.log(b.valueOf());
-  }
-});
-```
+  console.log('a changed:', a);
+}, [a]);
 
-This dynamic tracking ensures effects only run when absolutely necessary.
+// Runs when 'a' OR 'b' changes
+effect(() => {
+  console.log('a or b changed:', a, b);
+}, [a, b]);
+
+// Runs once on mount (empty dependency array)
+effect(() => {
+  console.log('mounted');
+  return () => console.log('unmounted');
+}, []);
+```
 
 ## Async Effects
 
-Effects execute synchronously. If you need to perform async operations, you can make the callback async, but remember that dependencies accessed *after* an `await` might not be tracked (depending on the implementation details, but generally tracking is synchronous).
+Effects can be async. Specify all dependencies in the dependency array.
 
 ```tsx
+const [userId] = state(1);
+
 effect(async () => {
-  const id = userId.valueOf(); // Tracked
-  const data = await fetchUser(id);
-  // Code after await runs later, dependencies read here might not track
-});
+  const data = await fetchUser(userId);
+  console.log('User data:', data);
+}, [userId]);  // Re-runs when userId changes
 ```
 
 For data fetching, prefer using `state(async () => ...)` (Resources) instead of manual effects.

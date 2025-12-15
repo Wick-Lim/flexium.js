@@ -64,18 +64,18 @@ function Counter() {
 import { state, effect } from 'flexium/core';
 
 function Counter() {
-  const count = state(0);
-  const doubled = state(() => count * 2);
+  const [count, setCount] = state(0);
+  const [doubled] = state(() => count * 2, { deps: [count] });
 
   effect(() => {
     document.title = `Count: ${count}`;
-  });
+  }, [count]);
 
   return (
     <div>
       <p>Count: {count}</p>
       <p>Doubled: {doubled}</p>
-      <button onclick={() => count.set(c => c + 1)}>Increment</button>
+      <button onclick={() => setCount(c => c + 1)}>Increment</button>
     </div>
   );
 }
@@ -90,7 +90,7 @@ function Counter() {
 | Updates | Re-render entire component tree | Surgical DOM updates |
 | Bundle Size | ~45kb gzipped | ~10KB gzipped |
 | Performance | Good with optimization | Excellent by default |
-| Dependency Tracking | Manual arrays | Automatic |
+| Dependency Tracking | Manual arrays | Explicit arrays (same pattern) |
 | Learning Curve | Moderate (hooks rules) | Low (simple mental model) |
 
 ### Flexium vs Solid.js
@@ -117,13 +117,13 @@ function UserProfile() {
 import { state } from 'flexium/core';
 
 function UserProfile() {
-  const userId = state(1);
-  const doubled = state(() => userId * 2);
+  const [userId, setUserId] = state(1);
+  const [doubled] = state(() => userId * 2, { deps: [userId] });
 
-  const user = state(async () => {
+  const [user] = state(async () => {
     const res = await fetch(`/api/users/${userId}`);
     return res.json();
-  });
+  }, { key: ['user', userId] });
 
   return <div>{user.status === 'loading' ? 'Loading...' : user.name}</div>;
 }
@@ -508,41 +508,38 @@ function ProductCard({ product }) {
 }
 ```
 
-### Automatic Dependency Tracking
+### Explicit Dependency Tracking
 
-No dependency arrays needed:
+Like React's useEffect, specify dependencies explicitly:
 
 ```tsx
 import { state, effect } from 'flexium/core';
 
 function SearchResults() {
-  const query = state('');
-  const category = state('all');
-  const results = state([]);
+  const [query, setQuery] = state('');
+  const [category, setCategory] = state('all');
+  const [results, setResults] = state([]);
 
-  // Automatically re-runs when query OR category changes
+  // Re-runs when query OR category changes
   effect(async () => {
-    const q = query.valueOf();
-    const cat = category.valueOf();
-
-    if (!q) {
-      results.set([]);
+    if (!query) {
+      setResults([]);
       return;
     }
 
-    const res = await fetch(`/api/search?q=${q}&category=${cat}`);
+    const res = await fetch(`/api/search?q=${query}&category=${category}`);
     const data = await res.json();
-    results.set(data);
-  });
+    setResults(data);
+  }, [query, category]);
 
   return (
     <div>
       <input
         value={query}
-        oninput={(e) => query.set(e.target.value)}
+        oninput={(e) => setQuery(e.target.value)}
       />
 
-      <select onchange={(e) => category.set(e.target.value)}>
+      <select onchange={(e) => setCategory(e.target.value)}>
         <option value="all">All</option>
         <option value="books">Books</option>
         <option value="electronics">Electronics</option>

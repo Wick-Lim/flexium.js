@@ -129,10 +129,10 @@ import { state, effect } from 'flexium/core';
 
 const [count, setCount] = state(0);
 
-// Side effects - auto-tracks dependencies, no dependency array needed!
+// Side effects with explicit dependencies (like React useEffect)
 effect(() => {
   console.log('Count changed to:', count);
-});
+}, [count]);
 ```
 
 ## License

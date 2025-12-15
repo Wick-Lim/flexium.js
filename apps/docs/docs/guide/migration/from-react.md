@@ -11,9 +11,9 @@ This guide walks you through migrating React apps to Flexium step by step.
 Flexium provides a React-like API but with some important differences:
 
 - ✅ **Single API**: One `state()` for all state management
-- ✅ **No dependency arrays**: Automatic tracking
+- ✅ **Familiar pattern**: Same `[value, setter]` tuple as React
 - ✅ **No Virtual DOM**: Faster rendering
-- ⚠️ **Proxy comparison warning**: Direct comparison not possible
+- ✅ **Same dependency arrays**: `effect(fn, [deps])` like React
 
 ---
 
@@ -21,9 +21,9 @@ Flexium provides a React-like API but with some important differences:
 
 | React | Flexium | Notes |
 |-------|---------|-------|
-| `useState` | `state` | Almost identical pattern |
-| `useMemo` | `state(() => ...)` | computed state |
-| `useEffect` | `effect` | Almost identical, cleanup same |
+| `useState` | `state` | Same `[value, setter]` tuple |
+| `useMemo` | `state(() => ..., { deps })` | computed state with deps |
+| `useEffect` | `effect(fn, deps)` | Same pattern with deps array |
 | `useCallback` | Unnecessary | Auto-optimized |
 | `useRef` | `ref` | Same |
 | `useContext` | `context` | Same |
@@ -78,19 +78,19 @@ function Counter() {
 import { state } from 'flexium/core'
 
 function Counter() {
-  const count = state(0)
-  
+  const [count, setCount] = state(0)
+
   return (
     <div>
       <p>Count: {count}</p>
-      <button onclick={() => count.set(count.valueOf() + 1)}>+</button>
+      <button onclick={() => setCount(count + 1)}>+</button>
     </div>
   )
 }
 ```
 
 **Changes**:
-- `useState` → `state`
+- `useState` → `state` (same tuple pattern!)
 - `onClick` → `onclick` (lowercase)
 - Rest is the same
 
@@ -155,23 +155,23 @@ function Timer() {
 import { state, effect } from 'flexium/core'
 
 function Timer() {
-  const count = state(0)
-  
+  const [count, setCount] = state(0)
+
   effect(() => {
     const interval = setInterval(() => {
-      count.set(c => c + 1)
+      setCount(c => c + 1)
     }, 1000)
-    
+
     return () => clearInterval(interval)  // Cleanup same
-  })
-  
+  }, [])  // Empty deps = run once on mount
+
   return <div>Count: {count}</div>
 }
 ```
 
 **Changes**:
 - `useEffect` → `effect`
-- No dependency array needed (automatic tracking)
+- Same dependency array pattern
 - Cleanup function is the same
 
 ---
@@ -198,21 +198,20 @@ function UserProfile({ userId }) {
 import { state, effect } from 'flexium/core'
 
 function UserProfile({ userId }) {
-  const user = state(null)
-  
+  const [user, setUser] = state(null)
+
   effect(() => {
-    const id = userId  // Reading automatically tracks
-    fetch(`/api/users/${id}`)
+    fetch(`/api/users/${userId}`)
       .then(res => res.json())
-      .then(data => user.set(data))
-  })
-  
+      .then(data => setUser(data))
+  }, [userId])  // Same dependency array pattern!
+
   return user ? <div>{user.name}</div> : <div>Loading...</div>
 }
 ```
 
 **Changes**:
-- Instead of dependency array, reading inside effect automatically tracks
+- Same dependency array pattern as React
 
 ---
 
@@ -236,13 +235,13 @@ function Parent() {
 import { state } from 'flexium/core'
 
 function Parent() {
-  const count = state(0)
-  
+  const [count, setCount] = state(0)
+
   // useCallback unnecessary - auto-optimized
   const handleClick = () => {
-    count.set(c => c + 1)
+    setCount(c => c + 1)
   }
-  
+
   return <Child onclick={handleClick} />
 }
 ```
@@ -536,7 +535,7 @@ function UserDetail() {
 
 ## Key Differences
 
-### 1. No Dependency Arrays Needed
+### 1. Same Dependency Array Pattern
 
 ```tsx
 // React: Dependency array required
@@ -544,10 +543,10 @@ useEffect(() => {
   console.log(count)
 }, [count])
 
-// Flexium: Automatic tracking
+// Flexium: Same pattern!
 effect(() => {
-  console.log(count)  // Reading count automatically tracks
-})
+  console.log(count)
+}, [count])
 ```
 
 ---

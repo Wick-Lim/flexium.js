@@ -54,13 +54,13 @@ Create `src/App.tsx`:
 import { state } from 'flexium/core'
 
 export function App() {
-  const count = state(0)
+  const [count, setCount] = state(0)
 
   return (
     <div style={{ padding: '20px' }}>
       <h1>Counter: {count}</h1>
       <button
-        onclick={() => count.set(c => c + 1)}
+        onclick={() => setCount(c => c + 1)}
         style={{ padding: '10px 20px', fontSize: '16px' }}
       >
         Increment
@@ -87,9 +87,9 @@ render(<App />, document.getElementById('app')!)
 ### 1. Local State
 
 ```tsx
-const count = state(0);
+const [count, setCount] = state(0);
 // count -> use directly as value
-// count.set(1) or count.set(c => c + 1) -> set value
+// setCount(1) or setCount(c => c + 1) -> set value
 ```
 
 ### 2. Global State
@@ -98,10 +98,10 @@ Share state between components easily using a unique `key`.
 
 ```tsx
 // In Header.tsx
-const theme = state('light', { key: ['theme'] });
+const [theme, setTheme] = state('light', { key: ['theme'] });
 
 // Or with explicit undefined for async loading scenarios
-const theme = state(undefined, { key: ['theme'] });
+const [theme, setTheme] = state(undefined, { key: ['theme'] });
 ```
 
 ### 3. Async State (Resources)
@@ -109,31 +109,31 @@ const theme = state(undefined, { key: ['theme'] });
 Flexium handles loading and error states for you.
 
 ```tsx
-// status: 'idle' | 'loading' | 'success' | 'error'
-const user = state(async () => {
+// control.status: 'idle' | 'loading' | 'success' | 'error'
+const [user, control] = state(async () => {
   const res = await fetch('/api/user');
   return res.json();
 });
 
 return (
   <div>
-    {user.status === 'loading' && <p>Loading...</p>}
-    {user.error && <p>Error: {user.error.message}</p>}
-    {user.valueOf() && <p>Welcome, {user.name}</p>}
+    {control.status === 'loading' && <p>Loading...</p>}
+    {control.error && <p>Error: {control.error.message}</p>}
+    {user && <p>Welcome, {user.name}</p>}
   </div>
 );
 ```
 
 ### 4. Computed State
 
-Pass a function to `state()` to create a value that updates automatically when dependencies change.
+Pass a function to `state()` with `deps` to create a value that updates when dependencies change.
 
 ```tsx
-const count = state(0);
-const double = state(() => count * 2);  // Use count directly
+const [count, setCount] = state(0);
+const [double] = state(() => count * 2, { deps: [count] });
 ```
 
 ## Next Steps
 
 - Learn about [State Management](/guide/state) in depth.
-- Explore [Cross-Platform Primitives](/guide/primitives).
+- Explore [JSX & Rendering](/guide/jsx).

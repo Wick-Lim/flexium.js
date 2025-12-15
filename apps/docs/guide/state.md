@@ -154,12 +154,11 @@ const [filteredItems] = state(() => {
 - When you need explicit control over recomputation
 - Migrating from React's `useMemo`
 
-**Difference from automatic computed:**
-| Computed | With `deps` |
-|----------|-------------|
-| `state(() => ...)` | `state(() => ..., { deps: [...] })` |
-| Auto-tracks reactive dependencies | Manual dependency array |
-| Re-runs on any accessed signal change | Re-runs only when deps change |
+**Computed state requires `deps`:**
+| Usage | Example |
+|-------|---------|
+| With deps | `state(() => count * 2, { deps: [count] })` |
+| Re-runs when deps change | Explicit dependency tracking |
 
 ```tsx
 // Example: Kanban board with memoized columns
@@ -194,9 +193,9 @@ import { state, effect } from 'flexium/core'
 const [count, setCount] = state(0)
 
 effect(() => {
-  // Automatically runs when 'count' changes
+  // Runs when 'count' changes
   console.log('Count is:', count)
-})
+}, [count])
 ```
 
 For detailed usage, automatic tracking, and cleanup, see the **[Effects](/guide/effects)** guide.

@@ -169,8 +169,7 @@ export default defineConfig({
           items: [
             { text: 'Reactivity', link: '/guide/state' },
             { text: 'JSX & Rendering', link: '/guide/jsx' },
-            { text: 'Control Flow', link: '/guide/flow' },
-            { text: 'Primitives', link: '/guide/primitives' }
+            { text: 'Control Flow', link: '/guide/flow' }
           ]
         },
         {
@@ -219,25 +218,6 @@ export default defineConfig({
             { text: 'render()', link: '/docs/dom/render' },
             { text: 'f()', link: '/docs/dom/f' },
             { text: '&lt;Portal /&gt;', link: '/docs/dom/portal' }
-          ]
-        },
-        {
-          text: 'flexium/primitives',
-          collapsed: false,
-          items: [
-            { text: '&lt;Row /&gt;', link: '/docs/primitives/row' },
-            { text: '&lt;Column /&gt;', link: '/docs/primitives/column' },
-            { text: '&lt;Grid /&gt;', link: '/docs/primitives/grid' },
-            { text: '&lt;Stack /&gt;', link: '/docs/primitives/stack' },
-            { text: '&lt;Spacer /&gt;', link: '/docs/primitives/spacer' },
-            { text: '&lt;ScrollView /&gt;', link: '/docs/primitives/scrollview' },
-            { text: '&lt;Text /&gt;', link: '/docs/primitives/text' },
-            { text: '&lt;Image /&gt;', link: '/docs/primitives/image' },
-            { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
-            { text: '&lt;Button /&gt;', link: '/docs/primitives/button' },
-            { text: '&lt;List /&gt;', link: '/docs/primitives/list' },
-            { text: 'Forms (state)', link: '/docs/primitives/form' },
-            { text: 'Motion', link: '/docs/primitives/motion' }
           ]
         },
         {
@@ -327,25 +307,6 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/primitives',
-          collapsed: false,
-          items: [
-            { text: '&lt;Row /&gt;', link: '/docs/primitives/row' },
-            { text: '&lt;Column /&gt;', link: '/docs/primitives/column' },
-            { text: '&lt;Grid /&gt;', link: '/docs/primitives/grid' },
-            { text: '&lt;Stack /&gt;', link: '/docs/primitives/stack' },
-            { text: '&lt;Spacer /&gt;', link: '/docs/primitives/spacer' },
-            { text: '&lt;ScrollView /&gt;', link: '/docs/primitives/scrollview' },
-            { text: '&lt;Text /&gt;', link: '/docs/primitives/text' },
-            { text: '&lt;Image /&gt;', link: '/docs/primitives/image' },
-            { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
-            { text: '&lt;Button /&gt;', link: '/docs/primitives/button' },
-            { text: '&lt;List /&gt;', link: '/docs/primitives/list' },
-            { text: 'Forms (state)', link: '/docs/primitives/form' },
-            { text: 'Motion', link: '/docs/primitives/motion' }
-          ]
-        },
-        {
           text: 'flexium/canvas',
           collapsed: false,
           items: [
@@ -425,25 +386,6 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/primitives',
-          collapsed: false,
-          items: [
-            { text: '&lt;Row /&gt;', link: '/docs/primitives/row' },
-            { text: '&lt;Column /&gt;', link: '/docs/primitives/column' },
-            { text: '&lt;Grid /&gt;', link: '/docs/primitives/grid' },
-            { text: '&lt;Stack /&gt;', link: '/docs/primitives/stack' },
-            { text: '&lt;Spacer /&gt;', link: '/docs/primitives/spacer' },
-            { text: '&lt;ScrollView /&gt;', link: '/docs/primitives/scrollview' },
-            { text: '&lt;Text /&gt;', link: '/docs/primitives/text' },
-            { text: '&lt;Image /&gt;', link: '/docs/primitives/image' },
-            { text: '&lt;Pressable /&gt;', link: '/docs/primitives/pressable' },
-            { text: '&lt;Button /&gt;', link: '/docs/primitives/button' },
-            { text: '&lt;List /&gt;', link: '/docs/primitives/list' },
-            { text: 'Forms (state)', link: '/docs/primitives/form' },
-            { text: 'Motion', link: '/docs/primitives/motion' }
-          ]
-        },
-        {
           text: 'flexium/canvas',
           collapsed: false,
           items: [
@@ -505,45 +447,7 @@ export default defineConfig({
       ],
       '/reference/': [
         {
-          text: 'Layout Primitives',
-          collapsed: false,
-          items: [
-            { text: '&lt;Row /&gt;', link: '/reference/primitives/row' },
-            { text: '&lt;Column /&gt;', link: '/reference/primitives/column' },
-            { text: '&lt;Grid /&gt;', link: '/reference/primitives/grid' },
-            { text: '&lt;Stack /&gt;', link: '/reference/primitives/stack' },
-            { text: '&lt;Spacer /&gt;', link: '/reference/primitives/spacer' },
-            { text: '&lt;ScrollView /&gt;', link: '/reference/primitives/scrollview' }
-          ]
-        },
-        {
-          text: 'UI Primitives',
-          collapsed: false,
-          items: [
-            { text: '&lt;Text /&gt;', link: '/reference/primitives/text' },
-            { text: '&lt;UIText /&gt;', link: '/reference/primitives/ui-text' },
-            { text: '&lt;Image /&gt;', link: '/reference/primitives/image' },
-            { text: '&lt;Pressable /&gt;', link: '/reference/primitives/pressable' },
-            { text: '&lt;Button /&gt;', link: '/reference/primitives/button' },
-            { text: '&lt;List /&gt;', link: '/reference/primitives/list' }
-          ]
-        },
-        {
-          text: 'Form Patterns',
-          collapsed: false,
-          items: [
-            { text: 'Forms with state()', link: '/reference/primitives/form' }
-          ]
-        },
-        {
-          text: 'Motion Primitives',
-          collapsed: false,
-          items: [
-            { text: 'Motion', link: '/reference/primitives/motion' }
-          ]
-        },
-        {
-          text: 'Canvas Primitives',
+          text: 'Canvas',
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/reference/canvas/canvas' },

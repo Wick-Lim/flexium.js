@@ -10,13 +10,13 @@ Flexium's philosophy is simple: **one `state()` function for all reactive needs*
 import { state } from 'flexium/core'
 
 // Mutable state
-const count = state(0)
+const [count, setCount] = state(0)
 
 // Derived state
-const doubled = state(() => count.valueOf() * 2)
+const [doubled] = state(() => count * 2, { deps: [count] })
 
 // Async state
-const users = state(async () => fetch('/api/users'))
+const [users] = state(async () => fetch('/api/users'))
 ```
 
 ### Why One API?
@@ -31,7 +31,7 @@ Traditional frameworks re-render entire components when state changes. Flexium's
 
 ```tsx
 function Counter() {
-  const count = state(0)
+  const [count, setCount] = state(0)
 
   // Only this text node updates when count changes
   return <p>Count: {count}</p>
@@ -43,24 +43,24 @@ function Counter() {
 ### 1. `state()` - All Reactive State
 
 ```tsx
-// Mutable state → Proxy
-const name = state('Alice')
+// Mutable state - returns [value, setter]
+const [name, setName] = state('Alice')
 
-// Derived state → Proxy (readonly)
-const greeting = state(() => `Hello, ${name.valueOf()}!`)
+// Derived state - requires deps
+const [greeting] = state(() => `Hello, ${name}!`, { deps: [name] })
 
-// Async state → Proxy (with refetch, status, error properties)
-const data = state(async () => fetchData())
+// Async state - returns [value, control]
+const [data, control] = state(async () => fetchData())
 ```
 
 ### 2. `effect()` - Side Effects
 
-Run code when state changes:
+Run code when dependencies change:
 
 ```tsx
 effect(() => {
   document.title = `Count: ${count}`
-})
+}, [count])
 ```
 
 ## The Rendering Model
@@ -126,7 +126,7 @@ When you pass signals as props, reactivity flows through:
 
 ```tsx
 function Parent() {
-  const count = state(0)
+  const [count, setCount] = state(0)
   return <Child count={count} />
 }
 
@@ -142,50 +142,23 @@ State created inside components is local to that component:
 
 ```tsx
 function Counter() {
-  const count = state(0) // Local state
-  return <button onclick={() => count.set(c => c + 1)}>{count}</button>
+  const [count, setCount] = state(0) // Local state
+  return <button onclick={() => setCount(c => c + 1)}>{count}</button>
 }
 ```
-
-## Primitives
-
-Flexium includes cross-platform UI primitives:
-
-### Layout
-
-```tsx
-<Row gap={16}>
-  <Column flex={1}>Left</Column>
-  <Column flex={2}>Right</Column>
-</Row>
-```
-
-### Components
-
-```tsx
-<Button onPress={() => alert('Clicked!')}>
-  Click Me
-</Button>
-
-<ScrollView height={400}>
-  <LongContent />
-</ScrollView>
-```
-
-These primitives work consistently across web and canvas renderers.
 
 ## Lifecycle
 
 ### Mount/Unmount
 
 ```tsx
-import { effect } from 'flexium/core'
+import { effect, onCleanup } from 'flexium/core'
 
 function MyComponent() {
   effect(() => {
     console.log('Mounted!')
     return () => console.log('Unmounting!')
-  })
+  }, [])  // Empty deps = run once on mount
 
   onCleanup(() => {
     console.log('Cleaning up!')
@@ -206,7 +179,7 @@ effect(() => {
   })
 
   return () => subscription.unsubscribe()
-})
+}, [])  // Empty deps for subscription setup
 ```
 
 ## Error & Loading Handling
@@ -243,12 +216,11 @@ function DataView() {
 
 | Concept | Purpose | Example |
 |---------|---------|---------|
-| `state(value)` | Mutable state | `const x = state(0)` |
-| `state(() => T)` | Derived value | `state(() => a.valueOf() + b.valueOf())` |
-| `state(async)` | Async data | `state(async () => fetch(...))` |
-| `effect()` | Side effects | `effect(() => log(x))` |
+| `state(value)` | Mutable state | `const [x, setX] = state(0)` |
+| `state(() => T, { deps })` | Derived value | `state(() => a + b, { deps: [a, b] })` |
+| `state(async () => T)` | Async data | `const [data, control] = state(async () => fetch(...))` |
+| `effect(fn, deps)` | Side effects | `effect(() => log(x), [x])` |
 | `items.map()` | List render | `items.map(item => <div>{item}</div>)` |
-| Primitives | UI building blocks | `<Row>`, `<Button>`, etc. |
 
 ## Next Steps
 
