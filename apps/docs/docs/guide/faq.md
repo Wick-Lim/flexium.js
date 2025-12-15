@@ -297,7 +297,7 @@ sync(() => {
 
 ### Q: How do I set up routing?
 
-**A**: Use `Router` and `Route` components.
+**A**: Use `Routes` and `Route` components.
 
 ```tsx
 import { Routes, Route } from 'flexium/router'

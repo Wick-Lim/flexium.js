@@ -428,8 +428,7 @@ function App() {
 ```
 
 **Changes**:
-- `BrowserRouter` → `Router`
-- `Routes` → Remove (unnecessary)
+- `BrowserRouter` + `Routes` → `Routes` (simplified)
 - `Route`'s `element` → `component`
 - `Link`'s `to` prop is the same
 
