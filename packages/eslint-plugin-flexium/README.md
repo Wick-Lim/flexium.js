@@ -56,13 +56,13 @@ Disallow reading state values outside of reactive contexts.
 ```javascript
 // ❌ Bad - state read outside reactive context
 const [count, setCount] = state(0);
-if (+count > 5) {  // Note: cast to primitive for comparison
+if (count > 5) {
   doSomething();
 }
 
 // ✅ Good - state read inside effect
 effect(() => {
-  if (+count > 5) {
+  if (count > 5) {
     doSomething();
   }
 });
@@ -103,10 +103,10 @@ const [count, setCount] = state(0);
 const [doubled] = state(() => {
   console.log('Computing...');  // Side effect!
   return count * 2;
-});
+}, { deps: [count] });
 
 // ✅ Good - pure computed
-const [doubled] = state(() => count * 2);
+const [doubled] = state(() => count * 2, { deps: [count] });
 
 // ✅ Good - side effect in effect
 effect(() => {
@@ -218,8 +218,8 @@ const [b] = state(() => a + 1); // Creates infinite loop!
 
 // ✅ Good - no circular dependencies
 const [count, setCount] = state(0);
-const [doubled] = state(() => count * 2);
-const [quadrupled] = state(() => doubled * 2);
+const [doubled] = state(() => count * 2, { deps: [count] });
+const [quadrupled] = state(() => doubled * 2, { deps: [doubled] });
 ```
 
 ### `flexium/component-naming`

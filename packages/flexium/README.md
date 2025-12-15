@@ -80,18 +80,18 @@ Pass an async function to handle data fetching automatically.
 
 ```tsx
 function UserProfile({ id }) {
-  const [user, refetch, isLoading, error] = state(async () => {
+  const [user, control] = state(async () => {
     const res = await fetch(`/api/users/${id}`);
     return res.json();
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error!</div>;
+  if (control.loading) return <div>Loading...</div>;
+  if (control.error) return <div>Error!</div>;
 
   return (
     <div>
       <h1>{user.name}</h1>
-      <button onclick={() => refetch()}>Reload</button>
+      <button onclick={() => control.refetch()}>Reload</button>
     </div>
   );
 }
@@ -101,7 +101,7 @@ function UserProfile({ id }) {
 
 ```tsx
 const [count, setCount] = state(1);
-const [double] = state(() => count * 2);
+const [double] = state(() => count * 2, { deps: [count] });
 ```
 
 ### Array Keys & Params

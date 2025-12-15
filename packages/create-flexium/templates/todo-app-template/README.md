@@ -138,8 +138,8 @@ setCount(c => c + 1)
 ### Computed Pattern
 ```javascript
 // Create computed state
-// Pass a function that returns the value
-const [doubled] = state(() => count * 2)
+// Pass a function with deps option
+const [doubled] = state(() => count * 2, { deps: [count] })
 
 // Always up-to-date
 console.log(doubled) // count * 2
@@ -170,7 +170,7 @@ const [error] = state(() => {
   if (!input) return 'Required'
   if (input.length < 3) return 'Too short'
   return null
-})
+}, { deps: [input] })
 ```
 
 ### Filter Pattern
@@ -180,7 +180,7 @@ const [filter, setFilter] = state('all')
 const [filtered] = state(() => {
   if (filter === 'all') return items
   return items.filter(item => item.status === filter)
-})
+}, { deps: [items, filter] })
 ```
 
 ### Persistence Pattern

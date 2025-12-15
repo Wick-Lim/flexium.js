@@ -128,18 +128,18 @@ function Example() {
   const [count, setCount] = state(0)
 
   // Read state value
-  console.log(+count) // 0
+  console.log(count) // 0
 
   // Update state value
   setCount(1) // Set directly
   setCount(c => c + 1) // With updater function
 
   // Create derived (computed) values
-  const [doubled] = state(() => count * 2)
+  const [doubled] = state(() => count * 2, { deps: [count] })
 
   // Run side effects
   effect(() => {
-    console.log('Count changed:', +count)
+    console.log('Count changed:', count)
   })
 }
 ```
