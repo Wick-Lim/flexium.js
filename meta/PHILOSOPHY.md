@@ -31,10 +31,10 @@ const [count, setCount] = state(0)
 
 ### Global State
 ```javascript
-// String key for simple cases
-const [theme, setTheme] = state('dark', { key: 'theme' })
+// Array key for global state
+const [theme, setTheme] = state('dark', { key: ['theme'] })
 
-// Array key for hierarchical namespacing
+// Hierarchical namespacing with array keys
 const [user] = state(null, { key: ['app', 'user', userId] })
 ```
 
@@ -128,7 +128,9 @@ The signal system is pure JavaScript. No JSX required. No build step required fo
 We don't bundle everything. Import what you need:
 - `flexium/core` - Signals only
 - `flexium/dom` - DOM renderer
-- `flexium/primitives` - UI components
+- `flexium/canvas` - Canvas renderer
+- `flexium/router` - Client-side routing
+- `flexium/interactive` - Keyboard/mouse/game loop
 
 ### No Backwards Compatibility Hacks
 
@@ -138,7 +140,7 @@ When something is wrong, we fix it. We don't preserve broken behavior for "compa
 
 ### Why Signals Over Virtual DOM?
 
-Virtual DOM was revolutionary in 2013. It's 2024 now.
+Virtual DOM was revolutionary in 2013. It's 2025 now.
 
 | Virtual DOM | Signals |
 |------------|---------|
@@ -179,22 +181,22 @@ h('div', { class: 'card' },
 ## The Ideal Flexium Code
 
 ```javascript
-import { state, effect } from 'flexium'
-import { render, Row, Column, Button, Text } from 'flexium/dom'
+import { state, effect } from 'flexium/core'
+import { render } from 'flexium/dom'
 
 function App() {
   const [count, setCount] = state(0)
   const [doubled] = state(() => count * 2)
 
   return (
-    <Column gap={16}>
-      <Text>Count: {+count}</Text>
-      <Text>Doubled: {+doubled}</Text>
-      <Row gap={8}>
-        <Button onClick={() => setCount(c => c - 1)}>-</Button>
-        <Button onClick={() => setCount(c => c + 1)}>+</Button>
-      </Row>
-    </Column>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <span>Count: {+count}</span>
+      <span>Doubled: {+doubled}</span>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button onClick={() => setCount(c => c - 1)}>-</button>
+        <button onClick={() => setCount(c => c + 1)}>+</button>
+      </div>
+    </div>
   )
 }
 
@@ -202,8 +204,8 @@ render(<App />, document.getElementById('root'))
 ```
 
 Notice:
-- One import path for state
-- One import path for rendering
+- Core signals from `flexium/core`
+- DOM renderer from `flexium/dom`
 - No providers, no context, no wrappers
 - State and UI in one place
 - Clear, readable, maintainable
