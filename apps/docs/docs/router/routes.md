@@ -120,4 +120,4 @@ import RouterDemo from '../../components/RouterDemo.vue'
 - [&lt;Route /&gt;](/docs/router/route) - Define route patterns
 - [&lt;Link /&gt;](/docs/router/link) - Navigate between routes
 - [&lt;Outlet /&gt;](/docs/router/outlet) - Render nested routes
-- [router()](/docs/router/router-hook) - Access router context
+- [router()](/docs/router/router) - Access router context

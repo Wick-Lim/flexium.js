@@ -331,7 +331,7 @@ function Component() {
 }
 ```
 
-**See**: Check [router-hook documentation](/docs/router/router-hook).
+**See**: Check [router() documentation](/docs/router/router).
 
 ---
 
