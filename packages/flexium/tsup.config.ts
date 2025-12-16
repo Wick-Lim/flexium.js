@@ -5,6 +5,7 @@ export default defineConfig({
     index: 'src/index.ts',
     core: 'src/core/index.ts',
     dom: 'src/dom/index.ts',
+    server: 'src/server/index.ts',
     router: 'src/router/index.ts',
     canvas: 'src/canvas/index.ts',
     interactive: 'src/interactive/index.ts',

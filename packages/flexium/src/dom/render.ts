@@ -244,8 +244,13 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
 
             if (fnode.props) {
                 Object.entries(fnode.props).forEach(([key, value]) => {
-                    if (key === 'ref' && typeof value === 'function') {
-                        value(dom)
+                    if (key === 'ref') {
+                        // Handle both callback refs and RefObject
+                        if (typeof value === 'function') {
+                            value(dom)
+                        } else if (value && typeof value === 'object' && 'current' in value) {
+                            value.current = dom
+                        }
                     } else if (key.startsWith('on') && typeof value === 'function') {
                         const eventName = key.slice(2).toLowerCase()
                         dom.addEventListener(eventName, value as EventListener)
