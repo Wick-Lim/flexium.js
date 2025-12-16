@@ -1,6 +1,7 @@
 import { reactive } from './reactive'
 import { unsafeEffect } from './lifecycle'
 import { hook } from './hook'
+import { registerSignal, updateSignal } from './devtools'
 import type { StateSetter, ResourceControl, StateOptions } from './types'
 
 export type { StateSetter, ResourceControl, StateOptions }
@@ -142,6 +143,9 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
           type: 'signal',
           value: input
         })
+
+        // Register with DevTools
+        registerSignal(newContainer, options?.name)
       }
 
       // Register in global registry if needed
@@ -166,6 +170,8 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
       } else {
         container.value = newValue
       }
+      // Notify DevTools of update
+      updateSignal(container, container.value)
     }
     return [currentValue, setter]
   } else {

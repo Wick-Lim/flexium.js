@@ -13,6 +13,8 @@ export type StateAction<T> = StateSetter<T> | ResourceControl
 export interface StateOptions {
     key?: unknown[]
     deps?: any[]
+    /** Debug name for DevTools */
+    name?: string
 }
 
 // Context types
