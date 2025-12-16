@@ -1,4 +1,4 @@
-import { activeEffect, trackEffect, triggerEffects } from './effect'
+import { activeEffect, trackEffect, triggerEffects } from './lifecycle'
 
 export const REACTIVE_SIGNAL = Symbol('flexium.reactive')
 

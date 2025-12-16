@@ -1,16 +1,6 @@
-export interface LoopCallbacks {
-  fixedFps?: number
-  onUpdate?: (delta: number) => void
-  onFixedUpdate?: (fixedDelta: number) => void
-  onRender?: (alpha: number) => void
-}
+import type { LoopCallbacks, Loop } from './types'
 
-export interface Loop {
-  start: () => void
-  stop: () => void
-  isRunning: () => boolean
-  getFps: () => number
-}
+export type { LoopCallbacks, Loop }
 
 export function loop(callbacks: LoopCallbacks): Loop {
   const { fixedFps = 60, onUpdate, onFixedUpdate, onRender } = callbacks

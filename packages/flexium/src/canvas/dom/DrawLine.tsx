@@ -1,15 +1,8 @@
 import { effect } from '../../core/lifecycle'
 import { queueDraw } from '../Canvas'
+import type { DrawLineProps } from '../types'
 
-export interface DrawLineProps {
-  x1: number | (() => number)
-  y1: number | (() => number)
-  x2: number | (() => number)
-  y2: number | (() => number)
-  stroke?: string | (() => string)
-  strokeWidth?: number | (() => number)
-  opacity?: number | (() => number)
-}
+export type { DrawLineProps }
 
 export function DrawLine(props: DrawLineProps) {
   effect(() => {

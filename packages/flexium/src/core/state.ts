@@ -1,23 +1,10 @@
-
 import { reactive } from './reactive'
-import { unsafeEffect } from './effect'
+import { unsafeEffect } from './lifecycle'
 import { hook } from './hook'
+import type { StateSetter, ResourceControl, StateOptions } from './types'
 
-export type StateSetter<T> = (newValue: T | ((prev: T) => T)) => void
-
-export type ResourceControl = {
-  refetch: () => Promise<void>
-  readonly loading: boolean
-  readonly error: unknown
-  readonly status: 'idle' | 'loading' | 'success' | 'error'
-}
-
+export type { StateSetter, ResourceControl, StateOptions }
 export type StateAction<T> = StateSetter<T> | ResourceControl
-
-export interface StateOptions {
-  key?: unknown[]
-  deps?: any[]
-}
 
 // Global State Registry
 const globalRegistry = new Map<string, any>()

@@ -1,15 +1,8 @@
 import { effect } from '../../core/lifecycle'
 import { queueDraw } from '../Canvas'
+import type { DrawCircleProps } from '../types'
 
-export interface DrawCircleProps {
-  x: number | (() => number)
-  y: number | (() => number)
-  radius: number | (() => number)
-  fill?: string | (() => string)
-  stroke?: string | (() => string)
-  strokeWidth?: number | (() => number)
-  opacity?: number | (() => number)
-}
+export type { DrawCircleProps }
 
 export function DrawCircle(props: DrawCircleProps) {
   effect(() => {

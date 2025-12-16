@@ -1,17 +1,8 @@
 import { effect } from '../../core/lifecycle'
 import { queueDraw } from '../Canvas'
+import type { DrawTextProps } from '../types'
 
-export interface DrawTextProps {
-  text: string | (() => string)
-  x: number | (() => number)
-  y: number | (() => number)
-  fill?: string | (() => string)
-  fontSize?: number | (() => number)
-  fontFamily?: string | (() => string)
-  fontWeight?: string | (() => string)
-  textAlign?: 'left' | 'center' | 'right'
-  opacity?: number | (() => number)
-}
+export type { DrawTextProps }
 
 export function DrawText(props: DrawTextProps) {
   effect(() => {

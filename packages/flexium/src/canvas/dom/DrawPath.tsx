@@ -1,13 +1,8 @@
 import { effect } from '../../core/lifecycle'
 import { queueDraw } from '../Canvas'
+import type { DrawPathProps } from '../types'
 
-export interface DrawPathProps {
-  d: string | (() => string)
-  fill?: string | (() => string)
-  stroke?: string | (() => string)
-  strokeWidth?: number | (() => number)
-  opacity?: number | (() => number)
-}
+export type { DrawPathProps }
 
 export function DrawPath(props: DrawPathProps) {
   effect(() => {

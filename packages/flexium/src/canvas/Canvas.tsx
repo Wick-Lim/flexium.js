@@ -1,18 +1,8 @@
 import { effect } from '../core/lifecycle'
 import { isReactive } from '../core/reactive'
+import type { CanvasProps, CanvasDrawNode } from './types'
 
-export interface CanvasProps {
-  width: number
-  height: number
-  children?: any
-  style?: any
-  ref?: (el: HTMLCanvasElement) => void
-}
-
-interface CanvasDrawNode {
-  type: 'rect' | 'circle' | 'arc' | 'line' | 'text' | 'path'
-  props: any
-}
+export type { CanvasProps }
 
 // Canvas context for children to access
 let currentCanvasContext: CanvasRenderingContext2D | null = null

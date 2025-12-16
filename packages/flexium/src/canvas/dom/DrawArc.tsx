@@ -1,18 +1,8 @@
 import { effect } from '../../core/lifecycle'
 import { queueDraw } from '../Canvas'
+import type { DrawArcProps } from '../types'
 
-export interface DrawArcProps {
-  x: number | (() => number)
-  y: number | (() => number)
-  radius: number | (() => number)
-  startAngle: number | (() => number)
-  endAngle: number | (() => number)
-  counterclockwise?: boolean
-  fill?: string | (() => string)
-  stroke?: string | (() => string)
-  strokeWidth?: number | (() => number)
-  opacity?: number | (() => number)
-}
+export type { DrawArcProps }
 
 export function DrawArc(props: DrawArcProps) {
   effect(() => {

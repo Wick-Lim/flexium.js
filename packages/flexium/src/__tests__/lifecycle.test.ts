@@ -1,11 +1,11 @@
 /**
- * Lifecycle API Tests (effect, sync, batch)
+ * Lifecycle API Tests (effect, sync)
  *
  * 공개 API 동작에 집중 - 내부 구현이 바뀌어도 테스트는 유지되어야 함
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, f } from '../dom'
-import { state, effect, sync, batch } from '../core'
+import { state, effect, sync } from '../core'
 
 const nextTick = () => new Promise(resolve => setTimeout(resolve, 10))
 
@@ -231,49 +231,5 @@ describe('sync()', () => {
     sync()
 
     expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('1')
-  })
-})
-
-describe('batch()', () => {
-  let container: HTMLDivElement
-
-  beforeEach(() => {
-    container = document.createElement('div')
-    document.body.appendChild(container)
-  })
-
-  afterEach(() => {
-    document.body.removeChild(container)
-  })
-
-  it('should batch multiple state updates', async () => {
-    let renderCount = 0
-    let setA: any, setB: any, setC: any
-
-    function App() {
-      renderCount++
-      const [a, setAFn] = state(0)
-      const [b, setBFn] = state(0)
-      const [c, setCFn] = state(0)
-      setA = setAFn
-      setB = setBFn
-      setC = setCFn
-
-      return f('div', { 'data-testid': 'sum' }, String(a + b + c))
-    }
-
-    render(f(App), container)
-    expect(renderCount).toBe(1)
-    expect(container.querySelector('[data-testid="sum"]')?.textContent).toBe('0')
-
-    // batch 없이 개별 업데이트하면 각각 리렌더
-    // batch로 묶으면 한번에 처리
-    batch(() => {
-      setA(1)
-      setB(2)
-      setC(3)
-    })
-
-    expect(container.querySelector('[data-testid="sum"]')?.textContent).toBe('6')
   })
 })

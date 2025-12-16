@@ -1,29 +1,7 @@
 import { state } from '../core/state'
+import { MouseButton, type MouseOptions, type MouseState } from './types'
 
-export enum MouseButton {
-  Left = 0,
-  Middle = 1,
-  Right = 2
-}
-
-export interface MouseOptions {
-  canvas?: HTMLCanvasElement | (() => HTMLCanvasElement | undefined)
-  target?: EventTarget
-}
-
-export interface MouseState {
-  x: number | null
-  y: number | null
-  deltaX: number
-  deltaY: number
-  wheelDelta: number
-  isPressed: (button: MouseButton) => boolean
-  isLeftPressed: () => boolean
-  isRightPressed: () => boolean
-  isMiddlePressed: () => boolean
-  clearFrameState: () => void
-  dispose: () => void
-}
+export { MouseButton, type MouseOptions, type MouseState }
 
 export function mouse(options: MouseOptions = {}): MouseState {
   const target = options.target || window

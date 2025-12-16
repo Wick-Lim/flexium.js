@@ -1,8 +1,6 @@
-export interface Context<T> {
-    Provider: (props: { value: T; children: any }) => any
-    id: symbol
-    defaultValue: T
-}
+import type { Context } from './types'
+
+export type { Context }
 
 const contextMap = new Map<symbol, any>()
 
