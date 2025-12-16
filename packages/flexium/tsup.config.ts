@@ -8,6 +8,7 @@ export default defineConfig({
     router: 'src/router/index.ts',
     canvas: 'src/canvas/index.ts',
     interactive: 'src/interactive/index.ts',
+    server: 'src/server/index.ts',
     'jsx-runtime': 'src/jsx-runtime.ts',
     'jsx-dev-runtime': 'src/jsx-dev-runtime.ts',
   },

@@ -2,6 +2,9 @@
 import { pushContext } from '../core/context'
 import { runWithComponent, type ComponentInstance } from '../core/hook'
 import { unsafeEffect } from '../core/effect'
+import { isErrorCatcher, getErrorHandler } from './ErrorBoundary'
+import { setPortalRenderer, isPortal, PORTAL_MARKER } from './Portal'
+import { applyRef } from '../core/ref'
 
 // Types
 export type FNodeChild = FNode | string | number | boolean | null | undefined | FNodeChild[] | (() => FNode)
@@ -23,6 +26,8 @@ interface DOMComponentInstance extends ComponentInstance {
     renderFn?: () => void  // Store render function for manual updates
     children: Set<DOMComponentInstance>  // Track child component instances
     parentInstance?: DOMComponentInstance  // Track parent component instance
+    isMounted: boolean  // Track mount state to prevent double cleanup
+    cleanupFns: (() => void)[]  // Store cleanup functions
 }
 
 // Registry to store component instances by parent and key
@@ -33,6 +38,18 @@ let currentRenderingInstance: DOMComponentInstance | null = null
 
 // Recursively remove component instance and all its children
 function removeComponentInstance(instance: DOMComponentInstance): void {
+    // Skip if already unmounted
+    if (instance.isMounted === false) return
+    instance.isMounted = false
+
+    // Run cleanup functions
+    if (instance.cleanupFns) {
+        instance.cleanupFns.forEach(fn => {
+            try { fn() } catch (e) { console.error('Cleanup error:', e) }
+        })
+        instance.cleanupFns.length = 0
+    }
+
     // First, recursively remove all child instances
     instance.children.forEach(child => {
         removeComponentInstance(child)
@@ -47,6 +64,7 @@ function removeComponentInstance(instance: DOMComponentInstance): void {
 
     // Clear the children set
     instance.children.clear()
+    instance.nodes = []
 
     // Remove from parent's children set
     if (instance.parentInstance) {
@@ -131,7 +149,9 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
         props: mergeProps(fnode),  // Regular props, we handle updates manually
         key,
         children: new Set(),
-        parentInstance: currentRenderingInstance || undefined
+        parentInstance: currentRenderingInstance || undefined,
+        isMounted: true,
+        cleanupFns: []
     }
 
     // Register this instance as a child of the current rendering instance
@@ -150,6 +170,11 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
         const currentFnode = instance.fnode
         const currentProps = instance.props
 
+        // Check if this is an ErrorCatcher component
+        const errorHandler = isErrorCatcher(currentFnode.type)
+            ? getErrorHandler(currentProps)
+            : null
+
         // Check if this is a Context Provider
         const isProvider = (currentFnode.type as any)._contextId !== undefined
         if (isProvider) {
@@ -161,77 +186,105 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
         const previousRenderingInstance = currentRenderingInstance
         currentRenderingInstance = instance
 
-        // Render component with hook context
-        const result = runWithComponent(instance, () => currentFnode.type(currentProps))
+        try {
+            // Render component with hook context
+            const result = runWithComponent(instance, () => currentFnode.type(currentProps))
 
-        // DON'T restore currentRenderingInstance yet - we need it for renderNode calls below
-        // It will be restored at the end of this function
+            // DON'T restore currentRenderingInstance yet - we need it for renderNode calls below
+            // It will be restored at the end of this function
 
-        if (isFirstRender) {
-            // First render: create new DOM nodes
-            const newNodes = renderNode(result, parent)
-            instance.nodes = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
-            // Mark nodes as owned by this instance (for reconciliation)
-            // Only set ownership if not already owned (child components set ownership first)
-            instance.nodes.forEach(node => {
-                if (!(node as any).__ownerInstance) {
-                    (node as any).__ownerInstance = instance
-                }
-            })
-            isFirstRender = false
-        } else {
-            // Re-render: reconcile with existing DOM
-            // Don't early return if nodes is empty - component might render other components
-            if (instance.nodes.length === 0) {
-                // Component has no DOM nodes yet, might be rendering other components
-                // Just re-render without reconciliation
+            if (isFirstRender) {
+                // First render: create new DOM nodes
                 const newNodes = renderNode(result, parent)
                 instance.nodes = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
-                // Restore previous rendering instance before returning
-                currentRenderingInstance = previousRenderingInstance
-                return
-            }
-
-            const firstNode = instance.nodes[0]
-            const nodeParent = firstNode.parentNode as HTMLElement
-
-            if (!nodeParent) {
-                // Restore previous rendering instance before returning
-                currentRenderingInstance = previousRenderingInstance
-                return
-            }
-
-            // Create marker to know where to insert new nodes
-            const marker = document.createComment('flexium-marker')
-            const lastNode = instance.nodes[instance.nodes.length - 1]
-            if (lastNode.nextSibling) {
-                nodeParent.insertBefore(marker, lastNode.nextSibling)
+                // Mark nodes as owned by this instance (for reconciliation)
+                // Only set ownership if not already owned (child components set ownership first)
+                instance.nodes.forEach(node => {
+                    if (!(node as any).__ownerInstance) {
+                        (node as any).__ownerInstance = instance
+                    }
+                })
+                isFirstRender = false
             } else {
-                nodeParent.appendChild(marker)
+                // Re-render: reconcile with existing DOM
+                // Don't early return if nodes is empty - component might render other components
+                if (instance.nodes.length === 0) {
+                    // Component has no DOM nodes yet, might be rendering other components
+                    // Just re-render without reconciliation
+                    const newNodes = renderNode(result, parent)
+                    instance.nodes = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
+                    // Restore previous rendering instance before returning
+                    currentRenderingInstance = previousRenderingInstance
+                    return
+                }
+
+                const firstNode = instance.nodes[0]
+                const nodeParent = firstNode.parentNode as HTMLElement
+
+                if (!nodeParent) {
+                    // Restore previous rendering instance before returning
+                    currentRenderingInstance = previousRenderingInstance
+                    return
+                }
+
+                // Create marker to know where to insert new nodes
+                const marker = document.createComment('flexium-marker')
+                const lastNode = instance.nodes[instance.nodes.length - 1]
+                if (lastNode.nextSibling) {
+                    nodeParent.insertBefore(marker, lastNode.nextSibling)
+                } else {
+                    nodeParent.appendChild(marker)
+                }
+
+                // Clear children references - actual cleanup happens via key-based registry
+                // Don't call removeComponentInstance here as it removes DOM nodes that reconcile needs
+                instance.children.clear()
+
+                // Create temporary container for collecting new nodes
+                const tempContainer = document.createElement('div')
+
+                // Render into temp container, but use actual parent for registry
+                const newNodes = renderNode(result, tempContainer, nodeParent)
+                const newNodesArray = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
+
+                // Use reconcile to patch existing nodes instead of replacing
+                const reconciledNodes = reconcile(instance.nodes, newNodesArray, nodeParent, marker)
+
+                // Remove marker
+                nodeParent.removeChild(marker)
+
+                instance.nodes = reconciledNodes
             }
 
-            // Clear children references - actual cleanup happens via key-based registry
-            // Don't call removeComponentInstance here as it removes DOM nodes that reconcile needs
-            instance.children.clear()
+            // Restore previous rendering instance after all renderNode calls are done
+            currentRenderingInstance = previousRenderingInstance
+        } catch (error) {
+            // Restore rendering instance
+            currentRenderingInstance = previousRenderingInstance
 
-            // Create temporary container for collecting new nodes
-            const tempContainer = document.createElement('div')
+            // If this component has an error handler, use it
+            if (errorHandler) {
+                errorHandler(error as Error)
+                return
+            }
 
-            // Render into temp container, but use actual parent for registry
-            const newNodes = renderNode(result, tempContainer, nodeParent)
-            const newNodesArray = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
+            // Otherwise, find parent error boundary
+            let parentInstance = instance.parentInstance
+            while (parentInstance) {
+                if (isErrorCatcher(parentInstance.fnode?.type)) {
+                    const handler = getErrorHandler(parentInstance.props)
+                    if (handler) {
+                        handler(error as Error)
+                        return
+                    }
+                }
+                parentInstance = parentInstance.parentInstance
+            }
 
-            // Use reconcile to patch existing nodes instead of replacing
-            const reconciledNodes = reconcile(instance.nodes, newNodesArray, nodeParent, marker)
-
-            // Remove marker
-            nodeParent.removeChild(marker)
-
-            instance.nodes = reconciledNodes
+            // No error boundary found, log and re-throw
+            console.error('Uncaught error in component:', error)
+            throw error
         }
-
-        // Restore previous rendering instance after all renderNode calls are done
-        currentRenderingInstance = previousRenderingInstance
     }
 
     // Store renderFn for manual updates
@@ -321,9 +374,9 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
             // Set props/attributes
             if (fnode.props) {
                 Object.entries(fnode.props).forEach(([key, value]) => {
-                    if (key === 'ref' && typeof value === 'function') {
-                        // ref callback - call with the DOM element
-                        value(dom);
+                    if (key === 'ref') {
+                        // Support both ref callbacks and ref objects
+                        applyRef(value as any, dom);
                     } else if (key.startsWith('on') && typeof value === 'function') {
                         // Event handler: onClick -> click
                         const eventName = key.slice(2).toLowerCase();
@@ -350,6 +403,18 @@ function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElemen
 
             parent.appendChild(dom);
             return dom;
+        }
+
+        // 4b-1. Portal Component - special handling
+        if (typeof fnode.type === 'function' && isPortal(fnode.type)) {
+            // Portal renders nothing at its location
+            // The actual rendering happens in the Portal component via portalRenderer
+            const props = { ...fnode.props }
+            if (fnode.children && fnode.children.length > 0) {
+                props.children = fnode.children.length === 1 ? fnode.children[0] : fnode.children
+            }
+            fnode.type(props)
+            return null
         }
 
         // 4b. Function Component
@@ -382,6 +447,11 @@ export function render(app: any, container: HTMLElement) {
 
     renderNode(app, container);
 }
+
+// Set up portal renderer to use renderNode
+setPortalRenderer((children, container) => {
+  renderNode(children, container as HTMLElement)
+})
 
 // f() - Create FNodes without JSX
 export function f(
@@ -577,3 +647,9 @@ export function reconcile(oldNodes: Node[], newNodes: Node[], parent: Node, befo
 
     return resultNodes
 }
+
+export { hydrate, type HydrateOptions } from './hydrate'
+export { ErrorBoundary, type ErrorBoundaryProps } from './ErrorBoundary'
+export { Suspense, SuspenseContext, useSuspense, type SuspenseProps } from './Suspense'
+export { lazy } from './lazy'
+export { Portal, isPortal, type PortalProps } from './Portal'

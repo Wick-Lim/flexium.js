@@ -20,10 +20,45 @@ export interface StateOptions {
 }
 
 // Global State Registry
-const globalRegistry = new Map<string, any>()
+interface RegistryEntry {
+  container: any
+  refCount: number
+}
+
+const globalRegistry = new Map<string, RegistryEntry>()
 
 function serializeKey(key: unknown[]): string {
   return JSON.stringify(key)
+}
+
+/**
+ * Clean up a global state by key (decrements ref count)
+ */
+export function releaseGlobalState(key: unknown[]): boolean {
+  const serializedKey = serializeKey(key)
+  const entry = globalRegistry.get(serializedKey)
+  if (entry) {
+    entry.refCount--
+    if (entry.refCount <= 0) {
+      globalRegistry.delete(serializedKey)
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Clear all global states (for testing)
+ */
+export function clearGlobalRegistry(): void {
+  globalRegistry.clear()
+}
+
+/**
+ * Get global registry size (for debugging)
+ */
+export function getGlobalRegistrySize(): number {
+  return globalRegistry.size
 }
 
 // Overloads
@@ -91,7 +126,9 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
 
     // Check Registry FIRST
     if (serializedKey && globalRegistry.has(serializedKey)) {
-      stateRef.container = globalRegistry.get(serializedKey)
+      const entry = globalRegistry.get(serializedKey)!
+      entry.refCount++
+      stateRef.container = entry.container
     } else {
       let newContainer: any
 
@@ -159,7 +196,10 @@ export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: St
 
       // Register in global registry if needed
       if (serializedKey) {
-        globalRegistry.set(serializedKey, newContainer)
+        globalRegistry.set(serializedKey, {
+          container: newContainer,
+          refCount: 1
+        })
       }
 
       stateRef.container = newContainer
