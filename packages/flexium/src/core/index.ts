@@ -9,4 +9,4 @@ export { effect, sync } from './lifecycle'
 export { createContext, context } from './context'
 
 // Ref API
-export { useRef, createRef, forwardRef } from '../ref'
+export { ref, forwardRef } from '../ref'

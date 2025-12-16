@@ -32,7 +32,7 @@ export interface ForwardRefComponent<P, T> {
  * )
  *
  * function Parent() {
- *   const inputRef = useRef<HTMLInputElement>()
+ *   const inputRef = ref<HTMLInputElement>()
  *
  *   return (
  *     <div>
