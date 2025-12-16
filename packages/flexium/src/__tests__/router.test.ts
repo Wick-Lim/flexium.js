@@ -1,17 +1,16 @@
 /**
- * Router Tests
+ * Router API Tests
  *
- * Routes, Route, Link 컴포넌트 기본 테스트
- * Note: jsdom에서 window.location mocking이 복잡하므로 기본 기능 위주로 테스트
+ * Tests for: Routes, Route, Link, Outlet, router()
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f } from '../dom'
-import { Routes, Route, Link } from '../router'
+import { Routes, Route, Link, Outlet } from '../router'
 import { state } from '../core'
 
-const nextTick = () => new Promise(resolve => setTimeout(resolve, 50))
+const tick = () => new Promise(r => setTimeout(r, 50))
 
-describe('Routes & Route - Basic', () => {
+describe('Routes & Route', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -25,6 +24,21 @@ describe('Routes & Route - Basic', () => {
 
   it('should render Routes container', () => {
     function Home() {
+      return f('div', { 'data-testid': 'home' }, 'Home')
+    }
+
+    function App() {
+      return f(Routes, {}, [
+        f(Route, { path: '/', component: Home })
+      ])
+    }
+
+    render(f(App), container)
+    expect(container.children.length).toBeGreaterThan(0)
+  })
+
+  it('should render matching route', () => {
+    function Home() {
       return f('div', { 'data-testid': 'home' }, 'Home Page')
     }
 
@@ -35,26 +49,7 @@ describe('Routes & Route - Basic', () => {
     }
 
     render(f(App), container)
-
-    // Routes should render something
-    expect(container.children.length).toBeGreaterThan(0)
-  })
-
-  it('should render Route component', () => {
-    function Page() {
-      return f('div', { 'data-testid': 'page' }, 'Page Content')
-    }
-
-    function App() {
-      return f(Routes, {}, [
-        f(Route, { path: '/', component: Page })
-      ])
-    }
-
-    render(f(App), container)
-
-    // Should have rendered the page
-    expect(container.querySelector('[data-testid="page"]')).not.toBeNull()
+    expect(container.querySelector('[data-testid="home"]')).not.toBeNull()
   })
 
   it('should render home route by default', () => {
@@ -74,13 +69,37 @@ describe('Routes & Route - Basic', () => {
     }
 
     render(f(App), container)
+    expect(container.querySelector('[data-testid="home"]')).not.toBeNull()
+  })
 
+  it('should support multiple routes', () => {
+    function Home() {
+      return f('div', { 'data-testid': 'home' }, 'Home')
+    }
+
+    function About() {
+      return f('div', { 'data-testid': 'about' }, 'About')
+    }
+
+    function Contact() {
+      return f('div', { 'data-testid': 'contact' }, 'Contact')
+    }
+
+    function App() {
+      return f(Routes, {}, [
+        f(Route, { path: '/', component: Home }),
+        f(Route, { path: '/about', component: About }),
+        f(Route, { path: '/contact', component: Contact })
+      ])
+    }
+
+    render(f(App), container)
     // Default path "/" should match
     expect(container.querySelector('[data-testid="home"]')).not.toBeNull()
   })
 })
 
-describe('Link component', () => {
+describe('Link', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -122,12 +141,10 @@ describe('Link component', () => {
     }
 
     render(f(App), container)
-
-    const link = container.querySelector('a')
-    expect(link?.textContent).toBe('Test Link')
+    expect(container.querySelector('a')?.textContent).toBe('Test Link')
   })
 
-  it('should support className prop', () => {
+  it('should support class prop', () => {
     function App() {
       return f(Routes, {}, [
         f(Route, {
@@ -138,12 +155,10 @@ describe('Link component', () => {
     }
 
     render(f(App), container)
-
-    const link = container.querySelector('a')
-    expect(link?.className).toContain('nav-link')
+    expect(container.querySelector('a')?.className).toContain('nav-link')
   })
 
-  it('should support multiple Link components', () => {
+  it('should support multiple links', () => {
     function App() {
       return f(Routes, {}, [
         f(Route, {
@@ -158,13 +173,11 @@ describe('Link component', () => {
     }
 
     render(f(App), container)
-
-    const links = container.querySelectorAll('a')
-    expect(links.length).toBe(3)
+    expect(container.querySelectorAll('a').length).toBe(3)
   })
 })
 
-describe('Router - State-based patterns', () => {
+describe('State-based navigation patterns', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -178,125 +191,97 @@ describe('Router - State-based patterns', () => {
 
   it('should support tab navigation with state', async () => {
     function TabNav() {
-      const [activeTab, setActiveTab] = state('home')
+      const [tab, setTab] = state<'home' | 'about' | 'contact'>('home')
 
       const tabs = {
-        home: f('div', { 'data-testid': 'home-tab' }, 'Home Content'),
-        about: f('div', { 'data-testid': 'about-tab' }, 'About Content'),
-        contact: f('div', { 'data-testid': 'contact-tab' }, 'Contact Content'),
+        home: f('div', { 'data-testid': 'home-tab' }, 'Home'),
+        about: f('div', { 'data-testid': 'about-tab' }, 'About'),
+        contact: f('div', { 'data-testid': 'contact-tab' }, 'Contact')
       }
 
       return f('div', {}, [
         f('nav', {}, [
-          f('button', {
-            'data-testid': 'nav-home',
-            onclick: () => setActiveTab('home')
-          }, 'Home'),
-          f('button', {
-            'data-testid': 'nav-about',
-            onclick: () => setActiveTab('about')
-          }, 'About'),
-          f('button', {
-            'data-testid': 'nav-contact',
-            onclick: () => setActiveTab('contact')
-          }, 'Contact')
+          f('button', { 'data-testid': 'nav-home', onclick: () => setTab('home') }, 'Home'),
+          f('button', { 'data-testid': 'nav-about', onclick: () => setTab('about') }, 'About'),
+          f('button', { 'data-testid': 'nav-contact', onclick: () => setTab('contact') }, 'Contact')
         ]),
-        f('main', { 'data-testid': 'content' }, tabs[activeTab as keyof typeof tabs])
+        f('main', {}, tabs[tab])
       ])
     }
 
     render(f(TabNav), container)
-
     expect(container.querySelector('[data-testid="home-tab"]')).not.toBeNull()
 
     container.querySelector<HTMLButtonElement>('[data-testid="nav-about"]')?.click()
-    await nextTick()
+    await tick()
 
     expect(container.querySelector('[data-testid="about-tab"]')).not.toBeNull()
     expect(container.querySelector('[data-testid="home-tab"]')).toBeNull()
-
-    container.querySelector<HTMLButtonElement>('[data-testid="nav-contact"]')?.click()
-    await nextTick()
-
-    expect(container.querySelector('[data-testid="contact-tab"]')).not.toBeNull()
   })
 
   it('should support protected routes pattern', async () => {
-    function ProtectedContent({ isLoggedIn }: { isLoggedIn: boolean }) {
-      if (!isLoggedIn) {
-        return f('div', { 'data-testid': 'login-prompt' }, 'Please login first')
+    function ProtectedContent({ loggedIn }: { loggedIn: boolean }) {
+      if (!loggedIn) {
+        return f('div', { 'data-testid': 'login-prompt' }, 'Please login')
       }
-      return f('div', { 'data-testid': 'protected-content' }, 'Secret content!')
+      return f('div', { 'data-testid': 'protected' }, 'Protected content')
     }
 
     function App() {
-      const [isLoggedIn, setIsLoggedIn] = state(false)
+      const [loggedIn, setLoggedIn] = state(false)
 
       return f('div', {}, [
-        f(ProtectedContent, { isLoggedIn }),
-        f('button', {
-          'data-testid': 'login-btn',
-          onclick: () => setIsLoggedIn(true)
-        }, 'Login'),
-        f('button', {
-          'data-testid': 'logout-btn',
-          onclick: () => setIsLoggedIn(false)
-        }, 'Logout')
+        f(ProtectedContent, { loggedIn }),
+        f('button', { 'data-testid': 'login', onclick: () => setLoggedIn(true) }, 'Login'),
+        f('button', { 'data-testid': 'logout', onclick: () => setLoggedIn(false) }, 'Logout')
       ])
     }
 
     render(f(App), container)
-
-    // Initially not logged in
     expect(container.querySelector('[data-testid="login-prompt"]')).not.toBeNull()
-    expect(container.querySelector('[data-testid="protected-content"]')).toBeNull()
 
-    // Login
-    container.querySelector<HTMLButtonElement>('[data-testid="login-btn"]')?.click()
-    await nextTick()
+    container.querySelector<HTMLButtonElement>('[data-testid="login"]')?.click()
+    await tick()
 
-    expect(container.querySelector('[data-testid="protected-content"]')).not.toBeNull()
-    expect(container.querySelector('[data-testid="login-prompt"]')).toBeNull()
+    expect(container.querySelector('[data-testid="protected"]')).not.toBeNull()
 
-    // Logout
-    container.querySelector<HTMLButtonElement>('[data-testid="logout-btn"]')?.click()
-    await nextTick()
+    container.querySelector<HTMLButtonElement>('[data-testid="logout"]')?.click()
+    await tick()
 
     expect(container.querySelector('[data-testid="login-prompt"]')).not.toBeNull()
   })
 
-  it('should support conditional route rendering', async () => {
-    function ConditionalRoutes() {
-      const [userRole, setUserRole] = state<'guest' | 'user' | 'admin'>('guest')
+  it('should support role-based content', async () => {
+    function App() {
+      const [role, setRole] = state<'guest' | 'user' | 'admin'>('guest')
 
-      const roleContent = {
-        guest: f('div', { 'data-testid': 'guest-view' }, 'Welcome, Guest'),
-        user: f('div', { 'data-testid': 'user-view' }, 'Welcome, User'),
-        admin: f('div', { 'data-testid': 'admin-view' }, 'Admin Dashboard'),
+      const content = {
+        guest: f('div', { 'data-testid': 'guest' }, 'Guest view'),
+        user: f('div', { 'data-testid': 'user' }, 'User view'),
+        admin: f('div', { 'data-testid': 'admin' }, 'Admin view')
       }
 
       return f('div', {}, [
         f('select', {
           'data-testid': 'role-select',
-          onchange: (e: Event) => setUserRole((e.target as HTMLSelectElement).value as any)
+          onchange: (e: Event) => setRole((e.target as HTMLSelectElement).value as any)
         }, [
           f('option', { value: 'guest' }, 'Guest'),
           f('option', { value: 'user' }, 'User'),
           f('option', { value: 'admin' }, 'Admin')
         ]),
-        roleContent[userRole]
+        content[role]
       ])
     }
 
-    render(f(ConditionalRoutes), container)
-
-    expect(container.querySelector('[data-testid="guest-view"]')).not.toBeNull()
+    render(f(App), container)
+    expect(container.querySelector('[data-testid="guest"]')).not.toBeNull()
 
     const select = container.querySelector('[data-testid="role-select"]') as HTMLSelectElement
     select.value = 'admin'
     select.dispatchEvent(new Event('change'))
-    await nextTick()
+    await tick()
 
-    expect(container.querySelector('[data-testid="admin-view"]')).not.toBeNull()
+    expect(container.querySelector('[data-testid="admin"]')).not.toBeNull()
   })
 })

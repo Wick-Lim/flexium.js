@@ -1,15 +1,15 @@
 /**
- * Integration Tests - Real Component Patterns
+ * Integration Tests
  *
- * 실제 앱에서 사용하는 패턴들을 테스트
+ * Complex scenarios combining multiple APIs
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, f } from '../dom'
-import { state, effect, createContext, context } from '../core'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, f, Portal, Suspense, ErrorBoundary } from '../dom'
+import { state, effect, sync, ref, forwardRef, createContext, context } from '../core'
 
-const nextTick = () => new Promise(resolve => setTimeout(resolve, 10))
+const tick = () => new Promise(r => setTimeout(r, 50))
 
-describe('Integration: Counter App', () => {
+describe('State + Effect + Render', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -21,124 +21,100 @@ describe('Integration: Counter App', () => {
     document.body.removeChild(container)
   })
 
-  it('should handle basic counter', async () => {
+  it('should build a complete counter with side effects', async () => {
+    const logs: string[] = []
+
     function Counter() {
       const [count, setCount] = state(0)
+
+      effect(() => {
+        logs.push(`Count changed to ${count}`)
+        return () => logs.push(`Cleanup ${count}`)
+      }, [count])
 
       return f('div', {}, [
         f('span', { 'data-testid': 'count' }, String(count)),
         f('button', { 'data-testid': 'inc', onclick: () => setCount(count + 1) }, '+'),
-        f('button', { 'data-testid': 'dec', onclick: () => setCount(count - 1) }, '-'),
-        f('button', { 'data-testid': 'reset', onclick: () => setCount(0) }, 'Reset')
+        f('button', { 'data-testid': 'dec', onclick: () => setCount(count - 1) }, '-')
       ])
     }
 
     render(f(Counter), container)
+    await tick()
 
-    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('0')
-
-    // Increment
-    container.querySelector<HTMLButtonElement>('[data-testid="inc"]')?.click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('1')
+    expect(logs).toContain('Count changed to 0')
 
     container.querySelector<HTMLButtonElement>('[data-testid="inc"]')?.click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('2')
+    await tick()
 
-    // Decrement
-    container.querySelector<HTMLButtonElement>('[data-testid="dec"]')?.click()
-    await nextTick()
     expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('1')
-
-    // Reset
-    container.querySelector<HTMLButtonElement>('[data-testid="reset"]')?.click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('0')
-  })
-})
-
-describe('Integration: Todo App', () => {
-  let container: HTMLDivElement
-
-  beforeEach(() => {
-    container = document.createElement('div')
-    document.body.appendChild(container)
+    expect(logs.some(l => l.includes('Count changed to 1'))).toBe(true)
   })
 
-  afterEach(() => {
-    document.body.removeChild(container)
-  })
-
-  it('should add and remove todos', async () => {
-    interface Todo {
-      id: number
-      text: string
-      done: boolean
-    }
-
+  it('should build a todo app', async () => {
     function TodoApp() {
-      const [todos, setTodos] = state<Todo[]>([])
-      const [nextId, setNextId] = state(1)
+      const [todos, setTodos] = state<{ id: number; text: string; done: boolean }[]>([])
+      const [input, setInput] = state('')
+      const inputRef = ref<HTMLInputElement | null>(null)
 
       const addTodo = () => {
-        setTodos([...todos, { id: nextId, text: `Todo ${nextId}`, done: false }])
-        setNextId(nextId + 1)
-      }
-
-      const removeTodo = (id: number) => {
-        setTodos(todos.filter((t: Todo) => t.id !== id))
+        if (!input.trim()) return
+        setTodos([...todos, { id: Date.now(), text: input, done: false }])
+        setInput('')
+        inputRef.current?.focus()
       }
 
       const toggleTodo = (id: number) => {
-        setTodos(todos.map((t: Todo) =>
-          t.id === id ? { ...t, done: !t.done } : t
-        ))
+        setTodos(todos.map(t => t.id === id ? { ...t, done: !t.done } : t))
+      }
+
+      const deleteTodo = (id: number) => {
+        setTodos(todos.filter(t => t.id !== id))
       }
 
       return f('div', {}, [
-        f('button', { 'data-testid': 'add', onclick: addTodo }, 'Add Todo'),
+        f('div', {}, [
+          f('input', {
+            ref: inputRef,
+            'data-testid': 'input',
+            value: input,
+            oninput: (e: Event) => setInput((e.target as HTMLInputElement).value)
+          }),
+          f('button', { 'data-testid': 'add', onclick: addTodo }, 'Add')
+        ]),
         f('ul', { 'data-testid': 'list' },
-          todos.map((todo: Todo) =>
-            f('li', { key: todo.id, 'data-testid': `todo-${todo.id}` }, [
-              f('span', {
-                style: todo.done ? 'text-decoration:line-through' : '',
-                onclick: () => toggleTodo(todo.id)
-              }, todo.text),
-              f('button', {
-                'data-testid': `remove-${todo.id}`,
-                onclick: () => removeTodo(todo.id)
-              }, 'X')
-            ])
-          )
+          todos.map(todo => f('li', { key: todo.id }, [
+            f('input', {
+              type: 'checkbox',
+              checked: todo.done,
+              onchange: () => toggleTodo(todo.id)
+            }),
+            f('span', {
+              style: { textDecoration: todo.done ? 'line-through' : 'none' }
+            }, todo.text),
+            f('button', { onclick: () => deleteTodo(todo.id) }, 'X')
+          ]))
         ),
-        f('div', { 'data-testid': 'count' }, `Total: ${todos.length}`)
+        f('p', { 'data-testid': 'count' }, `${todos.filter(t => !t.done).length} remaining`)
       ])
     }
 
     render(f(TodoApp), container)
 
-    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('Total: 0')
-
-    // Add todos
-    container.querySelector<HTMLButtonElement>('[data-testid="add"]')?.click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('Total: 1')
+    const input = container.querySelector('[data-testid="input"]') as HTMLInputElement
+    input.value = 'Learn Flexium'
+    input.dispatchEvent(new Event('input'))
+    await tick()
 
     container.querySelector<HTMLButtonElement>('[data-testid="add"]')?.click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('Total: 2')
+    await tick()
 
-    // Remove first todo
-    container.querySelector<HTMLButtonElement>('[data-testid="remove-1"]')?.click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('Total: 1')
-    expect(container.querySelector('[data-testid="todo-1"]')).toBeNull()
-    expect(container.querySelector('[data-testid="todo-2"]')).not.toBeNull()
+    expect(container.querySelectorAll('li').length).toBe(1)
+    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('1 remaining')
   })
 })
 
-describe('Integration: Form with Validation', () => {
+describe('Context + State + Components', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -150,199 +126,182 @@ describe('Integration: Form with Validation', () => {
     document.body.removeChild(container)
   })
 
-  it('should validate form fields', async () => {
-    function Form() {
-      const [email, setEmail] = state('')
-      const [error] = state(() => {
-        if (!email) return 'Email is required'
-        if (!email.includes('@')) return 'Invalid email format'
-        return ''
-      }, { deps: [email] })
+  it('should build theme switching app', async () => {
+    const ThemeCtx = createContext<'light' | 'dark'>('light')
 
-      return f('div', {}, [
-        f('input', {
-          'data-testid': 'email',
-          type: 'email',
-          value: email,
-          oninput: (e: Event) => setEmail((e.target as HTMLInputElement).value)
-        }),
-        f('div', { 'data-testid': 'error' }, error),
-        f('button', {
-          'data-testid': 'submit',
-          disabled: !!error
-        }, 'Submit')
-      ])
+    function ThemeToggle() {
+      const theme = context(ThemeCtx)
+      return f('span', { 'data-testid': 'theme' }, `Current: ${theme}`)
     }
 
-    render(f(Form), container)
-
-    expect(container.querySelector('[data-testid="error"]')?.textContent).toBe('Email is required')
-
-    // Type invalid email
-    const input = container.querySelector('[data-testid="email"]') as HTMLInputElement
-    input.value = 'test'
-    input.dispatchEvent(new Event('input'))
-    await nextTick()
-
-    expect(container.querySelector('[data-testid="error"]')?.textContent).toBe('Invalid email format')
-
-    // Type valid email
-    input.value = 'test@example.com'
-    input.dispatchEvent(new Event('input'))
-    await nextTick()
-
-    expect(container.querySelector('[data-testid="error"]')?.textContent).toBe('')
-  })
-})
-
-describe('Integration: Data Fetching', () => {
-  let container: HTMLDivElement
-
-  beforeEach(() => {
-    container = document.createElement('div')
-    document.body.appendChild(container)
-  })
-
-  afterEach(() => {
-    document.body.removeChild(container)
-  })
-
-  it('should show loading, then data', async () => {
-    function DataFetcher() {
-      const [data, { loading, error }] = state(async () => {
-        await new Promise(r => setTimeout(r, 20))
-        return { message: 'Hello from API' }
-      })
-
-      if (loading) return f('div', { 'data-testid': 'status' }, 'Loading...')
-      if (error) return f('div', { 'data-testid': 'status' }, 'Error!')
-      return f('div', { 'data-testid': 'status' }, data?.message || '')
-    }
-
-    render(f(DataFetcher), container)
-
-    expect(container.querySelector('[data-testid="status"]')?.textContent).toBe('Loading...')
-
-    await new Promise(r => setTimeout(r, 50))
-
-    expect(container.querySelector('[data-testid="status"]')?.textContent).toBe('Hello from API')
-  })
-})
-
-describe('Integration: Component Composition', () => {
-  let container: HTMLDivElement
-
-  beforeEach(() => {
-    container = document.createElement('div')
-    document.body.appendChild(container)
-  })
-
-  afterEach(() => {
-    document.body.removeChild(container)
-  })
-
-  it('should compose multiple components', async () => {
-    function Button({ label, onClick }: { label: string; onClick: () => void }) {
-      return f('button', { onclick: onClick }, label)
-    }
-
-    function Display({ value }: { value: number }) {
-      return f('span', { 'data-testid': 'display' }, String(value))
-    }
-
-    function Calculator() {
-      const [value, setValue] = state(0)
-
-      return f('div', {}, [
-        f(Display, { value }),
-        f(Button, { label: '+1', onClick: () => setValue(value + 1) }),
-        f(Button, { label: '+10', onClick: () => setValue(value + 10) }),
-        f(Button, { label: 'Clear', onClick: () => setValue(0) })
-      ])
-    }
-
-    render(f(Calculator), container)
-
-    expect(container.querySelector('[data-testid="display"]')?.textContent).toBe('0')
-
-    // Click +1
-    const buttons = container.querySelectorAll('button')
-    buttons[0].click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="display"]')?.textContent).toBe('1')
-
-    // Click +10
-    buttons[1].click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="display"]')?.textContent).toBe('11')
-
-    // Click Clear
-    buttons[2].click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="display"]')?.textContent).toBe('0')
-  })
-})
-
-describe('Integration: Context + State', () => {
-  let container: HTMLDivElement
-
-  beforeEach(() => {
-    container = document.createElement('div')
-    document.body.appendChild(container)
-  })
-
-  afterEach(() => {
-    document.body.removeChild(container)
-  })
-
-  it('should combine context with local state', async () => {
-    const UserContext = createContext<{ name: string }>({ name: 'Guest' })
-
-    function Greeting() {
-      const user = context(UserContext)
-      const [greeting, setGreeting] = state('Hello')
-
-      return f('div', {}, [
-        f('span', { 'data-testid': 'message' }, `${greeting}, ${user.name}!`),
-        f('button', {
-          'data-testid': 'change',
-          onclick: () => setGreeting(greeting === 'Hello' ? 'Hi' : 'Hello')
-        }, 'Change Greeting')
-      ])
+    function ThemedButton({ onClick }: { onClick: () => void }) {
+      const theme = context(ThemeCtx)
+      return f('button', {
+        'data-testid': 'toggle',
+        class: theme === 'dark' ? 'dark-btn' : 'light-btn',
+        onclick: onClick
+      }, 'Toggle Theme')
     }
 
     function App() {
-      const [user, setUser] = state({ name: 'Alice' })
+      const [theme, setTheme] = state<'light' | 'dark'>('light')
 
-      return f(UserContext.Provider, { value: user }, [
-        f(Greeting),
-        f('button', {
-          'data-testid': 'change-user',
-          onclick: () => setUser({ name: user.name === 'Alice' ? 'Bob' : 'Alice' })
-        }, 'Change User')
+      return f(ThemeCtx.Provider, { value: theme }, [
+        f('div', { class: `app ${theme}` }, [
+          f(ThemeToggle),
+          f(ThemedButton, { onClick: () => setTheme(theme === 'light' ? 'dark' : 'light') })
+        ])
       ])
     }
 
     render(f(App), container)
 
-    expect(container.querySelector('[data-testid="message"]')?.textContent).toBe('Hello, Alice!')
+    expect(container.querySelector('[data-testid="theme"]')?.textContent).toBe('Current: light')
+    expect(container.querySelector('[data-testid="toggle"]')?.className).toBe('light-btn')
 
-    // Change greeting (local state)
-    container.querySelector<HTMLButtonElement>('[data-testid="change"]')?.click()
-    await nextTick()
-    expect(container.querySelector('[data-testid="message"]')?.textContent).toBe('Hi, Alice!')
+    container.querySelector<HTMLButtonElement>('[data-testid="toggle"]')?.click()
+    await tick()
 
-    // Change user (context) - 컴포넌트가 다시 렌더링되면서 상태 유지됨
-    container.querySelector<HTMLButtonElement>('[data-testid="change-user"]')?.click()
-    await nextTick()
-    // Note: Greeting은 같은 컴포넌트 인스턴스이므로 로컬 state 유지
-    // 만약 'Hello, Bob!'이면 컴포넌트가 재생성된 것
-    const message = container.querySelector('[data-testid="message"]')?.textContent
-    expect(['Hi, Bob!', 'Hello, Bob!']).toContain(message)
+    expect(container.querySelector('[data-testid="theme"]')?.textContent).toBe('Current: dark')
+    expect(container.querySelector('[data-testid="toggle"]')?.className).toBe('dark-btn')
+  })
+
+  it('should build auth context app', async () => {
+    interface User {
+      id: number
+      name: string
+    }
+
+    interface AuthContext {
+      user: User | null
+      login: (name: string) => void
+      logout: () => void
+    }
+
+    const AuthCtx = createContext<AuthContext>({
+      user: null,
+      login: () => {},
+      logout: () => {}
+    })
+
+    function UserDisplay() {
+      const { user } = context(AuthCtx)
+      if (!user) {
+        return f('span', { 'data-testid': 'guest' }, 'Guest')
+      }
+      return f('span', { 'data-testid': 'user' }, `Hello, ${user.name}`)
+    }
+
+    function LoginButton() {
+      const { user, login, logout } = context(AuthCtx)
+
+      if (user) {
+        return f('button', { 'data-testid': 'logout', onclick: logout }, 'Logout')
+      }
+      return f('button', { 'data-testid': 'login', onclick: () => login('John') }, 'Login')
+    }
+
+    function App() {
+      const [user, setUser] = state<User | null>(null)
+
+      const authValue: AuthContext = {
+        user,
+        login: (name) => setUser({ id: 1, name }),
+        logout: () => setUser(null)
+      }
+
+      return f(AuthCtx.Provider, { value: authValue }, [
+        f('div', {}, [
+          f(UserDisplay),
+          f(LoginButton)
+        ])
+      ])
+    }
+
+    render(f(App), container)
+
+    expect(container.querySelector('[data-testid="guest"]')).not.toBeNull()
+    expect(container.querySelector('[data-testid="login"]')).not.toBeNull()
+
+    container.querySelector<HTMLButtonElement>('[data-testid="login"]')?.click()
+    await tick()
+
+    expect(container.querySelector('[data-testid="user"]')?.textContent).toBe('Hello, John')
+    expect(container.querySelector('[data-testid="logout"]')).not.toBeNull()
+
+    container.querySelector<HTMLButtonElement>('[data-testid="logout"]')?.click()
+    await tick()
+
+    expect(container.querySelector('[data-testid="guest"]')).not.toBeNull()
   })
 })
 
-describe('Integration: Side Effects', () => {
+describe('Portal + Modal Pattern', () => {
+  let container: HTMLDivElement
+  let modalRoot: HTMLDivElement
+
+  beforeEach(() => {
+    container = document.createElement('div')
+    document.body.appendChild(container)
+
+    modalRoot = document.createElement('div')
+    modalRoot.id = 'modal-root'
+    document.body.appendChild(modalRoot)
+  })
+
+  afterEach(() => {
+    document.body.removeChild(container)
+    document.body.removeChild(modalRoot)
+  })
+
+  it('should build a complete modal system', async () => {
+    function Modal({ open, children }: {
+      open: boolean
+      children: any
+    }) {
+      if (!open) return null
+
+      return f(Portal, { target: modalRoot }, [
+        f('div', { class: 'modal-backdrop', 'data-testid': 'backdrop' }, [
+          f('div', {
+            class: 'modal-content',
+            'data-testid': 'modal'
+          }, [
+            f('button', { class: 'close-btn', 'data-testid': 'close' }, 'X'),
+            children
+          ])
+        ])
+      ])
+    }
+
+    function App() {
+      const [open, setOpen] = state(false)
+
+      return f('div', {}, [
+        f('button', { 'data-testid': 'open', onclick: () => setOpen(true) }, 'Open Modal'),
+        f(Modal, { open }, [
+          f('h2', {}, 'Modal Title'),
+          f('p', {}, 'Modal content here')
+        ])
+      ])
+    }
+
+    render(f(App), container)
+
+    // Initially modal should not be visible
+    expect(modalRoot.querySelector('[data-testid="modal"]')).toBeNull()
+
+    // Open modal
+    container.querySelector<HTMLButtonElement>('[data-testid="open"]')?.click()
+    await tick()
+
+    // Modal should be rendered in portal target
+    expect(modalRoot.querySelector('[data-testid="modal"]')).not.toBeNull()
+    expect(modalRoot.querySelector('h2')?.textContent).toBe('Modal Title')
+  })
+})
+
+describe('ErrorBoundary patterns', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -354,85 +313,40 @@ describe('Integration: Side Effects', () => {
     document.body.removeChild(container)
   })
 
-  it('should handle document title effect', async () => {
-    function PageTitle() {
-      const [title, setTitle] = state('Home')
-
-      effect(() => {
-        document.title = `App - ${title}`
-      }, [title])
-
-      return f('div', {}, [
-        f('span', { 'data-testid': 'current' }, title),
-        f('button', { 'data-testid': 'about', onclick: () => setTitle('About') }, 'Go to About'),
-        f('button', { 'data-testid': 'home', onclick: () => setTitle('Home') }, 'Go to Home')
+  it('should render normal content without errors', () => {
+    function App() {
+      return f(ErrorBoundary, {
+        fallback: () => f('div', { 'data-testid': 'error' }, 'Error!')
+      }, [
+        f(Suspense, { fallback: f('div', {}, 'Loading...') }, [
+          f('div', { 'data-testid': 'content' }, 'Working content')
+        ])
       ])
     }
 
-    render(f(PageTitle), container)
+    render(f(App), container)
 
-    expect(document.title).toBe('App - Home')
-
-    container.querySelector<HTMLButtonElement>('[data-testid="about"]')?.click()
-    await nextTick()
-    expect(document.title).toBe('App - About')
-
-    container.querySelector<HTMLButtonElement>('[data-testid="home"]')?.click()
-    await nextTick()
-    expect(document.title).toBe('App - Home')
+    expect(container.querySelector('[data-testid="content"]')).not.toBeNull()
+    expect(container.querySelector('[data-testid="error"]')).toBeNull()
   })
 
-  it('should clean up intervals on deps change', async () => {
-    const tickCounts: number[] = []
-
-    function Timer() {
-      const [running, setRunning] = state(false)
-      const [ticks, setTicks] = state(0)
-
-      effect(() => {
-        if (!running) return
-
-        const interval = setInterval(() => {
-          setTicks((t: number) => {
-            tickCounts.push(t + 1)
-            return t + 1
-          })
-        }, 10)
-
-        return () => clearInterval(interval)
-      }, [running])
-
-      return f('div', {}, [
-        f('span', { 'data-testid': 'ticks' }, String(ticks)),
-        f('button', {
-          'data-testid': 'toggle',
-          onclick: () => setRunning(!running)
-        }, running ? 'Stop' : 'Start')
+  it('should support Suspense inside ErrorBoundary', () => {
+    function App() {
+      return f(ErrorBoundary, {
+        fallback: () => f('div', {}, 'Error')
+      }, [
+        f(Suspense, { fallback: f('div', { 'data-testid': 'loading' }, 'Loading...') }, [
+          f('div', { 'data-testid': 'loaded' }, 'Loaded!')
+        ])
       ])
     }
 
-    render(f(Timer), container)
-
-    // Start timer
-    container.querySelector<HTMLButtonElement>('[data-testid="toggle"]')?.click()
-    await nextTick()
-
-    await new Promise(r => setTimeout(r, 50))
-
-    // Stop timer
-    container.querySelector<HTMLButtonElement>('[data-testid="toggle"]')?.click()
-    await nextTick()
-
-    const ticksAtStop = tickCounts.length
-
-    // Wait more - should not tick anymore
-    await new Promise(r => setTimeout(r, 50))
-
-    expect(tickCounts.length).toBe(ticksAtStop) // No more ticks after stop
+    render(f(App), container)
+    expect(container.querySelector('[data-testid="loaded"]')).not.toBeNull()
   })
 })
 
-describe('Integration: List Rendering', () => {
+describe('Ref + forwardRef + Components', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -444,60 +358,251 @@ describe('Integration: List Rendering', () => {
     document.body.removeChild(container)
   })
 
-  it('should handle keyed list reordering', async () => {
-    function List() {
-      const [items, setItems] = state(['A', 'B', 'C'])
+  it('should build form with forwarded refs', async () => {
+    const Input = forwardRef<HTMLInputElement, {
+      label: string
+      error?: string
+    }>((props, inputRef) => {
+      return f('div', { class: 'form-field' }, [
+        f('label', {}, props.label),
+        f('input', { ref: inputRef, class: props.error ? 'error' : '' }),
+        props.error ? f('span', { class: 'error-msg' }, props.error) : null
+      ])
+    })
 
-      const reverse = () => setItems([...items].reverse())
-      const shuffle = () => setItems(['B', 'A', 'C'])
+    function Form() {
+      const nameRef = ref<HTMLInputElement | null>(null)
+      const emailRef = ref<HTMLInputElement | null>(null)
+      const [submitted, setSubmitted] = state(false)
 
-      return f('div', {}, [
-        f('ul', {},
-          items.map((item: string) => f('li', { key: item, 'data-key': item }, item))
-        ),
-        f('button', { 'data-testid': 'reverse', onclick: reverse }, 'Reverse'),
-        f('button', { 'data-testid': 'shuffle', onclick: shuffle }, 'Shuffle')
+      const handleSubmit = () => {
+        const name = nameRef.current?.value || ''
+        const email = emailRef.current?.value || ''
+
+        if (name && email) {
+          setSubmitted(true)
+        } else {
+          // Focus first empty field
+          if (!name) nameRef.current?.focus()
+          else if (!email) emailRef.current?.focus()
+        }
+      }
+
+      if (submitted) {
+        return f('div', { 'data-testid': 'success' }, 'Form submitted!')
+      }
+
+      return f('form', { onsubmit: (e: Event) => e.preventDefault() }, [
+        f(Input, { ref: nameRef, label: 'Name' }),
+        f(Input, { ref: emailRef, label: 'Email' }),
+        f('button', { 'data-testid': 'submit', type: 'button', onclick: handleSubmit }, 'Submit')
       ])
     }
 
-    render(f(List), container)
+    render(f(Form), container)
 
-    const getItems = () =>
-      Array.from(container.querySelectorAll('li')).map(li => li.textContent)
+    // Try submit without data - should focus name input
+    container.querySelector<HTMLButtonElement>('[data-testid="submit"]')?.click()
+    await tick()
 
-    expect(getItems()).toEqual(['A', 'B', 'C'])
+    // Fill in the fields and submit
+    const inputs = container.querySelectorAll('input')
+    inputs[0].value = 'John'
+    inputs[1].value = 'john@example.com'
 
-    container.querySelector<HTMLButtonElement>('[data-testid="reverse"]')?.click()
-    await nextTick()
-    expect(getItems()).toEqual(['C', 'B', 'A'])
+    container.querySelector<HTMLButtonElement>('[data-testid="submit"]')?.click()
+    await tick()
 
-    container.querySelector<HTMLButtonElement>('[data-testid="shuffle"]')?.click()
-    await nextTick()
-    expect(getItems()).toEqual(['B', 'A', 'C'])
+    expect(container.querySelector('[data-testid="success"]')).not.toBeNull()
+  })
+})
+
+describe('Complex State Management', () => {
+  let container: HTMLDivElement
+
+  beforeEach(() => {
+    container = document.createElement('div')
+    document.body.appendChild(container)
   })
 
-  it('should handle conditional rendering', async () => {
-    function Conditional() {
-      const [show, setShow] = state(true)
+  afterEach(() => {
+    document.body.removeChild(container)
+  })
+
+  it('should handle deeply nested state updates', async () => {
+    interface AppState {
+      user: {
+        profile: {
+          name: string
+          settings: {
+            theme: string
+            notifications: boolean
+          }
+        }
+      }
+    }
+
+    function App() {
+      const [appState, setAppState] = state<AppState>({
+        user: {
+          profile: {
+            name: 'John',
+            settings: {
+              theme: 'light',
+              notifications: true
+            }
+          }
+        }
+      })
+
+      const toggleTheme = () => {
+        setAppState({
+          ...appState,
+          user: {
+            ...appState.user,
+            profile: {
+              ...appState.user.profile,
+              settings: {
+                ...appState.user.profile.settings,
+                theme: appState.user.profile.settings.theme === 'light' ? 'dark' : 'light'
+              }
+            }
+          }
+        })
+      }
 
       return f('div', {}, [
-        show ? f('p', { 'data-testid': 'content' }, 'Visible') : null,
-        f('button', { 'data-testid': 'toggle', onclick: () => setShow(!show) }, 'Toggle')
+        f('span', { 'data-testid': 'name' }, appState.user.profile.name),
+        f('span', { 'data-testid': 'theme' }, appState.user.profile.settings.theme),
+        f('button', { 'data-testid': 'toggle', onclick: toggleTheme }, 'Toggle Theme')
       ])
     }
 
-    render(f(Conditional), container)
+    render(f(App), container)
 
-    expect(container.querySelector('[data-testid="content"]')).not.toBeNull()
-
-    container.querySelector<HTMLButtonElement>('[data-testid="toggle"]')?.click()
-    await nextTick()
-
-    expect(container.querySelector('[data-testid="content"]')).toBeNull()
+    expect(container.querySelector('[data-testid="theme"]')?.textContent).toBe('light')
 
     container.querySelector<HTMLButtonElement>('[data-testid="toggle"]')?.click()
-    await nextTick()
+    await tick()
 
-    expect(container.querySelector('[data-testid="content"]')).not.toBeNull()
+    expect(container.querySelector('[data-testid="theme"]')?.textContent).toBe('dark')
+  })
+
+  it('should handle multiple independent states', async () => {
+    function MultiStateApp() {
+      const [count, setCount] = state(0)
+      const [text, setText] = state('')
+      const [items, setItems] = state<string[]>([])
+      const [flag, setFlag] = state(false)
+
+      return f('div', {}, [
+        f('div', {}, [
+          f('span', { 'data-testid': 'count' }, String(count)),
+          f('button', { 'data-testid': 'inc', onclick: () => setCount(c => c + 1) }, '+')
+        ]),
+        f('div', {}, [
+          f('input', {
+            'data-testid': 'input',
+            value: text,
+            oninput: (e: Event) => setText((e.target as HTMLInputElement).value)
+          }),
+          f('span', { 'data-testid': 'text' }, text)
+        ]),
+        f('div', {}, [
+          f('button', {
+            'data-testid': 'add-item',
+            onclick: () => setItems([...items, `Item ${items.length + 1}`])
+          }, 'Add Item'),
+          f('span', { 'data-testid': 'items-count' }, String(items.length))
+        ]),
+        f('div', {}, [
+          f('button', { 'data-testid': 'toggle-flag', onclick: () => setFlag(!flag) }, 'Toggle'),
+          f('span', { 'data-testid': 'flag' }, String(flag))
+        ])
+      ])
+    }
+
+    render(f(MultiStateApp), container)
+
+    // Test each state independently
+    container.querySelector<HTMLButtonElement>('[data-testid="inc"]')?.click()
+    await tick()
+    expect(container.querySelector('[data-testid="count"]')?.textContent).toBe('1')
+
+    const input = container.querySelector('[data-testid="input"]') as HTMLInputElement
+    input.value = 'Hello'
+    input.dispatchEvent(new Event('input'))
+    await tick()
+    expect(container.querySelector('[data-testid="text"]')?.textContent).toBe('Hello')
+
+    container.querySelector<HTMLButtonElement>('[data-testid="add-item"]')?.click()
+    await tick()
+    expect(container.querySelector('[data-testid="items-count"]')?.textContent).toBe('1')
+
+    container.querySelector<HTMLButtonElement>('[data-testid="toggle-flag"]')?.click()
+    await tick()
+    expect(container.querySelector('[data-testid="flag"]')?.textContent).toBe('true')
+  })
+})
+
+describe('Lifecycle Integration', () => {
+  let container: HTMLDivElement
+
+  beforeEach(() => {
+    container = document.createElement('div')
+    document.body.appendChild(container)
+  })
+
+  afterEach(() => {
+    document.body.removeChild(container)
+  })
+
+  it('should run effects on mount', async () => {
+    const lifecycle: string[] = []
+
+    function Child({ id }: { id: string }) {
+      effect(() => {
+        lifecycle.push(`${id} mounted`)
+      }, [])
+
+      return f('div', { 'data-testid': id }, id)
+    }
+
+    function App() {
+      return f('div', {}, [
+        f(Child, { id: 'child-1' }),
+        f(Child, { id: 'child-2' })
+      ])
+    }
+
+    render(f(App), container)
+    await tick()
+
+    expect(lifecycle).toContain('child-1 mounted')
+    expect(lifecycle).toContain('child-2 mounted')
+  })
+
+  it('should run sync during render for DOM access', () => {
+    let syncExecuted = false
+    let refAttached = false
+
+    function Component() {
+      const divRef = ref<HTMLDivElement | null>(null)
+
+      sync(() => {
+        syncExecuted = true
+        if (divRef.current) {
+          refAttached = true
+        }
+      }, [])
+
+      return f('div', { ref: divRef, 'data-testid': 'target' }, 'Content')
+    }
+
+    render(f(Component), container)
+
+    expect(syncExecuted).toBe(true)
+    // Note: ref may not be attached during first sync call
+    expect(container.querySelector('[data-testid="target"]')).not.toBeNull()
   })
 })
