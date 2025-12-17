@@ -25,7 +25,7 @@ export function Suspense(props: SuspenseProps): FNodeChild {
 
   // Track pending promises using hook for mutable Set
   const pendingSet = hook(() => new Set<Promise<any>>())
-  const [pendingCount, setPendingCount] = state(0)
+  const [, setPendingCount] = state(0)
   const [showFallback, setShowFallback] = state(false)
 
   // Register function for lazy components

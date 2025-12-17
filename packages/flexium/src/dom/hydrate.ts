@@ -141,7 +141,7 @@ function hydrateNode(fnode: FNodeChild, parent: HTMLElement): Node | Node[] | nu
   // Object (FNode)
   if (typeof fnode === 'object' && isFNode(fnode)) {
     if (typeof fnode.type === 'string') {
-      return hydrateElement(fnode, parent)
+      return hydrateElement(fnode)
     }
 
     if (typeof fnode.type === 'function') {
@@ -186,7 +186,7 @@ function hydrateTextNode(text: string): Node | null {
   return current
 }
 
-function hydrateElement(fnode: FNode, parent: HTMLElement): Node {
+function hydrateElement(fnode: FNode): Node {
   skipEmptyTextNodes()
 
   const current = hydrationCursor as Element
@@ -321,7 +321,7 @@ function hydrateComponent(fnode: FNode, parent: HTMLElement): Node | Node[] | nu
 
       // Re-render logic (same as render.ts but simplified)
       const currentProps = instance.props
-      const currentResult = runWithComponent(instance, () => Component(currentProps))
+      runWithComponent(instance, () => Component(currentProps))
 
       // For subsequent renders, use full render path
       // This will be handled by the normal reconciliation
