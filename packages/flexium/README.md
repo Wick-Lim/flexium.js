@@ -11,9 +11,9 @@ Flexium is a next-generation UI framework that unifies state management, async d
 ## Key Features
 
 - **Unified State API** - No more `useState`, `useRecoil`, `useQuery` separation. Just `state()`.
-- **No Virtual DOM** - Direct DOM updates for maximum performance and minimal memory usage.
-- **Tiny Bundle** - ~8KB (min+gzip) including Router and Motion.
-- **Cross-Platform** - DOM, Canvas, and SSR renderers included.
+- **No Virtual DOM** - Direct DOM updates via Proxy-based fine-grained reactivity.
+- **Tiny Bundle** - Minimal footprint with tree-shaking support.
+- **Cross-Platform** - DOM, Canvas, Server (SSR) renderers included.
 - **TypeScript First** - Full type inference out of the box.
 - **Zero-Config JSX** - Works with standard tooling.
 
@@ -39,20 +39,20 @@ Flexium unifies all state concepts into one function.
 ### Local State
 
 ```tsx
-import { state } from 'flexium/core';
-import { render } from 'flexium/dom';
+import { state } from 'flexium/core'
+import { render } from 'flexium/dom'
 
 function Counter() {
-  const [count, setCount] = state(0);
+  const [count, setCount] = state(0)
 
   return (
     <button onclick={() => setCount(c => c + 1)}>
       Count: {count}
     </button>
-  );
+  )
 }
 
-render(<Counter />, document.getElementById('app'));
+render(Counter, document.getElementById('app'))
 ```
 
 ### Global State
@@ -61,16 +61,17 @@ Just add a `key` to share state across components. Keys can be strings or arrays
 
 ```tsx
 // Define global state with array key
-const [theme, setTheme] = state('light', { key: ['app', 'theme'] });
+const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
 
 function ThemeToggle() {
-  const [theme, setTheme] = state(undefined, { key: ['app', 'theme'] });
+  // Access same state anywhere with the same key
+  const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
 
   return (
     <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
       Theme: {theme}
     </button>
-  );
+  )
 }
 ```
 
@@ -81,55 +82,40 @@ Pass an async function to handle data fetching automatically.
 ```tsx
 function UserProfile({ id }) {
   const [user, control] = state(async () => {
-    const res = await fetch(`/api/users/${id}`);
-    return res.json();
-  });
+    const res = await fetch(`/api/users/${id}`)
+    return res.json()
+  })
 
-  if (control.loading) return <div>Loading...</div>;
-  if (control.error) return <div>Error!</div>;
+  if (control.loading) return <div>Loading...</div>
+  if (control.error) return <div>Error!</div>
 
   return (
     <div>
       <h1>{user.name}</h1>
       <button onclick={() => control.refetch()}>Reload</button>
     </div>
-  );
+  )
 }
 ```
 
-### Derived State
+### Computed/Derived State
 
 ```tsx
-const [count, setCount] = state(1);
-const [double] = state(() => count * 2, { deps: [count] });
-```
-
-### Array Keys & Params
-
-```tsx
-// Array keys for dynamic caching (like TanStack Query)
-const [user] = state(fetchUser, { key: ['user', userId] });
-
-// Explicit params for better DX
-const [data] = state(
-  async ({ userId, postId }) => fetchPost(userId, postId),
-  {
-    key: ['posts', userId, postId],
-    params: { userId, postId }
-  }
-);
+const [count, setCount] = state(1)
+const [doubled] = state(() => count * 2, { deps: [count] })
 ```
 
 ## Package Structure
 
 ```
 flexium
-├── /core       # Core reactivity: state(), effect(), batch()
-├── /dom        # DOM renderer: render(), Portal
-├── /canvas     # Canvas renderer: Canvas, Rect, Circle, Text
-├── /primitives # Cross-platform components: Row, Column, Stack
-├── /router     # SPA routing: Router, Route, Link
-└── /server     # SSR utilities
+├── /core         # Core reactivity: state(), effect(), sync(), context()
+├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
+├── /ref          # Ref system: ref(), forwardRef()
+├── /router       # SPA routing: Routes, Route, Link, Outlet
+├── /server       # SSR: renderToString(), renderToStaticMarkup()
+├── /canvas       # Canvas 2D: Canvas, DrawRect, DrawCircle, DrawText
+└── /interactive  # Game loop: loop(), keyboard(), mouse()
 ```
 
 ## Control Flow
@@ -138,62 +124,19 @@ Use native JavaScript for control flow - no special components needed:
 
 ```tsx
 // Conditional rendering
-{isLoggedIn() ? <Dashboard /> : <Login />}
+{isLoggedIn ? <Dashboard /> : <Login />}
 
 // Short-circuit for simple conditions
-{isAdmin() && <AdminPanel />}
+{isAdmin && <AdminPanel />}
 
-// List rendering with optimized reconciliation
+// List rendering
 {items.map(item => <Item key={item.id} data={item} />)}
-
-// Pattern matching with ternary chains
-{status() === 'loading' ? <Loading /> :
- status() === 'error' ? <Error /> :
- status() === 'success' ? <Success /> :
- <Default />}
-```
-
-## Canvas Rendering
-
-```tsx
-import { Canvas, Rect, Circle, Text } from 'flexium/canvas';
-
-function App() {
-  const [x, setX] = state(100);
-
-  return (
-    <Canvas width={400} height={300}>
-      <Rect x={0} y={0} width={400} height={300} fill="#1a1a2e" />
-      <Circle x={x} y={150} radius={30} fill="#e94560" />
-      <Text x={200} y={50} text="Hello Canvas!" fill="white" />
-    </Canvas>
-  );
-}
-```
-
-## Cross-Platform Primitives
-
-```tsx
-import { Row, Column, Text, Pressable } from 'flexium/primitives';
-
-function App() {
-  return (
-    <Column gap={16} padding={20}>
-      <Text size="xl" weight="bold">Welcome</Text>
-      <Row gap={8}>
-        <Pressable onPress={() => console.log('clicked')}>
-          <Text>Click me</Text>
-        </Pressable>
-      </Row>
-    </Column>
-  );
-}
 ```
 
 ## Routing
 
 ```tsx
-import { Routes, Route, Link } from 'flexium/router';
+import { Routes, Route, Link, router } from 'flexium/router'
 
 function App() {
   return (
@@ -206,21 +149,135 @@ function App() {
       <Route path="/about" component={About} />
       <Route path="/users/:id" component={UserProfile} />
     </Routes>
-  );
+  )
 }
 
 function UserProfile({ params }) {
-  // Params are passed as props to the component
-  return <h1>User: {params.id}</h1>;
+  return <h1>User: {params.id}</h1>
 }
 
 // Or use the router hook
-import { router } from 'flexium/router';
-
 function UserProfileHook() {
-  const r = router();
-  // Access params directly from router context
-  return <h1>User: {r.params.id}</h1>;
+  const r = router()
+  return <h1>User: {r.params.id}</h1>
+}
+```
+
+## Canvas Rendering
+
+```tsx
+import { Canvas, DrawRect, DrawCircle, DrawText } from 'flexium/canvas'
+
+function App() {
+  const [x, setX] = state(100)
+
+  return (
+    <Canvas width={400} height={300}>
+      <DrawRect x={0} y={0} width={400} height={300} fill="#1a1a2e" />
+      <DrawCircle x={x} y={150} radius={30} fill="#e94560" />
+      <DrawText x={200} y={50} text="Hello Canvas!" fill="white" />
+    </Canvas>
+  )
+}
+```
+
+## Game Development
+
+```tsx
+import { state, effect } from 'flexium/core'
+import { Canvas, DrawRect } from 'flexium/canvas'
+import { loop, keyboard, Keys } from 'flexium/interactive'
+
+function Game() {
+  const [x, setX] = state(100)
+  const kb = keyboard()
+
+  const gameLoop = loop({
+    fixedFps: 60,
+    onUpdate: (delta) => {
+      if (kb.isPressed(Keys.ArrowRight)) setX(x => x + 200 * delta)
+      if (kb.isPressed(Keys.ArrowLeft)) setX(x => x - 200 * delta)
+    }
+  })
+
+  effect(() => {
+    gameLoop.start()
+    return () => gameLoop.stop()
+  }, [])
+
+  return (
+    <Canvas width={800} height={600}>
+      <DrawRect x={x} y={300} width={50} height={50} fill="red" />
+    </Canvas>
+  )
+}
+```
+
+## Server-Side Rendering
+
+```tsx
+import { renderToString } from 'flexium/server'
+import { hydrate } from 'flexium/dom'
+
+// Server
+const { html, state } = renderToString(App, { hydrate: true })
+
+// Client
+hydrate(App, document.getElementById('root'), { state })
+```
+
+## Built-in Components
+
+### Portal
+
+```tsx
+import { Portal } from 'flexium/dom'
+
+<Portal target={document.body}>
+  <Modal />
+</Portal>
+```
+
+### Suspense
+
+```tsx
+import { Suspense, lazy } from 'flexium/dom'
+
+const LazyComponent = lazy(() => import('./Heavy'))
+
+<Suspense fallback={<Loading />}>
+  <LazyComponent />
+</Suspense>
+```
+
+### ErrorBoundary
+
+```tsx
+import { ErrorBoundary } from 'flexium/dom'
+
+<ErrorBoundary fallback={(error) => <Error message={error.message} />}>
+  <App />
+</ErrorBoundary>
+```
+
+## Context API
+
+```tsx
+import { createContext, context } from 'flexium/core'
+
+const ThemeCtx = createContext('light')
+
+function App() {
+  return (
+    <ThemeCtx.Provider value="dark">
+      <Child />
+    </ThemeCtx.Provider>
+  )
+}
+
+function Child() {
+  const theme = context(ThemeCtx)
+  return <div>Theme: {theme}</div>
 }
 ```
 
