@@ -7,7 +7,7 @@ Official Vite plugin for [Flexium](https://flexium.junhyuk.im) - a fine-grained 
 - **JSX Transform** - Automatic configuration for Flexium's JSX
 - **Hot Module Replacement** - Component-level HMR for fast development
 - **DevTools Integration** - Development tools support
-- **Auto Imports** - Optionally auto-import common primitives
+- **Auto Imports** - Optionally auto-import common APIs
 
 ## Installation
 
@@ -19,12 +19,12 @@ npm install vite-plugin-flexium -D
 
 ```ts
 // vite.config.ts
-import { defineConfig } from 'vite';
-import flexium from 'vite-plugin-flexium';
+import { defineConfig } from 'vite'
+import flexium from 'vite-plugin-flexium'
 
 export default defineConfig({
-  plugins: [flexium()],
-});
+  plugins: [flexium()]
+})
 ```
 
 ## Options
@@ -32,22 +32,22 @@ export default defineConfig({
 ```ts
 interface FlexiumPluginOptions {
   // Enable JSX transform (default: true)
-  jsx?: boolean;
+  jsx?: boolean
 
   // Enable HMR (default: true)
-  hmr?: boolean;
+  hmr?: boolean
 
   // Enable DevTools (default: true in development)
-  devtools?: boolean;
+  devtools?: boolean
 
   // Include patterns (default: [/\.[jt]sx?$/])
-  include?: (string | RegExp)[];
+  include?: (string | RegExp)[]
 
   // Exclude patterns (default: [/node_modules/])
-  exclude?: (string | RegExp)[];
+  exclude?: (string | RegExp)[]
 
   // Auto-import Flexium primitives (default: false)
-  autoImport?: boolean;
+  autoImport?: boolean
 }
 ```
 
@@ -57,28 +57,28 @@ interface FlexiumPluginOptions {
 
 ```ts
 // vite.config.ts
-import { defineConfig } from 'vite';
-import flexium from 'vite-plugin-flexium';
+import { defineConfig } from 'vite'
+import flexium from 'vite-plugin-flexium'
 
 export default defineConfig({
-  plugins: [flexium()],
-});
+  plugins: [flexium()]
+})
 ```
 
 ### With Auto Imports
 
 ```ts
 // vite.config.ts
-import { defineConfig } from 'vite';
-import flexium from 'vite-plugin-flexium';
+import { defineConfig } from 'vite'
+import flexium from 'vite-plugin-flexium'
 
 export default defineConfig({
   plugins: [
     flexium({
-      autoImport: true, // Auto-import state, effect, computed, etc.
-    }),
-  ],
-});
+      autoImport: true // Auto-import signal, computed, effect
+    })
+  ]
+})
 ```
 
 ### TypeScript Configuration
@@ -98,11 +98,11 @@ Or use pragma comments:
 
 ```tsx
 /** @jsxImportSource flexium */
-import { state } from 'flexium/core';
+import { state } from 'flexium/core'
 
 function App() {
-  const [count, setCount] = state(0);
-  return <button onclick={() => setCount(c => c + 1)}>{count}</button>;
+  const [count, setCount] = state(0)
+  return <button onclick={() => setCount(c => c + 1)}>{count}</button>
 }
 ```
 
@@ -120,9 +120,64 @@ In development mode, the plugin adds `window.__FLEXIUM_DEVTOOLS__` for debugging
 
 ```ts
 // Access devtools in browser console
-window.__FLEXIUM_DEVTOOLS__.signals; // Map of all signals
-window.__FLEXIUM_DEVTOOLS__.effects; // Map of all effects
-window.__FLEXIUM_DEVTOOLS__.components; // Map of all components
+window.__FLEXIUM_DEVTOOLS__.signals    // Map of all signals
+window.__FLEXIUM_DEVTOOLS__.effects    // Map of all effects
+window.__FLEXIUM_DEVTOOLS__.components // Map of all components
+```
+
+## How It Works
+
+### JSX Plugin
+
+Configures esbuild to use Flexium's `h()` function and `Fragment`:
+
+```ts
+esbuild: {
+  jsxFactory: 'h',
+  jsxFragment: 'Fragment',
+  jsxInject: `import { h, Fragment } from 'flexium'`
+}
+```
+
+### HMR Plugin
+
+Injects HMR accept code into component files:
+
+```ts
+if (import.meta.hot) {
+  import.meta.hot.accept((newModule) => {
+    window.__FLEXIUM_HMR__?.handleUpdate?.(id, newModule)
+  })
+}
+```
+
+### DevTools Plugin
+
+Injects development tools initialization:
+
+```html
+<script type="module">
+  window.__FLEXIUM_DEVTOOLS__ = {
+    version: '...',
+    enabled: true,
+    signals: new Map(),
+    effects: new Map(),
+    components: new Map()
+  }
+</script>
+```
+
+## Named Exports
+
+For advanced usage, individual plugins are also exported:
+
+```ts
+import {
+  createJsxPlugin,
+  createHmrPlugin,
+  createDevToolsPlugin,
+  createAutoImportPlugin
+} from 'vite-plugin-flexium'
 ```
 
 ## License
