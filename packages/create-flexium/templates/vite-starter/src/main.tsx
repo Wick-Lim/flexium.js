@@ -3,80 +3,71 @@ import { render } from 'flexium/dom'
 import './style.css'
 
 function App() {
-  // State inside component - now works with hook system!
   const [count, setCount] = state(0)
   const [doubled] = state(() => count * 2)
-  const [tripled] = state(() => count * 3)
 
-  // Effect for logging
   effect(() => {
-    console.log('Count changed:', +count)
+    console.log('Count:', +count)
   })
 
-  // Event handlers
-  const increment = () => setCount(c => c + 1)
-  const decrement = () => setCount(c => c - 1)
-  const reset = () => setCount(0)
-
   return (
-    <div class="container">
-      <div class="hero">
-        <h1>Flexium</h1>
-        <p class="subtitle">Fine-grained Reactivity Framework</p>
-        <div class="tags">
-          <span class="tag">State</span>
-          <span class="tag">Computed</span>
-          <span class="tag">Effects</span>
-          <span class="tag">Zero Dependencies</span>
-        </div>
-      </div>
+    <div class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8">
+      <div class="max-w-2xl mx-auto">
+        <header class="text-center mb-16">
+          <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-4">
+            Flexium
+          </h1>
+          <p class="text-slate-400 text-lg">
+            Fine-grained Reactivity Framework
+          </p>
+        </header>
 
-      <div class="card">
-        <h2>Interactive Counter</h2>
-        <div class="display">{count}</div>
-        <div class="stats">
-          <div class="stat-card">
-            <div class="stat-value">{doubled}</div>
-            <div class="stat-label">Double</div>
+        <div class="bg-slate-800/50 backdrop-blur rounded-2xl p-8 border border-slate-700 mb-8">
+          <h2 class="text-xl font-semibold mb-6 flex items-center gap-3">
+            <span class="w-1 h-6 bg-blue-500 rounded"></span>
+            Counter
+          </h2>
+
+          <div class="text-7xl font-bold text-center py-8 text-white">
+            {count}
           </div>
-          <div class="stat-card">
-            <div class="stat-value">{tripled}</div>
-            <div class="stat-label">Triple</div>
+
+          <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-slate-900/50 rounded-xl p-6 text-center border border-slate-700">
+              <div class="text-3xl font-bold mb-2">{doubled}</div>
+              <div class="text-xs text-slate-500 uppercase tracking-wide">Double</div>
+            </div>
+            <div class="bg-slate-900/50 rounded-xl p-6 text-center border border-slate-700">
+              <div class="text-3xl font-bold mb-2">{() => count * 3}</div>
+              <div class="text-xs text-slate-500 uppercase tracking-wide">Triple</div>
+            </div>
+          </div>
+
+          <div class="flex gap-4 justify-center">
+            <button
+              class="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg font-medium transition-colors"
+              onclick={() => setCount(c => c + 1)}
+            >
+              + Increment
+            </button>
+            <button
+              class="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg font-medium transition-colors"
+              onclick={() => setCount(c => c - 1)}
+            >
+              - Decrement
+            </button>
+            <button
+              class="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium transition-colors"
+              onclick={() => setCount(0)}
+            >
+              Reset
+            </button>
           </div>
         </div>
-        <div class="buttons">
-          <button class="btn btn-success" onclick={increment}>
-            + Increment
-          </button>
-          <button class="btn btn-danger" onclick={decrement}>
-            - Decrement
-          </button>
-          <button class="btn btn-secondary" onclick={reset}>
-            Reset
-          </button>
-        </div>
-      </div>
 
-      <div class="card">
-        <h2>Features</h2>
-        <ul class="features">
-          <li>
-            <strong>State</strong> - Reactive primitives for state management
-          </li>
-          <li>
-            <strong>Computed</strong> - Automatically derived values
-          </li>
-          <li>
-            <strong>Effects</strong> - Side effects that react to changes
-          </li>
-          <li>
-            <strong>JSX</strong> - Familiar syntax with fine-grained updates
-          </li>
-        </ul>
-      </div>
-
-      <div class="footer">
-        Built with Flexium
+        <footer class="text-center text-slate-500 text-sm">
+          Built with Flexium + Tailwind CSS
+        </footer>
       </div>
     </div>
   )
