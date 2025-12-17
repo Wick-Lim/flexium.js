@@ -4,11 +4,12 @@ import './style.css'
 
 function App() {
   const [count, setCount] = state(0)
-  const [doubled] = state(() => count * 2)
+  const [doubled] = state(() => count * 2, { deps: [count] })
+  const [tripled] = state(() => count * 3, { deps: [count] })
 
   effect(() => {
-    console.log('Count:', +count)
-  })
+    console.log('Count:', count)
+  }, [count])
 
   return (
     <div class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8">
@@ -38,7 +39,7 @@ function App() {
               <div class="text-xs text-slate-500 uppercase tracking-wide">Double</div>
             </div>
             <div class="bg-slate-900/50 rounded-xl p-6 text-center border border-slate-700">
-              <div class="text-3xl font-bold mb-2">{() => count * 3}</div>
+              <div class="text-3xl font-bold mb-2">{tripled}</div>
               <div class="text-xs text-slate-500 uppercase tracking-wide">Triple</div>
             </div>
           </div>
