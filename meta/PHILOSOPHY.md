@@ -8,7 +8,8 @@ Modern JavaScript development is fragmented. To build a simple app, you need:
 - useState for local state
 - Recoil/Jotai/Zustand for global state
 - React Query/SWR for data fetching
-- Redux Toolkit Query for API caching
+- Canvas libraries for game/visualization
+- Separate routing solutions
 
 This is insanity.
 
@@ -19,7 +20,7 @@ A developer must learn 5+ different mental models, 5+ different APIs, and manage
 **One function: `state()`**
 
 ```javascript
-import { state } from 'flexium'
+import { state } from 'flexium/core'
 
 // That's it. One import. One concept.
 ```
@@ -31,21 +32,18 @@ const [count, setCount] = state(0)
 
 ### Global State
 ```javascript
-// String key for simple cases
-const [theme, setTheme] = state('dark', { key: 'theme' })
-
 // Array key for hierarchical namespacing
 const [user] = state(null, { key: ['app', 'user', userId] })
 ```
 
-### Async Data
+### Async Data (Resource)
 ```javascript
-const [user] = state(async () => fetchUser(id))
+const [user, { loading, error, refetch }] = state(() => fetchUser(id))
 ```
 
 ### Computed Values
 ```javascript
-const [doubled] = state(() => count * 2)
+const [doubled] = state(() => count * 2, { deps: [count] })
 ```
 
 Same function. Same mental model. Different capabilities based on what you pass.
@@ -64,7 +62,7 @@ Flexium unifies:
 - Local state (useState equivalent)
 - Global state (Recoil atoms equivalent)
 - Async resources (React Query equivalent)
-- Computed values (selectors equivalent)
+- Computed values (useMemo equivalent)
 
 Into one `state()` function.
 
@@ -76,12 +74,11 @@ Flexium has no:
 - Virtual DOM
 - Complex diffing algorithms
 - Hooks rules to memorize
-- Context API boilerplate
-- Provider hierarchies
+- Provider hierarchies (except for explicit Context)
 
-Just signals. Direct, traceable, debuggable.
+Just Proxy-based reactivity. Direct, traceable, debuggable.
 
-When a signal changes, its subscribers update. That's the entire mental model.
+When a reactive property changes, its effects update. That's the entire mental model.
 
 ### 3. Performance
 
@@ -89,29 +86,44 @@ When a signal changes, its subscribers update. That's the entire mental model.
 
 React re-renders entire component trees. Then you optimize with memo(), useMemo(), useCallback().
 
-Flexium updates only what depends on what changed. No optimization needed. It's just how signals work.
+Flexium uses **Fine-grained Reactivity**. Only the specific DOM nodes that depend on changed values update. No optimization needed. It's just how Proxy tracking works.
 
 ```javascript
-const [name] = state('John')
-const [age] = state(30)
+const [name, setName] = state('John')
+const [age, setAge] = state(30)
 
-// Only this text node updates when name changes
-<span>{String(name)}</span>
+// Only this span updates when name changes
+<span>{name}</span>
 
-// This doesn't re-run when age changes
-<span>{+age}</span>
+// This span doesn't re-render when name changes
+<span>{age}</span>
 ```
 
-### 4. Honesty
+### 4. Cross-Platform
+
+> "Write once, render anywhere"
+
+Flexium isn't just a DOM framework. It's a reactive core with multiple renderers:
+
+| Module | Purpose |
+|--------|---------|
+| `flexium/dom` | Web DOM rendering |
+| `flexium/server` | Server-side rendering (SSR) |
+| `flexium/canvas` | 2D Canvas rendering |
+| `flexium/interactive` | Game loop & input handling |
+
+Same `state()`, same components, different targets.
+
+### 5. Honesty
 
 > "No magic, no surprises"
 
 - No hidden re-renders
 - No stale closure traps
-- No dependency array footguns
-- No rules of hooks
+- No dependency array footguns (deps are optional, for memoization)
+- No rules of hooks (call order doesn't matter for `state()`)
 
-Signals are explicit. You use state values directly (no `.value` needed). Dependencies are tracked automatically by what you access.
+Dependencies are tracked automatically by what you access through Proxy.
 
 ## What We Don't Do
 
@@ -121,14 +133,28 @@ We don't add features "just in case." Every feature must prove its worth.
 
 ### No Framework Lock-in
 
-The signal system is pure JavaScript. No JSX required. No build step required for the core.
+The reactive system is pure JavaScript. No JSX required. No build step required for the core.
+
+```javascript
+import { f } from 'flexium/dom'
+
+f('div', { class: 'card' },
+  f('h1', null, 'Title'),
+  f('p', null, 'Content')
+)
+```
 
 ### No Kitchen Sink
 
 We don't bundle everything. Import what you need:
-- `flexium/core` - Signals only
-- `flexium/dom` - DOM renderer
-- `flexium/primitives` - UI components
+
+```javascript
+import { state, effect } from 'flexium/core'  // Core reactivity
+import { render } from 'flexium/dom'           // DOM renderer
+import { renderToString } from 'flexium/server' // SSR
+import { Canvas, DrawRect } from 'flexium/canvas' // Canvas
+import { loop, keyboard } from 'flexium/interactive' // Game
+```
 
 ### No Backwards Compatibility Hacks
 
@@ -136,18 +162,18 @@ When something is wrong, we fix it. We don't preserve broken behavior for "compa
 
 ## Design Decisions
 
-### Why Signals Over Virtual DOM?
+### Why Proxy Over Virtual DOM?
 
 Virtual DOM was revolutionary in 2013. It's 2024 now.
 
-| Virtual DOM | Signals |
-|------------|---------|
+| Virtual DOM | Proxy Reactivity |
+|-------------|------------------|
 | Diffing cost on every update | Direct updates only |
 | Requires optimization (memo, etc.) | Fast by default |
 | Complex mental model | Simple mental model |
 | Hard to debug | Easy to trace |
 
-Flexium uses a **Hybrid Proxy Architecture** that enables direct usage of state values in JSX and arithmetic operations, making signals feel like plain values while maintaining fine-grained reactivity.
+Flexium uses **Proxy-based Fine-grained Reactivity** that tracks exactly which properties are accessed and updates only what's needed.
 
 ### Why One state() Instead of Multiple Hooks?
 
@@ -165,58 +191,82 @@ useCallback()
 state()
 ```
 
-### Why No JSX Requirement?
+### Why Multiple Renderers?
 
-JSX is convenient, not essential. The `h()` function works without compilation:
+The web isn't just DOM. Games need Canvas. Emails need static HTML. Flexium's architecture separates:
 
-```javascript
-h('div', { class: 'card' },
-  h('h1', null, 'Title'),
-  h('p', null, 'Content')
-)
-```
+1. **Reactive Core** - Pure state management
+2. **Renderers** - Platform-specific output
+
+This means you can use the same mental model for a web app, a game, or server-rendered content.
 
 ## The Ideal Flexium Code
 
 ```javascript
-import { state, effect } from 'flexium'
-import { render, Row, Column, Button, Text } from 'flexium/dom'
+import { state, effect } from 'flexium/core'
+import { render } from 'flexium/dom'
 
-function App() {
+function Counter() {
   const [count, setCount] = state(0)
-  const [doubled] = state(() => count * 2)
 
   return (
-    <Column gap={16}>
-      <Text>Count: {+count}</Text>
-      <Text>Doubled: {+doubled}</Text>
-      <Row gap={8}>
-        <Button onClick={() => setCount(c => c - 1)}>-</Button>
-        <Button onClick={() => setCount(c => c + 1)}>+</Button>
-      </Row>
-    </Column>
+    <div>
+      <span>Count: {count}</span>
+      <button onClick={() => setCount(c => c + 1)}>+</button>
+    </div>
   )
 }
 
-render(<App />, document.getElementById('root'))
+render(Counter, document.getElementById('root'))
 ```
 
 Notice:
 - One import path for state
 - One import path for rendering
-- No providers, no context, no wrappers
+- No providers, no context wrappers
 - State and UI in one place
 - Clear, readable, maintainable
+
+## The Ideal Flexium Game
+
+```javascript
+import { state } from 'flexium/core'
+import { render } from 'flexium/dom'
+import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
+import { loop, keyboard, Keys } from 'flexium/interactive'
+
+function Game() {
+  const [x, setX] = state(100)
+  const kb = keyboard()
+
+  const gameLoop = loop({
+    onUpdate: (delta) => {
+      if (kb.isPressed(Keys.ArrowRight)) setX(x => x + 200 * delta)
+      if (kb.isPressed(Keys.ArrowLeft)) setX(x => x - 200 * delta)
+    }
+  })
+
+  effect(() => { gameLoop.start(); return () => gameLoop.stop() }, [])
+
+  return (
+    <Canvas width={800} height={600}>
+      <DrawRect x={x} y={300} width={50} height={50} fill="red" />
+    </Canvas>
+  )
+}
+```
+
+Same `state()`. Same patterns. Different output.
 
 ## Summary
 
 | Old Way | Flexium Way |
 |---------|-------------|
 | Multiple state libraries | One `state()` |
-| Virtual DOM diffing | Direct signal updates |
+| Virtual DOM diffing | Direct Proxy updates |
 | Optimization required | Fast by default |
 | Complex mental model | Simple mental model |
-| Provider hierarchies | Flat composition |
+| DOM only | DOM, Canvas, Server |
 
 Flexium is not just another framework. It's a return to sanity.
 

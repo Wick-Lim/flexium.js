@@ -1,352 +1,699 @@
 # Flexium Architecture
 
-Flexium is built on a **Hybrid Proxy Architecture** that unifies all state management into a single `state()` API while maintaining fine-grained reactivity through signals.
+Flexium is built on a **Proxy-based Fine-grained Reactivity** system that provides direct DOM updates without Virtual DOM overhead.
 
 ## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Application Layer                     │
-│              (Your Components & Primitives)              │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│              High-Level API (state.ts)                   │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │  state() - Unified API                           │  │
-│  │  - Hybrid Proxy wrapping                         │  │
-│  │  - Global state registry                         │  │
-│  │  - Automatic mode detection                      │  │
-│  └──────────────────────────────────────────────────┘  │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│         Low-Level Primitives (signal.ts)                │
-│  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ │
-│  │ SignalNode   │  │ ComputedNode │  │ EffectNode   │ │
-│  │ (writable)   │  │ (derived)    │  │ (side fx)    │ │
-│  └──────────────┘  └──────────────┘  └─────────────┘ │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│            Dependency Graph (graph.ts)                  │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │  Doubly Linked List Structure                    │  │
-│  │  - Link pooling (GC optimization)                │  │
-│  │  - O(1) connect/disconnect                       │  │
-│  └──────────────────────────────────────────────────┘  │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│         Execution & Batching (sync.ts, effect.ts)      │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │  Auto-batching (microtask)                       │  │
-│  │  Manual batching (sync())                        │  │
-│  │  Owner/Scope management (owner.ts)                │  │
-│  └──────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
++------------------------------------------------------------------+
+|                      Application Layer                            |
+|                  (Your Components & JSX)                          |
++--------------------------------+---------------------------------+
+                                 |
++--------------------------------v---------------------------------+
+|                         Renderers                                 |
+|  +----------+  +----------+  +----------+  +----------------+    |
+|  |   DOM    |  |  Server  |  |  Canvas  |  |  Interactive   |    |
+|  | render() |  | toString |  | Canvas() |  | loop/keyboard  |    |
+|  +----------+  +----------+  +----------+  +----------------+    |
++--------------------------------+---------------------------------+
+                                 |
++--------------------------------v---------------------------------+
+|                      Core Reactive System                         |
+|  +------------------+  +------------------+  +----------------+   |
+|  |    reactive()    |  |     state()      |  |   effect()     |   |
+|  |  Proxy tracking  |  | Signal/Resource  |  |  Side effects  |   |
+|  +------------------+  +------------------+  +----------------+   |
+|                                                                   |
+|  +------------------+  +------------------+  +----------------+   |
+|  |     hook()       |  |   context()      |  |    sync()      |   |
+|  | Component state  |  |   Context API    |  |   Batching     |   |
+|  +------------------+  +------------------+  +----------------+   |
++------------------------------------------------------------------+
 ```
 
-## Core Components
+## Module Structure
 
-### 1. State API (`state.ts`)
+```
+packages/flexium/src/
+├── index.ts              # VERSION export
+├── jsx-runtime.ts        # JSX transform (jsx, jsxs, Fragment)
+├── jsx-dev-runtime.ts    # Development JSX (jsxDEV)
+│
+├── core/                 # Reactive Core
+│   ├── index.ts          # Public exports
+│   ├── types.ts          # Type definitions
+│   ├── reactive.ts       # Proxy-based reactivity
+│   ├── state.ts          # Unified state API
+│   ├── lifecycle.ts      # Effects & scheduling
+│   ├── hook.ts           # Component instance hooks
+│   ├── context.ts        # Context API
+│   └── devtools.ts       # DevTools integration
+│
+├── ref/                  # Ref System
+│   ├── index.ts
+│   ├── types.ts
+│   ├── ref.ts            # ref()
+│   └── forwardRef.ts     # forwardRef()
+│
+├── dom/                  # DOM Renderer
+│   ├── index.ts
+│   ├── types.ts          # FNode types
+│   ├── f.ts              # FNode factory
+│   ├── render.ts         # DOM rendering & reconciliation
+│   ├── hydrate.ts        # SSR hydration
+│   └── components/       # Built-in components
+│       ├── Portal.tsx
+│       ├── Suspense.tsx
+│       ├── ErrorBoundary.tsx
+│       └── lazy.ts
+│
+├── router/               # Client-side Router
+│   ├── index.ts
+│   ├── types.ts
+│   ├── router.ts         # Router context & location
+│   ├── utils.ts          # Route matching
+│   └── dom/              # Router components
+│       ├── Routes.tsx
+│       ├── Route.tsx
+│       ├── Link.tsx
+│       └── Outlet.tsx
+│
+├── server/               # Server-side Rendering
+│   ├── index.ts
+│   ├── types.ts
+│   ├── renderToString.ts # SSR renderer
+│   ├── serverState.ts    # Server state management
+│   └── escape.ts         # HTML escaping
+│
+├── canvas/               # Canvas 2D Renderer
+│   ├── index.ts
+│   ├── types.ts
+│   ├── Canvas.tsx        # Canvas component
+│   └── dom/              # Draw components
+│       ├── DrawRect.tsx
+│       ├── DrawCircle.tsx
+│       ├── DrawArc.tsx
+│       ├── DrawLine.tsx
+│       ├── DrawText.tsx
+│       └── DrawPath.tsx
+│
+└── interactive/          # Game Loop & Input
+    ├── index.ts
+    ├── types.ts
+    ├── loop.ts           # Game loop
+    ├── keyboard.ts       # Keyboard input
+    └── mouse.ts          # Mouse input
+```
 
-The unified entry point that handles all state patterns through a single function.
+---
 
-#### Hybrid Proxy Architecture
+## 1. Core Reactive System
+
+### 1.1 Proxy-based Reactivity (`reactive.ts`)
+
+The foundation of Flexium's reactivity is a Proxy-based dependency tracking system.
+
+#### Data Structure
+
+```
+targetMap (WeakMap)
+  └─ target (object)
+       └─ KeyToDepMap (Map)
+            └─ key (property) → Dep (Set<ReactiveEffect>)
+```
+
+#### Core Functions
 
 ```typescript
-// state() returns a Proxy that behaves like the value itself
-const [count, setCount] = state(0);
+// Create a reactive proxy
+function reactive<T extends object>(target: T): T
 
-// Direct usage in JSX (no .value needed)
-<div>{count}</div>
+// Track dependency (called in getter)
+function track(target: object, key: unknown): void
 
-// Direct arithmetic operations
-const doubled = count * 2;
+// Trigger updates (called in setter)
+function trigger(target: object, key: unknown): void
 
-// Array iteration
-items.map(item => ...)
+// Check if value is reactive
+function isReactive(value: unknown): boolean
 ```
 
-**Key Proxy Features:**
-- `Symbol.toPrimitive` / `valueOf`: Enables arithmetic operations (`count + 1`)
-- `Symbol.iterator`: Enables array iteration (`for...of`, `[...array]`)
-- Nested Proxy: Object properties are automatically wrapped for reactivity
-- Recursive forwarding: Deep property access tracks dependencies
+#### How It Works
 
-#### Mode Detection
-
-`state()` automatically detects the pattern:
+1. **Proxy Creation**: `reactive()` wraps an object with a Proxy
+2. **Getter Trap**: When a property is accessed, `track()` registers the current `activeEffect`
+3. **Setter Trap**: When a property is set, `trigger()` notifies all registered effects
+4. **Deep Reactivity**: Nested objects are automatically wrapped when accessed
 
 ```typescript
-// 1. Primitive value → SignalNode (writable)
-const [count, setCount] = state(0);
+const obj = reactive({ count: 0, nested: { value: 1 } })
 
-// 2. Sync function → ComputedNode (derived)
-const [doubled] = state(() => count * 2);
+// Reading triggers tracking
+console.log(obj.count)  // track(obj, 'count')
 
-// 3. Async function → Resource (with loading/error)
-const [user, refetch, status, error] = state(async () => {
-  const res = await fetch('/api/user');
-  return res.json();
-});
+// Writing triggers updates
+obj.count = 1  // trigger(obj, 'count')
 
-// 4. With key → Global state (shared across components)
-const [theme, setTheme] = state('light', { key: 'app-theme' });
+// Nested objects are also reactive
+obj.nested.value = 2  // trigger(nested, 'value')
 ```
 
-#### Global State Registry
+#### Symbol Marker
 
-States with `key` are stored in a global registry, allowing shared access:
+```typescript
+export const REACTIVE_SIGNAL = Symbol('flexium.reactive')
+// Used to identify already-proxied objects
+```
+
+### 1.2 Unified State API (`state.ts`)
+
+The `state()` function provides three patterns through a single API:
+
+| Pattern | Input | Return | Use Case |
+|---------|-------|--------|----------|
+| **Signal** | `value` | `[value, setter]` | Local/Global state |
+| **Resource** | `() => Promise` | `[value, ResourceControl]` | Async data |
+| **Computed** | `() => T, {deps}` | `[value, ResourceControl]` | Derived values |
+
+#### Signal Mode
+
+```typescript
+const [count, setCount] = state(0)
+
+// Setter supports direct value or updater function
+setCount(5)
+setCount(prev => prev + 1)
+```
+
+#### Resource Mode (Async)
+
+```typescript
+const [user, control] = state(() => fetch('/api/user').then(r => r.json()))
+
+// ResourceControl interface
+interface ResourceControl {
+  refetch: () => Promise<void>
+  readonly loading: boolean
+  readonly error: unknown
+  readonly status: 'idle' | 'loading' | 'success' | 'error'
+}
+```
+
+#### Computed Mode (with deps)
+
+```typescript
+const [doubled] = state(() => count * 2, { deps: [count] })
+// Re-computes only when deps change
+```
+
+#### Global Registry
+
+States with `key` option are stored in a global registry:
 
 ```typescript
 // Component A
-const [theme, setTheme] = state('light', { key: 'theme' });
+const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
 
-// Component B (anywhere in the app)
-const [theme] = state(undefined, { key: 'theme' }); // Accesses same state
+// Component B (anywhere)
+const [theme] = state('light', { key: ['app', 'theme'] })  // Same state!
 ```
 
-### 2. Signal Primitives (`signal.ts`)
+### 1.3 Effect System (`lifecycle.ts`)
 
-Low-level reactive primitives that power the state API.
-
-#### SignalNode
-
-Atomic writable signal:
+#### ReactiveEffectLike Class
 
 ```typescript
-class SignalNode<T> {
-  version: number           // Epoch-based change detection
-  nodeType: NodeType.Signal // Fast type checking
-  subsHead: Link | undefined // Subscriber list
-  
-  get(): T                  // Track dependency if in effect/computed
-  set(value: T): void       // Update and notify subscribers
-  peek(): T                 // Read without tracking
+class ReactiveEffectLike {
+  deps: Set<any>[] = []    // Dependencies this effect depends on
+  active = true            // Whether effect is active
+  fn: () => void           // Effect function
+  scheduler?: () => void   // Custom scheduler
+
+  run()      // Execute effect with tracking
+  stop()     // Deactivate effect
+  cleanup()  // Remove from all dependencies
 }
 ```
 
-**Performance Optimizations:**
-- Hot path fields first (CPU cache optimization)
-- Version-based change detection (epoch system)
-- Direct linked list traversal (no array allocation)
+#### Scheduling System
 
-#### ComputedNode
+```
+State Change
+    │
+    ▼
+trigger() → queueJob(effect) → queue (Set)
+                                   │
+                                   ▼ (microtask)
+                               flush() → Run all queued effects
+```
 
-Derived signal with automatic memoization:
+- **Auto-batching**: Multiple state changes in same tick are batched
+- **Deduplication**: Same effect queued multiple times runs once
+- **Microtask**: Effects run after current synchronous code
+
+#### Public APIs
 
 ```typescript
-class ComputedNode<T> {
-  flags: SubscriberFlags     // Dirty/Stale/Running state
-  lastCleanEpoch: number    // Track when last computed
-  
-  get(): T                   // Lazy evaluation + dependency tracking
-  peek(): T                  // Force computation if needed
+// Reactive side effect (component-scoped)
+function effect(fn: () => void | (() => void), deps?: any[]): void
+
+// Manual batching / flush
+function sync(fn?: () => void): void
+```
+
+### 1.4 Hook System (`hook.ts`)
+
+Component-scoped state management using a hook index pattern.
+
+#### Component Instance
+
+```typescript
+interface ComponentInstance {
+  hooks: any[]       // Stored hook values
+  hookIndex: number  // Current hook index (reset each render)
 }
 ```
 
-**Lazy Evaluation:**
-- Only computes when accessed
-- Checks dependencies before recomputing
-- Uses epoch comparison for fast dirty checking
-
-#### EffectNode
-
-Side effect runner:
+#### hook() Function
 
 ```typescript
-class EffectNode {
-  depsHead: Link | undefined // Dependencies list
-  cleanups: (() => void)[]   // Cleanup functions
-  
-  execute(): void            // Run effect and track dependencies
-  dispose(): void            // Clean up dependencies and run cleanups
-}
-```
+function hook<T>(factory: () => T): T {
+  if (!currentComponent) return factory()  // Outside component
 
-**Features:**
-- Automatic dependency tracking
-- Cleanup function support
-- Running flag prevents infinite loops
+  const { hooks, hookIndex } = currentComponent
 
-### 3. Dependency Graph (`graph.ts`)
-
-Efficient dependency tracking using doubly linked lists.
-
-#### Link Structure
-
-```typescript
-interface Link {
-  dep: IObservable | undefined  // The signal/computed being tracked
-  sub: ISubscriber | undefined // The effect/computed tracking it
-  
-  // Pointers for dependency's subscriber list
-  prevSub: Link | undefined
-  nextSub: Link | undefined
-  
-  // Pointers for subscriber's dependency list
-  prevDep: Link | undefined
-  nextDep: Link | undefined
-}
-```
-
-**Benefits:**
-- O(1) connect/disconnect operations
-- No array allocations
-- Efficient memory usage
-
-#### Link Pooling
-
-Links are pooled to reduce GC pressure:
-
-```typescript
-namespace LinkPool {
-  const pool: Link[] = []
-  
-  export function alloc(dep, sub): Link {
-    // Reuse from pool or create new
+  if (hookIndex < hooks.length) {
+    // Return existing value
+    return hooks[hookIndex++]
   }
-  
-  export function free(link: Link): void {
-    // Return to pool (max 10,000)
+
+  // Create and store new value
+  const value = factory()
+  hooks.push(value)
+  return value
+}
+```
+
+### 1.5 Context API (`context.ts`)
+
+```typescript
+// Create context with default value
+const ThemeCtx = createContext('light')
+
+// Provider component
+<ThemeCtx.Provider value="dark">
+  <App />
+</ThemeCtx.Provider>
+
+// Consume context
+const theme = context(ThemeCtx)
+```
+
+#### Internal Implementation
+
+- `contextMap: Map<symbol, value>` - Global context storage
+- `pushContext()` / `popContext()` - Stack management during render
+- `snapshotContext()` / `runWithContext()` - Context capture for async
+
+---
+
+## 2. DOM Renderer (`dom/`)
+
+### 2.1 FNode (Virtual Node)
+
+```typescript
+interface FNode {
+  type: string | Function   // Tag name or component
+  props: Record<string, any>
+  children: FNodeChild[]
+  key?: any
+}
+
+type FNodeChild =
+  | FNode
+  | string | number | boolean
+  | null | undefined
+  | FNodeChild[]
+  | (() => FNode)
+```
+
+### 2.2 Rendering Flow
+
+```
+render(app, container)
+         │
+         ▼
+    renderNode(fnode, parent)
+         │
+    ┌────┴────┐
+    │         │
+    ▼         ▼
+ string    function
+   type      type
+    │         │
+    ▼         ▼
+createElement  renderComponent()
+    │              │
+    ▼              ▼
+appendChild   ComponentInstance
+              + unsafeEffect()
+              for reactive updates
+```
+
+### 2.3 Component Instance (DOM)
+
+```typescript
+interface DOMComponentInstance extends ComponentInstance {
+  nodes: Node[]                      // Rendered DOM nodes
+  parent: HTMLElement                // Parent container
+  fnode: FNode                       // Current FNode
+  props: any                         // Merged props
+  key?: any                          // For reconciliation
+  renderFn?: () => void              // Re-render trigger
+  children: Set<DOMComponentInstance>
+  parentInstance?: DOMComponentInstance
+}
+```
+
+### 2.4 Reconciliation
+
+DOM updates use a simple reconciliation strategy:
+
+1. **Text Nodes**: Direct `nodeValue` update
+2. **Element Nodes**:
+   - Update attributes (diff old vs new)
+   - Update event handlers
+   - Recursively reconcile children
+3. **Different Types**: Replace entire node
+
+### 2.5 Built-in Components
+
+| Component | Purpose |
+|-----------|---------|
+| `Portal` | Render children into different DOM node |
+| `Suspense` | Show fallback while async children load |
+| `ErrorBoundary` | Catch and handle errors in children |
+| `lazy()` | Code splitting with dynamic import |
+
+---
+
+## 3. Router (`router/`)
+
+### 3.1 Location State
+
+```typescript
+interface Location {
+  pathname: string
+  search: string
+  hash: string
+  query: Record<string, string>
+}
+
+// Singleton pattern - shared across app
+const [location, navigate] = location()
+```
+
+### 3.2 Route Matching
+
+```typescript
+interface RouteMatch {
+  route: RouteDefinition
+  params: Record<string, string>  // :id → { id: '123' }
+  pathname: string
+}
+
+// Simple segment matching with param extraction
+// /user/:id matches /user/123 → params: { id: '123' }
+```
+
+### 3.3 Components
+
+```tsx
+<Routes>
+  <Route path="/" component={Home} />
+  <Route path="/user/:id" component={User}>
+    <Route path="/posts" component={UserPosts} />  {/* Nested */}
+  </Route>
+</Routes>
+
+<Link to="/user/123">User</Link>
+
+// In nested routes
+<Outlet />  {/* Renders child route */}
+```
+
+### 3.4 Security
+
+- Path length limit (2048 chars)
+- Prototype pollution prevention (`__proto__`, `constructor`)
+- XSS prevention (`javascript:` protocol blocked)
+
+---
+
+## 4. Server Renderer (`server/`)
+
+### 4.1 renderToString()
+
+```typescript
+const { html, state } = renderToString(App, {
+  hydrate: true  // Include data-fid markers
+})
+
+// Result
+interface SSRResult {
+  html: string           // Rendered HTML
+  state: SerializedState // State for hydration
+}
+```
+
+### 4.2 Rendering Rules
+
+- HTML entities escaped (`<`, `>`, `&`, `"`, `'`)
+- Self-closing tags for void elements (`<br>`, `<img>`, etc.)
+- Boolean attributes rendered without value (`disabled`, `checked`)
+- Style objects converted to CSS strings
+- Event handlers and refs skipped (client-only)
+
+### 4.3 Hydration
+
+```typescript
+hydrate(App, container, {
+  state: serializedState,  // From server
+  onHydrated: () => {},    // Success callback
+  onMismatch: (error) => {} // Fallback to full render
+})
+```
+
+---
+
+## 5. Canvas Renderer (`canvas/`)
+
+### 5.1 Architecture
+
+```
+<Canvas>
+  <DrawRect />   →  queueDraw({ type: 'rect', props })
+  <DrawCircle /> →  queueDraw({ type: 'circle', props })
+</Canvas>
+        │
+        ▼
+Canvas effect() →
+  1. clearRect()
+  2. Process drawQueue
+  3. Execute drawNode() for each
+```
+
+### 5.2 Draw Components
+
+| Component | Canvas API |
+|-----------|------------|
+| `DrawRect` | `fillRect()`, `strokeRect()` |
+| `DrawCircle` | `arc()` with full circle |
+| `DrawArc` | `arc()` with angles |
+| `DrawLine` | `moveTo()`, `lineTo()` |
+| `DrawText` | `fillText()` |
+| `DrawPath` | `Path2D` from SVG path |
+
+### 5.3 Reactive Props
+
+All Draw component props support getter functions for reactivity:
+
+```tsx
+const [x, setX] = state(100)
+
+// x updates automatically when state changes
+<DrawRect x={x} y={100} width={50} height={50} fill="red" />
+```
+
+---
+
+## 6. Interactive Module (`interactive/`)
+
+### 6.1 Game Loop
+
+```typescript
+const gameLoop = loop({
+  fixedFps: 60,  // Physics update rate
+
+  onUpdate(delta) {
+    // Variable timestep (render rate)
+    // delta = seconds since last frame
+  },
+
+  onFixedUpdate(fixedDelta) {
+    // Fixed timestep (physics)
+    // fixedDelta = 1/60 seconds
+  },
+
+  onRender(alpha) {
+    // Interpolation factor for smooth rendering
+    // alpha = accumulated time / fixedDelta
+  }
+})
+
+gameLoop.start()
+gameLoop.stop()
+gameLoop.isRunning()
+gameLoop.getFps()
+```
+
+**Features**:
+- Fixed + variable timestep hybrid
+- Accumulator pattern for physics stability
+- Max delta cap (0.25s) prevents "spiral of death"
+
+### 6.2 Keyboard Input
+
+```typescript
+const kb = keyboard(window)
+
+// Polling API
+kb.isPressed(Keys.Space)      // Currently held
+kb.isJustPressed(Keys.KeyW)   // Pressed this frame
+kb.isJustReleased(Keys.KeyA)  // Released this frame
+kb.getPressedKeys()           // All pressed keys
+
+// Frame cleanup (call at end of game loop)
+kb.clearFrameState()
+
+// Cleanup
+kb.dispose()
+```
+
+### 6.3 Mouse Input
+
+```typescript
+const mouse = mouse({ canvas: canvasElement })
+
+// Position
+mouse.x, mouse.y       // Current position
+mouse.deltaX, mouse.deltaY  // Movement since last frame
+mouse.wheelDelta       // Scroll amount
+
+// Buttons
+mouse.isPressed(MouseButton.Left)
+mouse.isLeftPressed()
+mouse.isRightPressed()
+mouse.isMiddlePressed()
+
+// Cleanup
+mouse.clearFrameState()
+mouse.dispose()
+```
+
+---
+
+## 7. JSX Runtime
+
+### Production (`jsx-runtime.ts`)
+
+```typescript
+function jsx(type, props, key?): FNode {
+  const { children, ...otherProps } = props
+  return {
+    type,
+    props: otherProps,
+    children: Array.isArray(children) ? children : [children],
+    key
   }
 }
+
+function jsxs(type, props, key?): FNode  // Same as jsx
+function Fragment(props): FNodeChild     // Returns children directly
 ```
 
-### 4. Batching System (`sync.ts`)
-
-Two-level batching for optimal performance.
-
-#### Auto-Batching (Default)
-
-Automatic microtask batching for event handlers:
+### Development (`jsx-dev-runtime.ts`)
 
 ```typescript
-// Multiple updates in event handler are batched automatically
-button.onclick = () => {
-  setCount(c => c + 1);
-  setFlag(true);
-  setName('John');
-  // All updates batched, DOM updates once
-};
-```
-
-#### Manual Batching
-
-Explicit synchronous batching:
-
-```typescript
-import { sync } from 'flexium/core';
-
-sync(() => {
-  setCount(1);
-  setFlag(true);
-}); // DOM updates once here, synchronously
-```
-
-### 5. Owner/Scope System (`owner.ts`)
-
-Manages reactive scopes and cleanup.
-
-```typescript
-interface Owner {
-  cleanups: (() => void)[]      // Cleanup functions
-  context: Record<symbol, any>   // Context values
-  owner: Owner | null            // Parent owner
+function jsxDEV(type, props, key, isStaticChildren, source, self) {
+  return jsx(type, props, key)  // Additional params ignored
 }
 ```
 
-**Features:**
-- Automatic cleanup when owner is disposed
-- Context propagation through owner chain
-- Component-scoped effects
+---
+
+## 8. DevTools Integration
+
+```typescript
+// Browser extension hook
+window.__FLEXIUM_DEVTOOLS__ = {
+  signals: Map<number, SignalInfo>,
+  onSignalCreate: (info) => {},
+  onSignalUpdate: (id, value) => {},
+  onRender: (event) => {}
+}
+
+// Internal tracking
+registerSignal(container, name?)  // On signal creation
+updateSignal(container, value)    // On signal update
+reportRender(componentName, trigger, duration)
+```
+
+---
 
 ## Performance Characteristics
 
 | Operation | Complexity | Notes |
 |-----------|------------|-------|
-| State access | O(1) | Proxy overhead negligible |
-| State update | O(subscribers) | Only notifies actual subscribers |
-| Computed evaluation | O(dependencies) | Lazy + cached |
-| Dependency tracking | O(1) | Linked list append |
-| Array reconciliation | O(1) to O(N) | Optimized for append/remove |
+| State read | O(1) | Proxy property access |
+| State write | O(subscribers) | Triggers dependent effects |
+| Effect tracking | O(1) | Set.add() |
+| Effect cleanup | O(deps) | Remove from all dep sets |
+| DOM reconciliation | O(children) | Per-level, not tree-wide |
 
 ## Memory Model
 
-- **Proxy Caching**: Proxies are cached per Box/Signal (WeakMap)
-- **Link Pooling**: Links reused to reduce GC pressure
-- **Automatic Cleanup**: Effects disposed when owner is destroyed
-- **WeakMap Usage**: Prevents memory leaks in dependency graph
+- **Proxy Caching**: `reactiveMap` (WeakMap) prevents duplicate proxies
+- **Effect Cleanup**: Automatic when component unmounts
+- **Context Scope**: Stack-based, restored after render
+- **Global Registry**: Persistent for keyed states
 
 ## Key Design Decisions
 
-### 1. Why Proxy?
+### Why Proxy over Signals?
 
-- Enables direct usage without `.value`
-- Transparent reactivity (works in JSX, arithmetic, etc.)
-- Better developer experience
+- No `.value` access needed
+- Works transparently in JSX
+- Deep reactivity automatic
+- Familiar object syntax
 
-### 2. Why Doubly Linked Lists?
+### Why Hook Index Pattern?
 
-- O(1) operations (no array allocations)
-- Efficient memory usage
-- Easy to traverse in both directions
+- Simple implementation
+- No explicit dependencies
+- Works with function components
+- Predictable behavior
 
-### 3. Why Epoch-Based Validation?
+### Why Separate Renderers?
 
-- Fast change detection (number comparison)
-- Avoids unnecessary recomputations
-- Works well with batching
+- Same reactive core, different outputs
+- No DOM code in Canvas renderer
+- Tree-shaking friendly
+- Platform-specific optimizations
 
-### 4. Why Two-Level Batching?
+### Why Microtask Batching?
 
-- Auto-batching: Convenient for common cases
-- Manual batching: Control when needed
-- Best of both worlds
-
-## File Structure
-
-```
-packages/flexium/src/core/
-├── index.ts          # Public API exports
-├── state.ts          # Unified state() API + Proxy
-├── signal.ts         # SignalNode, ComputedNode, createResource
-├── effect.ts         # EffectNode
-├── graph.ts          # Dependency graph + Link pooling
-├── sync.ts           # Batching system
-├── owner.ts          # Owner/Scope management
-├── renderer.ts       # Renderer interface
-├── fnode.ts          # FNode creation utility
-├── context.ts        # Context API
-└── errors.ts         # Error system
-```
-
-## Extension Points
-
-### Custom Renderers
-
-Implement the `Renderer` interface for new platforms:
-
-```typescript
-interface Renderer {
-  createNode(type: string, props: Record<string, unknown>): RenderNode
-  updateNode(node: RenderNode, oldProps: Record<string, unknown>, newProps: Record<string, unknown>): void
-  // ... other methods
-}
-```
-
-### Advanced Primitives
-
-Low-level primitives available via `flexium/advanced`:
-
-```typescript
-import { SignalNode, ComputedNode, EffectNode } from 'flexium/advanced';
-```
-
-## Future Considerations
-
-- **Native Renderer**: iOS/Android support (planned)
-- **SSR Optimization**: Server-side rendering improvements
-- **DevTools Integration**: Enhanced debugging capabilities
+- Natural batching for event handlers
+- No explicit batch() calls needed
+- Synchronous when needed via sync()
