@@ -255,7 +255,6 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Best Practices', link: '/docs/guide/best-practices/' },
-            { text: 'Migration from React', link: '/docs/guide/migration/from-react' },
             { text: 'FAQ', link: '/docs/guide/faq' }
           ]
         },
@@ -339,7 +338,6 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Best Practices', link: '/docs/guide/best-practices/' },
-            { text: 'Migration from React', link: '/docs/guide/migration/from-react' },
             { text: 'FAQ', link: '/docs/guide/faq' }
           ]
         },
@@ -416,7 +414,6 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Best Practices', link: '/docs/guide/best-practices/' },
-            { text: 'Migration from React', link: '/docs/guide/migration/from-react' },
             { text: 'FAQ', link: '/docs/guide/faq' }
           ]
         },

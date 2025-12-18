@@ -167,23 +167,6 @@ use(({ onCleanup }) => {
 }, [time])
 ```
 
-::: info Migration
-`onMount()` and `onCleanup()` have been removed. Use `use()` with empty deps `[]` instead.
-```tsx
-// ❌ Old way (removed)
-onMount(() => {
-  const ws = new WebSocket('...')
-  return () => ws.close()
-})
-
-// ✅ New way
-use(({ onCleanup }) => {
-  const ws = new WebSocket('...')
-  onCleanup(() => ws.close())
-}, [])
-```
-:::
-
 ---
 
 ## Async State
