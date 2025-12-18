@@ -1,6 +1,6 @@
-export type { FNode, FNodeChild } from './types'
+// Core rendering
 export { f } from './f'
-export { render, reconcile } from './render'
+export { render } from './render'
 export { hydrate } from './hydrate'
 export type { HydrateOptions } from './hydrate'
 
@@ -10,14 +10,12 @@ export {
   Suspense,
   ErrorBoundary,
   lazy,
-  suspenseContext
 } from './components'
 
 export type {
   PortalProps,
   SuspenseProps,
   LazyComponent,
-  SuspenseContextValue,
   ErrorInfo,
   ErrorBoundaryProps
 } from './components'
