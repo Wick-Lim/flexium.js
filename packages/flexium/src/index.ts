@@ -1,1 +1,1 @@
-export const VERSION = '0.13.0' // Bump version to signify rebuild
+export const VERSION = '0.13.1' // Bump version to signify rebuild
