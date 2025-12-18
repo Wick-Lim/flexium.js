@@ -1,10 +1,20 @@
+// Canvas context types
+export type CanvasMode = '2d' | 'webgl' | 'webgl2'
+export type CanvasContext = CanvasRenderingContext2D | WebGLRenderingContext | WebGL2RenderingContext
+
 // Canvas types
 export interface CanvasProps {
     width: number
     height: number
+    /** Rendering context mode. Default: '2d' */
+    mode?: CanvasMode
+    /** WebGL context attributes (only used when mode is 'webgl' or 'webgl2') */
+    webglAttributes?: WebGLContextAttributes
     children?: any
     style?: any
     ref?: (el: HTMLCanvasElement) => void
+    /** Callback with the rendering context */
+    onContext?: (ctx: CanvasContext) => void
 }
 
 export interface CanvasDrawNode {

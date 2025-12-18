@@ -1,10 +1,10 @@
 import { use } from '../core/use'
 import { isReactive } from '../core/reactive'
-import type { CanvasProps, CanvasDrawNode } from './types'
+import type { CanvasProps, CanvasDrawNode, CanvasContext } from './types'
 
 export type { CanvasProps }
 
-// Canvas context for children to access
+// Canvas context for children to access (2D mode only)
 let currentCanvasContext: CanvasRenderingContext2D | null = null
 const drawQueue: CanvasDrawNode[] = []
 
@@ -17,41 +17,56 @@ export function queueDraw(node: CanvasDrawNode) {
 }
 
 export function Canvas(props: CanvasProps) {
-  const { width, height, children, style, ref } = props
+  const { width, height, mode = '2d', webglAttributes, children, style, ref, onContext } = props
 
   let canvas: HTMLCanvasElement | undefined
-  let ctx: CanvasRenderingContext2D | null = null
+  let ctx: CanvasContext | null = null
 
   const render = () => {
     if (!canvas || !ctx) return
 
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height)
+    // For 2D mode, use the draw queue system
+    if (mode === '2d' && ctx instanceof CanvasRenderingContext2D) {
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height)
 
-    // Clear draw queue
-    drawQueue.length = 0
+      // Clear draw queue
+      drawQueue.length = 0
 
-    // Set current context for children
-    currentCanvasContext = ctx
+      // Set current context for children
+      currentCanvasContext = ctx
 
-    // Render children (they will queue draw commands)
-    if (Array.isArray(children)) {
-      children.forEach(child => {
-        if (typeof child === 'function') {
-          child()
-        }
+      // Render children (they will queue draw commands)
+      if (Array.isArray(children)) {
+        children.forEach(child => {
+          if (typeof child === 'function') {
+            child()
+          }
+        })
+      } else if (typeof children === 'function') {
+        children()
+      }
+
+      // Execute draw queue
+      drawQueue.forEach(node => {
+        drawNode(ctx as CanvasRenderingContext2D, node)
       })
-    } else if (typeof children === 'function') {
-      children()
+
+      // Clear context
+      currentCanvasContext = null
     }
-
-    // Execute draw queue
-    drawQueue.forEach(node => {
-      drawNode(ctx!, node)
-    })
-
-    // Clear context
-    currentCanvasContext = null
+    // For WebGL modes, just call children if they exist (they handle their own rendering)
+    else {
+      if (Array.isArray(children)) {
+        children.forEach(child => {
+          if (typeof child === 'function') {
+            child()
+          }
+        })
+      } else if (typeof children === 'function') {
+        children()
+      }
+    }
   }
 
   use(() => {
@@ -64,8 +79,16 @@ export function Canvas(props: CanvasProps) {
     <canvas
       ref={(el: HTMLCanvasElement) => {
         canvas = el
-        ctx = el.getContext('2d')
+        // Get the appropriate context based on mode
+        if (mode === '2d') {
+          ctx = el.getContext('2d')
+        } else if (mode === 'webgl') {
+          ctx = el.getContext('webgl', webglAttributes) || el.getContext('experimental-webgl', webglAttributes) as WebGLRenderingContext | null
+        } else if (mode === 'webgl2') {
+          ctx = el.getContext('webgl2', webglAttributes)
+        }
         if (ref) ref(el)
+        if (onContext && ctx) onContext(ctx)
         render()
       }}
       width={width}

@@ -1,4 +1,5 @@
 export { Canvas, type CanvasProps } from './Canvas'
+export type { CanvasMode, CanvasContext } from './types'
 export { DrawRect, type DrawRectProps } from './dom/DrawRect'
 export { DrawCircle, type DrawCircleProps } from './dom/DrawCircle'
 export { DrawArc, type DrawArcProps } from './dom/DrawArc'
