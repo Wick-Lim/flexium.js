@@ -418,34 +418,34 @@ describe('vite-plugin-flexium', () => {
       expect(result?.code).toContain("import { computed } from 'flexium'");
     });
 
-    it('should add import for effect when used', () => {
+    it('should add import for useEffect when used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'effect(() => console.log(count.value));';
+      const code = 'useEffect(() => console.log(count.value));';
       const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
 
       expect(result).not.toBeNull();
-      expect(result?.code).toContain("import { effect } from 'flexium'");
+      expect(result?.code).toContain("import { useEffect } from 'flexium'");
     });
 
-    // Note: batch is deprecated - use sync from flexium/advanced instead
+    // Note: batch is deprecated - use useSync from flexium/advanced instead
 
-    // Note: onCleanup and createContext are deprecated - use effect() and state() with key instead
+    // Note: onCleanup and createContext are deprecated - use useEffect() and useState() with key instead
 
-    // Note: useContext is deprecated - use state() with key instead
+    // Note: useContext is deprecated - use useState() with key instead
 
     it('should add multiple imports when multiple primitives are used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);
       const code = `
         const count = signal(0);
         const doubled = computed(() => count.value * 2);
-        effect(() => console.log(doubled.value));
+        useEffect(() => console.log(doubled.value));
       `;
       const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
 
       expect(result).not.toBeNull();
       expect(result?.code).toContain('signal');
       expect(result?.code).toContain('computed');
-      expect(result?.code).toContain('effect');
+      expect(result?.code).toContain('useEffect');
     });
 
     it('should not add imports if already imported from flexium', () => {

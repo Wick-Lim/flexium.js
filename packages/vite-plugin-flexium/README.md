@@ -75,7 +75,7 @@ import flexium from 'vite-plugin-flexium'
 export default defineConfig({
   plugins: [
     flexium({
-      autoImport: true // Auto-import signal, computed, effect
+      autoImport: true // Auto-import signal, computed, useEffect
     })
   ]
 })
@@ -98,10 +98,10 @@ Or use pragma comments:
 
 ```tsx
 /** @jsxImportSource flexium */
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function App() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
   return <button onclick={() => setCount(c => c + 1)}>{count}</button>
 }
 ```

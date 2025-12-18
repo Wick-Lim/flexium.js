@@ -44,7 +44,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     },
     messages: {
       sideEffectInComputed:
-        'Computed functions should be pure. Found side effect: "{{method}}". Use effect() for side effects instead.',
+        'Computed functions should be pure. Found side effect: "{{method}}". Use useEffect() for side effects instead.',
     },
     schema: [],
   },
@@ -62,10 +62,10 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
           return;
         }
 
-        // Also check state() with a function argument (derived state)
+        // Also check useState() with a function argument (derived state)
         if (
           node.callee.type === "Identifier" &&
-          node.callee.name === "state" &&
+          node.callee.name === "useState" &&
           node.arguments[0]?.type === "ArrowFunctionExpression"
         ) {
           // This is derived state, treat like computed
@@ -123,7 +123,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         // Track exiting computed()
         if (
           node.callee.type === "Identifier" &&
-          (node.callee.name === "computed" || node.callee.name === "state")
+          (node.callee.name === "computed" || node.callee.name === "useState")
         ) {
           insideComputed = false;
         }

@@ -9,21 +9,21 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
   meta: {
     type: "problem",
     docs: {
-      description: "Prevent calling effect() in component render body",
+      description: "Prevent calling useEffect() in component render body",
     },
     messages: {
       effectInRender:
-        "effect() should not be called during component render. Effects should be created at module level or inside other effects/lifecycle hooks.",
+        "useEffect() should not be called during component render. Effects should be created at module level or inside other effects/lifecycle hooks.",
     },
     schema: [],
   },
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an effect() call
+        // Check if this is an useEffect() call
         if (
           node.callee.type !== "Identifier" ||
-          node.callee.name !== "effect"
+          node.callee.name !== "useEffect"
         ) {
           return;
         }
@@ -36,7 +36,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
 
           // If we find a function component, check if effect is in its body
           if (isFunctionComponent(ancestor)) {
-            // Check if effect() is called directly in the component body
+            // Check if useEffect() is called directly in the component body
             // (not inside another function or effect)
             let isDirectlyInComponent = true;
 
@@ -56,7 +56,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
                 if (
                   parent?.type === "CallExpression" &&
                   parent.callee.type === "Identifier" &&
-                  parent.callee.name === "effect"
+                  parent.callee.name === "useEffect"
                 ) {
                   continue;
                 }
@@ -68,9 +68,9 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
               if (
                 intermediate.type === "CallExpression" &&
                 intermediate.callee.type === "Identifier" &&
-                (intermediate.callee.name === "effect" ||
+                (intermediate.callee.name === "useEffect" ||
                   intermediate.callee.name === "computed" ||
-                  intermediate.callee.name === "sync")
+                  intermediate.callee.name === "useSync")
               ) {
                 isDirectlyInComponent = false;
                 break;

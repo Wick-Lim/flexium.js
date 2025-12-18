@@ -53,17 +53,17 @@ Or configure rules individually:
 
 Disallow reading state values outside of reactive contexts.
 
-**Why?** State reads outside of `effect()` or JSX will not be tracked and won't trigger re-renders.
+**Why?** State reads outside of `useEffect()` or JSX will not be tracked and won't trigger re-renders.
 
 ```javascript
 // ❌ Bad - state read outside reactive context
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 if (count > 5) {
   doSomething()
 }
 
 // ✅ Good - state read inside effect
-effect(() => {
+useEffect(() => {
   if (count > 5) {
     doSomething()
   }
@@ -81,12 +81,12 @@ Enforce cleanup functions in effects that add event listeners or timers.
 
 ```javascript
 // ❌ Bad - no cleanup for event listener
-effect(() => {
+useEffect(() => {
   window.addEventListener('resize', handleResize)
 })
 
 // ✅ Good - returns cleanup function
-effect(() => {
+useEffect(() => {
   window.addEventListener('resize', handleResize)
   return () => window.removeEventListener('resize', handleResize)
 })
@@ -96,38 +96,38 @@ effect(() => {
 
 Disallow side effects in computed state functions.
 
-**Why?** Computed values should be pure functions. Side effects belong in `effect()`.
+**Why?** Computed values should be pure functions. Side effects belong in `useEffect()`.
 
 ```javascript
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 
 // ❌ Bad - side effect in computed
-const [doubled] = state(() => {
+const [doubled] = useState(() => {
   console.log('Computing...')  // Side effect!
   return count * 2
 }, { deps: [count] })
 
 // ✅ Good - pure computed
-const [doubled] = state(() => count * 2, { deps: [count] })
+const [doubled] = useState(() => count * 2, { deps: [count] })
 
 // ✅ Good - side effect in effect
-effect(() => {
+useEffect(() => {
   console.log('Count changed:', count)
 })
 ```
 
 ### `flexium/prefer-sync`
 
-Suggest using `sync()` when multiple state updates occur consecutively.
+Suggest using `useSync()` when multiple state updates occur consecutively.
 
-**Why?** Multiple state updates are auto-batched via microtask, but `sync()` provides explicit synchronous batching when needed.
+**Why?** Multiple state updates are auto-batched via microtask, but `useSync()` provides explicit synchronous batching when needed.
 
 ```javascript
-import { state, sync } from 'flexium/core'
+import { useState, useSync } from 'flexium/core'
 
-const [count, setCount] = state(0)
-const [name, setName] = state('')
-const [active, setActive] = state(false)
+const [count, setCount] = useState(0)
+const [name, setName] = useState('')
+const [active, setActive] = useState(false)
 
 // ⚠️ Auto-batched (microtask), but may want explicit control
 setCount(1)
@@ -135,7 +135,7 @@ setName('test')
 setActive(true)
 
 // ✅ Good - explicit synchronous batching
-sync(() => {
+useSync(() => {
   setCount(1)
   setName('test')
   setActive(true)
@@ -149,7 +149,7 @@ Warn about direct object/array mutations in state.
 **Why?** State containing objects or arrays should be updated immutably. Direct mutations won't trigger reactivity updates.
 
 ```javascript
-const [items, setItems] = state([1, 2, 3])
+const [items, setItems] = useState([1, 2, 3])
 
 // ❌ Bad - direct mutation (won't trigger updates)
 items.push(4)
@@ -160,7 +160,7 @@ setItems(prev => [...prev, 4])
 setItems(prev => prev.map((item, i) => i === 0 ? 10 : item))
 
 // For objects
-const [user, setUser] = state({ name: 'John', age: 30 })
+const [user, setUser] = useState({ name: 'John', age: 30 })
 
 // ❌ Bad
 user.age = 31
@@ -171,14 +171,14 @@ setUser(prev => ({ ...prev, age: 31 }))
 
 ### `flexium/no-effect-in-render`
 
-Prevent calling effect() in component render body without proper scoping.
+Prevent calling useEffect() in component render body without proper scoping.
 
 **Why?** Effects created during every render can cause performance issues and unexpected behavior.
 
 ```javascript
 // ❌ Bad - effect created on every render without deps
 const MyComponent = () => {
-  effect(() => {
+  useEffect(() => {
     console.log('This runs on every render!')
   })
 
@@ -187,7 +187,7 @@ const MyComponent = () => {
 
 // ✅ Good - effect with empty deps (runs once)
 const MyComponent = () => {
-  effect(() => {
+  useEffect(() => {
     console.log('This runs once on mount')
   }, [])
 
@@ -203,13 +203,13 @@ Detect circular dependencies between computed states.
 
 ```javascript
 // ❌ Bad - circular dependency
-const [a] = state(() => b + 1, { deps: [b] })
-const [b] = state(() => a + 1, { deps: [a] }) // Creates infinite loop!
+const [a] = useState(() => b + 1, { deps: [b] })
+const [b] = useState(() => a + 1, { deps: [a] }) // Creates infinite loop!
 
 // ✅ Good - no circular dependencies
-const [count, setCount] = state(0)
-const [doubled] = state(() => count * 2, { deps: [count] })
-const [quadrupled] = state(() => doubled * 2, { deps: [doubled] })
+const [count, setCount] = useState(0)
+const [doubled] = useState(() => count * 2, { deps: [count] })
+const [quadrupled] = useState(() => doubled * 2, { deps: [doubled] })
 ```
 
 ### `flexium/component-naming`
@@ -235,7 +235,7 @@ Prevent reassigning state variables.
 **Why?** State variables should be updated via their setter function, not reassigned.
 
 ```javascript
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 
 // ❌ Bad - reassigning state variable
 count = 5
@@ -251,7 +251,7 @@ Warn about comparing state values with `===` or `!==`.
 **Why?** State values are Proxy-wrapped and may not compare as expected with strict equality.
 
 ```javascript
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 
 // ⚠️ Warning - comparing proxied state
 if (count === 0) { }
@@ -266,14 +266,14 @@ if (count == 0) { }  // loose equality works
 Warn when computed state or effects reference reactive values not in deps array.
 
 ```javascript
-const [a, setA] = state(1)
-const [b, setB] = state(2)
+const [a, setA] = useState(1)
+const [b, setB] = useState(2)
 
 // ⚠️ Warning - b is used but not in deps
-const [sum] = state(() => a + b, { deps: [a] })
+const [sum] = useState(() => a + b, { deps: [a] })
 
 // ✅ Good - all dependencies listed
-const [sum] = state(() => a + b, { deps: [a, b] })
+const [sum] = useState(() => a + b, { deps: [a, b] })
 ```
 
 ### `flexium/effect-dependencies-complete`
@@ -281,16 +281,16 @@ const [sum] = state(() => a + b, { deps: [a, b] })
 Enforce complete dependency arrays in effects.
 
 ```javascript
-const [count, setCount] = state(0)
-const [name, setName] = state('')
+const [count, setCount] = useState(0)
+const [name, setName] = useState('')
 
 // ⚠️ Warning - name is used but not in deps
-effect(() => {
+useEffect(() => {
   console.log(count, name)
 }, [count])
 
 // ✅ Good - all dependencies listed
-effect(() => {
+useEffect(() => {
   console.log(count, name)
 }, [count, name])
 ```
@@ -300,16 +300,16 @@ effect(() => {
 Suggest using computed state instead of effect for derived values.
 
 ```javascript
-const [count, setCount] = state(0)
-const [doubled, setDoubled] = state(0)
+const [count, setCount] = useState(0)
+const [doubled, setDoubled] = useState(0)
 
 // ⚠️ Warning - prefer computed for derived values
-effect(() => {
+useEffect(() => {
   setDoubled(count * 2)
 }, [count])
 
 // ✅ Good - use computed state
-const [doubled] = state(() => count * 2, { deps: [count] })
+const [doubled] = useState(() => count * 2, { deps: [count] })
 ```
 
 ## Rule Severity by Configuration

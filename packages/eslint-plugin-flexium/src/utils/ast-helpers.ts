@@ -1,7 +1,7 @@
 import type { TSESTree } from "@typescript-eslint/utils";
 
-export const SIGNAL_FUNCTIONS = ["signal", "computed", "state"];
-export const REACTIVE_CONTEXTS = ["effect", "computed", "sync", "root"];
+export const SIGNAL_FUNCTIONS = ["signal", "computed", "useState"];
+export const REACTIVE_CONTEXTS = ["useEffect", "computed", "useSync", "root"];
 export const SIGNAL_READ_METHODS = ["value", "peek"];
 
 export function isSignalCreation(node: TSESTree.CallExpression): boolean {

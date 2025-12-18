@@ -6,11 +6,11 @@
 
 **Simpler, Faster, Unified.**
 
-Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `state()`.
+Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `useState()`.
 
 ## Key Features
 
-- **Unified State API** - No more `useState`, `useRecoil`, `useQuery` separation. Just `state()`.
+- **Unified State API** - No more `useRecoil`, `useQuery` separation. Just `useState()`.
 - **No Virtual DOM** - Direct DOM updates via Proxy-based fine-grained reactivity.
 - **Tiny Bundle** - Minimal footprint with tree-shaking support.
 - **Cross-Platform** - DOM, Canvas, Server (SSR) renderers included.
@@ -32,18 +32,18 @@ npm install
 npm run dev
 ```
 
-## The Only API You Need: `state()`
+## The Only API You Need: `useState()`
 
 Flexium unifies all state concepts into one function.
 
 ### Local State
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
 
   return (
     <button onclick={() => setCount(c => c + 1)}>
@@ -61,11 +61,11 @@ Just add a `key` to share state across components. Keys can be strings or arrays
 
 ```tsx
 // Define global state with array key
-const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
+const [theme, setTheme] = useState('light', { key: ['app', 'theme'] })
 
 function ThemeToggle() {
   // Access same state anywhere with the same key
-  const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
+  const [theme, setTheme] = useState('light', { key: ['app', 'theme'] })
 
   return (
     <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
@@ -81,7 +81,7 @@ Pass an async function to handle data fetching automatically.
 
 ```tsx
 function UserProfile({ id }) {
-  const [user, control] = state(async () => {
+  const [user, control] = useState(async () => {
     const res = await fetch(`/api/users/${id}`)
     return res.json()
   })
@@ -101,21 +101,22 @@ function UserProfile({ id }) {
 ### Computed/Derived State
 
 ```tsx
-const [count, setCount] = state(1)
-const [doubled] = state(() => count * 2, { deps: [count] })
+const [count, setCount] = useState(1)
+const [doubled] = useState(() => count * 2, { deps: [count] })
 ```
 
 ## Package Structure
 
 ```
 flexium
-├── /core         # Core reactivity: state(), effect(), sync(), context()
+├── /core         # Core reactivity: useState(), useEffect(), useSync()
+├── /advanced     # Advanced APIs: createContext(), useContext()
 ├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
-├── /ref          # Ref system: ref(), forwardRef()
-├── /router       # SPA routing: Routes, Route, Link, Outlet
+├── /ref          # Ref system: useRef(), forwardRef()
+├── /router       # SPA routing: Routes, Route, Link, Outlet, useRouter(), useLocation()
 ├── /server       # SSR: renderToString(), renderToStaticMarkup()
 ├── /canvas       # Canvas 2D: Canvas, DrawRect, DrawCircle, DrawText
-└── /interactive  # Game loop: loop(), keyboard(), mouse()
+└── /interactive  # Game loop: useLoop(), keyboard(), mouse()
 ```
 
 ## Control Flow
@@ -136,7 +137,7 @@ Use native JavaScript for control flow - no special components needed:
 ## Routing
 
 ```tsx
-import { Routes, Route, Link, router } from 'flexium/router'
+import { Routes, Route, Link, useRouter } from 'flexium/router'
 
 function App() {
   return (
@@ -158,7 +159,7 @@ function UserProfile({ params }) {
 
 // Or use the router hook
 function UserProfileHook() {
-  const r = router()
+  const r = useRouter()
   return <h1>User: {r.params.id}</h1>
 }
 ```
@@ -167,9 +168,10 @@ function UserProfileHook() {
 
 ```tsx
 import { Canvas, DrawRect, DrawCircle, DrawText } from 'flexium/canvas'
+import { useState } from 'flexium/core'
 
 function App() {
-  const [x, setX] = state(100)
+  const [x, setX] = useState(100)
 
   return (
     <Canvas width={400} height={300}>
@@ -184,15 +186,15 @@ function App() {
 ## Game Development
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 import { Canvas, DrawRect } from 'flexium/canvas'
-import { loop, keyboard, Keys } from 'flexium/interactive'
+import { useLoop, keyboard, Keys } from 'flexium/interactive'
 
 function Game() {
-  const [x, setX] = state(100)
+  const [x, setX] = useState(100)
   const kb = keyboard()
 
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     fixedFps: 60,
     onUpdate: (delta) => {
       if (kb.isPressed(Keys.ArrowRight)) setX(x => x + 200 * delta)
@@ -200,7 +202,7 @@ function Game() {
     }
   })
 
-  effect(() => {
+  useEffect(() => {
     gameLoop.start()
     return () => gameLoop.stop()
   }, [])
@@ -263,7 +265,7 @@ import { ErrorBoundary } from 'flexium/dom'
 ## Context API
 
 ```tsx
-import { createContext, context } from 'flexium/core'
+import { createContext, useContext } from 'flexium/advanced'
 
 const ThemeCtx = createContext('light')
 
@@ -276,7 +278,7 @@ function App() {
 }
 
 function Child() {
-  const theme = context(ThemeCtx)
+  const theme = useContext(ThemeCtx)
   return <div>Theme: {theme}</div>
 }
 ```

@@ -19,10 +19,10 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an effect() call
+        // Check if this is an useEffect() call
         if (
           node.callee.type !== "Identifier" ||
-          node.callee.name !== "effect"
+          node.callee.name !== "useEffect"
         ) {
           return;
         }
@@ -53,7 +53,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
               if (
                 calleeName === "signal" ||
                 calleeName === "computed" ||
-                calleeName === "state"
+                calleeName === "useState"
               ) {
                 if (ancestor.id.type === "Identifier") {
                   declaredSignals.add(ancestor.id.name);

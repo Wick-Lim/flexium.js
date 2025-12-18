@@ -9,7 +9,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     type: "suggestion",
     docs: {
       description:
-        "Suggest using computed() for derived state instead of effect()",
+        "Suggest using computed() for derived state instead of useEffect()",
     },
     messages: {
       preferComputed:
@@ -37,7 +37,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
             }
           }
 
-          if (calleeName === "state") {
+          if (calleeName === "useState") {
             if (node.id.type === "ArrayPattern") {
               if (node.id.elements[0]?.type === "Identifier") {
                 signalVariables.add(node.id.elements[0].name);
@@ -51,10 +51,10 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       },
 
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an effect() call
+        // Check if this is an useEffect() call
         if (
           node.callee.type !== "Identifier" ||
-          node.callee.name !== "effect"
+          node.callee.name !== "useEffect"
         ) {
           return;
         }

@@ -4,7 +4,7 @@ type MessageIds = "stateStrictComparison" | "stateBooleanCoercion";
 type Options = [];
 
 /**
- * ESLint rule to prevent direct comparison of state() values.
+ * ESLint rule to prevent direct comparison of useState() values.
  *
  * State values are Proxy objects, so:
  * - `stateValue === 5` always returns false (Proxy !== primitive)
@@ -22,7 +22,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     type: "problem",
     docs: {
       description:
-        "Prevent direct comparison of state() proxy values which always fail",
+        "Prevent direct comparison of useState() proxy values which always fail",
     },
     messages: {
       stateStrictComparison:
@@ -34,7 +34,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     hasSuggestions: true,
   },
   create(context) {
-    // Track state variables declared via destructuring: const [val, setVal] = state(...)
+    // Track state variables declared via destructuring: const [val, setVal] = useState(...)
     const stateVariables = new Set<string>();
 
     /**
@@ -99,14 +99,14 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     }
 
     return {
-      // Track state declarations: const [val, setVal] = state(...)
+      // Track state declarations: const [val, setVal] = useState(...)
       VariableDeclarator(node: TSESTree.VariableDeclarator) {
         if (
           node.init?.type === "CallExpression" &&
           node.init.callee.type === "Identifier" &&
-          node.init.callee.name === "state"
+          node.init.callee.name === "useState"
         ) {
-          // Handle array destructuring: const [val, setVal] = state(...)
+          // Handle array destructuring: const [val, setVal] = useState(...)
           if (node.id.type === "ArrayPattern") {
             // First element is the value (proxy)
             const firstElement = node.id.elements[0];
