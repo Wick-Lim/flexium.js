@@ -7,6 +7,7 @@ export default defineConfig({
     dom: 'src/dom/index.ts',
     server: 'src/server/index.ts',
     router: 'src/router/index.ts',
+    css: 'src/css/index.ts',
     'jsx-runtime': 'src/jsx-runtime.ts',
     'jsx-dev-runtime': 'src/jsx-dev-runtime.ts',
   },
