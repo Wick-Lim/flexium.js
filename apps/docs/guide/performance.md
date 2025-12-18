@@ -699,10 +699,10 @@ import { root, untrack } from 'flexium/core';
 import { Routes, Route, Link } from 'flexium/router';
 
 // Canvas
-import { Canvas } from 'flexium-canvas';
+import { Canvas } from 'flexium-canvas/dom';
 
 // Interactive utilities
-import { useKeyboard, useMouse, useLoop } from 'flexium-canvas';
+import { useKeyboard, useMouse, useLoop } from 'flexium-canvas/interactive';
 ```
 
 ### Analyze Bundle Size

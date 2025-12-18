@@ -5,7 +5,7 @@ Track keyboard input for games and interactive applications.
 ## Import
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium-canvas'
+import { useKeyboard, Keys } from 'flexium-canvas/interactive'
 ```
 
 ## Signature
@@ -33,7 +33,7 @@ interface KeyboardState {
 ## Keys Constants
 
 ```ts
-import { Keys } from 'flexium-canvas'
+import { Keys } from 'flexium-canvas/interactive'
 
 Keys.ArrowUp
 Keys.ArrowDown

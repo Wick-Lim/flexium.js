@@ -24,8 +24,8 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 | --- | --- | --- |
 | [`use()` with `key`](#usestate-with-key) | `flexium/core` | Share state globally (replaces Context API) |
 | [`useRouter()`](#userouter) | `flexium/router` | Access routing state and navigation |
-| [`useKeyboard()`](#keyboard) | `flexium-canvas` | Track keyboard input state |
-| [`useMouse()`](#mouse) | `flexium-canvas` | Track mouse position and button state |
+| [`useKeyboard()`](#keyboard) | `flexium-canvas/interactive` | Track keyboard input state |
+| [`useMouse()`](#mouse) | `flexium-canvas/interactive` | Track mouse position and button state |
 
 ---
 
@@ -298,7 +298,7 @@ Returns a `KeyboardState` object:
 #### Usage
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium-canvas';
+import { useKeyboard, Keys } from 'flexium-canvas/interactive';
 import { use } from 'flexium/core';
 
 function PlayerController() {
@@ -339,7 +339,7 @@ function PlayerController() {
 #### Game Loop Integration
 
 ```tsx
-import { useKeyboard, Keys, useLoop } from 'flexium-canvas';
+import { useKeyboard, Keys, useLoop } from 'flexium-canvas/interactive';
 import { use } from 'flexium/core';
 
 function Game() {
@@ -387,7 +387,7 @@ function Game() {
 Flexium provides a `Keys` constant with common key codes:
 
 ```tsx
-import { Keys } from 'flexium-canvas';
+import { Keys } from 'flexium-canvas/interactive';
 
 // Arrow keys
 Keys.ArrowUp, Keys.ArrowDown, Keys.ArrowLeft, Keys.ArrowRight
@@ -483,7 +483,7 @@ Returns a `MouseState` object:
 #### Basic Usage
 
 ```tsx
-import { mouse } from 'flexium-canvas';
+import { mouse } from 'flexium-canvas/interactive';
 
 function MouseTracker() {
   const mouse = useMouse();
@@ -502,7 +502,7 @@ function MouseTracker() {
 #### Canvas Drawing
 
 ```tsx
-import { useMouse } from 'flexium-canvas';
+import { useMouse } from 'flexium-canvas/interactive';
 import { useRef, use } from 'flexium/core';
 
 function DrawingCanvas() {
@@ -540,7 +540,7 @@ function DrawingCanvas() {
 #### Game Loop Integration
 
 ```tsx
-import { mouse, useLoop } from 'flexium-canvas';
+import { mouse, useLoop } from 'flexium-canvas/interactive';
 import { use } from 'flexium/core';
 
 function ShootingGame() {
@@ -624,7 +624,7 @@ function ZoomableView() {
 #### Mouse Button Constants
 
 ```tsx
-import { MouseButton } from 'flexium-canvas';
+import { MouseButton } from 'flexium-canvas/interactive';
 
 MouseButton.Left    // 0
 MouseButton.Middle  // 1
@@ -971,7 +971,7 @@ function Component() {
 ```tsx
 import { use } from 'flexium/core';
 import { useRouter } from 'flexium/router';
-import { useKeyboard, Keys } from 'flexium-canvas';
+import { useKeyboard, Keys } from 'flexium-canvas/interactive';
 
 function GamePlayer() {
   const { navigate } = useRouter();

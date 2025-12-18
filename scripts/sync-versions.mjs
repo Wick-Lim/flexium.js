@@ -35,6 +35,7 @@ const FILES_TO_SYNC = [
 
   // Source files
   { path: 'packages/flexium/src/index.ts', type: 'regex', pattern: /VERSION = '[^']+'/g, replace: (v) => `VERSION = '${v}'` },
+  { path: 'packages/flexium-canvas/src/index.ts', type: 'regex', pattern: /VERSION = '[^']+'/g, replace: (v) => `VERSION = '${v}'` },
 
   // Config files
   { path: 'apps/docs/.vitepress/config.ts', type: 'regex', pattern: /text: 'v[^']+'/g, replace: (v) => `text: 'v${v}'` },

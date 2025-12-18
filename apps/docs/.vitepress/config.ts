@@ -220,7 +220,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium-canvas',
+          text: 'flexium-canvas/dom',
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
@@ -229,7 +229,13 @@ export default defineConfig({
             { text: '&lt;DrawArc /&gt;', link: '/docs/canvas/arc' },
             { text: '&lt;DrawLine /&gt;', link: '/docs/canvas/line' },
             { text: '&lt;DrawPath /&gt;', link: '/docs/canvas/path' },
-            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' },
+            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' }
+          ]
+        },
+        {
+          text: 'flexium-canvas/interactive',
+          collapsed: false,
+          items: [
             { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },
             { text: 'useMouse()', link: '/docs/interactive/use-mouse' },
             { text: 'useLoop()', link: '/docs/interactive/use-loop' }
@@ -292,7 +298,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium-canvas',
+          text: 'flexium-canvas/dom',
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
@@ -301,7 +307,13 @@ export default defineConfig({
             { text: '&lt;DrawArc /&gt;', link: '/docs/canvas/arc' },
             { text: '&lt;DrawLine /&gt;', link: '/docs/canvas/line' },
             { text: '&lt;DrawPath /&gt;', link: '/docs/canvas/path' },
-            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' },
+            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' }
+          ]
+        },
+        {
+          text: 'flexium-canvas/interactive',
+          collapsed: false,
+          items: [
             { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },
             { text: 'useMouse()', link: '/docs/interactive/use-mouse' },
             { text: 'useLoop()', link: '/docs/interactive/use-loop' }
@@ -364,7 +376,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium-canvas',
+          text: 'flexium-canvas/dom',
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
@@ -373,7 +385,13 @@ export default defineConfig({
             { text: '&lt;DrawArc /&gt;', link: '/docs/canvas/arc' },
             { text: '&lt;DrawLine /&gt;', link: '/docs/canvas/line' },
             { text: '&lt;DrawPath /&gt;', link: '/docs/canvas/path' },
-            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' },
+            { text: '&lt;DrawText /&gt;', link: '/docs/canvas/text' }
+          ]
+        },
+        {
+          text: 'flexium-canvas/interactive',
+          collapsed: false,
+          items: [
             { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },
             { text: 'useMouse()', link: '/docs/interactive/use-mouse' },
             { text: 'useLoop()', link: '/docs/interactive/use-loop' }

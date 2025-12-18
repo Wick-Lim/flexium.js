@@ -269,7 +269,7 @@ Interactive canvas with particle trail effects. Move your mouse to see smooth, r
 ::: details View Source Code
 ```tsx
 import { use } from 'flexium/core'
-import { Canvas, DrawCircle } from 'flexium-canvas'
+import { Canvas, DrawCircle } from 'flexium-canvas/dom'
 
 function ParticleCanvas() {
   const [mouseX, setMouseX] = use(150)
@@ -338,8 +338,8 @@ A complete game built with Flexium's game module. Use arrow keys or WASD to cont
 ```tsx
 import { use } from 'flexium/core'
 import { mount } from 'flexium/dom'
-import { Canvas, DrawRect } from 'flexium-canvas'
-import { useKeyboard, useLoop, Keys } from 'flexium-canvas'
+import { Canvas, DrawRect } from 'flexium-canvas/dom'
+import { useKeyboard, useLoop, Keys } from 'flexium-canvas/interactive'
 
 const [snake, setSnake] = use([{ x: 7, y: 7 }])
 const [direction, setDirection] = use('RIGHT')

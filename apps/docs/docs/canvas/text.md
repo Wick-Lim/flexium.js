@@ -17,7 +17,7 @@ Draws text on the canvas.
 ## Usage
 
 ```tsx
-import { Canvas, DrawText } from 'flexium-canvas';
+import { Canvas, DrawText } from 'flexium-canvas/dom';
 
 <Canvas width={300} height={100}>
   <DrawText

@@ -5,7 +5,7 @@ Track mouse position and button states.
 ## Import
 
 ```tsx
-import { mouse } from 'flexium-canvas'
+import { mouse } from 'flexium-canvas/interactive'
 ```
 
 ## Signature

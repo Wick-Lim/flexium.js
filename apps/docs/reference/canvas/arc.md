@@ -17,7 +17,7 @@ Draws an arc on the canvas.
 ## Usage
 
 ```tsx
-import { Canvas, DrawArc } from 'flexium-canvas';
+import { Canvas, DrawArc } from 'flexium-canvas/dom';
 
 <Canvas width={200} height={200}>
   <DrawArc
