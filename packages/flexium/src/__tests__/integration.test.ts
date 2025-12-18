@@ -359,10 +359,10 @@ describe('Ref + forwardRef + Components', () => {
   })
 
   it('should build form with forwarded refs', async () => {
-    const Input = forwardRef<HTMLInputElement, {
+    const Input = forwardRef<{
       label: string
       error?: string
-    }>((props, inputRef) => {
+    }, HTMLInputElement>((props, inputRef) => {
       return f('div', { class: 'form-field' }, [
         f('label', {}, props.label),
         f('input', { ref: inputRef, class: props.error ? 'error' : '' }),
@@ -594,7 +594,7 @@ describe('Lifecycle Integration', () => {
         if (divRef.current) {
           refAttached = true
         }
-      }, [])
+      })
 
       return f('div', { ref: divRef, 'data-testid': 'target' }, 'Content')
     }

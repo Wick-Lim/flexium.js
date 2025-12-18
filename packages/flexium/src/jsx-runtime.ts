@@ -5,7 +5,7 @@ export function jsx(type: any, props: any, key?: any): FNode {
     return {
         type,
         props: otherProps,
-        children: Array.isArray(children) ? children : (children ? [children] : []),
+        children: Array.isArray(children) ? children : (children != null ? [children] : []),
         key
     }
 }
