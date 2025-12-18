@@ -120,7 +120,7 @@ console.log(store.get().count)  // 1
 - Building application components
 - Normal state management needs
 - When you want the simplest API
-- Building custom reactive libraries (using `useState` primitives)
+- Building custom reactive libraries (using `use()` primitives)
 
 ### Use advanced APIs from `flexium/core`
 - `root()`: Managing disposal scopes manually

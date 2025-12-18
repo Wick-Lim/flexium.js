@@ -1127,7 +1127,7 @@ function SlideTransition({ children }) {
   const r = useRouter();
   const location = r.location;
   const [isAnimating, setIsAnimating] = use(false);
-  const direction = useState<'left' | 'right'>('right');
+  const [direction, setDirection] = use<'left' | 'right'>('right');
 
   use(() => {
     setIsAnimating(true);
@@ -1569,7 +1569,7 @@ Wrap routes in error boundaries:
 ```tsx
 function RouteErrorBoundary({ children }) {
   const [hasError, setHasError] = use(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = use<Error | null>(null);
 
   try {
     return children;
@@ -1645,7 +1645,7 @@ function PrefetchLink({ to, children }) {
 Style active links based on current route:
 
 ```tsx
-import { use } from 'flexium'; // Assuming useState is imported from flexium
+import { use } from 'flexium/core';
 
 function NavLink({ to, children, activeClass = 'active', ...props }) {
   const r = useRouter();

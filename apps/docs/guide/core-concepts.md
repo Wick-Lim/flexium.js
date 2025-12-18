@@ -152,7 +152,7 @@ function Counter() {
 ### Mount/Unmount
 
 ```tsx
-import { useEffect, onCleanup } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function MyComponent() {
   use(() => {

@@ -2,10 +2,10 @@ import { reactive } from './reactive'
 import { unsafeEffect } from './lifecycle'
 import { hook } from './hook'
 import { registerSignal, updateSignal } from './devtools'
-import { Context, useContext as _useContext } from './context'
+import { Context, getContextValue } from './context'
 
-// Re-export context utilities
-export { Context, createContext, pushContext, popContext, snapshotContext, runWithContext } from './context'
+// Re-export Context class only (other functions are internal)
+export { Context } from './context'
 
 function isContext(value: any): value is Context<any> {
   return value && typeof value === 'object' && 'id' in value && 'defaultValue' in value && 'Provider' in value
@@ -65,7 +65,7 @@ export function use<T, P = void>(
 ): any {
   // Context mode: use(SomeContext) returns [value, undefined] tuple for UX consistency
   if (isContext(input)) {
-    const value = _useContext(input)
+    const value = getContextValue(input)
     return [value, undefined]
   }
 

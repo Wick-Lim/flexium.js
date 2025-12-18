@@ -14,9 +14,9 @@ import { use } from 'flexium/core'
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
-  const [currentState, setCurrentState] = useState<LoadingState>('idle')
-  const [data, setData] = useState<any>(null)
-  const [error, setError] = useState<Error | null>(null)
+  const [currentState, setCurrentState] = use<LoadingState>('idle')
+  const [data, setData] = use<any>(null)
+  const [error, setError] = use<Error | null>(null)
   
   const loadData = async () => {
     // idle -> loading
@@ -80,7 +80,7 @@ function DataLoader() {
 ## Complex State Machine (Form Submission)
 
 ```tsx
-import { useState, sync } from 'flexium/core'
+import { use, sync } from 'flexium/core'
 
 type FormState =
   | { type: 'idle' }
@@ -90,7 +90,7 @@ type FormState =
   | { type: 'error'; message: string }
 
 function ComplexForm() {
-  const [formState, setFormState] = useState<FormState>({ type: 'idle' })
+  const [formState, setFormState] = use<FormState>({ type: 'idle' })
   const [formData, setFormData] = use({
     email: '',
     password: ''
@@ -204,7 +204,7 @@ type GameState =
   | { type: 'gameOver'; score: number; level: number }
 
 function Game() {
-  const [gameState, setGameState] = useState<GameState>({ type: 'menu' })
+  const [gameState, setGameState] = use<GameState>({ type: 'menu' })
   const [score, setScore] = use(0)
   const [level, setLevel] = use(1)
   
@@ -324,7 +324,7 @@ type State =
   | { type: 'error'; error: Error }
 
 function ActionBasedStateMachine() {
-  const [machineState, setMachineState] = useState<State>({ type: 'idle' })
+  const [machineState, setMachineState] = use<State>({ type: 'idle' })
   
   const dispatch = (action: Action) => {
     switch (action.type) {

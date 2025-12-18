@@ -84,11 +84,11 @@ function PostDetail({ postId }: { postId: number }) {
 import { use } from 'flexium/core'
 
 function InfiniteScrollList() {
-  const [items, setItems] = useState<any[]>([])
+  const [items, setItems] = use<any[]>([])
   const [page, setPage] = use(1)
   const [hasMore, setHasMore] = use(true)
   const [isLoading, setIsLoading] = use(false)
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError] = use<Error | null>(null)
   
   const loadMore = async () => {
     if (isLoading || !hasMore) return
@@ -155,7 +155,7 @@ function InfiniteScrollList() {
 ## Optimistic Updates
 
 ```tsx
-import { useState, sync } from 'flexium/core'
+import { use, sync } from 'flexium/core'
 
 function LikeButton({ postId }: { postId: number }) {
   const [post, setPost] = use(async () => {

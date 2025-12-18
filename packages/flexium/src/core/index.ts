@@ -8,4 +8,4 @@ export { sync } from './lifecycle'
 export { useRef } from './ref'
 
 // Context
-export { Context, createContext, useContext } from './context'
+export { Context } from './context'

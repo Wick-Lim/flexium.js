@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f, Portal, Suspense, ErrorBoundary } from '../dom'
-import { use, sync, useRef, createContext } from '../core'
+import { use, sync, useRef, Context } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -127,7 +127,7 @@ describe('Context + State + Components', () => {
   })
 
   it('should build theme switching app', async () => {
-    const ThemeCtx = createContext<'light' | 'dark'>('light')
+    const ThemeCtx = new Context<'light' | 'dark'>('light')
 
     function ThemeToggle() {
       const [theme] = use(ThemeCtx)
@@ -178,7 +178,7 @@ describe('Context + State + Components', () => {
       logout: () => void
     }
 
-    const AuthCtx = createContext<AuthContext>({
+    const AuthCtx = new Context<AuthContext>({
       user: null,
       login: () => {},
       logout: () => {}

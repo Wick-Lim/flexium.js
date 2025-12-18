@@ -9,7 +9,7 @@ A complete form validation example including real-time validation, async validat
 ## Complete Form Validation Example
 
 ```tsx
-import { useState, sync } from 'flexium/core'
+import { use, sync } from 'flexium/core'
 
 interface FormData {
   email: string
@@ -26,20 +26,20 @@ interface FormErrors {
 }
 
 function RegistrationForm() {
-  const [form, setForm] = useState<FormData>({
+  const [form, setForm] = use<FormData>({
     email: '',
     password: '',
     confirmPassword: '',
     name: ''
   })
 
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [touched, setTouched] = use<Record<string, boolean>>({})
   const [isSubmitting, setIsSubmitting] = use(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = use<string | null>(null)
   const [isCheckingEmail, setIsCheckingEmail] = use(false)
 
   // Real-time validation
-  const [errors, setErrors] = useState<FormErrors>(() => {
+  const [errors, setErrors] = use<FormErrors>(() => {
     const errs: FormErrors = {}
     
     // Email validation

@@ -19,8 +19,8 @@ function LoginForm() {
     password: ''
   })
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [errors, setErrors] = use<Record<string, string>>({})
+  const [touched, setTouched] = use<Record<string, boolean>>({})
 
   const handleSubmit = (e: Event) => {
     e.preventDefault()
@@ -119,7 +119,7 @@ function FormWithValidation() {
 function FormWithAsyncValidation() {
   const [form, setForm] = use({ email: '' })
   const [isChecking, setIsChecking] = use(false)
-  const [emailError, setEmailError] = useState<string | null>(null)
+  const [emailError, setEmailError] = use<string | null>(null)
 
   const checkEmailAvailability = async (email: string) => {
     if (!email) return
@@ -314,9 +314,9 @@ function InfiniteScrollList() {
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
-  const [loadingState, setLoadingState] = useState<LoadingState>('idle')
+  const [loadingState, setLoadingState] = use<LoadingState>('idle')
   const [data, setData] = use(null)
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError] = use<Error | null>(null)
 
   const loadData = async () => {
     setLoadingState('loading')
@@ -363,7 +363,7 @@ type FormState =
   | { type: 'error'; message: string }
 
 function ComplexForm() {
-  const [formState, setFormState] = useState<FormState>({ type: 'idle' })
+  const [formState, setFormState] = use<FormState>({ type: 'idle' })
   const [formData, setFormData] = use({ email: '', password: '' })
 
   const handleSubmit = async () => {
@@ -520,7 +520,7 @@ function PersistentForm() {
 
 ```tsx
 // app/state.ts
-export const [theme, setTheme] = useState<'light' | 'dark'>('light', {
+export const [theme, setTheme] = use<'light' | 'dark'>('light', {
   key: 'app:theme'
 })
 
@@ -548,7 +548,7 @@ function ThemeToggle() {
 
 ```tsx
 // app/error-handler.ts
-export const [globalError, setGlobalError] = useState<Error | null>(null, {
+export const [globalError, setGlobalError] = use<Error | null>(null, {
   key: 'app:error'
 })
 

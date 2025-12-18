@@ -644,7 +644,7 @@ function SearchBox() {
   // Server: Renders empty search box
   // Client: Adds autocomplete
   use(() => {
-    if (query.length > 2) {  // query works directly in useEffect (both query() and query work)
+    if (query.length > 2) {  // query works directly in use() effect
       fetchSuggestions(query).then(s => setSuggestions(s))
     }
   })

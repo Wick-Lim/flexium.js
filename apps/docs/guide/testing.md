@@ -490,7 +490,7 @@ describe('TodoList Component', () => {
   });
 
   function TodoList() {
-    const [todos, setTodos] = useState<string[]>([]);
+    const [todos, setTodos] = use<string[]>([]);
     const [input, setInput] = use('');
 
     const addTodo = () => {

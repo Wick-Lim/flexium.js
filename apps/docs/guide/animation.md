@@ -59,21 +59,19 @@ import { use } from 'flexium/core'
 const [isExpanded, setIsExpanded] = use(false)
 const controller = new MotionController(element)
 
-// Watch state and animate
-const unwatch = useState.watch(() => {
+// Watch state and animate reactively
+use(() => {
   controller.animate({
     animate: isExpanded
       ? { height: 'auto', opacity: 1 }
       : { height: 0, opacity: 0 }
   })
+
+  return () => controller.dispose()
 })
 
 // Toggle animation
 setIsExpanded(true)
-
-// Cleanup
-unwatch()
-controller.dispose()
 ```
 
 ### Exit Animations

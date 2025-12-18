@@ -34,13 +34,8 @@ export class Context<T> {
     }
 }
 
-/** @deprecated Use `new Context(defaultValue)` instead */
-export function createContext<T>(defaultValue: T): Context<T> {
-    return new Context(defaultValue)
-}
-
-/** @deprecated Use `use(context)` instead */
-export function useContext<T>(ctx: Context<T>): T {
+// Internal: get context value (used by use.ts)
+export function getContextValue<T>(ctx: Context<T>): T {
     return contextMap.has(ctx.id) ? contextMap.get(ctx.id) : ctx.defaultValue
 }
 

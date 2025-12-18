@@ -106,9 +106,7 @@ use(() => {
   return () => clearInterval(interval)  // cleanup
 })
 
-// ✅ Delete global state
-import { use } from 'flexium/core'
-useState.delete('old:key')  // Delete unused key
+// ✅ Global state is automatically cleaned up when no longer used
 ```
 
 **See**: Check [use() documentation - With Cleanup](/docs/core/effect#with-cleanup).
@@ -119,7 +117,7 @@ useState.delete('old:key')  // Delete unused key
 
 ### Q: use() gets stuck in infinite loop
 
-**A**: Don't update tracked state inside useEffect.
+**A**: Don't update tracked state inside `use()` effect.
 
 ```tsx
 // ❌ Infinite loop occurs
@@ -148,7 +146,7 @@ use(() => {
 
 ### Q: use() doesn't run
 
-**A**: State must be read inside useEffect for dependencies to be tracked.
+**A**: State must be read inside `use()` effect for dependencies to be tracked.
 
 ```tsx
 // ❌ Dependencies not tracked
@@ -216,17 +214,17 @@ const [users, refetch, status] = use(async () => {
 
 ```tsx
 // ✅ Explicit type specification
-const [user, setUser] = useState<User | null>(null)
+const [user, setUser] = use<User | null>(null)
 
 // ✅ Use generics
-const [count, setCount] = useState<number>(0)
+const [count, setCount] = use<number>(0)
 
 // ✅ For complex types
 interface FormData {
   email: string
   password: string
 }
-const [form, setForm] = useState<FormData>({
+const [form, setForm] = use<FormData>({
   email: '',
   password: ''
 })

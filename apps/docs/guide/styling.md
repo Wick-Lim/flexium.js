@@ -163,7 +163,7 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 The `class` attribute can also accept a function for reactive class names:
 
 ```tsx
-const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+const [status, setStatus] = use<'idle' | 'loading' | 'success' | 'error'>('idle')
 
 <div class={() => `status-badge ${status}`}>
   {status}
@@ -268,7 +268,7 @@ Update CSS variables reactively for instant theme changes:
 import { use } from 'flexium/core'
 
 function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [theme, setTheme] = use<'light' | 'dark'>('light')
 
   use(() => {
     const root = document.documentElement
@@ -305,7 +305,7 @@ Create responsive, interactive UIs by deriving styles from application state.
 
 ```tsx
 function StatusIndicator() {
-  const [status, setStatus] = useState<'online' | 'offline' | 'away'>('offline')
+  const [status, setStatus] = use<'online' | 'offline' | 'away'>('offline')
 
   const statusStyles = {
     online: { background: '#4caf50', color: '#fff' },
@@ -473,7 +473,7 @@ Implement light/dark mode and custom themes.
 import { use } from 'flexium/core'
 
 function useTheme() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app-theme' })
+  const [theme, setTheme] = use<'light' | 'dark'>('light', { key: 'app-theme' })
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
@@ -533,7 +533,7 @@ Use context to provide theme throughout your app:
 import { use } from 'flexium/core'
 
 // Theme state - shared globally with key
-const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app:theme' })
+const [theme, setTheme] = use<'light' | 'dark'>('light', { key: 'app:theme' })
 
 const lightColors = {
   background: '#ffffff',
@@ -577,7 +577,7 @@ Detect and respect user's system theme preference:
 
 ```tsx
 function useSystemTheme() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+  const [theme, setTheme] = use<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }

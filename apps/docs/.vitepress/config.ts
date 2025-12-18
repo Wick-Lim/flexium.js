@@ -274,7 +274,7 @@ export default defineConfig({
           text: 'Type Reference',
           collapsed: true,
           items: [
-            { text: 'Types', link: '/docs/types' }
+            { text: 'Types', link: '/reference/types' }
           ]
         }
       ],

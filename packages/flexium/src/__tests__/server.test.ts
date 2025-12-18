@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { f, hydrate } from '../dom'
 import { renderToString, renderToStaticMarkup, getIsServer } from '../server'
-import { use, createContext } from '../core'
+import { use, Context } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -56,7 +56,7 @@ describe('renderToString()', () => {
   })
 
   it('should render with context', () => {
-    const ThemeCtx = createContext('light')
+    const ThemeCtx = new Context('light')
 
     function ThemedDiv() {
       const [theme] = use(ThemeCtx)

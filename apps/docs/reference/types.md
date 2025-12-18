@@ -244,10 +244,10 @@ interface Context<T> {
 import { use } from 'flexium/core'
 
 // Share theme globally - no Provider needed
-const [theme, setTheme] = useState<'light' | 'dark'>('dark', { key: 'app:theme' })
+const [theme, setTheme] = use<'light' | 'dark'>('dark', { key: ['app', 'theme'] })
 
 function ThemedComponent() {
-  const [theme, setTheme] = use('light', { key: 'app:theme' })
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
   return <div>Current theme: {theme}</div>
 }
 ```

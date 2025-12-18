@@ -534,7 +534,7 @@ function OptimizedList() {
 Split your application into smaller chunks that load on demand:
 
 ```tsx
-// Use dynamic imports with useState for code splitting
+// Use dynamic imports with use() for code splitting
 function App() {
   const [route, setRoute] = use('dashboard');
   const [components, setComponents] = use({
@@ -578,7 +578,7 @@ With Flexium Router, automatically split by route:
 
 ```tsx
 import { Routes, Route } from 'flexium/router';
-// Use dynamic imports with useState for code splitting
+// Use dynamic imports with use() for code splitting
 const [Home, setHome] = use(null);
 const [About, setAbout] = use(null);
 const [Contact, setContact] = use(null);

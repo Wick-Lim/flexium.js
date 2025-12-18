@@ -1,11 +1,12 @@
 import { reactive } from '../core/reactive'
-import { createContext, useContext } from '../core/context'
+import { Context } from '../core/context'
+import { use } from '../core/use'
 import type { Location, RouterContext } from './types'
 import { parseQuery, isUnsafePath } from './utils'
 
 // Contexts
-export const RouterCtx = createContext<RouterContext>(null as any)
-export const RouteDepthCtx = createContext<number>(0)
+export const RouterCtx = new Context<RouterContext>(null as any)
+export const RouteDepthCtx = new Context<number>(0)
 
 // Helper functions
 const getDefaultLocation = (): Location => ({
@@ -74,7 +75,7 @@ export function useLocation(): [Location, (path: string) => void] {
 
 // Router hook - returns full router context
 export function useRouter(): RouterContext {
-    const routerContext = useContext(RouterCtx)
+    const [routerContext] = use(RouterCtx)
     if (!routerContext) {
         throw new Error('useRouter() must be called within a <Routes> component')
     }

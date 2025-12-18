@@ -34,8 +34,8 @@ function User(props: Props) {
 `use()` infers types automatically, or you can specify them.
 
 ```tsx
-const count = useState<number>(0);
-const user = useState<User | null>(null);
+const count = use<number>(0);
+const user = use<User | null>(null);
 ```
 
 ## FNode Children Types

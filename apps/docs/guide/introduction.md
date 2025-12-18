@@ -576,7 +576,7 @@ Compared to React 18 on common operations:
 ### Real-World Performance
 
 ```tsx
-import { useState, useSync } from 'flexium/core';
+import { use, sync } from 'flexium/core';
 
 // Efficiently update 1000 items
 function LargeList() {

@@ -1,45 +1,38 @@
 # Global State Sharing
 
-::: warning Deprecated: Context API
-The Context API (`createContext`, `context`) is deprecated. Use `use()` with `key` option instead.
+Flexium provides two ways to share state across components: Context with Provider hierarchy, or global state with keys.
 
-Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `use()` with keys for global state sharing.
-:::
+## Option 1: Global State with key (Recommended)
 
-## Recommended: Use use() with key
-
-Instead of Context API, use `use()` with a `key` option to share state globally:
+The simplest way to share state globally:
 
 ```tsx
 import { use } from 'flexium/core'
 
-// Share theme globally - no Provider needed
-const [theme, setTheme] = use<'light' | 'dark'>('light', { key: ['app', 'theme'] })
-
-// In any component - access the same state
-function ThemedButton() {
+// No Provider needed - state is shared globally by key
+function ThemeToggle() {
   const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
   return (
-    <button
-      onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
-      style={{
-        background: theme === 'dark' ? '#333' : '#fff',
-        color: theme === 'dark' ? '#fff' : '#333'
-      }}
-    >
-      Current theme: {theme}
+    <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+      Current: {theme}
     </button>
   )
 }
+
+function ThemedCard() {
+  // Access the same state from anywhere
+  const [theme] = use('light', { key: ['app', 'theme'] })
+
+  return <div class={theme}>Themed content</div>
+}
 ```
 
-## Complete Example: Auth State
+### Complete Example: Auth State
 
 ```tsx
 import { use } from 'flexium/core'
 
-// Auth state - shared globally
 function useAuth() {
   const [user, setUser] = use<User | null>(null, { key: ['app', 'auth', 'user'] })
 
@@ -52,14 +45,11 @@ function useAuth() {
     setUser(userData)
   }
 
-  const logout = () => {
-    setUser(null)
-  }
+  const logout = () => setUser(null)
 
   return { user, login, logout }
 }
 
-// Use in any component
 function Header() {
   const { user, logout } = useAuth()
 
@@ -78,91 +68,58 @@ function Header() {
 }
 ```
 
-## Multiple Global States
+## Option 2: Context with Provider
+
+For cases where you need different values in different subtrees:
 
 ```tsx
-import { use } from 'flexium/core'
+import { Context, use } from 'flexium/core'
 
-// Theme state
-const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
+const ThemeContext = new Context<'light' | 'dark'>('light')
 
-// Language state
-const [lang, setLang] = use('en', { key: ['app', 'language'] })
-
-// User state
-const [user, setUser] = use(null, { key: ['app', 'user'] })
-
-// Use in any component
-function ProfileCard() {
-  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
-  const [lang, setLang] = use('en', { key: ['app', 'language'] })
-  const [user, setUser] = use(null, { key: ['app', 'user'] })
-
+function App() {
   return (
-    <div class={`card-${theme}`}>
-      <h2>{lang === 'en' ? 'Profile' : 'Profil'}</h2>
-      <p>{user?.name}</p>
+    <div>
+      {/* Light theme section */}
+      <ThemeContext.Provider value="light">
+        <Sidebar />
+      </ThemeContext.Provider>
+
+      {/* Dark theme section */}
+      <ThemeContext.Provider value="dark">
+        <MainContent />
+      </ThemeContext.Provider>
     </div>
   )
 }
-```
 
-## Benefits of use() with key
-
-- ✅ **No Provider boilerplate** - No wrapper components needed
-- ✅ **No hierarchy** - Access from anywhere, not just child components
-- ✅ **Simpler mental model** - Same API as local state
-- ✅ **Automatic cleanup** - Use `useState.delete(key)` when needed
-- ✅ **Type-safe** - Full TypeScript support
-
-## Migration from Context API
-
-If you're using deprecated Context API, migrate to `use()` with keys:
-
-```tsx
-// ❌ Old way (deprecated)
-import { Context, use } from 'flexium/core'
-
-const ThemeContext = new Context('light')
-
-function App() {
-  const [theme, setTheme] = use('dark')
-  return (
-    <ThemeContext.Provider value={theme}>
-      <Child />
-    </ThemeContext.Provider>
-  )
+function Sidebar() {
+  const [theme] = use(ThemeContext)  // 'light'
+  return <nav class={theme}>...</nav>
 }
 
-function Child() {
-  const [theme] = use(ThemeContext)
-  return <div>{theme}</div>
-}
-
-// ✅ New way
-import { use } from 'flexium/core'
-
-function App() {
-  // Set theme globally - no Provider needed
-  const [theme, setTheme] = use('dark', { key: ['app', 'theme'] })
-  return <Child />
-}
-
-function Child() {
-  // Access theme from anywhere
-  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
-  return <div>{theme}</div>
+function MainContent() {
+  const [theme] = use(ThemeContext)  // 'dark'
+  return <main class={theme}>...</main>
 }
 ```
+
+## When to Use Each
+
+| Use key when... | Use Context when... |
+|-----------------|---------------------|
+| Simple global state | Different values for different subtrees |
+| Same value everywhere | Need Provider hierarchy |
+| Want minimal boilerplate | Following established patterns |
 
 ## Best Practices
 
-1. **Use descriptive keys**: Use hierarchical keys like `['app', 'theme']` or `['app', 'auth', 'user']`
-2. **Type safety**: Use TypeScript for type-safe state
-3. **Cleanup when needed**: Global state is automatically cleaned up when no longer used
-4. **Avoid overuse**: Don't use global state for every piece of data - prefer local state when possible
+1. **Use descriptive keys**: `['app', 'theme']` or `['app', 'auth', 'user']`
+2. **Prefer key for global state**: Less boilerplate, simpler mental model
+3. **Use Context for subtree variations**: When different parts need different values
 
 ## See Also
 
-- [use()](/docs/core/state) - Complete use() documentation with key option
-- [Best Practices: State Organization](/docs/guide/best-practices/state-organization) - How to organize global state
+- [Context](/docs/core/context) - Context API reference
+- [use()](/docs/core/state) - State and effects
+- [Best Practices: State Organization](/docs/guide/best-practices/state-organization)

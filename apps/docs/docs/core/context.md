@@ -1,19 +1,93 @@
-# Context API
+# Context
 
-::: warning Deprecated
-The Context API is deprecated. Use `use()` with `key` option instead for sharing state across components.
+Context provides a way to pass data through the component tree without manually passing props.
 
-Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `use()` with keys for global state sharing.
-:::
+## Import
 
-## Recommended: Use use() with key
+```ts
+import { Context, use } from 'flexium/core'
+```
 
-Instead of Context API, use `use()` with a `key` option:
+## Creating a Context
+
+```ts
+const ThemeContext = new Context<'light' | 'dark'>('light')
+```
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { Context, use } from 'flexium/core'
+
+// Create context with default value
+const ThemeContext = new Context<'light' | 'dark'>('light')
+
+function App() {
+  const [theme, setTheme] = use<'light' | 'dark'>('dark')
+
+  return (
+    <ThemeContext.Provider value={theme}>
+      <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+        Toggle
+      </button>
+      <ThemedCard />
+    </ThemeContext.Provider>
+  )
+}
+
+function ThemedCard() {
+  // Consume context using use()
+  const [theme] = use(ThemeContext)
+
+  return (
+    <div style={{ background: theme === 'dark' ? '#333' : '#fff' }}>
+      Current theme: {theme}
+    </div>
+  )
+}
+```
+
+### Multiple Contexts
+
+```tsx
+const ThemeContext = new Context<'light' | 'dark'>('light')
+const UserContext = new Context<User | null>(null)
+
+function App() {
+  const [theme] = use<'light' | 'dark'>('dark')
+  const [user] = use<User | null>({ name: 'John' })
+
+  return (
+    <ThemeContext.Provider value={theme}>
+      <UserContext.Provider value={user}>
+        <Dashboard />
+      </UserContext.Provider>
+    </ThemeContext.Provider>
+  )
+}
+
+function Dashboard() {
+  const [theme] = use(ThemeContext)
+  const [user] = use(UserContext)
+
+  return (
+    <div class={theme}>
+      Welcome, {user?.name}
+    </div>
+  )
+}
+```
+
+## Alternative: Global State with key
+
+For simpler cases without Provider hierarchy, use `use()` with `key`:
 
 ```tsx
 import { use } from 'flexium/core'
 
-// In any component
+// No Provider needed - state is shared globally by key
 function ThemeToggle() {
   const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
@@ -23,115 +97,24 @@ function ThemeToggle() {
     </button>
   )
 }
-```
 
-### Complete Example: Auth State
-
-```tsx
-import { use } from 'flexium/core'
-
-// Auth state - shared globally
-function useAuth() {
-  const [user, setUser] = use<User | null>(null, { key: ['app', 'auth', 'user'] })
-
-  const login = async (email: string, password: string) => {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password })
-    })
-    const userData = await response.json()
-    setUser(userData)
-  }
-
-  const logout = () => {
-    setUser(null)
-  }
-
-  return { user, login, logout }
-}
-
-// Use in any component
-function Header() {
-  const { user, logout } = useAuth()
-
-  return (
-    <header>
-      {user ? (
-        <>
-          <span>Welcome, {user.name}</span>
-          <button onclick={logout}>Logout</button>
-        </>
-      ) : (
-        <LoginButton />
-      )}
-    </header>
-  )
-}
-```
-
-### Multiple Global States
-
-```tsx
-import { use } from 'flexium/core'
-
-// Use in any component
-function Dashboard() {
-  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
-  const [user, setUser] = use(null, { key: ['app', 'auth', 'user'] })
-  const [items, setItems] = use([], { key: ['app', 'cart', 'items'] })
-
-  return (
-    <div class={theme}>
-      <p>Welcome, {user?.name}</p>
-      <p>Cart items: {items.length}</p>
-    </div>
-  )
-}
-```
-
-## Benefits of use() with key
-
-- ✅ **No Provider boilerplate** - No wrapper components needed
-- ✅ **No hierarchy** - Access from anywhere, not just child components
-- ✅ **Simpler mental model** - Same API as local state
-- ✅ **Automatic cleanup** - State is automatically cleaned up when no longer used
-- ✅ **Type-safe** - Full TypeScript support
-
-## Migration from Context API
-
-If you're using deprecated Context API, migrate to `use()` with keys:
-
-```tsx
-// ❌ Old way (deprecated)
-import { Context, use } from 'flexium/core'
-
-const ThemeContext = new Context('light')
-
-function ThemeProvider(props) {
-  const [theme] = use('light')
-  return (
-    <ThemeContext.Provider value={theme}>
-      {props.children}
-    </ThemeContext.Provider>
-  )
-}
-
-function Child() {
-  const [theme] = use(ThemeContext)
-  return <div>{theme}</div>
-}
-
-// ✅ New way
-import { use } from 'flexium/core'
-
-// No Provider needed!
-function Child() {
+function ThemedCard() {
+  // Access the same state from anywhere
   const [theme] = use('light', { key: ['app', 'theme'] })
-  return <div>{theme}</div>
+
+  return <div class={theme}>Themed content</div>
 }
 ```
+
+## When to Use Context vs key
+
+| Use Context when... | Use key when... |
+|---------------------|-----------------|
+| Need Provider hierarchy | Simple global state |
+| Different values for different subtrees | Same value everywhere |
+| Following established patterns | Want minimal boilerplate |
 
 ## See Also
 
-- [use()](/docs/core/state) - Complete use() documentation with key option
-- [Best Practices: State Organization](/docs/guide/best-practices/state-organization) - How to organize global state
+- [use()](/docs/core/state) - State and effects
+- [Best Practices: State Organization](/docs/guide/best-practices/state-organization) - How to organize state

@@ -319,7 +319,7 @@ const element = document.createElement('div')
 const controller = new MotionController(element)
 
 // Watch state and animate on changes
-const unwatch = useState.watch(() => {
+use(() => {
   controller.animate({
     animate: isVisible
       ? { opacity: 1, y: 0 }
@@ -459,7 +459,7 @@ function AnimatedCard() {
   })
 
   // Watch state changes
-  const unwatch = useState.watch(() => {
+  use(() => {
     if (isExpanded) {
       card.style.width = '400px'
       card.style.height = '300px'

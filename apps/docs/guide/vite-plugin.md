@@ -95,7 +95,7 @@ import flexium from 'vite-plugin-flexium';
 export default defineConfig({
   plugins: [
     flexium({
-      autoImport: true, // Auto-import signal, useEffect, computed, etc.
+      autoImport: true, // Auto-import signal,use, computed, etc.
     }),
   ],
 });
@@ -264,7 +264,7 @@ If auto imports aren't working:
 
 1. Verify `autoImport: true` in the plugin options
 2. Restart the Vite dev server after changing the config
-3. Check that you're using supported primitives (useState, useEffect, etc.)
+3. Check that you're using supported primitives (use(), sync(), etc.)
 
 ## Migration from Manual Configuration
 

@@ -45,10 +45,10 @@ Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchie
 import { use } from 'flexium/core';
 
 // Share theme globally - no Provider needed
-const theme = useState<'light' | 'dark'>('light', { key: ['app', 'theme'] });
+const [theme, setTheme] = use<'light' | 'dark'>('light', { key: ['app', 'theme'] });
 
 function ThemedButton() {
-  const [theme, setTheme] = use('light', { key: 'app:theme' });
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] });
   
   return (
     <button class={`btn-${theme}`}>
@@ -71,7 +71,7 @@ interface User {
 
 // Auth state - shared globally
 function useAuth() {
-  const user = useState<User | null>(null, { key: ['app', 'auth', 'user'] });
+  const [user, setUser] = use<User | null>(null, { key: ['app', 'auth', 'user'] });
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -144,7 +144,7 @@ function ProfileCard() {
 
 1. **Use descriptive keys**: Use hierarchical keys like `'app:theme'` or `['app', 'auth', 'user']`
 2. **Type safety**: Use TypeScript for type-safe state
-3. **Cleanup when needed**: Use `useState.delete(key)` to clean up unused global state
+3. **Cleanup when needed**: Global state is automatically cleaned up when no longer used
 4. **Avoid overuse**: Don't use global state for every piece of data - prefer local state when possible
 
 ---
@@ -508,7 +508,7 @@ function MouseTracker() {
 
 ```tsx
 import { mouse } from 'flexium/interactive';
-import { useRef, useEffect } from 'flexium/core';
+import { useRef, use } from 'flexium/core';
 
 function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -551,7 +551,7 @@ import { use } from 'flexium/core';
 function ShootingGame() {
   const m = useMouse();
   const [crosshair, setCrosshair] = use({ x: 0, y: 0 });
-  const [projectiles, setProjectiles] = useState<Array<{ x: number, y: number }>>([]);
+  const [projectiles, setProjectiles] = use<Array<{ x: number, y: number }>>([]);
 
   useLoop((dt) => {
     // Update crosshair position
@@ -680,8 +680,8 @@ import { use } from 'flexium/core';
 
 function useForm<T>(initialValues: T) {
   const [values, setValues] = use(initialValues);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = use<Record<string, string>>({});
+  const [touched, setTouched] = use<Record<string, boolean>>({});
 
   const setValue = (field: keyof T, value: unknown) => {
     setValues({ ...values, [field]: value });
@@ -771,9 +771,9 @@ function LoginForm() {
 import { use } from 'flexium/core';
 
 function useFetch<T>(url: string) {
-  const [data, setData] = useState<T | null>(null);
+  const [data, setData] = use<T | null>(null);
   const [loading, setLoading] = use(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = use<Error | null>(null);
 
   const refetch = async () => {
     setLoading(true);
@@ -828,7 +828,7 @@ import { use } from 'flexium/core';
 
 function useLocalStorage<T>(key: string, initialValue: T) {
   const storedValue = localStorage.getItem(key);
-  const [value, setValue] = useState<T>(
+  const [value, setValue] = use<T>(
     storedValue ? JSON.parse(storedValue) : initialValue
   );
 
@@ -957,13 +957,13 @@ interface AppState {
 }
 
 // Use use() with key instead of Context
-const appState = useState<AppState>({
+const [appState, setAppState] = use<AppState>({
   user: null,
   theme: 'light'
 }, { key: ['app', 'state'] });
 
 function Component() {
-  const appState = useState<AppState>({
+  const [appState, setAppState] = use<AppState>({
     user: null,
     theme: 'light'
   }, { key: ['app', 'state'] });

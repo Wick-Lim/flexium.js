@@ -409,7 +409,7 @@ function useAuth() {
 
 // Cart state - shared globally
 function useCart() {
-  const items = useState<Array<{id: number, name: string, price: number, qty: number}>>([], { key: ['app', 'cart', 'items'] })
+  const items = use<Array<{id: number, name: string, price: number, qty: number}>>([], { key: ['app', 'cart', 'items'] })
   
   const addItem = (product: {id: number, name: string, price: number}) => {
     setItems(items => {
@@ -436,7 +436,7 @@ function useCart() {
 
 // Notification state - shared globally
 function useNotifications() {
-  const notifications = useState<Array<{msg: string, type: string}>>([], { key: ['app', 'notifications'] })
+  const notifications = use<Array<{msg: string, type: string}>>([], { key: ['app', 'notifications'] })
   
   const notify = (msg: string, type: string) => {
     setNotifications(n => [...n, { msg, type }])

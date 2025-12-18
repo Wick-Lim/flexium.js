@@ -1,11 +1,11 @@
 /**
  * Core API Tests
  *
- * Tests for: use, sync, useRef, createContext, useContext
+ * Tests for: use, sync, useRef, Context
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, f } from '../dom'
-import { use, sync, useRef, createContext } from '../core'
+import { use, sync, useRef, Context } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -319,7 +319,7 @@ describe('useRef()', () => {
   })
 })
 
-describe('createContext() & use(Context)', () => {
+describe('Context & use(Context)', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -332,7 +332,7 @@ describe('createContext() & use(Context)', () => {
   })
 
   it('should provide and consume context', () => {
-    const ThemeCtx = createContext('light')
+    const ThemeCtx = new Context('light')
 
     function ThemedButton() {
       const [theme] = use(ThemeCtx)
@@ -350,7 +350,7 @@ describe('createContext() & use(Context)', () => {
   })
 
   it('should use default value when no provider', () => {
-    const CountCtx = createContext(100)
+    const CountCtx = new Context(100)
 
     function Display() {
       const [count] = use(CountCtx)
@@ -362,7 +362,7 @@ describe('createContext() & use(Context)', () => {
   })
 
   it('should support nested providers', () => {
-    const LevelCtx = createContext(0)
+    const LevelCtx = new Context(0)
 
     function ShowLevel() {
       const [level] = use(LevelCtx)
@@ -384,7 +384,7 @@ describe('createContext() & use(Context)', () => {
   })
 
   it('should update when context value changes', async () => {
-    const UserCtx = createContext({ name: 'Guest' })
+    const UserCtx = new Context({ name: 'Guest' })
 
     function Greeting() {
       const [user] = use(UserCtx)

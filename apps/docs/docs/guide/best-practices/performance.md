@@ -229,12 +229,7 @@ function TemporaryComponent() {
     return fetch('/api/temp-data').then(r => r.json())
   }, { key: 'temp:data' })
 
-  use(() => {
-    // Effect runs on mount
-    return () => {
-      useState.delete('temp:data')  // Memory cleanup
-    }
-  })
+  // Global state is automatically cleaned up when no longer used
 
   return <div>...</div>
 }
@@ -246,38 +241,8 @@ function ConditionalComponent({ userId }: { userId: number | null }) {
     return fetch(`/api/users/${userId}`).then(r => r.json())
   }, { key: userId ? ['user', userId] : undefined })
 
-  use(() => {
-    if (!userId) {
-      // Cleanup previous data when userId is missing
-      useState.delete(['user', userId])
-    }
-  })
-
+  // Global state is automatically cleaned up when no longer used
   return userId ? <div>...</div> : null
-}
-```
-
----
-
-### Bulk Cleanup
-
-```tsx
-// ✅ Cleanup multiple keys at once
-function cleanupUserData(userId: number) {
-  const keys = [
-    ['user', userId],
-    ['user', userId, 'posts'],
-    ['user', userId, 'followers'],
-    ['user', userId, 'settings']
-  ]
-
-  keys.forEach(key => useState.delete(key))
-}
-
-// ✅ Cleanup by namespace
-function cleanupNamespace(namespace: string) {
-  // Cleanup all related keys (implementation dependent)
-  // Example: delete all keys matching 'user:*' pattern
 }
 ```
 

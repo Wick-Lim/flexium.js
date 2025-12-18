@@ -25,7 +25,7 @@ Flexium unifies all state concepts into one function.
 ### 1. Local State
 
 ```javascript
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Counter() {
   // Create local state
@@ -125,7 +125,7 @@ Unlike other signal-based frameworks, Flexium's `.map()` is automatically reacti
 Flexium uses a signal-based reactivity system. Components run once, and only the parts that depend on changed state will update.
 
 ```javascript
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [count, setCount] = use(0);
 

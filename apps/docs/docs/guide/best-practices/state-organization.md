@@ -188,60 +188,8 @@ function TemporaryComponent() {
     return fetch('/api/temp-data').then(r => r.json())
   }, { key: 'temp:data' })
 
-  // Cleanup on component unmount
-  use(() => {
-    return () => {
-      useState.delete('temp:data')
-    }
-  })
-
   return <div>...</div>
 }
-
-// ✅ Conditional cleanup
-function ConditionalComponent({ show }: { show: boolean }) {
-  const [data, setData] = use(async () => {
-    return fetch('/api/data').then(r => r.json())
-  }, { key: 'conditional:data' })
-
-  use(() => {
-    if (!show) {
-      // Cleanup when no longer needed
-      useState.delete('conditional:data')
-    }
-  })
-
-  return show ? <div>...</div> : null
-}
-```
-
----
-
-### State Cleanup Patterns
-
-```tsx
-// ✅ Cleanup multiple keys at once
-function cleanupUserData(userId: number) {
-  useState.delete(['user', userId])
-  useState.delete(['user', userId, 'posts'])
-  useState.delete(['user', userId, 'followers'])
-}
-
-// ✅ Cleanup by namespace
-function cleanupEcommerce() {
-  useState.delete('ecommerce:cart')
-  useState.delete('ecommerce:checkout')
-  useState.delete('ecommerce:payment')
-}
-
-// ✅ Cleanup in useEffect cleanup
-use(() => {
-  const [tempData, setTempData] = use(null, { key: ['temp:data'] })
-
-  return () => {
-    useState.delete('temp:data')  // cleanup
-  }
-})
 ```
 
 ---
@@ -254,11 +202,11 @@ use(() => {
 // app/state.ts - Global state definitions
 
 // Authentication
-export const [user, setUser] = useState<User | null>(null, { key: 'auth:user' })
+export const [user, setUser] = use<User | null>(null, { key: 'auth:user' })
 export const [isAuthenticated, setIsAuthenticated] = use(() => user !== null)
 
 // App settings
-export const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app:theme' })
+export const [theme, setTheme] = use<'light' | 'dark'>('light', { key: 'app:theme' })
 export const [language, setLanguage] = use('en', { key: 'app:language' })
 
 // Data caching
@@ -268,7 +216,7 @@ export const [posts, setPosts] = use(async () => {
 }, { key: ['posts', 'all'] })
 
 // UI state
-export const [notifications, setNotifications] = useState<Notification[]>([], {
+export const [notifications, setNotifications] = use<Notification[]>([], {
   key: 'app:notifications'
 })
 ```

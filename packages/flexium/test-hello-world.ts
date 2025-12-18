@@ -1,4 +1,4 @@
-import { useState, useEffect } from './src/core';
+import { use } from './src/core';
 import { render } from './src/dom';
 
 // Minimal usage

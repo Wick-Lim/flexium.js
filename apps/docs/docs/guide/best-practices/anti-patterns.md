@@ -27,7 +27,7 @@ function Component() {
   return <div>{count}</div>  // Automatically tracks updates
 }
 
-// Or read inside useEffect
+// Or read inside use() effect
 use(() => {
   console.log(count)  // Tracks updates
 })
@@ -87,7 +87,7 @@ const [posts, setPosts] = use([], { key: ['app', 'user', userId, 'posts'] })
 
 ### ❌ Updating State Inside Effect (Infinite Loop)
 
-**Problem**: Updating tracked state inside useEffect can cause infinite loops.
+**Problem**: Updating tracked state inside `use()` effect can cause infinite loops.
 
 ```tsx
 // ❌ Anti-pattern - infinite loop
@@ -146,7 +146,7 @@ use(() => {
 
 ### ❌ Not Reading State Inside Effect
 
-**Problem**: If state isn't read inside useEffect, dependencies aren't tracked.
+**Problem**: If state isn't read inside `use()` effect, dependencies aren't tracked.
 
 ```tsx
 // ❌ Anti-pattern - dependencies not tracked
@@ -192,7 +192,7 @@ const [data] = use(() => ({
 
 ### ❌ Side Effects Inside Computed
 
-**Problem**: Computed should be pure functions. Handle side effects in useEffect.
+**Problem**: Computed should be pure functions. Handle side effects in `use()` effect.
 
 ```tsx
 // ❌ Anti-pattern - side effects
@@ -207,7 +207,7 @@ const [doubled] = use(() => {
 const [count, setCount] = use(0)
 const [doubled] = use(() => count * 2, [count])  // Pure function
 
-// Side effects in useEffect
+// Side effects in use() effect
 use(() => {
   console.log('Count changed:', count)
   localStorage.setItem('count', String(count))
@@ -350,7 +350,7 @@ interface User {
   email: string
 }
 
-const [user, setUser] = useState<User | null>(null)
+const [user, setUser] = use<User | null>(null)
 setUser({ name: 'John', email: 'john@example.com' })  // Type safe
 ```
 
@@ -387,7 +387,7 @@ function Component() {
   // Remains in memory after component unmounts
 }
 
-// ✅ Correct approach - cleanup in useEffect
+// ✅ Correct approach - cleanup in use() effect
 import { use } from 'flexium/core'
 
 function Component() {
@@ -421,7 +421,7 @@ function Component() {
 
 ### Recommendations
 
-1. ✅ Read state inside JSX or useEffect
+1. ✅ Read state inside JSX or `use()` effect
 2. ✅ Don't use global if local is sufficient
 3. ✅ Sync updates with `sync()`
 4. ✅ Use `deps` option for derived state

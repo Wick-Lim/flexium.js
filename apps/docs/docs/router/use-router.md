@@ -164,7 +164,7 @@ function Pagination() {
 
 - Must be used within a `Routes` component
 - All return values are reactive
-- Use `useEffect` to react to route changes
+- Use `use()` with deps to react to route changes
 
 ## Demo
 

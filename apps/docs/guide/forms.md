@@ -641,7 +641,7 @@ function RegistrationForm() {
 Handle file uploads with state management:
 
 ```tsx
-const [file, setFile] = useState<File | null>(null)
+const [file, setFile] = use<File | null>(null)
 const [fileError, setFileError] = use('')
 
 const validateFile = (file: File | null) => {
@@ -721,17 +721,17 @@ interface FormTouched {
   password: boolean
 }
 
-const [formData, setFormData] = useState<LoginData>({
+const [formData, setFormData] = use<LoginData>({
   email: '',
   password: '',
 })
 
-const [errors, setErrors] = useState<FormErrors>({
+const [errors, setErrors] = use<FormErrors>({
   email: '',
   password: '',
 })
 
-const [touched, setTouched] = useState<FormTouched>({
+const [touched, setTouched] = use<FormTouched>({
   email: false,
   password: false,
 })

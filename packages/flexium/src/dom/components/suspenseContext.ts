@@ -1,4 +1,5 @@
-import { createContext, useContext } from '../../core/context'
+import { Context } from '../../core/context'
+import { use } from '../../core/use'
 import type { SuspenseContextValue } from './types'
 
 const defaultValue: SuspenseContextValue = {
@@ -6,8 +7,9 @@ const defaultValue: SuspenseContextValue = {
   hasBoundary: false
 }
 
-export const SuspenseCtx = createContext<SuspenseContextValue>(defaultValue)
+export const SuspenseCtx = new Context<SuspenseContextValue>(defaultValue)
 
 export function suspenseContext(): SuspenseContextValue {
-  return useContext(SuspenseCtx)
+  const [value] = use(SuspenseCtx)
+  return value
 }
