@@ -89,7 +89,7 @@ function SettingsLayout() {
 ```tsx
 function ProtectedLayout() {
   const { isAuthenticated } = useAuth()
-  const r = router()
+  const r = useRouter()
 
   if (!isAuthenticated()) {
     r.navigate('/login')
@@ -188,7 +188,7 @@ function SidebarLayout() {
 
 ```tsx
 function TabLayout() {
-  const r = router()
+  const r = useRouter()
   const currentPath = r.location.pathname
 
   return (
@@ -217,11 +217,11 @@ function TabLayout() {
 
 ```tsx
 function LoadingLayout() {
-  const r = router()
-  const isLoading = state(false)
+  const r = useRouter()
+  const isLoading = useState(false)
 
   // Track route changes
-  effect(() => {
+  useEffect(() => {
     const path = r.location.pathname
     isLoading.set(true)
     // Simulate loading
@@ -241,11 +241,11 @@ function LoadingLayout() {
 
 - Must be used inside a component rendered by `<Route>`
 - Each layout level needs its own `<Outlet>`
-- No props are passed - child components receive route params via `router()`
+- No props are passed - child components receive route params via `useRouter()`
 
 ## See Also
 
 - [&lt;Routes /&gt;](/docs/router/routes) - Root routing component
 - [&lt;Route /&gt;](/docs/router/route) - Route definitions
 - [&lt;Link /&gt;](/docs/router/link) - Navigation links
-- [router()](/docs/router/router) - Access router context
+- [useRouter()](/docs/router/router) - Access router context

@@ -1,4 +1,4 @@
-# loop()
+# useLoop()
 
 Create a consistent animation/game loop with delta time.
 
@@ -17,13 +17,13 @@ Use arrow keys or WASD to control the snake:
 ## Import
 
 ```tsx
-import { loop } from 'flexium/interactive'
+import { useLoop } from 'flexium/interactive'
 ```
 
 ## Signature
 
 ```ts
-function loop(options: LoopOptions): Loop
+function useLoop(options: LoopOptions): Loop
 
 interface LoopOptions {
   onUpdate: (delta: number) => void
@@ -60,14 +60,14 @@ interface Loop {
 
 ```tsx
 function Game() {
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     onUpdate: (delta) => {
       // delta is time since last frame in seconds
       updateGame(delta)
     }
   })
 
-  effect(() => {
+  useEffect(() => {
     gameLoop.start()
     return () => gameLoop.stop()
   })
@@ -81,7 +81,7 @@ function Game() {
 ```tsx
 const speed = 200 // pixels per second
 
-const gameLoop = loop({
+const gameLoop = useLoop({
   onUpdate: (delta) => {
     // Consistent movement regardless of frame rate
     player.x += speed * delta
@@ -92,7 +92,7 @@ const gameLoop = loop({
 ### Separate Update and Render
 
 ```tsx
-const gameLoop = loop({
+const gameLoop = useLoop({
   onUpdate: (delta) => {
     // Physics, AI, input handling
     updatePhysics(delta)
@@ -114,7 +114,7 @@ const gameLoop = loop({
 let accumulator = 0
 const FIXED_STEP = 1 / 60 // 60 updates per second
 
-const gameLoop = loop({
+const gameLoop = useLoop({
   onUpdate: (delta) => {
     accumulator += delta
 
@@ -133,17 +133,17 @@ const gameLoop = loop({
 
 ```tsx
 function PausableGame() {
-  const paused = state(false)
+  const paused = useState(false)
   const kb = keyboard()
 
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     onUpdate: (delta) => {
       if (paused.valueOf()) return
       updateGame(delta)
     }
   })
 
-  effect(() => {
+  useEffect(() => {
     if (kb.isJustPressed(Keys.Escape)) {
       paused.set(p => !p)
     }
@@ -162,11 +162,11 @@ function PausableGame() {
 
 ```tsx
 function FPSCounter() {
-  const fps = state(0)
+  const fps = useState(0)
   let frameCount = 0
   let lastTime = performance.now()
 
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     onUpdate: () => {
       frameCount++
       const now = performance.now()
@@ -179,7 +179,7 @@ function FPSCounter() {
     }
   })
 
-  effect(() => {
+  useEffect(() => {
     gameLoop.start()
     return () => gameLoop.stop()
   })
@@ -191,9 +191,9 @@ function FPSCounter() {
 ### State Machine
 
 ```tsx
-const gameState = state('menu')
+const gameState = useState('menu')
 
-const gameLoop = loop({
+const gameLoop = useLoop({
   onUpdate: (delta) => {
     switch (gameState.valueOf()) {
       case 'menu':

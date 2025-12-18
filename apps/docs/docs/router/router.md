@@ -1,17 +1,17 @@
-# router()
+# useRouter()
 
 Access router state and navigation functions.
 
 ## Import
 
 ```tsx
-import { router } from 'flexium/router'
+import { useRouter } from 'flexium/router'
 ```
 
 ## Signature
 
 ```ts
-function router(): RouterContext
+function useRouter(): RouterContext
 
 interface RouterContext {
   path: Accessor<string>
@@ -40,7 +40,7 @@ interface RouterContext {
 
 ```tsx
 function Breadcrumb() {
-  const { path } = router()
+  const { path } = useRouter()
 
   return <span>Current: {path.valueOf()}</span>
 }
@@ -51,7 +51,7 @@ function Breadcrumb() {
 ```tsx
 // Route: /users/:id
 function UserProfile() {
-  const { params } = router()
+  const { params } = useRouter()
 
   return <div>User ID: {params.id}</div>
 }
@@ -62,7 +62,7 @@ function UserProfile() {
 ```tsx
 // URL: /search?q=hello&sort=date
 function SearchPage() {
-  const { query } = router()
+  const { query } = useRouter()
 
   return (
     <div>
@@ -77,7 +77,7 @@ function SearchPage() {
 
 ```tsx
 function LoginForm() {
-  const { navigate } = router()
+  const { navigate } = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -92,7 +92,7 @@ function LoginForm() {
 ### Navigate with Options
 
 ```tsx
-const { navigate } = router()
+const { navigate } = useRouter()
 
 // Replace current history entry
 navigate('/login', { replace: true })
@@ -105,7 +105,7 @@ navigate('/checkout', { state: { cartId: '123' } })
 
 ```tsx
 function NavigationControls() {
-  const { back, forward } = router()
+  const { back, forward } = useRouter()
 
   return (
     <div>
@@ -120,10 +120,10 @@ function NavigationControls() {
 
 ```tsx
 function ProtectedPage() {
-  const { navigate } = router()
+  const { navigate } = useRouter()
   const { user } = context(AuthContext)
 
-  effect(() => {
+  useEffect(() => {
     if (!user) {
       navigate('/login', { replace: true })
     }
@@ -137,7 +137,7 @@ function ProtectedPage() {
 
 ```tsx
 function Pagination() {
-  const { query, navigate, path } = router()
+  const { query, navigate, path } = useRouter()
 
   const goToPage = (page) => {
     navigate(`${path.valueOf()}?page=${page}`)
@@ -164,7 +164,7 @@ function Pagination() {
 
 - Must be used within a `Routes` component
 - All return values are reactive
-- Use effects to react to route changes
+- Use `useEffect` to react to route changes
 
 ## Demo
 

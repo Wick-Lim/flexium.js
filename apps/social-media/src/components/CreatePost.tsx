@@ -1,9 +1,9 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { useCurrentUser, createPost } from '../store'
 
 export default function CreatePost() {
   const [currentUser] = useCurrentUser()
-  const [content, setContent] = state('')
+  const [content, setContent] = useState('')
 
   function handleSubmit(e: Event) {
     e.preventDefault()

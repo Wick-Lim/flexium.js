@@ -4,19 +4,19 @@ Understanding the fundamental concepts behind Flexium will help you build better
 
 ## One API for All State
 
-Flexium's philosophy is simple: **one `state()` function for all reactive needs**.
+Flexium's philosophy is simple: **one `useState()` function for all reactive needs**.
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 // Mutable state
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 
 // Derived state
-const [doubled] = state(() => count * 2, { deps: [count] })
+const [doubled] = useState(() => count * 2, { deps: [count] })
 
 // Async state
-const [users] = state(async () => fetch('/api/users'))
+const [users] = useState(async () => fetch('/api/users'))
 ```
 
 ### Why One API?
@@ -31,7 +31,7 @@ Traditional frameworks re-render entire components when state changes. Flexium's
 
 ```tsx
 function Counter() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
 
   // Only this text node updates when count changes
   return <p>Count: {count}</p>
@@ -40,25 +40,25 @@ function Counter() {
 
 ## Reactive Primitives
 
-### 1. `state()` - All Reactive State
+### 1. `useState()` - All Reactive State
 
 ```tsx
 // Mutable state - returns [value, setter]
-const [name, setName] = state('Alice')
+const [name, setName] = useState('Alice')
 
 // Derived state - requires deps
-const [greeting] = state(() => `Hello, ${name}!`, { deps: [name] })
+const [greeting] = useState(() => `Hello, ${name}!`, { deps: [name] })
 
 // Async state - returns [value, control]
-const [data, control] = state(async () => fetchData())
+const [data, control] = useState(async () => fetchData())
 ```
 
-### 2. `effect()` - Side Effects
+### 2. `useEffect()` - Side Effects
 
 Run code when dependencies change:
 
 ```tsx
-effect(() => {
+useEffect(() => {
   document.title = `Count: ${count}`
 }, [count])
 ```
@@ -126,7 +126,7 @@ When you pass signals as props, reactivity flows through:
 
 ```tsx
 function Parent() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
   return <Child count={count} />
 }
 
@@ -142,7 +142,7 @@ State created inside components is local to that component:
 
 ```tsx
 function Counter() {
-  const [count, setCount] = state(0) // Local state
+  const [count, setCount] = useState(0) // Local state
   return <button onclick={() => setCount(c => c + 1)}>{count}</button>
 }
 ```
@@ -152,10 +152,10 @@ function Counter() {
 ### Mount/Unmount
 
 ```tsx
-import { effect, onCleanup } from 'flexium/core'
+import { useEffect, onCleanup } from 'flexium/core'
 
 function MyComponent() {
-  effect(() => {
+  useEffect(() => {
     console.log('Mounted!')
     return () => console.log('Unmounting!')
   }, [])  // Empty deps = run once on mount
@@ -173,7 +173,7 @@ function MyComponent() {
 Effects can return cleanup functions:
 
 ```tsx
-effect(() => {
+useEffect(() => {
   const subscription = api.subscribe(data => {
     // Handle data
   })
@@ -184,10 +184,10 @@ effect(() => {
 
 ## Error & Loading Handling
 
-Handle errors and loading states explicitly with `state(async)`:
+Handle errors and loading states explicitly with `useState(async)`:
 
 ```tsx
-const data = state(async () => {
+const data = useState(async () => {
   const res = await fetch('/api/data')
   if (!res.ok) throw new Error('Failed to fetch')
   return res.json()
@@ -216,10 +216,10 @@ function DataView() {
 
 | Concept | Purpose | Example |
 |---------|---------|---------|
-| `state(value)` | Mutable state | `const [x, setX] = state(0)` |
-| `state(() => T, { deps })` | Derived value | `state(() => a + b, { deps: [a, b] })` |
-| `state(async () => T)` | Async data | `const [data, control] = state(async () => fetch(...))` |
-| `effect(fn, deps)` | Side effects | `effect(() => log(x), [x])` |
+| `useState(value)` | Mutable state | `const [x, setX] = useState(0)` |
+| `useState(() => T, { deps })` | Derived value | `useState(() => a + b, { deps: [a, b] })` |
+| `useState(async () => T)` | Async data | `const [data, control] = useState(async () => fetch(...))` |
+| `useEffect(fn, deps)` | Side effects | `useEffect(() => log(x), [x])` |
 | `items.map()` | List render | `items.map(item => <div>{item}</div>)` |
 
 ## Next Steps

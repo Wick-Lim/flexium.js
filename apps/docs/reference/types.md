@@ -83,9 +83,9 @@ type StateValue<T> = T & {
 
 **Usage:**
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
-const count = state(0)
+const count = useState(0)
 
 // Read value (tracks dependency)
 console.log(count.valueOf()) // 0
@@ -99,7 +99,7 @@ count.set(5)
 const current = count.peek()
 ```
 
-**Related:** `Computed`, `effect()`, `state()`
+**Related:** `Computed`, `useEffect()`, `useState()`
 
 ### Computed
 
@@ -116,17 +116,17 @@ type Computed<T> = Readonly<StateValue<T>>
 
 **Usage:**
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
-const count = state(1)
-const doubled = state(() => count.valueOf() * 2)
+const count = useState(1)
+const doubled = useState(() => count.valueOf() * 2)
 
 console.log(doubled.valueOf()) // 2
 count.set(5)
 console.log(doubled.valueOf()) // 10
 ```
 
-**Related:** `StateValue`, `state()`
+**Related:** `StateValue`, `useState()`
 
 ### Resource
 
@@ -152,9 +152,9 @@ type Resource<T> = StateValue<T | undefined> & {
 
 **Usage:**
 ```tsx
-import { state } from 'flexium/core'
-// state() handles async functions as resources
-const user = state(async () => fetchUser(userId))
+import { useState } from 'flexium/core'
+// useState() handles async functions as resources
+const user = useState(async () => fetchUser(userId))
 
 return () => {
   if (user.status.valueOf() === 'loading') return <div>Loading...</div>
@@ -163,7 +163,7 @@ return () => {
 }
 ```
 
-**Related:** `state()`, `StateValue`
+**Related:** `useState()`, `StateValue`
 
 ## Component Types
 
@@ -277,7 +277,7 @@ interface Location {
 
 **Usage:**
 ```tsx
-const r = router()
+const r = useRouter()
 console.log(r.location.pathname) // "/users/123"
 console.log(r.location.query) // { page: "1" }
 ```
@@ -303,7 +303,7 @@ interface RouterContext {
 
 **Usage:**
 ```tsx
-const r = router()
+const r = useRouter()
 
 // Navigate
 r.navigate('/users/123')
@@ -501,10 +501,10 @@ interface DrawRectProps {
 
 **Usage:**
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
-const x = state(10)
-const fill = state('red')
+const x = useState(10)
+const fill = useState('red')
 
 <DrawRect
   x={x}

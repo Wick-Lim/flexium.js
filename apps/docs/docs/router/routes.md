@@ -103,7 +103,7 @@ function App() {
 ## Notes
 
 - Only one Routes component should be at the root of your app
-- All children have access to router context via `router()` hook
+- All children have access to router context via `useRouter()` hook
 - Combine with Link for navigation
 - Route and non-Route children can be mixed freely
 
@@ -120,4 +120,4 @@ import RouterDemo from '../../components/RouterDemo.vue'
 - [&lt;Route /&gt;](/docs/router/route) - Define route patterns
 - [&lt;Link /&gt;](/docs/router/link) - Navigate between routes
 - [&lt;Outlet /&gt;](/docs/router/outlet) - Render nested routes
-- [router()](/docs/router/router) - Access router context
+- [useRouter()](/docs/router/router) - Access router context

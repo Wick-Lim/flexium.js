@@ -1,11 +1,11 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { addTask, type Priority, type TaskStatus } from '../store'
 
 export default function AddTaskForm() {
-  const [title, setTitle] = state('')
-  const [description, setDescription] = state('')
-  const [status, setStatus] = state<TaskStatus>('todo')
-  const [priority, setPriority] = state<Priority>('medium')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [status, setStatus] = useState<TaskStatus>('todo')
+  const [priority, setPriority] = useState<Priority>('medium')
 
   function handleSubmit(e: Event) {
     e.preventDefault()

@@ -1,4 +1,4 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 interface TableRow {
   id: number
@@ -17,7 +17,7 @@ const mockData: TableRow[] = [
 ]
 
 export default function DataTable() {
-  const [data] = state<TableRow[]>(mockData)
+  const [data] = useState<TableRow[]>(mockData)
 
   function getStatusBadge(status: string) {
     const classes = {

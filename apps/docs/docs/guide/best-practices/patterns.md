@@ -11,10 +11,10 @@ Learn practical patterns commonly used in Flexium.
 ### Basic Form Pattern
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function LoginForm() {
-  const form = state({
+  const form = useState({
     email: '',
     password: ''
   })
@@ -72,14 +72,14 @@ function LoginForm() {
 
 ```tsx
 function FormWithValidation() {
-  const form = state({
+  const form = useState({
     email: '',
     password: '',
     confirmPassword: ''
   })
   
   // Real-time validation
-  const errors = state(() => {
+  const errors = useState(() => {
     const errs: Record<string, string> = {}
     
     if (form.email && !form.email.includes('@')) {
@@ -117,8 +117,8 @@ function FormWithValidation() {
 
 ```tsx
 function FormWithAsyncValidation() {
-  const form = state({ email: '' })
-  const isChecking = state(false)
+  const form = useState({ email: '' })
+  const isChecking = useState(false)
   const emailError = state<string | null>(null)
   
   const checkEmailAvailability = async (email: string) => {
@@ -166,7 +166,7 @@ function FormWithAsyncValidation() {
 
 ```tsx
 function PostList() {
-  const posts = state(async () => {
+  const posts = useState(async () => {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch')
     return res.json()
@@ -202,7 +202,7 @@ function PostList() {
 
 ```tsx
 function UserPosts({ userId }: { userId: number }) {
-  const posts = state(async () => {
+  const posts = useState(async () => {
     const res = await fetch(`/api/users/${userId}/posts`)
     return res.json()
   }, { key: ['user', userId, 'posts'] })
@@ -223,8 +223,8 @@ function UserPosts({ userId }: { userId: number }) {
 
 ```tsx
 function LikeButton({ postId }: { postId: number }) {
-  const isLiked = state(false)
-  const isUpdating = state(false)
+  const isLiked = useState(false)
+  const isUpdating = useState(false)
   
   const toggleLike = async () => {
     // Optimistic update
@@ -260,10 +260,10 @@ function LikeButton({ postId }: { postId: number }) {
 
 ```tsx
 function InfiniteScrollList() {
-  const items = state([])
-  const page = state(1)
-  const hasMore = state(true)
-  const isLoading = state(false)
+  const items = useState([])
+  const page = useState(1)
+  const hasMore = useState(true)
+  const isLoading = useState(false)
   
   const loadMore = async () => {
     if (isLoading.valueOf() || !hasMore.valueOf()) return
@@ -315,7 +315,7 @@ type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
   const loadingState = state<LoadingState>('idle')
-  const data = state(null)
+  const data = useState(null)
   const error = state<Error | null>(null)
   
   const loadData = async () => {
@@ -364,7 +364,7 @@ type FormState =
 
 function ComplexForm() {
   const formState = state<FormState>({ type: 'idle' })
-  const formData = state({ email: '', password: '' })
+  const formData = useState({ email: '', password: '' })
   
   const handleSubmit = async () => {
     // Validation phase
@@ -419,8 +419,8 @@ function ComplexForm() {
 
 ```tsx
 function SearchInput() {
-  const query = state('')
-  const results = state([])
+  const query = useState('')
+  const results = useState([])
   
   effect(() => {
     if (!query.valueOf()) {
@@ -460,8 +460,8 @@ function SearchInput() {
 
 ```tsx
 function ScrollTracker() {
-  const scrollY = state(0)
-  const lastUpdate = state(0)
+  const scrollY = useState(0)
+  const lastUpdate = useState(0)
   
   effect(() => {
     const handleScroll = () => {
@@ -489,7 +489,7 @@ function ScrollTracker() {
 
 ```tsx
 function PersistentForm() {
-  const form = state(() => {
+  const form = useState(() => {
     // Get initial value from local storage
     const saved = localStorage.getItem('form-data')
     return saved ? JSON.parse(saved) : { email: '', name: '' }
@@ -524,7 +524,7 @@ export const theme = state<'light' | 'dark'>('light', {
   key: 'app:theme'
 })
 
-export const language = state('en', {
+export const language = useState('en', {
   key: 'app:language'
 })
 
@@ -579,7 +579,7 @@ function ErrorBoundary({ children }: { children: any }) {
 
 ## Related Documentation
 
-- [state() API](/docs/core/state) - State API documentation
-- [effect() API](/docs/core/effect) - Side effect API
+- [useState() API](/docs/core/state) - State API documentation
+- [useEffect() API](/docs/core/effect) - Side effect API
 - [Best Practices - State Organization](/docs/guide/best-practices/state-organization)
 - [Best Practices - Performance Optimization](/docs/guide/best-practices/performance)

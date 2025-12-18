@@ -1,29 +1,29 @@
 ---
-title: state() - Unified State Management API
-description: Learn how to use Flexium's unified state() API for local state, global state, async data fetching, and computed values.
+title: useState() - Unified State Management API
+description: Learn how to use Flexium's unified useState() API for local state, global state, async data fetching, and computed values.
 head:
   - - meta
     - property: og:title
-      content: state() API - Flexium State Management
+      content: useState() API - Flexium State Management
   - - meta
     - property: og:description
-      content: Master Flexium's unified state() API - one function for local, global, async, and computed state management.
+      content: Master Flexium's unified useState() API - one function for local, global, async, and computed state management.
 ---
 
-# state()
+# useState()
 
-`state()` is the single, unified API for all state management in Flexium.
+`useState()` is the single, unified API for all state management in Flexium.
 It handles local state, shared global state, async data fetching, and derived values.
 
-## The `state()` API
+## The `useState()` API
 
-The `state()` function always returns a **tuple**:
+The `useState()` function always returns a **tuple**:
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 // Returns [value, setter]
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 
 // Read the value
 console.log(count + 1)  // 1
@@ -39,7 +39,7 @@ Local state is isolated to the component where it's created.
 
 ```tsx
 function Counter() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
 
   return (
     <div>
@@ -59,9 +59,9 @@ To share state across components, provide a unique `key` in the options.
 
 ```tsx
 // store/theme.ts
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
-export const useTheme = () => state('light', { key: 'theme' })
+export const useTheme = () => useState('light', { key: 'theme' })
 ```
 
 ```tsx
@@ -90,11 +90,11 @@ function Footer() {
 
 ### 3. Async State (Resources)
 
-Pass an async function to `state()` to create an async resource.
+Pass an async function to `useState()` to create an async resource.
 
 ```tsx
 function UserProfile({ id }) {
-  const [user, control] = state(async () => {
+  const [user, control] = useState(async () => {
     const response = await fetch(`/api/users/${id}`)
     if (!response.ok) throw new Error('Failed to fetch')
     return response.json()
@@ -123,10 +123,10 @@ function UserProfile({ id }) {
 Pass a synchronous function with `deps` to derive state from other values.
 
 ```tsx
-const [count, setCount] = state(1)
+const [count, setCount] = useState(1)
 
 // Updates when count changes
-const [double] = state(() => count * 2, { deps: [count] })
+const [double] = useState(() => count * 2, { deps: [count] })
 
 console.log(double) // 2
 setCount(5)
@@ -139,10 +139,10 @@ For expensive computations that should only re-run when specific dependencies ch
 
 ```tsx
 const [items] = useItems()
-const [filter, setFilter] = state('all')
+const [filter, setFilter] = useState('all')
 
 // Only recomputes when items or filter changes
-const [filteredItems] = state(() => {
+const [filteredItems] = useState(() => {
   return items.filter(item =>
     filter === 'all' ? true : item.status === filter
   )
@@ -157,7 +157,7 @@ const [filteredItems] = state(() => {
 **Computed state requires `deps`:**
 | Usage | Example |
 |-------|---------|
-| With deps | `state(() => count * 2, { deps: [count] })` |
+| With deps | `useState(() => count * 2, { deps: [count] })` |
 | Re-runs when deps change | Explicit dependency tracking |
 
 ```tsx
@@ -165,9 +165,9 @@ const [filteredItems] = state(() => {
 function KanbanBoard() {
   const [tasks] = useTasks()
 
-  const [todo] = state(() => tasks.filter(t => t.status === 'todo'), { deps: [tasks] })
-  const [inProgress] = state(() => tasks.filter(t => t.status === 'in-progress'), { deps: [tasks] })
-  const [done] = state(() => tasks.filter(t => t.status === 'done'), { deps: [tasks] })
+  const [todo] = useState(() => tasks.filter(t => t.status === 'todo'), { deps: [tasks] })
+  const [inProgress] = useState(() => tasks.filter(t => t.status === 'in-progress'), { deps: [tasks] })
+  const [done] = useState(() => tasks.filter(t => t.status === 'done'), { deps: [tasks] })
 
   return (
     <div class="kanban">
@@ -185,14 +185,14 @@ The `deps` option is not supported with async functions. Use automatic tracking 
 
 ## Effects & Side Effects
 
-While `state()` manages data, `effect()` handles side effects like DOM manipulation, logging, or subscriptions.
+While `useState()` manages data, `useEffect()` handles side effects like DOM manipulation, logging, or subscriptions.
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 
-effect(() => {
+useEffect(() => {
   // Runs when 'count' changes
   console.log('Count is:', count)
 }, [count])
@@ -205,7 +205,7 @@ For detailed usage, automatic tracking, and cleanup, see the **[Effects](/guide/
 For rendering lists efficiently, use familiar `.map()` syntax:
 
 ```tsx
-const [todos, setTodos] = state([{ id: 1, text: 'Buy milk' }])
+const [todos, setTodos] = useState([{ id: 1, text: 'Buy milk' }])
 
 return (
   <ul>
@@ -222,11 +222,11 @@ Keys can be arrays for hierarchical namespacing - similar to TanStack Query:
 
 ```tsx
 // String key
-const [user, setUser] = state(null, { key: 'user' })
+const [user, setUser] = useState(null, { key: 'user' })
 
 // Array key - great for dynamic keys
-const [userProfile] = state(null, { key: ['user', 'profile', userId] })
-const [posts] = state([], { key: ['user', 'posts', userId] })
+const [userProfile] = useState(null, { key: ['user', 'profile', userId] })
+const [posts] = useState([], { key: ['user', 'posts', userId] })
 ```
 
 ### 7. Params Option
@@ -235,10 +235,10 @@ Pass explicit parameters to functions for better DX:
 
 ```tsx
 // Implicit dependencies (closure)
-const [user] = state(async () => fetch(`/api/users/${userId}`))
+const [user] = useState(async () => fetch(`/api/users/${userId}`))
 
 // Explicit dependencies (params) - recommended for complex cases
-const [userWithParams, control] = state(
+const [userWithParams, control] = useState(
   async ({ userId, postId }) => fetch(`/api/users/${userId}/posts/${postId}`),
   {
     key: ['user', 'posts', userId, postId],
@@ -254,7 +254,7 @@ const [userWithParams, control] = state(
 
 ## Best Practices
 
-1. **Destructure the tuple**: `const [value, setter] = state(initial)`
+1. **Destructure the tuple**: `const [value, setter] = useState(initial)`
 2. **Use setter for updates**: `setter(newValue)` or `setter(prev => prev + 1)`
-3. **Use deps for expensive computations**: `state(() => ..., { deps: [...] })`
+3. **Use deps for expensive computations**: `useState(() => ..., { deps: [...] })`
 4. **Use array keys for dynamic data**: `['user', userId]` instead of `'user-' + userId`

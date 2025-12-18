@@ -1,31 +1,31 @@
 # Lifecycle Management
 
-Flexium uses `effect()` for all lifecycle needs. There are no separate mount or cleanup hooks.
+Flexium uses `useEffect()` for all lifecycle needs. There are no separate mount or cleanup hooks.
 
 ::: info
-`onMount()` and `onCleanup()` have been removed. Use `effect()` instead.
+`onMount()` and `onCleanup()` have been removed. Use `useEffect()` instead.
 :::
 
 ## Import
 
 ```ts
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 ```
 
-## Using effect() for Lifecycle
+## Using useEffect() for Lifecycle
 
-`effect()` handles all lifecycle needs - no separate hooks required:
+`useEffect()` handles all lifecycle needs - no separate hooks required:
 
 ### Mount + Cleanup
 
 ```tsx
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 
 function MyComponent() {
   // Runs once on mount, cleanup on unmount
-  effect(() => {
+  useEffect(() => {
     console.log('Component mounted!')
-    
+
     // Return cleanup function
     return () => console.log('Component unmounted!')
   })
@@ -39,12 +39,12 @@ function MyComponent() {
 #### Initialize Third-Party Libraries
 
 ```tsx
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 
 function ChartComponent() {
   let chartInstance
 
-  effect(() => {
+  useEffect(() => {
     chartInstance = new Chart(document.getElementById('chart'), {
       type: 'bar',
       data: chartData
@@ -60,12 +60,12 @@ function ChartComponent() {
 #### Fetch Initial Data
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function UserProfile(props) {
-  const user = state(null)
+  const user = useState(null)
 
-  effect(() => {
+  useEffect(() => {
     // Fetch runs once on mount
     fetch(`/api/users/${props.id}`)
       .then(res => res.json())
@@ -79,10 +79,10 @@ function UserProfile(props) {
 #### Set Up Event Listeners
 
 ```tsx
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 
 function KeyboardHandler() {
-  effect(() => {
+  useEffect(() => {
     const handler = (e) => console.log('Key pressed:', e.key)
     window.addEventListener('keydown', handler)
 
@@ -96,13 +96,13 @@ function KeyboardHandler() {
 ### Reactive Effects with Cleanup
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function WebSocketComponent() {
-  const messages = state([])
-  const userId = state(1)
+  const messages = useState([])
+  const userId = useState(1)
 
-  effect(() => {
+  useEffect(() => {
     // Re-creates WebSocket when userId changes
     const ws = new WebSocket(`wss://example.com/${userId.valueOf()}`)
 
@@ -121,12 +121,12 @@ function WebSocketComponent() {
 ### Cancel Pending Requests
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function SearchResults(props) {
-  const results = state([])
+  const results = useState([])
 
-  effect(() => {
+  useEffect(() => {
     const controller = new AbortController()
 
     fetch(`/api/search?q=${props.query}`, {
@@ -146,12 +146,12 @@ function SearchResults(props) {
 ### Dispose Timers
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function Countdown(props) {
-  const time = state(props.seconds)
+  const time = useState(props.seconds)
 
-  effect(() => {
+  useEffect(() => {
     if (time.valueOf() <= 0) return
 
     const timeout = setTimeout(() => {
@@ -175,13 +175,13 @@ function Countdown(props) {
 
 ## Best Practices
 
-1. **Use effect() for all lifecycle needs** - mount, cleanup, and reactive side effects
+1. **Use useEffect() for all lifecycle needs** - mount, cleanup, and reactive side effects
 2. **Return cleanup function** - for resources that need disposal
 3. **Avoid infinite loops** - don't update tracked state inside effects without conditions
 
 ## Migration from onMount/onCleanup
 
-If you were using `onMount()` or `onCleanup()`, migrate to `effect()`:
+If you were using `onMount()` or `onCleanup()`, migrate to `useEffect()`:
 
 ```tsx
 // ❌ Old way (removed)
@@ -193,9 +193,9 @@ onMount(() => {
 })
 
 // ✅ New way
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 
-effect(() => {
+useEffect(() => {
   const ws = new WebSocket('...')
   return () => ws.close()
 })
@@ -203,5 +203,5 @@ effect(() => {
 
 ## See Also
 
-- [effect()](/docs/core/effect) - Complete effect() documentation
-- [state()](/docs/core/state) - Reactive state management
+- [useEffect()](/docs/core/effect) - Complete useEffect() documentation
+- [useState()](/docs/core/state) - Reactive state management

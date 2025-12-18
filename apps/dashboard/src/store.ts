@@ -1,4 +1,4 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 export interface Stat {
   label: string
@@ -116,19 +116,19 @@ function generateActivities(): Activity[] {
 
 // Global state
 export function useStats() {
-  return state<Stat[]>(generateStats(), { key: ['dashboard', 'stats'] })
+  return useState<Stat[]>(generateStats(), { key: ['dashboard', 'stats'] })
 }
 
 export function useSalesChart() {
-  return state<ChartData[]>(generateChartData(), { key: ['dashboard', 'sales-chart'] })
+  return useState<ChartData[]>(generateChartData(), { key: ['dashboard', 'sales-chart'] })
 }
 
 export function useTrafficChart() {
-  return state<ChartData[]>(generateChartData(), { key: ['dashboard', 'traffic-chart'] })
+  return useState<ChartData[]>(generateChartData(), { key: ['dashboard', 'traffic-chart'] })
 }
 
 export function useActivities() {
-  return state<Activity[]>(generateActivities(), { key: ['dashboard', 'activities'] })
+  return useState<Activity[]>(generateActivities(), { key: ['dashboard', 'activities'] })
 }
 
 // Real-time updates

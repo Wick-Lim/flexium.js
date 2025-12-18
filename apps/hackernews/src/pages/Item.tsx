@@ -1,5 +1,5 @@
-import { state, effect } from 'flexium/core'
-import { router, Link } from 'flexium/router'
+import { useState, useEffect } from 'flexium/core'
+import { useRouter, Link } from 'flexium/router'
 import { loadItem, useItem } from '../store'
 
 function Comment(props: { id: number }) {
@@ -9,7 +9,7 @@ function Comment(props: { id: number }) {
     // Load comment data if missing
     if (!comment) {
         // Use effect to load data
-        effect(() => {
+        useEffect(() => {
             loadItem(props.id);
         }, [props.id]);
     }
@@ -37,14 +37,14 @@ function Comment(props: { id: number }) {
 }
 
 export default function Item(props: { params?: { id?: string } } = {}) {
-    const r = router()
-    const [itemId] = state(() => {
+    const r = useRouter()
+    const [itemId] = useState(() => {
         const idStr = r.params.id || props.params?.id;
         return idStr ? parseInt(idStr) : undefined
     })
 
     // Load item data when itemId changes
-    effect(() => {
+    useEffect(() => {
         if (itemId) {
             loadItem(itemId)
         }

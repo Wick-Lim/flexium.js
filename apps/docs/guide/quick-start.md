@@ -51,10 +51,10 @@ Update your `tsconfig.json`:
 Create `src/App.tsx`:
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 export function App() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
 
   return (
     <div style={{ padding: '20px' }}>
@@ -87,7 +87,7 @@ render(<App />, document.getElementById('app')!)
 ### 1. Local State
 
 ```tsx
-const [count, setCount] = state(0);
+const [count, setCount] = useState(0);
 // count -> use directly as value
 // setCount(1) or setCount(c => c + 1) -> set value
 ```
@@ -98,10 +98,10 @@ Share state between components easily using a unique `key`.
 
 ```tsx
 // In Header.tsx
-const [theme, setTheme] = state('light', { key: ['theme'] });
+const [theme, setTheme] = useState('light', { key: ['theme'] });
 
 // Or with explicit undefined for async loading scenarios
-const [theme, setTheme] = state(undefined, { key: ['theme'] });
+const [theme, setTheme] = useState(undefined, { key: ['theme'] });
 ```
 
 ### 3. Async State (Resources)
@@ -110,7 +110,7 @@ Flexium handles loading and error states for you.
 
 ```tsx
 // control.status: 'idle' | 'loading' | 'success' | 'error'
-const [user, control] = state(async () => {
+const [user, control] = useState(async () => {
   const res = await fetch('/api/user');
   return res.json();
 });
@@ -126,11 +126,11 @@ return (
 
 ### 4. Computed State
 
-Pass a function to `state()` with `deps` to create a value that updates when dependencies change.
+Pass a function to `useState()` with `deps` to create a value that updates when dependencies change.
 
 ```tsx
-const [count, setCount] = state(0);
-const [double] = state(() => count * 2, { deps: [count] });
+const [count, setCount] = useState(0);
+const [double] = useState(() => count * 2, { deps: [count] });
 ```
 
 ## Next Steps

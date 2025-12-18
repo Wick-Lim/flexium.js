@@ -1,4 +1,4 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { Link } from 'flexium/router'
 import { toggleLike, addComment, type Post, type User } from '../store'
 import Comments from './Comments'
@@ -14,7 +14,7 @@ export default function PostCard({
   showComments: boolean
   onToggleComments: () => void
 }) {
-  const [commentText, setCommentText] = state('')
+  const [commentText, setCommentText] = useState('')
   const isLiked = post.likedBy.includes(currentUser.id)
 
   function handleLike() {

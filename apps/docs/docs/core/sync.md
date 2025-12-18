@@ -2,7 +2,7 @@
 import SyncDemo from '../../components/SyncDemo.vue'
 </script>
 
-# sync()
+# useSync()
 
 Synchronize state updates to the DOM.
 
@@ -15,17 +15,17 @@ Synchronize state updates to the DOM.
 ## Import
 
 ```ts
-import { sync } from 'flexium/core'
+import { useSync } from 'flexium/core'
 ```
 
 ## Signature
 
 ```ts
 // 1. Force Flush
-function sync(): void
+function useSync(): void
 
 // 2. Sync Updates
-function sync<T>(fn: () => T): T
+function useSync<T>(fn: () => T): T
 ```
 
 ## Usage
@@ -33,17 +33,17 @@ function sync<T>(fn: () => T): T
 ### Basic Usage
 
 ```tsx
-const firstName = state('John')
-const lastName = state('Doe')
-const age = state(25)
+const firstName = useState('John')
+const lastName = useState('Doe')
+const age = useState(25)
 
-// Without sync: 3 separate updates
+// Without useSync: 3 separate updates
 firstName.set('Jane')
 lastName.set('Smith')
 age.set(30)
 
-// With sync: 1 combined update
-sync(() => {
+// With useSync: 1 combined update
+useSync(() => {
   firstName.set('Jane')
   lastName.set('Smith')
   age.set(30)
@@ -54,12 +54,12 @@ sync(() => {
 
 ```tsx
 function UserForm() {
-  const name = state('')
-  const email = state('')
-  const errors = state({})
+  const name = useState('')
+  const email = useState('')
+  const errors = useState({})
 
   const handleSubmit = () => {
-    sync(() => {
+    useSync(() => {
       name.set('')
       email.set('')
       errors.set({})
@@ -77,13 +77,13 @@ function UserForm() {
 ### Reset Multiple States
 
 ```tsx
-const items = state([])
-const filter = state('')
-const sortBy = state('name')
-const page = state(1)
+const items = useState([])
+const filter = useState('')
+const sortBy = useState('name')
+const page = useState(1)
 
 function resetFilters() {
-  sync(() => {
+  useSync(() => {
     filter.set('')
     sortBy.set('name')
     page.set(1)
@@ -94,7 +94,7 @@ function resetFilters() {
 ### With Return Value
 
 ```tsx
-const result = sync(() => {
+const result = useSync(() => {
   count.set(prev => prev + 1)
   total.set(prev => prev + 100)
   return 'done'
@@ -106,10 +106,10 @@ console.log(result) // 'done'
 ### Nested Syncs
 
 ```tsx
-sync(() => {
+useSync(() => {
   a.set(1)
 
-  sync(() => {
+  useSync(() => {
     b.set(2)
     c.set(3)
   })
@@ -131,13 +131,13 @@ sync(() => {
 
 ## Behavior
 
-- `sync()` (no args): Force flushes pending effects immediately
-- `sync(fn)`: Syncs updates inside `fn`, then flushes immediately
+- `useSync()` (no args): Force flushes pending effects immediately
+- `useSync(fn)`: Syncs updates inside `fn`, then flushes immediately
 - Reading state inside sync returns the **pending** value
 
 ## When to Use
 
-Use `sync()` when:
+Use `useSync()` when:
 
 - Updating multiple related states together
 - Resetting form or filter states
@@ -153,5 +153,5 @@ Use `sync()` when:
 
 ## See Also
 
-- [state()](/docs/core/state)
-- [effect()](/docs/core/effect)
+- [useState()](/docs/core/state)
+- [useEffect()](/docs/core/effect)

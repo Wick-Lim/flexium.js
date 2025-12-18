@@ -9,10 +9,10 @@ Data fetching pattern examples including caching, infinite scroll, optimistic up
 ## Basic Data Fetching
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function PostList() {
-  const posts = state(async () => {
+  const posts = useState(async () => {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch posts')
     return res.json()
@@ -53,26 +53,26 @@ function PostList() {
 // Share same data across multiple components
 function PostList() {
   // Cache with global key
-  const posts = state(async () => {
+  const posts = useState(async () => {
     return fetch('/api/posts').then(r => r.json())
   }, { key: ['posts', 'all'] })
-  
+
   return <div>{posts.valueOf().map(p => <Post key={p.id} {...p} />)}</div>
 }
 
 function PostDetail({ postId }: { postId: number }) {
   // Find from already cached posts
-  const allPosts = state(null, { key: ['posts', 'all'] })
-  const post = state(() => {
+  const allPosts = useState(null, { key: ['posts', 'all'] })
+  const post = useState(() => {
     return allPosts.valueOf()?.find(p => p.id === postId)
   })
-  
+
   // Fetch individually if not found
-  const fetchedPost = state(async () => {
+  const fetchedPost = useState(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
   }, { key: ['posts', postId] })
-  
+
   return <div>{post || fetchedPost}</div>
 }
 ```
@@ -82,14 +82,14 @@ function PostDetail({ postId }: { postId: number }) {
 ## Infinite Scroll
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function InfiniteScrollList() {
-  const items = state<any[]>([])
-  const page = state(1)
-  const hasMore = state(true)
-  const isLoading = state(false)
-  const error = state<Error | null>(null)
+  const items = useState<any[]>([])
+  const page = useState(1)
+  const hasMore = useState(true)
+  const isLoading = useState(false)
+  const error = useState<Error | null>(null)
   
   const loadMore = async () => {
     if (isLoading.valueOf() || !hasMore.valueOf()) return
@@ -114,7 +114,7 @@ function InfiniteScrollList() {
   }
   
   // Scroll event listener
-  effect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop
       const windowHeight = window.innerHeight
@@ -156,24 +156,24 @@ function InfiniteScrollList() {
 ## Optimistic Updates
 
 ```tsx
-import { state, sync } from 'flexium/core'
+import { useState, useSync } from 'flexium/core'
 
 function LikeButton({ postId }: { postId: number }) {
-  const post = state(async () => {
+  const post = useState(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
   }, { key: ['posts', postId] })
-  
-  const isLiked = state(() => post.valueOf()?.isLiked ?? false)
-  const likeCount = state(() => post.valueOf()?.likeCount ?? 0)
-  const isUpdating = state(false)
+
+  const isLiked = useState(() => post.valueOf()?.isLiked ?? false)
+  const likeCount = useState(() => post.valueOf()?.likeCount ?? 0)
+  const isUpdating = useState(false)
   
   const toggleLike = async () => {
     const previousLiked = isLiked.valueOf()
     const previousCount = likeCount.valueOf()
 
     // Optimistic update
-    sync(() => {
+    useSync(() => {
       isLiked.set(prev => !prev)
       likeCount.set(prev => previousLiked ? prev - 1 : prev + 1)
       isUpdating.set(true)
@@ -190,14 +190,14 @@ function LikeButton({ postId }: { postId: number }) {
       
       // Sync state with server response
       const data = await res.json()
-      sync(() => {
+      useSync(() => {
         isLiked.set(data.isLiked)
         likeCount.set(data.likeCount)
       })
-      
+
     } catch (error) {
       // Rollback on failure
-      sync(() => {
+      useSync(() => {
         isLiked.set(previousLiked)
         likeCount.set(previousCount)
       })
@@ -221,13 +221,13 @@ function LikeButton({ postId }: { postId: number }) {
 ## Error Retry
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function DataWithRetry() {
-  const retryCount = state(0)
+  const retryCount = useState(0)
   const maxRetries = 3
-  
-  const data = state(async () => {
+
+  const data = useState(async () => {
     const res = await fetch('/api/data')
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`)
@@ -270,21 +270,21 @@ function DataWithRetry() {
 ## Automatic Retry (Exponential Backoff)
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function DataWithAutoRetry() {
-  const data = state(async () => {
+  const data = useState(async () => {
     const res = await fetch('/api/data')
     if (!res.ok) throw new Error('Failed to fetch')
     return res.json()
   }, { key: 'data:auto-retry' })
-  
-  const retryCount = state(0)
-  const shouldRetry = state(false)
+
+  const retryCount = useState(0)
+  const shouldRetry = useState(false)
   const maxRetries = 3
-  
+
   // Automatic retry on error
-  effect(() => {
+  useEffect(() => {
     if (data.status.valueOf() === 'error' && retryCount.valueOf() < maxRetries) {
       const delay = Math.min(1000 * Math.pow(2, retryCount.valueOf()), 10000) // Exponential backoff
       
@@ -328,18 +328,18 @@ function DataWithAutoRetry() {
 ## Polling
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function PollingData({ interval = 5000 }: { interval?: number }) {
-  const data = state(async () => {
+  const data = useState(async () => {
     const res = await fetch('/api/data')
     return res.json()
   }, { key: 'data:polling' })
-  
-  const isPolling = state(true)
-  
+
+  const isPolling = useState(true)
+
   // Polling setup
-  effect(() => {
+  useEffect(() => {
     if (!isPolling.valueOf()) return
     
     const intervalId = setInterval(() => {
@@ -374,6 +374,6 @@ function PollingData({ interval = 5000 }: { interval?: number }) {
 
 ## Related Documentation
 
-- [state() API - Async State](/docs/core/state#async-state) - Async state API
+- [useState() API - Async State](/docs/core/state#async-state) - Async state API
 - [Best Practices - Common Patterns](/docs/guide/best-practices/patterns) - Data fetching patterns
 - [Best Practices - Performance Optimization](/docs/guide/best-practices/performance) - Performance optimization guide

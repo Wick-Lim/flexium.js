@@ -65,12 +65,12 @@ Check out these full applications built with Flexium:
 ---
 
 <script setup>
-import ShowcaseDemo from '../components/ShowcaseDemo.vue'
-import TodoDemo from '../components/TodoDemo.vue'
-import CanvasDemo from '../components/CanvasDemo.vue'
-import TimerDemo from '../components/TimerDemo.vue'
-import SnakeGameDemo from '../components/SnakeGameDemo.vue'
-import ContextDemo from '../components/ContextDemo.vue'
+import ShowcaseDemo from './components/ShowcaseDemo.vue'
+import TodoDemo from './components/TodoDemo.vue'
+import CanvasDemo from './components/CanvasDemo.vue'
+import TimerDemo from './components/TimerDemo.vue'
+import SnakeGameDemo from './components/SnakeGameDemo.vue'
+import ContextDemo from './components/ContextDemo.vue'
 </script>
 
 ---
@@ -85,12 +85,12 @@ A simple counter demonstrating `state()` and `computed()` - the building blocks 
 
 ::: details View Source Code
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Counter() {
-  const count = state(0)
-  const doubled = state(() => count * 2)  // derived value
+  const count = useState(0)
+  const doubled = useState(() => count * 2)  // derived value
 
   return (
     <Column gap={16} padding={24}>
@@ -127,21 +127,21 @@ A fully functional todo list with add, toggle, and delete operations. Shows how 
 
 ::: details View Source Code
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function TodoApp() {
-  const todos = state([
+  const todos = useState([
     { id: 1, text: 'Learn Flexium', done: true },
     { id: 2, text: 'Build something awesome', done: false }
   ])
-  const inputText = state('')
+  const inputText = useState('')
 
   const addTodo = () => {
-    if (!inputText.trim()) return
+    if (!inputText.valueOf().trim()) return
     todos.set(prev => [...prev, {
       id: Date.now(),
-      text: inputText,
+      text: inputText.valueOf(),
       done: false
     }])
     inputText.set('')
@@ -198,13 +198,13 @@ A precise stopwatch with lap recording. Demonstrates timer-based state updates a
 
 ::: details View Source Code
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Stopwatch() {
-  const seconds = state(0)
-  const isRunning = state(false)
-  const laps = state([])
+  const seconds = useState(0)
+  const isRunning = useState(false)
+  const laps = useState([])
 
   // Format time display
   const formatTime = (s) => {
@@ -268,17 +268,17 @@ Interactive canvas with particle trail effects. Move your mouse to see smooth, r
 
 ::: details View Source Code
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function ParticleCanvas() {
-  const mouseX = state(150)
-  const mouseY = state(150)
-  const hue = state(0)
-  const particles = state([])
+  const mouseX = useState(150)
+  const mouseY = useState(150)
+  const hue = useState(0)
+  const particles = useState([])
 
   // Animate hue
-  effect(() => {
+  useEffect(() => {
     const id = setInterval(() => hue.set(h => (h + 1) % 360), 16)
     return () => clearInterval(id)
   })
@@ -336,27 +336,27 @@ A complete game built with Flexium's game module. Use arrow keys or WASD to cont
 
 ::: details View Source Code
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
-import { keyboard, loop, Keys } from 'flexium/interactive'
+import { keyboard, useLoop, Keys } from 'flexium/interactive'
 
-const snake = state([{ x: 7, y: 7 }])
-const direction = state('RIGHT')
-const food = state({ x: 12, y: 7 })
-const score = state(0)
+const snake = useState([{ x: 7, y: 7 }])
+const direction = useState('RIGHT')
+const food = useState({ x: 12, y: 7 })
+const score = useState(0)
 
 function SnakeGame() {
   const kb = keyboard()
 
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     onUpdate: (delta) => {
       // Handle input and move snake
       moveSnake()
     }
   })
 
-  effect(() => {
+  useEffect(() => {
     gameLoop.start()
     return () => gameLoop.stop()
   })
@@ -390,11 +390,11 @@ Authentication, shopping cart, and notifications with multiple providers working
 
 ::: details View Source Code
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const user = state(null, { key: ['app', 'auth', 'user'] })
+  const user = useState(null, { key: ['app', 'auth', 'user'] })
   
   const login = (name: string) => {
     user.set({ name })
@@ -409,7 +409,7 @@ function useAuth() {
 
 // Cart state - shared globally
 function useCart() {
-  const items = state<Array<{id: number, name: string, price: number, qty: number}>>([], { key: ['app', 'cart', 'items'] })
+  const items = useState<Array<{id: number, name: string, price: number, qty: number}>>([], { key: ['app', 'cart', 'items'] })
   
   const addItem = (product: {id: number, name: string, price: number}) => {
     items.set(items => {
@@ -429,14 +429,14 @@ function useCart() {
     items.set(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
   }
   
-  const total = state(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), { key: ['app', 'cart', 'total'] })
+  const total = useState(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), { key: ['app', 'cart', 'total'] })
   
   return { items, addItem, removeItem, updateQty, total }
 }
 
 // Notification state - shared globally
 function useNotifications() {
-  const notifications = state<Array<{msg: string, type: string}>>([], { key: ['app', 'notifications'] })
+  const notifications = useState<Array<{msg: string, type: string}>>([], { key: ['app', 'notifications'] })
   
   const notify = (msg: string, type: string) => {
     notifications.set(n => [...n, { msg, type }])

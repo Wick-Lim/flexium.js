@@ -1,10 +1,10 @@
-import { state, effect } from 'flexium/core';
+import { useState, useEffect } from 'flexium/core';
 import { Link } from 'flexium/router';
 import { loadItem, loadStories, useItem } from '../store';
 
 function StoryItem(props: { id: number; index: number; key?: number }) {
     // Load item data
-    effect(() => {
+    useEffect(() => {
         loadItem(props.id);
     }, [props.id]);
 
@@ -39,7 +39,7 @@ function StoryItem(props: { id: number; index: number; key?: number }) {
 }
 
 export default function Stories(props: { type: string }) {
-    const [list, control] = state(() => loadStories(props.type), { key: [props.type] })
+    const [list, control] = useState(() => loadStories(props.type), { key: [props.type] })
 
     if (control.status !== 'success') {
         return (

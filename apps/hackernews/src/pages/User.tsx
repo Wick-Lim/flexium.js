@@ -1,13 +1,13 @@
-import { state, effect } from 'flexium/core'
-import { router } from 'flexium/router'
+import { useState, useEffect } from 'flexium/core'
+import { useRouter } from 'flexium/router'
 import { loadUser, useUser } from '../store'
 
 export default function User(props: { params?: { id?: string } } = {}) {
-    const r = router()
-    const [userId] = state(() => {
+    const r = useRouter()
+    const [userId] = useState(() => {
         return r.params.id || props.params?.id
     })
-    const [user] = state(() => {
+    const [user] = useState(() => {
         if (!userId) {
             return undefined
         }
@@ -16,7 +16,7 @@ export default function User(props: { params?: { id?: string } } = {}) {
         return globalUser
     })
 
-    effect(() => {
+    useEffect(() => {
         if (userId) {
             loadUser(userId);
         }

@@ -1,4 +1,4 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 export interface User {
   id: number
@@ -86,11 +86,11 @@ const mockPosts: Post[] = [
 ]
 
 export function useCurrentUser() {
-  return state<User>(currentUser, { key: ['currentUser'] })
+  return useState<User>(currentUser, { key: ['currentUser'] })
 }
 
 export function usePosts() {
-  return state<Post[]>(mockPosts, { key: ['posts'] })
+  return useState<Post[]>(mockPosts, { key: ['posts'] })
 }
 
 let nextPostId = Math.max(...mockPosts.map(p => p.id)) + 1

@@ -54,10 +54,10 @@ features:
 ## Quick Example
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function Counter() {
-  const count = state(0)
+  const count = useState(0)
 
   return (
     <button onclick={() => count.set(c => c + 1)}>

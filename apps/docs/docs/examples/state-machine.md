@@ -9,14 +9,14 @@ State machine pattern examples including complex state transitions, guard condit
 ## Basic State Machine
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
-  const currentState = state<LoadingState>('idle')
-  const data = state<any>(null)
-  const error = state<Error | null>(null)
+  const currentState = useState<LoadingState>('idle')
+  const data = useState<any>(null)
+  const error = useState<Error | null>(null)
   
   const loadData = async () => {
     // idle -> loading
@@ -80,9 +80,9 @@ function DataLoader() {
 ## Complex State Machine (Form Submission)
 
 ```tsx
-import { state, sync } from 'flexium/core'
+import { useState, useSync } from 'flexium/core'
 
-type FormState = 
+type FormState =
   | { type: 'idle' }
   | { type: 'validating' }
   | { type: 'submitting' }
@@ -90,8 +90,8 @@ type FormState =
   | { type: 'error'; message: string }
 
 function ComplexForm() {
-  const formState = state<FormState>({ type: 'idle' })
-  const formData = state({
+  const formState = useState<FormState>({ type: 'idle' })
+  const formData = useState({
     email: '',
     password: ''
   })
@@ -195,18 +195,18 @@ function ComplexForm() {
 ## State Machine with Guard Conditions
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
-type GameState = 
+type GameState =
   | { type: 'menu' }
   | { type: 'playing'; score: number; level: number }
   | { type: 'paused'; score: number; level: number }
   | { type: 'gameOver'; score: number; level: number }
 
 function Game() {
-  const gameState = state<GameState>({ type: 'menu' })
-  const score = state(0)
-  const level = state(1)
+  const gameState = useState<GameState>({ type: 'menu' })
+  const score = useState(0)
+  const level = useState(1)
   
   const startGame = () => {
     // menu -> playing (guard: always allowed)
@@ -309,22 +309,22 @@ function Game() {
 ## Action-Based State Machine
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
-type Action = 
+type Action =
   | { type: 'LOAD' }
   | { type: 'LOAD_SUCCESS'; data: any }
   | { type: 'LOAD_ERROR'; error: Error }
   | { type: 'RESET' }
 
-type State = 
+type State =
   | { type: 'idle' }
   | { type: 'loading' }
   | { type: 'success'; data: any }
   | { type: 'error'; error: Error }
 
 function ActionBasedStateMachine() {
-  const machineState = state<State>({ type: 'idle' })
+  const machineState = useState<State>({ type: 'idle' })
   
   const dispatch = (action: Action) => {
     switch (action.type) {
@@ -390,12 +390,12 @@ export function createStateMachine<TState, TAction>(
   initialState: TState,
   reducer: (state: TState, action: TAction) => TState
 ) {
-  const machineState = state(initialState)
-  
+  const machineState = useState(initialState)
+
   const dispatch = (action: TAction) => {
     machineState.set(reducer(machineState, action))
   }
-  
+
   return [machineState, dispatch] as const
 }
 
@@ -439,5 +439,5 @@ function Counter() {
 
 ## Related Documentation
 
-- [state() API](/docs/core/state) - State API documentation
+- [useState() API](/docs/core/state) - State API documentation
 - [Best Practices - Common Patterns](/docs/guide/best-practices/patterns) - State machine patterns

@@ -1,9 +1,9 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { updateTaskStatus, deleteTask, type Task, type TaskStatus } from '../store'
 
 export default function TaskCard({ task }: { task: Task }) {
-  const [isEditing, setIsEditing] = state(false)
-  const [newStatus, setNewStatus] = state<TaskStatus>(task.status)
+  const [isEditing, setIsEditing] = useState(false)
+  const [newStatus, setNewStatus] = useState<TaskStatus>(task.status)
 
   function handleStatusChange(e: Event) {
     const target = e.target as HTMLSelectElement

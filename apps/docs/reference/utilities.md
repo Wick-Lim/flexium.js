@@ -22,8 +22,8 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 
 | Function | Package | Description |
 | --- | --- | --- |
-| [`state()` with `key`](#state-with-key) | `flexium/core` | Share state globally (replaces Context API) |
-| [`router()`](#router) | `flexium/router` | Access routing state and navigation |
+| [`useState()` with `key`](#usestate-with-key) | `flexium/core` | Share state globally (replaces Context API) |
+| [`useRouter()`](#userouter) | `flexium/router` | Access routing state and navigation |
 | [`keyboard()`](#keyboard) | `flexium/interactive` | Track keyboard input state |
 | [`mouse()`](#mouse) | `flexium/interactive` | Track mouse position and button state |
 
@@ -31,24 +31,24 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 
 ## Core Utilities
 
-### context
+### useContext
 
 ::: warning Deprecated
-The Context API is deprecated. Use `state()` with `key` option instead.
+The Context API is deprecated. Use `useState()` with `key` option instead.
 
-Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `state()` with keys for global state sharing.
+Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `useState()` with keys for global state sharing.
 :::
 
-**Recommended**: Use `state()` with `key` option instead:
+**Recommended**: Use `useState()` with `key` option instead:
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 // Share theme globally - no Provider needed
-const theme = state<'light' | 'dark'>('light', { key: ['app', 'theme'] });
+const theme = useState<'light' | 'dark'>('light', { key: ['app', 'theme'] });
 
 function ThemedButton() {
-  const theme = state('light', { key: 'app:theme' });
+  const theme = useState('light', { key: 'app:theme' });
   
   return (
     <button class={`btn-${theme.valueOf()}`}>
@@ -61,7 +61,7 @@ function ThemedButton() {
 #### Complex Example: Auth State
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 interface User {
   id: string;
@@ -71,7 +71,7 @@ interface User {
 
 // Auth state - shared globally
 function useAuth() {
-  const user = state<User | null>(null, { key: ['app', 'auth', 'user'] });
+  const user = useState<User | null>(null, { key: ['app', 'auth', 'user'] });
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -115,21 +115,21 @@ function UserProfile() {
 #### Multiple Global States
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 // Theme state
-const theme = state('light', { key: 'app:theme' });
+const theme = useState('light', { key: 'app:theme' });
 
 // Language state
-const lang = state('en', { key: 'app:language' });
+const lang = useState('en', { key: 'app:language' });
 
 // User state
-const user = state(null, { key: 'app:user' });
+const user = useState(null, { key: 'app:user' });
 
 function ProfileCard() {
-  const theme = state('light', { key: 'app:theme' });
-  const lang = state('en', { key: ['app', 'language'] });
-  const user = state(null, { key: ['app', 'user'] });
+  const theme = useState('light', { key: 'app:theme' });
+  const lang = useState('en', { key: ['app', 'language'] });
+  const user = useState(null, { key: ['app', 'user'] });
 
   return (
     <div class={`card-${theme.valueOf()}`}>
@@ -144,21 +144,21 @@ function ProfileCard() {
 
 1. **Use descriptive keys**: Use hierarchical keys like `'app:theme'` or `['app', 'auth', 'user']`
 2. **Type safety**: Use TypeScript for type-safe state
-3. **Cleanup when needed**: Use `state.delete(key)` to clean up unused global state
+3. **Cleanup when needed**: Use `useState.delete(key)` to clean up unused global state
 4. **Avoid overuse**: Don't use global state for every piece of data - prefer local state when possible
 
 ---
 
 ## Router Utilities
 
-### router
+### useRouter
 
 Access the complete router context including location, params, navigation, and route matches.
 
 #### Signature
 
 ```tsx
-function router(): RouterContext
+function useRouter(): RouterContext
 ```
 
 #### Return Value
@@ -175,10 +175,10 @@ Returns a `RouterContext` object:
 #### Usage
 
 ```tsx
-import { router } from 'flexium/router';
+import { useRouter } from 'flexium/router';
 
 function UserProfile() {
-  const r = router();
+  const r = useRouter();
 
   // Access current location
   const location = r.location;
@@ -209,8 +209,8 @@ function UserProfile() {
 
 ```tsx
 function SearchBar() {
-  const r = router();
-  const query = state('');
+  const r = useRouter();
+  const query = useState('');
 
   const handleSearch = () => {
     const searchQuery = query.valueOf();
@@ -235,7 +235,7 @@ function SearchBar() {
 
 ```tsx
 function ProtectedAction() {
-  const r = router();
+  const r = useRouter();
 
   const handleAction = async () => {
     const isAuthorized = await checkPermissions();
@@ -261,7 +261,7 @@ function ProtectedAction() {
 Throws an error if used outside a `<Routes>` component:
 
 ```
-Error: router() must be called within a <Routes> component
+Error: useRouter() must be called within a <Routes> component
 ```
 
 For complete routing documentation, see the [Router API Reference](/reference/router).
@@ -304,27 +304,27 @@ Returns a `KeyboardState` object:
 
 ```tsx
 import { keyboard, Keys } from 'flexium/interactive';
-import { state, effect } from 'flexium/core';
+import { useState, useEffect } from 'flexium/core';
 
 function PlayerController() {
-  const keyboard = keyboard();
-  const [position, setPosition] = state({ x: 0, y: 0 });
+  const kb = keyboard();
+  const position = useState({ x: 0, y: 0 });
 
   // React to keyboard input
-  effect(() => {
+  useEffect(() => {
     const speed = 5;
-    const newPos = { ...position() };
+    const newPos = { ...position.valueOf() };
 
-    if (keyboard.isPressed(Keys.ArrowUp)) {
+    if (kb.isPressed(Keys.ArrowUp)) {
       newPos.y -= speed;
     }
-    if (keyboard.isPressed(Keys.ArrowDown)) {
+    if (kb.isPressed(Keys.ArrowDown)) {
       newPos.y += speed;
     }
-    if (keyboard.isPressed(Keys.ArrowLeft)) {
+    if (kb.isPressed(Keys.ArrowLeft)) {
       newPos.x -= speed;
     }
-    if (keyboard.isPressed(Keys.ArrowRight)) {
+    if (kb.isPressed(Keys.ArrowRight)) {
       newPos.x += speed;
     }
 
@@ -344,33 +344,33 @@ function PlayerController() {
 #### Game Loop Integration
 
 ```tsx
-import { keyboard, Keys, loop } from 'flexium/interactive';
-import { state } from 'flexium/core';
+import { keyboard, Keys, useLoop } from 'flexium/interactive';
+import { useState } from 'flexium/core';
 
 function Game() {
-  const keyboard = keyboard();
-  const player = state({ x: 100, y: 100, jumping: false });
+  const kb = keyboard();
+  const player = useState({ x: 100, y: 100, jumping: false });
 
-  loop((dt) => {
+  useLoop((dt) => {
     const pos = { ...player.valueOf() };
 
     // Check for jump
-    if (keyboard.isJustPressed(Keys.Space) && !pos.jumping) {
+    if (kb.isJustPressed(Keys.Space) && !pos.jumping) {
       pos.jumping = true;
     }
 
     // Movement
-    if (keyboard.isPressed(Keys.KeyA)) {
+    if (kb.isPressed(Keys.KeyA)) {
       pos.x -= 200 * dt;
     }
-    if (keyboard.isPressed(Keys.KeyD)) {
+    if (kb.isPressed(Keys.KeyD)) {
       pos.x += 200 * dt;
     }
 
     player.set(pos);
 
     // Clear frame state at end of update
-    keyboard.clearFrameState();
+    kb.clearFrameState();
   });
 
   return (
@@ -414,7 +414,7 @@ Keys.Digit0, Keys.Digit1, Keys.Digit2, ...
 
 ```tsx
 function CanvasInput() {
-  const canvasRef = state<HTMLCanvasElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const kb = keyboard(canvasRef.valueOf() || window);
 
   return (
@@ -433,10 +433,10 @@ function CanvasInput() {
 
 ```tsx
 function GameComponent() {
-  const keyboard = keyboard();
+  const kb = keyboard();
 
-  effect(() => {
-    return () => keyboard.dispose();
+  useEffect(() => {
+    return () => kb.dispose();
   });
 
   return <div>Game</div>;
@@ -508,24 +508,24 @@ function MouseTracker() {
 
 ```tsx
 import { mouse } from 'flexium/interactive';
-import { state, effect } from 'flexium/core';
+import { useRef, useEffect } from 'flexium/core';
 
 function DrawingCanvas() {
-  const canvasRef = state<HTMLCanvasElement | null>(null);
-  const mouse = mouse({
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const m = mouse({
     target: window,
     canvas: canvasRef.valueOf() || undefined
   });
 
-  effect(() => {
+  useEffect(() => {
     const canvas = canvasRef.valueOf();
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    if (mouse.isLeftPressed()) {
-      const pos = mouse.position();
+    if (m.isLeftPressed()) {
+      const pos = m.position();
       ctx.fillStyle = 'blue';
       ctx.fillRect(pos.x - 5, pos.y - 5, 10, 10);
     }
@@ -545,25 +545,26 @@ function DrawingCanvas() {
 #### Game Loop Integration
 
 ```tsx
-import { mouse, loop } from 'flexium/interactive';
+import { mouse, useLoop } from 'flexium/interactive';
+import { useState } from 'flexium/core';
 
 function ShootingGame() {
-  const mouse = mouse();
-  const crosshair = state({ x: 0, y: 0 });
-  const projectiles = state<Array<{ x: number, y: number }>>([]);
+  const m = mouse();
+  const crosshair = useState({ x: 0, y: 0 });
+  const projectiles = useState<Array<{ x: number, y: number }>>([]);
 
-  loop((dt) => {
+  useLoop((dt) => {
     // Update crosshair position
-    const pos = mouse.position();
+    const pos = m.position();
     crosshair.set({ x: pos.x, y: pos.y });
 
     // Shoot on left click
-    if (mouse.isLeftPressed()) {
+    if (m.isLeftPressed()) {
       projectiles.set([...projectiles.valueOf(), { x: pos.x, y: pos.y }]);
     }
 
     // Clear frame state
-    mouse.clearFrameState();
+    m.clearFrameState();
   });
 
   return (
@@ -602,11 +603,11 @@ function ShootingGame() {
 
 ```tsx
 function ZoomableView() {
-  const mouse = mouse();
-  const zoom = state(1);
+  const m = mouse();
+  const zoom = useState(1);
 
-  effect(() => {
-    const wheel = mouse.wheelDelta();
+  useEffect(() => {
+    const wheel = m.wheelDelta();
     if (wheel !== 0) {
       const newZoom = zoom.valueOf() + (wheel * -0.1);
       zoom.set(Math.max(0.5, Math.min(3, newZoom)));
@@ -638,13 +639,13 @@ MouseButton.Right   // 2
 #### Cleanup
 
 ```tsx
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 
 function GameComponent() {
-  const mouse = mouse();
+  const m = mouse();
 
-  effect(() => {
-    return () => mouse.dispose();
+  useEffect(() => {
+    return () => m.dispose();
   });
 
   return <div>Game</div>;
@@ -675,12 +676,12 @@ Flexium doesn't have special rules for hooks - you can create custom hooks by co
 #### Form Hook
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 function useForm<T>(initialValues: T) {
-  const values = state(initialValues);
-  const errors = state<Record<string, string>>({});
-  const touched = state<Record<string, boolean>>({});
+  const values = useState(initialValues);
+  const errors = useState<Record<string, string>>({});
+  const touched = useState<Record<string, boolean>>({});
 
   const setValue = (field: keyof T, value: unknown) => {
     values.set({ ...values.valueOf(), [field]: value });
@@ -767,12 +768,12 @@ function LoginForm() {
 #### Fetch Hook
 
 ```tsx
-import { state, effect } from 'flexium/core';
+import { useState, useEffect } from 'flexium/core';
 
 function useFetch<T>(url: string) {
-  const data = state<T | null>(null);
-  const loading = state(true);
-  const error = state<Error | null>(null);
+  const data = useState<T | null>(null);
+  const loading = useState(true);
+  const error = useState<Error | null>(null);
 
   const refetch = async () => {
     loading.set(true);
@@ -793,7 +794,7 @@ function useFetch<T>(url: string) {
   };
 
   // Fetch on mount
-  effect(() => {
+  useEffect(() => {
     refetch();
   });
 
@@ -823,22 +824,22 @@ function UserList() {
 #### Local Storage Hook
 
 ```tsx
+import { useState, useEffect } from 'flexium/core';
+
 function useLocalStorage<T>(key: string, initialValue: T) {
-  import { state, effect } from 'flexium/core';
-  
   const storedValue = localStorage.getItem(key);
-  const [value, setValue] = state<T>(
+  const value = useState<T>(
     storedValue ? JSON.parse(storedValue) : initialValue
   );
 
   // Save to localStorage on change
-  effect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value.valueOf()));
   });
 
   const remove = () => {
     localStorage.removeItem(key);
-    setValue(initialValue);
+    value.set(initialValue);
   };
 
   return [value, remove] as const;
@@ -846,11 +847,11 @@ function useLocalStorage<T>(key: string, initialValue: T) {
 
 // Usage
 function ThemeToggle() {
-  const [theme, setTheme] = useLocalStorage('theme', 'light');
+  const [theme, clearTheme] = useLocalStorage('theme', 'light');
 
   return (
     <div>
-      <button onclick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+      <button onclick={() => theme.set(theme.valueOf() === 'light' ? 'dark' : 'light')}>
         Toggle Theme (Current: {theme})
       </button>
       <button onclick={clearTheme}>
@@ -864,18 +865,18 @@ function ThemeToggle() {
 #### Window Size Hook
 
 ```tsx
-import { state, effect } from 'flexium/core';
+import { useState, useEffect } from 'flexium/core';
 
 function useWindowSize() {
-  const [width, setWidth] = state(window.innerWidth);
-  const [height, setHeight] = state(window.innerHeight);
+  const width = useState(window.innerWidth);
+  const height = useState(window.innerHeight);
 
   const handleResize = () => {
-    setWidth(window.innerWidth);
-    setHeight(window.innerHeight);
+    width.set(window.innerWidth);
+    height.set(window.innerHeight);
   };
 
-  effect(() => {
+  useEffect(() => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   });
@@ -889,9 +890,9 @@ function ResponsiveComponent() {
 
   return (
     <div>
-      <p>Window size: {width} x {height}</p>
-      {+width < 768 && <div>Mobile view</div>}
-      {+width >= 768 && <div>Desktop view</div>}
+      <p>Window size: {width.valueOf()} x {height.valueOf()}</p>
+      {width.valueOf() < 768 && <div>Mobile view</div>}
+      {width.valueOf() >= 768 && <div>Desktop view</div>}
     </div>
   );
 }
@@ -901,12 +902,12 @@ function ResponsiveComponent() {
 
 ## When to Use Which Hook
 
-### context
+### useContext
 - **Use when**: Sharing state across multiple nested components
 - **Don't use when**: Data is only needed by one or two components (use props instead)
 - **Example**: Theme, authentication, language settings
 
-### router
+### useRouter
 - **Use when**: Need access to URL, params, or navigation in any component
 - **Don't use when**: Simple links suffice (use `<Link>` component)
 - **Example**: Programmatic navigation, reading query params, route guards
@@ -928,16 +929,16 @@ function ResponsiveComponent() {
 ### 1. Always Cleanup Resources
 
 ```tsx
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 
 function GameComponent() {
-  const keyboard = keyboard();
-  const mouse = mouse();
+  const kb = keyboard();
+  const m = mouse();
 
-  effect(() => {
+  useEffect(() => {
     return () => {
-      keyboard.dispose();
-      mouse.dispose();
+      kb.dispose();
+      m.dispose();
     };
   });
 
@@ -948,21 +949,24 @@ function GameComponent() {
 ### 2. Type Safety with TypeScript
 
 ```tsx
-  import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 interface AppState {
   user: User | null;
   theme: 'light' | 'dark';
 }
 
-  // Use state() with key instead of Context
-  const [appState, setAppState] = state<AppState>({
+// Use useState() with key instead of Context
+const appState = useState<AppState>({
   user: null,
   theme: 'light'
-});
+}, { key: ['app', 'state'] });
 
 function Component() {
-  const [appState] = state({ key: ['app', 'state'] });
+  const appState = useState<AppState>({
+    user: null,
+    theme: 'light'
+  }, { key: ['app', 'state'] });
   // TypeScript ensures correct usage
 }
 ```
@@ -970,19 +974,19 @@ function Component() {
 ### 3. Combine Utilities Effectively
 
 ```tsx
-import { state, effect } from 'flexium/core';
-import { router } from 'flexium/router';
+import { useState, useEffect } from 'flexium/core';
+import { useRouter } from 'flexium/router';
 import { keyboard, Keys } from 'flexium/interactive';
 
 function GamePlayer() {
-  const { navigate } = router();
+  const { navigate } = useRouter();
   const kb = keyboard();
-  const [position, setPosition] = state({ x: 0, y: 0 });
+  const position = useState({ x: 0, y: 0 });
 
-  effect(() => {
+  useEffect(() => {
     // Update position based on keyboard
     if (kb.isPressed(Keys.ArrowUp)) {
-      setPosition(p => ({ ...p, y: p.y - 5 }));
+      position.set(p => ({ ...p, y: p.y - 5 }));
     }
     // ...
   });
@@ -998,9 +1002,9 @@ function DataDisplay() {
   const { data } = useFetch('/api/data');
 
   // Use derived state for expensive transformations
-  const [processedData] = state(() => {
-    if (!data) return [];
-    return expensiveTransformation(data);
+  const processedData = useState(() => {
+    if (!data.valueOf()) return [];
+    return expensiveTransformation(data.valueOf());
   });
 
   return <div>{JSON.stringify(processedData)}</div>;
@@ -1010,11 +1014,11 @@ function DataDisplay() {
 ### 5. Keep Hooks Simple and Focused
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 // Good: Single responsibility
 function useAuth() {
-  const [user, setUser] = state(null);
+  const user = useState(null);
   const login = async (credentials) => { /* ... */ };
   const logout = () => { /* ... */ };
   return { user, login, logout };
@@ -1022,10 +1026,10 @@ function useAuth() {
 
 // Bad: Too many responsibilities
 function useEverything() {
-  const [user, setUser] = state(null);
-  const [theme, setTheme] = state('light');
-  const keyboard = keyboard();
-  const router = router();
+  const user = useState(null);
+  const theme = useState('light');
+  const kb = keyboard();
+  const r = useRouter();
   // Too much!
 }
 ```

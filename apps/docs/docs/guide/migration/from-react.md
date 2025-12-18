@@ -21,13 +21,13 @@ Flexium provides a React-like API but with some important differences:
 
 | React | Flexium | Notes |
 |-------|---------|-------|
-| `useState` | `state` | Same `[value, setter]` tuple |
+| `useState` | `useState` | Same `[value, setter]` tuple |
 | `useMemo` | `state(() => ..., { deps })` | computed state with deps |
 | `useEffect` | `effect(fn, deps)` | Same pattern with deps array |
 | `useCallback` | Unnecessary | Auto-optimized |
-| `useRef` | `ref` | Same |
-| `useContext` | `context` | Same |
-| `useReducer` | `state` + methods | Implement directly |
+| `useRef` | `useRef` | Same |
+| `useContext` | `useContext` | Same |
+| `useReducer` | `useState` + methods | Implement directly |
 | `React.memo` | Unnecessary | Auto-optimized |
 | `React Router` | `flexium/router` | Similar API |
 
@@ -52,7 +52,7 @@ npm install flexium
 import { useState, useEffect, useMemo } from 'react'
 
 // ✅ After (Flexium)
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 ```
 
 ### Step 3: Convert Components
@@ -75,10 +75,10 @@ function Counter() {
 }
 
 // ✅ After (Flexium)
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function Counter() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
 
   return (
     <div>
@@ -90,7 +90,7 @@ function Counter() {
 ```
 
 **Changes**:
-- `useState` → `state` (same tuple pattern!)
+- `useState` → `useState` (same tuple pattern!)
 - `onClick` → `onclick` (lowercase)
 - Rest is the same
 
@@ -112,14 +112,14 @@ function Calculator() {
 }
 
 // ✅ After (Flexium)
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function Calculator() {
-  const [price, setPrice] = state(100)
-  const [quantity, setQuantity] = state(2)
+  const [price, setPrice] = useState(100)
+  const [quantity, setQuantity] = useState(2)
 
   // Use deps to specify dependencies (like useMemo)
-  const [total] = state(() => price * quantity, { deps: [price, quantity] })
+  const [total] = useState(() => price * quantity, { deps: [price, quantity] })
 
   return <div>Total: {total}</div>
 }
@@ -127,7 +127,7 @@ function Calculator() {
 
 **Changes**:
 - `useMemo(() => ..., [deps])` → `state(() => ..., { deps: [...] })`
-- Returns a tuple: `const [value] = state(...)`
+- Returns a tuple: `const [value] = useState(...)`
 
 ---
 
@@ -152,10 +152,10 @@ function Timer() {
 }
 
 // ✅ After (Flexium)
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function Timer() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
 
   effect(() => {
     const interval = setInterval(() => {
@@ -170,7 +170,7 @@ function Timer() {
 ```
 
 **Changes**:
-- `useEffect` → `effect`
+- `useEffect` → `useEffect`
 - Same dependency array pattern
 - Cleanup function is the same
 
@@ -195,10 +195,10 @@ function UserProfile({ userId }) {
 }
 
 // ✅ After (Flexium)
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function UserProfile({ userId }) {
-  const [user, setUser] = state(null)
+  const [user, setUser] = useState(null)
 
   effect(() => {
     fetch(`/api/users/${userId}`)
@@ -232,10 +232,10 @@ function Parent() {
 }
 
 // ✅ After (Flexium)
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function Parent() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
 
   // useCallback unnecessary - auto-optimized
   const handleClick = () => {
@@ -268,7 +268,7 @@ function Input() {
 }
 
 // ✅ After (Flexium)
-import { ref } from 'flexium/core'
+import { useRef } from 'flexium/core'
 
 function Input() {
   const inputRef = ref<HTMLInputElement>()
@@ -282,7 +282,7 @@ function Input() {
 ```
 
 **Changes**:
-- `useRef` → `ref`
+- `useRef` → `useRef`
 - Usage is the same
 
 ---
@@ -309,17 +309,17 @@ function Child() {
 }
 
 // ✅ After (Flexium) - Use state() with key
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const theme = state('dark', { key: 'app:theme' })
+  const theme = useState('dark', { key: 'app:theme' })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const theme = state('light', { key: 'app:theme' })
+  const theme = useState('light', { key: 'app:theme' })
   return <div>Theme: {theme}</div>
 }
 ```
@@ -361,10 +361,10 @@ function Counter() {
 }
 
 // ✅ After (Flexium)
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function Counter() {
-  const counterState = state({ count: 0 })
+  const counterState = useState({ count: 0 })
   
   const increment = () => counterState.set(s => ({ ...s, count: s.count + 1 }))
   const decrement = () => counterState.set(s => ({ ...s, count: s.count - 1 }))
@@ -380,7 +380,7 @@ function Counter() {
 ```
 
 **Changes**:
-- `useReducer` → `state` + helper functions
+- `useReducer` → `useState` + helper functions
 - Convert reducer logic to regular functions
 
 ---
@@ -451,10 +451,10 @@ function UserDetail() {
 }
 
 // ✅ After (Flexium Router)
-import { router } from 'flexium/router'
+import { useRouter } from 'flexium/router'
 
 function UserDetail() {
-  const r = router()
+  const r = useRouter()
   const id = r.params().id
   
   const goBack = () => window.history.back()
@@ -650,7 +650,7 @@ function TodoApp() {
 ### After (Flexium)
 
 ```tsx
-import { state, effect, sync } from 'flexium/core'
+import { useState, useEffect, useSync } from 'flexium/core'
 
 interface Todo {
   id: number
@@ -659,19 +659,19 @@ interface Todo {
 }
 
 function TodoApp() {
-  const todos = state<Todo[]>([])
-  const filter = state<'all' | 'active' | 'completed'>('all')
-  
+  const todos = useState<Todo[]>([])
+  const filter = useState<'all' | 'active' | 'completed'>('all')
+
   // Load from local storage
-  effect(() => {
+  useEffect(() => {
     const saved = localStorage.getItem('todos')
     if (saved) {
       todos.set(JSON.parse(saved))
     }
   })
-  
+
   // Save to local storage
-  effect(() => {
+  useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos.valueOf()))
   })
   
@@ -686,7 +686,7 @@ function TodoApp() {
   }
   
   // Filtering with computed state
-  const filteredTodos = state(() => {
+  const filteredTodos = useState(() => {
     if (filter.valueOf() === 'active') return todos.filter(t => !t.completed)
     if (filter.valueOf() === 'completed') return todos.filter(t => t.completed)
     return todos.valueOf()
@@ -725,9 +725,9 @@ function TodoApp() {
 ```
 
 **Key Changes**:
-- `useState` → `state`
-- `useEffect` → `effect`
-- `useMemo` → `state(() => ...)`
+- `useState` → `useState` (same!)
+- `useEffect` → `useEffect` (same!)
+- `useMemo` → `useState(() => ...)`
 - `onClick` → `onclick`
 - `onChange` → `onchange`
 - `onKeyDown` → `onkeydown`
@@ -755,9 +755,9 @@ a.set(1)
 b.set(2)
 c.set(3)  // Effect runs 3 times
 
-// ✅ Solution: Use sync()
-import { sync } from 'flexium/core'
-sync(() => {
+// ✅ Solution: Use useSync()
+import { useSync } from 'flexium/core'
+useSync(() => {
   a.set(1)
   b.set(2)
   c.set(3)  // Effect runs only once
@@ -768,8 +768,8 @@ sync(() => {
 
 ```tsx
 // ✅ Explicit type specification
-const user = state<User | null>(null)
-const count = state<number>(0)
+const user = useState<User | null>(null)
+const count = useState<number>(0)
 ```
 
 ---
@@ -779,10 +779,10 @@ const count = state<number>(0)
 ### 1. Use Sync Updates
 
 ```tsx
-import { sync } from 'flexium/core'
+import { useSync } from 'flexium/core'
 
 // Multiple state updates at once
-sync(() => {
+useSync(() => {
   setA(1)
   setB(2)
   setC(3)
@@ -800,7 +800,7 @@ sync(() => {
 
 ```tsx
 // State shared across multiple components should be global
-const [user] = state(null, { key: 'auth:user' })
+const [user] = useState(null, { key: 'auth:user' })
 ```
 
 ---

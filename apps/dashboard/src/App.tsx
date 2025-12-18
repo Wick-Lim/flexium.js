@@ -1,4 +1,4 @@
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 import { startRealTimeUpdates, stopRealTimeUpdates } from './store'
 import Stats from './components/Stats'
 import Charts from './components/Charts'
@@ -6,7 +6,7 @@ import RecentActivity from './components/RecentActivity'
 import DataTable from './components/DataTable'
 
 export default function App() {
-  effect(() => {
+  useEffect(() => {
     startRealTimeUpdates()
     return () => {
       stopRealTimeUpdates()

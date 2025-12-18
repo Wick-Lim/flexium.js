@@ -65,16 +65,16 @@ Learn common mistakes and anti-patterns to avoid.
 
 ```tsx
 // Local state
-const count = state(0)
+const count = useState(0)
 
 // Global state
-const user = state(null, { key: 'auth:user' })
+const user = useState(null, { key: 'auth:user' })
 
 // Computed state
-const doubled = state(() => count.valueOf() * 2)
+const doubled = useState(() => count.valueOf() * 2)
 
 // Async state
-const data = state(async () => {
+const data = useState(async () => {
   return fetch('/api/data').then(r => r.json())
 })
 ```
@@ -82,9 +82,9 @@ const data = state(async () => {
 ### Sync Updates
 
 ```tsx
-import { sync } from 'flexium/core'
+import { useSync } from 'flexium/core'
 
-sync(() => {
+useSync(() => {
   a.set(1)
   b.set(2)
   c.set(3)

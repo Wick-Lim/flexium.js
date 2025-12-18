@@ -14,7 +14,7 @@ Frequently asked questions and answers.
 
 ```tsx
 // ❌ Wrong approach - outside reactive context
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 console.log(count)  // Only outputs initial value, doesn't track updates
 
 // ✅ Correct approach 1: Inside effect()
@@ -24,12 +24,12 @@ effect(() => {
 
 // ✅ Correct approach 2: Inside JSX
 function Counter() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
   return <div>{count}</div>  // Automatically tracks updates
 }
 ```
 
-**See**: Check [effect() documentation](/docs/core/effect).
+**See**: Check [useEffect() documentation](/docs/core/effect).
 
 ---
 
@@ -39,22 +39,22 @@ function Counter() {
 
 ```tsx
 // ❌ Bad example - creates new object every time
-const [data] = state(() => ({
+const [data] = useState(() => ({
   items: items,
   timestamp: Date.now()  // Different value each time
 }))
 
 // ✅ Good example - stable dependencies
-const [data] = state(() => ({
+const [data] = useState(() => ({
   items: items,
   timestamp: 1234567890  // Fixed value
 }))
 ```
 
-Or use `sync()` to sync multiple updates:
+Or use `useSync()` to sync multiple updates:
 
 ```tsx
-import { sync } from 'flexium/core'
+import { useSync } from 'flexium/core'
 
 sync(() => {
   setA(1)
@@ -63,7 +63,7 @@ sync(() => {
 })  // Single recalculation
 ```
 
-**See**: Check [sync() documentation](/docs/core/sync).
+**See**: Check [useSync() documentation](/docs/core/sync).
 
 ---
 
@@ -74,27 +74,27 @@ sync(() => {
 ```tsx
 // ✅ Global state examples
 // - User authentication
-const [user] = state(null, { key: ['auth', 'user'] })
+const [user] = useState(null, { key: ['auth', 'user'] })
 // In another component
-const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
+const [theme, setTheme] = useState('light', { key: ['app', 'theme'] })
 
 // - Server data caching
-const [posts] = state(async () => fetch('/api/posts'), {
+const [posts] = useState(async () => fetch('/api/posts'), {
   key: ['posts', 'all']
 })
 
 // ❌ When local state is sufficient
 // - State only used within component
-const [isOpen, setIsOpen] = state(false)  // No key needed
+const [isOpen, setIsOpen] = useState(false)  // No key needed
 ```
 
-**See**: Check [state() documentation - Global State](/docs/core/state#global-state).
+**See**: Check [useState() documentation - Global State](/docs/core/state#global-state).
 
 ---
 
 ### Q: Memory leak occurs
 
-**A**: Return cleanup functions from `effect()` or delete unused global state.
+**A**: Return cleanup functions from `useEffect()` or delete unused global state.
 
 ```tsx
 // ✅ Return cleanup function
@@ -107,11 +107,11 @@ effect(() => {
 })
 
 // ✅ Delete global state
-import { state } from 'flexium/core'
-state.delete('old:key')  // Delete unused key
+import { useState } from 'flexium/core'
+useState.delete('old:key')  // Delete unused key
 ```
 
-**See**: Check [effect() documentation - With Cleanup](/docs/core/effect#with-cleanup).
+**See**: Check [useEffect() documentation - With Cleanup](/docs/core/effect#with-cleanup).
 
 ---
 
@@ -123,7 +123,7 @@ state.delete('old:key')  // Delete unused key
 
 ```tsx
 // ❌ Infinite loop occurs
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 effect(() => {
   setCount(count + 1)  // count changes → effect re-runs → count changes → ...
 })
@@ -152,7 +152,7 @@ effect(() => {
 
 ```tsx
 // ❌ Dependencies not tracked
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 effect(() => {
   console.log('Hello')  // Doesn't read count
 })
@@ -171,7 +171,7 @@ setCount(1)  // Effect re-runs
 
 ### Q: How do I check async state status?
 
-**A**: The third value returned by `state()` is the status.
+**A**: The third value returned by `useState()` is the status.
 
 ```tsx
 const [data, refetch, status, error] = state(async () => {
@@ -189,7 +189,7 @@ if (String(status) === 'error') {
 }
 ```
 
-**See**: Check [state() documentation - Async State](/docs/core/state#async-state).
+**See**: Check [useState() documentation - Async State](/docs/core/state#async-state).
 
 ---
 
@@ -241,7 +241,7 @@ const [form, setForm] = state<FormData>({
 ```tsx
 import { isStateValue } from 'flexium/core'
 
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 
 if (isStateValue(count)) {
   // count is StateValue<number>
@@ -255,10 +255,10 @@ if (isStateValue(count)) {
 
 ### Q: How do I update multiple states at once?
 
-**A**: Use `sync()` to sync updates.
+**A**: Use `useSync()` to sync updates.
 
 ```tsx
-import { sync } from 'flexium/core'
+import { useSync } from 'flexium/core'
 
 // ❌ Multiple updates
 setA(1)  // Update 1
@@ -273,7 +273,7 @@ sync(() => {
 })  // Single re-render
 ```
 
-**See**: Check [sync() documentation](/docs/core/sync).
+**See**: Check [useSync() documentation](/docs/core/sync).
 
 ---
 
@@ -319,19 +319,19 @@ function App() {
 
 ### Q: How do I get the current path?
 
-**A**: Use the `router()` function.
+**A**: Use the `useRouter()` function.
 
 ```tsx
-import { router } from 'flexium/router'
+import { useRouter } from 'flexium/router'
 
 function Component() {
-  const r = router()
+  const r = useRouter()
   console.log(r.location().pathname)  // Current path
   console.log(r.params())  // Path parameters
 }
 ```
 
-**See**: Check [router() documentation](/docs/router/router).
+**See**: Check [useRouter() documentation](/docs/router/router).
 
 ---
 
@@ -343,7 +343,7 @@ function Component() {
 
 ```tsx
 // ❌ Access before initialization
-const [user] = state(null)
+const [user] = useState(null)
 console.log(user.name)  // Error: user is null
 
 // ✅ Safe access
@@ -359,19 +359,19 @@ console.log(user?.name)
 
 ### Q: Component doesn't re-render
 
-**A**: State must be read inside JSX or inside `effect()`.
+**A**: State must be read inside JSX or inside `useEffect()`.
 
 ```tsx
 // ❌ Doesn't re-render
 function Component() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
   const displayCount = count  // Read outside component
   return <div>{displayCount}</div>
 }
 
 // ✅ Re-renders
 function Component() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
   return <div>{count}</div>  // Read inside JSX
 }
 ```

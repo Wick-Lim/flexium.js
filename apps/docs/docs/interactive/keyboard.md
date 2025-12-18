@@ -56,7 +56,7 @@ Keys.Alt
 function Game() {
   const kb = keyboard()
 
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     onUpdate: () => {
       if (kb.isPressed(Keys.ArrowUp)) {
         moveUp()
@@ -77,7 +77,7 @@ function Game() {
 function PlayerController() {
   const kb = keyboard()
 
-  effect(() => {
+  useEffect(() => {
     if (kb.isPressed('w') || kb.isPressed('W')) {
       player.y -= speed
     }
@@ -99,7 +99,7 @@ function PlayerController() {
 ```tsx
 const kb = keyboard()
 
-const gameLoop = loop({
+const gameLoop = useLoop({
   onUpdate: () => {
     // Only jump on initial press, not while held
     if (kb.isJustPressed(Keys.Space)) {
@@ -112,10 +112,10 @@ const gameLoop = loop({
 ### Pause Menu
 
 ```tsx
-const paused = state(false)
+const paused = useState(false)
 const kb = keyboard()
 
-effect(() => {
+useEffect(() => {
   if (kb.isJustPressed(Keys.Escape)) {
     paused.set(p => !p)
   }
@@ -175,4 +175,4 @@ import UseKeyboardDemo from '../../components/UseKeyboardDemo.vue'
 ## See Also
 
 - [mouse()](/docs/interactive/mouse)
-- [loop()](/docs/interactive/loop)
+- [useLoop()](/docs/interactive/loop)

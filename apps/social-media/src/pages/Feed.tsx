@@ -1,4 +1,4 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { usePosts, useCurrentUser } from '../store'
 import PostCard from '../components/PostCard'
 import CreatePost from '../components/CreatePost'
@@ -6,7 +6,7 @@ import CreatePost from '../components/CreatePost'
 export default function Feed() {
   const [posts] = usePosts()
   const [currentUser] = useCurrentUser()
-  const [showComments, setShowComments] = state<Record<number, boolean>>({})
+  const [showComments, setShowComments] = useState<Record<number, boolean>>({})
 
   return (
     <div class="container">

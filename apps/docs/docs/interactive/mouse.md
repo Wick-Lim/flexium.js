@@ -70,9 +70,9 @@ function Game() {
 function DrawingApp() {
   const canvasRef = ref(null)
   const m = mouse()
-  const isDrawing = state(false)
+  const isDrawing = useState(false)
 
-  effect(() => {
+  useEffect(() => {
     if (m.isLeftPressed()) {
       const ctx = canvasRef.current.getContext('2d')
       ctx.lineTo(m.position.x, m.position.y)
@@ -89,7 +89,7 @@ function DrawingApp() {
 ```tsx
 const m = mouse()
 
-const gameLoop = loop({
+const gameLoop = useLoop({
   onUpdate: () => {
     if (m.isLeftPressed()) {
       handleClick(m.position.x, m.position.y)
@@ -149,10 +149,10 @@ function CanvasGame() {
 ```tsx
 function Draggable(props) {
   const m = mouse()
-  const isDragging = state(false)
-  const offset = state({ x: 0, y: 0 })
+  const isDragging = useState(false)
+  const offset = useState({ x: 0, y: 0 })
 
-  effect(() => {
+  useEffect(() => {
     if (!m.isLeftPressed()) {
       isDragging.set(false)
     }
@@ -186,9 +186,9 @@ function Draggable(props) {
 ```tsx
 function ContextMenuArea() {
   const m = mouse()
-  const menuPos = state(null)
+  const menuPos = useState(null)
 
-  effect(() => {
+  useEffect(() => {
     if (m.isRightPressed()) {
       menuPos.set({ x: m.position.x, y: m.position.y })
     }
@@ -214,7 +214,7 @@ function ContextMenuArea() {
 
 ## Notes
 
-- Use with `loop` for interactive input
+- Use with `useLoop` for interactive input
 - Position is relative to viewport by default
 - Prevent default context menu for right-click handling
 
@@ -229,4 +229,4 @@ import UseMouseDemo from '../../components/UseMouseDemo.vue'
 ## See Also
 
 - [keyboard()](/docs/interactive/keyboard)
-- [loop()](/docs/interactive/loop)
+- [useLoop()](/docs/interactive/loop)

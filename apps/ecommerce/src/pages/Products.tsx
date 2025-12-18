@@ -1,4 +1,4 @@
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { Link } from 'flexium/router'
 import { useProducts, addToCart, type Product } from '../store'
 
@@ -26,15 +26,15 @@ function ProductCard({ product }: { product: Product }) {
 
 export default function Products() {
   const [products] = useProducts()
-  const [searchQuery, setSearchQuery] = state('')
-  const [selectedCategory, setSelectedCategory] = state<string>('all')
-  const [sortBy, setSortBy] = state<string>('default')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<string>('default')
 
   // Get unique categories
   const categories = ['all', ...new Set(products.map(p => p.category))]
 
   // Filter and sort products
-  const [filteredProducts] = state(() => {
+  const [filteredProducts] = useState(() => {
     let filtered = [...products]
 
     // Filter by search query

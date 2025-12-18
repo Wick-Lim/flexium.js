@@ -15,14 +15,14 @@ Local state is state that is only used within a component.
 ```tsx
 // ✅ Local state example
 function Modal() {
-  const isOpen = state(false)  // Only used in this component
-  const selectedItem = state(null)  // Modal internal state
+  const isOpen = useState(false)  // Only used in this component
+  const selectedItem = useState(null)  // Modal internal state
   
   return isOpen ? <div>...</div> : null
 }
 
 function Form() {
-  const formData = state({
+  const formData = useState({
     email: '',
     password: ''
   })  // Form internal state
@@ -46,19 +46,19 @@ Global state is state that is shared across multiple components.
 // ✅ Global state examples
 
 // 1. User authentication (accessed app-wide)
-const user = state(null, { key: 'auth:user' })
+const user = useState(null, { key: 'auth:user' })
 
 // 2. App settings (dark mode, etc.)
-const theme = state('light', { key: 'app:theme' })
+const theme = useState('light', { key: 'app:theme' })
 
 // 3. Server data caching
-const posts = state(async () => {
+const posts = useState(async () => {
   const res = await fetch('/api/posts')
   return res.json()
 }, { key: ['posts', 'all'] })
 
 // 4. Global UI state
-const notifications = state([], { key: 'app:notifications' })
+const notifications = useState([], { key: 'app:notifications' })
 ```
 
 **Use global state when:**
@@ -75,18 +75,18 @@ const notifications = state([], { key: 'app:notifications' })
 
 ```tsx
 // ✅ Hierarchical keys
-const user = state(null, { key: ['auth', 'user'] })
-const posts = state([], { key: ['user', userId, 'posts'] })
-const settings = state({}, { key: ['app', 'settings'] })
+const user = useState(null, { key: ['auth', 'user'] })
+const posts = useState([], { key: ['user', userId, 'posts'] })
+const settings = useState({}, { key: ['app', 'settings'] })
 
 // ✅ Namespace usage
-const user = state(null, { key: 'auth:user' })
-const posts = state([], { key: `user:${userId}:posts` })
-const settings = state({}, { key: 'app:settings' })
+const user = useState(null, { key: 'auth:user' })
+const posts = useState([], { key: `user:${userId}:posts` })
+const settings = useState({}, { key: 'app:settings' })
 
 // ✅ Clear and specific keys
-const cart = state([], { key: 'ecommerce:cart' })
-const checkout = state(null, { key: 'ecommerce:checkout' })
+const cart = useState([], { key: 'ecommerce:cart' })
+const checkout = useState(null, { key: 'ecommerce:checkout' })
 ```
 
 **Characteristics of good keys:**
@@ -101,15 +101,15 @@ const checkout = state(null, { key: 'ecommerce:checkout' })
 
 ```tsx
 // ❌ Too generic
-const data = state(null, { key: 'data' })
-const user = state(null, { key: 'user' })
+const data = useState(null, { key: 'data' })
+const user = useState(null, { key: 'user' })
 
 // ❌ Unclear meaning
-const state1 = state(null, { key: 'state1' })
-const temp = state(null, { key: 'temp' })
+const state1 = useState(null, { key: 'state1' })
+const temp = useState(null, { key: 'temp' })
 
 // ❌ High collision risk
-const count = state(0, { key: 'count' })  // Can be used in multiple places
+const count = useState(0, { key: 'count' })  // Can be used in multiple places
 ```
 
 **Characteristics of bad keys:**
@@ -127,21 +127,21 @@ const count = state(0, { key: 'count' })  // Can be used in multiple places
 // ✅ Managing state with hierarchical structure
 function UserProfile({ userId }: { userId: number }) {
   // User information
-  const user = state(null, { key: ['user', userId] })
+  const user = useState(null, { key: ['user', userId] })
   
   // User's posts
-  const posts = state([], { key: ['user', userId, 'posts'] })
+  const posts = useState([], { key: ['user', userId, 'posts'] })
   
   // User's followers
-  const followers = state([], { key: ['user', userId, 'followers'] })
+  const followers = useState([], { key: ['user', userId, 'followers'] })
   
   return <div>...</div>
 }
 
 // ✅ Expressing hierarchy with array keys
-const appState = state({}, { key: ['app', 'state'] })
-const userState = state({}, { key: ['app', 'user', 'state'] })
-const adminState = state({}, { key: ['app', 'admin', 'state'] })
+const appState = useState({}, { key: ['app', 'state'] })
+const userState = useState({}, { key: ['app', 'user', 'state'] })
+const adminState = useState({}, { key: ['app', 'admin', 'state'] })
 ```
 
 ---
@@ -151,12 +151,12 @@ const adminState = state({}, { key: ['app', 'admin', 'state'] })
 ```tsx
 // ✅ Managing per-user state with dynamic keys
 function PostDetail({ postId }: { postId: number }) {
-  const post = state(async () => {
+  const post = useState(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
   }, { key: ['posts', postId] })
   
-  const comments = state(async () => {
+  const comments = useState(async () => {
     const res = await fetch(`/api/posts/${postId}/comments`)
     return res.json()
   }, { key: ['posts', postId, 'comments'] })
@@ -166,8 +166,8 @@ function PostDetail({ postId }: { postId: number }) {
 
 // ✅ Creating keys with template literals
 function ProductPage({ productId }: { productId: string }) {
-  const product = state(null, { key: `product:${productId}` })
-  const reviews = state([], { key: `product:${productId}:reviews` })
+  const product = useState(null, { key: `product:${productId}` })
+  const reviews = useState([], { key: `product:${productId}:reviews` })
   
   return <div>...</div>
 }
@@ -181,17 +181,17 @@ function ProductPage({ productId }: { productId: string }) {
 
 ```tsx
 // ✅ Cleanup on component unmount
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 
 function TemporaryComponent() {
-  const data = state(async () => {
+  const data = useState(async () => {
     return fetch('/api/temp-data').then(r => r.json())
   }, { key: 'temp:data' })
   
   // Cleanup on component unmount
   effect(() => {
     return () => {
-      state.delete('temp:data')
+      useState.delete('temp:data')
     }
   })
   
@@ -200,14 +200,14 @@ function TemporaryComponent() {
 
 // ✅ Conditional cleanup
 function ConditionalComponent({ show }: { show: boolean }) {
-  const data = state(async () => {
+  const data = useState(async () => {
     return fetch('/api/data').then(r => r.json())
   }, { key: 'conditional:data' })
   
   effect(() => {
     if (!show) {
       // Cleanup when no longer needed
-      state.delete('conditional:data')
+      useState.delete('conditional:data')
     }
   })
   
@@ -222,24 +222,24 @@ function ConditionalComponent({ show }: { show: boolean }) {
 ```tsx
 // ✅ Cleanup multiple keys at once
 function cleanupUserData(userId: number) {
-  state.delete(['user', userId])
-  state.delete(['user', userId, 'posts'])
-  state.delete(['user', userId, 'followers'])
+  useState.delete(['user', userId])
+  useState.delete(['user', userId, 'posts'])
+  useState.delete(['user', userId, 'followers'])
 }
 
 // ✅ Cleanup by namespace
 function cleanupEcommerce() {
-  state.delete('ecommerce:cart')
-  state.delete('ecommerce:checkout')
-  state.delete('ecommerce:payment')
+  useState.delete('ecommerce:cart')
+  useState.delete('ecommerce:checkout')
+  useState.delete('ecommerce:payment')
 }
 
 // ✅ Cleanup in effect cleanup
 effect(() => {
-  const tempData = state(null, { key: 'temp:data' })
+  const tempData = useState(null, { key: 'temp:data' })
   
   return () => {
-    state.delete('temp:data')  // cleanup
+    useState.delete('temp:data')  // cleanup
   }
 })
 ```
@@ -255,14 +255,14 @@ effect(() => {
 
 // Authentication
 export const user = state<User | null>(null, { key: 'auth:user' })
-export const isAuthenticated = state(() => user.valueOf() !== null)
+export const isAuthenticated = useState(() => user.valueOf() !== null)
 
 // App settings
 export const theme = state<'light' | 'dark'>('light', { key: 'app:theme' })
-export const language = state('en', { key: 'app:language' })
+export const language = useState('en', { key: 'app:language' })
 
 // Data caching
-export const posts = state(async () => {
+export const posts = useState(async () => {
   const res = await fetch('/api/posts')
   return res.json()
 }, { key: ['posts', 'all'] })
@@ -277,20 +277,20 @@ export const notifications = state<Notification[]>([], {
 // components/UserProfile.tsx - Per-user state
 function UserProfile({ userId }: { userId: number }) {
   // User information (cached)
-  const user = state(async () => {
+  const user = useState(async () => {
     const res = await fetch(`/api/users/${userId}`)
     return res.json()
   }, { key: ['user', userId] })
   
   // User's posts
-  const posts = state(async () => {
+  const posts = useState(async () => {
     const res = await fetch(`/api/users/${userId}/posts`)
     return res.json()
   }, { key: ['user', userId, 'posts'] })
   
   // Local UI state
-  const isEditing = state(false)
-  const editForm = state({ name: '', bio: '' })
+  const isEditing = useState(false)
+  const editForm = useState({ name: '', bio: '' })
   
   return <div>...</div>
 }
@@ -312,6 +312,6 @@ function UserProfile({ userId }: { userId: number }) {
 
 ## Related Documentation
 
-- [state() API](/docs/core/state) - State API documentation
+- [useState() API](/docs/core/state) - State API documentation
 - [Anti-patterns](/docs/guide/best-practices/anti-patterns) - Patterns to avoid
 - [Performance Optimization](/docs/guide/best-practices/performance) - Performance guide
