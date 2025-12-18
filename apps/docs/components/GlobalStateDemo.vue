@@ -7,7 +7,7 @@ const container = ref(null)
 
 // Component A - can read and write global state
 function CounterA() {
-  const [count, setCount] = use(0, undefined, { key: ['app', 'count'] })
+  const [count, setCount] = use(0, { key: ['app', 'count'] })
 
   return f('div', {
     style: {
@@ -75,7 +75,7 @@ function CounterA() {
 
 // Component B - shares the same global state
 function CounterB() {
-  const [count, setCount] = use(0, undefined, { key: ['app', 'count'] })
+  const [count, setCount] = use(0, { key: ['app', 'count'] })
   const [doubled] = use(() => count * 2, [count])
 
   return f('div', {
@@ -151,7 +151,7 @@ function CounterB() {
 
 // Component C - displays the shared state
 function DisplayC() {
-  const [count] = use(0, undefined, { key: ['app', 'count'] })
+  const [count] = use(0, { key: ['app', 'count'] })
 
   return f('div', {
     style: {

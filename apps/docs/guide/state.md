@@ -61,7 +61,7 @@ To share state across components, provide a unique `key` in the options.
 // store/theme.ts
 import { use } from 'flexium/core'
 
-export const useTheme = () => use('light', undefined, { key: ['theme'] })
+export const useTheme = () => use('light', { key: ['theme'] })
 ```
 
 ```tsx
@@ -222,11 +222,11 @@ Keys can be arrays for hierarchical namespacing - similar to TanStack Query:
 
 ```tsx
 // String key (deprecated - use array)
-const [user, setUser] = use(null, undefined, { key: ['user'] })
+const [user, setUser] = use(null, { key: ['user'] })
 
 // Array key - great for dynamic keys (recommended)
-const [userProfile] = use(null, undefined, { key: ['user', 'profile', userId] })
-const [posts] = use([], undefined, { key: ['user', 'posts', userId] })
+const [userProfile] = use(null, { key: ['user', 'profile', userId] })
+const [posts] = use([], { key: ['user', 'posts', userId] })
 ```
 
 ### 7. Params Option

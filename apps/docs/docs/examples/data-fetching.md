@@ -16,7 +16,7 @@ function PostList() {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch posts')
     return res.json()
-  }, undefined, { key: ['posts', 'all'] })
+  }, { key: ['posts', 'all'] })
 
   if (control.loading) {
     return <div>Loading...</div>
@@ -54,14 +54,14 @@ function PostList() {
   // Cache with global key
   const [posts, control] = use(async () => {
     return fetch('/api/posts').then(r => r.json())
-  }, undefined, { key: ['posts', 'all'] })
+  }, { key: ['posts', 'all'] })
 
   return <div>{posts?.map(p => <Post key={p.id} {...p} />)}</div>
 }
 
 function PostDetail({ postId }: { postId: number }) {
   // Find from already cached posts
-  const [allPosts] = use(null, undefined, { key: ['posts', 'all'] })
+  const [allPosts] = use(null, { key: ['posts', 'all'] })
   const [post] = use(() => {
     return allPosts?.find(p => p.id === postId)
   }, [allPosts, postId])
@@ -70,7 +70,7 @@ function PostDetail({ postId }: { postId: number }) {
   const [fetchedPost, control] = use(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
-  }, undefined, { key: ['posts', postId] })
+  }, { key: ['posts', postId] })
 
   return <div>{post || fetchedPost}</div>
 }

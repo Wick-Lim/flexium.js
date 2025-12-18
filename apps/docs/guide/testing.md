@@ -348,8 +348,8 @@ describe('use() API', () => {
   });
 
   it('should create global state with key', () => {
-    const [count1, setCount1] = use(0, undefined, { key: ['global-count'] });
-    const [count2, setCount2] = use(0, undefined, { key: ['global-count'] });
+    const [count1, setCount1] = use(0, { key: ['global-count'] });
+    const [count2, setCount2] = use(0, { key: ['global-count'] });
 
     // Both reference same state
     expect(count1).toBe(0);

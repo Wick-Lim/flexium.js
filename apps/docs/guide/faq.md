@@ -44,10 +44,10 @@ Use global state with a key:
 
 ```tsx
 // In any component
-const [user, setUser] = use(null, undefined, { key: ['currentUser'] })
+const [user, setUser] = use(null, { key: ['currentUser'] })
 
 // In another component - same state!
-const [user, setUser] = use(null, undefined, { key: ['currentUser'] })
+const [user, setUser] = use(null, { key: ['currentUser'] })
 ```
 
 Or use Context API:
@@ -57,13 +57,13 @@ import { use } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme] = use('dark', undefined, { key: ['app', 'theme'] })
+  const [theme] = use('dark', { key: ['app', 'theme'] })
   return <MyComponent />
 }
 
 function MyComponent() {
   // Access theme from anywhere
-  const [theme] = use('light', undefined, { key: ['app', 'theme'] })
+  const [theme] = use('light', { key: ['app', 'theme'] })
   return <div>Theme: {theme}</div>
 }
 ```

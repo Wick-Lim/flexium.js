@@ -98,10 +98,10 @@ Share state between components easily using a unique `key`.
 
 ```tsx
 // In Header.tsx
-const [theme, setTheme] = use('light', undefined, { key: ['theme'] });
+const [theme, setTheme] = use('light', { key: ['theme'] });
 
 // Or with explicit undefined for async loading scenarios
-const [theme, setTheme] = use(undefined, undefined, { key: ['theme'] });
+const [theme, setTheme] = use(undefined, { key: ['theme'] });
 ```
 
 ### 3. Async State (Resources)

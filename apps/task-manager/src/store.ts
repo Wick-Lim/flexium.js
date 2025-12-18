@@ -64,7 +64,7 @@ const initialTasks: Task[] = [
 ]
 
 export function useTasks() {
-  return use<Task[]>(initialTasks, undefined, { key: ['tasks'] })
+  return use<Task[]>(initialTasks, { key: ['tasks'] })
 }
 
 let nextId = Math.max(...initialTasks.map(t => t.id)) + 1

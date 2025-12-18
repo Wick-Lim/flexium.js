@@ -45,32 +45,46 @@ export function use<T>(ctx: Context<T>): [T, undefined]
 
 export function use<T, P = void>(
   fn: (ctx: UseContext<P>) => Promise<T>,
-  deps?: any[],
+  depsOrOptions?: any[] | UseOptions,
   options?: UseOptions
 ): [T | undefined, ResourceControl<P>]
 
 export function use<T>(
   fn: (ctx: UseContext) => T,
-  deps?: any[],
+  depsOrOptions?: any[] | UseOptions,
   options?: UseOptions
 ): [T, ResourceControl]
 
 export function use<T>(
   initialValue: T extends Function ? never : T,
-  deps?: any[],
   options?: UseOptions
 ): [T, Setter<T>]
 
 export function use<T, P = void>(
   input: T | Context<T> | ((ctx: UseContext<P>) => T) | ((ctx: UseContext<P>) => Promise<T>),
-  deps?: any[],
-  options?: UseOptions
+  depsOrOptions?: any[] | UseOptions,
+  thirdArg?: UseOptions
 ): any {
   // Context mode: use(SomeContext) returns [value, undefined] tuple for UX consistency
   if (isContext(input)) {
     const value = _useContext(input)
     return [value, undefined]
   }
+
+  // Normalize arguments:
+  // - use(value, { key }) → options only
+  // - use(fn, [deps]) → deps only
+  // - use(fn, [deps], { key }) → deps + options
+  let deps: any[] | undefined
+  let options: UseOptions | undefined
+
+  if (Array.isArray(depsOrOptions)) {
+    deps = depsOrOptions
+    options = thirdArg  // third arg is options when second is deps array
+  } else if (depsOrOptions && typeof depsOrOptions === 'object') {
+    options = depsOrOptions as UseOptions
+  }
+
   // Validate key if provided
   if (options?.key && !Array.isArray(options.key)) {
     throw new Error('State key must be an array')

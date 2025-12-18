@@ -116,19 +116,19 @@ function generateActivities(): Activity[] {
 
 // Global state
 export function useStats() {
-  return use<Stat[]>(generateStats(), undefined, { key: ['dashboard', 'stats'] })
+  return use<Stat[]>(generateStats(), { key: ['dashboard', 'stats'] })
 }
 
 export function useSalesChart() {
-  return use<ChartData[]>(generateChartData(), undefined, { key: ['dashboard', 'sales-chart'] })
+  return use<ChartData[]>(generateChartData(), { key: ['dashboard', 'sales-chart'] })
 }
 
 export function useTrafficChart() {
-  return use<ChartData[]>(generateChartData(), undefined, { key: ['dashboard', 'traffic-chart'] })
+  return use<ChartData[]>(generateChartData(), { key: ['dashboard', 'traffic-chart'] })
 }
 
 export function useActivities() {
-  return use<Activity[]>(generateActivities(), undefined, { key: ['dashboard', 'activities'] })
+  return use<Activity[]>(generateActivities(), { key: ['dashboard', 'activities'] })
 }
 
 // Real-time updates

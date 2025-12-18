@@ -27,7 +27,7 @@ function Component() {
   const [count, setCount] = use(0)                          // local
   const [doubled] = use(() => count * 2, [count])           // derived
   const [user] = use(async () => fetchUser())               // async
-  const [theme, setTheme] = use('dark', undefined, { key: ['theme'] })   // global
+  const [theme, setTheme] = use('dark', { key: ['theme'] })   // global
 
   return <div>{count} × 2 = {doubled}</div>
 }

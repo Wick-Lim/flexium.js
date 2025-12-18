@@ -74,9 +74,9 @@ sync(() => {
 ```tsx
 // ✅ Global state examples
 // - User authentication
-const [user] = use(null, undefined, { key: ['auth', 'user'] })
+const [user] = use(null, { key: ['auth', 'user'] })
 // In another component
-const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
+const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
 // - Server data caching
 const [posts] = use(async () => fetch('/api/posts'), {

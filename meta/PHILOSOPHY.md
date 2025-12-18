@@ -33,7 +33,7 @@ const [count, setCount] = use(0)
 ### Global State
 ```javascript
 // Array key for hierarchical namespacing
-const [user] = use(null, undefined, { key: ['app', 'user', userId] })
+const [user] = use(null, { key: ['app', 'user', userId] })
 ```
 
 ### Async Data (Resource)

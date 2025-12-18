@@ -86,11 +86,11 @@ const mockPosts: Post[] = [
 ]
 
 export function useCurrentUser() {
-  return use<User>(currentUser, undefined, { key: ['currentUser'] })
+  return use<User>(currentUser, { key: ['currentUser'] })
 }
 
 export function usePosts() {
-  return use<Post[]>(mockPosts, undefined, { key: ['posts'] })
+  return use<Post[]>(mockPosts, { key: ['posts'] })
 }
 
 let nextPostId = Math.max(...mockPosts.map(p => p.id)) + 1

@@ -553,7 +553,7 @@ const [colors, setColors] = use(() => String(theme) === 'light' ? lightColors : 
 const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
 function ThemedButton() {
-  const [theme, setTheme2] = use('light', undefined, { key: ['app:theme'] })
+  const [theme, setTheme2] = use('light', { key: ['app:theme'] })
   const [colors, setColors2] = use(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
 
   return (

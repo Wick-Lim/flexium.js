@@ -15,7 +15,7 @@ import { use } from 'flexium/core'
 
 // In any component
 function ThemeToggle() {
-  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
   return (
     <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
@@ -32,7 +32,7 @@ import { use } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const [user, setUser] = use<User | null>(null, undefined, { key: ['app', 'auth', 'user'] })
+  const [user, setUser] = use<User | null>(null, { key: ['app', 'auth', 'user'] })
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -76,9 +76,9 @@ import { use } from 'flexium/core'
 
 // Use in any component
 function Dashboard() {
-  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
-  const [user, setUser] = use(null, undefined, { key: ['app', 'auth', 'user'] })
-  const [items, setItems] = use([], undefined, { key: ['app', 'cart', 'items'] })
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
+  const [user, setUser] = use(null, { key: ['app', 'auth', 'user'] })
+  const [items, setItems] = use([], { key: ['app', 'cart', 'items'] })
 
   return (
     <div class={theme}>
@@ -127,7 +127,7 @@ import { use } from 'flexium/core'
 
 // No Provider needed!
 function Child() {
-  const [theme] = use('light', undefined, { key: ['app', 'theme'] })
+  const [theme] = use('light', { key: ['app', 'theme'] })
   return <div>{theme}</div>
 }
 ```

@@ -394,7 +394,7 @@ import { use } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const [user, setUser] = use(null, undefined, { key: ['app', 'auth', 'user'] })
+  const [user, setUser] = use(null, { key: ['app', 'auth', 'user'] })
   
   const login = (name: string) => {
     setUser({ name })

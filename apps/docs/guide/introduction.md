@@ -293,7 +293,7 @@ Start simple and add complexity only when needed:
 const [count, setCount] = use(0);
 
 // Need it global? Just add a key
-const [globalCount, setGlobalCount] = use(0, undefined, { key: ['globalCount'] });
+const [globalCount, setGlobalCount] = use(0, { key: ['globalCount'] });
 
 // Need async? Make the initializer async
 const [data] = use(async () => fetchData());
@@ -318,7 +318,7 @@ function Dashboard() {
   const [filter, setFilter] = use('all');
 
   // 2. Global state (shared across components)
-  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] });
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] });
 
   // 3. Computed state (auto-updates)
   const [greeting] = use(() =>

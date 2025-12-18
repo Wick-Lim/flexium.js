@@ -14,11 +14,11 @@ Instead of Context API, use `use()` with a `key` option to share state globally:
 import { use } from 'flexium/core'
 
 // Share theme globally - no Provider needed
-const [theme, setTheme] = use<'light' | 'dark'>('light', undefined, { key: ['app', 'theme'] })
+const [theme, setTheme] = use<'light' | 'dark'>('light', { key: ['app', 'theme'] })
 
 // In any component - access the same state
 function ThemedButton() {
-  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
   return (
     <button
@@ -41,7 +41,7 @@ import { use } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const [user, setUser] = use<User | null>(null, undefined, { key: ['app', 'auth', 'user'] })
+  const [user, setUser] = use<User | null>(null, { key: ['app', 'auth', 'user'] })
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -84,19 +84,19 @@ function Header() {
 import { use } from 'flexium/core'
 
 // Theme state
-const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
+const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
 // Language state
-const [lang, setLang] = use('en', undefined, { key: ['app', 'language'] })
+const [lang, setLang] = use('en', { key: ['app', 'language'] })
 
 // User state
-const [user, setUser] = use(null, undefined, { key: ['app', 'user'] })
+const [user, setUser] = use(null, { key: ['app', 'user'] })
 
 // Use in any component
 function ProfileCard() {
-  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
-  const [lang, setLang] = use('en', undefined, { key: ['app', 'language'] })
-  const [user, setUser] = use(null, undefined, { key: ['app', 'user'] })
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
+  const [lang, setLang] = use('en', { key: ['app', 'language'] })
+  const [user, setUser] = use(null, { key: ['app', 'user'] })
 
   return (
     <div class={`card-${theme}`}>
@@ -145,13 +145,13 @@ import { use } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme, setTheme] = use('dark', undefined, { key: ['app', 'theme'] })
+  const [theme, setTheme] = use('dark', { key: ['app', 'theme'] })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
   return <div>{theme}</div>
 }
 ```

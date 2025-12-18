@@ -23,17 +23,17 @@ interface Story {
 
 // 1. Lists (Top, New, etc.)
 export function useList(type: string) {
-    return use<number[]>([], undefined, { key: ['list', type] });
+    return use<number[]>([], { key: ['list', type] });
 }
 
 // 2. Items (Stories, Comments)
 export function useItem(id: number) {
-    return use<Story | undefined>(undefined, undefined, { key: ['item', id] });
+    return use<Story | undefined>(undefined, { key: ['item', id] });
 }
 
 // 3. Users
 export function useUser(id: string) {
-    return use<any>(undefined, undefined, { key: ['user', id] });
+    return use<any>(undefined, { key: ['user', id] });
 }
 
 // Fetch Actions

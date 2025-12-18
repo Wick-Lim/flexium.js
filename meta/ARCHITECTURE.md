@@ -232,10 +232,10 @@ States with `key` option are stored in a global registry:
 
 ```typescript
 // Component A
-const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
+const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
 // Component B (anywhere)
-const [theme] = use('light', undefined, { key: ['app', 'theme'] })  // Same state!
+const [theme] = use('light', { key: ['app', 'theme'] })  // Same state!
 ```
 
 ### 1.3 Effect System (`lifecycle.ts`)

@@ -223,10 +223,10 @@ Use the `key` option to share state across components:
 
 ```tsx
 // In Component A
-const [count, setCount] = use(0, undefined, { key: ['app', 'count'] })
+const [count, setCount] = use(0, { key: ['app', 'count'] })
 
 // In Component B - shares the same state
-const [count, setCount] = use(0, undefined, { key: ['app', 'count'] })
+const [count, setCount] = use(0, { key: ['app', 'count'] })
 
 // Changes in A are reflected in B and vice versa
 ```
@@ -237,8 +237,8 @@ Keys can be arrays for hierarchical namespacing:
 
 ```tsx
 // Great for dynamic keys with IDs
-const [user, setUser] = use(null, undefined, { key: ['user', 'profile', userId] })
-const [posts, setPosts] = use([], undefined, { key: ['user', 'posts', userId] })
+const [user, setUser] = use(null, { key: ['user', 'profile', userId] })
+const [posts, setPosts] = use([], { key: ['user', 'posts', userId] })
 ```
 
 ---

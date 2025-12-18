@@ -7,10 +7,10 @@ export function mouse(options: MouseOptions = {}): MouseState {
   const target = options.target || window
   const canvasGetter = typeof options.canvas === 'function' ? options.canvas : () => options.canvas as HTMLCanvasElement | undefined
 
-  const [position, setPosition] = use({ x: 0, y: 0 }, undefined, { key: ['mouse', 'position'] })
-  const [delta, setDelta] = use({ x: 0, y: 0 }, undefined, { key: ['mouse', 'delta'] })
-  const [wheelDelta, setWheelDelta] = use(0, undefined, { key: ['mouse', 'wheel'] })
-  const [buttons, setButtons] = use<Set<number>>(new Set<number>(), undefined, { key: ['mouse', 'buttons'] })
+  const [position, setPosition] = use({ x: 0, y: 0 }, { key: ['mouse', 'position'] })
+  const [delta, setDelta] = use({ x: 0, y: 0 }, { key: ['mouse', 'delta'] })
+  const [wheelDelta, setWheelDelta] = use(0, { key: ['mouse', 'wheel'] })
+  const [buttons, setButtons] = use<Set<number>>(new Set<number>(), { key: ['mouse', 'buttons'] })
 
   let lastX = 0
   let lastY = 0

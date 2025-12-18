@@ -204,12 +204,12 @@ const mockProducts: Product[] = [
 
 // Global cart state
 export function useCart() {
-  return use<CartItem[]>([], undefined, { key: ['cart'] })
+  return use<CartItem[]>([], { key: ['cart'] })
 }
 
 // Global products state
 export function useProducts() {
-  return use<Product[]>(mockProducts, undefined, { key: ['products'] })
+  return use<Product[]>(mockProducts, { key: ['products'] })
 }
 
 // Cart actions
