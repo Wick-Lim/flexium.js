@@ -243,7 +243,7 @@ function createAutoImportPlugin(opts: Required<FlexiumPluginOptions>): Plugin {
     "signal",
     "computed",
     "useEffect",
-    // Note: sync, createContext, useContext are in flexium/core
+    // Note: sync, Context are in flexium/core
   ];
 
   return {

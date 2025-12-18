@@ -75,7 +75,7 @@ import flexium from 'vite-plugin-flexium'
 export default defineConfig({
   plugins: [
     flexium({
-      autoImport: true // Auto-import use, sync, createContext
+      autoImport: true // Auto-import use, sync, Context
     })
   ]
 })

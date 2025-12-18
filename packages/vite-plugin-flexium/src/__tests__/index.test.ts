@@ -427,7 +427,7 @@ describe('vite-plugin-flexium', () => {
       expect(result?.code).toContain("import { useEffect } from 'flexium'");
     });
 
-    // Note: sync and createContext are in flexium/core
+    // Note: sync and Context are in flexium/core
 
     it('should add multiple imports when multiple primitives are used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);

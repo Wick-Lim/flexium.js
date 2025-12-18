@@ -165,7 +165,7 @@ f('div', { class: 'card' },
 We don't bundle everything. Import what you need:
 
 ```javascript
-import { use, sync, useRef, createContext } from 'flexium/core' // Core reactivity
+import { use, sync, useRef, Context } from 'flexium/core' // Core reactivity
 import { render } from 'flexium/dom'                  // DOM renderer
 import { renderToString } from 'flexium/server'       // SSR
 import { Canvas, DrawRect } from 'flexium/canvas'     // Canvas

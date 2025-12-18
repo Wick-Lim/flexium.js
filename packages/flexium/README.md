@@ -109,7 +109,7 @@ const [doubled] = use(() => count * 2, [count])
 
 ```
 flexium
-├── /core         # Core reactivity: use(), sync(), createContext()
+├── /core         # Core reactivity: use(), sync(), Context
 ├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
 ├── /ref          # Ref system: useRef(), forwardRef()
 ├── /router       # SPA routing: Routes, Route, Link, Outlet, useRouter(), useLocation()
@@ -264,13 +264,19 @@ import { ErrorBoundary } from 'flexium/dom'
 ## Context API
 
 ```tsx
-import { use, createContext } from 'flexium/core'
+import { use, Context } from 'flexium/core'
 
-const ThemeCtx = createContext('light')
+// Create context with default value
+const ThemeCtx = new Context<'light' | 'dark'>('light')
 
 function App() {
+  const [theme, setTheme] = use<'light' | 'dark'>('light')
+
   return (
-    <ThemeCtx.Provider value="dark">
+    <ThemeCtx.Provider value={theme}>
+      <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+        Toggle Theme
+      </button>
       <Child />
     </ThemeCtx.Provider>
   )
@@ -278,7 +284,7 @@ function App() {
 
 function Child() {
   const [theme] = use(ThemeCtx)
-  return <div>Theme: {theme}</div>
+  return <div class={theme}>Current theme: {theme}</div>
 }
 ```
 

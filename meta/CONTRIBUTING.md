@@ -48,8 +48,7 @@ flexium.js/
 │       │   ├── ref/          # Ref system
 │       │   │   └── ref.ts        # useRef()
 │       │   │
-│       │   ├── advanced/     # Advanced APIs
-│       │   │   └── index.ts      # createContext()
+│       │   ├── context.ts    # Context class
 │       │   │
 │       │   ├── dom/          # DOM renderer
 │       │   │   ├── render.ts     # render(), reconcile()
@@ -268,11 +267,11 @@ The most critical module. Changes here affect everything.
 - `lifecycle.ts` - Ensure cleanup is always called
 - `hook.ts` - Never break hook order semantics
 
-### Advanced (`advanced/`)
+### Context (`context.ts`)
 
-Context factory lives here, separate from core.
+Context class for dependency injection.
 
-- `createContext()` export only
+- `new Context(defaultValue)` creates context
 - Context consumption is via `use(Context)` in core
 - Keep it minimal
 

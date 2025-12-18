@@ -245,12 +245,12 @@ const [posts, setPosts] = use([], { key: ['user', 'posts', userId] })
 
 ## Context
 
-Consume context values created with `createContext`:
+Consume context values:
 
 ```tsx
-import { use, createContext } from 'flexium/core'
+import { use, Context } from 'flexium/core'
 
-const ThemeContext = createContext('light')
+const ThemeContext = new Context('light')
 
 function ThemedButton() {
   const [theme] = use(ThemeContext)  // Returns [value, undefined]

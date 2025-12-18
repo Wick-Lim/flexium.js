@@ -26,8 +26,8 @@ Flexium is built on a **Proxy-based Fine-grained Reactivity** system that provid
 |  +------------------+  +------------------+  +----------------+   |
 |                                                                   |
 |  +------------------+  +------------------+  +----------------+   |
-|  |     hook()       |  |    useRef()      |  | createContext()|   |
-|  | Component state  |  |   Mutable ref    |  | Context factory|   |
+|  |     hook()       |  |    useRef()      |  | new Context()  |   |
+|  | Component state  |  |   Mutable ref    |  | Context class  |   |
 |  +------------------+  +------------------+  +----------------+   |
 +------------------------------------------------------------------+
 ```
@@ -55,8 +55,7 @@ packages/flexium/src/
 │   ├── types.ts
 │   └── ref.ts            # useRef()
 │
-├── advanced/             # Advanced APIs
-│   └── index.ts          # createContext()
+├── context.ts            # Context class
 │
 ├── dom/                  # DOM Renderer
 │   ├── index.ts
@@ -333,10 +332,10 @@ Refs are passed via props - no special forwarding mechanism needed.
 ### 2.1 Context API
 
 ```typescript
-import { createContext, use } from 'flexium/core'
+import { Context, use } from 'flexium/core'
 
 // Create context with default value
-const ThemeCtx = createContext('light')
+const ThemeCtx = new Context('light')
 
 // Provider component
 <ThemeCtx.Provider value="dark">
