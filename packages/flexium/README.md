@@ -13,7 +13,7 @@ Flexium is a next-generation UI framework that unifies state management, async d
 - **Unified State API** - No more `useRecoil`, `useQuery` separation. Just `use()`.
 - **No Virtual DOM** - Direct DOM updates via Proxy-based fine-grained reactivity.
 - **Tiny Bundle** - Minimal footprint with tree-shaking support.
-- **Cross-Platform** - DOM, Canvas, Server (SSR) renderers included.
+- **Cross-Platform** - DOM and Server (SSR) renderers included.
 - **TypeScript First** - Full type inference out of the box.
 - **Zero-Config JSX** - Works with standard tooling.
 
@@ -113,9 +113,7 @@ flexium
 ├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
 ├── /ref          # Ref system: useRef(), forwardRef()
 ├── /router       # SPA routing: Routes, Route, Link, Outlet, useRouter(), useLocation()
-├── /server       # SSR: renderToString(), renderToStaticMarkup()
-├── /canvas       # Canvas 2D: Canvas, DrawRect, DrawCircle, DrawText
-└── /interactive  # Game loop: useLoop(), useKeyboard(), useMouse()
+└── /server       # SSR: renderToString(), renderToStaticMarkup()
 ```
 
 ## Control Flow
@@ -160,57 +158,6 @@ function UserProfile({ params }) {
 function UserProfileHook() {
   const r = useRouter()
   return <h1>User: {r.params.id}</h1>
-}
-```
-
-## Canvas Rendering
-
-```tsx
-import { Canvas, DrawRect, DrawCircle, DrawText } from 'flexium/canvas'
-import { use } from 'flexium/core'
-
-function App() {
-  const [x, setX] = use(100)
-
-  return (
-    <Canvas width={400} height={300}>
-      <DrawRect x={0} y={0} width={400} height={300} fill="#1a1a2e" />
-      <DrawCircle x={x} y={150} radius={30} fill="#e94560" />
-      <DrawText x={200} y={50} text="Hello Canvas!" fill="white" />
-    </Canvas>
-  )
-}
-```
-
-## Game Development
-
-```tsx
-import { use } from 'flexium/core'
-import { Canvas, DrawRect } from 'flexium/canvas'
-import { useLoop, useKeyboard, Keys } from 'flexium/interactive'
-
-function Game() {
-  const [x, setX] = use(100)
-  const kb = useKeyboard()
-
-  const gameLoop = useLoop({
-    fixedFps: 60,
-    onUpdate: (delta) => {
-      if (kb.isPressed(Keys.ArrowRight)) setX(x => x + 200 * delta)
-      if (kb.isPressed(Keys.ArrowLeft)) setX(x => x - 200 * delta)
-    }
-  })
-
-  use(({ onCleanup }) => {
-    gameLoop.start()
-    onCleanup(() => gameLoop.stop())
-  }, [])
-
-  return (
-    <Canvas width={800} height={600}>
-      <DrawRect x={x} y={300} width={50} height={50} fill="red" />
-    </Canvas>
-  )
 }
 ```
 
