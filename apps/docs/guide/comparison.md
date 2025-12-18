@@ -103,7 +103,7 @@ function TodoList() {
 ```jsx [React]
 // Same syntax, but different behavior
 function TodoList() {
-  const [todos, setTodos] = use([...])
+  const [todos, setTodos] = useState([...])
 
   return (
     <ul>
@@ -154,7 +154,7 @@ setCount(c => c + 1)
 ```
 
 ```jsx [React]
-const [count, setCount] = use(5)
+const [count, setCount] = useState(5)
 
 // Tuple-based access
 count               // 5
@@ -202,7 +202,7 @@ function Component() {
 ```jsx [React]
 // Native JavaScript works
 function Component() {
-  const [show] = use(true)
+  const [show] = useState(true)
 
   return (
     <div>
@@ -255,16 +255,16 @@ use(() => {
 ```
 
 ```jsx [React]
-import { use } from 'react'
+import { useEffect } from 'react'
 
 // Manual dependency array
-use(() => {
+useEffect(() => {
   console.log('Count:', count)
   console.log('Name:', name)
 }, [count, name])
 
 // Common bugs:
-use(() => {
+useEffect(() => {
   console.log(count) // Always 0! Stale closure
 }, []) // Forgot to add count!
 ```
@@ -306,7 +306,7 @@ use(() => {
 
 | Framework | APIs to Learn | Time to Productive |
 |-----------|---------------|-------------------|
-| **Flexium** | `use()`, `use()` | Hours |
+| **Flexium** | `use()` | Hours |
 | React | useState, useMemo, useCallback, useEffect, useContext, useReducer, + external libs | Days to weeks |
 
 ## Migration Guide
@@ -315,10 +315,10 @@ use(() => {
 
 | React | Flexium | Notes |
 |-------|---------|-------|
-| `use(x)` | `use(x)` | Returns `[value, setter]` tuple |
-| `useMemo(() => x, [deps])` | `use(() => x, { deps })` | Computed with deps |
+| `useState(x)` | `use(x)` | Returns `[value, setter]` tuple |
+| `useMemo(() => x, [deps])` | `use(() => x, [deps])` | Computed with deps |
 | `useCallback(fn, [deps])` | Just use `fn` | No wrapper needed |
-| `use(() => {}, [deps])` | `use(() => {}, [deps])` | Same pattern |
+| `useEffect(() => {}, [deps])` | `use(() => {}, [deps])` | Same pattern |
 | React Query | `use(async () => ...)` | Built-in |
 | Recoil/Jotai | `use(x, { key })` | Built-in |
 | `items.map()` | `items.map()` | Same! But optimized |
