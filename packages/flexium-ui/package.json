@@ -1,0 +1,51 @@
+{
+  "name": "flexium-ui",
+  "version": "0.14.2",
+  "description": "Column/Row based UI component library for Flexium",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "flexium": ">=0.14.2"
+  },
+  "devDependencies": {
+    "flexium": "workspace:*",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.8"
+  },
+  "keywords": [
+    "flexium",
+    "ui",
+    "components",
+    "column",
+    "row",
+    "flex"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wick-Lim/flexium.js.git",
+    "directory": "packages/flexium-ui"
+  },
+  "bugs": {
+    "url": "https://github.com/Wick-Lim/flexium.js/issues"
+  },
+  "homepage": "https://github.com/Wick-Lim/flexium.js/tree/main/packages/flexium-ui#readme"
+}

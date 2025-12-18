@@ -14,6 +14,11 @@ export function jsxs(type: any, props: any, key?: any): FNode {
     return jsx(type, props, key)
 }
 
+// Development version (same as jsx for our purposes)
+export function jsxDEV(type: any, props: any, key?: any): FNode {
+    return jsx(type, props, key)
+}
+
 export function Fragment(props: any): FNodeChild {
     return props.children
 }

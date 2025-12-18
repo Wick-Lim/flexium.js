@@ -8,6 +8,7 @@
     "build": "turbo run build",
     "build:flexium": "turbo run build --filter=flexium",
     "build:flexium-canvas": "turbo run build --filter=flexium-canvas",
+    "build:flexium-ui": "turbo run build --filter=flexium-ui",
     "build:create-flexium": "turbo run build --filter=create-flexium",
     "build:eslint-plugin": "turbo run build --filter=eslint-plugin-flexium",
     "build:vite-plugin": "turbo run build --filter=vite-plugin-flexium",

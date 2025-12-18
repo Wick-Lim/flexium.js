@@ -106,6 +106,7 @@ async function deploy(type) {
   // Then build the rest in parallel
   const buildSuccess = await runParallel([
     'npm run build:flexium-canvas',
+    'npm run build:flexium-ui',
     'npm run build:create-flexium',
     'npm run build:eslint-plugin',
     'npm run build:vite-plugin',
@@ -138,6 +139,12 @@ async function deploy(type) {
   console.log('\n  Publishing flexium-canvas...');
   if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/flexium-canvas') })) {
     console.error('❌ Failed to publish flexium-canvas');
+    process.exit(1);
+  }
+
+  console.log('\n  Publishing flexium-ui...');
+  if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/flexium-ui') })) {
+    console.error('❌ Failed to publish flexium-ui');
     process.exit(1);
   }
 
@@ -174,6 +181,7 @@ async function deploy(type) {
   console.log(`   npm packages:`);
   console.log(`   - https://www.npmjs.com/package/flexium`);
   console.log(`   - https://www.npmjs.com/package/flexium-canvas`);
+  console.log(`   - https://www.npmjs.com/package/flexium-ui`);
   console.log(`   - https://www.npmjs.com/package/create-flexium`);
   console.log(`   - https://www.npmjs.com/package/eslint-plugin-flexium`);
   console.log(`   - https://www.npmjs.com/package/vite-plugin-flexium`);
