@@ -23,7 +23,7 @@ import { Transition } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function App() {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = use(false)
 
   return (
     <div>
@@ -287,7 +287,7 @@ import { TransitionGroup, Transition } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function NotificationList() {
-  const [notifications, setNotifications] = useState([
+  const [notifications, setNotifications] = use([
     { id: 1, text: 'Welcome!' },
     { id: 2, text: 'New message' },
     { id: 3, text: 'Update available' }
@@ -320,7 +320,7 @@ interface TransitionGroupProps {
 
 ```tsx
 function AnimatedList() {
-  const [items, setItems] = useState([1, 2, 3, 4, 5])
+  const [items, setItems] = use([1, 2, 3, 4, 5])
 
   return (
     <TransitionGroup stagger={100}>
@@ -369,8 +369,8 @@ function TrackedTransition() {
 
 ```tsx
 function ModalWithCallback() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [hasExited, setHasExited] = useState(false)
+  const [isOpen, setIsOpen] = use(false)
+  const [hasExited, setHasExited] = use(false)
 
   return (
     <>
@@ -401,7 +401,7 @@ The most common pattern - animate conditional content:
 
 ```tsx
 function ConditionalContent() {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = use(false)
 
   return (
     <div>
@@ -423,7 +423,7 @@ Animate list items as they're added or removed:
 
 ```tsx
 function TodoList() {
-  const [todos, setTodos] = useState([
+  const [todos, setTodos] = use([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build app' }
   ])
@@ -461,7 +461,7 @@ Different animations for different states:
 
 ```tsx
 function LoadingState() {
-  const [status, setStatus] = useState('loading')
+  const [status, setStatus] = use('loading')
 
   return (
     <Switch>
@@ -541,7 +541,7 @@ function Modal({ isOpen, onClose, children }) {
 
 // Usage
 function App() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = use(false)
 
   return (
     <div>
@@ -561,7 +561,7 @@ function App() {
 
 ```tsx
 function Tabs() {
-  const [activeTab, setActiveTab] = useState('home')
+  const [activeTab, setActiveTab] = use('home')
 
   const tabs = ['home', 'profile', 'settings']
 
@@ -607,7 +607,7 @@ function Tabs() {
 
 ```tsx
 function ImageGrid() {
-  const [images, setImages] = useState([
+  const [images, setImages] = use([
     { id: 1, url: '/img1.jpg' },
     { id: 2, url: '/img2.jpg' },
     { id: 3, url: '/img3.jpg' },
@@ -645,7 +645,7 @@ function ImageGrid() {
 
 ```tsx
 function NotificationStack() {
-  const [notifications, setNotifications] = useState([])
+  const [notifications, setNotifications] = use([])
 
   const addNotification = (message) => {
     const id = Date.now()

@@ -1,11 +1,11 @@
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import AddTaskForm from './components/AddTaskForm'
 import KanbanBoard from './components/KanbanBoard'
 import Filters from './components/Filters'
 import { type Priority } from './store'
 
 export default function App() {
-  const [filter, setFilter] = useState<Priority | 'all'>('all')
+  const [filter, setFilter] = use<Priority | 'all'>('all')
 
   return (
     <div>

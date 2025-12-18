@@ -298,7 +298,7 @@ interface CounterProps {
 }
 
 export function Counter({ initialCount = 0, step = 1, onCountChange }: CounterProps) {
-  const [count, setCount] = useState(initialCount)
+  const [count, setCount] = use(initialCount)
 
   const increment = () => {
     setCount(c => c + step)

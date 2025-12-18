@@ -1,4 +1,4 @@
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 export interface Product {
   id: number
@@ -204,12 +204,12 @@ const mockProducts: Product[] = [
 
 // Global cart state
 export function useCart() {
-  return useState<CartItem[]>([], { key: ['cart'] })
+  return use<CartItem[]>([], undefined, { key: ['cart'] })
 }
 
 // Global products state
 export function useProducts() {
-  return useState<Product[]>(mockProducts, { key: ['products'] })
+  return use<Product[]>(mockProducts, undefined, { key: ['products'] })
 }
 
 // Cart actions

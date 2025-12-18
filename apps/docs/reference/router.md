@@ -556,7 +556,7 @@ Pass data through query parameters:
 ```tsx
 function SearchForm() {
   const r = useRouter();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = use('');
 
   const handleSearch = (searchQuery: string, filters: object) => {
     const params = new URLSearchParams({
@@ -960,7 +960,7 @@ function NotFound() {
   ];
 
   // Log 404 for analytics
-  useEffect(() => {
+  use(() => {
     logPageNotFound(location.pathname);
   });
 
@@ -1081,9 +1081,9 @@ import { useRouter } from 'flexium/router';
 function TransitionWrapper({ children }) {
   const r = useRouter();
   const location = r.location;
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isTransitioning, setIsTransitioning] = use(false);
 
-  useEffect(() => {
+  use(() => {
     // Trigger transition on location change
     setIsTransitioning(true);
 
@@ -1126,10 +1126,10 @@ function App() {
 function SlideTransition({ children }) {
   const r = useRouter();
   const location = r.location;
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isAnimating, setIsAnimating] = use(false);
   const direction = useState<'left' | 'right'>('right');
 
-  useEffect(() => {
+  use(() => {
     setIsAnimating(true);
 
     setTimeout(() => {
@@ -1160,9 +1160,9 @@ function SlideTransition({ children }) {
 function PageTransition({ children }) {
   const r = useRouter();
   const location = r.location;
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = use(true);
 
-  useEffect(() => {
+  use(() => {
     setIsLoading(true);
 
     // Simulate page load
@@ -1205,7 +1205,7 @@ Apply different transitions based on routes:
 function RouteTransition({ children }) {
   const r = useRouter();
   const location = r.location;
-  const [previousPath, setPreviousPath] = useState('');
+  const [previousPath, setPreviousPath] = use('');
 
   const getTransitionType = () => {
     const current = location.pathname;
@@ -1219,7 +1219,7 @@ function RouteTransition({ children }) {
     return 'fade';
   };
 
-  useEffect(() => {
+  use(() => {
     setPreviousPath(location.pathname);
   });
 
@@ -1537,7 +1537,7 @@ Show loading indicators during navigation:
 ```tsx
 ```tsx
 function App() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = use(false);
 
   return (
     <Routes>
@@ -1568,7 +1568,7 @@ Wrap routes in error boundaries:
 ```tsx
 ```tsx
 function RouteErrorBoundary({ children }) {
-  const [hasError, setHasError] = useState(false);
+  const [hasError, setHasError] = use(false);
   const [error, setError] = useState<Error | null>(null);
 
   try {
@@ -1676,7 +1676,7 @@ function ScrollManager() {
   const r = useRouter();
   const location = r.location;
 
-  useEffect(() => {
+  use(() => {
     // Scroll to top on route change
     window.scrollTo(0, 0);
 
@@ -1718,7 +1718,7 @@ function DocumentTitle() {
   const r = useRouter();
   const location = r.location;
 
-  useEffect(() => {
+  use(() => {
     const route = findRouteByPath(location.pathname);
     if (route?.meta?.title) {
       document.title = `${route.meta.title} - My App`;

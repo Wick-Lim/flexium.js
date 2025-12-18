@@ -14,7 +14,7 @@ Learn practical patterns commonly used in Flexium.
 import { useState } from 'flexium/core'
 
 function LoginForm() {
-  const [form, setForm] = useState({
+  const [form, setForm] = use({
     email: '',
     password: ''
   })
@@ -72,14 +72,14 @@ function LoginForm() {
 
 ```tsx
 function FormWithValidation() {
-  const [form, setForm] = useState({
+  const [form, setForm] = use({
     email: '',
     password: '',
     confirmPassword: ''
   })
 
   // Real-time validation
-  const [errors] = useState(() => {
+  const [errors] = use(() => {
     const errs: Record<string, string> = {}
 
     if (form.email && !form.email.includes('@')) {
@@ -117,8 +117,8 @@ function FormWithValidation() {
 
 ```tsx
 function FormWithAsyncValidation() {
-  const [form, setForm] = useState({ email: '' })
-  const [isChecking, setIsChecking] = useState(false)
+  const [form, setForm] = use({ email: '' })
+  const [isChecking, setIsChecking] = use(false)
   const [emailError, setEmailError] = useState<string | null>(null)
 
   const checkEmailAvailability = async (email: string) => {
@@ -166,7 +166,7 @@ function FormWithAsyncValidation() {
 
 ```tsx
 function PostList() {
-  const [posts] = useState(async () => {
+  const [posts] = use(async () => {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch')
     return res.json()
@@ -202,13 +202,13 @@ function PostList() {
 
 ```tsx
 function UserPosts({ userId }: { userId: number }) {
-  const [posts] = useState(async () => {
+  const [posts] = use(async () => {
     const res = await fetch(`/api/users/${userId}/posts`)
     return res.json()
   }, { key: ['user', userId, 'posts'] })
 
   // Automatically refetch when userId changes
-  useEffect(() => {
+  use(() => {
     const id = userId  // Dependency tracking
     posts.refetch()
   })
@@ -223,8 +223,8 @@ function UserPosts({ userId }: { userId: number }) {
 
 ```tsx
 function LikeButton({ postId }: { postId: number }) {
-  const [isLiked, setIsLiked] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
+  const [isLiked, setIsLiked] = use(false)
+  const [isUpdating, setIsUpdating] = use(false)
 
   const toggleLike = async () => {
     // Optimistic update
@@ -260,10 +260,10 @@ function LikeButton({ postId }: { postId: number }) {
 
 ```tsx
 function InfiniteScrollList() {
-  const [items, setItems] = useState([])
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
+  const [items, setItems] = use([])
+  const [page, setPage] = use(1)
+  const [hasMore, setHasMore] = use(true)
+  const [isLoading, setIsLoading] = use(false)
 
   const loadMore = async () => {
     if (isLoading || !hasMore) return
@@ -283,7 +283,7 @@ function InfiniteScrollList() {
     }
   }
 
-  useEffect(() => {
+  use(() => {
     const handleScroll = () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
         loadMore()
@@ -315,7 +315,7 @@ type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
   const [loadingState, setLoadingState] = useState<LoadingState>('idle')
-  const [data, setData] = useState(null)
+  const [data, setData] = use(null)
   const [error, setError] = useState<Error | null>(null)
 
   const loadData = async () => {
@@ -364,7 +364,7 @@ type FormState =
 
 function ComplexForm() {
   const [formState, setFormState] = useState<FormState>({ type: 'idle' })
-  const [formData, setFormData] = useState({ email: '', password: '' })
+  const [formData, setFormData] = use({ email: '', password: '' })
 
   const handleSubmit = async () => {
     // Validation phase
@@ -419,10 +419,10 @@ function ComplexForm() {
 
 ```tsx
 function SearchInput() {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
+  const [query, setQuery] = use('')
+  const [results, setResults] = use([])
 
-  useEffect(() => {
+  use(() => {
     if (!query) {
       setResults([])
       return
@@ -460,10 +460,10 @@ function SearchInput() {
 
 ```tsx
 function ScrollTracker() {
-  const [scrollY, setScrollY] = useState(0)
-  const [lastUpdate, setLastUpdate] = useState(0)
+  const [scrollY, setScrollY] = use(0)
+  const [lastUpdate, setLastUpdate] = use(0)
 
-  useEffect(() => {
+  use(() => {
     const handleScroll = () => {
       const now = Date.now()
       // Update only once per 100ms
@@ -489,14 +489,14 @@ function ScrollTracker() {
 
 ```tsx
 function PersistentForm() {
-  const [form, setForm] = useState(() => {
+  const [form, setForm] = use(() => {
     // Get initial value from local storage
     const saved = localStorage.getItem('form-data')
     return saved ? JSON.parse(saved) : { email: '', name: '' }
   })
 
   // Save to local storage on state change
-  useEffect(() => {
+  use(() => {
     localStorage.setItem('form-data', JSON.stringify(form))
   })
 
@@ -524,7 +524,7 @@ export const [theme, setTheme] = useState<'light' | 'dark'>('light', {
   key: 'app:theme'
 })
 
-export const [language, setLanguage] = useState('en', {
+export const [language, setLanguage] = use('en', {
   key: 'app:language'
 })
 
@@ -579,7 +579,7 @@ function ErrorBoundary({ children }: { children: any }) {
 
 ## Related Documentation
 
-- [useState() API](/docs/core/state) - State API documentation
-- [useEffect() API](/docs/core/effect) - Side effect API
+- [use() API](/docs/core/state) - State API documentation
+- [use() API](/docs/core/effect) - Side effect API
 - [Best Practices - State Organization](/docs/guide/best-practices/state-organization)
 - [Best Practices - Performance Optimization](/docs/guide/best-practices/performance)

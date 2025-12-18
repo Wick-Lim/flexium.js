@@ -1,9 +1,9 @@
 # Lifecycle Management
 
-Flexium uses `useEffect()` for all lifecycle needs. There are no separate mount or cleanup hooks.
+Flexium uses `use()` for all lifecycle needs. There are no separate mount or cleanup hooks.
 
 ::: info
-`onMount()` and `onCleanup()` have been removed. Use `useEffect()` instead.
+`onMount()` and `onCleanup()` have been removed. Use `use()` instead.
 :::
 
 ## Import
@@ -12,9 +12,9 @@ Flexium uses `useEffect()` for all lifecycle needs. There are no separate mount 
 import { useEffect } from 'flexium/core'
 ```
 
-## Using useEffect() for Lifecycle
+## Using use() for Lifecycle
 
-`useEffect()` handles all lifecycle needs - no separate hooks required:
+`use()` handles all lifecycle needs - no separate hooks required:
 
 ### Mount + Cleanup
 
@@ -23,11 +23,11 @@ import { useEffect } from 'flexium/core'
 
 function MyComponent() {
   // Runs once on mount, cleanup on unmount
-  useEffect(() => {
+  use(({ onCleanup }) => {
     console.log('Component mounted!')
 
     // Return cleanup function
-    return () => console.log('Component unmounted!')
+    onCleanup(() => console.log('Component unmounted!'))
   })
 
   return <div>Hello</div>
@@ -44,13 +44,13 @@ import { useEffect } from 'flexium/core'
 function ChartComponent() {
   let chartInstance
 
-  useEffect(() => {
+  use(({ onCleanup }) => {
     chartInstance = new Chart(document.getElementById('chart'), {
       type: 'bar',
       data: chartData
     })
 
-    return () => chartInstance.destroy()
+    onCleanup(() => chartInstance.destroy())
   })
 
   return <canvas id="chart" />
@@ -63,9 +63,9 @@ function ChartComponent() {
 import { useState, useEffect } from 'flexium/core'
 
 function UserProfile(props) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = use(null)
 
-  useEffect(() => {
+  use(() => {
     // Fetch runs once on mount
     fetch(`/api/users/${props.id}`)
       .then(res => res.json())
@@ -82,11 +82,11 @@ function UserProfile(props) {
 import { useEffect } from 'flexium/core'
 
 function KeyboardHandler() {
-  useEffect(() => {
+  use(() => {
     const handler = (e) => console.log('Key pressed:', e.key)
     window.addEventListener('keydown', handler)
 
-    return () => window.removeEventListener('keydown', handler)
+    onCleanup(() => window.removeEventListener('keydown', handler))
   })
 
   return <div>Press any key</div>
@@ -99,10 +99,10 @@ function KeyboardHandler() {
 import { useState, useEffect } from 'flexium/core'
 
 function WebSocketComponent() {
-  const [messages, setMessages] = useState([])
-  const [userId, setUserId] = useState(1)
+  const [messages, setMessages] = use([])
+  const [userId, setUserId] = use(1)
 
-  useEffect(() => {
+  use(() => {
     // Re-creates WebSocket when userId changes
     const ws = new WebSocket(`wss://example.com/${userId}`)
 
@@ -111,7 +111,7 @@ function WebSocketComponent() {
     }
 
     // Cleanup before re-run or unmount
-    return () => ws.close()
+    onCleanup(() => ws.close())
   })
 
   return <div>{messages.map(msg => <div>{msg}</div>)}</div>
@@ -124,9 +124,9 @@ function WebSocketComponent() {
 import { useState, useEffect } from 'flexium/core'
 
 function SearchResults(props) {
-  const [results, setResults] = useState([])
+  const [results, setResults] = use([])
 
-  useEffect(() => {
+  use(() => {
     const controller = new AbortController()
 
     fetch(`/api/search?q=${props.query}`, {
@@ -136,7 +136,7 @@ function SearchResults(props) {
       .then(data => setResults(data))
 
     // Cancel request if query changes or component unmounts
-    return () => controller.abort()
+    onCleanup(() => controller.abort())
   })
 
   return <div>{results.map(item => <div>{item.title}</div>)}</div>
@@ -149,16 +149,16 @@ function SearchResults(props) {
 import { useState, useEffect } from 'flexium/core'
 
 function Countdown(props) {
-  const [time, setTime] = useState(props.seconds)
+  const [time, setTime] = use(props.seconds)
 
-  useEffect(() => {
+  use(() => {
     if (time <= 0) return
 
     const timeout = setTimeout(() => {
       setTime(t => t - 1)
     }, 1000)
 
-    return () => clearTimeout(timeout)
+    onCleanup(() => clearTimeout(timeout))
   })
 
   return <div>{time} seconds remaining</div>
@@ -175,33 +175,31 @@ function Countdown(props) {
 
 ## Best Practices
 
-1. **Use useEffect() for all lifecycle needs** - mount, cleanup, and reactive side effects
+1. **Use use() for all lifecycle needs** - mount, cleanup, and reactive side effects
 2. **Return cleanup function** - for resources that need disposal
 3. **Avoid infinite loops** - don't update tracked state inside effects without conditions
 
 ## Migration from onMount/onCleanup
 
-If you were using `onMount()` or `onCleanup()`, migrate to `useEffect()`:
+If you were using `onMount()` or `onCleanup()`, migrate to `use()`:
 
 ```tsx
 // ❌ Old way (removed)
-import { onMount, onCleanup } from 'flexium/core'
-
 onMount(() => {
   const ws = new WebSocket('...')
-  onCleanup(() => ws.close())
+  return () => ws.close()
 })
 
 // ✅ New way
 import { useEffect } from 'flexium/core'
 
-useEffect(() => {
+use(({ onCleanup }) => {
   const ws = new WebSocket('...')
-  return () => ws.close()
+  onCleanup(() => ws.close())
 })
 ```
 
 ## See Also
 
-- [useEffect()](/docs/core/effect) - Complete useEffect() documentation
-- [useState()](/docs/core/state) - Reactive state management
+- [use()](/docs/core/effect) - Complete use() documentation
+- [use()](/docs/core/state) - Reactive state management

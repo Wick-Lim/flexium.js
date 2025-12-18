@@ -30,7 +30,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an useEffect() call
+        // Check if this is an use() call
         if (
           node.callee.type !== "Identifier" ||
           node.callee.name !== "useEffect"

@@ -6,11 +6,11 @@
 
 **Simpler, Faster, Unified.**
 
-Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `useState()`.
+Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `use()`.
 
 ## Key Features
 
-- **Unified State API** - No more `useRecoil`, `useQuery` separation. Just `useState()`.
+- **Unified State API** - No more `useRecoil`, `useQuery` separation. Just `use()`.
 - **No Virtual DOM** - Direct DOM updates via Proxy-based fine-grained reactivity.
 - **Tiny Bundle** - Minimal footprint with tree-shaking support.
 - **Cross-Platform** - DOM, Canvas, Server (SSR) renderers included.
@@ -32,7 +32,7 @@ npm install
 npm run dev
 ```
 
-## The Only API You Need: `useState()`
+## The Only API You Need: `use()`
 
 Flexium unifies all state concepts into one function.
 
@@ -43,7 +43,7 @@ import { useState } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
 
   return (
     <button onclick={() => setCount(c => c + 1)}>
@@ -61,11 +61,11 @@ Just add a `key` to share state across components. Keys can be strings or arrays
 
 ```tsx
 // Define global state with array key
-const [theme, setTheme] = useState('light', { key: ['app', 'theme'] })
+const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
 function ThemeToggle() {
   // Access same state anywhere with the same key
-  const [theme, setTheme] = useState('light', { key: ['app', 'theme'] })
+  const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
   return (
     <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
@@ -81,7 +81,7 @@ Pass an async function to handle data fetching automatically.
 
 ```tsx
 function UserProfile({ id }) {
-  const [user, control] = useState(async () => {
+  const [user, control] = use(async () => {
     const res = await fetch(`/api/users/${id}`)
     return res.json()
   })
@@ -101,15 +101,15 @@ function UserProfile({ id }) {
 ### Computed/Derived State
 
 ```tsx
-const [count, setCount] = useState(1)
-const [doubled] = useState(() => count * 2, { deps: [count] })
+const [count, setCount] = use(1)
+const [doubled] = use(() => count * 2, { deps: [count] })
 ```
 
 ## Package Structure
 
 ```
 flexium
-├── /core         # Core reactivity: useState(), useEffect(), sync()
+├── /core         # Core reactivity: use(), use(), sync()
 ├── /advanced     # Advanced APIs: createContext(), useContext()
 ├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
 ├── /ref          # Ref system: useRef(), forwardRef()
@@ -171,7 +171,7 @@ import { Canvas, DrawRect, DrawCircle, DrawText } from 'flexium/canvas'
 import { useState } from 'flexium/core'
 
 function App() {
-  const [x, setX] = useState(100)
+  const [x, setX] = use(100)
 
   return (
     <Canvas width={400} height={300}>
@@ -191,7 +191,7 @@ import { Canvas, DrawRect } from 'flexium/canvas'
 import { useLoop, keyboard, Keys } from 'flexium/interactive'
 
 function Game() {
-  const [x, setX] = useState(100)
+  const [x, setX] = use(100)
   const kb = keyboard()
 
   const gameLoop = useLoop({
@@ -202,7 +202,7 @@ function Game() {
     }
   })
 
-  useEffect(() => {
+  use(() => {
     gameLoop.start()
     return () => gameLoop.stop()
   }, [])

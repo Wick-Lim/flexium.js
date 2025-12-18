@@ -1,6 +1,6 @@
 ---
 title: Forms - State-based Form Handling
-description: Build reactive forms using Flexium's useState() API. Learn about form state management, validation, and submission handling.
+description: Build reactive forms using Flexium's use() API. Learn about form state management, validation, and submission handling.
 head:
   - - meta
     - property: og:title
@@ -12,7 +12,7 @@ head:
 
 # Forms
 
-Flexium handles forms using the `useState()` API for reactive form state management. This guide shows how to build forms with validation and error handling.
+Flexium handles forms using the `use()` API for reactive form state management. This guide shows how to build forms with validation and error handling.
 
 ## Basic Usage
 
@@ -20,22 +20,22 @@ Flexium handles forms using the `useState()` API for reactive form state managem
 import { useState } from 'flexium/core'
 
 function LoginForm() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = use({
     email: '',
     password: '',
   })
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = use({
     email: '',
     password: '',
   })
 
-  const [touched, setTouched] = useState({
+  const [touched, setTouched] = use({
     email: false,
     password: false,
   })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = use(false)
 
   const validateEmail = (email: string) => {
     if (!email) return 'Email is required'
@@ -117,34 +117,34 @@ function LoginForm() {
 
 ## Form State Management
 
-Use Flexium's `useState()` API to manage form state reactively.
+Use Flexium's `use()` API to manage form state reactively.
 
 ### Form State Structure
 
 ```tsx
 // Form data
-const [formData, setFormData] = useState({
+const [formData, setFormData] = use({
   email: '',
   password: '',
   // ... more fields
 })
 
 // Validation errors
-const [errors, setErrors] = useState({
+const [errors, setErrors] = use({
   email: '',
   password: '',
   // ... matching field errors
 })
 
 // Field touched state
-const [touched, setTouched] = useState({
+const [touched, setTouched] = use({
   email: false,
   password: false,
   // ... matching fields
 })
 
 // Submission state
-const [isSubmitting, setIsSubmitting] = useState(false)
+const [isSubmitting, setIsSubmitting] = use(false)
 ```
 
 ## Validation
@@ -255,7 +255,7 @@ const validateUsername = (username: string) => {
 Perform async validation for server-side checks.
 
 ```tsx
-const [isValidating, setIsValidating] = useState(false)
+const [isValidating, setIsValidating] = use(false)
 
 const validateUsernameAsync = async (username: string) => {
   if (!username) return 'Username is required'
@@ -417,7 +417,7 @@ const resetForm = () => {
 import { useState } from 'flexium/core'
 
 function RegistrationForm() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = use({
     username: '',
     email: '',
     password: '',
@@ -425,7 +425,7 @@ function RegistrationForm() {
     age: '',
   })
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = use({
     username: '',
     email: '',
     password: '',
@@ -433,7 +433,7 @@ function RegistrationForm() {
     age: '',
   })
 
-  const [touched, setTouched] = useState({
+  const [touched, setTouched] = use({
     username: false,
     email: false,
     password: false,
@@ -441,7 +441,7 @@ function RegistrationForm() {
     age: false,
   })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = use(false)
 
   const validateUsername = (username: string) => {
     if (!username) return 'Username is required'
@@ -642,7 +642,7 @@ Handle file uploads with state management:
 
 ```tsx
 const [file, setFile] = useState<File | null>(null)
-const [fileError, setFileError] = useState('')
+const [fileError, setFileError] = use('')
 
 const validateFile = (file: File | null) => {
   if (!file) return 'Please select a file'

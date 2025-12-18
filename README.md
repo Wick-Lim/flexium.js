@@ -1,11 +1,11 @@
 # Flexium.js
 
 **Simpler, Faster, Unified.**
-Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `useState()`.
+Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `use()`.
 
 ## Key Features
 
-- **Unified State API**: No more `useRecoil`, `useQuery` separation. Just `useState()`.
+- **Unified State API**: No more `useRecoil`, `useQuery` separation. Just `use()`.
 - **Fine-Grained Reactivity**: Updates only what changed. No Virtual DOM overhead.
 - **React-Style `.map()` with Optimization**: `items.map()` works reactively with automatic DOM caching.
 - **High Performance**: Optimized Monomorphic VNodes & Keyed Reconciliation.
@@ -18,7 +18,7 @@ Flexium is a next-generation UI framework that unifies state management, async d
 npm install flexium
 ```
 
-## The Only API You Need: `useState()`
+## The Only API You Need: `use()`
 
 Flexium unifies all state concepts into one function.
 
@@ -29,7 +29,7 @@ import { useState } from 'flexium/core';
 
 function Counter() {
   // Create local state
-  const [count, setCount] = useState(0);
+  const [count, setCount] = use(0);
 
   return (
     <button onclick={() => setCount(c => c + 1)}>
@@ -45,11 +45,11 @@ Just add a `key` to share state across components.
 
 ```javascript
 // Define global state (with initial value)
-const [theme, setTheme] = useState('light', { key: 'theme' });
+const [theme, setTheme] = use('light', { key: 'theme' });
 
 function ThemeToggler() {
   // Access existing global state (initial value optional)
-  const [theme, setTheme] = useState(undefined, { key: 'theme' });
+  const [theme, setTheme] = use(undefined, { key: 'theme' });
 
   return (
     <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
@@ -66,7 +66,7 @@ Pass an async function to handle data fetching automatically.
 ```javascript
 function UserProfile({ id }) {
   // Automatically fetches data. Re-runs if dependencies change.
-  const [user, { refetch, loading, error }] = useState(async () => {
+  const [user, { refetch, loading, error }] = use(async () => {
     const res = await fetch(`/api/users/${id}`);
     return res.json();
   });
@@ -90,9 +90,9 @@ function UserProfile({ id }) {
 Pass a synchronous function to create a value that updates automatically.
 
 ```javascript
-const [count, setCount] = useState(1);
+const [count, setCount] = use(1);
 // 'double' updates whenever 'count' changes
-const [double] = useState(() => count * 2);
+const [double] = use(() => count * 2);
 
 console.log(double); // 2 - use values directly!
 ```
@@ -103,7 +103,7 @@ Use familiar `.map()` syntax with automatic optimization:
 
 ```javascript
 function TodoList() {
-  const [todos, setTodos] = useState([
+  const [todos, setTodos] = use([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build something awesome' }
   ]);
@@ -127,10 +127,10 @@ Flexium uses a signal-based reactivity system. Components run once, and only the
 ```javascript
 import { useState, useEffect } from 'flexium/core';
 
-const [count, setCount] = useState(0);
+const [count, setCount] = use(0);
 
 // Side effects run automatically when dependencies change
-useEffect(() => {
+use(() => {
   console.log('Count changed to:', count);
 });
 ```

@@ -29,7 +29,7 @@ Flexium supports the familiar React-style `.map()` syntax with **automatic optim
 import { useState } from 'flexium/core'
 
 function TodoList() {
-  const [todos] = useState([
+  const [todos] = use([
     { id: 1, text: 'Buy milk' },
     { id: 2, text: 'Walk the dog' }
   ])
@@ -59,7 +59,7 @@ In most frameworks, `items.map()` either:
 ### With Objects
 
 ```tsx
-const [users] = useState([
+const [users] = use([
   { id: 1, name: 'Alice' },
   { id: 2, name: 'Bob' }
 ])
@@ -97,7 +97,7 @@ For if/else conditions, use the ternary operator - just like React:
 import { useState } from 'flexium/core';
 
 function LoginButton() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = use(false);
 
   return (
     <div>
@@ -118,7 +118,7 @@ For conditionally showing content when a value is truthy:
 import { useState } from 'flexium/core';
 
 function UserGreeting() {
-  const [user] = useState(null);
+  const [user] = use(null);
 
   return (
     <div>
@@ -134,7 +134,7 @@ For multiple mutually exclusive conditions, use nested ternaries or a function:
 
 ```tsx
 function StatusDisplay() {
-  const [status] = useState('loading');
+  const [status] = use('loading');
 
   const renderStatus = () => {
     if (status === 'loading') return <p>Loading...</p>;
@@ -151,7 +151,7 @@ Or with nested ternaries:
 
 ```tsx
 function StatusDisplay() {
-  const [status] = useState('loading');
+  const [status] = use('loading');
 
   return (
     <div>

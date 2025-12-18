@@ -101,7 +101,7 @@ Or use pragma comments:
 import { useState } from 'flexium/core'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
   return <button onclick={() => setCount(c => c + 1)}>{count}</button>
 }
 ```

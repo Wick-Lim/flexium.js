@@ -39,8 +39,8 @@ flexium.js/
 │       │   │
 │       │   ├── core/         # Reactive system
 │       │   │   ├── reactive.ts   # Proxy reactivity
-│       │   │   ├── state.ts      # useState()
-│       │   │   ├── lifecycle.ts  # useEffect(), sync()
+│       │   │   ├── state.ts      # use()
+│       │   │   ├── lifecycle.ts  # use(), sync()
 │       │   │   ├── hook.ts       # hook()
 │       │   │   ├── context.ts    # Context implementation
 │       │   │   └── devtools.ts   # DevTools integration
@@ -101,7 +101,7 @@ git checkout -b fix/issue-description
 Follow existing patterns. Key principles:
 
 - **Keep it simple** - No over-engineering
-- **One API** - Prefer extending `useState()` over new APIs
+- **One API** - Prefer extending `use()` over new APIs
 - **No magic** - Explicit behavior, easy to trace
 - **Performance** - Consider reactive tracking cost
 
@@ -115,7 +115,7 @@ import { useState } from '../core/state'
 
 describe('useState', () => {
   it('should hold a primitive value', () => {
-    const [count, setCount] = useState(0)
+    const [count, setCount] = use(0)
     expect(count).toBe(0)
 
     setCount(5)
@@ -123,7 +123,7 @@ describe('useState', () => {
   })
 
   it('should support updater function', () => {
-    const [count, setCount] = useState(10)
+    const [count, setCount] = use(10)
     setCount(prev => prev + 1)
     expect(count).toBe(11)
   })
@@ -317,7 +317,7 @@ Context API lives here, separate from core.
 
 ### Maybe (Discuss First)
 
-- New APIs (we prefer extending `useState()`)
+- New APIs (we prefer extending `use()`)
 - New renderers (Native, WebGL, etc.)
 - Breaking changes
 
@@ -335,7 +335,7 @@ Context API lives here, separate from core.
 Clear and descriptive:
 - `feat: add beforeEnter guard to Router`
 - `fix: resolve memory leak in effect cleanup`
-- `docs: clarify useState() resource pattern`
+- `docs: clarify use() resource pattern`
 
 ### Description
 
@@ -387,7 +387,7 @@ describe('useState + render', () => {
     const container = document.createElement('div')
 
     function App() {
-      const [count, setCount] = useState(0)
+      const [count, setCount] = use(0)
       return <div>{count}</div>
     }
 

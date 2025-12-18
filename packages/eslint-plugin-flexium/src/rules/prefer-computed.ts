@@ -9,7 +9,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     type: "suggestion",
     docs: {
       description:
-        "Suggest using computed() for derived state instead of useEffect()",
+        "Suggest using computed() for derived state instead of use()",
     },
     messages: {
       preferComputed:
@@ -51,7 +51,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       },
 
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an useEffect() call
+        // Check if this is an use() call
         if (
           node.callee.type !== "Identifier" ||
           node.callee.name !== "useEffect"

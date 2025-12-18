@@ -70,9 +70,9 @@ function Game() {
 function DrawingApp() {
   const canvasRef = useRef(null)
   const m = mouse()
-  const [isDrawing, setIsDrawing] = useState(false)
+  const [isDrawing, setIsDrawing] = use(false)
 
-  useEffect(() => {
+  use(() => {
     if (m.isLeftPressed()) {
       const ctx = canvasRef.current.getContext('2d')
       ctx.lineTo(m.position.x, m.position.y)
@@ -149,10 +149,10 @@ function CanvasGame() {
 ```tsx
 function Draggable(props) {
   const m = mouse()
-  const [isDragging, setIsDragging] = useState(false)
-  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = use(false)
+  const [offset, setOffset] = use({ x: 0, y: 0 })
 
-  useEffect(() => {
+  use(() => {
     if (!m.isLeftPressed()) {
       setIsDragging(false)
     }
@@ -186,9 +186,9 @@ function Draggable(props) {
 ```tsx
 function ContextMenuArea() {
   const m = mouse()
-  const [menuPos, setMenuPos] = useState(null)
+  const [menuPos, setMenuPos] = use(null)
 
-  useEffect(() => {
+  use(() => {
     if (m.isRightPressed()) {
       setMenuPos({ x: m.position.x, y: m.position.y })
     }

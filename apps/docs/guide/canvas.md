@@ -46,10 +46,10 @@ import { useState, useEffect } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function AnimatedCircle() {
-  const [x, setX] = useState(50)
+  const [x, setX] = use(50)
 
   // Animate
-  useEffect(() => {
+  use(() => {
     const interval = setInterval(() => {
       setX(prev => (prev + 1) % 400)
     }, 16)
@@ -171,8 +171,8 @@ import { useState } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function InteractiveCanvas() {
-  const [mouseX, setMouseX] = useState(200)
-  const [mouseY, setMouseY] = useState(200)
+  const [mouseX, setMouseX] = use(200)
+  const [mouseY, setMouseY] = use(200)
 
   return (
     <div
@@ -197,8 +197,8 @@ function InteractiveCanvas() {
 Canvas updates are automatically synchronized and debounced with `requestAnimationFrame`:
 
 ```tsx
-const [x, setX] = useState(0)
-const [y, setY] = useState(0)
+const [x, setX] = use(0)
+const [y, setY] = use(0)
 
 // Both changes trigger only ONE canvas redraw
 setX(100)
@@ -231,10 +231,10 @@ import { useState, useEffect } from 'flexium/core'
 import { Canvas, DrawLine, DrawCircle, DrawText } from 'flexium/canvas'
 
 function RealtimeChart() {
-  const [dataPoints, setDataPoints] = useState([50, 60, 55, 70, 65, 80])
+  const [dataPoints, setDataPoints] = use([50, 60, 55, 70, 65, 80])
 
   // Simulate real-time data
-  useEffect(() => {
+  use(() => {
     const interval = setInterval(() => {
       const newPoint = 50 + Math.random() * 50
       setDataPoints(prev => [...prev.slice(1), newPoint])

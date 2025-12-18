@@ -123,7 +123,7 @@ function ProtectedPage() {
   const { navigate } = useRouter()
   const { user } = context(AuthContext)
 
-  useEffect(() => {
+  use(() => {
     if (!user) {
       navigate('/login', { replace: true })
     }

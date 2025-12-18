@@ -33,7 +33,7 @@ hero:
 features:
   - icon: ⚡
     title: Unified State API
-    details: One function for everything. useState() handles local, global, and async state effortlessly.
+    details: One function for everything. use() handles local, global, and async state effortlessly.
   - icon: 🎯
     title: Fine-Grained Reactivity
     details: Updates only what changed without Virtual DOM overhead. Optimized for performance.
@@ -57,7 +57,7 @@ features:
 import { useState } from 'flexium/core'
 
 function Counter() {
-  const [count] = useState(0)
+  const [count] = use(0)
 
   return (
     <button onclick={() => count.set(c => c + 1)}>

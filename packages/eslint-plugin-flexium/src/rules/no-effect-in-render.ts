@@ -9,18 +9,18 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
   meta: {
     type: "problem",
     docs: {
-      description: "Prevent calling useEffect() in component render body",
+      description: "Prevent calling use() in component render body",
     },
     messages: {
       effectInRender:
-        "useEffect() should not be called during component render. Effects should be created at module level or inside other effects/lifecycle hooks.",
+        "use() should not be called during component render. Effects should be created at module level or inside other effects/lifecycle hooks.",
     },
     schema: [],
   },
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an useEffect() call
+        // Check if this is an use() call
         if (
           node.callee.type !== "Identifier" ||
           node.callee.name !== "useEffect"
@@ -36,7 +36,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
 
           // If we find a function component, check if effect is in its body
           if (isFunctionComponent(ancestor)) {
-            // Check if useEffect() is called directly in the component body
+            // Check if use() is called directly in the component body
             // (not inside another function or effect)
             let isDirectlyInComponent = true;
 

@@ -34,9 +34,9 @@ function RegistrationForm() {
   })
 
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = use(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
+  const [isCheckingEmail, setIsCheckingEmail] = use(false)
 
   // Real-time validation
   const [errors, setErrors] = useState<FormErrors>(() => {
@@ -231,7 +231,7 @@ function RegistrationForm() {
 
 ### 1. Real-time Validation
 
-Validation runs automatically whenever form fields change. Implemented using `useState(() => ...)` as computed state.
+Validation runs automatically whenever form fields change. Implemented using `use(() => ...)` as computed state.
 
 ### 2. Touch Tracking
 
@@ -283,5 +283,5 @@ button:disabled {
 
 ## Related Documentation
 
-- [useState() API](/docs/core/state) - State API documentation
+- [use() API](/docs/core/state) - State API documentation
 - [Best Practices - Common Patterns](/docs/guide/best-practices/patterns) - Form handling patterns

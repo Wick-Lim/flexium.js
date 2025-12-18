@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { useRouter, Link } from 'flexium/router'
 import { loadItem, useItem } from '../store'
 
@@ -6,13 +6,11 @@ function Comment(props: { id: number }) {
     const [comment] = useItem(props.id);
 
     // Load comment data if missing
-    // Load comment data if missing
-    if (!comment) {
-        // Use effect to load data
-        useEffect(() => {
+    use(() => {
+        if (!comment) {
             loadItem(props.id);
-        }, [props.id]);
-    }
+        }
+    }, [props.id, comment]);
 
     // Use proxy directly - no function wrapper needed
     const c = comment;
@@ -38,13 +36,13 @@ function Comment(props: { id: number }) {
 
 export default function Item(props: { params?: { id?: string } } = {}) {
     const r = useRouter()
-    const [itemId] = useState(() => {
+    const [itemId] = use(() => {
         const idStr = r.params.id || props.params?.id;
         return idStr ? parseInt(idStr) : undefined
     })
 
     // Load item data when itemId changes
-    useEffect(() => {
+    use(() => {
         if (itemId) {
             loadItem(itemId)
         }

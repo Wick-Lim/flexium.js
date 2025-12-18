@@ -14,22 +14,22 @@ Frequently asked questions and answers.
 
 ```tsx
 // ❌ Wrong approach - outside reactive context
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 console.log(count)  // Only outputs initial value, doesn't track updates
 
-// ✅ Correct approach 1: Inside useEffect()
-useEffect(() => {
+// ✅ Correct approach 1: Inside use()
+use(() => {
   console.log(count)  // Tracks updates
 })
 
 // ✅ Correct approach 2: Inside JSX
 function Counter() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
   return <div>{count}</div>  // Automatically tracks updates
 }
 ```
 
-**See**: Check [useEffect() documentation](/docs/core/effect).
+**See**: Check [use() documentation](/docs/core/effect).
 
 ---
 
@@ -39,13 +39,13 @@ function Counter() {
 
 ```tsx
 // ❌ Bad example - creates new object every time
-const [data] = useState(() => ({
+const [data] = use(() => ({
   items: items,
   timestamp: Date.now()  // Different value each time
 }))
 
 // ✅ Good example - stable dependencies
-const [data] = useState(() => ({
+const [data] = use(() => ({
   items: items,
   timestamp: 1234567890  // Fixed value
 }))
@@ -74,31 +74,31 @@ sync(() => {
 ```tsx
 // ✅ Global state examples
 // - User authentication
-const [user] = useState(null, { key: ['auth', 'user'] })
+const [user] = use(null, { key: ['auth', 'user'] })
 // In another component
-const [theme, setTheme] = useState('light', { key: ['app', 'theme'] })
+const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
 // - Server data caching
-const [posts] = useState(async () => fetch('/api/posts'), {
+const [posts] = use(async () => fetch('/api/posts'), {
   key: ['posts', 'all']
 })
 
 // ❌ When local state is sufficient
 // - State only used within component
-const [isOpen, setIsOpen] = useState(false)  // No key needed
+const [isOpen, setIsOpen] = use(false)  // No key needed
 ```
 
-**See**: Check [useState() documentation - Global State](/docs/core/state#global-state).
+**See**: Check [use() documentation - Global State](/docs/core/state#global-state).
 
 ---
 
 ### Q: Memory leak occurs
 
-**A**: Return cleanup functions from `useEffect()` or delete unused global state.
+**A**: Return cleanup functions from `use()` or delete unused global state.
 
 ```tsx
 // ✅ Return cleanup function
-useEffect(() => {
+use(() => {
   const interval = setInterval(() => {
     console.log('tick')
   }, 1000)
@@ -111,25 +111,25 @@ import { useState } from 'flexium/core'
 useState.delete('old:key')  // Delete unused key
 ```
 
-**See**: Check [useEffect() documentation - With Cleanup](/docs/core/effect#with-cleanup).
+**See**: Check [use() documentation - With Cleanup](/docs/core/effect#with-cleanup).
 
 ---
 
 ## Effects and Side Effects
 
-### Q: useEffect() gets stuck in infinite loop
+### Q: use() gets stuck in infinite loop
 
 **A**: Don't update tracked state inside useEffect.
 
 ```tsx
 // ❌ Infinite loop occurs
-const [count, setCount] = useState(0)
-useEffect(() => {
+const [count, setCount] = use(0)
+use(() => {
   setCount(count + 1)  // count changes → effect re-runs → count changes → ...
 })
 
 // ✅ Correct approach: conditional update
-useEffect(() => {
+use(() => {
   if (count < 10) {
     setCount(count + 1)
   }
@@ -137,7 +137,7 @@ useEffect(() => {
 
 // ✅ Or: use untrack()
 import { untrack } from 'flexium/core'
-useEffect(() => {
+use(() => {
   untrack(() => {
     setCount(count + 1)  // Not tracked
   })
@@ -146,20 +146,20 @@ useEffect(() => {
 
 ---
 
-### Q: useEffect() doesn't run
+### Q: use() doesn't run
 
 **A**: State must be read inside useEffect for dependencies to be tracked.
 
 ```tsx
 // ❌ Dependencies not tracked
-const [count, setCount] = useState(0)
-useEffect(() => {
+const [count, setCount] = use(0)
+use(() => {
   console.log('Hello')  // Doesn't read count
 })
 setCount(1)  // Effect doesn't re-run
 
 // ✅ Dependencies tracked
-useEffect(() => {
+use(() => {
   console.log('Count:', count)  // Reads count
 })
 setCount(1)  // Effect re-runs
@@ -171,10 +171,10 @@ setCount(1)  // Effect re-runs
 
 ### Q: How do I check async state status?
 
-**A**: The third value returned by `useState()` is the status.
+**A**: The third value returned by `use()` is the status.
 
 ```tsx
-const [data, refetch, status, error] = useState(async () => {
+const [data, refetch, status, error] = use(async () => {
   const res = await fetch('/api/data')
   return res.json()
 })
@@ -189,7 +189,7 @@ if (String(status) === 'error') {
 }
 ```
 
-**See**: Check [useState() documentation - Async State](/docs/core/state#async-state).
+**See**: Check [use() documentation - Async State](/docs/core/state#async-state).
 
 ---
 
@@ -198,7 +198,7 @@ if (String(status) === 'error') {
 **A**: Use the `refetch` function.
 
 ```tsx
-const [users, refetch, status] = useState(async () => {
+const [users, refetch, status] = use(async () => {
   return fetch('/api/users').then(r => r.json())
 })
 
@@ -241,7 +241,7 @@ const [form, setForm] = useState<FormData>({
 ```tsx
 import { isStateValue } from 'flexium/core'
 
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
 if (isStateValue(count)) {
   // count is StateValue<number>
@@ -343,7 +343,7 @@ function Component() {
 
 ```tsx
 // ❌ Access before initialization
-const [user] = useState(null)
+const [user] = use(null)
 console.log(user.name)  // Error: user is null
 
 // ✅ Safe access
@@ -359,19 +359,19 @@ console.log(user?.name)
 
 ### Q: Component doesn't re-render
 
-**A**: State must be read inside JSX or inside `useEffect()`.
+**A**: State must be read inside JSX or inside `use()`.
 
 ```tsx
 // ❌ Doesn't re-render
 function Component() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
   const displayCount = count  // Read outside component
   return <div>{displayCount}</div>
 }
 
 // ✅ Re-renders
 function Component() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
   return <div>{count}</div>  // Read inside JSX
 }
 ```

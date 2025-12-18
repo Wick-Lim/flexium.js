@@ -441,7 +441,7 @@ function OrderStatus() {
   const params = r.params()
   const orderId = params.id
 
-  useEffect(() => {
+  use(() => {
     const checkStatus = async () => {
       const order = await fetchOrder(orderId)
 
@@ -473,9 +473,9 @@ import { useRouter } from 'flexium/router'
 function TransitionWrapper({ children }) {
   const r = useRouter()
   const location = r.location
-  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isTransitioning, setIsTransitioning] = use(false)
 
-  useEffect(() => {
+  use(() => {
     // Trigger transition on location change
     setIsTransitioning(true)
 
@@ -504,10 +504,10 @@ function TransitionWrapper({ children }) {
 function PageTransition({ children }) {
   const r = useRouter()
   const location = r.location
-  const [currentPath, setCurrentPath] = useState('')
-  const [isAnimating, setIsAnimating] = useState(false)
+  const [currentPath, setCurrentPath] = use('')
+  const [isAnimating, setIsAnimating] = use(false)
 
-  useEffect(() => {
+  use(() => {
     const newPath = location.pathname
 
     if (currentPath !== newPath) {
@@ -895,4 +895,4 @@ function App() {
 
 - [Router API Reference](/reference/router) - Complete API documentation
 - [State Management](/guide/state) - Managing application state
-- [Global State](/guide/context) - Sharing state globally with useState() key
+- [Global State](/guide/context) - Sharing state globally with use() key

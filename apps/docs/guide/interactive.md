@@ -268,7 +268,7 @@ Access the reactive signal for advanced use cases:
 const kb = useKeyboard()
 
 // Watch for any key state changes
-useEffect(() => {
+use(() => {
   const pressedKeys = kb.keys
   console.log('Pressed keys:', Array.from(pressedKeys))
 })
@@ -377,7 +377,7 @@ The position is relative to the target element (or canvas if specified):
 const m = useMouse({ canvas: myCanvas })
 
 // Position is in canvas coordinates
-useEffect(() => {
+use(() => {
   const pos = m.position
   console.log(`Mouse at: ${pos.x}, ${pos.y}`)
 })
@@ -484,7 +484,7 @@ import { useState } from 'flexium/core'
 
 function TopDownShooter() {
   // Game state
-  const [score, setScore] = useState(0)
+  const [score, setScore] = use(0)
   const player = { x: 400, y: 300, radius: 20, speed: 250 }
   const bullets: Array<{ x: number; y: number; vx: number; vy: number }> = []
   const enemies: Array<{ x: number; y: number; radius: 15 }> = []
@@ -789,7 +789,7 @@ import { Canvas, Circle, Rect } from 'flexium/canvas'
 import { useState } from 'flexium/core'
 
 function GameExample() {
-  const [entities, setEntities] = useState([
+  const [entities, setEntities] = use([
     { x: 100, y: 100, color: 'red' },
     { x: 200, y: 150, color: 'blue' }
   ])

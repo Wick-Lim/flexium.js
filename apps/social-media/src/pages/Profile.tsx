@@ -1,16 +1,16 @@
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { useRouter } from 'flexium/router'
 import { usePosts, getUserById, type User } from '../store'
 
 export default function Profile() {
   const r = useRouter()
-  const [userId] = useState(() => parseInt(r.params.id))
-  const [user] = useState<User | null>(() => {
+  const [userId] = use(() => parseInt(r.params.id))
+  const [user] = use<User | null>(() => {
     const found = getUserById(userId)
     return found || null
   })
   const [posts] = usePosts()
-  const [userPosts] = useState(() => posts.filter(p => p.author.id === userId))
+  const [userPosts] = use(() => posts.filter((p: any) => p.author.id === userId))
 
   if (!user) {
     return (

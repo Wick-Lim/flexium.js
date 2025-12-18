@@ -42,7 +42,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
             }
           }
 
-          // useState() returns [getter, setter]
+          // use() returns [getter, setter]
           if (calleeName === "useState") {
             if (
               node.id.type === "ArrayPattern" &&

@@ -49,7 +49,7 @@ For dynamic, reactive styling, pass a function that returns a style object. The 
 import { useState } from 'flexium/core'
 
 function ThemedButton() {
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = use(false)
 
   return (
     <button
@@ -76,8 +76,8 @@ The style function re-evaluates automatically when any referenced signal changes
 Mix static and reactive properties within the same style object:
 
 ```tsx
-const [size, setSize] = useState(16)
-const [color, setColor] = useState('#333')
+const [size, setSize] = use(16)
+const [color, setColor] = use('#333')
 
 <div style={{
   fontSize: size + 'px',     // Reactive - coercion works in concatenation
@@ -97,7 +97,7 @@ Use computed values for derived styles:
 import { useState } from 'flexium/core'
 
 function ProgressBar() {
-  const [progress, setProgress] = useState(0)
+  const [progress, setProgress] = use(0)
 
   return (
     <div style={{
@@ -136,8 +136,8 @@ Use the `class` attribute (not `className`) to apply CSS classes.
 Use template literals or helper functions for conditional classes:
 
 ```tsx
-const [isActive, setIsActive] = useState(false)
-const [isPrimary, setIsPrimary] = useState(true)
+const [isActive, setIsActive] = use(false)
+const [isPrimary, setIsPrimary] = use(true)
 
 // Using template literal
 <button class={`btn ${isActive ? 'active' : ''} ${isPrimary ? 'primary' : 'secondary'}`}>
@@ -218,7 +218,7 @@ function Button() {
 import styles from './App.module.css'
 
 function App() {
-  const [isActive, setIsActive] = useState(false)
+  const [isActive, setIsActive] = use(false)
 
   return (
     <div class={() => `${styles.container} ${isActive ? styles.active : ''}`}>
@@ -270,7 +270,7 @@ import { useState, useEffect } from 'flexium/core'
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
-  useEffect(() => {
+  use(() => {
     const root = document.documentElement
     if (String(theme) === 'dark') {
       root.style.setProperty('--background', '#1a1a1a')
@@ -331,7 +331,7 @@ function StatusIndicator() {
 Combine state-driven styles with CSS transitions for smooth animations:
 
 ```tsx
-const [isExpanded, setIsExpanded] = useState(false)
+const [isExpanded, setIsExpanded] = use(false)
 
 <div style={() => ({
   maxHeight: isExpanded ? '500px' : '0',
@@ -346,9 +346,9 @@ const [isExpanded, setIsExpanded] = useState(false)
 
 ```tsx
 function Card() {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isSelected, setIsSelected] = useState(false)
-  const [isDisabled, setIsDisabled] = useState(false)
+  const [isHovered, setIsHovered] = use(false)
+  const [isSelected, setIsSelected] = use(false)
+  const [isDisabled, setIsDisabled] = use(false)
 
   return (
     <div
@@ -410,9 +410,9 @@ Use matchMedia API with signals for JavaScript-driven responsive behavior:
 import { useState, useEffect } from 'flexium/core'
 
 function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false)
+  const [matches, setMatches] = use(false)
 
-  useEffect(() => {
+  use(() => {
     const mediaQuery = window.matchMedia(query)
     setMatches(mediaQuery.matches)
 
@@ -549,12 +549,12 @@ const darkColors = {
   secondary: '#2a2a2a'
 }
 
-const [colors, setColors] = useState(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
+const [colors, setColors] = use(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
 const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
 function ThemedButton() {
-  const [theme, setTheme2] = useState('light', { key: 'app:theme' })
-  const [colors, setColors2] = useState(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
+  const [theme, setTheme2] = use('light', { key: 'app:theme' })
+  const [colors, setColors2] = use(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
 
   return (
     <button style={() => ({
@@ -584,7 +584,7 @@ function useSystemTheme() {
     return 'light'
   })
 
-  useEffect(() => {
+  use(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = (e: MediaQueryListEvent) => {
       setTheme(e.matches ? 'dark' : 'light')
@@ -690,7 +690,7 @@ function mergeStyles(...styles: (StyleObject | undefined)[]): StyleObject {
 }
 
 function withHover(baseStyle: StyleObject, hoverStyle: StyleObject) {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = use(false)
 
   return {
     style: () => isHovered ? mergeStyles(baseStyle, hoverStyle) : baseStyle,
@@ -717,9 +717,9 @@ function InteractiveCard() {
 
 ```tsx
 function InteractiveButton() {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
-  const [isPressed, setIsPressed] = useState(false)
+  const [isHovered, setIsHovered] = use(false)
+  const [isFocused, setIsFocused] = use(false)
+  const [isPressed, setIsPressed] = use(false)
 
   return (
     <button
@@ -830,7 +830,7 @@ Use in components:
 
 ```tsx
 function AnimatedCard() {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = use(false)
 
   return (
     <>
@@ -854,7 +854,7 @@ function AnimatedCard() {
 
 ```tsx
 function ExpandablePanel() {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = use(false)
 
   return (
     <div>
@@ -928,9 +928,9 @@ Group multiple style changes together:
 ```tsx
 import { sync } from 'flexium/core'
 
-const [color, setColor] = useState('#333')
-const [size, setSize] = useState(16)
-const [weight, setWeight] = useState(400)
+const [color, setColor] = use('#333')
+const [size, setSize] = use(16)
+const [weight, setWeight] = use(400)
 
 // Bad: Multiple separate updates
 function updateTheme() {

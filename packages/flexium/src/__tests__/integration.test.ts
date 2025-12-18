@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f, Portal, Suspense, ErrorBoundary } from '../dom'
 import { use, sync, useRef } from '../core'
-import { createContext, useContext } from '../advanced'
+import { createContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -131,12 +131,12 @@ describe('Context + State + Components', () => {
     const ThemeCtx = createContext<'light' | 'dark'>('light')
 
     function ThemeToggle() {
-      const theme = useContext(ThemeCtx)
+      const [theme] = use(ThemeCtx)
       return f('span', { 'data-testid': 'theme' }, `Current: ${theme}`)
     }
 
     function ThemedButton({ onClick }: { onClick: () => void }) {
-      const theme = useContext(ThemeCtx)
+      const [theme] = use(ThemeCtx)
       return f('button', {
         'data-testid': 'toggle',
         class: theme === 'dark' ? 'dark-btn' : 'light-btn',
@@ -186,15 +186,15 @@ describe('Context + State + Components', () => {
     })
 
     function UserDisplay() {
-      const { user } = useContext(AuthCtx)
-      if (!user) {
+      const [ctx] = use(AuthCtx)
+      if (!ctx.user) {
         return f('span', { 'data-testid': 'guest' }, 'Guest')
       }
-      return f('span', { 'data-testid': 'user' }, `Hello, ${user.name}`)
+      return f('span', { 'data-testid': 'user' }, `Hello, ${ctx.user.name}`)
     }
 
     function LoginButton() {
-      const { user, login, logout } = useContext(AuthCtx)
+      const [{ user, login, logout }] = use(AuthCtx)
 
       if (user) {
         return f('button', { 'data-testid': 'logout', onclick: logout }, 'Logout')

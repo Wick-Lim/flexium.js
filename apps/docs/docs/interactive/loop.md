@@ -67,7 +67,7 @@ function Game() {
     }
   })
 
-  useEffect(() => {
+  use(() => {
     gameLoop.start()
     return () => gameLoop.stop()
   })
@@ -133,7 +133,7 @@ const gameLoop = useLoop({
 
 ```tsx
 function PausableGame() {
-  const [paused, setPaused] = useState(false)
+  const [paused, setPaused] = use(false)
   const kb = keyboard()
 
   const gameLoop = useLoop({
@@ -143,7 +143,7 @@ function PausableGame() {
     }
   })
 
-  useEffect(() => {
+  use(() => {
     if (kb.isJustPressed(Keys.Escape)) {
       setPaused(p => !p)
     }
@@ -162,7 +162,7 @@ function PausableGame() {
 
 ```tsx
 function FPSCounter() {
-  const [fps, setFps] = useState(0)
+  const [fps, setFps] = use(0)
   let frameCount = 0
   let lastTime = performance.now()
 
@@ -179,7 +179,7 @@ function FPSCounter() {
     }
   })
 
-  useEffect(() => {
+  use(() => {
     gameLoop.start()
     return () => gameLoop.stop()
   })
@@ -191,7 +191,7 @@ function FPSCounter() {
 ### State Machine
 
 ```tsx
-const [gameState, setGameState] = useState('menu')
+const [gameState, setGameState] = use('menu')
 
 const gameLoop = useLoop({
   onUpdate: (delta) => {

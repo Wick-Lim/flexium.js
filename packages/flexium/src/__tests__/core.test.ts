@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, f } from '../dom'
 import { use, sync, useRef } from '../core'
-import { createContext, useContext } from '../advanced'
+import { createContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -320,7 +320,7 @@ describe('useRef()', () => {
   })
 })
 
-describe('createContext() & useContext()', () => {
+describe('createContext() & use(Context)', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -336,7 +336,7 @@ describe('createContext() & useContext()', () => {
     const ThemeCtx = createContext('light')
 
     function ThemedButton() {
-      const theme = useContext(ThemeCtx)
+      const [theme] = use(ThemeCtx)
       return f('button', { 'data-testid': 'btn' }, `Theme: ${theme}`)
     }
 
@@ -354,7 +354,7 @@ describe('createContext() & useContext()', () => {
     const CountCtx = createContext(100)
 
     function Display() {
-      const count = useContext(CountCtx)
+      const [count] = use(CountCtx)
       return f('span', { 'data-testid': 'count' }, String(count))
     }
 
@@ -366,7 +366,7 @@ describe('createContext() & useContext()', () => {
     const LevelCtx = createContext(0)
 
     function ShowLevel() {
-      const level = useContext(LevelCtx)
+      const [level] = use(LevelCtx)
       return f('span', { 'data-testid': 'level' }, String(level))
     }
 
@@ -388,7 +388,7 @@ describe('createContext() & useContext()', () => {
     const UserCtx = createContext({ name: 'Guest' })
 
     function Greeting() {
-      const user = useContext(UserCtx)
+      const [user] = use(UserCtx)
       return f('span', { 'data-testid': 'greeting' }, `Hello, ${user.name}`)
     }
 

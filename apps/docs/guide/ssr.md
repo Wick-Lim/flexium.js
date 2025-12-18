@@ -162,12 +162,12 @@ Hydration walks the existing DOM tree and:
 
 1. **Validates Structure**: Ensures DOM matches the expected component tree
 2. **Attaches Events**: Adds event listeners from `onClick`, `onInput`, etc.
-3. **Sets Up Reactivity**: Creates `useEffect()` bindings for signals
+3. **Sets Up Reactivity**: Creates `use()` bindings for signals
 4. **Preserves DOM**: Reuses existing nodes instead of recreating them
 
 ```tsx
 function Counter() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
 
   return (
     <div>
@@ -240,10 +240,10 @@ During hydration, signals become fully reactive:
 
 ```tsx
 function Timer() {
-  const [seconds, setSeconds] = useState(0)
+  const [seconds, setSeconds] = use(0)
 
   // Effect only runs on the client after hydration
-  useEffect(() => {
+  use(() => {
     const interval = setInterval(() => {
       setSeconds(s => s + 1)
     }, 1000)
@@ -301,7 +301,7 @@ my-app/
 import { useState } from 'flexium/core'
 
 export default function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
 
   return (
     <div>
@@ -448,10 +448,10 @@ Server renders `10:30:15`, client hydrates at `10:30:16` - mismatch!
 
 ```tsx
 function Clock() {
-  const [time, setTime] = useState('')
+  const [time, setTime] = use('')
 
   // Only runs on client after hydration
-  useEffect(() => {
+  use(() => {
     setTime(new Date().toLocaleTimeString())
     const interval = setInterval(() => {
       setTime(new Date().toLocaleTimeString())
@@ -467,9 +467,9 @@ function Clock() {
 
 ```tsx
 function BrowserOnly({ children }) {
-  const [isBrowser, setIsBrowser] = useState(false)
+  const [isBrowser, setIsBrowser] = use(false)
 
-  useEffect(() => {
+  use(() => {
     setIsBrowser(true)
   })
 
@@ -504,10 +504,10 @@ Avoid complex objects that can't be JSON-serialized:
 
 ```tsx
 // GOOD
-const [user] = useState({ name: 'John', id: 123 })
+const [user] = use({ name: 'John', id: 123 })
 
 // BAD (functions don't serialize)
-const [user] = useState({
+const [user] = use({
   name: 'John',
   greet: () => 'Hello'
 })
@@ -519,10 +519,10 @@ Side effects should only run on the client:
 
 ```tsx
 function Component() {
-  const [data, setData] = useState(null)
+  const [data, setData] = use(null)
 
   // Runs only on client
-  useEffect(() => {
+  use(() => {
     fetch('/api/data')
       .then(res => res.json())
       .then(d => setData(d))
@@ -542,9 +542,9 @@ function Component() {
   // const width = window.innerWidth
 
   // GOOD: Check environment first
-  const [width, setWidth] = useState(0)
+  const [width, setWidth] = use(0)
 
-  useEffect(() => {
+  use(() => {
     if (typeof window !== 'undefined') {
       setWidth(window.innerWidth)
     }
@@ -566,7 +566,7 @@ export function setupAnalytics() {
 
 // Component.tsx
 function Component() {
-  useEffect(async () => {
+  use(async () => {
     if (typeof window !== 'undefined') {
       const { setupAnalytics } = await import('./client-utils')
       setupAnalytics()
@@ -591,7 +591,7 @@ const script = `window.__INITIAL_DATA__ = ${JSON.stringify(initialData)}`
 
 // Client
 function App({ initialData }) {
-  const [data] = useState(
+  const [data] = use(
     typeof window !== 'undefined'
       ? window.__INITIAL_DATA__
       : initialData
@@ -638,12 +638,12 @@ Start with SSR for fast initial load, then enhance with client-side features:
 
 ```tsx
 function SearchBox() {
-  const [query, setQuery] = useState('')
-  const [suggestions, setSuggestions] = useState([])
+  const [query, setQuery] = use('')
+  const [suggestions, setSuggestions] = use([])
 
   // Server: Renders empty search box
   // Client: Adds autocomplete
-  useEffect(() => {
+  use(() => {
     if (query.length > 2) {  // query works directly in useEffect (both query() and query work)
       fetchSuggestions(query).then(s => setSuggestions(s))
     }

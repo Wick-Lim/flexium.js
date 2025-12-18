@@ -64,7 +64,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
         return true;
       }
 
-      // Check setter call from useState() (e.g., setCount(5))
+      // Check setter call from use() (e.g., setCount(5))
       if (
         node.type === "CallExpression" &&
         node.callee.type === "Identifier" &&

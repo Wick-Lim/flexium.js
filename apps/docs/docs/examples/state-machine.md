@@ -91,7 +91,7 @@ type FormState =
 
 function ComplexForm() {
   const [formState, setFormState] = useState<FormState>({ type: 'idle' })
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = use({
     email: '',
     password: ''
   })
@@ -205,8 +205,8 @@ type GameState =
 
 function Game() {
   const [gameState, setGameState] = useState<GameState>({ type: 'menu' })
-  const [score, setScore] = useState(0)
-  const [level, setLevel] = useState(1)
+  const [score, setScore] = use(0)
+  const [level, setLevel] = use(1)
   
   const startGame = () => {
     // menu -> playing (guard: always allowed)
@@ -390,7 +390,7 @@ export function createStateMachine<TState, TAction>(
   initialState: TState,
   reducer: (state: TState, action: TAction) => TState
 ) {
-  const [machineState, setMachineState] = useState(initialState)
+  const [machineState, setMachineState] = use(initialState)
 
   const dispatch = (action: TAction) => {
     setMachineState(reducer(machineState, action))
@@ -439,5 +439,5 @@ function Counter() {
 
 ## Related Documentation
 
-- [useState() API](/docs/core/state) - State API documentation
+- [use() API](/docs/core/state) - State API documentation
 - [Best Practices - Common Patterns](/docs/guide/best-practices/patterns) - State machine patterns

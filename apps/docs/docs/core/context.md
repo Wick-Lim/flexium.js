@@ -1,14 +1,14 @@
 # Context API
 
 ::: warning Deprecated
-The Context API is deprecated. Use `useState()` with `key` option instead for sharing state across components.
+The Context API is deprecated. Use `use()` with `key` option instead for sharing state across components.
 
-Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `useState()` with keys for global state sharing.
+Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `use()` with keys for global state sharing.
 :::
 
-## Recommended: Use useState() with key
+## Recommended: Use use() with key
 
-Instead of Context API, use `useState()` with a `key` option:
+Instead of Context API, use `use()` with a `key` option:
 
 ```tsx
 import { useState } from 'flexium/core'
@@ -18,7 +18,7 @@ const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
 
 // In any component
 function ThemeToggle() {
-  const [theme] = useState('light', { key: 'app:theme' })
+  const [theme] = use('light', [], { key: 'app:theme' })
 
   return (
     <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
@@ -39,7 +39,7 @@ const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
 
 // In any component
 function ThemeToggle() {
-  const [theme] = useState('light', { key: 'app:theme' })
+  const [theme] = use('light', [], { key: 'app:theme' })
 
   return (
     <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
@@ -69,25 +69,25 @@ function Header() {
 import { useState } from 'flexium/core'
 
 // Theme state
-const [theme] = useState('light', { key: 'app:theme' })
+const [theme] = use('light', [], { key: 'app:theme' })
 
 // Auth state
-const [user] = useState(null, { key: 'app:auth:user' })
+const [user] = use(null, [], { key: 'app:auth:user' })
 
 // Cart state
-const [items] = useState([], { key: 'app:cart:items' })
+const [items] = use([], [], { key: 'app:cart:items' })
 
 // Use in any component
 function Dashboard() {
-  const [theme] = useState('light', { key: 'app:theme' })
-  const [user] = useState(null, { key: 'app:auth:user' })
-  const [items] = useState([], { key: 'app:cart:items' })
+  const [theme] = use('light', [], { key: 'app:theme' })
+  const [user] = use(null, [], { key: 'app:auth:user' })
+  const [items] = use([], [], { key: 'app:cart:items' })
 
   // Use all states
 }
 ```
 
-## Benefits of useState() with key
+## Benefits of use() with key
 
 - ✅ **No Provider boilerplate** - No wrapper components needed
 - ✅ **No hierarchy** - Access from anywhere, not just child components
@@ -97,7 +97,7 @@ function Dashboard() {
 
 ## Migration from Context API
 
-If you're using deprecated Context API, migrate to `useState()` with keys:
+If you're using deprecated Context API, migrate to `use()` with keys:
 
 ```tsx
 // ❌ Old way (deprecated)
@@ -106,7 +106,7 @@ import { createContext, useContext } from 'flexium/advanced'
 const ThemeContext = createContext('light')
 
 function ThemeProvider(props) {
-  const [theme] = useState('light')
+  const [theme] = use('light')
   return (
     <ThemeContext.Provider value={theme}>
       {props.children}
@@ -124,12 +124,12 @@ import { useState } from 'flexium/core'
 
 // No Provider needed!
 function Child() {
-  const [theme] = useState('light', { key: 'app:theme' })
+  const [theme] = use('light', [], { key: 'app:theme' })
   return <div>{theme}</div>
 }
 ```
 
 ## See Also
 
-- [useState()](/docs/core/state) - Complete useState() documentation with key option
+- [use()](/docs/core/state) - Complete use() documentation with key option
 - [Best Practices: State Organization](/docs/guide/best-practices/state-organization) - How to organize global state

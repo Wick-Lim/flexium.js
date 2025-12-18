@@ -218,10 +218,10 @@ function TabLayout() {
 ```tsx
 function LoadingLayout() {
   const r = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = use(false)
 
   // Track route changes
-  useEffect(() => {
+  use(() => {
     const path = r.location.pathname
     setIsLoading(true)
     // Simulate loading

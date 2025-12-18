@@ -1,8 +1,8 @@
 # Signals (Advanced)
 
 ::: info Recommended API
-For most application development, we recommend using the unified **[useState()](/guide/state)** API.
-The low-level `signal` and `computed` primitives have been unified into `useState()`.
+For most application development, we recommend using the unified **[use()](/guide/state)** API.
+The low-level `signal` and `computed` primitives have been unified into `use()`.
 :::
 
 ## The `signal` Primitive
@@ -13,7 +13,7 @@ A `SignalNode` is the atomic unit of reactivity. It holds a value and notifies s
 import { useState } from 'flexium/core'
 
 // Create
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
 // Read (tracks dependency)
 console.log(count)
@@ -36,8 +36,8 @@ Derived values that automatically update when their dependencies change.
 ```tsx
 import { useState } from 'flexium/core'
 
-const [count, setCount] = useState(1)
-const [double] = useState(() => count * 2)
+const [count, setCount] = use(1)
+const [double] = use(() => count * 2)
 
 console.log(double) // 2
 
@@ -49,9 +49,9 @@ console.log(double) // 10
 - **Cached**: If dependencies haven't changed, the cached value is returned.
 - **Pure**: Computed functions should be pure and side-effect free.
 
-## Comparison with `useState()`
+## Comparison with `use()`
 
-| Feature | `useState()` |
+| Feature | `use()` |
 |---------|-----------|
 | **Import** | `flexium/core` |
 | **Interface** | Array destructuring |
@@ -65,9 +65,9 @@ If you need to manually listen to a signal outside of an effect (e.g. bridging t
 ```tsx
 import { useEffect, useState } from 'flexium/core'
 
-const [count] = useState(0)
+const [count] = use(0)
 
-const dispose = useEffect(() => {
+const dispose = use(() => {
   console.log('Stream updated:', count)
 })
 

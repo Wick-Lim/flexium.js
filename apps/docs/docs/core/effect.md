@@ -1,4 +1,4 @@
-# useEffect()
+# use()
 
 Run side effects when reactive dependencies change.
 
@@ -8,7 +8,7 @@ import TimerDemo from '../../components/TimerDemo.vue'
 
 ## Live Demo
 
-A stopwatch demonstrating `useEffect()` for timer-based updates:
+A stopwatch demonstrating `use()` for timer-based updates:
 
 <ClientOnly>
   <TimerDemo />
@@ -23,7 +23,7 @@ import { useEffect } from 'flexium/core'
 ## Signature
 
 ```ts
-function useEffect(
+function use(
   fn: () => void | (() => void),
   deps: any[]
 ): () => void
@@ -34,9 +34,9 @@ function useEffect(
 ### Basic Usage
 
 ```tsx
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
-useEffect(() => {
+use(() => {
   console.log('Count changed:', count)
 }, [count])  // Explicit dependency array
 
@@ -47,9 +47,9 @@ setCount(2) // logs: "Count changed: 2"
 ### With Cleanup
 
 ```tsx
-const [isActive, setIsActive] = useState(false)
+const [isActive, setIsActive] = use(false)
 
-useEffect(() => {
+use(() => {
   if (isActive) {
     const interval = setInterval(() => {
       console.log('tick')
@@ -64,9 +64,9 @@ useEffect(() => {
 ### DOM Updates
 
 ```tsx
-const [theme, setTheme] = useState('light')
+const [theme, setTheme] = use('light')
 
-useEffect(() => {
+use(() => {
   document.body.classList.toggle('dark', theme === 'dark')
 }, [theme])
 ```
@@ -74,10 +74,10 @@ useEffect(() => {
 ### API Calls
 
 ```tsx
-const [userId, setUserId] = useState(1)
-const [user, setUser] = useState(null)
+const [userId, setUserId] = use(1)
+const [user, setUser] = use(null)
 
-useEffect(() => {
+use(() => {
   fetch(`/api/users/${userId}`)
     .then(res => res.json())
     .then(data => setUser(data))
@@ -91,9 +91,9 @@ useEffect(() => {
 ### Event Listeners
 
 ```tsx
-const [isListening] = useState(true)
+const [isListening] = use(true)
 
-useEffect(() => {
+use(() => {
   if (!isListening) return
 
   const handler = (e) => console.log('Key:', e.key)
@@ -106,10 +106,10 @@ useEffect(() => {
 ### Multiple Dependencies
 
 ```tsx
-const [a, setA] = useState(1)
-const [b, setB] = useState(2)
+const [a, setA] = use(1)
+const [b, setB] = use(2)
 
-useEffect(() => {
+use(() => {
   // Runs when either a or b changes
   console.log('Sum:', a + b)
 }, [a, b])
@@ -135,17 +135,17 @@ useEffect(() => {
 
 ## Lifecycle Patterns
 
-`useEffect()` handles all lifecycle needs - no separate hooks required:
+`use()` handles all lifecycle needs - no separate hooks required:
 
 ```tsx
 // Mount + Cleanup (empty deps = run once)
-useEffect(() => {
+use(() => {
   console.log('mounted')
   return () => console.log('cleanup')
 }, [])
 
 // React to changes + cleanup
-useEffect(() => {
+use(() => {
   const ws = new WebSocket(`wss://api.com/${userId}`)
   ws.onmessage = (e) => setMessages(m => [...m, e.data])
   return () => ws.close()  // cleanup before re-run or unmount
@@ -153,7 +153,7 @@ useEffect(() => {
 ```
 
 ::: info
-`onMount()` and `onCleanup()` have been removed. Use `useEffect()` instead. See [Lifecycle Management](/docs/core/lifecycle) for migration guide.
+`onMount()` and `onCleanup()` have been removed. Use `use()` instead. See [Lifecycle Management](/docs/core/lifecycle) for migration guide.
 :::
 
 ## Notes
@@ -164,5 +164,5 @@ useEffect(() => {
 
 ## See Also
 
-- [useState()](/docs/core/state)
+- [use()](/docs/core/state)
 - [sync()](/docs/core/sync)

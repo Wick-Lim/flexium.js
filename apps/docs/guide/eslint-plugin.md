@@ -83,12 +83,12 @@ Configure rules individually to match your project's needs:
 
 Disallow reading signal values outside of reactive contexts.
 
-**Why?** Signal reads outside of `useEffect()`, `computed()`, or JSX will not be tracked and won't trigger re-renders.
+**Why?** Signal reads outside of `use()`, `computed()`, or JSX will not be tracked and won't trigger re-renders.
 
 #### Bad
 
 ```javascript
-const [count, setCount] = useState(0);
+const [count, setCount] = use(0);
 
 // ❌ Signal read outside reactive context - won't trigger updates
 if (count > 5) {
@@ -99,17 +99,17 @@ if (count > 5) {
 #### Good
 
 ```javascript
-const [count, setCount] = useState(0);
+const [count, setCount] = use(0);
 
 // ✅ Signal read inside effect
-useEffect(() => {
+use(() => {
   if (count > 5) {
     doSomething();
   }
 });
 
 // ✅ Signal read inside computed
-const [shouldDoSomething] = useState(() => count > 5, { deps: [count] });
+const [shouldDoSomething] = use(() => count > 5, { deps: [count] });
 
 // ✅ Signal read inside JSX
 const App = () => (
@@ -129,12 +129,12 @@ Enforce cleanup functions in effects that add event listeners or timers.
 
 ```javascript
 // ❌ No cleanup for event listener
-useEffect(() => {
+use(() => {
   window.addEventListener('resize', handleResize);
 });
 
 // ❌ No cleanup for timer
-useEffect(() => {
+use(() => {
   const interval = setInterval(() => {
     console.log('Tick');
   }, 1000);
@@ -145,13 +145,13 @@ useEffect(() => {
 
 ```javascript
 // ✅ Returns cleanup function for event listener
-useEffect(() => {
+use(() => {
   window.addEventListener('resize', handleResize);
   return () => window.removeEventListener('resize', handleResize);
 });
 
 // ✅ Returns cleanup function for timer
-useEffect(() => {
+use(() => {
   const interval = setInterval(() => {
     console.log('Tick');
   }, 1000);
@@ -159,7 +159,7 @@ useEffect(() => {
 });
 
 // ✅ Effect without listeners/timers doesn't need cleanup
-useEffect(() => {
+use(() => {
   console.log('Count changed:', count);
 });
 ```
@@ -168,25 +168,25 @@ useEffect(() => {
 
 Disallow side effects in computed functions.
 
-**Why?** Computed values should be pure functions. Side effects belong in `useEffect()`.
+**Why?** Computed values should be pure functions. Side effects belong in `use()`.
 
 #### Bad
 
 ```javascript
 // ❌ Side effect in computed (console.log)
-const [doubled] = useState(() => {
+const [doubled] = use(() => {
   console.log('Computing...');
   return count * 2;
 });
 
 // ❌ Mutation in computed
-const [users] = useState([]);
-const [sortedUsers] = useState(() => {
+const [users] = use([]);
+const [sortedUsers] = use(() => {
   return users.sort(); // Mutates original array!
 }, { deps: [users] });
 
 // ❌ DOM manipulation in computed
-const [displayText] = useState(() => {
+const [displayText] = use(() => {
   document.title = String(count); // DOM side effect!
   return `Count: ${count}`;
 }, { deps: [count] });
@@ -196,20 +196,20 @@ const [displayText] = useState(() => {
 
 ```javascript
 // ✅ Pure computed
-const [doubled] = useState(() => count * 2, { deps: [count] });
+const [doubled] = use(() => count * 2, { deps: [count] });
 
 // ✅ Side effect in effect
-useEffect(() => {
+use(() => {
   console.log('Count changed:', count);
 });
 
 // ✅ Non-mutating computed
-const [sortedUsers] = useState(() => {
+const [sortedUsers] = use(() => {
   return [...users].sort(); // Creates new array
 }, { deps: [users] });
 
 // ✅ DOM manipulation in effect
-useEffect(() => {
+use(() => {
   document.title = String(count);
 });
 ```

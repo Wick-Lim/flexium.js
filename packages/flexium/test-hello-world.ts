@@ -2,8 +2,8 @@ import { useState, useEffect } from './src/core';
 import { render } from './src/dom';
 
 // Minimal usage
-const [count, setCount] = useState(0);
-useEffect(() => {
+const [count, setCount] = use(0);
+use(() => {
     console.log(count);
 }, []);
 

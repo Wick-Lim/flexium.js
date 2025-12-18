@@ -1,4 +1,4 @@
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type Priority = 'high' | 'medium' | 'low'
@@ -64,7 +64,7 @@ const initialTasks: Task[] = [
 ]
 
 export function useTasks() {
-  return useState<Task[]>(initialTasks, { key: ['tasks'] })
+  return use<Task[]>(initialTasks, undefined, { key: ['tasks'] })
 }
 
 let nextId = Math.max(...initialTasks.map(t => t.id)) + 1

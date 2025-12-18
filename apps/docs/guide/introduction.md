@@ -21,7 +21,7 @@ At its core, Flexium aims to solve the complexity and performance issues that pl
 
 Flexium stands out from other frameworks through several key innovations:
 
-- **Unified State**: One function (`useState()`) handles local, global, and async state, eliminating the need for multiple APIs.
+- **Unified State**: One function (`use()`) handles local, global, and async state, eliminating the need for multiple APIs.
 - **Fine-Grained Reactivity**: No Virtual DOM overhead. Updates are surgical and precise, updating only what changed.
 - **Type Safety**: Built with TypeScript for a superior developer experience with full type inference.
 - **Tiny Bundle Size**: Core + DOM is ~2.5KB gzipped, full bundle ~6KB - 85% smaller than React.
@@ -40,10 +40,10 @@ Understanding how Flexium compares to other popular frameworks helps you make an
 import { useState, useEffect, useContext, useMemo } from 'react';
 
 function Counter() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = use(0);
   const doubled = useMemo(() => count * 2, [count]);
 
-  useEffect(() => {
+  use(() => {
     document.title = `Count: ${count}`;
   }, [count]);
 
@@ -60,10 +60,10 @@ function Counter() {
 import { useState, useEffect } from 'flexium/core';
 
 function Counter() {
-  const [count, setCount] = useState(0);
-  const [doubled] = useState(() => count * 2);
+  const [count, setCount] = use(0);
+  const [doubled] = use(() => count * 2);
 
-  useEffect(() => {
+  use(() => {
     document.title = `Count: ${count}`;
   });
 
@@ -82,7 +82,7 @@ function Counter() {
 | Feature | React | Flexium |
 |---------|-------|---------|
 | Reactivity | Virtual DOM + Reconciliation | Fine-grained Signals |
-| State API | useState, useReducer, useContext | Unified `useState()` |
+| State API | useState, useReducer, useContext | Unified `use()` |
 | Updates | Re-render entire component tree | Surgical DOM updates |
 | Bundle Size | ~45kb gzipped | ~6KB gzipped |
 | Performance | Good with optimization | Excellent by default |
@@ -113,10 +113,10 @@ function UserProfile() {
 import { useState } from 'flexium/core';
 
 function UserProfile() {
-  const [userId] = useState(1);
-  const [doubled] = useState(() => userId * 2);
+  const [userId] = use(1);
+  const [doubled] = use(() => userId * 2);
 
-  const [user, userControl] = useState(async () => {
+  const [user, userControl] = use(async () => {
     const res = await fetch(`/api/users/${userId}`);
     return res.json();
   });
@@ -129,9 +129,9 @@ function UserProfile() {
 
 | Feature | Solid.js | Flexium |
 |---------|----------|---------|
-| Signal API | createSignal, createMemo, createResource | Unified `useState()` |
-| Async Data | createResource (separate) | Built into `useState()` |
-| Global State | Context or stores | `useState()` with key option |
+| Signal API | createSignal, createMemo, createResource | Unified `use()` |
+| Async Data | createResource (separate) | Built into `use()` |
+| Global State | Context or stores | `use()` with key option |
 | List Rendering | Must use `<For>` component | `items.map()` works with auto-optimization |
 | Bundle Size | ~7kb gzipped | ~6KB gzipped |
 | Cross-Platform | Web-focused | Web + Canvas (Native: coming soon) |
@@ -162,10 +162,10 @@ export default {
 import { useState, useEffect } from 'flexium/core';
 
 function Counter() {
-  const [count] = useState(0);
-  const [doubled] = useState(() => count * 2);
+  const [count] = use(0);
+  const [doubled] = use(() => count * 2);
 
-  useEffect(() => {
+  use(() => {
     console.log('Count:', count);
   });
 
@@ -179,7 +179,7 @@ function Counter() {
 |---------|-------|---------|
 | Reactivity | Proxy-based | Signal-based |
 | Template Syntax | SFC templates or JSX | JSX |
-| State Creation | ref, reactive | Unified `useState()` |
+| State Creation | ref, reactive | Unified `use()` |
 | Bundle Size | ~30kb gzipped | ~6KB gzipped |
 | TypeScript | Good (improved in v3) | Excellent (built-in) |
 | Ecosystem | Large, mature | Growing |
@@ -193,7 +193,7 @@ function Counter() {
 import { useState, useMemo } from 'preact/hooks';
 
 function Counter() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = use(0);
   const doubled = useMemo(() => count * 2, [count]);
 
   return (
@@ -208,8 +208,8 @@ function Counter() {
 import { useState } from 'flexium/core';
 
 function Counter() {
-  const [count, setCount] = useState(0);
-  const [doubled] = useState(() => count * 2);
+  const [count, setCount] = use(0);
+  const [doubled] = use(() => count * 2);
 
   return (
     <div>
@@ -226,7 +226,7 @@ function Counter() {
 |---------|--------|---------|
 | Reactivity | Virtual DOM | Fine-grained Signals |
 | Bundle Size | ~3-4kb core | ~10KB full framework |
-| API | React-like hooks | Unified useState() |
+| API | React-like hooks | Unified use() |
 | Performance | Good | Better (no VDOM) |
 | React Compat | High (preact/compat) | N/A (different paradigm) |
 
@@ -236,7 +236,7 @@ Flexium is built on several foundational principles that guide its design and de
 
 ### 1. Simplicity Through Unification
 
-Rather than providing 10 different APIs for 10 different use cases, Flexium provides one powerful API that handles all scenarios. The `useState()` function is the single entry point for:
+Rather than providing 10 different APIs for 10 different use cases, Flexium provides one powerful API that handles all scenarios. The `use()` function is the single entry point for:
 
 - Local component state
 - Global shared state
@@ -266,7 +266,7 @@ Flexium is written entirely in TypeScript with full type inference:
 import { useState } from 'flexium/core';
 
 // Type is inferred as number
-const [count, setCount] = useState(0);
+const [count, setCount] = use(0);
 
 // TypeScript knows count is a number
 const doubled: number = count * 2; // ✓
@@ -275,7 +275,7 @@ const doubled: number = count * 2; // ✓
 setCount('invalid'); // ✗ Type error
 
 // Async state has proper typing
-const [user] = useState(async () => ({
+const [user] = use(async () => ({
   name: 'John',
   age: 30
 }));
@@ -290,16 +290,16 @@ Start simple and add complexity only when needed:
 
 ```tsx
 // Start with local state
-const [count, setCount] = useState(0);
+const [count, setCount] = use(0);
 
 // Need it global? Just add a key
-const [globalCount, setGlobalCount] = useState(0, { key: 'globalCount' });
+const [globalCount, setGlobalCount] = use(0, { key: 'globalCount' });
 
 // Need async? Make the initializer async
-const [data] = useState(async () => fetchData());
+const [data] = use(async () => fetchData());
 
 // Need derived value? Pass a function
-const [doubled] = useState(() => count * 2);
+const [doubled] = use(() => count * 2);
 ```
 
 The same API grows with your needs.
@@ -315,24 +315,24 @@ import { useState } from 'flexium/core';
 
 function Dashboard() {
   // 1. Local state
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = use('all');
 
   // 2. Global state (shared across components)
-  const [theme, setTheme] = useState('light', { key: 'app-theme' });
+  const [theme, setTheme] = use('light', { key: 'app-theme' });
 
   // 3. Computed state (auto-updates)
-  const [greeting] = useState(() =>
+  const [greeting] = use(() =>
     theme === 'dark' ? 'Good evening' : 'Good morning'
   );
 
   // 4. Async state (data fetching)
-  const [todos, todosControl] = useState(async () => {
+  const [todos, todosControl] = use(async () => {
     const res = await fetch('/api/todos');
     return res.json();
   });
 
   // 5. Filtered computed state (depends on multiple signals)
-  const [filteredTodos] = useState(() => {
+  const [filteredTodos] = use(() => {
     if (!todos) return [];
     return filter === 'all'
       ? todos
@@ -368,17 +368,17 @@ Only what changes gets updated:
 import { useState, useEffect } from 'flexium/core';
 
 function Example() {
-  const [firstName, setFirstName] = useState('John');
-  const [lastName, setLastName] = useState('Doe');
-  const [age, setAge] = useState(30);
+  const [firstName, setFirstName] = use('John');
+  const [lastName, setLastName] = use('Doe');
+  const [age, setAge] = use(30);
 
   // This effect only runs when firstName changes
-  useEffect(() => {
+  use(() => {
     console.log('First name:', firstName);
   });
 
   // This effect only runs when firstName OR lastName changes
-  useEffect(() => {
+  use(() => {
     console.log('Full name:', `${firstName} ${lastName}`);
   });
 
@@ -405,12 +405,12 @@ Like React's useEffect, specify dependencies explicitly:
 import { useState, useEffect } from 'flexium/core';
 
 function SearchResults() {
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('all');
-  const [results, setResults] = useState([]);
+  const [query, setQuery] = use('');
+  const [category, setCategory] = use('all');
+  const [results, setResults] = use([]);
 
   // Re-runs when query OR category changes
-  useEffect(async () => {
+  use(async () => {
     if (!query) {
       setResults([]);
       return;
@@ -497,7 +497,7 @@ Flexium's architecture is designed for simplicity and performance:
 ┌─────────────────────────────────────────────────────────┐
 │                  Flexium Core API                        │
 │  ┌──────────┐  ┌────────┐  ┌────────┐  ┌──────────┐   │
-│  │useState()│  │useEffect│ │ sync│  │  mount   │   │
+│  │use()│  │useEffect│ │ sync│  │  mount   │   │
 │  └──────────┘  └────────┘  └────────┘  └──────────┘   │
 └────────────────────┬────────────────────────────────────┘
                      │
@@ -579,12 +579,12 @@ import { useState, useSync } from 'flexium/core';
 
 // Efficiently update 1000 items
 function LargeList() {
-  const [items, setItems] = useState(
+  const [items, setItems] = use(
     Array.from({ length: 1000 }, (_, i) => ({ id: i, value: i }))
   );
 
   const updateAll = () => {
-    useSync(() => {
+    sync(() => {
       // Even updating 1000 items at once is fast
       setItems(prev => prev.map(item => ({
         ...item,
@@ -616,7 +616,7 @@ function LargeList() {
    - Understand basic state
 
 2. **Master State Management** (2 hours)
-   - Learn `useState()` for local state
+   - Learn `use()` for local state
    - Try computed values
    - Experiment with effects
 
@@ -724,7 +724,7 @@ Ready to build with Flexium? Check out the [Quick Start](/guide/quick-start) gui
 After reading this introduction, explore:
 
 - [Quick Start](/guide/quick-start) - Build your first app
-- [State Management](/guide/state) - Master the `useState()` API
+- [State Management](/guide/state) - Master the `use()` API
 - [Performance Guide](/guide/performance) - Optimize your applications
 - [TypeScript Guide](/guide/typescript) - Leverage full type safety
 

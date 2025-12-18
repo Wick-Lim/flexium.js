@@ -17,7 +17,7 @@ A developer must learn 5+ different mental models, 5+ different APIs, and manage
 
 ## The Solution
 
-**One function: `useState()`**
+**One function: `use()`**
 
 ```javascript
 import { useState } from 'flexium/core'
@@ -27,23 +27,23 @@ import { useState } from 'flexium/core'
 
 ### Local State
 ```javascript
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 ```
 
 ### Global State
 ```javascript
 // Array key for hierarchical namespacing
-const [user] = useState(null, { key: ['app', 'user', userId] })
+const [user] = use(null, { key: ['app', 'user', userId] })
 ```
 
 ### Async Data (Resource)
 ```javascript
-const [user, { loading, error, refetch }] = useState(() => fetchUser(id))
+const [user, { loading, error, refetch }] = use(() => fetchUser(id))
 ```
 
 ### Computed Values
 ```javascript
-const [doubled] = useState(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, { deps: [count] })
 ```
 
 Same function. Same mental model. Different capabilities based on what you pass.
@@ -64,7 +64,7 @@ Flexium unifies:
 - Async resources (React Query equivalent)
 - Computed values (useMemo equivalent)
 
-Into one `useState()` function.
+Into one `use()` function.
 
 ### 2. Simplicity
 
@@ -89,8 +89,8 @@ React re-renders entire component trees. Then you optimize with memo(), useMemo(
 Flexium uses **Fine-grained Reactivity**. Only the specific DOM nodes that depend on changed values update. No optimization needed. It's just how Proxy tracking works.
 
 ```javascript
-const [name, setName] = useState('John')
-const [age, setAge] = useState(30)
+const [name, setName] = use('John')
+const [age, setAge] = use(30)
 
 // Only this span updates when name changes
 <span>{name}</span>
@@ -112,7 +112,7 @@ Flexium isn't just a DOM framework. It's a reactive core with multiple renderers
 | `flexium/canvas` | 2D Canvas rendering |
 | `flexium/interactive` | Game loop & input handling |
 
-Same `useState()`, same components, different targets.
+Same `use()`, same components, different targets.
 
 ### 5. Honesty
 
@@ -121,7 +121,7 @@ Same `useState()`, same components, different targets.
 - No hidden re-renders
 - No stale closure traps
 - No dependency array footguns (deps are optional, for memoization)
-- No rules of hooks (call order doesn't matter for `useState()`)
+- No rules of hooks (call order doesn't matter for `use()`)
 
 Dependencies are tracked automatically by what you access through Proxy.
 
@@ -176,20 +176,20 @@ Virtual DOM was revolutionary in 2013. It's 2024 now.
 
 Flexium uses **Proxy-based Fine-grained Reactivity** that tracks exactly which properties are accessed and updates only what's needed.
 
-### Why One useState() Instead of Multiple Hooks?
+### Why One use() Instead of Multiple Hooks?
 
 Learning curve matters. Time spent understanding API differences is time not spent building.
 
 ```javascript
 // React: 5 different concepts
-useState()
+use()
 useRecoilState()
 useQuery()
 useMemo()
 useCallback()
 
 // Flexium: 1 concept
-useState()
+use()
 ```
 
 ### Why Multiple Renderers?
@@ -208,7 +208,7 @@ import { useState, useEffect } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
 
   return (
     <div>
@@ -237,7 +237,7 @@ import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
 import { useLoop, keyboard, Keys } from 'flexium/interactive'
 
 function Game() {
-  const [x, setX] = useState(100)
+  const [x, setX] = use(100)
   const kb = keyboard()
 
   const gameLoop = useLoop({
@@ -247,7 +247,7 @@ function Game() {
     }
   })
 
-  useEffect(() => { gameLoop.start(); return () => gameLoop.stop() }, [])
+  use(() => { gameLoop.start(); return () => gameLoop.stop() }, [])
 
   return (
     <Canvas width={800} height={600}>
@@ -257,13 +257,13 @@ function Game() {
 }
 ```
 
-Same `useState()`. Same patterns. Different output.
+Same `use()`. Same patterns. Different output.
 
 ## Summary
 
 | Old Way | Flexium Way |
 |---------|-------------|
-| Multiple state libraries | One `useState()` |
+| Multiple state libraries | One `use()` |
 | Virtual DOM diffing | Direct Proxy updates |
 | Optimization required | Fast by default |
 | Complex mental model | Simple mental model |

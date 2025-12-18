@@ -77,7 +77,7 @@ function Game() {
 function PlayerController() {
   const kb = keyboard()
 
-  useEffect(() => {
+  use(() => {
     if (kb.isPressed('w') || kb.isPressed('W')) {
       player.y -= speed
     }
@@ -112,10 +112,10 @@ const gameLoop = useLoop({
 ### Pause Menu
 
 ```tsx
-const [paused] = useState(false)
+const [paused] = use(false)
 const kb = keyboard()
 
-useEffect(() => {
+use(() => {
   if (kb.isJustPressed(Keys.Escape)) {
     paused.set(p => !p)
   }

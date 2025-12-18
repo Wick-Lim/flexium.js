@@ -1,4 +1,4 @@
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Link } from 'flexium/router'
 import { useProducts, addToCart, type Product } from '../store'
 
@@ -26,20 +26,20 @@ function ProductCard({ product }: { product: Product }) {
 
 export default function Products() {
   const [products] = useProducts()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<string>('default')
+  const [searchQuery, setSearchQuery] = use('')
+  const [selectedCategory, setSelectedCategory] = use<string>('all')
+  const [sortBy, setSortBy] = use<string>('default')
 
   // Get unique categories
-  const categories = ['all', ...new Set(products.map(p => p.category))]
+  const categories = ['all', ...new Set(products.map((p: Product) => p.category))]
 
   // Filter and sort products
-  const [filteredProducts] = useState(() => {
+  const [filteredProducts] = use<Product[]>(() => {
     let filtered = [...products]
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(p =>
+      filtered = filtered.filter((p: Product) =>
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -47,20 +47,20 @@ export default function Products() {
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(p => p.category === selectedCategory)
+      filtered = filtered.filter((p: Product) => p.category === selectedCategory)
     }
 
     // Sort
     if (sortBy === 'price-low') {
-      filtered.sort((a, b) => a.price - b.price)
+      filtered.sort((a: Product, b: Product) => a.price - b.price)
     } else if (sortBy === 'price-high') {
-      filtered.sort((a, b) => b.price - a.price)
+      filtered.sort((a: Product, b: Product) => b.price - a.price)
     } else if (sortBy === 'rating') {
-      filtered.sort((a, b) => b.rating.rate - a.rating.rate)
+      filtered.sort((a: Product, b: Product) => b.rating.rate - a.rating.rate)
     }
 
     return filtered
-  }, { deps: [products, searchQuery, selectedCategory, sortBy] })
+  }, [products, searchQuery, selectedCategory, sortBy])
 
   return (
     <div class="container">

@@ -44,7 +44,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     },
     messages: {
       sideEffectInComputed:
-        'Computed functions should be pure. Found side effect: "{{method}}". Use useEffect() for side effects instead.',
+        'Computed functions should be pure. Found side effect: "{{method}}". Use use() for side effects instead.',
     },
     schema: [],
   },
@@ -62,7 +62,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
           return;
         }
 
-        // Also check useState() with a function argument (derived state)
+        // Also check use() with a function argument (derived state)
         if (
           node.callee.type === "Identifier" &&
           node.callee.name === "useState" &&

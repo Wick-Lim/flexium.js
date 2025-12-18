@@ -21,7 +21,7 @@ Flexium is built on a **Proxy-based Fine-grained Reactivity** system that provid
 +--------------------------------v---------------------------------+
 |                      Core Reactive System                         |
 |  +------------------+  +------------------+  +----------------+   |
-|  |    reactive()    |  |    useState()    |  |   useEffect()  |   |
+|  |    reactive()    |  |    use()    |  |   use()  |   |
 |  |  Proxy tracking  |  | Signal/Resource  |  |  Side effects  |   |
 |  +------------------+  +------------------+  +----------------+   |
 |                                                                   |
@@ -52,8 +52,8 @@ packages/flexium/src/
 │   ├── index.ts          # Public exports
 │   ├── types.ts          # Type definitions
 │   ├── reactive.ts       # Proxy-based reactivity
-│   ├── state.ts          # useState() - Unified state API
-│   ├── lifecycle.ts      # useEffect(), sync()
+│   ├── state.ts          # use() - Unified state API
+│   ├── lifecycle.ts      # use(), sync()
 │   ├── hook.ts           # hook() - Component instance hooks
 │   ├── context.ts        # Context implementation
 │   └── devtools.ts       # DevTools integration
@@ -178,7 +178,7 @@ export const REACTIVE_SIGNAL = Symbol('flexium.reactive')
 
 ### 1.2 Unified State API (`state.ts`)
 
-The `useState()` function provides three patterns through a single API:
+The `use()` function provides three patterns through a single API:
 
 | Pattern | Input | Return | Use Case |
 |---------|-------|--------|----------|
@@ -189,7 +189,7 @@ The `useState()` function provides three patterns through a single API:
 #### Signal Mode
 
 ```typescript
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
 // Setter supports direct value or updater function
 setCount(5)
@@ -199,7 +199,7 @@ setCount(prev => prev + 1)
 #### Resource Mode (Async)
 
 ```typescript
-const [user, control] = useState(() => fetch('/api/user').then(r => r.json()))
+const [user, control] = use(() => fetch('/api/user').then(r => r.json()))
 
 // ResourceControl interface
 interface ResourceControl {
@@ -213,7 +213,7 @@ interface ResourceControl {
 #### Computed Mode (with deps)
 
 ```typescript
-const [doubled] = useState(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, { deps: [count] })
 // Re-computes only when deps change
 ```
 
@@ -223,10 +223,10 @@ States with `key` option are stored in a global registry:
 
 ```typescript
 // Component A
-const [theme, setTheme] = useState('light', { key: ['app', 'theme'] })
+const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
 
 // Component B (anywhere)
-const [theme] = useState('light', { key: ['app', 'theme'] })  // Same state!
+const [theme] = use('light', { key: ['app', 'theme'] })  // Same state!
 ```
 
 ### 1.3 Effect System (`lifecycle.ts`)
@@ -266,7 +266,7 @@ trigger() → queueJob(effect) → queue (Set)
 
 ```typescript
 // Reactive side effect (component-scoped)
-function useEffect(fn: () => void | (() => void), deps?: any[]): void
+function use(fn: () => void | (() => void), deps?: any[]): void
 
 // Manual batching / flush
 function sync(fn?: () => void): void
@@ -545,7 +545,7 @@ hydrate(App, container, {
 </Canvas>
         │
         ▼
-Canvas useEffect() →
+Canvas use() →
   1. clearRect()
   2. Process drawQueue
   3. Execute drawNode() for each
@@ -567,7 +567,7 @@ Canvas useEffect() →
 All Draw component props support getter functions for reactivity:
 
 ```tsx
-const [x, setX] = useState(100)
+const [x, setX] = use(100)
 
 // x updates automatically when state changes
 <DrawRect x={x} y={100} width={50} height={50} fill="red" />

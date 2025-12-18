@@ -24,7 +24,7 @@ function handleSubmit() {
 import { useSync } from 'flexium/core'
 
 function handleSubmit() {
-  useSync(() => {
+  sync(() => {
     setLoading(true)
     setName('John')
     setEmail('john@example.com')
@@ -36,12 +36,12 @@ function handleSubmit() {
 
 ---
 
-### useSync() Usage Scenarios
+### sync() Usage Scenarios
 
 ```tsx
 // ✅ Form submission
 function handleFormSubmit() {
-  useSync(() => {
+  sync(() => {
     setSubmitting(true)
     setErrors({})
     setFormData({ ...formData, submitted: true })
@@ -49,7 +49,7 @@ function handleFormSubmit() {
 
   // API call
   submitForm(formData).then(() => {
-    useSync(() => {
+    sync(() => {
       setSubmitting(false)
       setSuccess(true)
     })
@@ -58,7 +58,7 @@ function handleFormSubmit() {
 
 // ✅ Multiple fields update simultaneously
 function handleBulkUpdate() {
-  useSync(() => {
+  sync(() => {
     setField1(value1)
     setField2(value2)
     setField3(value3)
@@ -68,7 +68,7 @@ function handleBulkUpdate() {
 
 // ✅ State reset
 function resetForm() {
-  useSync(() => {
+  sync(() => {
     setEmail('')
     setPassword('')
     setErrors({})
@@ -86,7 +86,7 @@ function resetForm() {
 ```tsx
 // ❌ Bad example - computed every time
 function ShoppingCart() {
-  const [items] = useState([])
+  const [items] = use([])
 
   // Recalculated every time (no memoization)
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -96,10 +96,10 @@ function ShoppingCart() {
 
 // ✅ Good example - automatic memoization
 function ShoppingCart() {
-  const [items] = useState([])
+  const [items] = use([])
 
   // Only recalculated when items change
-  const [total] = useState(() =>
+  const [total] = use(() =>
     items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   )
 
@@ -114,18 +114,18 @@ function ShoppingCart() {
 ```tsx
 // ✅ Filtering + sorting + transformation
 function ProductList({ category }: { category: string }) {
-  const [products] = useState([])
+  const [products] = use([])
 
   // Separate each step into computed (optional)
-  const [filtered] = useState(() =>
+  const [filtered] = use(() =>
     products.filter(p => p.category === category)
   )
 
-  const [sorted] = useState(() =>
+  const [sorted] = use(() =>
     [...filtered].sort((a, b) => b.price - a.price)
   )
 
-  const [formatted] = useState(() =>
+  const [formatted] = use(() =>
     sorted.map(p => ({ ...p, price: `$${p.price.toFixed(2)}` }))
   )
 
@@ -133,7 +133,7 @@ function ProductList({ category }: { category: string }) {
 }
 
 // Or compute all at once (may be more efficient)
-const [formatted] = useState(() => {
+const [formatted] = use(() => {
   const filtered = products.filter(p => p.category === category)
   const sorted = [...filtered].sort((a, b) => b.price - a.price)
   return sorted.map(p => ({ ...p, price: `$${p.price.toFixed(2)}` }))
@@ -146,16 +146,16 @@ const [formatted] = useState(() => {
 
 ```tsx
 // ❌ Bad example - new object every time
-const [items] = useState([1, 2, 3])
-const [data] = useState(() => ({
+const [items] = use([1, 2, 3])
+const [data] = use(() => ({
   items: items,
   timestamp: Date.now()  // Different value each time → unnecessary recalculation
 }))
 
 // ✅ Good example - stable dependencies
-const [items] = useState([1, 2, 3])
-const [timestamp] = useState(() => Date.now())  // Manage as separate state
-const [data] = useState(() => ({
+const [items] = use([1, 2, 3])
+const [timestamp] = use(() => Date.now())  // Manage as separate state
+const [data] = use(() => ({
   items: items,
   timestamp: timestamp  // Stable dependency
 }))
@@ -170,7 +170,7 @@ const [data] = useState(() => ({
 ```tsx
 // ❌ Bad example - regular map (slow with large lists)
 function ItemList() {
-  const [items] = useState([...])  // 1000+ items
+  const [items] = use([...])  // 1000+ items
 
   return (
     <div>
@@ -183,7 +183,7 @@ function ItemList() {
 
 // ✅ Good example - items.map() (auto-optimized)
 function ItemList() {
-  const [items] = useState([...])
+  const [items] = use([...])
 
   return (
     <div>
@@ -200,7 +200,7 @@ function ItemList() {
 ```tsx
 // ✅ Consider virtualization for very large lists
 function VirtualizedList() {
-  const [items] = useState([...])  // 10000+ items
+  const [items] = use([...])  // 10000+ items
 
   // items.map() auto-optimizes, but
   // consider additional virtualization library if needed
@@ -225,11 +225,11 @@ function VirtualizedList() {
 import { useState, useEffect } from 'flexium/core'
 
 function TemporaryComponent() {
-  const [data] = useState(async () => {
+  const [data] = use(async () => {
     return fetch('/api/temp-data').then(r => r.json())
   }, { key: 'temp:data' })
 
-  useEffect(() => {
+  use(() => {
     // Effect runs on mount
     return () => {
       useState.delete('temp:data')  // Memory cleanup
@@ -241,12 +241,12 @@ function TemporaryComponent() {
 
 // ✅ Conditional cleanup
 function ConditionalComponent({ userId }: { userId: number | null }) {
-  const [user] = useState(async () => {
+  const [user] = use(async () => {
     if (!userId) return null
     return fetch(`/api/users/${userId}`).then(r => r.json())
   }, { key: userId ? ['user', userId] : undefined })
 
-  useEffect(() => {
+  use(() => {
     if (!userId) {
       // Cleanup previous data when userId is missing
       useState.delete(['user', userId])
@@ -289,16 +289,16 @@ function cleanupNamespace(namespace: string) {
 
 ```tsx
 // ❌ Bad example - unnecessary re-execution
-const [count] = useState(0)
-const [name] = useState('John')
+const [count] = use(0)
+const [name] = use('John')
 
-useEffect(() => {
+use(() => {
   console.log('Count:', count)  // Good: doesn't re-run when name changes
   // But may re-run even when count hasn't changed
 })
 
 // ✅ Good example - track only needed dependencies
-useEffect(() => {
+use(() => {
   const currentCount = count  // Explicitly read
   console.log('Count:', currentCount)
   // Doesn't read name, so won't re-run when name changes
@@ -311,7 +311,7 @@ useEffect(() => {
 
 ```tsx
 // ✅ Timer cleanup
-useEffect(() => {
+use(() => {
   const interval = setInterval(() => {
     console.log('tick')
   }, 1000)
@@ -320,7 +320,7 @@ useEffect(() => {
 })
 
 // ✅ Event listener cleanup
-useEffect(() => {
+use(() => {
   const handleResize = () => {
     console.log('resized')
   }
@@ -331,7 +331,7 @@ useEffect(() => {
 })
 
 // ✅ Subscription cleanup
-useEffect(() => {
+use(() => {
   const subscription = subscribeToUpdates((data) => {
     console.log('update:', data)
   })
@@ -349,7 +349,7 @@ useEffect(() => {
 ```tsx
 // ✅ Same keys are automatically shared
 function ComponentA() {
-  const [users] = useState(async () => {
+  const [users] = use(async () => {
     return fetch('/api/users').then(r => r.json())
   }, { key: 'users' })
 
@@ -358,7 +358,7 @@ function ComponentA() {
 
 function ComponentB() {
   // Same key, so only one request is made
-  const [users] = useState(async () => {
+  const [users] = use(async () => {
     return fetch('/api/users').then(r => r.json())
   }, { key: 'users' })
 
@@ -373,7 +373,7 @@ function ComponentB() {
 ```tsx
 // ✅ Reuse with global cache
 function PostList() {
-  const [posts] = useState(async () => {
+  const [posts] = use(async () => {
     return fetch('/api/posts').then(r => r.json())
   }, { key: ['posts', 'all'] })
 
@@ -382,8 +382,8 @@ function PostList() {
 
 function PostDetail({ postId }: { postId: number }) {
   // Find from already cached posts
-  const [posts] = useState(null, { key: ['posts', 'all'] })
-  const [post] = useState(() => {
+  const [posts] = use(null, { key: ['posts', 'all'] })
+  const [post] = use(() => {
     return posts?.find(p => p.id === postId)
   })
 
@@ -399,7 +399,7 @@ function PostDetail({ postId }: { postId: number }) {
 
 ```tsx
 // ✅ Measure effect execution time
-useEffect(() => {
+use(() => {
   const start = performance.now()
 
   // Heavy computation
@@ -418,8 +418,8 @@ useEffect(() => {
 
 ### Optimization Checklist
 
-- [ ] Have you synced multiple state updates with `useSync()`?
-- [ ] Have you memoized complex calculations with `useState(() => ...)`?
+- [ ] Have you synced multiple state updates with `sync()`?
+- [ ] Have you memoized complex calculations with `use(() => ...)`?
 - [ ] Have you used `For` component for large lists?
 - [ ] Have you cleaned up unused global state?
 - [ ] Have you returned effect cleanup functions?
@@ -429,7 +429,7 @@ useEffect(() => {
 
 ## Related Documentation
 
-- [useSync() API](/docs/core/sync) - Sync update API
-- [useState() API](/docs/core/state) - State API documentation
+- [sync() API](/docs/core/sync) - Sync update API
+- [use() API](/docs/core/state) - State API documentation
 - [for() API](/docs/core/for) - List rendering API
 - [Best Practices - State Organization](/docs/guide/best-practices/state-organization)

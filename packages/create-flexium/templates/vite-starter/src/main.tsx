@@ -3,11 +3,11 @@ import { render } from 'flexium/dom'
 import './style.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [doubled] = useState(() => count * 2, { deps: [count] })
-  const [tripled] = useState(() => count * 3, { deps: [count] })
+  const [count, setCount] = use(0)
+  const [doubled] = use(() => count * 2, { deps: [count] })
+  const [tripled] = use(() => count * 3, { deps: [count] })
 
-  useEffect(() => {
+  use(() => {
     console.log('Count:', count)
   }, [count])
 

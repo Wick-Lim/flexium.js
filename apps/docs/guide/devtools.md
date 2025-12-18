@@ -117,7 +117,7 @@ interface EffectInfo {
 Give effects a name for easier debugging:
 
 ```typescript
-useEffect(
+use(
   () => {
     console.log('Count changed:', count);  // count works directly in effects
   },

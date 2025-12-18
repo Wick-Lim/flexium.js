@@ -2,6 +2,16 @@ import { reactive } from './reactive'
 import { unsafeEffect } from './lifecycle'
 import { hook } from './hook'
 import { registerSignal, updateSignal } from './devtools'
+import type { Context } from './types'
+
+// Re-export context utilities
+export { createContext, pushContext, popContext, snapshotContext, runWithContext } from './context'
+import { useContext as _useContext } from './context'
+export type { Context }
+
+function isContext(value: any): value is Context<any> {
+  return value && typeof value === 'object' && 'id' in value && 'defaultValue' in value && 'Provider' in value
+}
 
 // Types
 export type Setter<T> = (newValue: T | ((prev: T) => T)) => void
@@ -31,6 +41,8 @@ function serializeKey(key: unknown[]): string {
 }
 
 // Overloads
+export function use<T>(ctx: Context<T>): [T, undefined]
+
 export function use<T, P = void>(
   fn: (ctx: UseContext<P>) => Promise<T>,
   deps?: any[],
@@ -50,10 +62,15 @@ export function use<T>(
 ): [T, Setter<T>]
 
 export function use<T, P = void>(
-  input: T | ((ctx: UseContext<P>) => T) | ((ctx: UseContext<P>) => Promise<T>),
+  input: T | Context<T> | ((ctx: UseContext<P>) => T) | ((ctx: UseContext<P>) => Promise<T>),
   deps?: any[],
   options?: UseOptions
 ): any {
+  // Context mode: use(SomeContext) returns [value, undefined] tuple for UX consistency
+  if (isContext(input)) {
+    const value = _useContext(input)
+    return [value, undefined]
+  }
   // Validate key if provided
   if (options?.key && !Array.isArray(options.key)) {
     throw new Error('State key must be an array')

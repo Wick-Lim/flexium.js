@@ -1,4 +1,4 @@
-# useState()
+# use()
 
 One API for all reactive state.
 
@@ -23,29 +23,29 @@ import { useState } from 'flexium/core'
 
 ## Usage
 
-`useState()` always returns a **tuple**:
+`use()` always returns a **tuple**:
 
 ```tsx
 // Basic state - returns [value, setter]
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
 // Derived state - returns [value, control]
-const [doubled] = useState(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, { deps: [count] })
 
 // Async state - returns [value, control]
-const [users, control] = useState(async () => fetch('/api'))
+const [users, control] = use(async () => fetch('/api'))
 ```
 
 | Input | Returns |
 |-------|---------|
-| `useState(value)` | `[T, StateSetter<T>]` |
-| `useState(() => T)` | `[T, ResourceControl]` |
-| `useState(async () => T)` | `[T \| undefined, ResourceControl]` |
+| `use(value)` | `[T, StateSetter<T>]` |
+| `use(() => T)` | `[T, ResourceControl]` |
+| `use(async () => T)` | `[T \| undefined, ResourceControl]` |
 
 ## Basic State
 
 ```tsx
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
 // Read
 console.log(count + 1)  // 1
@@ -65,13 +65,13 @@ Pass a function with `deps` to create computed values:
 </ClientOnly>
 
 ```tsx
-const [price, setPrice] = useState(100)
-const [quantity, setQuantity] = useState(2)
+const [price, setPrice] = use(100)
+const [quantity, setQuantity] = use(2)
 
 // Use deps to specify dependencies
-const [subtotal] = useState(() => price * quantity, { deps: [price, quantity] })
-const [tax] = useState(() => subtotal * 0.1, { deps: [subtotal] })
-const [total] = useState(() => subtotal + tax, { deps: [subtotal, tax] })
+const [subtotal] = use(() => price * quantity, { deps: [price, quantity] })
+const [tax] = use(() => subtotal * 0.1, { deps: [subtotal] })
+const [total] = use(() => subtotal + tax, { deps: [subtotal, tax] })
 
 console.log(total)  // 220
 ```
@@ -82,10 +82,10 @@ Use `deps` to control when the computation re-runs:
 
 ```tsx
 const [items] = useItems()
-const [filter, setFilter] = useState('all')
+const [filter, setFilter] = use('all')
 
 // Only recomputes when items or filter changes
-const [filteredItems] = useState(() => {
+const [filteredItems] = use(() => {
   return items.filter(item =>
     filter === 'all' ? true : item.status === filter
   )
@@ -105,7 +105,7 @@ Pass an async function to handle data fetching with built-in status and error st
 </ClientOnly>
 
 ```tsx
-const [users, control] = useState(async () => {
+const [users, control] = use(async () => {
   const res = await fetch('/api/users')
   return res.json()
 })
@@ -145,10 +145,10 @@ Use the `key` option to share state across components:
 
 ```tsx
 // In Component A
-const [count, setCount] = useState(0, { key: 'app:count' })
+const [count, setCount] = use(0, { key: 'app:count' })
 
 // In Component B - shares the same state
-const [count, setCount] = useState(0, { key: 'app:count' })
+const [count, setCount] = use(0, { key: 'app:count' })
 
 // Changes in A are reflected in B and vice versa
 ```
@@ -159,11 +159,11 @@ Keys can be arrays for hierarchical namespacing:
 
 ```tsx
 // Array key - great for dynamic keys with IDs
-const [user, setUser] = useState(null, { key: ['user', 'profile', userId] })
-const [posts, setPosts] = useState([], { key: ['user', 'posts', userId] })
+const [user, setUser] = use(null, { key: ['user', 'profile', userId] })
+const [posts, setPosts] = use([], { key: ['user', 'posts', userId] })
 
 // Useful for cache key patterns similar to TanStack Query
-const [data, control] = useState(async () => fetchUser(id), {
+const [data, control] = use(async () => fetchUser(id), {
   key: ['users', id]
 })
 ```
@@ -172,8 +172,8 @@ const [data, control] = useState(async () => fetchUser(id), {
 
 ```tsx
 function Counter() {
-  const [count, setCount] = useState(0)
-  const [doubled] = useState(() => count * 2, { deps: [count] })
+  const [count, setCount] = use(0)
+  const [doubled] = use(() => count * 2, { deps: [count] })
 
   return (
     <div>
@@ -187,5 +187,5 @@ function Counter() {
 
 ## See Also
 
-- [useEffect()](/docs/core/effect)
+- [use()](/docs/core/effect)
 - [sync()](/docs/core/sync)

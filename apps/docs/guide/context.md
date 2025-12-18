@@ -1,14 +1,14 @@
 # Global State Sharing
 
 ::: warning Deprecated: Context API
-The Context API (`createContext`, `context`) is deprecated. Use `useState()` with `key` option instead.
+The Context API (`createContext`, `context`) is deprecated. Use `use()` with `key` option instead.
 
-Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `useState()` with keys for global state sharing.
+Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `use()` with keys for global state sharing.
 :::
 
-## Recommended: Use useState() with key
+## Recommended: Use use() with key
 
-Instead of Context API, use `useState()` with a `key` option to share state globally:
+Instead of Context API, use `use()` with a `key` option to share state globally:
 
 ```tsx
 import { useState } from 'flexium/core'
@@ -18,7 +18,7 @@ const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app:theme'
 
 // In any component - access the same state
 function ThemedButton() {
-  const [theme, setTheme] = useState('light', { key: 'app:theme' })
+  const [theme, setTheme] = use('light', { key: 'app:theme' })
 
   return (
     <button
@@ -84,19 +84,19 @@ function Header() {
 import { useState } from 'flexium/core'
 
 // Theme state
-const [theme, setTheme] = useState('light', { key: 'app:theme' })
+const [theme, setTheme] = use('light', { key: 'app:theme' })
 
 // Language state
-const [lang, setLang] = useState('en', { key: 'app:language' })
+const [lang, setLang] = use('en', { key: 'app:language' })
 
 // User state
-const [user, setUser] = useState(null, { key: 'app:user' })
+const [user, setUser] = use(null, { key: 'app:user' })
 
 // Use in any component
 function ProfileCard() {
-  const [theme, setTheme] = useState('light', { key: 'app:theme' })
-  const [lang, setLang] = useState('en', { key: 'app:language' })
-  const [user, setUser] = useState(null, { key: 'app:user' })
+  const [theme, setTheme] = use('light', { key: 'app:theme' })
+  const [lang, setLang] = use('en', { key: 'app:language' })
+  const [user, setUser] = use(null, { key: 'app:user' })
   
   return (
     <div class={`card-${theme}`}>
@@ -107,7 +107,7 @@ function ProfileCard() {
 }
 ```
 
-## Benefits of useState() with key
+## Benefits of use() with key
 
 - ✅ **No Provider boilerplate** - No wrapper components needed
 - ✅ **No hierarchy** - Access from anywhere, not just child components
@@ -117,7 +117,7 @@ function ProfileCard() {
 
 ## Migration from Context API
 
-If you're using deprecated Context API, migrate to `useState()` with keys:
+If you're using deprecated Context API, migrate to `use()` with keys:
 
 ```tsx
 // ❌ Old way (deprecated)
@@ -126,7 +126,7 @@ import { createContext, context } from 'flexium/core'
 const ThemeContext = createContext('light')
 
 function App() {
-  const [theme, setTheme] = useState('dark')
+  const [theme, setTheme] = use('dark')
   return (
     <ThemeContext.Provider value={theme}>
       <Child />
@@ -144,13 +144,13 @@ import { useState } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme, setTheme] = useState('dark', { key: 'app:theme' })
+  const [theme, setTheme] = use('dark', { key: 'app:theme' })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const [theme, setTheme] = useState('light', { key: 'app:theme' })
+  const [theme, setTheme] = use('light', { key: 'app:theme' })
   return <div>{theme}</div>
 }
 ```
@@ -164,5 +164,5 @@ function Child() {
 
 ## See Also
 
-- [useState()](/docs/core/state) - Complete useState() documentation with key option
+- [use()](/docs/core/state) - Complete use() documentation with key option
 - [Best Practices: State Organization](/docs/guide/best-practices/state-organization) - How to organize global state

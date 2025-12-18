@@ -85,7 +85,7 @@ type StateValue<T> = T & {
 ```tsx
 import { useState } from 'flexium/core'
 
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
 // Read value (tracks dependency)
 console.log(count) // 0
@@ -99,7 +99,7 @@ setCount(5)
 const current = count
 ```
 
-**Related:** `Computed`, `useEffect()`, `useState()`
+**Related:** `Computed`, `use()`, `use()`
 
 ### Computed
 
@@ -118,15 +118,15 @@ type Computed<T> = Readonly<StateValue<T>>
 ```tsx
 import { useState } from 'flexium/core'
 
-const [count, setCount] = useState(1)
-const [doubled] = useState(() => count * 2)
+const [count, setCount] = use(1)
+const [doubled] = use(() => count * 2)
 
 console.log(doubled) // 2
 setCount(5)
 console.log(doubled) // 10
 ```
 
-**Related:** `StateValue`, `useState()`
+**Related:** `StateValue`, `use()`
 
 ### Resource
 
@@ -153,8 +153,8 @@ type Resource<T> = StateValue<T | undefined> & {
 **Usage:**
 ```tsx
 import { useState } from 'flexium/core'
-// useState() handles async functions as resources
-const [user, setUser] = useState(async () => fetchUser(userId))
+// use() handles async functions as resources
+const [user, setUser] = use(async () => fetchUser(userId))
 
 return () => {
   if (user.status === 'loading') return <div>Loading...</div>
@@ -163,7 +163,7 @@ return () => {
 }
 ```
 
-**Related:** `useState()`, `StateValue`
+**Related:** `use()`, `StateValue`
 
 ## Component Types
 
@@ -247,12 +247,12 @@ import { useState } from 'flexium/core'
 const [theme, setTheme] = useState<'light' | 'dark'>('dark', { key: 'app:theme' })
 
 function ThemedComponent() {
-  const [theme, setTheme] = useState('light', { key: 'app:theme' })
+  const [theme, setTheme] = use('light', { key: 'app:theme' })
   return <div>Current theme: {theme}</div>
 }
 ```
 
-**Related:** `useState()` with `key` option (replaces Context API)
+**Related:** `use()` with `key` option (replaces Context API)
 
 ## Router Types
 
@@ -503,8 +503,8 @@ interface DrawRectProps {
 ```tsx
 import { useState } from 'flexium/core'
 
-const [x, setX] = useState(10)
-const [fill, setFill] = useState('red')
+const [x, setX] = use(10)
+const [fill, setFill] = use('red')
 
 <DrawRect
   x={x}

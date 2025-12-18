@@ -15,10 +15,10 @@ head:
 Flexium provides low-level reactive primitives through the `flexium/core` subpath for users who need fine-grained control over reactivity.
 
 ::: tip When to Use
-Most applications should use the `useState()` API from `flexium/core`. The advanced API is for:
+Most applications should use the `use()` API from `flexium/core`. The advanced API is for:
 - Library authors building on top of Flexium
 - Performance-critical code requiring manual optimization
-- Advanced patterns not covered by `useState()`
+- Advanced patterns not covered by `use()`
 :::
 
 ## Import
@@ -44,10 +44,10 @@ Creates an isolated reactive scope. Useful for managing cleanup of effects.
 import { useEffect, useState } from 'flexium/core'
 import { root } from 'flexium/core'
 
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
 const dispose = root((dispose) => {
-  useEffect(() => {
+  use(() => {
     console.log('Count:', count)
   })
 
@@ -69,11 +69,11 @@ Reads reactive values without creating dependencies. Useful when you need to acc
 import { useEffect, useState } from 'flexium/core'
 import { untrack } from 'flexium/core'
 
-const [count, setCount] = useState(0)
-const [multiplier, setMultiplier] = useState(2)
+const [count, setCount] = use(0)
+const [multiplier, setMultiplier] = use(2)
 
 // Only re-runs when 'count' changes, not 'multiplier'
-useEffect(() => {
+use(() => {
   const result = count * untrack(() => multiplier)
   console.log('Result:', result)
 })
@@ -90,7 +90,7 @@ Here's an example of building a custom store using advanced primitives:
 import { useEffect, useState } from 'flexium/core'
 
 function createStore<T extends object>(initialState: T) {
-  const [storeState, setStoreState] = useState(initialState)
+  const [storeState, setStoreState] = use(initialState)
 
   return {
     get: () => storeState,
@@ -100,7 +100,7 @@ function createStore<T extends object>(initialState: T) {
 
     // Subscribe to changes
     subscribe(callback: (s: T) => void) {
-      return useEffect(() => callback(storeState))
+      return use(() => callback(storeState))
     }
   }
 }
@@ -116,7 +116,7 @@ console.log(store.get().count)  // 1
 
 ## When to Use Advanced API
 
-### Use `useState()` (recommended)
+### Use `use()` (recommended)
 - Building application components
 - Normal state management needs
 - When you want the simplest API

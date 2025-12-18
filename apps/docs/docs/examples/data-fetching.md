@@ -12,7 +12,7 @@ Data fetching pattern examples including caching, infinite scroll, optimistic up
 import { useState } from 'flexium/core'
 
 function PostList() {
-  const [posts, setPosts] = useState(async () => {
+  const [posts, setPosts] = use(async () => {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch posts')
     return res.json()
@@ -53,7 +53,7 @@ function PostList() {
 // Share same data across multiple components
 function PostList() {
   // Cache with global key
-  const [posts, setPosts] = useState(async () => {
+  const [posts, setPosts] = use(async () => {
     return fetch('/api/posts').then(r => r.json())
   }, { key: ['posts', 'all'] })
 
@@ -62,13 +62,13 @@ function PostList() {
 
 function PostDetail({ postId }: { postId: number }) {
   // Find from already cached posts
-  const [allPosts, setAllPosts] = useState(null, { key: ['posts', 'all'] })
-  const [post, setPost] = useState(() => {
+  const [allPosts, setAllPosts] = use(null, { key: ['posts', 'all'] })
+  const [post, setPost] = use(() => {
     return allPosts?.find(p => p.id === postId)
   })
 
   // Fetch individually if not found
-  const [fetchedPost, setFetchedPost] = useState(async () => {
+  const [fetchedPost, setFetchedPost] = use(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
   }, { key: ['posts', postId] })
@@ -86,9 +86,9 @@ import { useState, useEffect } from 'flexium/core'
 
 function InfiniteScrollList() {
   const [items, setItems] = useState<any[]>([])
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
+  const [page, setPage] = use(1)
+  const [hasMore, setHasMore] = use(true)
+  const [isLoading, setIsLoading] = use(false)
   const [error, setError] = useState<Error | null>(null)
   
   const loadMore = async () => {
@@ -114,7 +114,7 @@ function InfiniteScrollList() {
   }
   
   // Scroll event listener
-  useEffect(() => {
+  use(() => {
     const handleScroll = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop
       const windowHeight = window.innerHeight
@@ -159,14 +159,14 @@ function InfiniteScrollList() {
 import { useState, sync } from 'flexium/core'
 
 function LikeButton({ postId }: { postId: number }) {
-  const [post, setPost] = useState(async () => {
+  const [post, setPost] = use(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
   }, { key: ['posts', postId] })
 
-  const [isLiked, setIsLiked] = useState(() => post?.isLiked ?? false)
-  const [likeCount, setLikeCount] = useState(() => post?.likeCount ?? 0)
-  const [isUpdating, setIsUpdating] = useState(false)
+  const [isLiked, setIsLiked] = use(() => post?.isLiked ?? false)
+  const [likeCount, setLikeCount] = use(() => post?.likeCount ?? 0)
+  const [isUpdating, setIsUpdating] = use(false)
   
   const toggleLike = async () => {
     const previousLiked = isLiked
@@ -224,10 +224,10 @@ function LikeButton({ postId }: { postId: number }) {
 import { useState } from 'flexium/core'
 
 function DataWithRetry() {
-  const [retryCount, setRetryCount] = useState(0)
+  const [retryCount, setRetryCount] = use(0)
   const maxRetries = 3
 
-  const [data, setData] = useState(async () => {
+  const [data, setData] = use(async () => {
     const res = await fetch('/api/data')
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`)
@@ -273,18 +273,18 @@ function DataWithRetry() {
 import { useState, useEffect } from 'flexium/core'
 
 function DataWithAutoRetry() {
-  const [data, setData] = useState(async () => {
+  const [data, setData] = use(async () => {
     const res = await fetch('/api/data')
     if (!res.ok) throw new Error('Failed to fetch')
     return res.json()
   }, { key: 'data:auto-retry' })
 
-  const [retryCount, setRetryCount] = useState(0)
-  const [shouldRetry, setShouldRetry] = useState(false)
+  const [retryCount, setRetryCount] = use(0)
+  const [shouldRetry, setShouldRetry] = use(false)
   const maxRetries = 3
 
   // Automatic retry on error
-  useEffect(() => {
+  use(() => {
     if (data.status === 'error' && retryCount < maxRetries) {
       const delay = Math.min(1000 * Math.pow(2, retryCount), 10000) // Exponential backoff
       
@@ -331,15 +331,15 @@ function DataWithAutoRetry() {
 import { useState, useEffect } from 'flexium/core'
 
 function PollingData({ interval = 5000 }: { interval?: number }) {
-  const [data, setData] = useState(async () => {
+  const [data, setData] = use(async () => {
     const res = await fetch('/api/data')
     return res.json()
   }, { key: 'data:polling' })
 
-  const [isPolling, setIsPolling] = useState(true)
+  const [isPolling, setIsPolling] = use(true)
 
   // Polling setup
-  useEffect(() => {
+  use(() => {
     if (!isPolling) return
     
     const intervalId = setInterval(() => {
@@ -374,6 +374,6 @@ function PollingData({ interval = 5000 }: { interval?: number }) {
 
 ## Related Documentation
 
-- [useState() API - Async State](/docs/core/state#async-state) - Async state API
+- [use() API - Async State](/docs/core/state#async-state) - Async state API
 - [Best Practices - Common Patterns](/docs/guide/best-practices/patterns) - Data fetching patterns
 - [Best Practices - Performance Optimization](/docs/guide/best-practices/performance) - Performance optimization guide

@@ -313,7 +313,7 @@ Use motion with Flexium's state for reactive animations.
 import { useState } from 'flexium/core'
 import { MotionController } from 'flexium/primitives'
 
-const [isVisible, setIsVisible] = useState(false)
+const [isVisible, setIsVisible] = use(false)
 
 const element = document.createElement('div')
 const controller = new MotionController(element)
@@ -431,7 +431,7 @@ import { MotionController } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function AnimatedCard() {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = use(false)
 
   const card = document.createElement('div')
   card.style.padding = '20px'

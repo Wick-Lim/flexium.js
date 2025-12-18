@@ -31,7 +31,7 @@ function User(props: Props) {
 
 ## State Typing
 
-`useState()` infers types automatically, or you can specify them.
+`use()` infers types automatically, or you can specify them.
 
 ```tsx
 const count = useState<number>(0);

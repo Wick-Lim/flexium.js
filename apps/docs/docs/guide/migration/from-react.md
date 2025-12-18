@@ -10,10 +10,10 @@ This guide walks you through migrating React apps to Flexium step by step.
 
 Flexium provides a React-like API but with some important differences:
 
-- ✅ **Single API**: One `useState()` for all state management
+- ✅ **Single API**: One `use()` for all state management
 - ✅ **Familiar pattern**: Same `[value, setter]` tuple as React
 - ✅ **No Virtual DOM**: Faster rendering
-- ✅ **Same dependency arrays**: `useEffect(fn, [deps])` like React
+- ✅ **Same dependency arrays**: `use(fn, [deps])` like React
 
 ---
 
@@ -22,8 +22,8 @@ Flexium provides a React-like API but with some important differences:
 | React | Flexium | Notes |
 |-------|---------|-------|
 | `useState` | `useState` | Same `[value, setter]` tuple |
-| `useMemo` | `useState(() => ..., { deps })` | computed state with deps |
-| `useEffect` | `useEffect(fn, deps)` | Same pattern with deps array |
+| `useMemo` | `use(() => ..., { deps })` | computed state with deps |
+| `useEffect` | `use(fn, deps)` | Same pattern with deps array |
 | `useCallback` | Unnecessary | Auto-optimized |
 | `useRef` | `useRef` | Same |
 | `useContext` | `useContext` | Same |
@@ -64,7 +64,7 @@ import { useState, useEffect } from 'flexium/core'
 import { useState } from 'react'
 
 function Counter() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
   
   return (
     <div>
@@ -78,7 +78,7 @@ function Counter() {
 import { useState } from 'flexium/core'
 
 function Counter() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
 
   return (
     <div>
@@ -103,8 +103,8 @@ function Counter() {
 import { useState, useMemo } from 'react'
 
 function Calculator() {
-  const [price, setPrice] = useState(100)
-  const [quantity, setQuantity] = useState(2)
+  const [price, setPrice] = use(100)
+  const [quantity, setQuantity] = use(2)
 
   const total = useMemo(() => price * quantity, [price, quantity])
 
@@ -115,19 +115,19 @@ function Calculator() {
 import { useState } from 'flexium/core'
 
 function Calculator() {
-  const [price, setPrice] = useState(100)
-  const [quantity, setQuantity] = useState(2)
+  const [price, setPrice] = use(100)
+  const [quantity, setQuantity] = use(2)
 
   // Use deps to specify dependencies (like useMemo)
-  const [total] = useState(() => price * quantity, { deps: [price, quantity] })
+  const [total] = use(() => price * quantity, { deps: [price, quantity] })
 
   return <div>Total: {total}</div>
 }
 ```
 
 **Changes**:
-- `useMemo(() => ..., [deps])` → `useState(() => ..., { deps: [...] })`
-- Returns a tuple: `const [value] = useState(...)`
+- `useMemo(() => ..., [deps])` → `use(() => ..., { deps: [...] })`
+- Returns a tuple: `const [value] = use(...)`
 
 ---
 
@@ -138,9 +138,9 @@ function Calculator() {
 import { useState, useEffect } from 'react'
 
 function Timer() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
   
-  useEffect(() => {
+  use(() => {
     const interval = setInterval(() => {
       setCount(c => c + 1)
     }, 1000)
@@ -155,9 +155,9 @@ function Timer() {
 import { useState, useEffect } from 'flexium/core'
 
 function Timer() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
 
-  useEffect(() => {
+  use(() => {
     const interval = setInterval(() => {
       setCount(c => c + 1)
     }, 1000)
@@ -183,9 +183,9 @@ function Timer() {
 import { useState, useEffect } from 'react'
 
 function UserProfile({ userId }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = use(null)
   
-  useEffect(() => {
+  use(() => {
     fetch(`/api/users/${userId}`)
       .then(res => res.json())
       .then(data => setUser(data))
@@ -198,9 +198,9 @@ function UserProfile({ userId }) {
 import { useState, useEffect } from 'flexium/core'
 
 function UserProfile({ userId }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = use(null)
 
-  useEffect(() => {
+  use(() => {
     fetch(`/api/users/${userId}`)
       .then(res => res.json())
       .then(data => setUser(data))
@@ -222,7 +222,7 @@ function UserProfile({ userId }) {
 import { useState, useCallback } from 'react'
 
 function Parent() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
   
   const handleClick = useCallback(() => {
     setCount(c => c + 1)
@@ -235,7 +235,7 @@ function Parent() {
 import { useState } from 'flexium/core'
 
 function Parent() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = use(0)
 
   // useCallback unnecessary - auto-optimized
   const handleClick = () => {
@@ -308,25 +308,25 @@ function Child() {
   return <div>Theme: {theme}</div>
 }
 
-// ✅ After (Flexium) - Use useState() with key
+// ✅ After (Flexium) - Use use() with key
 import { useState } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme, setTheme] = useState('dark', { key: 'app:theme' })
+  const [theme, setTheme] = use('dark', { key: 'app:theme' })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const [theme, setTheme] = useState('light', { key: 'app:theme' })
+  const [theme, setTheme] = use('light', { key: 'app:theme' })
   return <div>Theme: {theme}</div>
 }
 ```
 
 **Changes**:
-- `createContext` → `useState()` with `key` option
-- `useContext` → `useState()` with same `key`
+- `createContext` → `use()` with `key` option
+- `useContext` → `use()` with same `key`
 - No Provider needed - state is global
 
 ---
@@ -364,7 +364,7 @@ function Counter() {
 import { useState } from 'flexium/core'
 
 function Counter() {
-  const [counterState, setCounterState] = useState({ count: 0 })
+  const [counterState, setCounterState] = use({ count: 0 })
   
   const increment = () => setCounterState(s => ({ ...s, count: s.count + 1 }))
   const decrement = () => setCounterState(s => ({ ...s, count: s.count - 1 }))
@@ -538,12 +538,12 @@ function UserDetail() {
 
 ```tsx
 // React: Dependency array required
-useEffect(() => {
+use(() => {
   console.log(count)
 }, [count])
 
 // Flexium: Same pattern!
-useEffect(() => {
+use(() => {
   console.log(count)
 }, [count])
 ```
@@ -588,14 +588,14 @@ function TodoApp() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
   
-  useEffect(() => {
+  use(() => {
     const saved = localStorage.getItem('todos')
     if (saved) {
       setTodos(JSON.parse(saved))
     }
   }, [])
   
-  useEffect(() => {
+  use(() => {
     localStorage.setItem('todos', JSON.stringify(todos))
   }, [todos])
   
@@ -663,7 +663,7 @@ function TodoApp() {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
 
   // Load from local storage
-  useEffect(() => {
+  use(() => {
     const saved = localStorage.getItem('todos')
     if (saved) {
       setTodos(JSON.parse(saved))
@@ -671,7 +671,7 @@ function TodoApp() {
   })
 
   // Save to local storage
-  useEffect(() => {
+  use(() => {
     localStorage.setItem('todos', JSON.stringify(todos))
   })
   
@@ -686,7 +686,7 @@ function TodoApp() {
   }
   
   // Filtering with computed state
-  const [filteredTodos, setFilteredTodos] = useState(() => {
+  const [filteredTodos, setFilteredTodos] = use(() => {
     if (filter === 'active') return todos.filter(t => !t.completed)
     if (filter === 'completed') return todos.filter(t => t.completed)
     return todos
@@ -727,7 +727,7 @@ function TodoApp() {
 **Key Changes**:
 - `useState` → `useState` (same!)
 - `useEffect` → `useEffect` (same!)
-- `useMemo` → `useState(() => ...)`
+- `useMemo` → `use(() => ...)`
 - `onClick` → `onclick`
 - `onChange` → `onchange`
 - `onKeyDown` → `onkeydown`
@@ -800,7 +800,7 @@ sync(() => {
 
 ```tsx
 // State shared across multiple components should be global
-const [user] = useState(null, { key: 'auth:user' })
+const [user] = use(null, { key: 'auth:user' })
 ```
 
 ---

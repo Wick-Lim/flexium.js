@@ -77,7 +77,7 @@ import ContextDemo from './components/ContextDemo.vue'
 
 ## Counter Demo
 
-A simple counter demonstrating `useState()` and computed values - the building blocks of Flexium reactivity.
+A simple counter demonstrating `use()` and computed values - the building blocks of Flexium reactivity.
 
 <ClientOnly>
   <ShowcaseDemo />
@@ -89,8 +89,8 @@ import { useState } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Counter() {
-  const [count, setCount] = useState(0)
-  const [doubled] = useState(() => count * 2)  // derived value
+  const [count, setCount] = use(0)
+  const [doubled] = use(() => count * 2)  // derived value
 
   return (
     <Column gap={16} padding={24}>
@@ -131,11 +131,11 @@ import { useState } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function TodoApp() {
-  const [todos, setTodos] = useState([
+  const [todos, setTodos] = use([
     { id: 1, text: 'Learn Flexium', done: true },
     { id: 2, text: 'Build something awesome', done: false }
   ])
-  const [inputText, setInputText] = useState('')
+  const [inputText, setInputText] = use('')
 
   const addTodo = () => {
     if (!inputText.trim()) return
@@ -202,9 +202,9 @@ import { useState, useEffect } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Stopwatch() {
-  const [seconds, setSeconds] = useState(0)
-  const [isRunning, setIsRunning] = useState(false)
-  const [laps, setLaps] = useState([])
+  const [seconds, setSeconds] = use(0)
+  const [isRunning, setIsRunning] = use(false)
+  const [laps, setLaps] = use([])
 
   // Format time display
   const formatTime = (s) => {
@@ -272,13 +272,13 @@ import { useState, useEffect } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function ParticleCanvas() {
-  const [mouseX, setMouseX] = useState(150)
-  const [mouseY, setMouseY] = useState(150)
-  const [hue, setHue] = useState(0)
-  const [particles, setParticles] = useState([])
+  const [mouseX, setMouseX] = use(150)
+  const [mouseY, setMouseY] = use(150)
+  const [hue, setHue] = use(0)
+  const [particles, setParticles] = use([])
 
   // Animate hue
-  useEffect(() => {
+  use(() => {
     const id = setInterval(() => setHue(h => (h + 1) % 360), 16)
     return () => clearInterval(id)
   })
@@ -341,10 +341,10 @@ import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
 import { keyboard, useLoop, Keys } from 'flexium/interactive'
 
-const [snake, setSnake] = useState([{ x: 7, y: 7 }])
-const [direction, setDirection] = useState('RIGHT')
-const [food, setFood] = useState({ x: 12, y: 7 })
-const [score, setScore] = useState(0)
+const [snake, setSnake] = use([{ x: 7, y: 7 }])
+const [direction, setDirection] = use('RIGHT')
+const [food, setFood] = use({ x: 12, y: 7 })
+const [score, setScore] = use(0)
 
 function SnakeGame() {
   const kb = keyboard()
@@ -356,7 +356,7 @@ function SnakeGame() {
     }
   })
 
-  useEffect(() => {
+  use(() => {
     gameLoop.start()
     return () => gameLoop.stop()
   })
@@ -394,7 +394,7 @@ import { useState } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const [user, setUser] = useState(null, { key: ['app', 'auth', 'user'] })
+  const [user, setUser] = use(null, [], { key: ['app', 'auth', 'user'] })
   
   const login = (name: string) => {
     setUser({ name })
@@ -429,7 +429,7 @@ function useCart() {
     setItems(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
   }
   
-  const [total] = useState(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), { key: ['app', 'cart', 'total'] })
+  const [total] = use(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), [], { key: ['app', 'cart', 'total'] })
   
   return { items, addItem, removeItem, updateQty, total }
 }
@@ -534,7 +534,7 @@ Each documentation page now includes live demos. Here are some highlights:
   <div class="example-icon">⚡</div>
   <div class="example-content">
     <h3>Async State</h3>
-    <p>Data fetching with loading states using useState(async)</p>
+    <p>Data fetching with loading states using use(async)</p>
   </div>
 </a>
 

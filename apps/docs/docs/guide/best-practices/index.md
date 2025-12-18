@@ -25,7 +25,7 @@ Learn when to use local vs global state, how to name state keys, and how to mana
 Learn how to optimize the performance of Flexium apps.
 
 **Key Topics:**
-- Sync updates (`useSync()`)
+- Sync updates (`sync()`)
 - Computed optimization
 - List rendering optimization
 - Global State cleanup
@@ -65,16 +65,16 @@ Learn common mistakes and anti-patterns to avoid.
 
 ```tsx
 // Local state
-const [count, setCount] = useState(0)
+const [count, setCount] = use(0)
 
 // Global state
-const [user, setUser] = useState(null, { key: 'auth:user' })
+const [user, setUser] = use(null, { key: 'auth:user' })
 
 // Computed state
-const [doubled] = useState(() => count * 2)
+const [doubled] = use(() => count * 2)
 
 // Async state
-const [data] = useState(async () => {
+const [data] = use(async () => {
   return fetch('/api/data').then(r => r.json())
 })
 ```
@@ -84,7 +84,7 @@ const [data] = useState(async () => {
 ```tsx
 import { useSync } from 'flexium/core'
 
-useSync(() => {
+sync(() => {
   setA(1)
   setB(2)
   setC(3)

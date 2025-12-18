@@ -56,7 +56,7 @@ Use motion with reactive state:
 import { MotionController } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
-const [isExpanded, setIsExpanded] = useState(false)
+const [isExpanded, setIsExpanded] = use(false)
 const controller = new MotionController(element)
 
 // Watch state and animate
@@ -113,7 +113,7 @@ import { Transition } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function App() {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = use(false)
 
   return (
     <div>
@@ -232,7 +232,7 @@ import { TransitionGroup, Transition } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function NotificationList() {
-  const [notifications, setNotifications] = useState([...])
+  const [notifications, setNotifications] = use([...])
 
   return (
     <TransitionGroup stagger={50}>
@@ -364,7 +364,7 @@ import { TransitionGroup, Transition } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function TodoList() {
-  const [todos, setTodos] = useState([
+  const [todos, setTodos] = use([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build app' }
   ])

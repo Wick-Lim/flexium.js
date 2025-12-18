@@ -1,4 +1,4 @@
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { fetchIds, fetchItem, fetchUser } from './api'
 
 // Types
@@ -19,21 +19,21 @@ interface Story {
     descendants?: number
 }
 
-// Store Actions & Accessors using unified useState() API
+// Store Actions & Accessors using unified use() API
 
 // 1. Lists (Top, New, etc.)
 export function useList(type: string) {
-    return useState<number[]>([], { key: ['list', type] });
+    return use<number[]>([], undefined, { key: ['list', type] });
 }
 
 // 2. Items (Stories, Comments)
 export function useItem(id: number) {
-    return useState<Story | undefined>(undefined, { key: ['item', id] });
+    return use<Story | undefined>(undefined, undefined, { key: ['item', id] });
 }
 
 // 3. Users
 export function useUser(id: string) {
-    return useState<any>(undefined, { key: ['user', id] });
+    return use<any>(undefined, undefined, { key: ['user', id] });
 }
 
 // Fetch Actions

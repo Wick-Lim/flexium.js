@@ -420,7 +420,7 @@ describe('vite-plugin-flexium', () => {
 
     it('should add import for useEffect when used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'useEffect(() => console.log(count.value));';
+      const code = 'use(() => console.log(count.value));';
       const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
 
       expect(result).not.toBeNull();
@@ -429,16 +429,16 @@ describe('vite-plugin-flexium', () => {
 
     // Note: batch is deprecated - use sync from flexium/advanced instead
 
-    // Note: onCleanup and createContext are deprecated - use useEffect() and useState() with key instead
+    // Note: onCleanup and createContext are deprecated - use use() and use() with key instead
 
-    // Note: useContext is deprecated - use useState() with key instead
+    // Note: useContext is deprecated - use use() with key instead
 
     it('should add multiple imports when multiple primitives are used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);
       const code = `
         const count = signal(0);
         const doubled = computed(() => count.value * 2);
-        useEffect(() => console.log(doubled.value));
+        use(() => console.log(doubled.value));
       `;
       const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
 
