@@ -134,7 +134,7 @@ const gameLoop = useLoop({
 ```tsx
 function PausableGame() {
   const [paused, setPaused] = use(false)
-  const kb = keyboard()
+  const kb = useKeyboard()
 
   const gameLoop = useLoop({
     onUpdate: (delta) => {
@@ -229,6 +229,6 @@ const gameLoop = useLoop({
 
 ## See Also
 
-- [keyboard()](/docs/interactive/keyboard)
-- [mouse()](/docs/interactive/mouse)
+- [useKeyboard()](/docs/interactive/keyboard)
+- [useMouse()](/docs/interactive/mouse)
 - [&lt;Canvas /&gt;](/docs/canvas/canvas)

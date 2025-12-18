@@ -73,8 +73,8 @@ flexium.js/
 │       │   │
 │       │   └── interactive/  # Game loop & input
 │       │       ├── loop.ts       # useLoop()
-│       │       ├── keyboard.ts   # keyboard()
-│       │       └── mouse.ts      # mouse()
+│       │       ├── keyboard.ts   # useKeyboard()
+│       │       └── mouse.ts      # useMouse()
 │       │
 │       └── src/__tests__/    # Test files
 │

@@ -66,7 +66,7 @@ function UseMouseDemo() {
           color: '#111827',
           fontWeight: '600'
         }
-      }, 'mouse() Demo'),
+      }, 'useMouse() Demo'),
       f('p', {
         style: {
           margin: 0,

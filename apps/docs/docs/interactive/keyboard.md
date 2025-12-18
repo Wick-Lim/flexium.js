@@ -1,4 +1,4 @@
-# keyboard()
+# useKeyboard()
 
 Track keyboard input for games and interactive applications.
 
@@ -11,7 +11,7 @@ import { keyboard, Keys } from 'flexium/interactive'
 ## Signature
 
 ```ts
-function keyboard(): KeyboardState
+function useKeyboard(): KeyboardState
 
 interface KeyboardState {
   isPressed: (key: string) => boolean
@@ -54,7 +54,7 @@ Keys.Alt
 
 ```tsx
 function Game() {
-  const kb = keyboard()
+  const kb = useKeyboard()
 
   const gameLoop = useLoop({
     onUpdate: () => {
@@ -75,7 +75,7 @@ function Game() {
 
 ```tsx
 function PlayerController() {
-  const kb = keyboard()
+  const kb = useKeyboard()
 
   use(() => {
     if (kb.isPressed('w') || kb.isPressed('W')) {
@@ -97,7 +97,7 @@ function PlayerController() {
 ### Jump Detection
 
 ```tsx
-const kb = keyboard()
+const kb = useKeyboard()
 
 const gameLoop = useLoop({
   onUpdate: () => {
@@ -113,7 +113,7 @@ const gameLoop = useLoop({
 
 ```tsx
 const [paused] = use(false)
-const kb = keyboard()
+const kb = useKeyboard()
 
 use(() => {
   if (kb.isJustPressed(Keys.Escape)) {
@@ -125,7 +125,7 @@ use(() => {
 ### Multiple Keys
 
 ```tsx
-const kb = keyboard()
+const kb = useKeyboard()
 
 // Sprint while holding shift
 const speed = kb.isPressed(Keys.Shift) ? 10 : 5
@@ -140,7 +140,7 @@ if (kb.isPressed(Keys.Control) && kb.isJustPressed('s')) {
 
 ```tsx
 function DebugOverlay() {
-  const kb = keyboard()
+  const kb = useKeyboard()
 
   return (
     <div class="debug">
@@ -174,5 +174,5 @@ import UseKeyboardDemo from '../../components/UseKeyboardDemo.vue'
 
 ## See Also
 
-- [mouse()](/docs/interactive/mouse)
+- [useMouse()](/docs/interactive/mouse)
 - [useLoop()](/docs/interactive/loop)

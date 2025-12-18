@@ -104,8 +104,8 @@ packages/flexium/src/
     ├── index.ts
     ├── types.ts
     ├── loop.ts           # useLoop() - Game loop
-    ├── keyboard.ts       # keyboard() - Keyboard input
-    └── mouse.ts          # mouse() - Mouse input
+    ├── keyboard.ts       # useKeyboard() - Keyboard input
+    └── mouse.ts          # useMouse() - Mouse input
 ```
 
 ---

@@ -24,8 +24,8 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 | --- | --- | --- |
 | [`use()` with `key`](#usestate-with-key) | `flexium/core` | Share state globally (replaces Context API) |
 | [`useRouter()`](#userouter) | `flexium/router` | Access routing state and navigation |
-| [`keyboard()`](#keyboard) | `flexium/interactive` | Track keyboard input state |
-| [`mouse()`](#mouse) | `flexium/interactive` | Track mouse position and button state |
+| [`useKeyboard()`](#keyboard) | `flexium/interactive` | Track keyboard input state |
+| [`useMouse()`](#mouse) | `flexium/interactive` | Track mouse position and button state |
 
 ---
 
@@ -307,7 +307,7 @@ import { keyboard, Keys } from 'flexium/interactive';
 import { use } from 'flexium/core';
 
 function PlayerController() {
-  const kb = keyboard();
+  const kb = useKeyboard();
   const [position, setPosition] = use({ x: 0, y: 0 });
 
   // React to keyboard input
@@ -348,7 +348,7 @@ import { keyboard, Keys, useLoop } from 'flexium/interactive';
 import { use } from 'flexium/core';
 
 function Game() {
-  const kb = keyboard();
+  const kb = useKeyboard();
   const [player, setPlayer] = use({ x: 100, y: 100, jumping: false });
 
   useLoop((dt) => {
@@ -433,7 +433,7 @@ function CanvasInput() {
 
 ```tsx
 function GameComponent() {
-  const kb = keyboard();
+  const kb = useKeyboard();
 
   use(() => {
     return () => kb.dispose();
@@ -491,7 +491,7 @@ Returns a `MouseState` object:
 import { mouse } from 'flexium/interactive';
 
 function MouseTracker() {
-  const mouse = mouse();
+  const mouse = useMouse();
 
   return (
     <div>
@@ -549,7 +549,7 @@ import { mouse, useLoop } from 'flexium/interactive';
 import { use } from 'flexium/core';
 
 function ShootingGame() {
-  const m = mouse();
+  const m = useMouse();
   const [crosshair, setCrosshair] = use({ x: 0, y: 0 });
   const [projectiles, setProjectiles] = useState<Array<{ x: number, y: number }>>([]);
 
@@ -603,7 +603,7 @@ function ShootingGame() {
 
 ```tsx
 function ZoomableView() {
-  const m = mouse();
+  const m = useMouse();
   const [zoom, setZoom] = use(1);
 
   use(() => {
@@ -642,7 +642,7 @@ MouseButton.Right   // 2
 import { use } from 'flexium/core'
 
 function GameComponent() {
-  const m = mouse();
+  const m = useMouse();
 
   use(() => {
     return () => m.dispose();
@@ -932,8 +932,8 @@ function ResponsiveComponent() {
 import { use } from 'flexium/core'
 
 function GameComponent() {
-  const kb = keyboard();
-  const m = mouse();
+  const kb = useKeyboard();
+  const m = useMouse();
 
   use(() => {
     return () => {
@@ -980,7 +980,7 @@ import { keyboard, Keys } from 'flexium/interactive';
 
 function GamePlayer() {
   const { navigate } = useRouter();
-  const kb = keyboard();
+  const kb = useKeyboard();
   const [position, setPosition] = use({ x: 0, y: 0 });
 
   use(() => {
@@ -1028,7 +1028,7 @@ function useAuth() {
 function useEverything() {
   const [user, setUser] = use(null);
   const [theme, setTheme] = use('light');
-  const kb = keyboard();
+  const kb = useKeyboard();
   const r = useRouter();
   // Too much!
 }

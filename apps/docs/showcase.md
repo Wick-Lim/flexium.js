@@ -347,7 +347,7 @@ const [food, setFood] = use({ x: 12, y: 7 })
 const [score, setScore] = use(0)
 
 function SnakeGame() {
-  const kb = keyboard()
+  const kb = useKeyboard()
 
   const gameLoop = useLoop({
     onUpdate: (delta) => {

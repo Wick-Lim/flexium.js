@@ -115,7 +115,7 @@ flexium
 ├── /router       # SPA routing: Routes, Route, Link, Outlet, useRouter(), useLocation()
 ├── /server       # SSR: renderToString(), renderToStaticMarkup()
 ├── /canvas       # Canvas 2D: Canvas, DrawRect, DrawCircle, DrawText
-└── /interactive  # Game loop: useLoop(), keyboard(), mouse()
+└── /interactive  # Game loop: useLoop(), useKeyboard(), useMouse()
 ```
 
 ## Control Flow
@@ -191,7 +191,7 @@ import { useLoop, keyboard, Keys } from 'flexium/interactive'
 
 function Game() {
   const [x, setX] = use(100)
-  const kb = keyboard()
+  const kb = useKeyboard()
 
   const gameLoop = useLoop({
     fixedFps: 60,

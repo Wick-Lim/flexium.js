@@ -245,9 +245,9 @@ export default defineConfig({
           text: 'flexium/interactive',
           collapsed: false,
           items: [
-            { text: 'keyboard()', link: '/docs/interactive/keyboard' },
-            { text: 'mouse()', link: '/docs/interactive/mouse' },
-            { text: 'loop()', link: '/docs/interactive/loop' }
+            { text: 'useKeyboard()', link: '/docs/interactive/keyboard' },
+            { text: 'useMouse()', link: '/docs/interactive/mouse' },
+            { text: 'useLoop()', link: '/docs/interactive/loop' }
           ]
         },
         {
@@ -328,9 +328,9 @@ export default defineConfig({
           text: 'flexium/interactive',
           collapsed: false,
           items: [
-            { text: 'keyboard()', link: '/docs/interactive/keyboard' },
-            { text: 'mouse()', link: '/docs/interactive/mouse' },
-            { text: 'loop()', link: '/docs/interactive/loop' }
+            { text: 'useKeyboard()', link: '/docs/interactive/keyboard' },
+            { text: 'useMouse()', link: '/docs/interactive/mouse' },
+            { text: 'useLoop()', link: '/docs/interactive/loop' }
           ]
         },
         {
@@ -404,9 +404,9 @@ export default defineConfig({
           text: 'flexium/interactive',
           collapsed: false,
           items: [
-            { text: 'keyboard()', link: '/docs/interactive/keyboard' },
-            { text: 'mouse()', link: '/docs/interactive/mouse' },
-            { text: 'loop()', link: '/docs/interactive/loop' }
+            { text: 'useKeyboard()', link: '/docs/interactive/keyboard' },
+            { text: 'useMouse()', link: '/docs/interactive/mouse' },
+            { text: 'useLoop()', link: '/docs/interactive/loop' }
           ]
         },
         {

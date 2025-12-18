@@ -3,7 +3,7 @@ import { MouseButton, type MouseOptions, type MouseState } from './types'
 
 export { MouseButton, type MouseOptions, type MouseState }
 
-export function mouse(options: MouseOptions = {}): MouseState {
+export function useMouse(options: MouseOptions = {}): MouseState {
   const target = options.target || window
   const canvasGetter = typeof options.canvas === 'function' ? options.canvas : () => options.canvas as HTMLCanvasElement | undefined
 

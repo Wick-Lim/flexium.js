@@ -255,7 +255,7 @@ import { useLoop, keyboard, Keys } from 'flexium/interactive'
 
 function Game() {
   const [x, setX] = use(100)
-  const kb = keyboard()
+  const kb = useKeyboard()
 
   const gameLoop = useLoop({
     onUpdate: (delta) => {

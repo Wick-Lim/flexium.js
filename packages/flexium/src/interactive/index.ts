@@ -1,3 +1,3 @@
 export { useLoop, type Loop, type LoopCallbacks } from './loop'
-export { keyboard, Keys, type KeyboardState } from './keyboard'
-export { mouse, MouseButton, type MouseState, type MouseOptions } from './mouse'
+export { useKeyboard, Keys, type KeyboardState } from './keyboard'
+export { useMouse, MouseButton, type MouseState, type MouseOptions } from './mouse'

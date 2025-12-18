@@ -105,7 +105,7 @@ function UseKeyboardDemo() {
           color: '#111827',
           fontWeight: '600'
         }
-      }, 'keyboard() Demo'),
+      }, 'useKeyboard() Demo'),
       f('p', {
         style: {
           margin: 0,

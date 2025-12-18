@@ -1,4 +1,4 @@
-# mouse()
+# useMouse()
 
 Track mouse position and button states.
 
@@ -54,7 +54,7 @@ interface MouseState {
 
 ```tsx
 function Game() {
-  const m = mouse()
+  const m = useMouse()
 
   return (
     <div>
@@ -69,7 +69,7 @@ function Game() {
 ```tsx
 function DrawingApp() {
   const canvasRef = useRef(null)
-  const m = mouse()
+  const m = useMouse()
   const [isDrawing, setIsDrawing] = use(false)
 
   use(() => {
@@ -87,7 +87,7 @@ function DrawingApp() {
 ### Click Detection
 
 ```tsx
-const m = mouse()
+const m = useMouse()
 
 const gameLoop = useLoop({
   onUpdate: () => {
@@ -102,7 +102,7 @@ const gameLoop = useLoop({
 
 ```tsx
 function Cursor() {
-  const m = mouse()
+  const m = useMouse()
 
   return (
     <div
@@ -121,7 +121,7 @@ function Cursor() {
 function CanvasGame() {
   let canvasRef
 
-  const m = mouse()
+  const m = useMouse()
 
   const getCanvasPosition = () => {
     if (!canvasRef) return { x: 0, y: 0 }
@@ -148,7 +148,7 @@ function CanvasGame() {
 
 ```tsx
 function Draggable(props) {
-  const m = mouse()
+  const m = useMouse()
   const [isDragging, setIsDragging] = use(false)
   const [offset, setOffset] = use({ x: 0, y: 0 })
 
@@ -185,7 +185,7 @@ function Draggable(props) {
 
 ```tsx
 function ContextMenuArea() {
-  const m = mouse()
+  const m = useMouse()
   const [menuPos, setMenuPos] = use(null)
 
   use(() => {
@@ -228,5 +228,5 @@ import UseMouseDemo from '../../components/UseMouseDemo.vue'
 
 ## See Also
 
-- [keyboard()](/docs/interactive/keyboard)
+- [useKeyboard()](/docs/interactive/keyboard)
 - [useLoop()](/docs/interactive/loop)

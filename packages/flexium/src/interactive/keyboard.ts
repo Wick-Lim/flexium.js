@@ -3,7 +3,7 @@ import { Keys, type KeyboardState } from './types'
 
 export { Keys, type KeyboardState }
 
-export function keyboard(target: EventTarget = window): KeyboardState {
+export function useKeyboard(target: EventTarget = window): KeyboardState {
   const [pressedKeys, setPressedKeys] = use<Set<string>>(new Set<string>(), { key: ['keyboard', 'pressed'] })
   const [justPressedKeys, setJustPressedKeys] = use<Set<string>>(new Set<string>(), { key: ['keyboard', 'justPressed'] })
   const [justReleasedKeys, setJustReleasedKeys] = use<Set<string>>(new Set<string>(), { key: ['keyboard', 'justReleased'] })
