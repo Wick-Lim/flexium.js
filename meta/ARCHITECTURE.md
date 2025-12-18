@@ -14,21 +14,29 @@ Flexium is built on a **Proxy-based Fine-grained Reactivity** system that provid
 |                         Renderers                                 |
 |  +----------+  +----------+  +----------+  +----------------+    |
 |  |   DOM    |  |  Server  |  |  Canvas  |  |  Interactive   |    |
-|  | render() |  | toString |  | Canvas() |  | loop/keyboard  |    |
+|  | render() |  | toString |  | Canvas() |  | useLoop/input  |    |
 |  +----------+  +----------+  +----------+  +----------------+    |
 +--------------------------------+---------------------------------+
                                  |
 +--------------------------------v---------------------------------+
 |                      Core Reactive System                         |
 |  +------------------+  +------------------+  +----------------+   |
-|  |    reactive()    |  |     state()      |  |   effect()     |   |
+|  |    reactive()    |  |    useState()    |  |   useEffect()  |   |
 |  |  Proxy tracking  |  | Signal/Resource  |  |  Side effects  |   |
 |  +------------------+  +------------------+  +----------------+   |
 |                                                                   |
 |  +------------------+  +------------------+  +----------------+   |
-|  |     hook()       |  |   context()      |  |    sync()      |   |
-|  | Component state  |  |   Context API    |  |   Batching     |   |
+|  |     hook()       |  |    useSync()     |  |    useRef()    |   |
+|  | Component state  |  |   Batching       |  |   Mutable ref  |   |
 |  +------------------+  +------------------+  +----------------+   |
++------------------------------------------------------------------+
+                                 |
++--------------------------------v---------------------------------+
+|                     Advanced Module                               |
+|  +------------------+  +------------------+                       |
+|  |  createContext() |  |   useContext()   |                       |
+|  |  Context factory |  |  Context access  |                       |
+|  +------------------+  +------------------+                       |
 +------------------------------------------------------------------+
 ```
 
@@ -44,17 +52,19 @@ packages/flexium/src/
 │   ├── index.ts          # Public exports
 │   ├── types.ts          # Type definitions
 │   ├── reactive.ts       # Proxy-based reactivity
-│   ├── state.ts          # Unified state API
-│   ├── lifecycle.ts      # Effects & scheduling
-│   ├── hook.ts           # Component instance hooks
-│   ├── context.ts        # Context API
+│   ├── state.ts          # useState() - Unified state API
+│   ├── lifecycle.ts      # useEffect(), useSync()
+│   ├── hook.ts           # hook() - Component instance hooks
+│   ├── context.ts        # Context implementation
 │   └── devtools.ts       # DevTools integration
 │
 ├── ref/                  # Ref System
 │   ├── index.ts
 │   ├── types.ts
-│   ├── ref.ts            # ref()
-│   └── forwardRef.ts     # forwardRef()
+│   └── ref.ts            # useRef()
+│
+├── advanced/             # Advanced APIs
+│   └── index.ts          # createContext(), useContext()
 │
 ├── dom/                  # DOM Renderer
 │   ├── index.ts
@@ -71,7 +81,7 @@ packages/flexium/src/
 ├── router/               # Client-side Router
 │   ├── index.ts
 │   ├── types.ts
-│   ├── router.ts         # Router context & location
+│   ├── router.ts         # useRouter(), useLocation(), useNavigate(), etc.
 │   ├── utils.ts          # Route matching
 │   └── dom/              # Router components
 │       ├── Routes.tsx
@@ -101,9 +111,9 @@ packages/flexium/src/
 └── interactive/          # Game Loop & Input
     ├── index.ts
     ├── types.ts
-    ├── loop.ts           # Game loop
-    ├── keyboard.ts       # Keyboard input
-    └── mouse.ts          # Mouse input
+    ├── loop.ts           # useLoop() - Game loop
+    ├── keyboard.ts       # keyboard() - Keyboard input
+    └── mouse.ts          # mouse() - Mouse input
 ```
 
 ---
@@ -168,7 +178,7 @@ export const REACTIVE_SIGNAL = Symbol('flexium.reactive')
 
 ### 1.2 Unified State API (`state.ts`)
 
-The `state()` function provides three patterns through a single API:
+The `useState()` function provides three patterns through a single API:
 
 | Pattern | Input | Return | Use Case |
 |---------|-------|--------|----------|
@@ -179,7 +189,7 @@ The `state()` function provides three patterns through a single API:
 #### Signal Mode
 
 ```typescript
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 
 // Setter supports direct value or updater function
 setCount(5)
@@ -189,7 +199,7 @@ setCount(prev => prev + 1)
 #### Resource Mode (Async)
 
 ```typescript
-const [user, control] = state(() => fetch('/api/user').then(r => r.json()))
+const [user, control] = useState(() => fetch('/api/user').then(r => r.json()))
 
 // ResourceControl interface
 interface ResourceControl {
@@ -203,7 +213,7 @@ interface ResourceControl {
 #### Computed Mode (with deps)
 
 ```typescript
-const [doubled] = state(() => count * 2, { deps: [count] })
+const [doubled] = useState(() => count * 2, { deps: [count] })
 // Re-computes only when deps change
 ```
 
@@ -213,10 +223,10 @@ States with `key` option are stored in a global registry:
 
 ```typescript
 // Component A
-const [theme, setTheme] = state('light', { key: ['app', 'theme'] })
+const [theme, setTheme] = useState('light', { key: ['app', 'theme'] })
 
 // Component B (anywhere)
-const [theme] = state('light', { key: ['app', 'theme'] })  // Same state!
+const [theme] = useState('light', { key: ['app', 'theme'] })  // Same state!
 ```
 
 ### 1.3 Effect System (`lifecycle.ts`)
@@ -256,10 +266,10 @@ trigger() → queueJob(effect) → queue (Set)
 
 ```typescript
 // Reactive side effect (component-scoped)
-function effect(fn: () => void | (() => void), deps?: any[]): void
+function useEffect(fn: () => void | (() => void), deps?: any[]): void
 
 // Manual batching / flush
-function sync(fn?: () => void): void
+function useSync(fn?: () => void): void
 ```
 
 ### 1.4 Hook System (`hook.ts`)
@@ -295,9 +305,30 @@ function hook<T>(factory: () => T): T {
 }
 ```
 
-### 1.5 Context API (`context.ts`)
+### 1.5 Ref System (`ref/ref.ts`)
 
 ```typescript
+// Create a mutable ref
+const inputRef = useRef<HTMLInputElement>(null)
+
+// Access current value
+inputRef.current?.focus()
+
+// Attach to DOM element
+<input ref={inputRef} />
+```
+
+Refs are passed via props - no special forwarding mechanism needed.
+
+---
+
+## 2. Advanced Module (`advanced/`)
+
+### 2.1 Context API
+
+```typescript
+import { createContext, useContext } from 'flexium/advanced'
+
 // Create context with default value
 const ThemeCtx = createContext('light')
 
@@ -307,7 +338,7 @@ const ThemeCtx = createContext('light')
 </ThemeCtx.Provider>
 
 // Consume context
-const theme = context(ThemeCtx)
+const theme = useContext(ThemeCtx)
 ```
 
 #### Internal Implementation
@@ -318,9 +349,9 @@ const theme = context(ThemeCtx)
 
 ---
 
-## 2. DOM Renderer (`dom/`)
+## 3. DOM Renderer (`dom/`)
 
-### 2.1 FNode (Virtual Node)
+### 3.1 FNode (Virtual Node)
 
 ```typescript
 interface FNode {
@@ -338,7 +369,7 @@ type FNodeChild =
   | (() => FNode)
 ```
 
-### 2.2 Rendering Flow
+### 3.2 Rendering Flow
 
 ```
 render(app, container)
@@ -361,7 +392,7 @@ appendChild   ComponentInstance
               for reactive updates
 ```
 
-### 2.3 Component Instance (DOM)
+### 3.3 Component Instance (DOM)
 
 ```typescript
 interface DOMComponentInstance extends ComponentInstance {
@@ -376,7 +407,7 @@ interface DOMComponentInstance extends ComponentInstance {
 }
 ```
 
-### 2.4 Reconciliation
+### 3.4 Reconciliation
 
 DOM updates use a simple reconciliation strategy:
 
@@ -387,7 +418,7 @@ DOM updates use a simple reconciliation strategy:
    - Recursively reconcile children
 3. **Different Types**: Replace entire node
 
-### 2.5 Built-in Components
+### 3.5 Built-in Components
 
 | Component | Purpose |
 |-----------|---------|
@@ -398,9 +429,28 @@ DOM updates use a simple reconciliation strategy:
 
 ---
 
-## 3. Router (`router/`)
+## 4. Router (`router/`)
 
-### 3.1 Location State
+### 4.1 Router Hooks
+
+```typescript
+// Get current location and navigate function
+const [location, navigate] = useLocation()
+
+// Get full router context
+const router = useRouter()
+
+// Shorthand for navigation
+const navigate = useNavigate()
+
+// Get route params
+const params = useParams<{ id: string }>()
+
+// Get query string params
+const query = useQuery<{ page: string }>()
+```
+
+### 4.2 Location State
 
 ```typescript
 interface Location {
@@ -409,12 +459,9 @@ interface Location {
   hash: string
   query: Record<string, string>
 }
-
-// Singleton pattern - shared across app
-const [location, navigate] = location()
 ```
 
-### 3.2 Route Matching
+### 4.3 Route Matching
 
 ```typescript
 interface RouteMatch {
@@ -427,7 +474,7 @@ interface RouteMatch {
 // /user/:id matches /user/123 → params: { id: '123' }
 ```
 
-### 3.3 Components
+### 4.4 Components
 
 ```tsx
 <Routes>
@@ -443,7 +490,7 @@ interface RouteMatch {
 <Outlet />  {/* Renders child route */}
 ```
 
-### 3.4 Security
+### 4.5 Security
 
 - Path length limit (2048 chars)
 - Prototype pollution prevention (`__proto__`, `constructor`)
@@ -451,9 +498,9 @@ interface RouteMatch {
 
 ---
 
-## 4. Server Renderer (`server/`)
+## 5. Server Renderer (`server/`)
 
-### 4.1 renderToString()
+### 5.1 renderToString()
 
 ```typescript
 const { html, state } = renderToString(App, {
@@ -467,7 +514,7 @@ interface SSRResult {
 }
 ```
 
-### 4.2 Rendering Rules
+### 5.2 Rendering Rules
 
 - HTML entities escaped (`<`, `>`, `&`, `"`, `'`)
 - Self-closing tags for void elements (`<br>`, `<img>`, etc.)
@@ -475,7 +522,7 @@ interface SSRResult {
 - Style objects converted to CSS strings
 - Event handlers and refs skipped (client-only)
 
-### 4.3 Hydration
+### 5.3 Hydration
 
 ```typescript
 hydrate(App, container, {
@@ -487,9 +534,9 @@ hydrate(App, container, {
 
 ---
 
-## 5. Canvas Renderer (`canvas/`)
+## 6. Canvas Renderer (`canvas/`)
 
-### 5.1 Architecture
+### 6.1 Architecture
 
 ```
 <Canvas>
@@ -498,13 +545,13 @@ hydrate(App, container, {
 </Canvas>
         │
         ▼
-Canvas effect() →
+Canvas useEffect() →
   1. clearRect()
   2. Process drawQueue
   3. Execute drawNode() for each
 ```
 
-### 5.2 Draw Components
+### 6.2 Draw Components
 
 | Component | Canvas API |
 |-----------|------------|
@@ -515,12 +562,12 @@ Canvas effect() →
 | `DrawText` | `fillText()` |
 | `DrawPath` | `Path2D` from SVG path |
 
-### 5.3 Reactive Props
+### 6.3 Reactive Props
 
 All Draw component props support getter functions for reactivity:
 
 ```tsx
-const [x, setX] = state(100)
+const [x, setX] = useState(100)
 
 // x updates automatically when state changes
 <DrawRect x={x} y={100} width={50} height={50} fill="red" />
@@ -528,12 +575,12 @@ const [x, setX] = state(100)
 
 ---
 
-## 6. Interactive Module (`interactive/`)
+## 7. Interactive Module (`interactive/`)
 
-### 6.1 Game Loop
+### 7.1 Game Loop
 
 ```typescript
-const gameLoop = loop({
+const gameLoop = useLoop({
   fixedFps: 60,  // Physics update rate
 
   onUpdate(delta) {
@@ -563,7 +610,7 @@ gameLoop.getFps()
 - Accumulator pattern for physics stability
 - Max delta cap (0.25s) prevents "spiral of death"
 
-### 6.2 Keyboard Input
+### 7.2 Keyboard Input
 
 ```typescript
 const kb = keyboard(window)
@@ -581,30 +628,30 @@ kb.clearFrameState()
 kb.dispose()
 ```
 
-### 6.3 Mouse Input
+### 7.3 Mouse Input
 
 ```typescript
-const mouse = mouse({ canvas: canvasElement })
+const m = mouse({ canvas: canvasElement })
 
 // Position
-mouse.x, mouse.y       // Current position
-mouse.deltaX, mouse.deltaY  // Movement since last frame
-mouse.wheelDelta       // Scroll amount
+m.x, m.y           // Current position
+m.deltaX, m.deltaY // Movement since last frame
+m.wheelDelta       // Scroll amount
 
 // Buttons
-mouse.isPressed(MouseButton.Left)
-mouse.isLeftPressed()
-mouse.isRightPressed()
-mouse.isMiddlePressed()
+m.isPressed(MouseButton.Left)
+m.isLeftPressed()
+m.isRightPressed()
+m.isMiddlePressed()
 
 // Cleanup
-mouse.clearFrameState()
-mouse.dispose()
+m.clearFrameState()
+m.dispose()
 ```
 
 ---
 
-## 7. JSX Runtime
+## 8. JSX Runtime
 
 ### Production (`jsx-runtime.ts`)
 
@@ -614,7 +661,7 @@ function jsx(type, props, key?): FNode {
   return {
     type,
     props: otherProps,
-    children: Array.isArray(children) ? children : [children],
+    children: Array.isArray(children) ? children : (children != null ? [children] : []),
     key
   }
 }
@@ -633,7 +680,7 @@ function jsxDEV(type, props, key, isStaticChildren, source, self) {
 
 ---
 
-## 8. DevTools Integration
+## 9. DevTools Integration
 
 ```typescript
 // Browser extension hook
@@ -696,4 +743,4 @@ reportRender(componentName, trigger, duration)
 
 - Natural batching for event handlers
 - No explicit batch() calls needed
-- Synchronous when needed via sync()
+- Synchronous when needed via useSync()

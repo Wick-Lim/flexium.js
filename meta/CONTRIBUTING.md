@@ -39,15 +39,17 @@ flexium.js/
 │       │   │
 │       │   ├── core/         # Reactive system
 │       │   │   ├── reactive.ts   # Proxy reactivity
-│       │   │   ├── state.ts      # state() API
-│       │   │   ├── lifecycle.ts  # effect(), sync()
+│       │   │   ├── state.ts      # useState()
+│       │   │   ├── lifecycle.ts  # useEffect(), useSync()
 │       │   │   ├── hook.ts       # hook()
-│       │   │   ├── context.ts    # Context API
+│       │   │   ├── context.ts    # Context implementation
 │       │   │   └── devtools.ts   # DevTools integration
 │       │   │
 │       │   ├── ref/          # Ref system
-│       │   │   ├── ref.ts        # ref()
-│       │   │   └── forwardRef.ts # forwardRef()
+│       │   │   └── ref.ts        # useRef()
+│       │   │
+│       │   ├── advanced/     # Advanced APIs
+│       │   │   └── index.ts      # createContext(), useContext()
 │       │   │
 │       │   ├── dom/          # DOM renderer
 │       │   │   ├── render.ts     # render(), reconcile()
@@ -56,7 +58,7 @@ flexium.js/
 │       │   │   └── components/   # Portal, Suspense, ErrorBoundary, lazy
 │       │   │
 │       │   ├── router/       # Client-side routing
-│       │   │   ├── router.ts     # location(), router()
+│       │   │   ├── router.ts     # useLocation(), useRouter(), useNavigate(), etc.
 │       │   │   ├── utils.ts      # Route matching
 │       │   │   └── dom/          # Routes, Route, Link, Outlet
 │       │   │
@@ -70,9 +72,9 @@ flexium.js/
 │       │   │   └── dom/          # DrawRect, DrawCircle, etc.
 │       │   │
 │       │   └── interactive/  # Game loop & input
-│       │       ├── loop.ts
-│       │       ├── keyboard.ts
-│       │       └── mouse.ts
+│       │       ├── loop.ts       # useLoop()
+│       │       ├── keyboard.ts   # keyboard()
+│       │       └── mouse.ts      # mouse()
 │       │
 │       └── src/__tests__/    # Test files
 │
@@ -99,7 +101,7 @@ git checkout -b fix/issue-description
 Follow existing patterns. Key principles:
 
 - **Keep it simple** - No over-engineering
-- **One API** - Prefer extending `state()` over new APIs
+- **One API** - Prefer extending `useState()` over new APIs
 - **No magic** - Explicit behavior, easy to trace
 - **Performance** - Consider reactive tracking cost
 
@@ -109,11 +111,11 @@ Every feature needs tests. Tests are located in `src/__tests__/`.
 
 ```typescript
 import { describe, it, expect } from 'vitest'
-import { state } from '../core/state'
+import { useState } from '../core/state'
 
-describe('state', () => {
+describe('useState', () => {
   it('should hold a primitive value', () => {
-    const [count, setCount] = state(0)
+    const [count, setCount] = useState(0)
     expect(count).toBe(0)
 
     setCount(5)
@@ -121,7 +123,7 @@ describe('state', () => {
   })
 
   it('should support updater function', () => {
-    const [count, setCount] = state(10)
+    const [count, setCount] = useState(10)
     setCount(prev => prev + 1)
     expect(count).toBe(11)
   })
@@ -266,6 +268,13 @@ The most critical module. Changes here affect everything.
 - `lifecycle.ts` - Ensure cleanup is always called
 - `hook.ts` - Never break hook order semantics
 
+### Advanced (`advanced/`)
+
+Context API lives here, separate from core.
+
+- `createContext()` and `useContext()` exports only
+- Keep it minimal
+
 ### DOM (`dom/`)
 
 - `render.ts` - Reconciliation must be efficient
@@ -308,7 +317,7 @@ The most critical module. Changes here affect everything.
 
 ### Maybe (Discuss First)
 
-- New APIs (we prefer extending `state()`)
+- New APIs (we prefer extending `useState()`)
 - New renderers (Native, WebGL, etc.)
 - Breaking changes
 
@@ -326,7 +335,7 @@ The most critical module. Changes here affect everything.
 Clear and descriptive:
 - `feat: add beforeEnter guard to Router`
 - `fix: resolve memory leak in effect cleanup`
-- `docs: clarify state() resource pattern`
+- `docs: clarify useState() resource pattern`
 
 ### Description
 
@@ -373,12 +382,12 @@ describe('reactive', () => {
 Test modules working together:
 
 ```typescript
-describe('state + render', () => {
+describe('useState + render', () => {
   it('should update DOM when state changes', () => {
     const container = document.createElement('div')
 
     function App() {
-      const [count, setCount] = state(0)
+      const [count, setCount] = useState(0)
       return <div>{count}</div>
     }
 

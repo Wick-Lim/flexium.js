@@ -17,33 +17,33 @@ A developer must learn 5+ different mental models, 5+ different APIs, and manage
 
 ## The Solution
 
-**One function: `state()`**
+**One function: `useState()`**
 
 ```javascript
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 // That's it. One import. One concept.
 ```
 
 ### Local State
 ```javascript
-const [count, setCount] = state(0)
+const [count, setCount] = useState(0)
 ```
 
 ### Global State
 ```javascript
 // Array key for hierarchical namespacing
-const [user] = state(null, { key: ['app', 'user', userId] })
+const [user] = useState(null, { key: ['app', 'user', userId] })
 ```
 
 ### Async Data (Resource)
 ```javascript
-const [user, { loading, error, refetch }] = state(() => fetchUser(id))
+const [user, { loading, error, refetch }] = useState(() => fetchUser(id))
 ```
 
 ### Computed Values
 ```javascript
-const [doubled] = state(() => count * 2, { deps: [count] })
+const [doubled] = useState(() => count * 2, { deps: [count] })
 ```
 
 Same function. Same mental model. Different capabilities based on what you pass.
@@ -59,12 +59,12 @@ Every state management solution solves the same fundamental problem: reactive va
 Why have 10 different APIs for the same concept?
 
 Flexium unifies:
-- Local state (useState equivalent)
+- Local state (React useState equivalent)
 - Global state (Recoil atoms equivalent)
 - Async resources (React Query equivalent)
 - Computed values (useMemo equivalent)
 
-Into one `state()` function.
+Into one `useState()` function.
 
 ### 2. Simplicity
 
@@ -89,8 +89,8 @@ React re-renders entire component trees. Then you optimize with memo(), useMemo(
 Flexium uses **Fine-grained Reactivity**. Only the specific DOM nodes that depend on changed values update. No optimization needed. It's just how Proxy tracking works.
 
 ```javascript
-const [name, setName] = state('John')
-const [age, setAge] = state(30)
+const [name, setName] = useState('John')
+const [age, setAge] = useState(30)
 
 // Only this span updates when name changes
 <span>{name}</span>
@@ -112,7 +112,7 @@ Flexium isn't just a DOM framework. It's a reactive core with multiple renderers
 | `flexium/canvas` | 2D Canvas rendering |
 | `flexium/interactive` | Game loop & input handling |
 
-Same `state()`, same components, different targets.
+Same `useState()`, same components, different targets.
 
 ### 5. Honesty
 
@@ -121,7 +121,7 @@ Same `state()`, same components, different targets.
 - No hidden re-renders
 - No stale closure traps
 - No dependency array footguns (deps are optional, for memoization)
-- No rules of hooks (call order doesn't matter for `state()`)
+- No rules of hooks (call order doesn't matter for `useState()`)
 
 Dependencies are tracked automatically by what you access through Proxy.
 
@@ -149,11 +149,12 @@ f('div', { class: 'card' },
 We don't bundle everything. Import what you need:
 
 ```javascript
-import { state, effect } from 'flexium/core'  // Core reactivity
-import { render } from 'flexium/dom'           // DOM renderer
-import { renderToString } from 'flexium/server' // SSR
-import { Canvas, DrawRect } from 'flexium/canvas' // Canvas
-import { loop, keyboard } from 'flexium/interactive' // Game
+import { useState, useEffect } from 'flexium/core'      // Core reactivity
+import { render } from 'flexium/dom'                     // DOM renderer
+import { renderToString } from 'flexium/server'          // SSR
+import { Canvas, DrawRect } from 'flexium/canvas'        // Canvas
+import { useLoop, keyboard } from 'flexium/interactive'  // Game
+import { createContext, useContext } from 'flexium/advanced' // Context API
 ```
 
 ### No Backwards Compatibility Hacks
@@ -175,7 +176,7 @@ Virtual DOM was revolutionary in 2013. It's 2024 now.
 
 Flexium uses **Proxy-based Fine-grained Reactivity** that tracks exactly which properties are accessed and updates only what's needed.
 
-### Why One state() Instead of Multiple Hooks?
+### Why One useState() Instead of Multiple Hooks?
 
 Learning curve matters. Time spent understanding API differences is time not spent building.
 
@@ -188,7 +189,7 @@ useMemo()
 useCallback()
 
 // Flexium: 1 concept
-state()
+useState()
 ```
 
 ### Why Multiple Renderers?
@@ -203,11 +204,11 @@ This means you can use the same mental model for a web app, a game, or server-re
 ## The Ideal Flexium Code
 
 ```javascript
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
-  const [count, setCount] = state(0)
+  const [count, setCount] = useState(0)
 
   return (
     <div>
@@ -230,23 +231,23 @@ Notice:
 ## The Ideal Flexium Game
 
 ```javascript
-import { state } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 import { render } from 'flexium/dom'
 import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
-import { loop, keyboard, Keys } from 'flexium/interactive'
+import { useLoop, keyboard, Keys } from 'flexium/interactive'
 
 function Game() {
-  const [x, setX] = state(100)
+  const [x, setX] = useState(100)
   const kb = keyboard()
 
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     onUpdate: (delta) => {
       if (kb.isPressed(Keys.ArrowRight)) setX(x => x + 200 * delta)
       if (kb.isPressed(Keys.ArrowLeft)) setX(x => x - 200 * delta)
     }
   })
 
-  effect(() => { gameLoop.start(); return () => gameLoop.stop() }, [])
+  useEffect(() => { gameLoop.start(); return () => gameLoop.stop() }, [])
 
   return (
     <Canvas width={800} height={600}>
@@ -256,13 +257,13 @@ function Game() {
 }
 ```
 
-Same `state()`. Same patterns. Different output.
+Same `useState()`. Same patterns. Different output.
 
 ## Summary
 
 | Old Way | Flexium Way |
 |---------|-------------|
-| Multiple state libraries | One `state()` |
+| Multiple state libraries | One `useState()` |
 | Virtual DOM diffing | Direct Proxy updates |
 | Optimization required | Fast by default |
 | Complex mental model | Simple mental model |
