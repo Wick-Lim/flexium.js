@@ -31,15 +31,10 @@ Flexium provides a set of composable utility functions that integrate seamlessly
 
 ## Core Utilities
 
-### useContext
+### Global State
 
-::: warning Deprecated
-The Context API is deprecated. Use `use()` with `key` option instead.
+Use `use()` with `key` option to share state across components without Provider boilerplate:
 
-Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `use()` with keys for global state sharing.
-:::
-
-**Recommended**: Use `use()` with `key` option instead:
 
 ```tsx
 import { use } from 'flexium/core';
@@ -902,7 +897,7 @@ function ResponsiveComponent() {
 
 ## When to Use Which Hook
 
-### useContext
+### Global State (`use()` with `key`)
 - **Use when**: Sharing state across multiple nested components
 - **Don't use when**: Data is only needed by one or two components (use props instead)
 - **Example**: Theme, authentication, language settings
