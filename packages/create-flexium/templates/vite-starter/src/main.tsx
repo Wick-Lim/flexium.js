@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { render } from 'flexium/dom'
 import './style.css'
 
 function App() {
   const [count, setCount] = use(0)
-  const [doubled] = use(() => count * 2, { deps: [count] })
-  const [tripled] = use(() => count * 3, { deps: [count] })
+  const [doubled] = use(() => count * 2, [count])
+  const [tripled] = use(() => count * 3, [count])
 
   use(() => {
     console.log('Count:', count)
