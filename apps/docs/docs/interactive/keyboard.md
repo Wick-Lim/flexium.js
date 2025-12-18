@@ -112,7 +112,7 @@ const gameLoop = useLoop({
 ### Pause Menu
 
 ```tsx
-const paused = useState(false)
+const [paused] = useState(false)
 const kb = keyboard()
 
 useEffect(() => {

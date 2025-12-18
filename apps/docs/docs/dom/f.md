@@ -61,7 +61,7 @@ f(Button, null, 'Click me')
 ### Reactive Values
 
 ```ts
-const count = useState(0)
+const [count] = useState(0)
 
 f('div', null,
   f('span', null, count), // Reactive binding
@@ -97,8 +97,8 @@ f('input', {
 
 ```ts
 function Counter() {
-  const count = useState(0)
-  const doubled = useState(() => count * 2)
+  const [count] = useState(0)
+  const [doubled] = useState(() => count * 2)
 
   return f('div', { class: 'counter' },
     f('h1', null, 'Counter'),

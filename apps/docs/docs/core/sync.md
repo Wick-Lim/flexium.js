@@ -33,9 +33,9 @@ function sync<T>(fn: () => T): T
 ### Basic Usage
 
 ```tsx
-const firstName = useState('John')
-const lastName = useState('Doe')
-const age = useState(25)
+const [firstName] = useState('John')
+const [lastName] = useState('Doe')
+const [age] = useState(25)
 
 // Without sync: 3 separate updates
 firstName.set('Jane')
@@ -54,9 +54,9 @@ sync(() => {
 
 ```tsx
 function UserForm() {
-  const name = useState('')
-  const email = useState('')
-  const errors = useState({})
+  const [name] = useState('')
+  const [email] = useState('')
+  const [errors] = useState({})
 
   const handleSubmit = () => {
     sync(() => {
@@ -77,10 +77,10 @@ function UserForm() {
 ### Reset Multiple States
 
 ```tsx
-const items = useState([])
-const filter = useState('')
-const sortBy = useState('name')
-const page = useState(1)
+const [items] = useState([])
+const [filter] = useState('')
+const [sortBy] = useState('name')
+const [page] = useState(1)
 
 function resetFilters() {
   sync(() => {

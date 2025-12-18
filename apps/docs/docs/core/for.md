@@ -21,7 +21,7 @@ import TodoDemo from '../../components/TodoDemo.vue'
 ```tsx
 import { useState } from 'flexium/core'
 
-const items = useState(['Apple', 'Banana', 'Cherry'])
+const [items] = useState(['Apple', 'Banana', 'Cherry'])
 
 // Just like React, but with automatic optimization!
 {items.map(item => <li>{item}</li>)}
@@ -44,7 +44,7 @@ In most frameworks, `items.map()` either:
 ### Basic List
 
 ```tsx
-const items = useState(['Apple', 'Banana', 'Cherry'])
+const [items] = useState(['Apple', 'Banana', 'Cherry'])
 
 <ul>
   {items.map((item, index) => (
@@ -56,7 +56,7 @@ const items = useState(['Apple', 'Banana', 'Cherry'])
 ### Object Array
 
 ```tsx
-const users = useState([
+const [users] = useState([
   { id: 1, name: 'Alice' },
   { id: 2, name: 'Bob' },
   { id: 3, name: 'Charlie' }
@@ -75,7 +75,7 @@ const users = useState([
 ### Nested Lists
 
 ```tsx
-const categories = useState([
+const [categories] = useState([
   { name: 'Fruits', items: ['Apple', 'Banana'] },
   { name: 'Vegetables', items: ['Carrot', 'Broccoli'] }
 ])
@@ -95,7 +95,7 @@ const categories = useState([
 ### Empty State
 
 ```tsx
-const items = useState([])
+const [items] = useState([])
 
 {items.length > 0
   ? items.map(item => <div>{item}</div>)

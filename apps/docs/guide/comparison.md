@@ -327,8 +327,8 @@ useEffect(() => {
 
 | Svelte 5 | Flexium | Notes |
 |----------|---------|-------|
-| `let x = $state(0)` | `const x = useState(0)` | |
-| `let y = $derived(x * 2)` | `const y = useState(() => x * 2)` | Auto-detected |
+| `let x = $state(0)` | `const [x] = useState(0)` | |
+| `let y = $derived(x * 2)` | `const [y] = useState(() => x * 2)` | Auto-detected |
 | `{#each}` | `items.map()` | React syntax! |
 | `{#if}` | `{() => x && ...}` | Native JS |
 

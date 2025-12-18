@@ -18,7 +18,7 @@ const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
 
 // In any component
 function ThemeToggle() {
-  const theme = useState('light', { key: 'app:theme' })
+  const [theme] = useState('light', { key: 'app:theme' })
 
   return (
     <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
@@ -39,7 +39,7 @@ const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
 
 // In any component
 function ThemeToggle() {
-  const theme = useState('light', { key: 'app:theme' })
+  const [theme] = useState('light', { key: 'app:theme' })
 
   return (
     <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
@@ -69,19 +69,19 @@ function Header() {
 import { useState } from 'flexium/core'
 
 // Theme state
-const theme = useState('light', { key: 'app:theme' })
+const [theme] = useState('light', { key: 'app:theme' })
 
 // Auth state
-const user = useState(null, { key: 'app:auth:user' })
+const [user] = useState(null, { key: 'app:auth:user' })
 
 // Cart state
-const items = useState([], { key: 'app:cart:items' })
+const [items] = useState([], { key: 'app:cart:items' })
 
 // Use in any component
 function Dashboard() {
-  const theme = useState('light', { key: 'app:theme' })
-  const user = useState(null, { key: 'app:auth:user' })
-  const items = useState([], { key: 'app:cart:items' })
+  const [theme] = useState('light', { key: 'app:theme' })
+  const [user] = useState(null, { key: 'app:auth:user' })
+  const [items] = useState([], { key: 'app:cart:items' })
 
   // Use all states
 }
@@ -106,7 +106,7 @@ import { createContext, useContext } from 'flexium/advanced'
 const ThemeContext = createContext('light')
 
 function ThemeProvider(props) {
-  const theme = useState('light')
+  const [theme] = useState('light')
   return (
     <ThemeContext.Provider value={theme}>
       {props.children}
@@ -124,7 +124,7 @@ import { useState } from 'flexium/core'
 
 // No Provider needed!
 function Child() {
-  const theme = useState('light', { key: 'app:theme' })
+  const [theme] = useState('light', { key: 'app:theme' })
   return <div>{theme}</div>
 }
 ```
