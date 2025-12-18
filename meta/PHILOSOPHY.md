@@ -20,7 +20,7 @@ A developer must learn 5+ different mental models, 5+ different APIs, and manage
 **One function: `use()`**
 
 ```javascript
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // That's it. One import. One concept.
 ```
@@ -33,17 +33,31 @@ const [count, setCount] = use(0)
 ### Global State
 ```javascript
 // Array key for hierarchical namespacing
-const [user] = use(null, { key: ['app', 'user', userId] })
+const [user] = use(null, undefined, { key: ['app', 'user', userId] })
 ```
 
 ### Async Data (Resource)
 ```javascript
-const [user, { loading, error, refetch }] = use(() => fetchUser(id))
+const [user, { loading, error, refetch }] = use(async () => fetchUser(id))
 ```
 
 ### Computed Values
 ```javascript
-const [doubled] = use(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, [count])
+```
+
+### Side Effects
+```javascript
+use(({ onCleanup }) => {
+  const handler = () => console.log('clicked')
+  window.addEventListener('click', handler)
+  onCleanup(() => window.removeEventListener('click', handler))
+}, [])
+```
+
+### Context
+```javascript
+const [theme] = use(ThemeContext)  // Returns [value, undefined] tuple
 ```
 
 Same function. Same mental model. Different capabilities based on what you pass.
@@ -63,6 +77,8 @@ Flexium unifies:
 - Global state (Recoil atoms equivalent)
 - Async resources (React Query equivalent)
 - Computed values (useMemo equivalent)
+- Side effects (useEffect equivalent)
+- Context consumption (useContext equivalent)
 
 Into one `use()` function.
 
@@ -120,7 +136,7 @@ Same `use()`, same components, different targets.
 
 - No hidden re-renders
 - No stale closure traps
-- No dependency array footguns (deps are optional, for memoization)
+- No dependency array footguns (deps are explicit, second argument)
 - No rules of hooks (call order doesn't matter for `use()`)
 
 Dependencies are tracked automatically by what you access through Proxy.
@@ -149,12 +165,12 @@ f('div', { class: 'card' },
 We don't bundle everything. Import what you need:
 
 ```javascript
-import { useState, useEffect } from 'flexium/core'      // Core reactivity
-import { render } from 'flexium/dom'                     // DOM renderer
-import { renderToString } from 'flexium/server'          // SSR
-import { Canvas, DrawRect } from 'flexium/canvas'        // Canvas
-import { useLoop, keyboard } from 'flexium/interactive'  // Game
-import { createContext, useContext } from 'flexium/advanced' // Context API
+import { use, sync, useRef } from 'flexium/core'     // Core reactivity
+import { render } from 'flexium/dom'                  // DOM renderer
+import { renderToString } from 'flexium/server'       // SSR
+import { Canvas, DrawRect } from 'flexium/canvas'     // Canvas
+import { useLoop, keyboard } from 'flexium/interactive' // Game
+import { createContext } from 'flexium/advanced'      // Context factory
 ```
 
 ### No Backwards Compatibility Hacks
@@ -182,11 +198,12 @@ Learning curve matters. Time spent understanding API differences is time not spe
 
 ```javascript
 // React: 5 different concepts
-use()
+useState()
 useRecoilState()
 useQuery()
 useMemo()
-useCallback()
+useEffect()
+useContext()
 
 // Flexium: 1 concept
 use()
@@ -204,7 +221,7 @@ This means you can use the same mental model for a web app, a game, or server-re
 ## The Ideal Flexium Code
 
 ```javascript
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
@@ -231,9 +248,9 @@ Notice:
 ## The Ideal Flexium Game
 
 ```javascript
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { render } from 'flexium/dom'
-import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
+import { Canvas, DrawRect } from 'flexium/canvas'
 import { useLoop, keyboard, Keys } from 'flexium/interactive'
 
 function Game() {
@@ -247,7 +264,10 @@ function Game() {
     }
   })
 
-  use(() => { gameLoop.start(); return () => gameLoop.stop() }, [])
+  use(({ onCleanup }) => {
+    gameLoop.start()
+    onCleanup(() => gameLoop.stop())
+  }, [])
 
   return (
     <Canvas width={800} height={600}>

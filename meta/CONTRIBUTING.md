@@ -39,8 +39,8 @@ flexium.js/
 │       │   │
 │       │   ├── core/         # Reactive system
 │       │   │   ├── reactive.ts   # Proxy reactivity
-│       │   │   ├── state.ts      # use()
-│       │   │   ├── lifecycle.ts  # use(), sync()
+│       │   │   ├── use.ts        # use() - Unified hook API
+│       │   │   ├── lifecycle.ts  # sync(), effect internals
 │       │   │   ├── hook.ts       # hook()
 │       │   │   ├── context.ts    # Context implementation
 │       │   │   └── devtools.ts   # DevTools integration
@@ -49,7 +49,7 @@ flexium.js/
 │       │   │   └── ref.ts        # useRef()
 │       │   │
 │       │   ├── advanced/     # Advanced APIs
-│       │   │   └── index.ts      # createContext(), useContext()
+│       │   │   └── index.ts      # createContext()
 │       │   │
 │       │   ├── dom/          # DOM renderer
 │       │   │   ├── render.ts     # render(), reconcile()
@@ -111,9 +111,9 @@ Every feature needs tests. Tests are located in `src/__tests__/`.
 
 ```typescript
 import { describe, it, expect } from 'vitest'
-import { useState } from '../core/state'
+import { use } from '../core'
 
-describe('useState', () => {
+describe('use()', () => {
   it('should hold a primitive value', () => {
     const [count, setCount] = use(0)
     expect(count).toBe(0)
@@ -264,15 +264,16 @@ const targetMap = new WeakMap()
 The most critical module. Changes here affect everything.
 
 - `reactive.ts` - Keep Proxy handlers minimal
-- `state.ts` - Maintain the three-pattern API (Signal/Resource/Computed)
+- `use.ts` - Maintain unified API patterns (Signal/Resource/Computed/Effect/Context)
 - `lifecycle.ts` - Ensure cleanup is always called
 - `hook.ts` - Never break hook order semantics
 
 ### Advanced (`advanced/`)
 
-Context API lives here, separate from core.
+Context factory lives here, separate from core.
 
-- `createContext()` and `useContext()` exports only
+- `createContext()` export only
+- Context consumption is via `use(Context)` in core
 - Keep it minimal
 
 ### DOM (`dom/`)
@@ -382,7 +383,7 @@ describe('reactive', () => {
 Test modules working together:
 
 ```typescript
-describe('useState + render', () => {
+describe('use + render', () => {
   it('should update DOM when state changes', () => {
     const container = document.createElement('div')
 

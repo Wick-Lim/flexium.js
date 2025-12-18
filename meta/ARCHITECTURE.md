@@ -21,22 +21,14 @@ Flexium is built on a **Proxy-based Fine-grained Reactivity** system that provid
 +--------------------------------v---------------------------------+
 |                      Core Reactive System                         |
 |  +------------------+  +------------------+  +----------------+   |
-|  |    reactive()    |  |    use()    |  |   use()  |   |
-|  |  Proxy tracking  |  | Signal/Resource  |  |  Side effects  |   |
+|  |    reactive()    |  |      use()       |  |    sync()      |   |
+|  |  Proxy tracking  |  | Unified hook API |  |    Batching    |   |
 |  +------------------+  +------------------+  +----------------+   |
 |                                                                   |
 |  +------------------+  +------------------+  +----------------+   |
-|  |     hook()       |  |    sync()     |  |    useRef()    |   |
-|  | Component state  |  |   Batching       |  |   Mutable ref  |   |
+|  |     hook()       |  |    useRef()      |  | createContext()|   |
+|  | Component state  |  |   Mutable ref    |  | Context factory|   |
 |  +------------------+  +------------------+  +----------------+   |
-+------------------------------------------------------------------+
-                                 |
-+--------------------------------v---------------------------------+
-|                     Advanced Module                               |
-|  +------------------+  +------------------+                       |
-|  |  createContext() |  |   useContext()   |                       |
-|  |  Context factory |  |  Context access  |                       |
-|  +------------------+  +------------------+                       |
 +------------------------------------------------------------------+
 ```
 
@@ -52,8 +44,8 @@ packages/flexium/src/
 │   ├── index.ts          # Public exports
 │   ├── types.ts          # Type definitions
 │   ├── reactive.ts       # Proxy-based reactivity
-│   ├── state.ts          # use() - Unified state API
-│   ├── lifecycle.ts      # use(), sync()
+│   ├── use.ts            # use() - Unified hook API
+│   ├── lifecycle.ts      # sync(), effect internals
 │   ├── hook.ts           # hook() - Component instance hooks
 │   ├── context.ts        # Context implementation
 │   └── devtools.ts       # DevTools integration
@@ -64,7 +56,7 @@ packages/flexium/src/
 │   └── ref.ts            # useRef()
 │
 ├── advanced/             # Advanced APIs
-│   └── index.ts          # createContext(), useContext()
+│   └── index.ts          # createContext()
 │
 ├── dom/                  # DOM Renderer
 │   ├── index.ts
@@ -176,15 +168,17 @@ export const REACTIVE_SIGNAL = Symbol('flexium.reactive')
 // Used to identify already-proxied objects
 ```
 
-### 1.2 Unified State API (`state.ts`)
+### 1.2 Unified Hook API (`use.ts`)
 
-The `use()` function provides three patterns through a single API:
+The `use()` function provides multiple patterns through a single API:
 
 | Pattern | Input | Return | Use Case |
 |---------|-------|--------|----------|
 | **Signal** | `value` | `[value, setter]` | Local/Global state |
-| **Resource** | `() => Promise` | `[value, ResourceControl]` | Async data |
-| **Computed** | `() => T, {deps}` | `[value, ResourceControl]` | Derived values |
+| **Resource** | `async () => Promise` | `[value, ResourceControl]` | Async data |
+| **Computed** | `() => T, deps[]` | `[value, ResourceControl]` | Derived values |
+| **Effect** | `({ onCleanup }) => void, deps[]` | `void` | Side effects |
+| **Context** | `Context` | `[value, undefined]` | Context consumption |
 
 #### Signal Mode
 
@@ -199,7 +193,7 @@ setCount(prev => prev + 1)
 #### Resource Mode (Async)
 
 ```typescript
-const [user, control] = use(() => fetch('/api/user').then(r => r.json()))
+const [user, control] = use(async () => fetch('/api/user').then(r => r.json()))
 
 // ResourceControl interface
 interface ResourceControl {
@@ -213,8 +207,23 @@ interface ResourceControl {
 #### Computed Mode (with deps)
 
 ```typescript
-const [doubled] = use(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, [count])
 // Re-computes only when deps change
+```
+
+#### Effect Mode (with onCleanup)
+
+```typescript
+use(({ onCleanup }) => {
+  const id = setInterval(() => console.log('tick'), 1000)
+  onCleanup(() => clearInterval(id))
+}, [])
+```
+
+#### Context Mode
+
+```typescript
+const [theme] = use(ThemeContext)  // Returns [value, undefined] tuple
 ```
 
 #### Global Registry
@@ -223,10 +232,10 @@ States with `key` option are stored in a global registry:
 
 ```typescript
 // Component A
-const [theme, setTheme] = use('light', { key: ['app', 'theme'] })
+const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
 
 // Component B (anywhere)
-const [theme] = use('light', { key: ['app', 'theme'] })  // Same state!
+const [theme] = use('light', undefined, { key: ['app', 'theme'] })  // Same state!
 ```
 
 ### 1.3 Effect System (`lifecycle.ts`)
@@ -265,9 +274,6 @@ trigger() → queueJob(effect) → queue (Set)
 #### Public APIs
 
 ```typescript
-// Reactive side effect (component-scoped)
-function use(fn: () => void | (() => void), deps?: any[]): void
-
 // Manual batching / flush
 function sync(fn?: () => void): void
 ```
@@ -327,7 +333,8 @@ Refs are passed via props - no special forwarding mechanism needed.
 ### 2.1 Context API
 
 ```typescript
-import { createContext, useContext } from 'flexium/advanced'
+import { createContext } from 'flexium/advanced'
+import { use } from 'flexium/core'
 
 // Create context with default value
 const ThemeCtx = createContext('light')
@@ -337,8 +344,8 @@ const ThemeCtx = createContext('light')
   <App />
 </ThemeCtx.Provider>
 
-// Consume context
-const theme = useContext(ThemeCtx)
+// Consume context via use()
+const [theme] = use(ThemeCtx)  // Returns [value, undefined] tuple
 ```
 
 #### Internal Implementation
