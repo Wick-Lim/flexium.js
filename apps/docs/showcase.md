@@ -339,7 +339,7 @@ A complete game built with Flexium's game module. Use arrow keys or WASD to cont
 import { use } from 'flexium/core'
 import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
-import { keyboard, useLoop, Keys } from 'flexium/interactive'
+import { useKeyboard, useLoop, Keys } from 'flexium/interactive'
 
 const [snake, setSnake] = use([{ x: 7, y: 7 }])
 const [direction, setDirection] = use('RIGHT')

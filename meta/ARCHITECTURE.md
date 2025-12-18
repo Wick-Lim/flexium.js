@@ -618,7 +618,7 @@ gameLoop.getFps()
 ### 7.2 Keyboard Input
 
 ```typescript
-const kb = keyboard(window)
+const kb = useKeyboard()
 
 // Polling API
 kb.isPressed(Keys.Space)      // Currently held
@@ -636,7 +636,7 @@ kb.dispose()
 ### 7.3 Mouse Input
 
 ```typescript
-const m = mouse({ canvas: canvasElement })
+const m = useMouse({ canvas: canvasElement })
 
 // Position
 m.x, m.y           // Current position

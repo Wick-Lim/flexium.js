@@ -187,7 +187,7 @@ function App() {
 ```tsx
 import { use } from 'flexium/core'
 import { Canvas, DrawRect } from 'flexium/canvas'
-import { useLoop, keyboard, Keys } from 'flexium/interactive'
+import { useLoop, useKeyboard, Keys } from 'flexium/interactive'
 
 function Game() {
   const [x, setX] = use(100)

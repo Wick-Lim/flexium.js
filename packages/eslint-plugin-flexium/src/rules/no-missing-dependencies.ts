@@ -20,11 +20,16 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an use() or computed() call
+        // Check if this is a use() effect or computed() call
         if (
           node.callee.type !== "Identifier" ||
-          (node.callee.name !== "useEffect" && node.callee.name !== "computed")
+          (node.callee.name !== "use" && node.callee.name !== "computed")
         ) {
+          return;
+        }
+
+        // For use(), must have function + deps to be an effect
+        if (node.callee.name === "use" && node.arguments.length < 2) {
           return;
         }
 

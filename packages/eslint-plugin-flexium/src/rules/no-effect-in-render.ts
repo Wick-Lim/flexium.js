@@ -20,10 +20,20 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an use() call
+        // Check if this is a use() effect call
         if (
           node.callee.type !== "Identifier" ||
-          node.callee.name !== "useEffect"
+          node.callee.name !== "use"
+        ) {
+          return;
+        }
+
+        // Must have function as first arg and deps to be an effect
+        if (node.arguments.length < 2) return;
+        const firstArg = node.arguments[0];
+        if (
+          firstArg.type !== "ArrowFunctionExpression" &&
+          firstArg.type !== "FunctionExpression"
         ) {
           return;
         }
@@ -56,7 +66,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
                 if (
                   parent?.type === "CallExpression" &&
                   parent.callee.type === "Identifier" &&
-                  parent.callee.name === "useEffect"
+                  parent.callee.name === "use"
                 ) {
                   continue;
                 }
@@ -68,7 +78,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
               if (
                 intermediate.type === "CallExpression" &&
                 intermediate.callee.type === "Identifier" &&
-                (intermediate.callee.name === "useEffect" ||
+                (intermediate.callee.name === "use" ||
                   intermediate.callee.name === "computed" ||
                   intermediate.callee.name === "sync")
               ) {

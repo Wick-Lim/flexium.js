@@ -18,7 +18,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     },
     messages: {
       signalOutsideReactive:
-        'Signal "{{name}}" is read outside a reactive context (useEffect, computed, or JSX). This read will not be tracked and won\'t trigger re-renders.',
+        'Signal "{{name}}" is read outside a reactive context (use(), computed, or JSX). This read will not be tracked and won\'t trigger re-renders.',
     },
     schema: [],
   },
@@ -43,7 +43,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
           }
 
           // use() returns [getter, setter]
-          if (calleeName === "useState") {
+          if (calleeName === "use") {
             if (
               node.id.type === "ArrayPattern" &&
               node.id.elements[0]?.type === "Identifier"

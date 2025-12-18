@@ -298,7 +298,7 @@ Returns a `KeyboardState` object:
 #### Usage
 
 ```tsx
-import { keyboard, Keys } from 'flexium/interactive';
+import { useKeyboard, Keys } from 'flexium/interactive';
 import { use } from 'flexium/core';
 
 function PlayerController() {
@@ -339,7 +339,7 @@ function PlayerController() {
 #### Game Loop Integration
 
 ```tsx
-import { keyboard, Keys, useLoop } from 'flexium/interactive';
+import { useKeyboard, Keys, useLoop } from 'flexium/interactive';
 import { use } from 'flexium/core';
 
 function Game() {
@@ -410,7 +410,7 @@ Keys.Digit0, Keys.Digit1, Keys.Digit2, ...
 ```tsx
 function CanvasInput() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const kb = keyboard(canvasRef || window);
+  const kb = useKeyboard();
 
   return (
     <canvas
@@ -502,12 +502,12 @@ function MouseTracker() {
 #### Canvas Drawing
 
 ```tsx
-import { mouse } from 'flexium/interactive';
+import { useMouse } from 'flexium/interactive';
 import { useRef, use } from 'flexium/core';
 
 function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const m = mouse({
+  const m = useMouse({
     target: window,
     canvas: canvasRef || undefined
   });
@@ -971,7 +971,7 @@ function Component() {
 ```tsx
 import { use } from 'flexium/core';
 import { useRouter } from 'flexium/router';
-import { keyboard, Keys } from 'flexium/interactive';
+import { useKeyboard, Keys } from 'flexium/interactive';
 
 function GamePlayer() {
   const { navigate } = useRouter();

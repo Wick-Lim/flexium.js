@@ -240,10 +240,9 @@ function createDevToolsPlugin(opts: Required<FlexiumPluginOptions>): Plugin {
  */
 function createAutoImportPlugin(opts: Required<FlexiumPluginOptions>): Plugin {
   const autoImports = [
-    "signal",
-    "computed",
-    "useEffect",
-    // Note: sync, Context are in flexium/core
+    "use",
+    "sync",
+    // Note: Context is in flexium/core
   ];
 
   return {

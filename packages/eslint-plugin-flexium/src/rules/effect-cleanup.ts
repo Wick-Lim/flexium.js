@@ -30,13 +30,16 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an use() call
+        // Check if this is a use() effect call (with function as first arg and deps array)
         if (
           node.callee.type !== "Identifier" ||
-          node.callee.name !== "useEffect"
+          node.callee.name !== "use"
         ) {
           return;
         }
+
+        // Must have at least 2 args (function + deps) to be an effect
+        if (node.arguments.length < 2) return;
 
         // Get the callback function
         const callback = node.arguments[0];

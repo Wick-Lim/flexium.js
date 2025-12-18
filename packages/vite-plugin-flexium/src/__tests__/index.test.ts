@@ -400,48 +400,37 @@ describe('vite-plugin-flexium', () => {
       expect(result).toBeNull();
     });
 
-    it('should add import for signal when used', () => {
+    it('should add import for use when used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'const count = signal(0);';
+      const code = 'const [count, setCount] = use(0);';
       const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
 
       expect(result).not.toBeNull();
-      expect(result?.code).toContain("import { signal } from 'flexium'");
+      expect(result?.code).toContain("import { use } from 'flexium'");
     });
 
-    it('should add import for computed when used', () => {
+    it('should add import for sync when used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'const doubled = computed(() => count.value * 2);';
+      const code = 'sync(() => console.log("mounted"));';
       const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
 
       expect(result).not.toBeNull();
-      expect(result?.code).toContain("import { computed } from 'flexium'");
+      expect(result?.code).toContain("import { sync } from 'flexium'");
     });
 
-    it('should add import for useEffect when used', () => {
-      const plugin = createAutoImportPlugin(defaultOpts);
-      const code = 'use(() => console.log(count.value));';
-      const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
-
-      expect(result).not.toBeNull();
-      expect(result?.code).toContain("import { useEffect } from 'flexium'");
-    });
-
-    // Note: sync and Context are in flexium/core
+    // Note: Context is in flexium/core
 
     it('should add multiple imports when multiple primitives are used', () => {
       const plugin = createAutoImportPlugin(defaultOpts);
       const code = `
-        const count = signal(0);
-        const doubled = computed(() => count.value * 2);
-        use(() => console.log(doubled.value));
+        const [count, setCount] = use(0);
+        sync(() => console.log(count));
       `;
       const result = callPluginHook(plugin.transform, code, '/test/file.tsx', {});
 
       expect(result).not.toBeNull();
-      expect(result?.code).toContain('signal');
-      expect(result?.code).toContain('computed');
-      expect(result?.code).toContain('useEffect');
+      expect(result?.code).toContain('use');
+      expect(result?.code).toContain('sync');
     });
 
     it('should not add imports if already imported from flexium', () => {

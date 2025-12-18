@@ -5,7 +5,7 @@ Track keyboard input for games and interactive applications.
 ## Import
 
 ```tsx
-import { keyboard, Keys } from 'flexium/interactive'
+import { useKeyboard, Keys } from 'flexium/interactive'
 ```
 
 ## Signature

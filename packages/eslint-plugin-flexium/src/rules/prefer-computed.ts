@@ -37,7 +37,7 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
             }
           }
 
-          if (calleeName === "useState") {
+          if (calleeName === "use") {
             if (node.id.type === "ArrayPattern") {
               if (node.id.elements[0]?.type === "Identifier") {
                 signalVariables.add(node.id.elements[0].name);
@@ -51,13 +51,16 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       },
 
       CallExpression(node: TSESTree.CallExpression) {
-        // Check if this is an use() call
+        // Check if this is a use() effect call
         if (
           node.callee.type !== "Identifier" ||
-          node.callee.name !== "useEffect"
+          node.callee.name !== "use"
         ) {
           return;
         }
+
+        // Must have function + deps to be an effect
+        if (node.arguments.length < 2) return;
 
         const callback = node.arguments[0];
         if (!callback) return;
