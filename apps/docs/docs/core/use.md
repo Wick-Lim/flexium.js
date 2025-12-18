@@ -32,7 +32,7 @@ import { use } from 'flexium/core'
 | `use(() => T, [deps])` | Computed/derived value | `[T, ResourceControl]` |
 | `use(async () => T)` | Async data fetching | `[T \| undefined, ResourceControl]` |
 | `use(({ onCleanup }) => {}, [deps])` | Side effects | `[undefined, ResourceControl]` |
-| `use(value, undefined, { key })` | Global state | `[T, Setter<T>]` |
+| `use(value, { key })` | Global state | `[T, Setter<T>]` |
 | `use(Context)` | Context consumption | `[T, undefined]` |
 
 ---
