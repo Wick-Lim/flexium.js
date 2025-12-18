@@ -1,5 +1,5 @@
 import { css, cx } from 'flexium/css'
-import { getTheme } from '../theme'
+import { useTheme } from '../theme'
 import type { StyleObject } from 'flexium/css'
 
 export interface BadgeProps {
@@ -66,7 +66,7 @@ export function Badge(props: BadgeProps) {
     ...rest
   } = props
 
-  const theme = getTheme()
+  const theme = useTheme()
 
   // Get color from theme
   const themeColor = color === 'primary'

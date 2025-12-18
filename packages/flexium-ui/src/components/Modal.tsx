@@ -1,5 +1,5 @@
 import { css, cx } from 'flexium/css'
-import { getTheme } from '../theme'
+import { useTheme } from '../theme'
 import type { StyleObject } from 'flexium/css'
 
 export interface ModalProps {
@@ -48,7 +48,7 @@ export function Modal(props: ModalProps) {
     ...rest
   } = props
 
-  const theme = getTheme()
+  const theme = useTheme()
 
   if (!open) {
     return null

@@ -1,5 +1,5 @@
 import { css, cx } from 'flexium/css'
-import { getTheme } from '../theme'
+import { useTheme } from '../theme'
 import type { StyleObject } from 'flexium/css'
 
 export interface AvatarProps {
@@ -80,7 +80,7 @@ export function Avatar(props: AvatarProps) {
     ...rest
   } = props
 
-  const theme = getTheme()
+  const theme = useTheme()
 
   // Resolve size to number
   const sizeValue = typeof size === 'number' ? size : sizeConfig[size]

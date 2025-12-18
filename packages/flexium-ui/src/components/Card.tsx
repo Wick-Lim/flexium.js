@@ -1,5 +1,5 @@
 import { css, cx } from 'flexium/css'
-import { getTheme } from '../theme'
+import { useTheme } from '../theme'
 import type { StyleObject } from 'flexium/css'
 
 export interface CardProps {
@@ -42,7 +42,7 @@ export function Card(props: CardProps) {
     ...rest
   } = props
 
-  const theme = getTheme()
+  const theme = useTheme()
 
   // Resolve padding
   const paddingValue = padding === 'none' ? 0 : theme.spacing[padding]

@@ -1,5 +1,5 @@
 import { css, cx } from 'flexium/css'
-import { getTheme } from '../theme'
+import { useTheme } from '../theme'
 import type { StyleObject } from 'flexium/css'
 
 export interface TextProps {
@@ -65,7 +65,7 @@ export function Text(props: TextProps) {
     ...rest
   } = props
 
-  const theme = getTheme()
+  const theme = useTheme()
   const variantConfig = variantStyles[variant]
 
   // Resolve color

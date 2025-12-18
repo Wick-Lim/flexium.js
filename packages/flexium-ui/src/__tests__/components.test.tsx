@@ -3,13 +3,12 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest'
 import { resetStyles, getStyles } from 'flexium/css'
-import { resetTheme, getTheme } from '../theme'
+import { defaultTheme } from '../theme'
 import { Text, Button } from '../components'
 
 describe('Text', () => {
   beforeEach(() => {
     resetStyles()
-    resetTheme()
   })
 
   it('should render a span by default', () => {
@@ -30,15 +29,13 @@ describe('Text', () => {
   it('should apply font styles', () => {
     Text({ children: 'Hello' })
     const styles = getStyles()
-    const theme = getTheme()
-    expect(styles).toContain(`font-family:${theme.typography.fontFamily}`)
+    expect(styles).toContain(`font-family:${defaultTheme.typography.fontFamily}`)
   })
 
   it('should apply text color', () => {
     Text({ color: 'primary', children: 'Hello' })
     const styles = getStyles()
-    const theme = getTheme()
-    expect(styles).toContain(`color:${theme.colors.text.primary}`)
+    expect(styles).toContain(`color:${defaultTheme.colors.text.primary}`)
   })
 
   it('should apply custom color', () => {
@@ -75,7 +72,6 @@ describe('Text', () => {
 describe('Button', () => {
   beforeEach(() => {
     resetStyles()
-    resetTheme()
   })
 
   it('should render a button element', () => {
@@ -96,8 +92,7 @@ describe('Button', () => {
   it('should apply filled variant styles', () => {
     Button({ variant: 'filled', children: 'Click' })
     const styles = getStyles()
-    const theme = getTheme()
-    expect(styles).toContain(`background-color:${theme.colors.primary}`)
+    expect(styles).toContain(`background-color:${defaultTheme.colors.primary}`)
     expect(styles).toContain('color:#ffffff')
   })
 

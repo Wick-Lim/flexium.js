@@ -1,13 +1,10 @@
 /**
  * Theme Module Tests
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import {
   createTheme,
   defaultTheme,
-  setTheme,
-  getTheme,
-  resetTheme,
 } from '../theme'
 
 describe('defaultTheme', () => {
@@ -65,32 +62,5 @@ describe('createTheme()', () => {
     })
     expect(theme.spacing.md).toBe(20)
     expect(theme.spacing.sm).toBe(defaultTheme.spacing.sm)
-  })
-})
-
-describe('setTheme() / getTheme() / resetTheme()', () => {
-  beforeEach(() => {
-    resetTheme()
-  })
-
-  it('should return default theme initially', () => {
-    expect(getTheme()).toEqual(defaultTheme)
-  })
-
-  it('should set and get custom theme', () => {
-    const customTheme = createTheme({
-      colors: { primary: '#00ff00' },
-    })
-    setTheme(customTheme)
-    expect(getTheme().colors.primary).toBe('#00ff00')
-  })
-
-  it('should reset to default theme', () => {
-    const customTheme = createTheme({
-      colors: { primary: '#00ff00' },
-    })
-    setTheme(customTheme)
-    resetTheme()
-    expect(getTheme()).toEqual(defaultTheme)
   })
 })

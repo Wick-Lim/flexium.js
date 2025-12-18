@@ -1,5 +1,5 @@
 import { css, cx } from 'flexium/css'
-import { getTheme } from '../theme'
+import { useTheme } from '../theme'
 import type { StyleObject } from 'flexium/css'
 
 export interface ButtonProps {
@@ -56,7 +56,7 @@ export function Button(props: ButtonProps) {
     ...rest
   } = props
 
-  const theme = getTheme()
+  const theme = useTheme()
   const sizeConfig = sizeStyles[size]
 
   // Get color from theme

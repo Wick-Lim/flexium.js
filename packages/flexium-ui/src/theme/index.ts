@@ -1,6 +1,7 @@
 export { createTheme } from './createTheme'
 export { defaultTheme } from './defaultTheme'
-export { setTheme, getTheme, resetTheme } from './ThemeProvider'
+export { ThemeContext, ThemeProvider, useTheme } from './ThemeProvider'
+export type { ThemeProviderProps } from './ThemeProvider'
 export type {
   Theme,
   ThemeColors,

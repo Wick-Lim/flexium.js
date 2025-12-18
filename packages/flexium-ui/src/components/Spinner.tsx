@@ -1,5 +1,5 @@
 import { css, cx, keyframes } from 'flexium/css'
-import { getTheme } from '../theme'
+import { useTheme } from '../theme'
 import type { StyleObject } from 'flexium/css'
 
 export interface SpinnerProps {
@@ -43,7 +43,7 @@ export function Spinner(props: SpinnerProps) {
     ...rest
   } = props
 
-  const theme = getTheme()
+  const theme = useTheme()
 
   // Resolve size
   const spinnerSize = sizeMap[size]

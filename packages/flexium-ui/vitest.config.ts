@@ -20,6 +20,8 @@ export default defineConfig({
       'flexium/jsx-runtime': path.resolve(__dirname, '../flexium/src/jsx-runtime.ts'),
       'flexium/jsx-dev-runtime': path.resolve(__dirname, '../flexium/src/jsx-runtime.ts'),
       'flexium/css': path.resolve(__dirname, '../flexium/src/css/index.ts'),
+      'flexium/core': path.resolve(__dirname, '../flexium/src/core/index.ts'),
+      'flexium/dom': path.resolve(__dirname, '../flexium/src/dom/index.ts'),
       'flexium': path.resolve(__dirname, '../flexium/src/index.ts'),
     }
   },

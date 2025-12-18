@@ -3,29 +3,26 @@
  *
  * @example
  * ```tsx
- * import { Column, Row, Text, Button, Card, Spinner, Modal, createTheme, setTheme } from 'flexium-ui'
+ * import { Column, Row, Text, Button, Card, ThemeProvider, createTheme } from 'flexium-ui'
  *
- * // Optional: Create and set custom theme
+ * // Optional: Create custom theme
  * const theme = createTheme({ colors: { primary: '#0066ff' } })
- * setTheme(theme)
  *
  * // Build UI with Column/Row layout
  * function App() {
  *   return (
- *     <Column gap={16} padding={24}>
- *       <Text variant="h1">Welcome</Text>
- *       <Card shadow="md" padding="lg">
- *         <Text>Card content with elevation</Text>
- *         <Spinner size="md" color="primary" />
- *       </Card>
- *       <Row gap={8} mainAxisAlignment="end">
- *         <Button variant="outlined">Cancel</Button>
- *         <Button>Save</Button>
- *       </Row>
- *       <Modal open={true} title="Dialog" onClose={() => {}}>
- *         <Text>Modal content</Text>
- *       </Modal>
- *     </Column>
+ *     <ThemeProvider theme={theme}>
+ *       <Column gap={16} padding={24}>
+ *         <Text variant="h1">Welcome</Text>
+ *         <Card shadow="md" padding="lg">
+ *           <Text>Card content</Text>
+ *         </Card>
+ *         <Row gap={8} mainAxisAlignment="end">
+ *           <Button variant="outlined">Cancel</Button>
+ *           <Button>Save</Button>
+ *         </Row>
+ *       </Column>
+ *     </ThemeProvider>
  *   )
  * }
  * ```
@@ -73,11 +70,11 @@ export type {
 
 // Theme
 export {
+  ThemeProvider,
+  ThemeContext,
+  useTheme,
   createTheme,
   defaultTheme,
-  setTheme,
-  getTheme,
-  resetTheme,
 } from './theme'
 export type {
   Theme,
@@ -86,5 +83,6 @@ export type {
   ThemeTypography,
   ThemeBorderRadius,
   ThemeShadows,
+  ThemeProviderProps,
   DeepPartial,
 } from './theme'
