@@ -29,7 +29,7 @@ Flexium supports the familiar React-style `.map()` syntax with **automatic optim
 import { useState } from 'flexium/core'
 
 function TodoList() {
-  const todos = useState([
+  const [todos] = useState([
     { id: 1, text: 'Buy milk' },
     { id: 2, text: 'Walk the dog' }
   ])
@@ -59,7 +59,7 @@ In most frameworks, `items.map()` either:
 ### With Objects
 
 ```tsx
-const users = useState([
+const [users] = useState([
   { id: 1, name: 'Alice' },
   { id: 2, name: 'Bob' }
 ])
@@ -78,9 +78,9 @@ const users = useState([
 
 ```tsx
 // All updates are reactive and optimized - use setter with callback
-todos.set(prev => [...prev, { id: 3, text: 'New todo' }])  // Append
-todos.set(prev => prev.filter(t => t.id !== 1))             // Remove
-todos.set(prev => prev.map(t => t.id === 1 ? {...t, done: true} : t))  // Update
+setTodos(prev => [...prev, { id: 3, text: 'New todo' }])  // Append
+setTodos(prev => prev.filter(t => t.id !== 1))             // Remove
+setTodos(prev => prev.map(t => t.id === 1 ? {...t, done: true} : t))  // Update
 ```
 
 ---
@@ -97,13 +97,13 @@ For if/else conditions, use the ternary operator - just like React:
 import { useState } from 'flexium/core';
 
 function LoginButton() {
-  const isLoggedIn = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
     <div>
-      {isLoggedIn.valueOf()
-        ? <button onClick={() => isLoggedIn.set(false)}>Logout</button>
-        : <button onClick={() => isLoggedIn.set(true)}>Login</button>
+      {isLoggedIn
+        ? <button onClick={() => setIsLoggedIn(false)}>Logout</button>
+        : <button onClick={() => setIsLoggedIn(true)}>Login</button>
       }
     </div>
   );
@@ -118,11 +118,11 @@ For conditionally showing content when a value is truthy:
 import { useState } from 'flexium/core';
 
 function UserGreeting() {
-  const user = useState(null);
+  const [user] = useState(null);
 
   return (
     <div>
-      {user.valueOf() && <span>Welcome, {user.valueOf().name}!</span>}
+      {user && <span>Welcome, {user.name}!</span>}
     </div>
   );
 }
@@ -134,12 +134,12 @@ For multiple mutually exclusive conditions, use nested ternaries or a function:
 
 ```tsx
 function StatusDisplay() {
-  const status = useState('loading');
+  const [status] = useState('loading');
 
   const renderStatus = () => {
-    if (status.valueOf() === 'loading') return <p>Loading...</p>;
-    if (status.valueOf() === 'error') return <p style={{ color: 'red' }}>Error!</p>;
-    if (status.valueOf() === 'success') return <p>Success!</p>;
+    if (status === 'loading') return <p>Loading...</p>;
+    if (status === 'error') return <p style={{ color: 'red' }}>Error!</p>;
+    if (status === 'success') return <p>Success!</p>;
     return <p>Unknown state</p>;
   };
 
@@ -151,13 +151,13 @@ Or with nested ternaries:
 
 ```tsx
 function StatusDisplay() {
-  const status = useState('loading');
+  const [status] = useState('loading');
 
   return (
     <div>
-      {status.valueOf() === 'loading' ? <p>Loading...</p> :
-       status.valueOf() === 'error' ? <p style={{ color: 'red' }}>Error!</p> :
-       status.valueOf() === 'success' ? <p>Success!</p> :
+      {status === 'loading' ? <p>Loading...</p> :
+       status === 'error' ? <p style={{ color: 'red' }}>Error!</p> :
+       status === 'success' ? <p>Success!</p> :
        <p>Unknown state</p>}
     </div>
   );

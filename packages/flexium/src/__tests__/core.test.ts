@@ -1,11 +1,11 @@
 /**
  * Core API Tests
  *
- * Tests for: useState, useEffect, useSync, useRef, createContext, useContext
+ * Tests for: useState, useEffect, sync, useRef, createContext, useContext
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, f } from '../dom'
-import { useState, useEffect, useSync, useRef } from '../core'
+import { useState, useEffect, sync, useRef } from '../core'
 import { createContext, useContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
@@ -194,7 +194,7 @@ describe('useEffect()', () => {
   })
 })
 
-describe('useSync()', () => {
+describe('sync()', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -210,7 +210,7 @@ describe('useSync()', () => {
     let syncRan = false
 
     function App() {
-      useSync(() => {
+      sync(() => {
         syncRan = true
       })
 
@@ -227,7 +227,7 @@ describe('useSync()', () => {
     function App() {
       const [count, setCount] = useState(0)
 
-      useSync(() => {
+      sync(() => {
         syncCalls.push(count)
       })
 

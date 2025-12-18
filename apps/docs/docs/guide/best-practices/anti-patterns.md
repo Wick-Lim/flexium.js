@@ -229,8 +229,8 @@ setB(2)  // Re-render 2
 setC(3)  // Re-render 3
 
 // ✅ Correct approach - sync updates
-import { useSync } from 'flexium/core'
-useSync(() => {
+import { sync } from 'flexium/core'
+sync(() => {
   setA(1)
   setB(2)
   setC(3)
@@ -423,7 +423,7 @@ function Component() {
 
 1. ✅ Read state inside JSX or useEffect
 2. ✅ Don't use global if local is sufficient
-3. ✅ Sync updates with `useSync()`
+3. ✅ Sync updates with `sync()`
 4. ✅ Use `deps` option for derived state
 5. ✅ Always return cleanup functions
 6. ✅ Specify types explicitly

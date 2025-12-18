@@ -118,12 +118,12 @@ useEffect(() => {
 
 ### `flexium/prefer-sync`
 
-Suggest using `useSync()` when multiple state updates occur consecutively.
+Suggest using `sync()` when multiple state updates occur consecutively.
 
-**Why?** Multiple state updates are auto-batched via microtask, but `useSync()` provides explicit synchronous batching when needed.
+**Why?** Multiple state updates are auto-batched via microtask, but `sync()` provides explicit synchronous batching when needed.
 
 ```javascript
-import { useState, useSync } from 'flexium/core'
+import { useState, sync } from 'flexium/core'
 
 const [count, setCount] = useState(0)
 const [name, setName] = useState('')
@@ -135,7 +135,7 @@ setName('test')
 setActive(true)
 
 // ✅ Good - explicit synchronous batching
-useSync(() => {
+sync(() => {
   setCount(1)
   setName('test')
   setActive(true)

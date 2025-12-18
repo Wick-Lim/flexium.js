@@ -23,22 +23,22 @@ Flexium now supports **Automatic Batching** by default. Multiple state updates o
 ```tsx
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const firstName = useState('John')
-const lastName = useState('Doe')
-const age = useState(30)
+const [firstName, setFirstName] = useState('John')
+const [lastName, setLastName] = useState('Doe')
+const [age, setAge] = useState(30)
 
 useEffect(() => {
-  console.log(`${firstName.valueOf()} ${lastName.valueOf()}, age ${age.valueOf()}`)
+  console.log(`${firstName} ${lastName}, age ${age}`)
 })
 // Logs: "John Doe, age 30"
 
 // These updates are automatically batched!
 setTimeout(() => {
-  firstName.set('Jane')
-  lastName.set('Smith')
-  age.set(25)
+  setFirstName('Jane')
+  setLastName('Smith')
+  setAge(25)
 }, 0)
 // Effect runs only ONCE after the timeout callback finishes.
 // Logs: "Jane Smith, age 25"
@@ -51,14 +51,14 @@ The `useSync()` API is available for scenarios where you want **Synchronous Upda
 ```tsx
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 // ... signals ...
 
 // Updates run immediately after this block
 useSync(() => {
-  firstName.set('Jane')
-  lastName.set('Smith')
+  setFirstName('Jane')
+  setLastName('Smith')
 })
 // DOM is updated HERE, synchronously.
 ```
@@ -69,7 +69,7 @@ The `useSync()` function is available from multiple import paths:
 
 ```tsx
 // From core API
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 ```
 
 ## Force Sync
@@ -85,17 +85,17 @@ The `useSync()` function (without arguments) forces any pending auto-batched eff
 ```tsx
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const count = useState(0)
+const [count, setCount] = useState(0)
 let effectRan = false
 
 useEffect(() => {
-  count.valueOf()
+  count
   effectRan = true
 })
 
-count.set(1)
+setCount(1)
 // Effect is queued (auto-batching)
 
 useSync()
@@ -110,19 +110,19 @@ console.log(effectRan) // true
 ```tsx
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const firstName = useState('John')
-const lastName = useState('Doe')
+const [firstName, setFirstName] = useState('John')
+const [lastName, setLastName] = useState('Doe')
 let fullName = ''
 
 useEffect(() => {
-  fullName = `${firstName.valueOf()} ${lastName.valueOf()}`
+  fullName = `${firstName} ${lastName}`
 })
 
 useSync(() => {
-  firstName.set('Jane')
-  lastName.set('Smith')
+  setFirstName('Jane')
+  setLastName('Smith')
 })
 
 // Effect has already run!
@@ -137,20 +137,20 @@ console.log(fullName) // "Jane Smith"
 ```tsx
 import { describe, it, expect } from 'vitest'
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 describe('Counter', () => {
   it('should update when count changes', () => {
-    const count = useState(0)
+    const [count, setCount] = useState(0)
     let displayValue = 0
 
     useEffect(() => {
-      displayValue = count.valueOf() * 2
+      displayValue = count * 2
     })
 
     expect(displayValue).toBe(0)
 
-    count.set(5)
+    setCount(5)
     useSync() // Force effects to run
 
     expect(displayValue).toBe(10)
@@ -164,14 +164,14 @@ Use `useSync()` when you need to measure the DOM immediately after updates:
 
 ```tsx
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const items = useState(['a', 'b', 'c'])
+const [items, setItems] = useState(['a', 'b', 'c'])
 
 function addItemAndMeasure() {
   useSync(() => {
-    items.set([...items.valueOf(), 'd'])
+    setItems([...items, 'd'])
   })
 
   // DOM is now updated, safe to measure
@@ -193,14 +193,14 @@ function addItemAndMeasure() {
 ```tsx
 // useSync(fn) - for grouping updates
 useSync(() => {
-  a.set(1)
-  b.set(2)
+  setA(1)
+  setB(2)
 })
 // Effects run here, synchronously
 
 // useSync() - for forcing queued updates
-a.set(1) // Queued by auto-batch
-b.set(2) // Queued by auto-batch
+setA(1) // Queued by auto-batch
+setB(2) // Queued by auto-batch
 useSync()  // Forces all queued effects to run NOW
 ```
 
@@ -220,35 +220,35 @@ Batching provides significant performance improvements by:
 ```tsx
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const count = useState(0)
-const items = useState([])
-const loading = useState(false)
-const error = useState(null)
+const [count, setCount] = useState(0)
+const [items, setItems] = useState([])
+const [loading, setLoading] = useState(false)
+const [error, setError] = useState(null)
 
 // This effect would run 4 times without syncing
 useEffect(() => {
   console.log('State updated:', {
-    count: count.valueOf(),
-    items: items.valueOf().length,
-    loading: loading.valueOf(),
-    error: error.valueOf()
+    count: count,
+    items: items.length,
+    loading: loading,
+    error: error
   })
 })
 
-// Without useSync: 4 effect executions
-count.set(10)
-items.set([1, 2, 3])
-loading.set(false)
-error.set(null)
+// Without sync: 4 effect executions
+setCount(10)
+setItems([1, 2, 3])
+setLoading(false)
+setError(null)
 
-// With useSync: 1 effect execution
+// With sync: 1 effect execution
 useSync(() => {
-  count.set(10)
-  items.set([1, 2, 3])
-  loading.set(false)
-  error.set(null)
+  setCount(10)
+  setItems([1, 2, 3])
+  setLoading(false)
+  setError(null)
 })
 ```
 
@@ -258,16 +258,16 @@ useSync(() => {
 
 ```tsx
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const x = useState(0)
-const y = useState(0)
+const [x, setX] = useState(0)
+const [y, setY] = useState(0)
 
-// Update both coordinates in one useSync block
+// Update both coordinates in one sync block
 useSync(() => {
-  x.set(10)
-  y.set(20)
+  setX(10)
+  setY(20)
 })
 ```
 
@@ -277,15 +277,15 @@ The `useSync()` function returns the value returned by the callback:
 
 ```tsx
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const items = useState([])
-const count = useState(0)
+const [items, setItems] = useState([])
+const [count, setCount] = useState(0)
 
 const result = useSync(() => {
-  items.set([1, 2, 3, 4, 5])
-  count.set(5)
+  setItems([1, 2, 3, 4, 5])
+  setCount(5)
   return 'Updates complete'
 })
 
@@ -298,13 +298,13 @@ Batch multiple state changes triggered by user interactions:
 
 ```tsx
 import { useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 function UserForm() {
-  const firstName = useState('')
-  const lastName = useState('')
-  const email = useState('')
-  const errors = useState({})
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [errors, setErrors] = useState({})
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -313,11 +313,11 @@ function UserForm() {
     useSync(() => {
       const newErrors = {}
 
-      if (!firstName.valueOf()) newErrors.firstName = 'Required'
-      if (!lastName.valueOf()) newErrors.lastName = 'Required'
-      if (!email.valueOf()) newErrors.email = 'Required'
+      if (!firstName) newErrors.firstName = 'Required'
+      if (!lastName) newErrors.lastName = 'Required'
+      if (!email) newErrors.email = 'Required'
 
-      errors.set(newErrors)
+      setErrors(newErrors)
     })
   }
 
@@ -326,7 +326,7 @@ function UserForm() {
       <input
         type="text"
         value={firstName}
-        oninput={(e) => firstName.set(e.target.value)}
+        oninput={(e) => setFirstName(e.target.value)}
         placeholder="First Name"
       />
       {errors.firstName && <span>{errors.firstName}</span>}
@@ -334,7 +334,7 @@ function UserForm() {
       <input
         type="text"
         value={lastName}
-        oninput={(e) => lastName.set(e.target.value)}
+        oninput={(e) => setLastName(e.target.value)}
         placeholder="Last Name"
       />
       {errors.lastName && <span>{errors.lastName}</span>}
@@ -342,7 +342,7 @@ function UserForm() {
       <input
         type="email"
         value={email}
-        oninput={(e) => email.set(e.target.value)}
+        oninput={(e) => setEmail(e.target.value)}
         placeholder="Email"
       />
       {errors.email && <span>{errors.email}</span>}
@@ -355,49 +355,49 @@ function UserForm() {
 
 ## Nested Sync
 
-Sync blocks can be nested, and effects will only run after the outermost useSync completes:
+Sync blocks can be nested, and effects will only run after the outermost sync completes:
 
 ```tsx
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const count = useState(0)
+const [count, setCount] = useState(0)
 let runCount = 0
 
 useEffect(() => {
-  console.log('Count:', count.valueOf())
+  console.log('Count:', count)
   runCount++
 })
 
 useSync(() => {
-  count.set(1)
+  setCount(1)
 
   useSync(() => {
-    count.set(2)
+    setCount(2)
 
     useSync(() => {
-      count.set(3)
+      setCount(3)
     })
   })
 
-  count.set(4)
+  setCount(4)
 })
 
-console.log(runCount) // 2 (initial run + 1 useSync run)
-// Effect only ran once after all nested useSync blocks completed
+console.log(runCount) // 2 (initial run + 1 sync run)
+// Effect only ran once after all nested sync blocks completed
 ```
 
 ### How Nested Sync Works
 
-Flexium uses a depth counter to track nested useSync blocks:
+Flexium uses a depth counter to track nested sync blocks:
 
 1. Each `useSync()` call increments the depth counter
 2. Signal changes are queued while depth > 0
 3. When a block completes, the depth counter decrements
 4. When depth reaches 0, all queued effects execute
 
-This ensures that no matter how deeply useSync blocks are nested, effects only run once when all updates are complete.
+This ensures that no matter how deeply sync blocks are nested, effects only run once when all updates are complete.
 
 ## When to Use Sync
 
@@ -407,10 +407,10 @@ Batch multiple form field updates:
 
 ```tsx
 import { useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 function ProfileEditor() {
-  const form = useState({
+  const [form, setForm] = useState({
     name: '',
     email: '',
     bio: '',
@@ -422,7 +422,7 @@ function ProfileEditor() {
 
     // Update all form fields at once
     useSync(() => {
-      form.set({
+      setForm({
         name: user.name,
         email: user.email,
         bio: user.bio,
@@ -435,15 +435,15 @@ function ProfileEditor() {
     <div>
       <input
         value={form.name}
-        oninput={(e) => form.set(f => ({ ...f, name: e.target.value }))}
+        oninput={(e) => setForm(f => ({ ...f, name: e.target.value }))}
       />
       <input
         value={form.email}
-        oninput={(e) => form.set(f => ({ ...f, email: e.target.value }))}
+        oninput={(e) => setForm(f => ({ ...f, email: e.target.value }))}
       />
       <textarea
         value={form.bio}
-        oninput={(e) => form.set(f => ({ ...f, bio: e.target.value }))}
+        oninput={(e) => setForm(f => ({ ...f, bio: e.target.value }))}
       />
     </div>
   )
@@ -456,18 +456,18 @@ Process arrays of updates efficiently:
 
 ```tsx
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const items = useState([])
-const count = useState(0)
-const total = useState(0)
+const [items, setItems] = useState([])
+const [count, setCount] = useState(0)
+const [total, setTotal] = useState(0)
 
 const addMultipleItems = (newItems) => {
   useSync(() => {
-    items.set(prev => [...prev, ...newItems])
-    count.set(c => c + newItems.length)
-    total.set(t => t + newItems.reduce((sum, item) => sum + item.price, 0))
+    setItems(prev => [...prev, ...newItems])
+    setCount(c => c + newItems.length)
+    setTotal(t => t + newItems.reduce((sum, item) => sum + item.price, 0))
   })
 }
 
@@ -487,13 +487,13 @@ Update multiple states from API responses:
 
 ```tsx
 import { useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 function DataDashboard() {
-  const users = useState([])
-  const stats = useState(null)
-  const loading = useState(true)
-  const error = useState(null)
+  const [users, setUsers] = useState([])
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   const fetchData = async () => {
     try {
@@ -507,17 +507,17 @@ function DataDashboard() {
         statsRes.json()
       ])
 
-      // Update all states in one useSync block
+      // Update all states in one sync block
       useSync(() => {
-        users.set(usersData)
-        stats.set(statsData)
-        loading.set(false)
-        error.set(null)
+        setUsers(usersData)
+        setStats(statsData)
+        setLoading(false)
+        setError(null)
       })
     } catch (err) {
       useSync(() => {
-        error.set(err.message)
-        loading.set(false)
+        setError(err.message)
+        setLoading(false)
       })
     }
   }
@@ -544,22 +544,22 @@ Batch updates in animation loops:
 
 ```tsx
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const x = useState(0)
-const y = useState(0)
-const rotation = useState(0)
-const scale = useState(1)
+const [x, setX] = useState(0)
+const [y, setY] = useState(0)
+const [rotation, setRotation] = useState(0)
+const [scale, setScale] = useState(1)
 
 const animate = () => {
   requestAnimationFrame(() => {
     // Batch all position/transform updates
     useSync(() => {
-      x.set(Math.sin(Date.now() / 1000) * 100)
-      y.set(Math.cos(Date.now() / 1000) * 100)
-      rotation.set(r => (r + 1) % 360)
-      scale.set(1 + Math.sin(Date.now() / 500) * 0.2)
+      setX(Math.sin(Date.now() / 1000) * 100)
+      setY(Math.cos(Date.now() / 1000) * 100)
+      setRotation(r => (r + 1) % 360)
+      setScale(1 + Math.sin(Date.now() / 500) * 0.2)
     })
 
     animate()
@@ -575,33 +575,33 @@ Update game state atomically:
 
 ```tsx
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const score = useState(0)
-const lives = useState(3)
-const level = useState(1)
-const enemies = useState([])
+const [score, setScore] = useState(0)
+const [lives, setLives] = useState(3)
+const [level, setLevel] = useState(1)
+const [enemies, setEnemies] = useState([])
 
 const handlePlayerDeath = () => {
   useSync(() => {
-    lives.set(l => l - 1)
+    setLives(l => l - 1)
 
-    if (lives.valueOf() <= 0) {
+    if (lives <= 0) {
       // Game over
-      score.set(0)
-      lives.set(3)
-      level.set(1)
-      enemies.set([])
+      setScore(0)
+      setLives(3)
+      setLevel(1)
+      setEnemies([])
     }
   })
 }
 
 const completeLevel = () => {
   useSync(() => {
-    score.set(s => s + 1000)
-    level.set(l => l + 1)
-    enemies.set(generateEnemies(level.valueOf() + 1))
+    setScore(s => s + 1000)
+    setLevel(l => l + 1)
+    setEnemies(generateEnemies(level + 1))
   })
 }
 ```
@@ -615,11 +615,11 @@ Don't batch single signal updates - it adds unnecessary overhead:
 ```tsx
 // Bad - unnecessary syncing
 useSync(() => {
-  count.set(1)
+  setCount(1)
 })
 
 // Good - just update directly
-count.set(1)
+setCount(1)
 ```
 
 ### Independent Updates
@@ -628,13 +628,13 @@ Don't batch unrelated updates that don't share effects:
 
 ```tsx
 ```tsx
-const userCount = useState(0)
-const themeColor = useState('blue')
+const [userCount, setUserCount] = useState(0)
+const [themeColor, setThemeColor] = useState('blue')
 
 // These are independent - no shared effects
 // Syncing provides no benefit
-userCount.set(10)
-themeColor.set('red')
+setUserCount(10)
+setThemeColor('red')
 ```
 
 ### Already Synced Contexts
@@ -643,27 +643,27 @@ Event handlers are automatically synced in some frameworks. Check if your contex
 
 ```tsx
 import { useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const count = useState(0)
-const name = useState('')
+const [count, setCount] = useState(0)
+const [name, setName] = useState('')
 
 // In Flexium event handlers, updates are NOT automatically synced
 // So you should use useSync() when updating multiple signals
 
 <button onclick={() => {
   // These run separately without useSync()
-  count.set(c => c + 1)
-  name.set('Updated')
+  setCount(c => c + 1)
+  setName('Updated')
 }}>
   Update
 </button>
 
-// Better with explicit useSync
+// Better with explicit sync
 <button onclick={() => {
   useSync(() => {
-    count.set(c => c + 1)
-    name.set('Updated')
+    setCount(c => c + 1)
+    setName('Updated')
   })
 }}>
   Update
@@ -686,9 +686,9 @@ setAge(25)            → Effect runs → DOM updates
 **With Sync:**
 ```
 useSync(() => {
-  firstName.set('Jane')   → Queued
-  lastName.set('Smith')   → Queued
-  age.set(25)             → Queued
+  setFirstName('Jane')   → Queued
+  setLastName('Smith')   → Queued
+  setAge(25)             → Queued
 })                       → Effect runs once → DOM updates once
 ```
 
@@ -697,34 +697,34 @@ useSync(() => {
 ```tsx
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const a = useState(0)
-const b = useState(0)
-const c = useState(0)
+const [a, setA] = useState(0)
+const [b, setB] = useState(0)
+const [c, setC] = useState(0)
 let runCount = 0
 
 useEffect(() => {
-  a.valueOf() + b.valueOf() + c.valueOf()
+  a + b + c
   runCount++
 })
 
-// Without useSync
+// Without sync
 console.time('without-sync')
-a.set(1)
-b.set(2)
-c.set(3)
+setA(1)
+setB(2)
+setC(3)
 console.timeEnd('without-sync')
 console.log('Runs:', runCount) // 4 (initial + 3 updates)
 
 runCount = 0
 
-// With useSync
+// With sync
 console.time('with-sync')
 useSync(() => {
-  a.set(10)
-  b.set(20)
-  c.set(30)
+  setA(10)
+  setB(20)
+  setC(30)
 })
 console.timeEnd('with-sync')
 console.log('Runs:', runCount) // 1 (synced update)
@@ -736,20 +736,20 @@ console.log('Runs:', runCount) // 1 (synced update)
 
 ```tsx
 import { useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 function ContactForm() {
-  const name = useState('')
-  const email = useState('')
-  const message = useState('')
-  const submitted = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [submitted, setSubmitted] = useState(false)
 
   const resetForm = () => {
     useSync(() => {
-      name.set('')
-      email.set('')
-      message.set('')
-      submitted.set(false)
+      setName('')
+      setEmail('')
+      messsetAge('')
+      setSubmitted(false)
     })
   }
 
@@ -759,7 +759,7 @@ function ContactForm() {
 
     useSync(() => {
       resetForm()
-      submitted.set(true)
+      setSubmitted(true)
     })
   }
 
@@ -771,20 +771,20 @@ function ContactForm() {
 
 ```tsx
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const ball1X = useState(0)
-const ball1Y = useState(0)
-const ball2X = useState(100)
-const ball2Y = useState(100)
+const [ball1X, setBall1X] = useState(0)
+const [ball1Y, setBall1Y] = useState(0)
+const [ball2X, setBall2X] = useState(100)
+const [ball2Y, setBall2Y] = useState(100)
 
 const moveBalls = (deltaTime) => {
   useSync(() => {
-    ball1X.set(x => x + deltaTime * 2)
-    ball1Y.set(y => y + deltaTime * 1)
-    ball2X.set(x => x - deltaTime * 1.5)
-    ball2Y.set(y => y + deltaTime * 2.5)
+    setBall1X(x => x + deltaTime * 2)
+    setBall1Y(y => y + deltaTime * 1)
+    setBall2X(x => x - deltaTime * 1.5)
+    setBall2Y(y => y + deltaTime * 2.5)
   })
 }
 ```
@@ -793,36 +793,36 @@ const moveBalls = (deltaTime) => {
 
 ```tsx
 import { useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 function ShoppingCart() {
-  const items = useState([])
-  const total = useState(0)
-  const itemCount = useState(0)
+  const [items, setItems] = useState([])
+  const [total, setTotal] = useState(0)
+  const [itemCount, setItemCount] = useState(0)
 
   const addItem = (item) => {
     useSync(() => {
-      items.set(prev => [...prev, item])
-      total.set(t => t + item.price)
-      itemCount.set(c => c + 1)
+      setItems(prev => [...prev, item])
+      setTotal(t => t + item.price)
+      setItemCount(c => c + 1)
     })
   }
 
   const removeItem = (itemId) => {
-    const item = items.valueOf().find(i => i.id === itemId)
+    const item = items.find(i => i.id === itemId)
 
     useSync(() => {
-      items.set(prev => prev.filter(i => i.id !== itemId))
-      total.set(t => t - item.price)
-      itemCount.set(c => c - 1)
+      setItems(prev => prev.filter(i => i.id !== itemId))
+      setTotal(t => t - item.price)
+      setItemCount(c => c - 1)
     })
   }
 
   const clearCart = () => {
     useSync(() => {
-      items.set([])
-      total.set(0)
-      itemCount.set(0)
+      setItems([])
+      setTotal(0)
+      setItemCount(0)
     })
   }
 
@@ -839,21 +839,21 @@ function ShoppingCart() {
 ### 4. Real-time Data Synchronization
 
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const temperature = useState(20)
-const humidity = useState(50)
-const pressure = useState(1013)
-const timestamp = useState(Date.now())
+const [temperature, setTemperature] = useState(20)
+const [humidity, setHumidity] = useState(50)
+const [pressure, setPressure] = useState(1013)
+const [timestamp, setTimestamp] = useState(Date.now())
 
 // WebSocket updates multiple sensor values
 websocket.on('sensor-data', (data) => {
   useSync(() => {
-    temperature.set(data.temp)
-    humidity.set(data.humidity)
-    pressure.set(data.pressure)
-    timestamp.set(Date.now())
+    setTemperature(data.temp)
+    humiditsetY(data.humidity)
+    setPressure(data.pressure)
+    setTimestamp(Date.now())
   })
 })
 ```
@@ -867,37 +867,37 @@ Always sync updates that are logically related:
 ```tsx
 // Good - related updates synced together
 useSync(() => {
-  user.set(newUser)
-  permissions.set(newUser.permissions)
-  lastLogin.set(Date.now())
+  setUser(newUser)
+  setPermissions(newUser.permissions)
+  setLastLogin(Date.now())
 })
 
 // Bad - unrelated updates synced
 useSync(() => {
-  user.set(newUser)
-  themeColor.set('blue') // Unrelated!
+  setUser(newUser)
+  setThemeColor('blue') // Unrelated!
 })
 ```
 
 ### 2. Use peek() Inside Sync Blocks
 
-When reading current values inside a useSync block, use `peek()` to avoid creating dependencies:
+When reading current values inside a sync block, use `peek()` to avoid creating dependencies:
 
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const count = useState(0)
+const [count, setCount] = useState(0)
 
 // Good - uses functional update
 useSync(() => {
-  count.set(c => c + 1)
+  setCount(c => c + 1)
 })
 
 // Also okay - direct value access (auto-untracked in setter)
 useSync(() => {
-  const current = count.valueOf()
-  count.set(current + 1)
+  const current = count
+  setCount(current + 1)
 })
 ```
 
@@ -906,21 +906,21 @@ useSync(() => {
 Use the return value for operations that need confirmation:
 
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 import { useState } from 'flexium/core'
 
-const inventory = useState([])
-const soldItems = useState([])
+const [inventory, setInventory] = useState([])
+const [soldItems, setSoldItems] = useState([])
 
 const sellItem = (itemId) => {
   return useSync(() => {
-    const currentInventory = inventory.valueOf()
+    const currentInventory = inventory
     const item = currentInventory.find(i => i.id === itemId)
 
     if (!item) return false
 
-    inventory.set(currentInventory.filter(i => i.id !== itemId))
-    soldItems.set(prev => [...prev, item])
+    inventorsetY(currentInventory.filter(i => i.id !== itemId))
+    setSoldItems(prev => [...prev, item])
 
     return true
   })
@@ -933,21 +933,21 @@ if (sellItem(123)) {
 
 ### 4. Avoid Side Effects in Sync Blocks
 
-Keep useSync blocks focused on state updates only:
+Keep sync blocks focused on state updates only:
 
 ```tsx
 // Bad - mixing side effects with syncing
 useSync(() => {
-  loading.set(false)
-  data.set(newData)
+  setLoading(false)
+  setData(newData)
   console.log('Data loaded') // Side effect
   trackAnalytics('data-loaded') // Side effect
 })
 
 // Good - separate concerns
 useSync(() => {
-  loading.set(false)
-  data.set(newData)
+  setLoading(false)
+  setData(newData)
 })
 
 console.log('Data loaded')
@@ -962,9 +962,9 @@ Add comments explaining why updates are synced together:
 // Sync all cart state updates to ensure UI consistency
 // and prevent intermediate states where count doesn't match items array
 useSync(() => {
-  cartItems.set(newItems)
-  cartCount.set(newItems.length)
-  cartTotal.set(calculateTotal(newItems))
+  setCartItems(newItems)
+  setCartCount(newItems.length)
+  setCartTotal(calculateTotal(newItems))
 })
 ```
 
@@ -972,35 +972,35 @@ useSync(() => {
 
 ### Track Sync Depth
 
-You can track when useSync blocks are active:
+You can track when sync blocks are active:
 
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const count = useState(0)
+const [count, setCount] = useState(0)
 
 useEffect(() => {
-  console.log('Effect running, count:', count.valueOf())
+  console.log('Effect running, count:', count)
 })
 
-console.log('Before useSync')
+console.log('Before sync')
 useSync(() => {
-  console.log('Inside useSync')
-  count.set(1)
-  console.log('Still inside useSync')
-  count.set(2)
+  console.log('Inside sync')
+  setCount(1)
+  console.log('Still inside sync')
+  setCount(2)
   console.log('Sync ending')
 })
-console.log('After useSync')
+console.log('After sync')
 
 // Output:
 // Effect running, count: 0
-// Before useSync
-// Inside useSync
-// Still inside useSync
+// Before sync
+// Inside sync
+// Still inside sync
 // Sync ending
-// After useSync
+// After sync
 // Effect running, count: 2
 ```
 
@@ -1010,23 +1010,23 @@ Measure the performance benefit of syncing:
 
 ```tsx
 import { useEffect, useState } from 'flexium/core'
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-const signals = Array.from({ length: 100 }, () => useState(0))
+const signals = Array.from({ length: 100 }, () => { const [value, setValue] = useState(0); return { value, setValue }; })
 
 useEffect(() => {
-  signals.forEach(s => s.valueOf())
+  signals.forEach(s => s.value)
 })
 
-// Without useSync
+// Without sync
 console.time('no-sync')
-signals.forEach((s, i) => s.set(i))
+signals.forEach((s, i) => s.setValue(i))
 console.timeEnd('no-sync')
 
-// With useSync
+// With sync
 console.time('with-sync')
 useSync(() => {
-  signals.forEach((s, i) => s.set(i + 100))
+  signals.forEach((s, i) => s.setValue(i + 100))
 })
 console.timeEnd('with-sync')
 ```
@@ -1035,12 +1035,12 @@ console.timeEnd('with-sync')
 
 - **useSync()** groups multiple signal updates to run effects only once
 - **useSync()** (without args) forces pending auto-batched effects to run synchronously
-- Use useSync for **related state changes** like form updates, bulk operations, and API responses
+- Use sync for **related state changes** like form updates, bulk operations, and API responses
 - Use `useSync()` for **testing** and **DOM measurement** scenarios
-- **Nested useSync blocks** are fully supported - effects run after the outermost useSync completes
+- **Nested sync blocks** are fully supported - effects run after the outermost sync completes
 - Don't sync **single updates** or **unrelated changes**
 - Always **sync updates** in async callbacks and animation frames
-- Use **peek()** inside useSync blocks to avoid unnecessary dependency tracking
+- Use **peek()** inside sync blocks to avoid unnecessary dependency tracking
 - Syncing can provide **3-10x performance improvements** for multi-signal updates
 
 Synchronization is a powerful tool for optimizing Flexium applications. When used correctly, it ensures your UI stays responsive and consistent, even with complex state updates.

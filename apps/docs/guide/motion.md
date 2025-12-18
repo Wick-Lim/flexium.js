@@ -313,7 +313,7 @@ Use motion with Flexium's state for reactive animations.
 import { useState } from 'flexium/core'
 import { MotionController } from 'flexium/primitives'
 
-const isVisible = useState(false)
+const [isVisible, setIsVisible] = useState(false)
 
 const element = document.createElement('div')
 const controller = new MotionController(element)
@@ -321,7 +321,7 @@ const controller = new MotionController(element)
 // Watch state and animate on changes
 const unwatch = useState.watch(() => {
   controller.animate({
-    animate: isVisible.valueOf()
+    animate: isVisible
       ? { opacity: 1, y: 0 }
       : { opacity: 0, y: 20 },
     duration: 300,
@@ -329,7 +329,7 @@ const unwatch = useState.watch(() => {
 })
 
 // Update state to trigger animation
-isVisible.set(true)
+setIsVisible(true)
 
 // Cleanup
 unwatch()
@@ -431,7 +431,7 @@ import { MotionController } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function AnimatedCard() {
-  const isExpanded = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const card = document.createElement('div')
   card.style.padding = '20px'
@@ -455,12 +455,12 @@ function AnimatedCard() {
   controller.enableLayoutAnimation(300, 'ease-out')
 
   card.addEventListener('click', () => {
-    isExpanded.set(!isExpanded.valueOf())
+    setIsExpanded(!isExpanded)
   })
 
   // Watch state changes
   const unwatch = useState.watch(() => {
-    if (isExpanded.valueOf()) {
+    if (isExpanded) {
       card.style.width = '400px'
       card.style.height = '300px'
     } else {

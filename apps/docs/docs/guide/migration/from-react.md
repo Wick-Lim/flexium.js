@@ -313,13 +313,13 @@ import { useState } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const theme = useState('dark', { key: 'app:theme' })
+  const [theme, setTheme] = useState('dark', { key: 'app:theme' })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const theme = useState('light', { key: 'app:theme' })
+  const [theme, setTheme] = useState('light', { key: 'app:theme' })
   return <div>Theme: {theme}</div>
 }
 ```
@@ -364,10 +364,10 @@ function Counter() {
 import { useState } from 'flexium/core'
 
 function Counter() {
-  const counterState = useState({ count: 0 })
+  const [counterState, setCounterState] = useState({ count: 0 })
   
-  const increment = () => counterState.set(s => ({ ...s, count: s.count + 1 }))
-  const decrement = () => counterState.set(s => ({ ...s, count: s.count - 1 }))
+  const increment = () => setCounterState(s => ({ ...s, count: s.count + 1 }))
+  const decrement = () => setCounterState(s => ({ ...s, count: s.count - 1 }))
   
   return (
     <div>
@@ -650,7 +650,7 @@ function TodoApp() {
 ### After (Flexium)
 
 ```tsx
-import { useState, useEffect, useSync } from 'flexium/core'
+import { useState, useEffect, sync } from 'flexium/core'
 
 interface Todo {
   id: number
@@ -659,37 +659,37 @@ interface Todo {
 }
 
 function TodoApp() {
-  const todos = useState<Todo[]>([])
-  const filter = useState<'all' | 'active' | 'completed'>('all')
+  const [todos, setTodos] = useState<Todo[]>([])
+  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
 
   // Load from local storage
   useEffect(() => {
     const saved = localStorage.getItem('todos')
     if (saved) {
-      todos.set(JSON.parse(saved))
+      setTodos(JSON.parse(saved))
     }
   })
 
   // Save to local storage
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos.valueOf()))
+    localStorage.setItem('todos', JSON.stringify(todos))
   })
   
   const addTodo = (text: string) => {
-    todos.set([...todos.valueOf(), { id: Date.now(), text, completed: false }])
+    setTodos([...todos, { id: Date.now(), text, completed: false }])
   }
   
   const toggleTodo = (id: number) => {
-    todos.set(todos.valueOf().map(t => 
+    setTodos(todos.map(t => 
       t.id === id ? { ...t, completed: !t.completed } : t
     ))
   }
   
   // Filtering with computed state
-  const filteredTodos = useState(() => {
-    if (filter.valueOf() === 'active') return todos.filter(t => !t.completed)
-    if (filter.valueOf() === 'completed') return todos.filter(t => t.completed)
-    return todos.valueOf()
+  const [filteredTodos, setFilteredTodos] = useState(() => {
+    if (filter === 'active') return todos.filter(t => !t.completed)
+    if (filter === 'completed') return todos.filter(t => t.completed)
+    return todos
   })
   
   return (
@@ -703,9 +703,9 @@ function TodoApp() {
         }}
       />
       <div>
-        <button onclick={() => filter.set('all')}>All</button>
-        <button onclick={() => filter.set('active')}>Active</button>
-        <button onclick={() => filter.set('completed')}>Completed</button>
+        <button onclick={() => setFilter('all')}>All</button>
+        <button onclick={() => setFilter('active')}>Active</button>
+        <button onclick={() => setFilter('completed')}>Completed</button>
       </div>
       <ul>
         {filteredTodos.map(todo => (
@@ -751,16 +751,16 @@ if (equals(count, 5)) { ... }
 
 ```tsx
 // ❌ Problem: Multiple state updates cause duplicate execution
-a.set(1)
-b.set(2)
-c.set(3)  // Effect runs 3 times
+setA(1)
+setB(2)
+setC(3)  // Effect runs 3 times
 
-// ✅ Solution: Use useSync()
-import { useSync } from 'flexium/core'
-useSync(() => {
-  a.set(1)
-  b.set(2)
-  c.set(3)  // Effect runs only once
+// ✅ Solution: Use sync()
+import { sync } from 'flexium/core'
+sync(() => {
+  setA(1)
+  setB(2)
+  setC(3)  // Effect runs only once
 })
 ```
 
@@ -768,8 +768,8 @@ useSync(() => {
 
 ```tsx
 // ✅ Explicit type specification
-const user = useState<User | null>(null)
-const count = useState<number>(0)
+const [user, setUser] = useState<User | null>(null)
+const [count, setCount] = useState<number>(0)
 ```
 
 ---
@@ -779,10 +779,10 @@ const count = useState<number>(0)
 ### 1. Use Sync Updates
 
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 // Multiple state updates at once
-useSync(() => {
+sync(() => {
   setA(1)
   setB(2)
   setC(3)

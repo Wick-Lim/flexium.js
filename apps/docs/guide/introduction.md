@@ -60,8 +60,8 @@ function Counter() {
 import { useState, useEffect } from 'flexium/core';
 
 function Counter() {
-  const count = useState(0);
-  const doubled = useState(() => count * 2);
+  const [count, setCount] = useState(0);
+  const [doubled] = useState(() => count * 2);
 
   useEffect(() => {
     document.title = `Count: ${count}`;
@@ -71,7 +71,7 @@ function Counter() {
     <div>
       <p>Count: {count}</p>
       <p>Doubled: {doubled}</p>
-      <button onclick={() => count.set(c => c + 1)}>Increment</button>
+      <button onclick={() => setCount(c => c + 1)}>Increment</button>
     </div>
   );
 }
@@ -113,15 +113,15 @@ function UserProfile() {
 import { useState } from 'flexium/core';
 
 function UserProfile() {
-  const userId = useState(1);
-  const doubled = useState(() => userId * 2);
+  const [userId] = useState(1);
+  const [doubled] = useState(() => userId * 2);
 
-  const user = useState(async () => {
+  const [user, userControl] = useState(async () => {
     const res = await fetch(`/api/users/${userId}`);
     return res.json();
   });
 
-  return <div>{user.loading ? 'Loading...' : user.valueOf()?.name}</div>;
+  return <div>{userControl.loading ? 'Loading...' : user?.name}</div>;
 }
 ```
 
@@ -147,7 +147,7 @@ import { ref, computed, watchEffect } from 'vue';
 
 export default {
   setup() {
-    const count = ref(0);
+    const count = useRef(0);
     const doubled = computed(() => count.value * 2);
 
     watchEffect(() => {
@@ -162,8 +162,8 @@ export default {
 import { useState, useEffect } from 'flexium/core';
 
 function Counter() {
-  const count = useState(0);
-  const doubled = useState(() => count * 2);
+  const [count] = useState(0);
+  const [doubled] = useState(() => count * 2);
 
   useEffect(() => {
     console.log('Count:', count);
@@ -208,13 +208,13 @@ function Counter() {
 import { useState } from 'flexium/core';
 
 function Counter() {
-  const count = useState(0);
-  const doubled = useState(() => count * 2);
+  const [count, setCount] = useState(0);
+  const [doubled] = useState(() => count * 2);
 
   return (
     <div>
       <p>{count}</p>
-      <button onclick={() => count.set(c => c + 1)}>+</button>
+      <button onclick={() => setCount(c => c + 1)}>+</button>
     </div>
   );
 }
@@ -265,17 +265,17 @@ Flexium is written entirely in TypeScript with full type inference:
 ```tsx
 import { useState } from 'flexium/core';
 
-// Type is inferred as StateGetter<number>
-const count = useState(0);
+// Type is inferred as number
+const [count, setCount] = useState(0);
 
-// TypeScript knows count is a number proxy
+// TypeScript knows count is a number
 const doubled: number = count * 2; // ✓
 
 // TypeScript prevents type errors
-count.set('invalid'); // ✗ Type error
+setCount('invalid'); // ✗ Type error
 
 // Async state has proper typing
-const user = useState(async () => ({
+const [user] = useState(async () => ({
   name: 'John',
   age: 30
 }));
@@ -290,16 +290,16 @@ Start simple and add complexity only when needed:
 
 ```tsx
 // Start with local state
-const count = useState(0);
+const [count, setCount] = useState(0);
 
 // Need it global? Just add a key
-const globalCount = useState(0, { key: 'globalCount' });
+const [globalCount, setGlobalCount] = useState(0, { key: 'globalCount' });
 
 // Need async? Make the initializer async
-const data = useState(async () => fetchData());
+const [data] = useState(async () => fetchData());
 
 // Need derived value? Pass a function
-const doubled = useState(() => count * 2);
+const [doubled] = useState(() => count * 2);
 ```
 
 The same API grows with your needs.
@@ -315,36 +315,36 @@ import { useState } from 'flexium/core';
 
 function Dashboard() {
   // 1. Local state
-  const filter = useState('all');
+  const [filter, setFilter] = useState('all');
 
   // 2. Global state (shared across components)
-  const theme = useState('light', { key: 'app-theme' });
+  const [theme, setTheme] = useState('light', { key: 'app-theme' });
 
   // 3. Computed state (auto-updates)
-  const greeting = useState(() =>
+  const [greeting] = useState(() =>
     theme === 'dark' ? 'Good evening' : 'Good morning'
   );
 
   // 4. Async state (data fetching)
-  const todos = useState(async () => {
+  const [todos, todosControl] = useState(async () => {
     const res = await fetch('/api/todos');
     return res.json();
   });
 
   // 5. Filtered computed state (depends on multiple signals)
-  const filteredTodos = useState(() => {
-    if (!todos.valueOf()) return [];
-    return filter.valueOf() === 'all'
-      ? todos.valueOf()
-      : todos.valueOf().filter(t => t.status === filter.valueOf());
+  const [filteredTodos] = useState(() => {
+    if (!todos) return [];
+    return filter === 'all'
+      ? todos
+      : todos.filter(t => t.status === filter);
   });
 
   return (
     <div>
       <h1>{greeting}</h1>
 
-      {todos.loading ? <div>Loading todos...</div> : null}
-      {todos.error ? <div>Error: {todos.error.message}</div> : null}
+      {todosControl.loading ? <div>Loading todos...</div> : null}
+      {todosControl.error ? <div>Error: {todosControl.error.message}</div> : null}
 
       {filteredTodos.length > 0 && (
         <ul>
@@ -354,7 +354,7 @@ function Dashboard() {
         </ul>
       )}
 
-      <button onclick={() => todos.refetch()}>Refresh</button>
+      <button onclick={() => todosControl.refetch()}>Refresh</button>
     </div>
   );
 }
@@ -368,9 +368,9 @@ Only what changes gets updated:
 import { useState, useEffect } from 'flexium/core';
 
 function Example() {
-  const firstName = useState('John');
-  const lastName = useState('Doe');
-  const age = useState(30);
+  const [firstName, setFirstName] = useState('John');
+  const [lastName, setLastName] = useState('Doe');
+  const [age, setAge] = useState(30);
 
   // This effect only runs when firstName changes
   useEffect(() => {
@@ -390,8 +390,8 @@ function Example() {
       {/* Only this text node updates when age changes */}
       <p>Age: {age}</p>
 
-      <button onclick={() => firstName.set('Jane')}>Change Name</button>
-      <button onclick={() => age.set(a => a + 1)}>Increment Age</button>
+      <button onclick={() => setFirstName('Jane')}>Change Name</button>
+      <button onclick={() => setAge(a => a + 1)}>Increment Age</button>
     </div>
   );
 }
@@ -405,37 +405,37 @@ Like React's useEffect, specify dependencies explicitly:
 import { useState, useEffect } from 'flexium/core';
 
 function SearchResults() {
-  const query = useState('');
-  const category = useState('all');
-  const results = useState([]);
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('all');
+  const [results, setResults] = useState([]);
 
   // Re-runs when query OR category changes
   useEffect(async () => {
-    if (!query.valueOf()) {
-      results.set([]);
+    if (!query) {
+      setResults([]);
       return;
     }
 
-    const res = await fetch(`/api/search?q=${query.valueOf()}&category=${category.valueOf()}`);
+    const res = await fetch(`/api/search?q=${query}&category=${category}`);
     const data = await res.json();
-    results.set(data);
+    setResults(data);
   }, [query, category]);
 
   return (
     <div>
       <input
-        value={query.valueOf()}
-        oninput={(e) => query.set(e.target.value)}
+        value={query}
+        oninput={(e) => setQuery(e.target.value)}
       />
 
-      <select onchange={(e) => category.set(e.target.value)}>
+      <select onchange={(e) => setCategory(e.target.value)}>
         <option value="all">All</option>
         <option value="books">Books</option>
         <option value="electronics">Electronics</option>
       </select>
 
       <ul>
-        {results.valueOf().map(item => (
+        {results.map(item => (
           <li key={item.id}>{item.title}</li>
         ))}
       </ul>
@@ -497,7 +497,7 @@ Flexium's architecture is designed for simplicity and performance:
 ┌─────────────────────────────────────────────────────────┐
 │                  Flexium Core API                        │
 │  ┌──────────┐  ┌────────┐  ┌────────┐  ┌──────────┐   │
-│  │useState()│  │useEffect│ │ useSync│  │  mount   │   │
+│  │useState()│  │useEffect│ │ sync│  │  mount   │   │
 │  └──────────┘  └────────┘  └────────┘  └──────────┘   │
 └────────────────────┬────────────────────────────────────┘
                      │
@@ -579,14 +579,14 @@ import { useState, useSync } from 'flexium/core';
 
 // Efficiently update 1000 items
 function LargeList() {
-  const items = useState(
+  const [items, setItems] = useState(
     Array.from({ length: 1000 }, (_, i) => ({ id: i, value: i }))
   );
 
   const updateAll = () => {
     useSync(() => {
       // Even updating 1000 items at once is fast
-      items.set(prev => prev.map(item => ({
+      setItems(prev => prev.map(item => ({
         ...item,
         value: item.value + 1
       })));

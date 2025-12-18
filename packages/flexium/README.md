@@ -109,7 +109,7 @@ const [doubled] = useState(() => count * 2, { deps: [count] })
 
 ```
 flexium
-├── /core         # Core reactivity: useState(), useEffect(), useSync()
+├── /core         # Core reactivity: useState(), useEffect(), sync()
 ├── /advanced     # Advanced APIs: createContext(), useContext()
 ├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
 ├── /ref          # Ref system: useRef(), forwardRef()

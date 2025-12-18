@@ -216,7 +216,7 @@ useEffect(() => {
 
 ### `flexium/prefer-sync`
 
-Suggest using `useSync()` when multiple signals are updated consecutively.
+Suggest using `sync()` when multiple signals are updated consecutively.
 
 **Why?** Multiple signal updates without syncing can cause unnecessary re-renders.
 
@@ -240,10 +240,10 @@ function updateUser(id: number, data: UserData) {
 #### Good
 
 ```javascript
-import { useSync } from 'flexium/core';
+import { sync } from 'flexium/core';
 
 // ✅ Synced updates (single re-render)
-useSync(() => {
+sync(() => {
   setCount(1);
   setName('test');
   setActive(true);
@@ -251,7 +251,7 @@ useSync(() => {
 
 // ✅ Synced function
 function updateUser(id: number, data: UserData) {
-  useSync(() => {
+  sync(() => {
     setUserId(id);
     setUserName(data.name);
     setUserEmail(data.email);

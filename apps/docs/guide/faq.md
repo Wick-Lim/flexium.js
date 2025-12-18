@@ -34,7 +34,7 @@ Use `useState()` for all state management needs in Flexium:
 
 ```tsx
 // useState() - direct value access
-const count = useState(0)
+const [count, setCount] = useState(0)
 count // use directly
 ```
 
@@ -44,10 +44,10 @@ Use global state with a key:
 
 ```tsx
 // In any component
-const user = useState(null, { key: 'currentUser' })
+const [user, setUser] = useState(null, { key: 'currentUser' })
 
 // In another component - same state!
-const user = useState(null, { key: 'currentUser' })
+const [user, setUser] = useState(null, { key: 'currentUser' })
 ```
 
 Or use Context API:
@@ -57,13 +57,13 @@ import { useState } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const theme = useState('dark', { key: 'app:theme' })
+  const [theme] = useState('dark', { key: 'app:theme' })
   return <MyComponent />
 }
 
 function MyComponent() {
   // Access theme from anywhere
-  const theme = useState('light', { key: 'app:theme' })
+  const [theme] = useState('light', { key: 'app:theme' })
   return <div>Theme: {theme}</div>
 }
 ```
@@ -78,7 +78,7 @@ Common causes:
    let count = 0
 
    // Will update
-   const count = useState(0)
+   const [count, setCount] = useState(0)
    ```
 
 2. **Mutating objects directly** - Create new references
@@ -87,7 +87,7 @@ Common causes:
    user.name = 'Bob'
 
    // Will update
-   user.set({ ...user.valueOf(), name: 'Bob' })
+   setUser({ ...user, name: 'Bob' })
    ```
 
 3. **Reading outside reactive context** - Use in JSX or effects
@@ -106,9 +106,9 @@ Common causes:
 Use native JavaScript - just like React:
 
 ```tsx
-{isLoggedIn.valueOf() && <Dashboard />}
+{isLoggedIn && <Dashboard />}
 
-{isLoggedIn.valueOf() ? <Dashboard /> : <Login />}
+{isLoggedIn ? <Dashboard /> : <Login />}
 ```
 
 ### How do I render lists?
@@ -127,13 +127,13 @@ Use `<Switch>` and `<Match>`:
 
 ```tsx
 <Switch>
-  <Match when={status.valueOf() === 'loading'}>
+  <Match when={status === 'loading'}>
     <Spinner />
   </Match>
-  <Match when={status.valueOf() === 'error'}>
+  <Match when={status === 'error'}>
     <Error />
   </Match>
-  <Match when={status.valueOf() === 'success'}>
+  <Match when={status === 'success'}>
     <Content />
   </Match>
 </Switch>
@@ -243,8 +243,8 @@ Use `useState()` for form handling:
 import { useState } from 'flexium/core'
 
 function LoginForm() {
-  const formData = useState({ email: '', password: '' })
-  const errors = useState({})
+  const [formData, setFormData] = useState({ email: '', password: '' })
+  const [errors, setErrors] = useState({})
 
   const validate = () => {
     const newErrors = {}
@@ -254,7 +254,7 @@ function LoginForm() {
     if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters'
     }
-    errors.set(newErrors)
+    setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
@@ -269,14 +269,14 @@ function LoginForm() {
     <form onSubmit={handleSubmit}>
       <input
         value={formData.email}
-        onInput={(e) => formData.set({ ...formData.valueOf(), email: e.target.value })}
+        onInput={(e) => setFormData({ ...formData, email: e.target.value })}
       />
       {errors.email && <span>{errors.email}</span>}
 
       <input
         type="password"
         value={formData.password}
-        onInput={(e) => formData.set({ ...formData.valueOf(), password: e.target.value })}
+        onInput={(e) => setFormData({ ...formData, password: e.target.value })}
       />
       {errors.password && <span>{errors.password}</span>}
 
@@ -310,11 +310,11 @@ Usually caused by updating a signal inside an effect that reads it:
 ```tsx
 // Bad - infinite loop
 useEffect(() => {
-  count.set(c => c + 1)
+  setCount(c => c + 1)
 })
 
 // Good - use previous value in setter
-count.set(prev => prev + 1)
+setCount(prev => prev + 1)
 ```
 
 ## Migration

@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f, Portal, Suspense, ErrorBoundary } from '../dom'
-import { useState, useEffect, useSync, useRef } from '../core'
+import { useState, useEffect, sync, useRef } from '../core'
 import { createContext, useContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
@@ -590,7 +590,7 @@ describe('Lifecycle Integration', () => {
     function Component() {
       const divRef = useRef<HTMLDivElement | null>(null)
 
-      useSync(() => {
+      sync(() => {
         syncExecuted = true
         if (divRef.current) {
           refAttached = true

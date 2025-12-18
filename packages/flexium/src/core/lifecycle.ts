@@ -139,10 +139,10 @@ export function useEffect(fn: () => (void | (() => void)), deps?: any[]) {
 
 /**
  * Unified sync API
- * - useSync(): Force refresh (flush pending effects)
- * - useSync(fn): Batch updates (run fn then flush)
+ * - sync(): Force refresh (flush pending effects)
+ * - sync(fn): Batch updates (run fn then flush)
  */
-export function useSync(fn?: () => void) {
+export function sync(fn?: () => void) {
     if (fn) {
         setBatching(true)
         try {

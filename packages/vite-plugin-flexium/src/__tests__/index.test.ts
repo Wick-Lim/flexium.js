@@ -427,7 +427,7 @@ describe('vite-plugin-flexium', () => {
       expect(result?.code).toContain("import { useEffect } from 'flexium'");
     });
 
-    // Note: batch is deprecated - use useSync from flexium/advanced instead
+    // Note: batch is deprecated - use sync from flexium/advanced instead
 
     // Note: onCleanup and createContext are deprecated - use useEffect() and useState() with key instead
 

@@ -9,11 +9,11 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
     type: "suggestion",
     docs: {
       description:
-        "Suggest using useSync() when multiple signals are updated consecutively",
+        "Suggest using sync() when multiple signals are updated consecutively",
     },
     messages: {
       preferSync:
-        "Multiple signal updates ({{count}}) detected. Consider using useSync() to prevent cascading re-renders.",
+        "Multiple signal updates ({{count}}) detected. Consider using sync() to prevent cascading re-renders.",
     },
     schema: [
       {
@@ -118,15 +118,15 @@ const rule: TSESLint.RuleModule<MessageIds, Options> = {
       },
 
       ExpressionStatement(node: TSESTree.ExpressionStatement) {
-        // Check if already inside useSync()
+        // Check if already inside sync()
         const ancestors = context.getAncestors();
         for (const ancestor of ancestors) {
           if (
             ancestor.type === "CallExpression" &&
             ancestor.callee.type === "Identifier" &&
-            ancestor.callee.name === "useSync"
+            ancestor.callee.name === "sync"
           ) {
-            return; // Already inside useSync, don't warn
+            return; // Already inside sync, don't warn
           }
         }
 

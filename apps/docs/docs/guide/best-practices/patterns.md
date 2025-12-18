@@ -14,52 +14,52 @@ Learn practical patterns commonly used in Flexium.
 import { useState } from 'flexium/core'
 
 function LoginForm() {
-  const form = useState({
+  const [form, setForm] = useState({
     email: '',
     password: ''
   })
 
-  const errors = useState<Record<string, string>>({})
-  const touched = useState<Record<string, boolean>>({})
-  
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+
   const handleSubmit = (e: Event) => {
     e.preventDefault()
-    
+
     // Validation
     const newErrors: Record<string, string> = {}
     if (!form.email) newErrors.email = 'Email is required'
     if (!form.password) newErrors.password = 'Password is required'
-    
+
     if (Object.keys(newErrors).length > 0) {
-      errors.set(newErrors)
+      setErrors(newErrors)
       return
     }
-    
+
     // Submit
-    submitForm(form.valueOf())
+    submitForm(form)
   }
-  
+
   return (
     <form onsubmit={handleSubmit}>
       <input
         value={form.email}
         oninput={(e) => {
-          form.set({ ...form.valueOf(), email: e.currentTarget.value })
-          touched.set({ ...touched.valueOf(), email: true })
+          setForm({ ...form, email: e.currentTarget.value })
+          setTouched({ ...touched, email: true })
         }}
       />
       {touched.email && errors.email && <span>{errors.email}</span>}
-      
+
       <input
         type="password"
         value={form.password}
         oninput={(e) => {
-          form.set({ ...form.valueOf(), password: e.currentTarget.value })
-          touched.set({ ...touched.valueOf(), password: true })
+          setForm({ ...form, password: e.currentTarget.value })
+          setTouched({ ...touched, password: true })
         }}
       />
       {touched.password && errors.password && <span>{errors.password}</span>}
-      
+
       <button type="submit">Login</button>
     </form>
   )
@@ -72,39 +72,39 @@ function LoginForm() {
 
 ```tsx
 function FormWithValidation() {
-  const form = useState({
+  const [form, setForm] = useState({
     email: '',
     password: '',
     confirmPassword: ''
   })
-  
+
   // Real-time validation
-  const errors = useState(() => {
+  const [errors] = useState(() => {
     const errs: Record<string, string> = {}
-    
+
     if (form.email && !form.email.includes('@')) {
       errs.email = 'Invalid email format'
     }
-    
+
     if (form.password && form.password.length < 8) {
       errs.password = 'Password must be at least 8 characters'
     }
-    
+
     if (form.confirmPassword && form.password !== form.confirmPassword) {
       errs.confirmPassword = 'Passwords do not match'
     }
-    
+
     return errs
   })
-  
+
   return (
     <form>
       <input
         value={form.email}
-        oninput={(e) => form.set({ ...form.valueOf(), email: e.currentTarget.value })}
+        oninput={(e) => setForm({ ...form, email: e.currentTarget.value })}
       />
       {errors.email && <span>{errors.email}</span>}
-      
+
       {/* ... */}
     </form>
   )
@@ -117,37 +117,37 @@ function FormWithValidation() {
 
 ```tsx
 function FormWithAsyncValidation() {
-  const form = useState({ email: '' })
-  const isChecking = useState(false)
-  const emailError = useState<string | null>(null)
-  
+  const [form, setForm] = useState({ email: '' })
+  const [isChecking, setIsChecking] = useState(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
+
   const checkEmailAvailability = async (email: string) => {
     if (!email) return
-    
-    isChecking.set(true)
+
+    setIsChecking(true)
     try {
       const res = await fetch(`/api/check-email?email=${email}`)
       const { available } = await res.json()
-      
+
       if (!available) {
-        emailError.set('Email is already in use')
+        setEmailError('Email is already in use')
       } else {
-        emailError.set(null)
+        setEmailError(null)
       }
     } catch (error) {
-      emailError.set('Error checking email availability')
+      setEmailError('Error checking email availability')
     } finally {
-      isChecking.set(false)
+      setIsChecking(false)
     }
   }
-  
+
   return (
     <form>
       <input
         value={form.email}
         oninput={(e) => {
           const email = e.currentTarget.value
-          form.set({ ...form.valueOf(), email })
+          setForm({ ...form, email })
           checkEmailAvailability(email)
         }}
       />
@@ -166,16 +166,16 @@ function FormWithAsyncValidation() {
 
 ```tsx
 function PostList() {
-  const posts = useState(async () => {
+  const [posts] = useState(async () => {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch')
     return res.json()
   })
-  
+
   if (String(posts.status) === 'loading') {
     return <div>Loading...</div>
   }
-  
+
   if (String(posts.status) === 'error') {
     return (
       <div>
@@ -184,7 +184,7 @@ function PostList() {
       </div>
     )
   }
-  
+
   return (
     <div>
       <button onclick={posts.refetch}>Refresh</button>
@@ -202,17 +202,17 @@ function PostList() {
 
 ```tsx
 function UserPosts({ userId }: { userId: number }) {
-  const posts = useState(async () => {
+  const [posts] = useState(async () => {
     const res = await fetch(`/api/users/${userId}/posts`)
     return res.json()
   }, { key: ['user', userId, 'posts'] })
-  
+
   // Automatically refetch when userId changes
   useEffect(() => {
     const id = userId  // Dependency tracking
     posts.refetch()
   })
-  
+
   return <div>...</div>
 }
 ```
@@ -223,15 +223,15 @@ function UserPosts({ userId }: { userId: number }) {
 
 ```tsx
 function LikeButton({ postId }: { postId: number }) {
-  const isLiked = useState(false)
-  const isUpdating = useState(false)
-  
+  const [isLiked, setIsLiked] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+
   const toggleLike = async () => {
     // Optimistic update
-    const previousValue = isLiked.valueOf()
-    isLiked.set(!previousValue)
-    isUpdating.set(true)
-    
+    const previousValue = isLiked
+    setIsLiked(!previousValue)
+    setIsUpdating(true)
+
     try {
       await fetch(`/api/posts/${postId}/like`, {
         method: 'POST',
@@ -239,13 +239,13 @@ function LikeButton({ postId }: { postId: number }) {
       })
     } catch (error) {
       // Rollback on failure
-      isLiked.set(previousValue)
+      setIsLiked(previousValue)
       alert('Failed to update like')
     } finally {
-      isUpdating.set(false)
+      setIsUpdating(false)
     }
   }
-  
+
   return (
     <button onclick={toggleLike} disabled={isUpdating}>
       {isLiked ? '❤️' : '🤍'}
@@ -260,29 +260,29 @@ function LikeButton({ postId }: { postId: number }) {
 
 ```tsx
 function InfiniteScrollList() {
-  const items = useState([])
-  const page = useState(1)
-  const hasMore = useState(true)
-  const isLoading = useState(false)
-  
+  const [items, setItems] = useState([])
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+
   const loadMore = async () => {
-    if (isLoading.valueOf() || !hasMore.valueOf()) return
-    
-    isLoading.set(true)
+    if (isLoading || !hasMore) return
+
+    setIsLoading(true)
     try {
-      const res = await fetch(`/api/items?page=${page.valueOf()}`)
+      const res = await fetch(`/api/items?page=${page}`)
       const data = await res.json()
-      
-      items.set([...items.valueOf(), ...data.items])
-      hasMore.set(data.hasMore)
-      page.set(page.valueOf() + 1)
+
+      setItems([...items, ...data.items])
+      setHasMore(data.hasMore)
+      setPage(page + 1)
     } catch (error) {
       console.error('Failed to load more:', error)
     } finally {
-      isLoading.set(false)
+      setIsLoading(false)
     }
   }
-  
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
@@ -293,7 +293,7 @@ function InfiniteScrollList() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   })
-  
+
   return (
     <div>
       {items.map(item => <Item key={item.id} {...item} />)}
@@ -314,32 +314,32 @@ function InfiniteScrollList() {
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
-  const loadingState = useState<LoadingState>('idle')
-  const data = useState(null)
-  const error = useState<Error | null>(null)
-  
+  const [loadingState, setLoadingState] = useState<LoadingState>('idle')
+  const [data, setData] = useState(null)
+  const [error, setError] = useState<Error | null>(null)
+
   const loadData = async () => {
-    loadingState.set('loading')
-    error.set(null)
-    
+    setLoadingState('loading')
+    setError(null)
+
     try {
       const res = await fetch('/api/data')
       const result = await res.json()
-      
-      data.set(result)
-      loadingState.set('success')
+
+      setData(result)
+      setLoadingState('success')
     } catch (err) {
-      error.set(err as Error)
-      loadingState.set('error')
+      setError(err as Error)
+      setLoadingState('error')
     }
   }
-  
+
   return (
     <div>
-      {loadingState.valueOf() === 'idle' && <button onclick={loadData}>Load</button>}
-      {loadingState.valueOf() === 'loading' && <div>Loading...</div>}
-      {loadingState.valueOf() === 'success' && <div>{JSON.stringify(data)}</div>}
-      {loadingState.valueOf() === 'error' && (
+      {loadingState === 'idle' && <button onclick={loadData}>Load</button>}
+      {loadingState === 'loading' && <div>Loading...</div>}
+      {loadingState === 'success' && <div>{JSON.stringify(data)}</div>}
+      {loadingState === 'error' && (
         <div>
           <p>Error: {error?.message}</p>
           <button onclick={loadData}>Retry</button>
@@ -355,7 +355,7 @@ function DataLoader() {
 ### Complex State Machine
 
 ```tsx
-type FormState = 
+type FormState =
   | { type: 'idle' }
   | { type: 'validating' }
   | { type: 'submitting' }
@@ -363,38 +363,38 @@ type FormState =
   | { type: 'error'; message: string }
 
 function ComplexForm() {
-  const formState = useState<FormState>({ type: 'idle' })
-  const formData = useState({ email: '', password: '' })
-  
+  const [formState, setFormState] = useState<FormState>({ type: 'idle' })
+  const [formData, setFormData] = useState({ email: '', password: '' })
+
   const handleSubmit = async () => {
     // Validation phase
-    formState.set({ type: 'validating' })
-    
-    const errors = validateForm(formData.valueOf())
+    setFormState({ type: 'validating' })
+
+    const errors = validateForm(formData)
     if (errors.length > 0) {
-      formState.set({ type: 'error', message: errors[0] })
+      setFormState({ type: 'error', message: errors[0] })
       return
     }
-    
+
     // Submission phase
-    formState.set({ type: 'submitting' })
-    
+    setFormState({ type: 'submitting' })
+
     try {
       const res = await fetch('/api/submit', {
         method: 'POST',
-        body: JSON.stringify(formData.valueOf())
+        body: JSON.stringify(formData)
       })
       const data = await res.json()
-      
-      formState.set({ type: 'success', data })
+
+      setFormState({ type: 'success', data })
     } catch (error) {
-      formState.set({ 
-        type: 'error', 
-        message: (error as Error).message 
+      setFormState({
+        type: 'error',
+        message: (error as Error).message
       })
     }
   }
-  
+
   return (
     <div>
       {formState.type === 'idle' && (
@@ -419,30 +419,30 @@ function ComplexForm() {
 
 ```tsx
 function SearchInput() {
-  const query = useState('')
-  const results = useState([])
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
 
   useEffect(() => {
-    if (!query.valueOf()) {
-      results.set([])
+    if (!query) {
+      setResults([])
       return
     }
 
     // Debouncing: search after 300ms
     const timeoutId = setTimeout(async () => {
-      const res = await fetch(`/api/search?q=${query.valueOf()}`)
+      const res = await fetch(`/api/search?q=${query}`)
       const data = await res.json()
-      results.set(data.results)
+      setResults(data.results)
     }, 300)
 
     return () => clearTimeout(timeoutId)
   })
-  
+
   return (
     <div>
       <input
         value={query}
-        oninput={(e) => query.set(e.currentTarget.value)}
+        oninput={(e) => setQuery(e.currentTarget.value)}
       />
       <ul>
         {results.map(result => (
@@ -460,23 +460,23 @@ function SearchInput() {
 
 ```tsx
 function ScrollTracker() {
-  const scrollY = useState(0)
-  const lastUpdate = useState(0)
+  const [scrollY, setScrollY] = useState(0)
+  const [lastUpdate, setLastUpdate] = useState(0)
 
   useEffect(() => {
     const handleScroll = () => {
       const now = Date.now()
       // Update only once per 100ms
-      if (now - lastUpdate.valueOf() > 100) {
-        scrollY.set(window.scrollY)
-        lastUpdate.set(now)
+      if (now - lastUpdate > 100) {
+        setScrollY(window.scrollY)
+        setLastUpdate(now)
       }
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   })
-  
+
   return <div>Scroll Y: {scrollY}</div>
 }
 ```
@@ -489,22 +489,22 @@ function ScrollTracker() {
 
 ```tsx
 function PersistentForm() {
-  const form = useState(() => {
+  const [form, setForm] = useState(() => {
     // Get initial value from local storage
     const saved = localStorage.getItem('form-data')
     return saved ? JSON.parse(saved) : { email: '', name: '' }
   })
-  
+
   // Save to local storage on state change
   useEffect(() => {
-    localStorage.setItem('form-data', JSON.stringify(form.valueOf()))
+    localStorage.setItem('form-data', JSON.stringify(form))
   })
-  
+
   return (
     <form>
       <input
         value={form.email}
-        oninput={(e) => form.set({ ...form.valueOf(), email: e.currentTarget.value })}
+        oninput={(e) => setForm({ ...form, email: e.currentTarget.value })}
       />
       {/* ... */}
     </form>
@@ -520,21 +520,21 @@ function PersistentForm() {
 
 ```tsx
 // app/state.ts
-export const theme = useState<'light' | 'dark'>('light', {
+export const [theme, setTheme] = useState<'light' | 'dark'>('light', {
   key: 'app:theme'
 })
 
-export const language = useState('en', {
+export const [language, setLanguage] = useState('en', {
   key: 'app:language'
 })
 
 // components/ThemeToggle.tsx
-import { theme } from '../app/state'
+import { theme, setTheme } from '../app/state'
 
 function ThemeToggle() {
   return (
-    <button onclick={() => theme.set(theme.valueOf() === 'light' ? 'dark' : 'light')}>
-      {theme.valueOf() === 'light' ? '🌙' : '☀️'}
+    <button onclick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+      {theme === 'light' ? '🌙' : '☀️'}
     </button>
   )
 }
@@ -548,29 +548,29 @@ function ThemeToggle() {
 
 ```tsx
 // app/error-handler.ts
-export const globalError = useState<Error | null>(null, {
+export const [globalError, setGlobalError] = useState<Error | null>(null, {
   key: 'app:error'
 })
 
 export function handleError(error: Error) {
-  globalError.set(error)
+  setGlobalError(error)
   console.error('Global error:', error)
 }
 
 // components/ErrorBoundary.tsx
-import { globalError } from '../app/error-handler'
+import { globalError, setGlobalError } from '../app/error-handler'
 
 function ErrorBoundary({ children }: { children: any }) {
-  if (globalError.valueOf()) {
+  if (globalError) {
     return (
       <div>
         <h2>An error occurred</h2>
         <p>{globalError.message}</p>
-        <button onclick={() => globalError.set(null)}>Close</button>
+        <button onclick={() => setGlobalError(null)}>Close</button>
       </div>
     )
   }
-  
+
   return children
 }
 ```

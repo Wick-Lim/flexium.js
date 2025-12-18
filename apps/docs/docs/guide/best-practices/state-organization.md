@@ -15,14 +15,14 @@ Local state is state that is only used within a component.
 ```tsx
 // ✅ Local state example
 function Modal() {
-  const isOpen = useState(false)  // Only used in this component
-  const selectedItem = useState(null)  // Modal internal state
+  const [isOpen, setIsOpen] = useState(false)  // Only used in this component
+  const [selectedItem, setSelectedItem] = useState(null)  // Modal internal state
   
   return isOpen ? <div>...</div> : null
 }
 
 function Form() {
-  const formData = useState({
+  const [formData, setFormData] = useState({
     email: '',
     password: ''
   })  // Form internal state
@@ -46,19 +46,19 @@ Global state is state that is shared across multiple components.
 // ✅ Global state examples
 
 // 1. User authentication (accessed app-wide)
-const user = useState(null, { key: 'auth:user' })
+const [user, setUser] = useState(null, { key: 'auth:user' })
 
 // 2. App settings (dark mode, etc.)
-const theme = useState('light', { key: 'app:theme' })
+const [theme, setTheme] = useState('light', { key: 'app:theme' })
 
 // 3. Server data caching
-const posts = useState(async () => {
+const [posts, setPosts] = useState(async () => {
   const res = await fetch('/api/posts')
   return res.json()
 }, { key: ['posts', 'all'] })
 
 // 4. Global UI state
-const notifications = useState([], { key: 'app:notifications' })
+const [notifications, setNotifications] = useState([], { key: 'app:notifications' })
 ```
 
 **Use global state when:**
@@ -75,18 +75,18 @@ const notifications = useState([], { key: 'app:notifications' })
 
 ```tsx
 // ✅ Hierarchical keys
-const user = useState(null, { key: ['auth', 'user'] })
-const posts = useState([], { key: ['user', userId, 'posts'] })
-const settings = useState({}, { key: ['app', 'settings'] })
+const [user, setUser] = useState(null, { key: ['auth', 'user'] })
+const [posts, setPosts] = useState([], { key: ['user', userId, 'posts'] })
+const [settings, setSettings] = useState({}, { key: ['app', 'settings'] })
 
 // ✅ Namespace usage
-const user = useState(null, { key: 'auth:user' })
-const posts = useState([], { key: `user:${userId}:posts` })
-const settings = useState({}, { key: 'app:settings' })
+const [user, setUser] = useState(null, { key: 'auth:user' })
+const [posts, setPosts] = useState([], { key: `user:${userId}:posts` })
+const [settings, setSettings] = useState({}, { key: 'app:settings' })
 
 // ✅ Clear and specific keys
-const cart = useState([], { key: 'ecommerce:cart' })
-const checkout = useState(null, { key: 'ecommerce:checkout' })
+const [cart, setCart] = useState([], { key: 'ecommerce:cart' })
+const [checkout, setCheckout] = useState(null, { key: 'ecommerce:checkout' })
 ```
 
 **Characteristics of good keys:**
@@ -101,15 +101,15 @@ const checkout = useState(null, { key: 'ecommerce:checkout' })
 
 ```tsx
 // ❌ Too generic
-const data = useState(null, { key: 'data' })
-const user = useState(null, { key: 'user' })
+const [data, setData] = useState(null, { key: 'data' })
+const [user, setUser] = useState(null, { key: 'user' })
 
 // ❌ Unclear meaning
-const state1 = useState(null, { key: 'state1' })
-const temp = useState(null, { key: 'temp' })
+const [state1, setState1] = useState(null, { key: 'state1' })
+const [temp, setTemp] = useState(null, { key: 'temp' })
 
 // ❌ High collision risk
-const count = useState(0, { key: 'count' })  // Can be used in multiple places
+const [count, setCount] = useState(0, { key: 'count' })  // Can be used in multiple places
 ```
 
 **Characteristics of bad keys:**
@@ -127,21 +127,21 @@ const count = useState(0, { key: 'count' })  // Can be used in multiple places
 // ✅ Managing state with hierarchical structure
 function UserProfile({ userId }: { userId: number }) {
   // User information
-  const user = useState(null, { key: ['user', userId] })
+  const [user, setUser] = useState(null, { key: ['user', userId] })
   
   // User's posts
-  const posts = useState([], { key: ['user', userId, 'posts'] })
+  const [posts, setPosts] = useState([], { key: ['user', userId, 'posts'] })
   
   // User's followers
-  const followers = useState([], { key: ['user', userId, 'followers'] })
+  const [followers, setFollowers] = useState([], { key: ['user', userId, 'followers'] })
   
   return <div>...</div>
 }
 
 // ✅ Expressing hierarchy with array keys
-const appState = useState({}, { key: ['app', 'state'] })
-const userState = useState({}, { key: ['app', 'user', 'state'] })
-const adminState = useState({}, { key: ['app', 'admin', 'state'] })
+const [appState, setAppState] = useState({}, { key: ['app', 'state'] })
+const [userState, setUserState] = useState({}, { key: ['app', 'user', 'state'] })
+const [adminState, setAdminState] = useState({}, { key: ['app', 'admin', 'state'] })
 ```
 
 ---
@@ -151,12 +151,12 @@ const adminState = useState({}, { key: ['app', 'admin', 'state'] })
 ```tsx
 // ✅ Managing per-user state with dynamic keys
 function PostDetail({ postId }: { postId: number }) {
-  const post = useState(async () => {
+  const [post, setPost] = useState(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
   }, { key: ['posts', postId] })
   
-  const comments = useState(async () => {
+  const [comments, setComments] = useState(async () => {
     const res = await fetch(`/api/posts/${postId}/comments`)
     return res.json()
   }, { key: ['posts', postId, 'comments'] })
@@ -166,8 +166,8 @@ function PostDetail({ postId }: { postId: number }) {
 
 // ✅ Creating keys with template literals
 function ProductPage({ productId }: { productId: string }) {
-  const product = useState(null, { key: `product:${productId}` })
-  const reviews = useState([], { key: `product:${productId}:reviews` })
+  const [product, setProduct] = useState(null, { key: `product:${productId}` })
+  const [reviews, setReviews] = useState([], { key: `product:${productId}:reviews` })
   
   return <div>...</div>
 }
@@ -184,7 +184,7 @@ function ProductPage({ productId }: { productId: string }) {
 import { useState, useEffect } from 'flexium/core'
 
 function TemporaryComponent() {
-  const data = useState(async () => {
+  const [data, setData] = useState(async () => {
     return fetch('/api/temp-data').then(r => r.json())
   }, { key: 'temp:data' })
 
@@ -200,7 +200,7 @@ function TemporaryComponent() {
 
 // ✅ Conditional cleanup
 function ConditionalComponent({ show }: { show: boolean }) {
-  const data = useState(async () => {
+  const [data, setData] = useState(async () => {
     return fetch('/api/data').then(r => r.json())
   }, { key: 'conditional:data' })
 
@@ -236,7 +236,7 @@ function cleanupEcommerce() {
 
 // ✅ Cleanup in useEffect cleanup
 useEffect(() => {
-  const tempData = useState(null, { key: 'temp:data' })
+  const [tempData, setTempData] = useState(null, { key: 'temp:data' })
 
   return () => {
     useState.delete('temp:data')  // cleanup
@@ -254,21 +254,21 @@ useEffect(() => {
 // app/state.ts - Global state definitions
 
 // Authentication
-export const user = useState<User | null>(null, { key: 'auth:user' })
-export const isAuthenticated = useState(() => user.valueOf() !== null)
+export const [user, setUser] = useState<User | null>(null, { key: 'auth:user' })
+export const [isAuthenticated, setIsAuthenticated] = useState(() => user !== null)
 
 // App settings
-export const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
-export const language = useState('en', { key: 'app:language' })
+export const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app:theme' })
+export const [language, setLanguage] = useState('en', { key: 'app:language' })
 
 // Data caching
-export const posts = useState(async () => {
+export const [posts, setPosts] = useState(async () => {
   const res = await fetch('/api/posts')
   return res.json()
 }, { key: ['posts', 'all'] })
 
 // UI state
-export const notifications = useState<Notification[]>([], {
+export const [notifications, setNotifications] = useState<Notification[]>([], {
   key: 'app:notifications'
 })
 ```
@@ -277,20 +277,20 @@ export const notifications = useState<Notification[]>([], {
 // components/UserProfile.tsx - Per-user state
 function UserProfile({ userId }: { userId: number }) {
   // User information (cached)
-  const user = useState(async () => {
+  const [user, setUser] = useState(async () => {
     const res = await fetch(`/api/users/${userId}`)
     return res.json()
   }, { key: ['user', userId] })
   
   // User's posts
-  const posts = useState(async () => {
+  const [posts, setPosts] = useState(async () => {
     const res = await fetch(`/api/users/${userId}/posts`)
     return res.json()
   }, { key: ['user', userId, 'posts'] })
   
   // Local UI state
-  const isEditing = useState(false)
-  const editForm = useState({ name: '', bio: '' })
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState({ name: '', bio: '' })
   
   return <div>...</div>
 }

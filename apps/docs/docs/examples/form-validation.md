@@ -9,7 +9,7 @@ A complete form validation example including real-time validation, async validat
 ## Complete Form Validation Example
 
 ```tsx
-import { useState, useSync } from 'flexium/core'
+import { useState, sync } from 'flexium/core'
 
 interface FormData {
   email: string
@@ -26,20 +26,20 @@ interface FormErrors {
 }
 
 function RegistrationForm() {
-  const form = useState<FormData>({
+  const [form, setForm] = useState<FormData>({
     email: '',
     password: '',
     confirmPassword: '',
     name: ''
   })
 
-  const touched = useState<Record<string, boolean>>({})
-  const isSubmitting = useState(false)
-  const submitError = useState<string | null>(null)
-  const isCheckingEmail = useState(false)
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
 
   // Real-time validation
-  const errors = useState<FormErrors>(() => {
+  const [errors, setErrors] = useState<FormErrors>(() => {
     const errs: FormErrors = {}
     
     // Email validation
@@ -89,25 +89,25 @@ function RegistrationForm() {
       return
     }
     
-    isCheckingEmail.set(true)
+    setIsCheckingEmail(true)
     try {
       const res = await fetch(`/api/check-email?email=${email}`)
       const { available } = await res.json()
       
       if (!available) {
-        form.set(prev => ({ ...prev }))  // Update state to show error
+        setForm(prev => ({ ...prev }))  // Update state to show error
         // In practice, using a separate error state is better
       }
     } catch (error) {
       console.error('Email check failed:', error)
     } finally {
-      isCheckingEmail.set(false)
+      setIsCheckingEmail(false)
     }
   }
   
   const handleFieldChange = (field: keyof FormData, value: string) => {
-    form.set(prev => ({ ...prev, [field]: value }))
-    touched.set(prev => ({ ...prev, [field]: true }))
+    setForm(prev => ({ ...prev, [field]: value }))
+    setTouched(prev => ({ ...prev, [field]: true }))
 
     // Check email availability when email changes
     if (field === 'email') {
@@ -119,7 +119,7 @@ function RegistrationForm() {
     e.preventDefault()
     
     // Mark all fields as touched
-    touched.set({
+    setTouched({
       email: true,
       password: true,
       confirmPassword: true,
@@ -127,12 +127,12 @@ function RegistrationForm() {
     })
     
     // Stop submission if validation fails
-    if (Object.keys(errors.valueOf()).length > 0) {
+    if (Object.keys(errors).length > 0) {
       return
     }
     
-    isSubmitting.set(true)
-    submitError.set(null)
+    setIsSubmitting(true)
+    setSubmitError(null)
     
     try {
       const res = await fetch('/api/register', {
@@ -150,13 +150,13 @@ function RegistrationForm() {
       alert('Registration completed!')
       
     } catch (error) {
-      submitError.set((error as Error).message)
+      setSubmitError((error as Error).message)
     } finally {
-      isSubmitting.set(false)
+      setIsSubmitting(false)
     }
   }
   
-  const isFormValid = Object.keys(errors.valueOf()).length === 0
+  const isFormValid = Object.keys(errors).length === 0
   
   return (
     <form onsubmit={handleSubmit}>
@@ -231,7 +231,7 @@ function RegistrationForm() {
 
 ### 1. Real-time Validation
 
-Validation runs automatically whenever form fields change. Implemented using `state(() => ...)` as computed state.
+Validation runs automatically whenever form fields change. Implemented using `useState(() => ...)` as computed state.
 
 ### 2. Touch Tracking
 

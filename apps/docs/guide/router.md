@@ -350,7 +350,7 @@ function FilteredList() {
 
 ## Programmatic Navigation
 
-Navigate imperatively using the `navigate` function from `router()`.
+Navigate imperatively using the `navigate` function from `useRouter()`.
 
 ### Basic Navigation
 
@@ -473,21 +473,21 @@ import { useRouter } from 'flexium/router'
 function TransitionWrapper({ children }) {
   const r = useRouter()
   const location = r.location
-  const isTransitioning = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
     // Trigger transition on location change
-    isTransitioning.set(true)
+    setIsTransitioning(true)
 
     const timeout = setTimeout(() => {
-      isTransitioning.set(false)
+      setIsTransitioning(false)
     }, 300)
 
     return () => clearTimeout(timeout)
   })
 
   return (
-    <div class={() => isTransitioning.valueOf() ? 'fade-out' : 'fade-in'}>
+    <div class={() => isTransitioning ? 'fade-out' : 'fade-in'}>
       {children}
     </div>
   )
@@ -504,28 +504,28 @@ function TransitionWrapper({ children }) {
 function PageTransition({ children }) {
   const r = useRouter()
   const location = r.location
-  const currentPath = useState('')
-  const isAnimating = useState(false)
+  const [currentPath, setCurrentPath] = useState('')
+  const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
-    const newPath = location().pathname
+    const newPath = location.pathname
 
-    if (currentPath.valueOf() !== newPath) {
-      isAnimating.set(true)
+    if (currentPath !== newPath) {
+      setIsAnimating(true)
 
       setTimeout(() => {
-        currentPath.set(newPath)
-        isAnimating.set(false)
+        setCurrentPath(newPath)
+        setIsAnimating(false)
       }, 200)
     }
   })
 
   return (
     <div
-      class={() => `page-container ${isAnimating.valueOf() ? 'transitioning' : ''}`}
+      class={() => `page-container ${isAnimating ? 'transitioning' : ''}`}
       style={{
-        opacity: isAnimating.valueOf() ? 0 : 1,
-        transform: isAnimating.valueOf() ? 'translateY(20px)' : 'translateY(0)',
+        opacity: isAnimating ? 0 : 1,
+        transform: isAnimating ? 'translateY(20px)' : 'translateY(0)',
         transition: 'opacity 0.2s, transform 0.2s'
       }}
     >

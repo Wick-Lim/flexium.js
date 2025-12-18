@@ -159,10 +159,10 @@ useEffect(() => {
 ## Notes
 
 - Avoid creating infinite loops by updating tracked state inside effects
-- Use `useSync()` to group multiple state updates within effects
+- Use `sync()` to group multiple state updates within effects
 - Effects are synchronous by default
 
 ## See Also
 
 - [useState()](/docs/core/state)
-- [useSync()](/docs/core/sync)
+- [sync()](/docs/core/sync)

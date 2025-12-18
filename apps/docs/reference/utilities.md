@@ -48,10 +48,10 @@ import { useState } from 'flexium/core';
 const theme = useState<'light' | 'dark'>('light', { key: ['app', 'theme'] });
 
 function ThemedButton() {
-  const theme = useState('light', { key: 'app:theme' });
+  const [theme, setTheme] = useState('light', { key: 'app:theme' });
   
   return (
-    <button class={`btn-${theme.valueOf()}`}>
+    <button class={`btn-${theme}`}>
       Current theme: {theme}
     </button>
   );
@@ -79,15 +79,15 @@ function useAuth() {
       body: JSON.stringify({ email, password })
     });
     const userData = await response.json();
-    user.set(userData);
+    setUser(userData);
   };
 
   const logout = () => {
-    user.set(null);
+    setUser(null);
   };
 
   const isAuthenticated = () => {
-    return user.valueOf() !== null;
+    return user !== null;
   };
 
   return { user, login, logout, isAuthenticated };
@@ -96,7 +96,7 @@ function useAuth() {
 function UserProfile() {
   const { user, logout } = useAuth();
 
-  const currentUser = user.valueOf();
+  const currentUser = user;
 
   if (!currentUser) {
     return <div>Please log in</div>;
@@ -118,22 +118,22 @@ function UserProfile() {
 import { useState } from 'flexium/core';
 
 // Theme state
-const theme = useState('light', { key: 'app:theme' });
+const [theme, setTheme] = useState('light', { key: 'app:theme' });
 
 // Language state
-const lang = useState('en', { key: 'app:language' });
+const [lang, setLang] = useState('en', { key: 'app:language' });
 
 // User state
-const user = useState(null, { key: 'app:user' });
+const [user, setUser] = useState(null, { key: 'app:user' });
 
 function ProfileCard() {
-  const theme = useState('light', { key: 'app:theme' });
-  const lang = useState('en', { key: ['app', 'language'] });
-  const user = useState(null, { key: ['app', 'user'] });
+  const [theme, setTheme] = useState('light', { key: 'app:theme' });
+  const [lang, setLang] = useState('en', { key: ['app', 'language'] });
+  const [user, setUser] = useState(null, { key: ['app', 'user'] });
 
   return (
-    <div class={`card-${theme.valueOf()}`}>
-      <h2>{lang.valueOf() === 'en' ? 'Profile' : 'Profil'}</h2>
+    <div class={`card-${theme}`}>
+      <h2>{lang === 'en' ? 'Profile' : 'Profil'}</h2>
       <p>{user.name}</p>
     </div>
   );
@@ -210,10 +210,10 @@ function UserProfile() {
 ```tsx
 function SearchBar() {
   const r = useRouter();
-  const query = useState('');
+  const [query, setQuery] = useState('');
 
   const handleSearch = () => {
-    const searchQuery = query.valueOf();
+    const searchQuery = query;
     r.navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
@@ -221,8 +221,8 @@ function SearchBar() {
     <div>
       <input
         type="text"
-        value={query.valueOf()}
-        oninput={(e) => query.set(e.target.value)}
+        value={query}
+        oninput={(e) => setQuery(e.target.value)}
         placeholder="Search..."
       />
       <button onclick={handleSearch}>Search</button>
@@ -308,12 +308,12 @@ import { useState, useEffect } from 'flexium/core';
 
 function PlayerController() {
   const kb = keyboard();
-  const position = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   // React to keyboard input
   useEffect(() => {
     const speed = 5;
-    const newPos = { ...position.valueOf() };
+    const newPos = { ...position };
 
     if (kb.isPressed(Keys.ArrowUp)) {
       newPos.y -= speed;
@@ -328,7 +328,7 @@ function PlayerController() {
       newPos.x += speed;
     }
 
-    position.set(newPos);
+    setPosition(newPos);
   });
 
   return (
@@ -349,10 +349,10 @@ import { useState } from 'flexium/core';
 
 function Game() {
   const kb = keyboard();
-  const player = useState({ x: 100, y: 100, jumping: false });
+  const [player, setPlayer] = useState({ x: 100, y: 100, jumping: false });
 
   useLoop((dt) => {
-    const pos = { ...player.valueOf() };
+    const pos = { ...player };
 
     // Check for jump
     if (kb.isJustPressed(Keys.Space) && !pos.jumping) {
@@ -367,7 +367,7 @@ function Game() {
       pos.x += 200 * dt;
     }
 
-    player.set(pos);
+    setPlayer(pos);
 
     // Clear frame state at end of update
     kb.clearFrameState();
@@ -415,7 +415,7 @@ Keys.Digit0, Keys.Digit1, Keys.Digit2, ...
 ```tsx
 function CanvasInput() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const kb = keyboard(canvasRef.valueOf() || window);
+  const kb = keyboard(canvasRef || window);
 
   return (
     <canvas
@@ -514,11 +514,11 @@ function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const m = mouse({
     target: window,
-    canvas: canvasRef.valueOf() || undefined
+    canvas: canvasRef || undefined
   });
 
   useEffect(() => {
-    const canvas = canvasRef.valueOf();
+    const canvas = canvasRef;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
@@ -550,17 +550,17 @@ import { useState } from 'flexium/core';
 
 function ShootingGame() {
   const m = mouse();
-  const crosshair = useState({ x: 0, y: 0 });
-  const projectiles = useState<Array<{ x: number, y: number }>>([]);
+  const [crosshair, setCrosshair] = useState({ x: 0, y: 0 });
+  const [projectiles, setProjectiles] = useState<Array<{ x: number, y: number }>>([]);
 
   useLoop((dt) => {
     // Update crosshair position
     const pos = m.position();
-    crosshair.set({ x: pos.x, y: pos.y });
+    setCrosshair({ x: pos.x, y: pos.y });
 
     // Shoot on left click
     if (m.isLeftPressed()) {
-      projectiles.set([...projectiles.valueOf(), { x: pos.x, y: pos.y }]);
+      setProjectiles([...projectiles, { x: pos.x, y: pos.y }]);
     }
 
     // Clear frame state
@@ -583,7 +583,7 @@ function ShootingGame() {
       }} />
 
       {/* Projectiles */}
-      {projectiles.valueOf().map((p, i) => (
+      {projectiles.map((p, i) => (
         <div key={i} style={{
           position: 'absolute',
           left: `${p.x}px`,
@@ -604,23 +604,23 @@ function ShootingGame() {
 ```tsx
 function ZoomableView() {
   const m = mouse();
-  const zoom = useState(1);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     const wheel = m.wheelDelta();
     if (wheel !== 0) {
-      const newZoom = zoom.valueOf() + (wheel * -0.1);
-      zoom.set(Math.max(0.5, Math.min(3, newZoom)));
+      const newZoom = zoom + (wheel * -0.1);
+      setZoom(Math.max(0.5, Math.min(3, newZoom)));
     }
   });
 
   return (
     <div style={{
-      transform: `scale(${zoom.valueOf()})`,
+      transform: `scale(${zoom})`,
       transformOrigin: 'center center',
       transition: 'transform 0.1s'
     }}>
-      Zoom level: {zoom.valueOf().toFixed(2)}
+      Zoom level: {zoom.toFixed(2)}
     </div>
   );
 }
@@ -679,20 +679,20 @@ Flexium doesn't have special rules for hooks - you can create custom hooks by co
 import { useState } from 'flexium/core';
 
 function useForm<T>(initialValues: T) {
-  const values = useState(initialValues);
-  const errors = useState<Record<string, string>>({});
-  const touched = useState<Record<string, boolean>>({});
+  const [values, setValues] = useState(initialValues);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const setValue = (field: keyof T, value: unknown) => {
-    values.set({ ...values.valueOf(), [field]: value });
+    setValues({ ...values, [field]: value });
   };
 
   const setError = (field: keyof T, error: string) => {
-    errors.set({ ...errors.valueOf(), [field]: error });
+    setErrors({ ...errors, [field]: error });
   };
 
   const setTouched = (field: keyof T) => {
-    touched.set({ ...touched.valueOf(), [field]: true });
+    setTouched({ ...touched, [field]: true });
   };
 
   const validate = (validators: Record<keyof T, (value: unknown) => string | null>) => {
@@ -705,7 +705,7 @@ function useForm<T>(initialValues: T) {
       }
     }
 
-    errors.set(newErrors);
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -733,7 +733,7 @@ function LoginForm() {
     });
 
     if (isValid) {
-      console.log('Submit:', form.values.valueOf());
+      console.log('Submit:', form.values);
     }
   };
 
@@ -771,13 +771,13 @@ function LoginForm() {
 import { useState, useEffect } from 'flexium/core';
 
 function useFetch<T>(url: string) {
-  const data = useState<T | null>(null);
-  const loading = useState(true);
-  const error = useState<Error | null>(null);
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const refetch = async () => {
-    loading.set(true);
-    error.set(null);
+    setLoading(true);
+    setError(null);
 
     try {
       const response = await fetch(url);
@@ -785,11 +785,11 @@ function useFetch<T>(url: string) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const json = await response.json();
-      data.set(json);
+      setData(json);
     } catch (err) {
-      error.set(err as Error);
+      setError(err as Error);
     } finally {
-      loading.set(false);
+      setLoading(false);
     }
   };
 
@@ -828,18 +828,18 @@ import { useState, useEffect } from 'flexium/core';
 
 function useLocalStorage<T>(key: string, initialValue: T) {
   const storedValue = localStorage.getItem(key);
-  const value = useState<T>(
+  const [value, setValue] = useState<T>(
     storedValue ? JSON.parse(storedValue) : initialValue
   );
 
   // Save to localStorage on change
   useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value.valueOf()));
+    localStorage.setItem(key, JSON.stringify(value));
   });
 
   const remove = () => {
     localStorage.removeItem(key);
-    value.set(initialValue);
+    setValue(initialValue);
   };
 
   return [value, remove] as const;
@@ -851,7 +851,7 @@ function ThemeToggle() {
 
   return (
     <div>
-      <button onclick={() => theme.set(theme.valueOf() === 'light' ? 'dark' : 'light')}>
+      <button onclick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
         Toggle Theme (Current: {theme})
       </button>
       <button onclick={clearTheme}>
@@ -868,12 +868,12 @@ function ThemeToggle() {
 import { useState, useEffect } from 'flexium/core';
 
 function useWindowSize() {
-  const width = useState(window.innerWidth);
-  const height = useState(window.innerHeight);
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
 
   const handleResize = () => {
-    width.set(window.innerWidth);
-    height.set(window.innerHeight);
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
   };
 
   useEffect(() => {
@@ -890,9 +890,9 @@ function ResponsiveComponent() {
 
   return (
     <div>
-      <p>Window size: {width.valueOf()} x {height.valueOf()}</p>
-      {width.valueOf() < 768 && <div>Mobile view</div>}
-      {width.valueOf() >= 768 && <div>Desktop view</div>}
+      <p>Window size: {width} x {height}</p>
+      {width < 768 && <div>Mobile view</div>}
+      {width >= 768 && <div>Desktop view</div>}
     </div>
   );
 }
@@ -981,12 +981,12 @@ import { keyboard, Keys } from 'flexium/interactive';
 function GamePlayer() {
   const { navigate } = useRouter();
   const kb = keyboard();
-  const position = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     // Update position based on keyboard
     if (kb.isPressed(Keys.ArrowUp)) {
-      position.set(p => ({ ...p, y: p.y - 5 }));
+      setPosition(p => ({ ...p, y: p.y - 5 }));
     }
     // ...
   });
@@ -1002,9 +1002,9 @@ function DataDisplay() {
   const { data } = useFetch('/api/data');
 
   // Use derived state for expensive transformations
-  const processedData = useState(() => {
-    if (!data.valueOf()) return [];
-    return expensiveTransformation(data.valueOf());
+  const [processedData] = useState(() => {
+    if (!data) return [];
+    return expensiveTransformation(data);
   });
 
   return <div>{JSON.stringify(processedData)}</div>;
@@ -1018,7 +1018,7 @@ import { useState } from 'flexium/core';
 
 // Good: Single responsibility
 function useAuth() {
-  const user = useState(null);
+  const [user, setUser] = useState(null);
   const login = async (credentials) => { /* ... */ };
   const logout = () => { /* ... */ };
   return { user, login, logout };
@@ -1026,8 +1026,8 @@ function useAuth() {
 
 // Bad: Too many responsibilities
 function useEverything() {
-  const user = useState(null);
-  const theme = useState('light');
+  const [user, setUser] = useState(null);
+  const [theme, setTheme] = useState('light');
   const kb = keyboard();
   const r = useRouter();
   // Too much!

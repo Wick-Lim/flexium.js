@@ -26,7 +26,7 @@ Flexium is built on a **Proxy-based Fine-grained Reactivity** system that provid
 |  +------------------+  +------------------+  +----------------+   |
 |                                                                   |
 |  +------------------+  +------------------+  +----------------+   |
-|  |     hook()       |  |    useSync()     |  |    useRef()    |   |
+|  |     hook()       |  |    sync()     |  |    useRef()    |   |
 |  | Component state  |  |   Batching       |  |   Mutable ref  |   |
 |  +------------------+  +------------------+  +----------------+   |
 +------------------------------------------------------------------+
@@ -53,7 +53,7 @@ packages/flexium/src/
 │   ├── types.ts          # Type definitions
 │   ├── reactive.ts       # Proxy-based reactivity
 │   ├── state.ts          # useState() - Unified state API
-│   ├── lifecycle.ts      # useEffect(), useSync()
+│   ├── lifecycle.ts      # useEffect(), sync()
 │   ├── hook.ts           # hook() - Component instance hooks
 │   ├── context.ts        # Context implementation
 │   └── devtools.ts       # DevTools integration
@@ -269,7 +269,7 @@ trigger() → queueJob(effect) → queue (Set)
 function useEffect(fn: () => void | (() => void), deps?: any[]): void
 
 // Manual batching / flush
-function useSync(fn?: () => void): void
+function sync(fn?: () => void): void
 ```
 
 ### 1.4 Hook System (`hook.ts`)
@@ -743,4 +743,4 @@ reportRender(componentName, trigger, duration)
 
 - Natural batching for event handlers
 - No explicit batch() calls needed
-- Synchronous when needed via useSync()
+- Synchronous when needed via sync()

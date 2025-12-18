@@ -56,20 +56,20 @@ Use motion with reactive state:
 import { MotionController } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
-const isExpanded = useState(false)
+const [isExpanded, setIsExpanded] = useState(false)
 const controller = new MotionController(element)
 
 // Watch state and animate
 const unwatch = useState.watch(() => {
   controller.animate({
-    animate: isExpanded.valueOf()
+    animate: isExpanded
       ? { height: 'auto', opacity: 1 }
       : { height: 0, opacity: 0 }
   })
 })
 
 // Toggle animation
-isExpanded.set(true)
+setIsExpanded(true)
 
 // Cleanup
 unwatch()
@@ -113,13 +113,13 @@ import { Transition } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function App() {
-  const visible = useState(false)
+  const [visible, setVisible] = useState(false)
 
   return (
     <div>
-      <button onClick={() => visible.set(v => !v)}>Toggle</button>
+      <button onClick={() => setVisible(v => !v)}>Toggle</button>
 
-      {visible.valueOf() && (
+      {visible && (
         <Transition preset="fade">
           <div class="content">
             This content fades in and out
@@ -232,7 +232,7 @@ import { TransitionGroup, Transition } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function NotificationList() {
-  const notifications = useState([...])
+  const [notifications, setNotifications] = useState([...])
 
   return (
     <TransitionGroup stagger={50}>
@@ -364,17 +364,17 @@ import { TransitionGroup, Transition } from 'flexium/primitives'
 import { useState } from 'flexium/core'
 
 function TodoList() {
-  const todos = useState([
+  const [todos, setTodos] = useState([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build app' }
   ])
 
   const addTodo = (text) => {
-    todos.set(prev => [...prev, { id: Date.now(), text }])
+    setTodos(prev => [...prev, { id: Date.now(), text }])
   }
 
   const removeTodo = (id) => {
-    todos.set(prev => prev.filter(t => t.id !== id))
+    setTodos(prev => prev.filter(t => t.id !== id))
   }
 
   return (

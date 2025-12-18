@@ -218,20 +218,20 @@ function TabLayout() {
 ```tsx
 function LoadingLayout() {
   const r = useRouter()
-  const isLoading = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Track route changes
   useEffect(() => {
     const path = r.location.pathname
-    isLoading.set(true)
+    setIsLoading(true)
     // Simulate loading
-    setTimeout(() => isLoading.set(false), 500)
+    setTimeout(() => setIsLoading(false), 500)
   })
 
   return (
     <div class="layout">
       <Header />
-      {isLoading.valueOf() ? <Spinner /> : <Outlet />}
+      {isLoading ? <Spinner /> : <Outlet />}
     </div>
   )
 }

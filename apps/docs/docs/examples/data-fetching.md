@@ -12,20 +12,20 @@ Data fetching pattern examples including caching, infinite scroll, optimistic up
 import { useState } from 'flexium/core'
 
 function PostList() {
-  const posts = useState(async () => {
+  const [posts, setPosts] = useState(async () => {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch posts')
     return res.json()
   }, { key: 'posts:all' })
   
-  if (posts.status.valueOf() === 'loading') {
+  if (posts.status === 'loading') {
     return <div>Loading...</div>
   }
   
-  if (posts.status.valueOf() === 'error') {
+  if (posts.status === 'error') {
     return (
       <div>
-        <p>Error: {posts.error.valueOf()?.message}</p>
+        <p>Error: {posts.error?.message}</p>
         <button onclick={posts.refetch}>Retry</button>
       </div>
     )
@@ -34,7 +34,7 @@ function PostList() {
   return (
     <div>
       <button onclick={posts.refetch}>Refresh</button>
-      {posts.valueOf().map(post => (
+      {posts.map(post => (
         <Post key={post.id} {...post} />
       ))}
     </div>
@@ -53,22 +53,22 @@ function PostList() {
 // Share same data across multiple components
 function PostList() {
   // Cache with global key
-  const posts = useState(async () => {
+  const [posts, setPosts] = useState(async () => {
     return fetch('/api/posts').then(r => r.json())
   }, { key: ['posts', 'all'] })
 
-  return <div>{posts.valueOf().map(p => <Post key={p.id} {...p} />)}</div>
+  return <div>{posts.map(p => <Post key={p.id} {...p} />)}</div>
 }
 
 function PostDetail({ postId }: { postId: number }) {
   // Find from already cached posts
-  const allPosts = useState(null, { key: ['posts', 'all'] })
-  const post = useState(() => {
-    return allPosts.valueOf()?.find(p => p.id === postId)
+  const [allPosts, setAllPosts] = useState(null, { key: ['posts', 'all'] })
+  const [post, setPost] = useState(() => {
+    return allPosts?.find(p => p.id === postId)
   })
 
   // Fetch individually if not found
-  const fetchedPost = useState(async () => {
+  const [fetchedPost, setFetchedPost] = useState(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
   }, { key: ['posts', postId] })
@@ -85,17 +85,17 @@ function PostDetail({ postId }: { postId: number }) {
 import { useState, useEffect } from 'flexium/core'
 
 function InfiniteScrollList() {
-  const items = useState<any[]>([])
-  const page = useState(1)
-  const hasMore = useState(true)
-  const isLoading = useState(false)
-  const error = useState<Error | null>(null)
+  const [items, setItems] = useState<any[]>([])
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
   
   const loadMore = async () => {
-    if (isLoading.valueOf() || !hasMore.valueOf()) return
+    if (isLoading || !hasMore) return
     
-    isLoading.set(true)
-    error.set(null)
+    setIsLoading(true)
+    setError(null)
     
     try {
       const res = await fetch(`/api/items?page=${page}&limit=20`)
@@ -103,13 +103,13 @@ function InfiniteScrollList() {
 
       const data = await res.json()
 
-      items.set(prev => [...prev, ...data.items])
-      hasMore.set(data.hasMore)
-      page.set(prev => prev + 1)
+      setItems(prev => [...prev, ...data.items])
+      setHasMore(data.hasMore)
+      setPage(prev => prev + 1)
     } catch (err) {
-      error.set(err as Error)
+      setError(err as Error)
     } finally {
-      isLoading.set(false)
+      setIsLoading(false)
     }
   }
   
@@ -132,18 +132,18 @@ function InfiniteScrollList() {
   
   return (
     <div>
-      {items.valueOf().map(item => (
+      {items.map(item => (
         <Item key={item.id} {...item} />
       ))}
       
-      {isLoading.valueOf() && <div>Loading...</div>}
-      {error.valueOf() && (
+      {isLoading && <div>Loading...</div>}
+      {error && (
         <div>
-          <p>Error: {error.valueOf().message}</p>
+          <p>Error: {error.message}</p>
           <button onclick={loadMore}>Retry</button>
         </div>
       )}
-      {!hasMore.valueOf() && items.valueOf().length > 0 && (
+      {!hasMore && items.length > 0 && (
         <div>No more data</div>
       )}
     </div>
@@ -156,27 +156,27 @@ function InfiniteScrollList() {
 ## Optimistic Updates
 
 ```tsx
-import { useState, useSync } from 'flexium/core'
+import { useState, sync } from 'flexium/core'
 
 function LikeButton({ postId }: { postId: number }) {
-  const post = useState(async () => {
+  const [post, setPost] = useState(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
   }, { key: ['posts', postId] })
 
-  const isLiked = useState(() => post.valueOf()?.isLiked ?? false)
-  const likeCount = useState(() => post.valueOf()?.likeCount ?? 0)
-  const isUpdating = useState(false)
+  const [isLiked, setIsLiked] = useState(() => post?.isLiked ?? false)
+  const [likeCount, setLikeCount] = useState(() => post?.likeCount ?? 0)
+  const [isUpdating, setIsUpdating] = useState(false)
   
   const toggleLike = async () => {
-    const previousLiked = isLiked.valueOf()
-    const previousCount = likeCount.valueOf()
+    const previousLiked = isLiked
+    const previousCount = likeCount
 
     // Optimistic update
-    useSync(() => {
-      isLiked.set(prev => !prev)
-      likeCount.set(prev => previousLiked ? prev - 1 : prev + 1)
-      isUpdating.set(true)
+    sync(() => {
+      setIsLiked(prev => !prev)
+      setLikeCount(prev => previousLiked ? prev - 1 : prev + 1)
+      setIsUpdating(true)
     })
     
     try {
@@ -190,21 +190,21 @@ function LikeButton({ postId }: { postId: number }) {
       
       // Sync state with server response
       const data = await res.json()
-      useSync(() => {
-        isLiked.set(data.isLiked)
-        likeCount.set(data.likeCount)
+      sync(() => {
+        setIsLiked(data.isLiked)
+        setLikeCount(data.likeCount)
       })
 
     } catch (error) {
       // Rollback on failure
-      useSync(() => {
-        isLiked.set(previousLiked)
-        likeCount.set(previousCount)
+      sync(() => {
+        setIsLiked(previousLiked)
+        setLikeCount(previousCount)
       })
       
       alert('Failed to update like')
     } finally {
-      isUpdating.set(false)
+      setIsUpdating(false)
     }
   }
   
@@ -224,10 +224,10 @@ function LikeButton({ postId }: { postId: number }) {
 import { useState } from 'flexium/core'
 
 function DataWithRetry() {
-  const retryCount = useState(0)
+  const [retryCount, setRetryCount] = useState(0)
   const maxRetries = 3
 
-  const data = useState(async () => {
+  const [data, setData] = useState(async () => {
     const res = await fetch('/api/data')
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`)
@@ -236,21 +236,21 @@ function DataWithRetry() {
   }, { key: 'data:with-retry' })
   
   const handleRetry = () => {
-    if (retryCount.valueOf() < maxRetries) {
-      retryCount.set(prev => prev + 1)
+    if (retryCount < maxRetries) {
+      setRetryCount(prev => prev + 1)
       data.refetch()
     }
   }
   
-  if (data.status.valueOf() === 'loading') {
-    return <div>Loading... (Attempt {retryCount.valueOf() + 1}/{maxRetries + 1})</div>
+  if (data.status === 'loading') {
+    return <div>Loading... (Attempt {retryCount + 1}/{maxRetries + 1})</div>
   }
   
-  if (data.status.valueOf() === 'error') {
+  if (data.status === 'error') {
     return (
       <div>
-        <p>Error: {data.error.valueOf()?.message}</p>
-        {retryCount.valueOf() < maxRetries ? (
+        <p>Error: {data.error?.message}</p>
+        {retryCount < maxRetries ? (
           <button onclick={handleRetry}>
             Retry ({retryCount}/{maxRetries})
           </button>
@@ -273,23 +273,23 @@ function DataWithRetry() {
 import { useState, useEffect } from 'flexium/core'
 
 function DataWithAutoRetry() {
-  const data = useState(async () => {
+  const [data, setData] = useState(async () => {
     const res = await fetch('/api/data')
     if (!res.ok) throw new Error('Failed to fetch')
     return res.json()
   }, { key: 'data:auto-retry' })
 
-  const retryCount = useState(0)
-  const shouldRetry = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const [shouldRetry, setShouldRetry] = useState(false)
   const maxRetries = 3
 
   // Automatic retry on error
   useEffect(() => {
-    if (data.status.valueOf() === 'error' && retryCount.valueOf() < maxRetries) {
-      const delay = Math.min(1000 * Math.pow(2, retryCount.valueOf()), 10000) // Exponential backoff
+    if (data.status === 'error' && retryCount < maxRetries) {
+      const delay = Math.min(1000 * Math.pow(2, retryCount), 10000) // Exponential backoff
       
       const timeoutId = setTimeout(() => {
-        retryCount.set(prev => prev + 1)
+        setRetryCount(prev => prev + 1)
         data.refetch()
       }, delay)
       
@@ -297,20 +297,20 @@ function DataWithAutoRetry() {
     }
   })
   
-  if (data.status.valueOf() === 'loading') {
+  if (data.status === 'loading') {
     return (
       <div>
         Loading...
-        {retryCount.valueOf() > 0 && <span> (Retry {retryCount}/{maxRetries})</span>}
+        {retryCount > 0 && <span> (Retry {retryCount}/{maxRetries})</span>}
       </div>
     )
   }
   
-  if (data.status.valueOf() === 'error') {
+  if (data.status === 'error') {
     return (
       <div>
-        <p>Error: {data.error.valueOf()?.message}</p>
-        {retryCount.valueOf() >= maxRetries ? (
+        <p>Error: {data.error?.message}</p>
+        {retryCount >= maxRetries ? (
           <p>Maximum retry count exceeded</p>
         ) : (
           <p>Retrying automatically...</p>
@@ -331,16 +331,16 @@ function DataWithAutoRetry() {
 import { useState, useEffect } from 'flexium/core'
 
 function PollingData({ interval = 5000 }: { interval?: number }) {
-  const data = useState(async () => {
+  const [data, setData] = useState(async () => {
     const res = await fetch('/api/data')
     return res.json()
   }, { key: 'data:polling' })
 
-  const isPolling = useState(true)
+  const [isPolling, setIsPolling] = useState(true)
 
   // Polling setup
   useEffect(() => {
-    if (!isPolling.valueOf()) return
+    if (!isPolling) return
     
     const intervalId = setInterval(() => {
       data.refetch()
@@ -352,14 +352,14 @@ function PollingData({ interval = 5000 }: { interval?: number }) {
   return (
     <div>
       <div>
-        <button onclick={() => isPolling.set(prev => !prev)}>
+        <button onclick={() => setIsPolling(prev => !prev)}>
           {isPolling ? 'Stop Polling' : 'Start Polling'}
         </button>
         <button onclick={data.refetch}>Manual Refresh</button>
       </div>
       
-      {data.status.valueOf() === 'loading' && <div>Loading...</div>}
-      {data.status.valueOf() === 'success' && (
+      {data.status === 'loading' && <div>Loading...</div>}
+      {data.status === 'success' && (
         <div>
           <p>Last updated: {new Date().toLocaleTimeString()}</p>
           <pre>{JSON.stringify(data, null, 2)}</pre>

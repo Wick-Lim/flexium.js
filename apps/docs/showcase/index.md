@@ -89,8 +89,8 @@ import { useState } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Counter() {
-  const count = useState(0)
-  const doubled = useState(() => count * 2)  // derived value
+  const [count, setCount] = useState(0)
+  const [doubled] = useState(() => count * 2)  // derived value
 
   return (
     <Column gap={16} padding={24}>
@@ -99,13 +99,13 @@ function Counter() {
       </Text>
       <Text>Doubled: {doubled}</Text>
       <Row gap={12}>
-        <Pressable onPress={() => count.set(c => c - 1)}>
+        <Pressable onPress={() => setCount(c => c - 1)}>
           <Text style={buttonStyle}>- Decrement</Text>
         </Pressable>
-        <Pressable onPress={() => count.set(0)}>
+        <Pressable onPress={() => setCount(0)}>
           <Text style={buttonStyle}>Reset</Text>
         </Pressable>
-        <Pressable onPress={() => count.set(c => c + 1)}>
+        <Pressable onPress={() => setCount(c => c + 1)}>
           <Text style={buttonStyle}>+ Increment</Text>
         </Pressable>
       </Row>
@@ -131,24 +131,24 @@ import { useState } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function TodoApp() {
-  const todos = useState([
+  const [todos, setTodos] = useState([
     { id: 1, text: 'Learn Flexium', done: true },
     { id: 2, text: 'Build something awesome', done: false }
   ])
-  const inputText = useState('')
+  const [inputText, setInputText] = useState('')
 
   const addTodo = () => {
-    if (!inputText.valueOf().trim()) return
-    todos.set(prev => [...prev, {
+    if (!inputText.trim()) return
+    setTodos(prev => [...prev, {
       id: Date.now(),
-      text: inputText.valueOf(),
+      text: inputText,
       done: false
     }])
-    inputText.set('')
+    setInputText('')
   }
 
   const toggleTodo = (id) => {
-    todos.set(prev => prev.map(t =>
+    setTodos(prev => prev.map(t =>
       t.id === id ? { ...t, done: !t.done } : t
     ))
   }
@@ -158,7 +158,7 @@ function TodoApp() {
       <Row gap={8}>
         <input
           value={inputText}
-          oninput={(e) => inputText.set(e.target.value)}
+          oninput={(e) => setInputText(e.target.value)}
           placeholder="Add a new todo..."
         />
         <Pressable onPress={addTodo}>
@@ -202,9 +202,9 @@ import { useState, useEffect } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Stopwatch() {
-  const seconds = useState(0)
-  const isRunning = useState(false)
-  const laps = useState([])
+  const [seconds, setSeconds] = useState(0)
+  const [isRunning, setIsRunning] = useState(false)
+  const [laps, setLaps] = useState([])
 
   // Format time display
   const formatTime = (s) => {
@@ -218,11 +218,11 @@ function Stopwatch() {
   const startStop = () => {
     if (isRunning) {
       clearInterval(intervalId)
-      isRunning.set(false)
+      setIsRunning(false)
     } else {
-      isRunning.set(true)
+      setIsRunning(true)
       intervalId = setInterval(() => {
-        seconds.set(s => s + 0.01)
+        setSeconds(s => s + 0.01)
       }, 10)
     }
   }
@@ -239,10 +239,10 @@ function Stopwatch() {
             {isRunning ? 'Stop' : 'Start'}
           </Text>
         </Pressable>
-        <Pressable onPress={() => laps.set(prev => [seconds, ...prev])}>
+        <Pressable onPress={() => setLaps(prev => [seconds, ...prev])}>
           <Text>Lap</Text>
         </Pressable>
-        <Pressable onPress={() => { seconds.set(0); laps.set([]) }}>
+        <Pressable onPress={() => { setSeconds(0); setLaps([]) }}>
           <Text>Reset</Text>
         </Pressable>
       </Row>
@@ -272,14 +272,14 @@ import { useState, useEffect } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function ParticleCanvas() {
-  const mouseX = useState(150)
-  const mouseY = useState(150)
-  const hue = useState(0)
-  const particles = useState([])
+  const [mouseX, setMouseX] = useState(150)
+  const [mouseY, setMouseY] = useState(150)
+  const [hue, setHue] = useState(0)
+  const [particles, setParticles] = useState([])
 
   // Animate hue
   useEffect(() => {
-    const id = setInterval(() => hue.set(h => (h + 1) % 360), 16)
+    const id = setInterval(() => setHue(h => (h + 1) % 360), 16)
     return () => clearInterval(id)
   })
 
@@ -288,9 +288,9 @@ function ParticleCanvas() {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
-    mouseX.set(x)
-    mouseY.set(y)
-    particles.set(prev => [...prev.slice(-20), { x, y, hue: hue }])
+    setMouseX(x)
+    setMouseY(y)
+    setParticles(prev => [...prev.slice(-20), { x, y, hue: hue }])
   }
 
   return (
@@ -341,10 +341,10 @@ import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
 import { keyboard, useLoop, Keys } from 'flexium/interactive'
 
-const snake = useState([{ x: 7, y: 7 }])
-const direction = useState('RIGHT')
-const food = useState({ x: 12, y: 7 })
-const score = useState(0)
+const [snake, setSnake] = useState([{ x: 7, y: 7 }])
+const [direction, setDirection] = useState('RIGHT')
+const [food, setFood] = useState({ x: 12, y: 7 })
+const [score, setScore] = useState(0)
 
 function SnakeGame() {
   const kb = keyboard()
@@ -394,14 +394,14 @@ import { useState } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const user = useState(null, { key: ['app', 'auth', 'user'] })
+  const [user, setUser] = useState(null, { key: ['app', 'auth', 'user'] })
   
   const login = (name: string) => {
-    user.set({ name })
+    setUser({ name })
   }
   
   const logout = () => {
-    user.set(null)
+    setUser(null)
   }
   
   return { user, login, logout }
@@ -412,7 +412,7 @@ function useCart() {
   const items = useState<Array<{id: number, name: string, price: number, qty: number}>>([], { key: ['app', 'cart', 'items'] })
   
   const addItem = (product: {id: number, name: string, price: number}) => {
-    items.set(items => {
+    setItems(items => {
       const existing = items.find(item => item.id === product.id)
       if (existing) {
         return items.map(item => item.id === product.id ? {...item, qty: item.qty + 1} : item)
@@ -422,14 +422,14 @@ function useCart() {
   }
   
   const removeItem = (id: number) => {
-    items.set(items => items.filter(item => item.id !== id))
+    setItems(items => items.filter(item => item.id !== id))
   }
   
   const updateQty = (id: number, delta: number) => {
-    items.set(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
+    setItems(items => items.map(item => item.id === id ? {...item, qty: item.qty + delta} : item))
   }
   
-  const total = useState(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), { key: ['app', 'cart', 'total'] })
+  const [total] = useState(() => items.reduce((sum, item) => sum + item.price * item.qty, 0), { key: ['app', 'cart', 'total'] })
   
   return { items, addItem, removeItem, updateQty, total }
 }
@@ -439,9 +439,9 @@ function useNotifications() {
   const notifications = useState<Array<{msg: string, type: string}>>([], { key: ['app', 'notifications'] })
   
   const notify = (msg: string, type: string) => {
-    notifications.set(n => [...n, { msg, type }])
+    setNotifications(n => [...n, { msg, type }])
     setTimeout(() => {
-      notifications.set(n => n.slice(1))
+      setNotifications(n => n.slice(1))
     }, 3000)
   }
   
@@ -534,7 +534,7 @@ Each documentation page now includes live demos. Here are some highlights:
   <div class="example-icon">⚡</div>
   <div class="example-content">
     <h3>Async State</h3>
-    <p>Data fetching with loading states using state(async)</p>
+    <p>Data fetching with loading states using useState(async)</p>
   </div>
 </a>
 

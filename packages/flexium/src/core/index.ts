@@ -5,7 +5,7 @@ export type { RefObject, RefCallback, Ref } from '../ref/types'
 
 // Functions
 export { useState } from './state'
-export { useEffect, useSync } from './lifecycle'
+export { useEffect, sync } from './lifecycle'
 
 // Ref API
 export { useRef } from '../ref'

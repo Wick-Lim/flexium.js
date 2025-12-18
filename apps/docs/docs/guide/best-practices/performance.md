@@ -13,10 +13,10 @@ Learn how to optimize the performance of Flexium apps.
 ```tsx
 // ❌ Bad example - multiple updates
 function handleSubmit() {
-  loading.set(true)      // Update 1
-  name.set('John')       // Update 2
-  email.set('john@example.com')  // Update 3
-  loading.set(false)     // Update 4
+  setLoading(true)      // Update 1
+  setName('John')       // Update 2
+  setEmail('john@example.com')  // Update 3
+  setLoading(false)     // Update 4
   // Causes 4 re-renders
 }
 
@@ -25,10 +25,10 @@ import { useSync } from 'flexium/core'
 
 function handleSubmit() {
   useSync(() => {
-    loading.set(true)
-    name.set('John')
-    email.set('john@example.com')
-    loading.set(false)
+    setLoading(true)
+    setName('John')
+    setEmail('john@example.com')
+    setLoading(false)
   })
   // Single re-render
 }
@@ -42,16 +42,16 @@ function handleSubmit() {
 // ✅ Form submission
 function handleFormSubmit() {
   useSync(() => {
-    submitting.set(true)
-    errors.set({})
-    formData.set({ ...formData.valueOf(), submitted: true })
+    setSubmitting(true)
+    setErrors({})
+    setFormData({ ...formData, submitted: true })
   })
 
   // API call
-  submitForm(formData.valueOf()).then(() => {
+  submitForm(formData).then(() => {
     useSync(() => {
-      submitting.set(false)
-      success.set(true)
+      setSubmitting(false)
+      setSuccess(true)
     })
   })
 }
@@ -59,20 +59,20 @@ function handleFormSubmit() {
 // ✅ Multiple fields update simultaneously
 function handleBulkUpdate() {
   useSync(() => {
-    field1.set(value1)
-    field2.set(value2)
-    field3.set(value3)
-    field4.set(value4)
+    setField1(value1)
+    setField2(value2)
+    setField3(value3)
+    setField4(value4)
   })
 }
 
 // ✅ State reset
 function resetForm() {
   useSync(() => {
-    email.set('')
-    password.set('')
-    errors.set({})
-    touched.set({})
+    setEmail('')
+    setPassword('')
+    setErrors({})
+    setTouched({})
   })
 }
 ```
@@ -86,7 +86,7 @@ function resetForm() {
 ```tsx
 // ❌ Bad example - computed every time
 function ShoppingCart() {
-  const items = useState([])
+  const [items] = useState([])
 
   // Recalculated every time (no memoization)
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -96,10 +96,10 @@ function ShoppingCart() {
 
 // ✅ Good example - automatic memoization
 function ShoppingCart() {
-  const items = useState([])
+  const [items] = useState([])
 
   // Only recalculated when items change
-  const total = useState(() =>
+  const [total] = useState(() =>
     items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   )
 
@@ -114,18 +114,18 @@ function ShoppingCart() {
 ```tsx
 // ✅ Filtering + sorting + transformation
 function ProductList({ category }: { category: string }) {
-  const products = useState([])
+  const [products] = useState([])
 
   // Separate each step into computed (optional)
-  const filtered = useState(() =>
+  const [filtered] = useState(() =>
     products.filter(p => p.category === category)
   )
 
-  const sorted = useState(() =>
+  const [sorted] = useState(() =>
     [...filtered].sort((a, b) => b.price - a.price)
   )
 
-  const formatted = useState(() =>
+  const [formatted] = useState(() =>
     sorted.map(p => ({ ...p, price: `$${p.price.toFixed(2)}` }))
   )
 
@@ -133,7 +133,7 @@ function ProductList({ category }: { category: string }) {
 }
 
 // Or compute all at once (may be more efficient)
-const formatted = useState(() => {
+const [formatted] = useState(() => {
   const filtered = products.filter(p => p.category === category)
   const sorted = [...filtered].sort((a, b) => b.price - a.price)
   return sorted.map(p => ({ ...p, price: `$${p.price.toFixed(2)}` }))
@@ -146,16 +146,16 @@ const formatted = useState(() => {
 
 ```tsx
 // ❌ Bad example - new object every time
-const items = useState([1, 2, 3])
-const data = useState(() => ({
+const [items] = useState([1, 2, 3])
+const [data] = useState(() => ({
   items: items,
   timestamp: Date.now()  // Different value each time → unnecessary recalculation
 }))
 
 // ✅ Good example - stable dependencies
-const items = useState([1, 2, 3])
-const timestamp = useState(() => Date.now())  // Manage as separate state
-const data = useState(() => ({
+const [items] = useState([1, 2, 3])
+const [timestamp] = useState(() => Date.now())  // Manage as separate state
+const [data] = useState(() => ({
   items: items,
   timestamp: timestamp  // Stable dependency
 }))
@@ -170,7 +170,7 @@ const data = useState(() => ({
 ```tsx
 // ❌ Bad example - regular map (slow with large lists)
 function ItemList() {
-  const items = useState([...])  // 1000+ items
+  const [items] = useState([...])  // 1000+ items
 
   return (
     <div>
@@ -183,7 +183,7 @@ function ItemList() {
 
 // ✅ Good example - items.map() (auto-optimized)
 function ItemList() {
-  const items = useState([...])
+  const [items] = useState([...])
 
   return (
     <div>
@@ -200,7 +200,7 @@ function ItemList() {
 ```tsx
 // ✅ Consider virtualization for very large lists
 function VirtualizedList() {
-  const items = useState([...])  // 10000+ items
+  const [items] = useState([...])  // 10000+ items
 
   // items.map() auto-optimizes, but
   // consider additional virtualization library if needed
@@ -225,7 +225,7 @@ function VirtualizedList() {
 import { useState, useEffect } from 'flexium/core'
 
 function TemporaryComponent() {
-  const data = useState(async () => {
+  const [data] = useState(async () => {
     return fetch('/api/temp-data').then(r => r.json())
   }, { key: 'temp:data' })
 
@@ -241,7 +241,7 @@ function TemporaryComponent() {
 
 // ✅ Conditional cleanup
 function ConditionalComponent({ userId }: { userId: number | null }) {
-  const user = useState(async () => {
+  const [user] = useState(async () => {
     if (!userId) return null
     return fetch(`/api/users/${userId}`).then(r => r.json())
   }, { key: userId ? ['user', userId] : undefined })
@@ -289,8 +289,8 @@ function cleanupNamespace(namespace: string) {
 
 ```tsx
 // ❌ Bad example - unnecessary re-execution
-const count = useState(0)
-const name = useState('John')
+const [count] = useState(0)
+const [name] = useState('John')
 
 useEffect(() => {
   console.log('Count:', count)  // Good: doesn't re-run when name changes
@@ -299,7 +299,7 @@ useEffect(() => {
 
 // ✅ Good example - track only needed dependencies
 useEffect(() => {
-  const currentCount = count.valueOf()  // Explicitly read
+  const currentCount = count  // Explicitly read
   console.log('Count:', currentCount)
   // Doesn't read name, so won't re-run when name changes
 })
@@ -349,7 +349,7 @@ useEffect(() => {
 ```tsx
 // ✅ Same keys are automatically shared
 function ComponentA() {
-  const users = useState(async () => {
+  const [users] = useState(async () => {
     return fetch('/api/users').then(r => r.json())
   }, { key: 'users' })
 
@@ -358,7 +358,7 @@ function ComponentA() {
 
 function ComponentB() {
   // Same key, so only one request is made
-  const users = useState(async () => {
+  const [users] = useState(async () => {
     return fetch('/api/users').then(r => r.json())
   }, { key: 'users' })
 
@@ -373,7 +373,7 @@ function ComponentB() {
 ```tsx
 // ✅ Reuse with global cache
 function PostList() {
-  const posts = useState(async () => {
+  const [posts] = useState(async () => {
     return fetch('/api/posts').then(r => r.json())
   }, { key: ['posts', 'all'] })
 
@@ -382,9 +382,9 @@ function PostList() {
 
 function PostDetail({ postId }: { postId: number }) {
   // Find from already cached posts
-  const posts = useState(null, { key: ['posts', 'all'] })
-  const post = useState(() => {
-    return posts.valueOf()?.find(p => p.id === postId)
+  const [posts] = useState(null, { key: ['posts', 'all'] })
+  const [post] = useState(() => {
+    return posts?.find(p => p.id === postId)
   })
 
   return <div>...</div>

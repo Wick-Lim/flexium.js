@@ -29,10 +29,10 @@ import { useState } from 'flexium/core';
 
 function Counter() {
   // Create local state
-  const count = useState(0);
+  const [count, setCount] = useState(0);
 
   return (
-    <button onclick={() => count.set(c => c + 1)}>
+    <button onclick={() => setCount(c => c + 1)}>
       Count: {count}
     </button>
   );
@@ -45,14 +45,14 @@ Just add a `key` to share state across components.
 
 ```javascript
 // Define global state (with initial value)
-const theme = useState('light', { key: 'theme' });
+const [theme, setTheme] = useState('light', { key: 'theme' });
 
 function ThemeToggler() {
   // Access existing global state (initial value optional)
-  const theme = useState(undefined, { key: 'theme' });
+  const [theme, setTheme] = useState(undefined, { key: 'theme' });
 
   return (
-    <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
+    <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
       Current: {theme}
     </button>
   );
@@ -66,19 +66,19 @@ Pass an async function to handle data fetching automatically.
 ```javascript
 function UserProfile({ id }) {
   // Automatically fetches data. Re-runs if dependencies change.
-  const user = useState(async () => {
+  const [user, { refetch, loading, error }] = useState(async () => {
     const res = await fetch(`/api/users/${id}`);
     return res.json();
   });
 
   return () => {
-    if (user.loading) return <div>Loading...</div>;
-    if (user.error) return <div>Error!</div>;
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error!</div>;
 
     return (
       <div>
-        <h1>{user.valueOf().name}</h1>
-        <button onclick={() => user.refetch()}>Reload</button>
+        <h1>{user.name}</h1>
+        <button onclick={() => refetch()}>Reload</button>
       </div>
     );
   };
@@ -90,11 +90,11 @@ function UserProfile({ id }) {
 Pass a synchronous function to create a value that updates automatically.
 
 ```javascript
-const count = useState(1);
+const [count, setCount] = useState(1);
 // 'double' updates whenever 'count' changes
-const double = useState(() => count.valueOf() * 2);
+const [double] = useState(() => count * 2);
 
-console.log(double.valueOf()); // 2 - use values directly!
+console.log(double); // 2 - use values directly!
 ```
 
 ### 5. List Rendering
@@ -103,7 +103,7 @@ Use familiar `.map()` syntax with automatic optimization:
 
 ```javascript
 function TodoList() {
-  const todos = useState([
+  const [todos, setTodos] = useState([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build something awesome' }
   ]);
@@ -127,11 +127,11 @@ Flexium uses a signal-based reactivity system. Components run once, and only the
 ```javascript
 import { useState, useEffect } from 'flexium/core';
 
-const count = useState(0);
+const [count, setCount] = useState(0);
 
 // Side effects run automatically when dependencies change
 useEffect(() => {
-  console.log('Count changed to:', count.valueOf());
+  console.log('Count changed to:', count);
 });
 ```
 

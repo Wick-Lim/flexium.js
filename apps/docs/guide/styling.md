@@ -49,19 +49,19 @@ For dynamic, reactive styling, pass a function that returns a style object. The 
 import { useState } from 'flexium/core'
 
 function ThemedButton() {
-  const isDark = useState(false)
+  const [isDark, setIsDark] = useState(false)
 
   return (
     <button
       style={() => ({
-        background: isDark.valueOf() ? '#333' : '#fff',
-        color: isDark.valueOf() ? '#fff' : '#333',
-        border: `1px solid ${isDark.valueOf() ? '#555' : '#ddd'}`,
+        background: isDark ? '#333' : '#fff',
+        color: isDark ? '#fff' : '#333',
+        border: `1px solid ${isDark ? '#555' : '#ddd'}`,
         padding: '8px 16px',
         borderRadius: '4px',
         cursor: 'pointer'
       })}
-      onclick={() => isDark.set(d => !d)}
+      onclick={() => setIsDark(d => !d)}
     >
       Toggle Theme
     </button>
@@ -76,8 +76,8 @@ The style function re-evaluates automatically when any referenced signal changes
 Mix static and reactive properties within the same style object:
 
 ```tsx
-const size = useState(16)
-const color = useState('#333')
+const [size, setSize] = useState(16)
+const [color, setColor] = useState('#333')
 
 <div style={{
   fontSize: size + 'px',     // Reactive - coercion works in concatenation
@@ -97,7 +97,7 @@ Use computed values for derived styles:
 import { useState } from 'flexium/core'
 
 function ProgressBar() {
-  const progress = useState(0)
+  const [progress, setProgress] = useState(0)
 
   return (
     <div style={{
@@ -136,11 +136,11 @@ Use the `class` attribute (not `className`) to apply CSS classes.
 Use template literals or helper functions for conditional classes:
 
 ```tsx
-const isActive = useState(false)
-const isPrimary = useState(true)
+const [isActive, setIsActive] = useState(false)
+const [isPrimary, setIsPrimary] = useState(true)
 
 // Using template literal
-<button class={`btn ${isActive.valueOf() ? 'active' : ''} ${isPrimary.valueOf() ? 'primary' : 'secondary'}`}>
+<button class={`btn ${isActive ? 'active' : ''} ${isPrimary ? 'primary' : 'secondary'}`}>
   Click Me
 </button>
 
@@ -151,8 +151,8 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 
 <button class={() => classNames(
   'btn',
-  isActive.valueOf() && 'active',
-  isPrimary.valueOf() ? 'primary' : 'secondary'
+  isActive && 'active',
+  isPrimary ? 'primary' : 'secondary'
 )}>
   Click Me
 </button>
@@ -163,7 +163,7 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 The `class` attribute can also accept a function for reactive class names:
 
 ```tsx
-const status = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
 <div class={() => `status-badge ${status}`}>
   {status}
@@ -218,10 +218,10 @@ function Button() {
 import styles from './App.module.css'
 
 function App() {
-  const isActive = useState(false)
+  const [isActive, setIsActive] = useState(false)
 
   return (
-    <div class={() => `${styles.container} ${isActive.valueOf() ? styles.active : ''}`}>
+    <div class={() => `${styles.container} ${isActive ? styles.active : ''}`}>
       Content
     </div>
   )
@@ -268,7 +268,7 @@ Update CSS variables reactively for instant theme changes:
 import { useState, useEffect } from 'flexium/core'
 
 function App() {
-  const theme = useState<'light' | 'dark'>('light')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
     const root = document.documentElement
@@ -289,7 +289,7 @@ function App() {
       color: 'var(--text-color)',
       minHeight: '100vh'
     }}>
-      <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
+      <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
         Toggle Theme
       </button>
     </div>
@@ -305,7 +305,7 @@ Create responsive, interactive UIs by deriving styles from application state.
 
 ```tsx
 function StatusIndicator() {
-  const status = useState<'online' | 'offline' | 'away'>('offline')
+  const [status, setStatus] = useState<'online' | 'offline' | 'away'>('offline')
 
   const statusStyles = {
     online: { background: '#4caf50', color: '#fff' },
@@ -334,7 +334,7 @@ Combine state-driven styles with CSS transitions for smooth animations:
 const [isExpanded, setIsExpanded] = useState(false)
 
 <div style={() => ({
-  maxHeight: isExpanded.valueOf() ? '500px' : '0',
+  maxHeight: isExpanded ? '500px' : '0',
   overflow: 'hidden',
   transition: 'max-height 0.3s ease-in-out'
 })}>
@@ -346,28 +346,28 @@ const [isExpanded, setIsExpanded] = useState(false)
 
 ```tsx
 function Card() {
-  const isHovered = useState(false)
-  const isSelected = useState(false)
-  const isDisabled = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isSelected, setIsSelected] = useState(false)
+  const [isDisabled, setIsDisabled] = useState(false)
 
   return (
     <div
       style={() => ({
         padding: '16px',
         borderRadius: '8px',
-        background: isDisabled.valueOf() ? '#f5f5f5' :
-                    isSelected.valueOf() ? '#e3f2fd' :
-                    isHovered.valueOf() ? '#f9f9f9' : '#fff',
-        border: `2px solid ${isSelected.valueOf() ? '#2196f3' : '#ddd'}`,
-        cursor: isDisabled.valueOf() ? 'not-allowed' : 'pointer',
-        opacity: isDisabled.valueOf() ? 0.6 : 1,
-        transform: isHovered.valueOf() && !isDisabled.valueOf() ? 'scale(1.02)' : 'scale(1)',
+        background: isDisabled ? '#f5f5f5' :
+                    isSelected ? '#e3f2fd' :
+                    isHovered ? '#f9f9f9' : '#fff',
+        border: `2px solid ${isSelected ? '#2196f3' : '#ddd'}`,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        opacity: isDisabled ? 0.6 : 1,
+        transform: isHovered && !isDisabled ? 'scale(1.02)' : 'scale(1)',
         transition: 'all 0.2s ease',
-        boxShadow: isHovered.valueOf() && !isDisabled.valueOf() ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
+        boxShadow: isHovered && !isDisabled ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
       })}
-      onmouseenter={() => !isDisabled.valueOf() && isHovered.set(true)}
-      onmouseleave={() => isHovered.set(false)}
-      onclick={() => !isDisabled.valueOf() && isSelected.set(s => !s)}
+      onmouseenter={() => !isDisabled && setIsHovered(true)}
+      onmouseleave={() => setIsHovered(false)}
+      onclick={() => !isDisabled && setIsSelected(s => !s)}
     >
       Card Content
     </div>
@@ -410,13 +410,13 @@ Use matchMedia API with signals for JavaScript-driven responsive behavior:
 import { useState, useEffect } from 'flexium/core'
 
 function useMediaQuery(query: string) {
-  const matches = useState(false)
+  const [matches, setMatches] = useState(false)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(query)
-    matches.set(mediaQuery.matches)
+    setMatches(mediaQuery.matches)
 
-    const handler = (e: MediaQueryListEvent) => matches.set(e.matches)
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches)
     mediaQuery.addEventListener('change', handler)
 
     return () => mediaQuery.removeEventListener('change', handler)
@@ -431,9 +431,9 @@ function ResponsiveLayout() {
   return (
     <div style={() => ({
       display: 'flex',
-      flexDirection: isMobile.valueOf() ? 'column' : 'row',
-      gap: isMobile.valueOf() ? '8px' : '16px',
-      padding: isMobile.valueOf() ? '8px' : '24px'
+      flexDirection: isMobile ? 'column' : 'row',
+      gap: isMobile ? '8px' : '16px',
+      padding: isMobile ? '8px' : '24px'
     })}>
       <div>Content 1</div>
       <div>Content 2</div>
@@ -473,11 +473,11 @@ Implement light/dark mode and custom themes.
 import { useState } from 'flexium/core'
 
 function useTheme() {
-  const theme = useState<'light' | 'dark'>('light', { key: 'app-theme' })
+  const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app-theme' })
 
-  const toggleTheme = () => theme.set(t => t === 'light' ? 'dark' : 'light')
+  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
-  return { theme, setTheme: theme.set, toggleTheme }
+  return { theme, setTheme, toggleTheme }
 }
 
 function App() {
@@ -533,7 +533,7 @@ Use context to provide theme throughout your app:
 import { useState } from 'flexium/core'
 
 // Theme state - shared globally with key
-const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
+const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app:theme' })
 
 const lightColors = {
   background: '#ffffff',
@@ -549,12 +549,12 @@ const darkColors = {
   secondary: '#2a2a2a'
 }
 
-const colors = useState(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
-const toggleTheme = () => theme.set(t => t === 'light' ? 'dark' : 'light')
+const [colors, setColors] = useState(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
+const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
 function ThemedButton() {
-  const theme = useState('light', { key: 'app:theme' })
-  const colors = useState(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
+  const [theme, setTheme2] = useState('light', { key: 'app:theme' })
+  const [colors, setColors2] = useState(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
 
   return (
     <button style={() => ({
@@ -577,7 +577,7 @@ Detect and respect user's system theme preference:
 
 ```tsx
 function useSystemTheme() {
-  const theme = useState<'light' | 'dark'>(() => {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
@@ -587,7 +587,7 @@ function useSystemTheme() {
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = (e: MediaQueryListEvent) => {
-      theme.set(e.matches ? 'dark' : 'light')
+      setTheme(e.matches ? 'dark' : 'light')
     }
 
     mediaQuery.addEventListener('change', handler)
@@ -690,13 +690,13 @@ function mergeStyles(...styles: (StyleObject | undefined)[]): StyleObject {
 }
 
 function withHover(baseStyle: StyleObject, hoverStyle: StyleObject) {
-  const isHovered = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   return {
-    style: () => isHovered.valueOf() ? mergeStyles(baseStyle, hoverStyle) : baseStyle,
+    style: () => isHovered ? mergeStyles(baseStyle, hoverStyle) : baseStyle,
     handlers: {
-      onmouseenter: () => isHovered.set(true),
-      onmouseleave: () => isHovered.set(false)
+      onmouseenter: () => setIsHovered(true),
+      onmouseleave: () => setIsHovered(false)
     }
   }
 }
@@ -717,31 +717,31 @@ function InteractiveCard() {
 
 ```tsx
 function InteractiveButton() {
-  const isHovered = useState(false)
-  const isFocused = useState(false)
-  const isPressed = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
+  const [isPressed, setIsPressed] = useState(false)
 
   return (
     <button
       style={() => ({
-        background: isPressed.valueOf() ? '#1565c0' :
-                    isHovered.valueOf() ? '#1976d2' :
+        background: isPressed ? '#1565c0' :
+                    isHovered ? '#1976d2' :
                     '#2196f3',
         color: '#fff',
         padding: '8px 16px',
-        border: isFocused.valueOf() ? '2px solid #64b5f6' : 'none',
+        border: isFocused ? '2px solid #64b5f6' : 'none',
         borderRadius: '4px',
         cursor: 'pointer',
-        transform: isPressed.valueOf() ? 'scale(0.98)' : 'scale(1)',
-        boxShadow: isHovered.valueOf() && !isPressed.valueOf() ? '0 4px 8px rgba(0,0,0,0.2)' : 'none',
+        transform: isPressed ? 'scale(0.98)' : 'scale(1)',
+        boxShadow: isHovered && !isPressed ? '0 4px 8px rgba(0,0,0,0.2)' : 'none',
         transition: 'all 0.2s ease'
       })}
-      onmouseenter={() => isHovered.set(true)}
-      onmouseleave={() => { isHovered.set(false); isPressed.set(false) }}
-      onfocus={() => isFocused.set(true)}
-      onblur={() => isFocused.set(false)}
-      onmousedown={() => isPressed.set(true)}
-      onmouseup={() => isPressed.set(false)}
+      onmouseenter={() => setIsHovered(true)}
+      onmouseleave={() => { setIsHovered(false); setIsPressed(false) }}
+      onfocus={() => setIsFocused(true)}
+      onblur={() => setIsFocused(false)}
+      onmousedown={() => setIsPressed(true)}
+      onmouseup={() => setIsPressed(false)}
     >
       Interactive Button
     </button>
@@ -838,7 +838,7 @@ function AnimatedCard() {
         Toggle
       </button>
 
-      {isVisible.valueOf() && (
+      {isVisible && (
         <div style={{
           animation: 'slideUp 0.3s ease-out'
         }}>
@@ -859,12 +859,12 @@ function ExpandablePanel() {
   return (
     <div>
       <button onclick={() => setIsExpanded(e => !e)}>
-        {isExpanded.valueOf() ? 'Collapse' : 'Expand'}
+        {isExpanded ? 'Collapse' : 'Expand'}
       </button>
 
       <div style={() => ({
-        maxHeight: isExpanded.valueOf() ? '300px' : '0',
-        opacity: isExpanded.valueOf() ? 1 : 0,
+        maxHeight: isExpanded ? '300px' : '0',
+        opacity: isExpanded ? 1 : 0,
         overflow: 'hidden',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       })}>
@@ -926,7 +926,7 @@ const staticStyle = { color: 'red', padding: '8px' }
 Group multiple style changes together:
 
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 const [color, setColor] = useState('#333')
 const [size, setSize] = useState(16)
@@ -940,10 +940,10 @@ function updateTheme() {
 }
 
 // Good: Synced updates (advanced API)
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 function updateTheme() {
-  useSync(() => {
+  sync(() => {
     setColor('#fff')
     setSize(18)
     setWeight(500)
@@ -958,8 +958,8 @@ For smooth animations, prefer `transform` and `opacity` over layout-affecting pr
 ```tsx
 // Better performance
 <div style={() => ({
-  opacity: isVisible.valueOf() ? 1 : 0,
-  transform: `translateY(${isVisible.valueOf() ? 0 : 20}px)`,
+  opacity: isVisible ? 1 : 0,
+  transform: `translateY(${isVisible ? 0 : 20}px)`,
   transition: 'all 0.3s ease'
 })}>
   Content
@@ -967,8 +967,8 @@ For smooth animations, prefer `transform` and `opacity` over layout-affecting pr
 
 // Worse performance (triggers layout)
 <div style={() => ({
-  marginTop: isVisible.valueOf() ? '0' : '20px',
-  height: isVisible.valueOf() ? 'auto' : '0'
+  marginTop: isVisible ? '0' : '20px',
+  height: isVisible ? 'auto' : '0'
 })}>
   Content
 </div>

@@ -99,7 +99,7 @@ This results in:
 Use native JavaScript:
 
 ```tsx
-{isLoggedIn.valueOf() ? <Dashboard /> : <Login />}
+{isLoggedIn ? <Dashboard /> : <Login />}
 ```
 
 ### List Rendering
@@ -187,22 +187,22 @@ useEffect(() => {
 Handle errors and loading states explicitly with `useState(async)`:
 
 ```tsx
-const data = useState(async () => {
+const [data, dataControl] = useState(async () => {
   const res = await fetch('/api/data')
   if (!res.ok) throw new Error('Failed to fetch')
   return res.json()
 })
 
-// data.status: 'idle' | 'loading' | 'success' | 'error'
+// dataControl.status: 'idle' | 'loading' | 'success' | 'error'
 function DataView() {
   return (
     <div>
-      {data.status === 'loading' ? (
+      {dataControl.status === 'loading' ? (
         <Spinner />
-      ) : data.status === 'error' ? (
+      ) : dataControl.status === 'error' ? (
         <div>
-          <p>Error: {data.error.message}</p>
-          <button onclick={data.refetch}>Retry</button>
+          <p>Error: {dataControl.error.message}</p>
+          <button onclick={dataControl.refetch}>Retry</button>
         </div>
       ) : (
         <Content data={data} />

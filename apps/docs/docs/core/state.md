@@ -188,4 +188,4 @@ function Counter() {
 ## See Also
 
 - [useEffect()](/docs/core/effect)
-- [useSync()](/docs/core/sync)
+- [sync()](/docs/core/sync)

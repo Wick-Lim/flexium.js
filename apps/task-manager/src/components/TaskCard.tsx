@@ -23,7 +23,7 @@ export default function TaskCard({ task }: { task: Task }) {
         <div>
           <div class="task-title">{task.title}</div>
         </div>
-        {isEditing.valueOf() ? (
+        {isEditing ? (
           <select
             value={newStatus}
             onchange={handleStatusChange}

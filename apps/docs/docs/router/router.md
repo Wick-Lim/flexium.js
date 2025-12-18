@@ -42,7 +42,7 @@ interface RouterContext {
 function Breadcrumb() {
   const { path } = useRouter()
 
-  return <span>Current: {path.valueOf()}</span>
+  return <span>Current: {path}</span>
 }
 ```
 
@@ -66,8 +66,8 @@ function SearchPage() {
 
   return (
     <div>
-      <p>Search: {query.valueOf().q}</p>
-      <p>Sort: {query.valueOf().sort}</p>
+      <p>Search: {query.q}</p>
+      <p>Sort: {query.sort}</p>
     </div>
   )
 }
@@ -140,13 +140,13 @@ function Pagination() {
   const { query, navigate, path } = useRouter()
 
   const goToPage = (page) => {
-    navigate(`${path.valueOf()}?page=${page}`)
+    navigate(`${path}?page=${page}`)
   }
 
   return (
     <div>
-      <span>Page {query.valueOf().page || 1}</span>
-      <button onclick={() => goToPage((parseInt(query.valueOf().page) || 1) + 1)}>
+      <span>Page {query.page || 1}</span>
+      <button onclick={() => goToPage((parseInt(query.page) || 1) + 1)}>
         Next
       </button>
     </div>

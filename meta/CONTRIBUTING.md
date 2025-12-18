@@ -40,7 +40,7 @@ flexium.js/
 │       │   ├── core/         # Reactive system
 │       │   │   ├── reactive.ts   # Proxy reactivity
 │       │   │   ├── state.ts      # useState()
-│       │   │   ├── lifecycle.ts  # useEffect(), useSync()
+│       │   │   ├── lifecycle.ts  # useEffect(), sync()
 │       │   │   ├── hook.ts       # hook()
 │       │   │   ├── context.ts    # Context implementation
 │       │   │   └── devtools.ts   # DevTools integration

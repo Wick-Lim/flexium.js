@@ -63,16 +63,16 @@ function ChartComponent() {
 import { useState, useEffect } from 'flexium/core'
 
 function UserProfile(props) {
-  const user = useState(null)
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     // Fetch runs once on mount
     fetch(`/api/users/${props.id}`)
       .then(res => res.json())
-      .then(data => user.set(data))
+      .then(data => setUser(data))
   })
 
-  return user.valueOf() && <div>{user.name}</div>
+  return user && <div>{user.name}</div>
 }
 ```
 
@@ -99,22 +99,22 @@ function KeyboardHandler() {
 import { useState, useEffect } from 'flexium/core'
 
 function WebSocketComponent() {
-  const messages = useState([])
-  const userId = useState(1)
+  const [messages, setMessages] = useState([])
+  const [userId, setUserId] = useState(1)
 
   useEffect(() => {
     // Re-creates WebSocket when userId changes
-    const ws = new WebSocket(`wss://example.com/${userId.valueOf()}`)
+    const ws = new WebSocket(`wss://example.com/${userId}`)
 
     ws.onmessage = (e) => {
-      messages.set(m => [...m, e.data])
+      setMessages(m => [...m, e.data])
     }
 
     // Cleanup before re-run or unmount
     return () => ws.close()
   })
 
-  return <div>{messages.valueOf().map(msg => <div>{msg}</div>)}</div>
+  return <div>{messages.map(msg => <div>{msg}</div>)}</div>
 }
 ```
 
@@ -124,7 +124,7 @@ function WebSocketComponent() {
 import { useState, useEffect } from 'flexium/core'
 
 function SearchResults(props) {
-  const results = useState([])
+  const [results, setResults] = useState([])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -133,13 +133,13 @@ function SearchResults(props) {
       signal: controller.signal
     })
       .then(res => res.json())
-      .then(data => results.set(data))
+      .then(data => setResults(data))
 
     // Cancel request if query changes or component unmounts
     return () => controller.abort()
   })
 
-  return <div>{results.valueOf().map(item => <div>{item.title}</div>)}</div>
+  return <div>{results.map(item => <div>{item.title}</div>)}</div>
 }
 ```
 
@@ -149,13 +149,13 @@ function SearchResults(props) {
 import { useState, useEffect } from 'flexium/core'
 
 function Countdown(props) {
-  const time = useState(props.seconds)
+  const [time, setTime] = useState(props.seconds)
 
   useEffect(() => {
-    if (time.valueOf() <= 0) return
+    if (time <= 0) return
 
     const timeout = setTimeout(() => {
-      time.set(t => t - 1)
+      setTime(t => t - 1)
     }, 1000)
 
     return () => clearTimeout(timeout)

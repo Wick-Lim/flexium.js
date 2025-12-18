@@ -85,18 +85,18 @@ type StateValue<T> = T & {
 ```tsx
 import { useState } from 'flexium/core'
 
-const count = useState(0)
+const [count, setCount] = useState(0)
 
 // Read value (tracks dependency)
-console.log(count.valueOf()) // 0
-console.log(count + 1) // 1 (implicit coercion works in some cases, but .valueOf() is safer)
+console.log(count) // 0
+console.log(count + 1) // 1 (implicit coercion works in some cases, but  is safer)
 
 // Update value
-count.set(count.valueOf() + 1)
-count.set(5)
+setCount(count + 1)
+setCount(5)
 
 // Read without tracking
-const current = count.peek()
+const current = count
 ```
 
 **Related:** `Computed`, `useEffect()`, `useState()`
@@ -118,12 +118,12 @@ type Computed<T> = Readonly<StateValue<T>>
 ```tsx
 import { useState } from 'flexium/core'
 
-const count = useState(1)
-const doubled = useState(() => count.valueOf() * 2)
+const [count, setCount] = useState(1)
+const [doubled] = useState(() => count * 2)
 
-console.log(doubled.valueOf()) // 2
-count.set(5)
-console.log(doubled.valueOf()) // 10
+console.log(doubled) // 2
+setCount(5)
+console.log(doubled) // 10
 ```
 
 **Related:** `StateValue`, `useState()`
@@ -154,11 +154,11 @@ type Resource<T> = StateValue<T | undefined> & {
 ```tsx
 import { useState } from 'flexium/core'
 // useState() handles async functions as resources
-const user = useState(async () => fetchUser(userId))
+const [user, setUser] = useState(async () => fetchUser(userId))
 
 return () => {
-  if (user.status.valueOf() === 'loading') return <div>Loading...</div>
-  if (user.error.valueOf()) return <div>Error: {user.error.valueOf().message}</div>
+  if (user.status === 'loading') return <div>Loading...</div>
+  if (user.error) return <div>Error: {user.error.message}</div>
   return <div>{user.name}</div>
 }
 ```
@@ -244,10 +244,10 @@ interface Context<T> {
 import { useState } from 'flexium/core'
 
 // Share theme globally - no Provider needed
-const theme = useState<'light' | 'dark'>('dark', { key: 'app:theme' })
+const [theme, setTheme] = useState<'light' | 'dark'>('dark', { key: 'app:theme' })
 
 function ThemedComponent() {
-  const theme = useState('light', { key: 'app:theme' })
+  const [theme, setTheme] = useState('light', { key: 'app:theme' })
   return <div>Current theme: {theme}</div>
 }
 ```
@@ -503,8 +503,8 @@ interface DrawRectProps {
 ```tsx
 import { useState } from 'flexium/core'
 
-const x = useState(10)
-const fill = useState('red')
+const [x, setX] = useState(10)
+const [fill, setFill] = useState('red')
 
 <DrawRect
   x={x}

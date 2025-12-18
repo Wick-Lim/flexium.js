@@ -51,19 +51,19 @@ const [data] = useState(() => ({
 }))
 ```
 
-Or use `useSync()` to sync multiple updates:
+Or use `sync()` to sync multiple updates:
 
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
-useSync(() => {
+sync(() => {
   setA(1)
   setB(2)
   setC(3)
 })  // Single recalculation
 ```
 
-**See**: Check [useSync() documentation](/docs/core/sync).
+**See**: Check [sync() documentation](/docs/core/sync).
 
 ---
 
@@ -255,10 +255,10 @@ if (isStateValue(count)) {
 
 ### Q: How do I update multiple states at once?
 
-**A**: Use `useSync()` to sync updates.
+**A**: Use `sync()` to sync updates.
 
 ```tsx
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 
 // ❌ Multiple updates
 setA(1)  // Update 1
@@ -266,14 +266,14 @@ setB(2)  // Update 2
 setC(3)  // Update 3
 
 // ✅ Single update
-useSync(() => {
+sync(() => {
   setA(1)
   setB(2)
   setC(3)
 })  // Single re-render
 ```
 
-**See**: Check [useSync() documentation](/docs/core/sync).
+**See**: Check [sync() documentation](/docs/core/sync).
 
 ---
 
@@ -326,8 +326,8 @@ import { useRouter } from 'flexium/router'
 
 function Component() {
   const r = useRouter()
-  console.log(r.location().pathname)  // Current path
-  console.log(r.params())  // Path parameters
+  console.log(r.location.pathname)  // Current path
+  console.log(r.params)  // Path parameters
 }
 ```
 

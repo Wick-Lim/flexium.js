@@ -105,7 +105,7 @@ test('async state (resource) works', async () => {
   // Use String() to cast status proxy to primitive
   assert.strictEqual(String(status), 'loading');
   // data is undefined during loading - use strict comparison
-  assert.strictEqual(data.valueOf(), undefined);
+  assert.strictEqual(data, undefined);
 
   // Wait for data
   await new Promise(resolve => setTimeout(resolve, 50));

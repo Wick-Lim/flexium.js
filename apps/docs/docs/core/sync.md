@@ -2,7 +2,7 @@
 import SyncDemo from '../../components/SyncDemo.vue'
 </script>
 
-# useSync()
+# sync()
 
 Synchronize state updates to the DOM.
 
@@ -15,17 +15,17 @@ Synchronize state updates to the DOM.
 ## Import
 
 ```ts
-import { useSync } from 'flexium/core'
+import { sync } from 'flexium/core'
 ```
 
 ## Signature
 
 ```ts
 // 1. Force Flush
-function useSync(): void
+function sync(): void
 
 // 2. Sync Updates
-function useSync<T>(fn: () => T): T
+function sync<T>(fn: () => T): T
 ```
 
 ## Usage
@@ -37,13 +37,13 @@ const firstName = useState('John')
 const lastName = useState('Doe')
 const age = useState(25)
 
-// Without useSync: 3 separate updates
+// Without sync: 3 separate updates
 firstName.set('Jane')
 lastName.set('Smith')
 age.set(30)
 
-// With useSync: 1 combined update
-useSync(() => {
+// With sync: 1 combined update
+sync(() => {
   firstName.set('Jane')
   lastName.set('Smith')
   age.set(30)
@@ -59,7 +59,7 @@ function UserForm() {
   const errors = useState({})
 
   const handleSubmit = () => {
-    useSync(() => {
+    sync(() => {
       name.set('')
       email.set('')
       errors.set({})
@@ -83,7 +83,7 @@ const sortBy = useState('name')
 const page = useState(1)
 
 function resetFilters() {
-  useSync(() => {
+  sync(() => {
     filter.set('')
     sortBy.set('name')
     page.set(1)
@@ -94,7 +94,7 @@ function resetFilters() {
 ### With Return Value
 
 ```tsx
-const result = useSync(() => {
+const result = sync(() => {
   count.set(prev => prev + 1)
   total.set(prev => prev + 100)
   return 'done'
@@ -106,10 +106,10 @@ console.log(result) // 'done'
 ### Nested Syncs
 
 ```tsx
-useSync(() => {
+sync(() => {
   a.set(1)
 
-  useSync(() => {
+  sync(() => {
     b.set(2)
     c.set(3)
   })
@@ -131,13 +131,13 @@ useSync(() => {
 
 ## Behavior
 
-- `useSync()` (no args): Force flushes pending effects immediately
-- `useSync(fn)`: Syncs updates inside `fn`, then flushes immediately
+- `sync()` (no args): Force flushes pending effects immediately
+- `sync(fn)`: Syncs updates inside `fn`, then flushes immediately
 - Reading state inside sync returns the **pending** value
 
 ## When to Use
 
-Use `useSync()` when:
+Use `sync()` when:
 
 - Updating multiple related states together
 - Resetting form or filter states

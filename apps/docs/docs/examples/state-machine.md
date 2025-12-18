@@ -14,58 +14,58 @@ import { useState } from 'flexium/core'
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
-  const currentState = useState<LoadingState>('idle')
-  const data = useState<any>(null)
-  const error = useState<Error | null>(null)
+  const [currentState, setCurrentState] = useState<LoadingState>('idle')
+  const [data, setData] = useState<any>(null)
+  const [error, setError] = useState<Error | null>(null)
   
   const loadData = async () => {
     // idle -> loading
-    currentState.set('loading')
-    error.set(null)
+    setCurrentState('loading')
+    setError(null)
     
     try {
       const res = await fetch('/api/data')
       if (!res.ok) throw new Error('Failed to fetch')
       
       const d = await res.json()
-      data.set(d)
+      setData(d)
       
       // loading -> success
-      currentState.set('success')
+      setCurrentState('success')
     } catch (err) {
-      error.set(err as Error)
+      setError(err as Error)
       
       // loading -> error
-      currentState.set('error')
+      setCurrentState('error')
     }
   }
   
   const reset = () => {
-    currentState.set('idle')
-    data.set(null)
-    error.set(null)
+    setCurrentState('idle')
+    setData(null)
+    setError(null)
   }
   
   return (
     <div>
-      {currentState.valueOf() === 'idle' && (
+      {currentState === 'idle' && (
         <button onclick={loadData}>Load Data</button>
       )}
       
-      {currentState.valueOf() === 'loading' && (
+      {currentState === 'loading' && (
         <div>Loading...</div>
       )}
       
-      {currentState.valueOf() === 'success' && (
+      {currentState === 'success' && (
         <div>
           <pre>{JSON.stringify(data, null, 2)}</pre>
           <button onclick={reset}>Reset</button>
         </div>
       )}
       
-      {currentState.valueOf() === 'error' && (
+      {currentState === 'error' && (
         <div>
-          <p>Error: {error.valueOf()?.message}</p>
+          <p>Error: {error?.message}</p>
           <button onclick={loadData}>Retry</button>
           <button onclick={reset}>Reset</button>
         </div>
@@ -80,7 +80,7 @@ function DataLoader() {
 ## Complex State Machine (Form Submission)
 
 ```tsx
-import { useState, useSync } from 'flexium/core'
+import { useState, sync } from 'flexium/core'
 
 type FormState =
   | { type: 'idle' }
@@ -90,8 +90,8 @@ type FormState =
   | { type: 'error'; message: string }
 
 function ComplexForm() {
-  const formState = useState<FormState>({ type: 'idle' })
-  const formData = useState({
+  const [formState, setFormState] = useState<FormState>({ type: 'idle' })
+  const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
@@ -105,17 +105,17 @@ function ComplexForm() {
   
   const handleSubmit = async () => {
     // idle -> validating
-    formState.set({ type: 'validating' })
+    setFormState({ type: 'validating' })
     
     const errors = validateForm(formData)
     if (errors.length > 0) {
       // validating -> error
-      formState.set({ type: 'error', message: errors[0] })
+      setFormState({ type: 'error', message: errors[0] })
       return
     }
     
     // validating -> submitting
-    formState.set({ type: 'submitting' })
+    setFormState({ type: 'submitting' })
     
     try {
       const res = await fetch('/api/submit', {
@@ -129,10 +129,10 @@ function ComplexForm() {
       const data = await res.json()
       
       // submitting -> success
-      formState.set({ type: 'success', data })
+      setFormState({ type: 'success', data })
     } catch (error) {
       // submitting -> error
-      formState.set({ 
+      setFormState({ 
         type: 'error', 
         message: (error as Error).message 
       })
@@ -140,8 +140,8 @@ function ComplexForm() {
   }
   
   const reset = () => {
-    formState.set({ type: 'idle' })
-    formData.set({ email: '', password: '' })
+    setFormState({ type: 'idle' })
+    setFormData({ email: '', password: '' })
   }
   
   return (
@@ -150,13 +150,13 @@ function ComplexForm() {
         <form onsubmit={(e) => { e.preventDefault(); handleSubmit() }}>
           <input
             value={formData.email}
-            oninput={(e) => formData.set(prev => ({ ...prev, email: e.currentTarget.value }))}
+            oninput={(e) => setFormData(prev => ({ ...prev, email: e.currentTarget.value }))}
             placeholder="Email"
           />
           <input
             type="password"
             value={formData.password}
-            oninput={(e) => formData.set(prev => ({ ...prev, password: e.currentTarget.value }))}
+            oninput={(e) => setFormData(prev => ({ ...prev, password: e.currentTarget.value }))}
             placeholder="Password"
           />
           <button type="submit">Submit</button>
@@ -182,7 +182,7 @@ function ComplexForm() {
       {formState.type === 'error' && (
         <div>
           <p>Error: {formState.message}</p>
-          <button onclick={() => formState.set({ type: 'idle' })}>Retry</button>
+          <button onclick={() => setFormState({ type: 'idle' })}>Retry</button>
         </div>
       )}
     </div>
@@ -204,21 +204,21 @@ type GameState =
   | { type: 'gameOver'; score: number; level: number }
 
 function Game() {
-  const gameState = useState<GameState>({ type: 'menu' })
-  const score = useState(0)
-  const level = useState(1)
+  const [gameState, setGameState] = useState<GameState>({ type: 'menu' })
+  const [score, setScore] = useState(0)
+  const [level, setLevel] = useState(1)
   
   const startGame = () => {
     // menu -> playing (guard: always allowed)
-    gameState.set({ type: 'playing', score: 0, level: 1 })
-    score.set(0)
-    level.set(1)
+    setGameState({ type: 'playing', score: 0, level: 1 })
+    setScore(0)
+    setLevel(1)
   }
   
   const pauseGame = () => {
     // playing -> paused (guard: only when playing)
     if (gameState.type === 'playing') {
-      gameState.set({ 
+      setGameState({ 
         type: 'paused', 
         score: gameState.score, 
         level: gameState.level 
@@ -229,7 +229,7 @@ function Game() {
   const resumeGame = () => {
     // paused -> playing (guard: only when paused)
     if (gameState.type === 'paused') {
-      gameState.set({ 
+      setGameState({ 
         type: 'playing', 
         score: gameState.score, 
         level: gameState.level 
@@ -240,7 +240,7 @@ function Game() {
   const endGame = () => {
     // playing/paused -> gameOver (guard: only when playing or paused)
     if (gameState.type === 'playing' || gameState.type === 'paused') {
-      gameState.set({ 
+      setGameState({ 
         type: 'gameOver', 
         score: gameState.score, 
         level: gameState.level 
@@ -252,8 +252,8 @@ function Game() {
     // Only increase score when playing
     if (gameState.type === 'playing') {
       const newScore = gameState.score + points
-      score.set(newScore)
-      gameState.set({ 
+      setScore(newScore)
+      setGameState({ 
         type: 'playing', 
         score: newScore, 
         level: gameState.level 
@@ -324,12 +324,12 @@ type State =
   | { type: 'error'; error: Error }
 
 function ActionBasedStateMachine() {
-  const machineState = useState<State>({ type: 'idle' })
+  const [machineState, setMachineState] = useState<State>({ type: 'idle' })
   
   const dispatch = (action: Action) => {
     switch (action.type) {
       case 'LOAD':
-        machineState.set({ type: 'loading' })
+        setMachineState({ type: 'loading' })
         // Execute async action
         fetch('/api/data')
           .then(res => res.json())
@@ -338,15 +338,15 @@ function ActionBasedStateMachine() {
         break
       
       case 'LOAD_SUCCESS':
-        machineState.set({ type: 'success', data: action.data })
+        setMachineState({ type: 'success', data: action.data })
         break
       
       case 'LOAD_ERROR':
-        machineState.set({ type: 'error', error: action.error })
+        setMachineState({ type: 'error', error: action.error })
         break
       
       case 'RESET':
-        machineState.set({ type: 'idle' })
+        setMachineState({ type: 'idle' })
         break
     }
   }
@@ -390,10 +390,10 @@ export function createStateMachine<TState, TAction>(
   initialState: TState,
   reducer: (state: TState, action: TAction) => TState
 ) {
-  const machineState = useState(initialState)
+  const [machineState, setMachineState] = useState(initialState)
 
   const dispatch = (action: TAction) => {
-    machineState.set(reducer(machineState, action))
+    setMachineState(reducer(machineState, action))
   }
 
   return [machineState, dispatch] as const
