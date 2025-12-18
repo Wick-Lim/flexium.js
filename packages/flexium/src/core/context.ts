@@ -16,7 +16,7 @@ const contextMap = new Map<symbol, any>()
  * }
  *
  * function Child() {
- *   const theme = useContext(ThemeContext)
+ *   const [theme] = use(ThemeContext)
  *   return <div>{theme}</div>
  * }
  * ```
@@ -39,6 +39,7 @@ export function createContext<T>(defaultValue: T): Context<T> {
     return new Context(defaultValue)
 }
 
+/** @deprecated Use `use(context)` instead */
 export function useContext<T>(ctx: Context<T>): T {
     return contextMap.has(ctx.id) ? contextMap.get(ctx.id) : ctx.defaultValue
 }
