@@ -1,15 +1,15 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 function ContextDemo() {
   // Local state (global state keys cause reactivity issues)
-  const [user, setUser] = state(null)
-  const [cart, setCart] = state([])
-  const [notifications, setNotifications] = state([])
+  const [user, setUser] = use(null)
+  const [cart, setCart] = use([])
+  const [notifications, setNotifications] = use([])
 
   const products = [
     { id: 1, name: 'Flexium Pro', price: 99, emoji: '⚡' },
@@ -64,8 +64,8 @@ function ContextDemo() {
     ))
   }
 
-  const [total] = state(() => cart.reduce((sum, item) => sum + item.price * item.qty, 0), { deps: [cart] })
-  const [itemCount] = state(() => cart.reduce((sum, item) => sum + item.qty, 0), { deps: [cart] })
+  const [total] = use(() => cart.reduce((sum, item) => sum + item.price * item.qty, 0), [cart])
+  const [itemCount] = use(() => cart.reduce((sum, item) => sum + item.qty, 0), [cart])
 
   return f('div', {
     style: {

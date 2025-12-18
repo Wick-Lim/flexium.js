@@ -1735,4 +1735,4 @@ function DocumentTitle() {
 
 - [Router Guide](/guide/router) - Introduction to routing in Flexium
 - [State Management](/guide/state) - Managing application state
-- [Global State](/guide/context) - Sharing state globally with state() key
+- [Global State](/guide/context) - Sharing state globally with use() key

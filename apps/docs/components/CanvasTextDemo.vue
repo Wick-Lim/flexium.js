@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const container = ref(null)
 let frameId = null
@@ -9,11 +9,11 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [text, setText] = state('FLEXIUM')
-  const [fontSize, setFontSize] = state(48)
-  const [fontFamily, setFontFamily] = state('sans-serif')
-  const [textAlign, setTextAlign] = state('center')
-  const [time, setTime] = state(0)
+  const [text, setText] = use('FLEXIUM')
+  const [fontSize, setFontSize] = use(48)
+  const [fontFamily, setFontFamily] = use('sans-serif')
+  const [textAlign, setTextAlign] = use('center')
+  const [time, setTime] = use(0)
 
   // Build DOM
   const wrapper = document.createElement('div')

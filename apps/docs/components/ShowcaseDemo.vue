@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
@@ -8,8 +8,8 @@ let cleanup = null
 
 // Flexium Counter Component Logic
 function Counter() {
-  const [count, setCount] = state(0)
-  const [doubled] = state(() => count * 2, { deps: [count] })
+  const [count, setCount] = use(0)
+  const [doubled] = use(() => count * 2, [count])
 
   const containerNode = f('div', {
     style: {

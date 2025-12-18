@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const container = ref(null)
 let frameId = null
@@ -9,12 +9,12 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [x, setX] = state(50)
-  const [y, setY] = state(50)
-  const [width, setWidth] = state(100)
-  const [height, setHeight] = state(60)
-  const [rotation, setRotation] = state(0)
-  const [hue, setHue] = state(200)
+  const [x, setX] = use(50)
+  const [y, setY] = use(50)
+  const [width, setWidth] = use(100)
+  const [height, setHeight] = use(60)
+  const [rotation, setRotation] = use(0)
+  const [hue, setHue] = use(200)
 
   // Build DOM
   const wrapper = document.createElement('div')

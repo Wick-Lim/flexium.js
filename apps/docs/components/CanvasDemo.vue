@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state, effect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
@@ -63,7 +63,7 @@ function CanvasDemo() {
   }
 
   // Cleanup on component unmount
-  effect(() => {
+  use(() => {
     return () => {
       if (cleanupAnimation) cleanupAnimation()
     }

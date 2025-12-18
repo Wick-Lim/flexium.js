@@ -1,13 +1,13 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 // Route Matching Demo
 function RouteDemo() {
-  const [testPath, setTestPath] = state('/users/123')
+  const [testPath, setTestPath] = use('/users/123')
 
   // Route patterns to test
   const routes = [

@@ -8,7 +8,7 @@ import assert from 'node:assert';
 import { state, effect } from '../../packages/flexium/dist/test-exports.mjs';
 
 test('local state works like useState', () => {
-  const [count, setCount] = state(0);
+  const [count, setCount] = use(0);
 
   // Use +count to cast proxy to primitive for comparison
   assert.strictEqual(+count, 0);
@@ -21,11 +21,11 @@ test('local state works like useState', () => {
 });
 
 test('local state is reactive', () => {
-  const [count, setCount] = state(0);
+  const [count, setCount] = use(0);
   let runCount = 0;
   let lastValue = 0;
 
-  effect(() => {
+  use(() => {
     runCount++;
     // In effects, direct access works for tracking
     lastValue = +count;
@@ -43,10 +43,10 @@ test('global state is shared by key', () => {
   state.clear();
 
   // Component A creates global state
-  const [themeA, setThemeA] = state('light', { key: 'theme' });
+  const [themeA, setThemeA] = use('light', { key: 'theme' });
 
   // Component B accesses same global state
-  const [themeB] = state(undefined, { key: 'theme' }); // Initial value ignored/optional if exists
+  const [themeB] = use(undefined, { key: 'theme' }); // Initial value ignored/optional if exists
 
   // Use String() to cast string proxy to primitive
   assert.strictEqual(String(themeA), 'light');
@@ -62,13 +62,13 @@ test('global state is shared by key', () => {
 test('global state reactivity works across consumers', () => {
   state.clear();
 
-  const [user, setUser] = state('Alice', { key: 'user' });
+  const [user, setUser] = use('Alice', { key: 'user' });
   let observedUser = '';
 
   // Effect in Component B
-  effect(() => {
+  use(() => {
     // Access via new handle
-    const [currentUser] = state(undefined, { key: 'user' });
+    const [currentUser] = use(undefined, { key: 'user' });
     observedUser = String(currentUser);
   });
 
@@ -83,8 +83,8 @@ test('global state reactivity works across consumers', () => {
 test('global state independent keys', () => {
   state.clear();
 
-  const [a, setA] = state(1, { key: 'keyA' });
-  const [b, setB] = state(2, { key: 'keyB' });
+  const [a, setA] = use(1, { key: 'keyA' });
+  const [b, setB] = use(2, { key: 'keyB' });
 
   assert.strictEqual(+a, 1);
   assert.strictEqual(+b, 2);
@@ -96,9 +96,9 @@ test('global state independent keys', () => {
 
 test('async state (resource) works', async () => {
   // Use a fetcher function
-  // API: [data, refetch, status, error] = state(async () => ...)
+  // API: [data, refetch, status, error] = use(async () => ...)
   // Note: Implementation returns AsyncStatus ('idle'|'loading'|'success'|'error')
-  const [data, refetch, status, error] = state(async () => {
+  const [data, refetch, status, error] = use(async () => {
     return new Promise(resolve => setTimeout(() => resolve('loaded'), 10));
   });
 
@@ -130,11 +130,11 @@ test('global async state sharing', async () => {
   };
 
   // Component A initiates fetch
-  // API: [data, refetch, status, error] = state(async () => ..., { key })
-  const [dataA, refetchA, statusA] = state(fetcher, { key: 'async-data' });
+  // API: [data, refetch, status, error] = use(async () => ..., { key })
+  const [dataA, refetchA, statusA] = use(fetcher, { key: 'async-data' });
 
   // Component B subscribes to same resource
-  const [dataB, refetchB, statusB] = state(fetcher, { key: 'async-data' });
+  const [dataB, refetchB, statusB] = use(fetcher, { key: 'async-data' });
 
   assert.strictEqual(String(statusA), 'loading');
   assert.strictEqual(String(statusB), 'loading');
@@ -143,7 +143,7 @@ test('global async state sharing', async () => {
 
   assert.strictEqual(String(dataA), 'data-1');
   assert.strictEqual(String(dataB), 'data-1');
-  // Note: fetchCount may be 2 if each state() call triggers its own fetch
+  // Note: fetchCount may be 2 if each use() call triggers its own fetch
   // This depends on implementation - shared keyed state might dedupe or not
 
   // Refetch from B
@@ -157,10 +157,10 @@ test('global async state sharing', async () => {
 });
 
 test('state works as computed (derived state)', () => {
-  const [count, setCount] = state(1);
+  const [count, setCount] = use(1);
   // Sync computed function returns [StateValue] - value is computed immediately
   // Inside the compute function, use +count to get the primitive value
-  const [double] = state(() => count * 2);
+  const [double] = use(() => count * 2);
 
   // For sync computed, value should be available immediately
   // Use +double to cast the proxy to primitive

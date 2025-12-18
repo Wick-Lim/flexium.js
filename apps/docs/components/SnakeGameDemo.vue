@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state, effect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
@@ -115,7 +115,7 @@ function SnakeGame() {
   }
 
   // Setup keyboard listener and cleanup on mount
-  effect(() => {
+  use(() => {
     document.addEventListener('keydown', handleKeydown)
     return () => {
       if (cleanupAnimation) cleanupAnimation()

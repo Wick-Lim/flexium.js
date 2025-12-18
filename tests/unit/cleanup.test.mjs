@@ -6,7 +6,7 @@ test('onCleanup runs when effect re-runs', () => {
     const count = signal(0);
     let cleanupCount = 0;
 
-    effect(() => {
+    use(() => {
         // Access signal to track dependency
         const val = count.value;
         onCleanup(() => {
@@ -27,7 +27,7 @@ test('onCleanup runs when effect is disposed', () => {
     const count = signal(0);
     let cleanupCount = 0;
 
-    const dispose = effect(() => {
+    const dispose = use(() => {
         const val = count.value;
         onCleanup(() => {
             cleanupCount++;
@@ -45,7 +45,7 @@ test('multiple onCleanup callbacks', () => {
     let cleanup1 = 0;
     let cleanup2 = 0;
 
-    effect(() => {
+    use(() => {
         const val = count.value;
         onCleanup(() => cleanup1++);
         onCleanup(() => cleanup2++);
@@ -61,7 +61,7 @@ test('onCleanup works with returned cleanup function', () => {
     let cleanup1 = 0;
     let cleanup2 = 0;
 
-    effect(() => {
+    use(() => {
         const val = count.value;
         onCleanup(() => cleanup1++);
         return () => cleanup2++;

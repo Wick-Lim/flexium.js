@@ -1,18 +1,18 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 // render() Function Demo
 function RenderDemo() {
-  const [mountedApps, setMountedApps] = state([])
-  const [counter, setCounter] = state(0)
+  const [mountedApps, setMountedApps] = use([])
+  const [counter, setCounter] = use(0)
 
   // Simple app component
   const SimpleApp = (id, color) => {
-    const [count, setCount] = state(0)
+    const [count, setCount] = use(0)
 
     return f('div', {
       style: {

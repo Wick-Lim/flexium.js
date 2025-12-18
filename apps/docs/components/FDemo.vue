@@ -1,17 +1,17 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 // f() Function Demo
 function FDemo() {
-  const [selectedExample, setSelectedExample] = state('basic')
-  const [dynamicCount, setDynamicCount] = state(3)
-  const [inputValue, setInputValue] = state('Hello')
-  const [todoText, setTodoText] = state('')
-  const [todos, setTodos] = state(['Learn Flexium', 'Build an app'])
+  const [selectedExample, setSelectedExample] = use('basic')
+  const [dynamicCount, setDynamicCount] = use(3)
+  const [inputValue, setInputValue] = use('Hello')
+  const [todoText, setTodoText] = use('')
+  const [todos, setTodos] = use(['Learn Flexium', 'Build an app'])
 
   // Code examples
   const examples = {
@@ -59,7 +59,7 @@ function FDemo() {
     },
     reactive: {
       title: 'Reactive Values',
-      code: `const [count, setCount] = state(0)
+      code: `const [count, setCount] = use(0)
 f('div', null,
   f('span', null, count),
   f('button', {
@@ -67,7 +67,7 @@ f('div', null,
   }, '+')
 )`,
       render: () => {
-        const [count, setCount] = state(0)
+        const [count, setCount] = use(0)
         return f('div', {
           style: {
             padding: '16px',
@@ -190,7 +190,7 @@ f('ul', null,
     },
     input: {
       title: 'Input Binding',
-      code: `const [value, setValue] = state('')
+      code: `const [value, setValue] = use('')
 f('input', {
   value: value,
   oninput: (e) => setValue(e.target.value)

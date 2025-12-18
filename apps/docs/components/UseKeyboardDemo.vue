@@ -1,16 +1,16 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 // Keyboard Input Demo
 function UseKeyboardDemo() {
-  const [pressedKeys, setPressedKeys] = state(new Set())
-  const [lastPressed, setLastPressed] = state('')
-  const [lastReleased, setLastReleased] = state('')
-  const [keyLog, setKeyLog] = state([])
+  const [pressedKeys, setPressedKeys] = use(new Set())
+  const [lastPressed, setLastPressed] = use('')
+  const [lastReleased, setLastReleased] = use('')
+  const [keyLog, setKeyLog] = use([])
 
   // Keyboard event handlers
   const handleKeyDown = (e) => {

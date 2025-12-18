@@ -22,10 +22,10 @@ import {
 // Button Test Section
 // ==========================================
 function ButtonTests() {
-  const [clickCount, setClickCount] = state(0)
-  const [isLoading, setIsLoading] = state(false)
-  const [isDisabled, setIsDisabled] = state(false)
-  const [lastEvent, setLastEvent] = state('')
+  const [clickCount, setClickCount] = use(0)
+  const [isLoading, setIsLoading] = use(false)
+  const [isDisabled, setIsDisabled] = use(false)
+  const [lastEvent, setLastEvent] = use('')
 
   const handleClick = () => {
     setClickCount((c) => c + 1)
@@ -125,10 +125,10 @@ function ButtonTests() {
 // Transition Test Section
 // ==========================================
 function TransitionTests() {
-  const [showFade, setShowFade] = state(true)
-  const [showSlide, setShowSlide] = state(true)
-  const [showModal, setShowModal] = state(false)
-  const [showCustom, setShowCustom] = state(true)
+  const [showFade, setShowFade] = use(true)
+  const [showSlide, setShowSlide] = use(true)
+  const [showModal, setShowModal] = use(false)
+  const [showCustom, setShowCustom] = use(true)
 
   return (
     <section id="transition-tests" data-testid="transition-section">
@@ -192,12 +192,12 @@ function TransitionTests() {
 // TransitionGroup Test Section
 // ==========================================
 function TransitionGroupTests() {
-  const [items, setItems] = state([
+  const [items, setItems] = use([
     { id: 1, text: 'Item 1' },
     { id: 2, text: 'Item 2' },
     { id: 3, text: 'Item 3' },
   ])
-  const [nextId, setNextId] = state(4)
+  const [nextId, setNextId] = use(4)
 
   const addItem = () => {
     setItems((prev) => [...prev, { id: nextId, text: `Item ${nextId}` }])
@@ -361,8 +361,8 @@ function ListTests() {
 // Pressable Test Section
 // ==========================================
 function PressableTests() {
-  const [pressState, setPressState] = state('idle')
-  const [pressCount, setPressCount] = state(0)
+  const [pressState, setPressState] = use('idle')
+  const [pressCount, setPressCount] = use(0)
 
   return (
     <section id="pressable-tests" data-testid="pressable-section">
@@ -451,7 +451,7 @@ function TextTests() {
 // ScrollView Test Section
 // ==========================================
 function ScrollViewTests() {
-  const [scrollY, setScrollY] = state(0)
+  const [scrollY, setScrollY] = use(0)
 
   return (
     <section id="scrollview-tests" data-testid="scrollview-section">

@@ -70,17 +70,17 @@ console.log('🚀 Running Flexium Performance Benchmarks...\n');
 
 // 1. State Creation
 results.push(benchmark('State creation', () => {
-    state(0);
+    use(0);
 }));
 
 // 2. State read
-const [readState] = state(42);
+const [readState] = use(42);
 results.push(benchmark('State read (function call)', () => {
     const _ = readState();
 }));
 
 // 3. State write
-const [writeState, setWriteState] = state(0);
+const [writeState, setWriteState] = use(0);
 let writeCounter = 0;
 results.push(benchmark('State write', () => {
     setWriteState(writeCounter++);
@@ -88,20 +88,20 @@ results.push(benchmark('State write', () => {
 
 // 4. Computed creation
 results.push(benchmark('Computed creation', () => {
-    const [base] = state(1);
-    state(() => base() * 2);
+    const [base] = use(1);
+    use(() => base() * 2);
 }));
 
 // 5. Computed read (cached)
-const [computedBase, setComputedBase] = state(5);
-const [computedValue] = state(() => computedBase() * 2);
+const [computedBase, setComputedBase] = use(5);
+const [computedValue] = use(() => computedBase() * 2);
 results.push(benchmark('Computed read (cached)', () => {
     const _ = computedValue();
 }));
 
 // 6. Computed with dependency change
-const [changingBase, setChangingBase] = state(0);
-const [changingComputed] = state(() => changingBase() + 1);
+const [changingBase, setChangingBase] = use(0);
+const [changingComputed] = use(() => changingBase() + 1);
 let changeCounter = 0;
 results.push(benchmark('Computed with dep change', () => {
     setChangingBase(changeCounter++);
@@ -111,8 +111,8 @@ results.push(benchmark('Computed with dep change', () => {
 // 7. Effect creation (in root scope)
 results.push(benchmark('Effect creation', () => {
     root((dispose) => {
-        const [s] = state(0);
-        effect(() => { const _ = s(); });
+        const [s] = use(0);
+        use(() => { const _ = s(); });
         dispose();
     });
 }, 1000));
@@ -121,9 +121,9 @@ results.push(benchmark('Effect creation', () => {
 let setEffectTrigger;
 let effectRunCount = 0;
 root(() => {
-    const [trigger, setTrigger] = state(0);
+    const [trigger, setTrigger] = use(0);
     setEffectTrigger = setTrigger;
-    effect(() => {
+    use(() => {
         const _ = trigger();
         effectRunCount++;
     });
@@ -133,7 +133,7 @@ results.push(benchmark('Effect trigger', () => {
 }, 5000));
 
 // 9. Batch updates
-const batchStates = Array.from({ length: 10 }, () => state(0));
+const batchStates = Array.from({ length: 10 }, () => use(0));
 let batchCounter = 0;
 results.push(benchmark('Batch update (10 states)', () => {
     batch(() => {
@@ -145,18 +145,18 @@ results.push(benchmark('Batch update (10 states)', () => {
 }, 1000));
 
 // 10. Deep computed chain
-const [chainBase] = state(1);
+const [chainBase] = use(1);
 let [chainEnd] = [chainBase];
 for (let i = 0; i < 10; i++) {
     const prev = chainEnd;
-    [chainEnd] = state(() => prev() + 1);
+    [chainEnd] = use(() => prev() + 1);
 }
 results.push(benchmark('Deep computed chain (10 levels) read', () => {
     const _ = chainEnd();
 }));
 
 // 11. Many states update
-const manyStates = Array.from({ length: 100 }, () => state(0));
+const manyStates = Array.from({ length: 100 }, () => use(0));
 let manyCounter = 0;
 results.push(benchmark('Update 100 states', () => {
     for (const [_, set] of manyStates) {

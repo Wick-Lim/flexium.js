@@ -205,8 +205,8 @@ export default defineConfig({
           text: 'flexium/core',
           collapsed: false,
           items: [
-            { text: 'state()', link: '/docs/core/state' },
-            { text: 'effect()', link: '/docs/core/effect' },
+            { text: 'use()', link: '/docs/core/state' },
+            { text: 'use()', link: '/docs/core/effect' },
             { text: 'Lifecycle', link: '/docs/core/lifecycle' }
           ]
         },
@@ -290,8 +290,8 @@ export default defineConfig({
           text: 'flexium/core',
           collapsed: false,
           items: [
-            { text: 'state()', link: '/docs/core/state' },
-            { text: 'effect()', link: '/docs/core/effect' },
+            { text: 'use()', link: '/docs/core/state' },
+            { text: 'use()', link: '/docs/core/effect' },
             { text: 'Lifecycle', link: '/docs/core/lifecycle' }
           ]
         },
@@ -368,8 +368,8 @@ export default defineConfig({
           text: 'flexium/core',
           collapsed: false,
           items: [
-            { text: 'state()', link: '/docs/core/state' },
-            { text: 'effect()', link: '/docs/core/effect' },
+            { text: 'use()', link: '/docs/core/state' },
+            { text: 'use()', link: '/docs/core/effect' },
             { text: 'Lifecycle', link: '/docs/core/lifecycle' }
           ]
         },

@@ -1,18 +1,18 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { state, effect, sync } from 'flexium/core'
+import { use, sync } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 function SyncExample() {
-  const [counter1, setCounter1] = state(0)
-  const [counter2, setCounter2] = state(0)
-  const [counter3, setCounter3] = state(0)
-  const [renderCount, setRenderCount] = state(0)
+  const [counter1, setCounter1] = use(0)
+  const [counter2, setCounter2] = use(0)
+  const [counter3, setCounter3] = use(0)
+  const [renderCount, setRenderCount] = use(0)
 
   // Track renders using an effect
-  effect(() => {
+  use(() => {
     // Read all counters to track when they change
     // Access values to track dependencies
     void counter1

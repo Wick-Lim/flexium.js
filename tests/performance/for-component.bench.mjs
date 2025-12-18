@@ -31,7 +31,7 @@ function Row(props) {
 }
 
 function App() {
-    const [data, setData] = state([]);
+    const [data, setData] = use([]);
     global.setRows = setData;
 
     return () => {

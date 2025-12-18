@@ -170,7 +170,7 @@ flexiumResults.effectCreation = benchmark(
   'Effect creation',
   () => {
     root(() => {
-      effect(() => {
+      use(() => {
         const _ = baseSignal.value;
       });
     });

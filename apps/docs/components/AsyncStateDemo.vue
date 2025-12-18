@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
@@ -23,7 +23,7 @@ function fakeUserApi() {
 }
 
 function AsyncDemo() {
-  const [users, { refetch, status, error }] = state(async () => fakeUserApi())
+  const [users, { refetch, status, error }] = use(async () => fakeUserApi())
 
 
   const containerNode = f('div', {
@@ -185,7 +185,7 @@ function AsyncDemo() {
         color: '#e5e7eb',
         overflowX: 'auto'
       }
-    }, ['const [users, { refetch, status, error }] = state(async () => fetch(...))'])
+    }, ['const [users, { refetch, status, error }] = use(async () => fetch(...))'])
   ])
 
   return containerNode

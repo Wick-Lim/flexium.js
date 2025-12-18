@@ -1,13 +1,13 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 // Simulated Router Demo
 function RouterDemo() {
-  const [currentRoute, setCurrentRoute] = state('/')
+  const [currentRoute, setCurrentRoute] = use('/')
 
   const navigate = (path) => {
     setCurrentRoute(path)

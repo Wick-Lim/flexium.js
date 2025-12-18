@@ -56,7 +56,7 @@ function Component() {
   // Global state still often separate, but Runes work anywhere
   import { theme } from './stores.js'; 
 
-  let count = $state(0);
+  let count = $use(0);
   let doubled = $derived(count * 2);
   
   // Async state handling
@@ -122,7 +122,7 @@ function TodoList() {
 
 ```html [Svelte 5]
 <script>
-  let todos = $state([...]);
+  let todos = $use([...]);
 </script>
 
 <ul>
@@ -166,7 +166,7 @@ count + 10          // 15
 
 ```html [Svelte 5]
 <script>
-  let count = $state(5);
+  let count = $use(5);
 
   // Script: Direct access (Runes)
   console.log(count);      // 5
@@ -217,7 +217,7 @@ function Component() {
 
 ```html [Svelte 5]
 <script>
-  let show = $state(true);
+  let show = $use(true);
 </script>
 
 <div>
@@ -271,7 +271,7 @@ use(() => {
 
 ```html [Svelte 5]
 <script>
-  $effect(() => {
+  $use(() => {
     console.log('Count:', count);
     console.log('Name:', name);
   });
@@ -327,7 +327,7 @@ use(() => {
 
 | Svelte 5 | Flexium | Notes |
 |----------|---------|-------|
-| `let x = $state(0)` | `const [x] = use(0)` | |
+| `let x = $use(0)` | `const [x] = use(0)` | |
 | `let y = $derived(x * 2)` | `const [y] = use(() => x * 2)` | Auto-detected |
 | `{#each}` | `items.map()` | React syntax! |
 | `{#if}` | `{() => x && ...}` | Native JS |

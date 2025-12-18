@@ -1,13 +1,13 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 // Link Navigation Demo
 function LinkDemo() {
-  const [currentPath, setCurrentPath] = state('/')
+  const [currentPath, setCurrentPath] = use('/')
 
   // Simulated Link component
   const Link = (props) => {

@@ -26,7 +26,7 @@ test('diamond dependency problem - computed values are correct', () => {
   const d = computed(() => b.value + c.value)
 
   let effectRuns = 0
-  effect(() => {
+  use(() => {
     effectRuns++
     d.value
   })
@@ -67,7 +67,7 @@ test('effect writing to signal does not cause infinite loop', async () => {
   const count = signal(0)
   let iterations = 0
 
-  effect(() => {
+  use(() => {
     iterations++
     if (count.value < 5) {
       count.value = count.value + 1
@@ -145,7 +145,7 @@ test('signal with object - mutation detection', () => {
   const obj = signal({ count: 0 })
   let effectRuns = 0
 
-  effect(() => {
+  use(() => {
     effectRuns++
     obj.value.count
   })
@@ -165,7 +165,7 @@ test('signal with array - push detection', () => {
   const arr = signal([1, 2, 3])
   let effectRuns = 0
 
-  effect(() => {
+  use(() => {
     effectRuns++
     arr.value.length
   })
@@ -190,7 +190,7 @@ test('nested batch calls', () => {
   const b = signal(2)
   let effectRuns = 0
 
-  effect(() => {
+  use(() => {
     effectRuns++
     a.value + b.value
   })
@@ -216,7 +216,7 @@ test('batch with error', () => {
   const a = signal(1)
   let effectRuns = 0
 
-  effect(() => {
+  use(() => {
     effectRuns++
     a.value
   })
@@ -284,7 +284,7 @@ test('nested untrack calls', () => {
   const c = signal(3)
 
   let effectRuns = 0
-  effect(() => {
+  use(() => {
     effectRuns++
     a.value +
       untrack(() => {
@@ -312,7 +312,7 @@ test('effect cleanup runs before next execution', () => {
   const count = signal(0)
   const cleanupOrder = []
 
-  effect(() => {
+  use(() => {
     const current = count.value
     cleanupOrder.push(`effect-${current}`)
 
@@ -337,7 +337,7 @@ test('effect disposal cleans up immediately', () => {
   const count = signal(0)
   let cleanupRan = false
 
-  const dispose = effect(() => {
+  const dispose = use(() => {
     count.value
     return () => {
       cleanupRan = true
@@ -354,7 +354,7 @@ test('effect with async cleanup', async () => {
   const count = signal(0)
   let cleanupComplete = false
 
-  const dispose = effect(() => {
+  const dispose = use(() => {
     count.value
     return async () => {
       await new Promise((r) => setTimeout(r, 10))
@@ -379,12 +379,12 @@ test('nested roots are independent', () => {
   let innerEffectValue = 0
 
   const outerDispose = root((dispose) => {
-    effect(() => {
+    use(() => {
       outerEffectValue = count.value
     })
 
     const innerDispose = root((innerD) => {
-      effect(() => {
+      use(() => {
         innerEffectValue = count.value * 10
       })
       return innerD
@@ -451,7 +451,7 @@ test('rapid signal updates', () => {
   const count = signal(0)
   let effectRuns = 0
 
-  effect(() => {
+  use(() => {
     effectRuns++
     count.value
   })
@@ -478,7 +478,7 @@ test('batch with many updates is faster', () => {
   const count = signal(0)
   let effectRuns = 0
 
-  effect(() => {
+  use(() => {
     effectRuns++
     count.value
   })
@@ -524,7 +524,7 @@ test('signal with falsy values', () => {
 
   // Effect should still work with falsy values
   let effectRan = false
-  effect(() => {
+  use(() => {
     if (!zero.value && !empty.value && !falseVal.value) {
       effectRan = true
     }
@@ -563,7 +563,7 @@ test('disposed effects do not hold references', () => {
   const count = signal(0)
   let largeObject = { data: new Array(10000).fill('x') }
 
-  const dispose = effect(() => {
+  const dispose = use(() => {
     count.value
     largeObject // Reference to large object
   })

@@ -21,7 +21,7 @@ const signals = [];
 
 bench(`Create ${COUNT.toLocaleString()} state signals`, () => {
     for (let i = 0; i < COUNT; i++) {
-        signals.push(state(i));
+        signals.push(use(i));
     }
 }, COUNT);
 
@@ -51,14 +51,14 @@ bench(`Update ${COUNT.toLocaleString()} signals`, () => {
 // Create a chain: A -> B -> C -> D
 // Update A, check D
 const CHAIN_DEPTH = 1000;
-const [startState, setStart] = state(0);
+const [startState, setStart] = use(0);
 let currentGetter = startState;
 
 console.log(`Building reactive chain of depth ${CHAIN_DEPTH}...`);
 // Build chain
 for(let i = 0; i < CHAIN_DEPTH; i++) {
     const prev = currentGetter;
-    const [next] = state(() => prev + 1); // Derived state
+    const [next] = use(() => prev + 1); // Derived state
     currentGetter = next;
 }
 

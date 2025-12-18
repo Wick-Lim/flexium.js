@@ -1,13 +1,13 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 function ThemeDemo() {
-  const [isDark, setIsDark] = state(false)
-  const [primaryColor, setPrimaryColor] = state('#4f46e5')
+  const [isDark, setIsDark] = use(false)
+  const [primaryColor, setPrimaryColor] = use('#4f46e5')
 
   const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 

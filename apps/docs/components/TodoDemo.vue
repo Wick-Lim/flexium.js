@@ -1,18 +1,18 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 function TodoDemo() {
-  const [todos, setTodos] = state([
+  const [todos, setTodos] = use([
     { id: 1, text: 'Learn Flexium', done: true },
     { id: 2, text: 'Build something awesome', done: false },
     { id: 3, text: 'Share with the world', done: false }
   ])
-  const [inputValue, setInputValue] = state('')
-  const [nextId, setNextId] = state(4)
+  const [inputValue, setInputValue] = use('')
+  const [nextId, setNextId] = use(4)
 
   const addTodo = () => {
     const text = inputValue.trim()

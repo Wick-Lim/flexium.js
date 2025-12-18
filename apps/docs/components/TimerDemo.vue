@@ -1,15 +1,15 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 let timerInterval = null
 
 function TimerDemo() {
-  const [seconds, setSeconds] = state(0)
-  const [isRunning, setIsRunning] = state(false)
-  const [laps, setLaps] = state([])
+  const [seconds, setSeconds] = use(0)
+  const [isRunning, setIsRunning] = use(false)
+  const [laps, setLaps] = use([])
 
   // Format time as mm:ss.ms
   const formatTime = (totalSeconds) => {

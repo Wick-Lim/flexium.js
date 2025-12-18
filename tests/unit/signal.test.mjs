@@ -119,7 +119,7 @@ test('computed chains multiple dependencies', () => {
 
 test('effect runs immediately', () => {
   let runCount = 0;
-  effect(() => {
+  use(() => {
     runCount++;
   });
   assert.strictEqual(runCount, 1);
@@ -129,7 +129,7 @@ test('effect runs when signal changes', () => {
   const count = signal(0);
   let effectValue = 0;
 
-  effect(() => {
+  use(() => {
     effectValue = count.value;
   });
 
@@ -147,7 +147,7 @@ test('effect tracks multiple signals', () => {
   const b = signal(2);
   let sum = 0;
 
-  effect(() => {
+  use(() => {
     sum = a.value + b.value;
   });
 
@@ -164,7 +164,7 @@ test('effect runs cleanup function', () => {
   const count = signal(0);
   let cleanupRan = false;
 
-  const dispose = effect(() => {
+  const dispose = use(() => {
     const current = count.value;
     return () => {
       cleanupRan = true;
@@ -181,7 +181,7 @@ test('effect can be disposed', () => {
   const count = signal(0);
   let effectValue = 0;
 
-  const dispose = effect(() => {
+  const dispose = use(() => {
     effectValue = count.value;
   });
 
@@ -200,7 +200,7 @@ test('effect does not run infinitely', async () => {
   const count = signal(0);
   let runCount = 0;
 
-  effect(() => {
+  use(() => {
     runCount++;
     if (count.value < 3) {
       count.value = count.value + 1; // Write to signal in effect
@@ -216,7 +216,7 @@ test('effect does not run infinitely', async () => {
 test('effect handles errors with onError handler', () => {
   let errorCaught = null;
 
-  effect(
+  use(
     () => {
       throw new Error('Test error');
     },
@@ -239,7 +239,7 @@ test('batch prevents multiple effect runs', () => {
   const b = signal(2);
   let runCount = 0;
 
-  effect(() => {
+  use(() => {
     runCount++;
     const sum = a.value + b.value;
   });
@@ -260,7 +260,7 @@ test('batch with nested signal updates', () => {
   const doubled = computed(() => count.value * 2);
   let effectRuns = 0;
 
-  effect(() => {
+  use(() => {
     effectRuns++;
     const val = doubled.value;
   });
@@ -287,7 +287,7 @@ test('untrack reads signal without creating dependency', () => {
   const b = signal(2);
   let sum = 0;
 
-  effect(() => {
+  use(() => {
     sum = a.value + untrack(() => b.value);
   });
 
@@ -317,7 +317,7 @@ test('root creates disposable scope', () => {
   let effectValue = 0;
 
   const cleanup = root((dispose) => {
-    effect(() => {
+    use(() => {
       effectValue = count.value;
     });
     return dispose;
@@ -341,10 +341,10 @@ test('root disposes multiple effects', () => {
   let productValue = 0;
 
   const cleanup = root((dispose) => {
-    effect(() => {
+    use(() => {
       sumValue = a.value + b.value;
     });
-    effect(() => {
+    use(() => {
       productValue = a.value * b.value;
     });
     return dispose;
@@ -378,7 +378,7 @@ test('complex reactive graph', () => {
   const total = computed(() => subtotal.value + tax.value);
 
   let lastTotal = 0;
-  effect(() => {
+  use(() => {
     lastTotal = total.value;
   });
 
@@ -400,7 +400,7 @@ test('conditional dependencies', () => {
   const age = signal(30);
   let result = '';
 
-  effect(() => {
+  use(() => {
     if (showDetails.value) {
       result = `${name.value} is ${age.value}`;
     } else {

@@ -1,18 +1,18 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 function ComputedCalculator() {
-  const [num1, setNum1] = state(10)
-  const [num2, setNum2] = state(5)
+  const [num1, setNum1] = use(10)
+  const [num2, setNum2] = use(5)
 
-  const [sum] = state(() => num1 + num2, { deps: [num1, num2] })
-  const [difference] = state(() => num1 - num2, { deps: [num1, num2] })
-  const [product] = state(() => num1 * num2, { deps: [num1, num2] })
-  const [average] = state(() => (num1 + num2) / 2, { deps: [num1, num2] })
+  const [sum] = use(() => num1 + num2, [num1, num2])
+  const [difference] = use(() => num1 - num2, [num1, num2])
+  const [product] = use(() => num1 * num2, [num1, num2])
+  const [average] = use(() => (num1 + num2) / 2, [num1, num2])
 
   const containerNode = f('div', {
     style: {

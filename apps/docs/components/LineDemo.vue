@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const container = ref(null)
 let frameId = null
@@ -9,11 +9,11 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [strokeWidth, setStrokeWidth] = state(3)
-  const [lineCap, setLineCap] = state('round')
-  const [points, setPoints] = state([])
-  const [time, setTime] = state(0)
-  const [isDrawing, setIsDrawing] = state(false)
+  const [strokeWidth, setStrokeWidth] = use(3)
+  const [lineCap, setLineCap] = use('round')
+  const [points, setPoints] = use([])
+  const [time, setTime] = use(0)
+  const [isDrawing, setIsDrawing] = use(false)
 
   // Build DOM
   const wrapper = document.createElement('div')

@@ -1,16 +1,16 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 // router() Function Demo
 function RouterDemo() {
-  const [path, setPath] = state('/')
-  const [params, setParams] = state({})
-  const [query, setQuery] = state({})
-  const [history, setHistory] = state(['/'])
+  const [path, setPath] = use('/')
+  const [params, setParams] = use({})
+  const [query, setQuery] = use({})
+  const [history, setHistory] = use(['/'])
 
   // Simulated router() function
   const createRouter = () => {

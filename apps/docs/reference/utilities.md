@@ -1039,7 +1039,7 @@ function useEverything() {
 ## See Also
 
 - [State Management](/guide/state) - Working with signals and effects
-- [Global State Sharing](/guide/context) - Using state() with key for global state
+- [Global State Sharing](/guide/context) - Using use() with key for global state
 - [Router Guide](/guide/router) - Complete routing documentation
 - [Interactive Apps](/guide/interactive) - Building games with Flexium
 - [Animation](/guide/animation) - Animation techniques and patterns

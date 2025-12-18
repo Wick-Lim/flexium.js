@@ -1,19 +1,19 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 import { f, render } from 'flexium/dom'
 
 const container = ref(null)
 
 // Mouse Input Demo
 function UseMouseDemo() {
-  const [mouseX, setMouseX] = state(0)
-  const [mouseY, setMouseY] = state(0)
-  const [leftPressed, setLeftPressed] = state(false)
-  const [rightPressed, setRightPressed] = state(false)
-  const [middlePressed, setMiddlePressed] = state(false)
-  const [clickLog, setClickLog] = state([])
-  const [isInside, setIsInside] = state(false)
+  const [mouseX, setMouseX] = use(0)
+  const [mouseY, setMouseY] = use(0)
+  const [leftPressed, setLeftPressed] = use(false)
+  const [rightPressed, setRightPressed] = use(false)
+  const [middlePressed, setMiddlePressed] = use(false)
+  const [clickLog, setClickLog] = use([])
+  const [isInside, setIsInside] = use(false)
 
   let trackingArea = null
 

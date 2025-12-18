@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, onUnmounted } from 'vue'
-import { state } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const container = ref(null)
 let frameId = null
@@ -9,10 +9,10 @@ onMounted(() => {
   if (!container.value) return
 
   // State
-  const [scale, setScale] = state(1)
-  const [rotation, setRotation] = state(0)
-  const [selectedPath, setSelectedPath] = state('star')
-  const [time, setTime] = state(0)
+  const [scale, setScale] = use(1)
+  const [rotation, setRotation] = use(0)
+  const [selectedPath, setSelectedPath] = use('star')
+  const [time, setTime] = use(0)
 
   // SVG Path definitions
   const paths = {
