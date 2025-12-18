@@ -1,24 +1,24 @@
 # Global State Sharing
 
 ::: warning Deprecated: Context API
-The Context API (`createContext`, `context`) is deprecated. Use `state()` with `key` option instead.
+The Context API (`createContext`, `context`) is deprecated. Use `useState()` with `key` option instead.
 
-Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `state()` with keys for global state sharing.
+Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchies". Use `useState()` with keys for global state sharing.
 :::
 
-## Recommended: Use state() with key
+## Recommended: Use useState() with key
 
-Instead of Context API, use `state()` with a `key` option to share state globally:
+Instead of Context API, use `useState()` with a `key` option to share state globally:
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 // Share theme globally - no Provider needed
-const theme = state<'light' | 'dark'>('light', { key: 'app:theme' })
+const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
 
 // In any component - access the same state
 function ThemedButton() {
-  const theme = state('light', { key: 'app:theme' })
+  const theme = useState('light', { key: 'app:theme' })
   
   return (
     <button
@@ -37,11 +37,11 @@ function ThemedButton() {
 ## Complete Example: Auth State
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const user = state<User | null>(null, { key: 'app:auth:user' })
+  const user = useState<User | null>(null, { key: 'app:auth:user' })
   
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -81,22 +81,22 @@ function Header() {
 ## Multiple Global States
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 // Theme state
-const theme = state('light', { key: 'app:theme' })
+const theme = useState('light', { key: 'app:theme' })
 
 // Language state
-const lang = state('en', { key: 'app:language' })
+const lang = useState('en', { key: 'app:language' })
 
 // User state
-const user = state(null, { key: 'app:user' })
+const user = useState(null, { key: 'app:user' })
 
 // Use in any component
 function ProfileCard() {
-  const theme = state('light', { key: 'app:theme' })
-  const lang = state('en', { key: 'app:language' })
-  const user = state(null, { key: 'app:user' })
+  const theme = useState('light', { key: 'app:theme' })
+  const lang = useState('en', { key: 'app:language' })
+  const user = useState(null, { key: 'app:user' })
   
   return (
     <div class={`card-${theme.valueOf()}`}>
@@ -107,17 +107,17 @@ function ProfileCard() {
 }
 ```
 
-## Benefits of state() with key
+## Benefits of useState() with key
 
 - ✅ **No Provider boilerplate** - No wrapper components needed
 - ✅ **No hierarchy** - Access from anywhere, not just child components
 - ✅ **Simpler mental model** - Same API as local state
-- ✅ **Automatic cleanup** - Use `state.delete(key)` when needed
+- ✅ **Automatic cleanup** - Use `useState.delete(key)` when needed
 - ✅ **Type-safe** - Full TypeScript support
 
 ## Migration from Context API
 
-If you're using deprecated Context API, migrate to `state()` with keys:
+If you're using deprecated Context API, migrate to `useState()` with keys:
 
 ```tsx
 // ❌ Old way (deprecated)
@@ -126,7 +126,7 @@ import { createContext, context } from 'flexium/core'
 const ThemeContext = createContext('light')
 
 function App() {
-  const theme = state('dark')
+  const theme = useState('dark')
   return (
     <ThemeContext.Provider value={theme}>
       <Child />
@@ -140,17 +140,17 @@ function Child() {
 }
 
 // ✅ New way
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const theme = state('dark', { key: 'app:theme' })
+  const theme = useState('dark', { key: 'app:theme' })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const theme = state('light', { key: 'app:theme' })
+  const theme = useState('light', { key: 'app:theme' })
   return <div>{theme}</div>
 }
 ```
@@ -159,10 +159,10 @@ function Child() {
 
 1. **Use descriptive keys**: Use hierarchical keys like `'app:theme'` or `['app', 'auth', 'user']`
 2. **Type safety**: Use TypeScript for type-safe state
-3. **Cleanup when needed**: Use `state.delete(key)` to clean up unused global state
+3. **Cleanup when needed**: Use `useState.delete(key)` to clean up unused global state
 4. **Avoid overuse**: Don't use global state for every piece of data - prefer local state when possible
 
 ## See Also
 
-- [state()](/docs/core/state) - Complete state() documentation with key option
+- [useState()](/docs/core/state) - Complete useState() documentation with key option
 - [Best Practices: State Organization](/docs/guide/best-practices/state-organization) - How to organize global state

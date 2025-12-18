@@ -54,13 +54,13 @@ Use motion with reactive state:
 
 ```tsx
 import { MotionController } from 'flexium/primitives'
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
-const isExpanded = state(false)
+const isExpanded = useState(false)
 const controller = new MotionController(element)
 
 // Watch state and animate
-const unwatch = state.watch(() => {
+const unwatch = useState.watch(() => {
   controller.animate({
     animate: isExpanded.valueOf()
       ? { height: 'auto', opacity: 1 }
@@ -110,10 +110,10 @@ The Transition component provides high-level enter/exit animations for condition
 
 ```tsx
 import { Transition } from 'flexium/primitives'
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function App() {
-  const visible = state(false)
+  const visible = useState(false)
 
   return (
     <div>
@@ -229,10 +229,10 @@ Stagger animations for lists:
 
 ```tsx
 import { TransitionGroup, Transition } from 'flexium/primitives'
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function NotificationList() {
-  const notifications = state([...])
+  const notifications = useState([...])
 
   return (
     <TransitionGroup stagger={50}>
@@ -336,7 +336,7 @@ controller.disableLayoutAnimation()
 
 ```tsx
 import { Transition, transitions } from 'flexium/primitives'
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function Modal({ isOpen, onClose, children }) {
   return isOpen ? (
@@ -361,10 +361,10 @@ function Modal({ isOpen, onClose, children }) {
 
 ```tsx
 import { TransitionGroup, Transition } from 'flexium/primitives'
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function TodoList() {
-  const todos = state([
+  const todos = useState([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build app' }
   ])

@@ -315,7 +315,7 @@ interface RouteMatch {
 Throws an error if used outside of a `<Routes>` component:
 
 ```
-Error: router() must be called within a <Routes> component
+Error: useRouter() must be called within a <Routes> component
 ```
 
 ---

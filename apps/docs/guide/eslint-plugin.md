@@ -83,12 +83,12 @@ Configure rules individually to match your project's needs:
 
 Disallow reading signal values outside of reactive contexts.
 
-**Why?** Signal reads outside of `effect()`, `computed()`, or JSX will not be tracked and won't trigger re-renders.
+**Why?** Signal reads outside of `useEffect()`, `computed()`, or JSX will not be tracked and won't trigger re-renders.
 
 #### Bad
 
 ```javascript
-const [count, setCount] = state(0);
+const [count, setCount] = useState(0);
 
 // ❌ Signal read outside reactive context - won't trigger updates
 if (count > 5) {
@@ -99,17 +99,17 @@ if (count > 5) {
 #### Good
 
 ```javascript
-const [count, setCount] = state(0);
+const [count, setCount] = useState(0);
 
 // ✅ Signal read inside effect
-effect(() => {
+useEffect(() => {
   if (count > 5) {
     doSomething();
   }
 });
 
 // ✅ Signal read inside computed
-const [shouldDoSomething] = state(() => count > 5, { deps: [count] });
+const [shouldDoSomething] = useState(() => count > 5, { deps: [count] });
 
 // ✅ Signal read inside JSX
 const App = () => (
@@ -129,12 +129,12 @@ Enforce cleanup functions in effects that add event listeners or timers.
 
 ```javascript
 // ❌ No cleanup for event listener
-effect(() => {
+useEffect(() => {
   window.addEventListener('resize', handleResize);
 });
 
 // ❌ No cleanup for timer
-effect(() => {
+useEffect(() => {
   const interval = setInterval(() => {
     console.log('Tick');
   }, 1000);
@@ -145,13 +145,13 @@ effect(() => {
 
 ```javascript
 // ✅ Returns cleanup function for event listener
-effect(() => {
+useEffect(() => {
   window.addEventListener('resize', handleResize);
   return () => window.removeEventListener('resize', handleResize);
 });
 
 // ✅ Returns cleanup function for timer
-effect(() => {
+useEffect(() => {
   const interval = setInterval(() => {
     console.log('Tick');
   }, 1000);
@@ -159,7 +159,7 @@ effect(() => {
 });
 
 // ✅ Effect without listeners/timers doesn't need cleanup
-effect(() => {
+useEffect(() => {
   console.log('Count changed:', count);
 });
 ```
@@ -168,25 +168,25 @@ effect(() => {
 
 Disallow side effects in computed functions.
 
-**Why?** Computed values should be pure functions. Side effects belong in `effect()`.
+**Why?** Computed values should be pure functions. Side effects belong in `useEffect()`.
 
 #### Bad
 
 ```javascript
 // ❌ Side effect in computed (console.log)
-const [doubled] = state(() => {
+const [doubled] = useState(() => {
   console.log('Computing...');
   return count * 2;
 });
 
 // ❌ Mutation in computed
-const [users] = state([]);
-const [sortedUsers] = state(() => {
+const [users] = useState([]);
+const [sortedUsers] = useState(() => {
   return users.sort(); // Mutates original array!
 }, { deps: [users] });
 
 // ❌ DOM manipulation in computed
-const [displayText] = state(() => {
+const [displayText] = useState(() => {
   document.title = String(count); // DOM side effect!
   return `Count: ${count}`;
 }, { deps: [count] });
@@ -196,27 +196,27 @@ const [displayText] = state(() => {
 
 ```javascript
 // ✅ Pure computed
-const [doubled] = state(() => count * 2, { deps: [count] });
+const [doubled] = useState(() => count * 2, { deps: [count] });
 
 // ✅ Side effect in effect
-effect(() => {
+useEffect(() => {
   console.log('Count changed:', count);
 });
 
 // ✅ Non-mutating computed
-const [sortedUsers] = state(() => {
+const [sortedUsers] = useState(() => {
   return [...users].sort(); // Creates new array
 }, { deps: [users] });
 
 // ✅ DOM manipulation in effect
-effect(() => {
+useEffect(() => {
   document.title = String(count);
 });
 ```
 
 ### `flexium/prefer-sync`
 
-Suggest using `sync()` when multiple signals are updated consecutively.
+Suggest using `useSync()` when multiple signals are updated consecutively.
 
 **Why?** Multiple signal updates without syncing can cause unnecessary re-renders.
 
@@ -240,10 +240,10 @@ function updateUser(id: number, data: UserData) {
 #### Good
 
 ```javascript
-import { sync } from 'flexium/core';
+import { useSync } from 'flexium/core';
 
 // ✅ Synced updates (single re-render)
-sync(() => {
+useSync(() => {
   setCount(1);
   setName('test');
   setActive(true);
@@ -251,7 +251,7 @@ sync(() => {
 
 // ✅ Synced function
 function updateUser(id: number, data: UserData) {
-  sync(() => {
+  useSync(() => {
     setUserId(id);
     setUserName(data.name);
     setUserEmail(data.email);

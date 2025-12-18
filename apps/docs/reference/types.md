@@ -241,18 +241,18 @@ interface Context<T> {
 
 **Usage:**
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 // Share theme globally - no Provider needed
-const theme = state<'light' | 'dark'>('dark', { key: 'app:theme' })
+const theme = useState<'light' | 'dark'>('dark', { key: 'app:theme' })
 
 function ThemedComponent() {
-  const theme = state('light', { key: 'app:theme' })
+  const theme = useState('light', { key: 'app:theme' })
   return <div>Current theme: {theme}</div>
 }
 ```
 
-**Related:** `state()` with `key` option (replaces Context API)
+**Related:** `useState()` with `key` option (replaces Context API)
 
 ## Router Types
 

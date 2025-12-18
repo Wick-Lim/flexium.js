@@ -187,14 +187,14 @@ function TemporaryComponent() {
   const data = useState(async () => {
     return fetch('/api/temp-data').then(r => r.json())
   }, { key: 'temp:data' })
-  
+
   // Cleanup on component unmount
-  effect(() => {
+  useEffect(() => {
     return () => {
       useState.delete('temp:data')
     }
   })
-  
+
   return <div>...</div>
 }
 
@@ -203,14 +203,14 @@ function ConditionalComponent({ show }: { show: boolean }) {
   const data = useState(async () => {
     return fetch('/api/data').then(r => r.json())
   }, { key: 'conditional:data' })
-  
-  effect(() => {
+
+  useEffect(() => {
     if (!show) {
       // Cleanup when no longer needed
       useState.delete('conditional:data')
     }
   })
-  
+
   return show ? <div>...</div> : null
 }
 ```
@@ -234,10 +234,10 @@ function cleanupEcommerce() {
   useState.delete('ecommerce:payment')
 }
 
-// ✅ Cleanup in effect cleanup
-effect(() => {
+// ✅ Cleanup in useEffect cleanup
+useEffect(() => {
   const tempData = useState(null, { key: 'temp:data' })
-  
+
   return () => {
     useState.delete('temp:data')  // cleanup
   }
@@ -254,11 +254,11 @@ effect(() => {
 // app/state.ts - Global state definitions
 
 // Authentication
-export const user = state<User | null>(null, { key: 'auth:user' })
+export const user = useState<User | null>(null, { key: 'auth:user' })
 export const isAuthenticated = useState(() => user.valueOf() !== null)
 
 // App settings
-export const theme = state<'light' | 'dark'>('light', { key: 'app:theme' })
+export const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
 export const language = useState('en', { key: 'app:language' })
 
 // Data caching
@@ -268,7 +268,7 @@ export const posts = useState(async () => {
 }, { key: ['posts', 'all'] })
 
 // UI state
-export const notifications = state<Notification[]>([], {
+export const notifications = useState<Notification[]>([], {
   key: 'app:notifications'
 })
 ```

@@ -310,16 +310,16 @@ controller.animate({
 Use motion with Flexium's state for reactive animations.
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { MotionController } from 'flexium/primitives'
 
-const isVisible = state(false)
+const isVisible = useState(false)
 
 const element = document.createElement('div')
 const controller = new MotionController(element)
 
 // Watch state and animate on changes
-const unwatch = state.watch(() => {
+const unwatch = useState.watch(() => {
   controller.animate({
     animate: isVisible.valueOf()
       ? { opacity: 1, y: 0 }
@@ -428,10 +428,10 @@ controller.animate({
 
 ```tsx
 import { MotionController } from 'flexium/primitives'
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function AnimatedCard() {
-  const isExpanded = state(false)
+  const isExpanded = useState(false)
 
   const card = document.createElement('div')
   card.style.padding = '20px'
@@ -459,7 +459,7 @@ function AnimatedCard() {
   })
 
   // Watch state changes
-  const unwatch = state.watch(() => {
+  const unwatch = useState.watch(() => {
     if (isExpanded.valueOf()) {
       card.style.width = '400px'
       card.style.height = '300px'

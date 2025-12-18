@@ -36,7 +36,7 @@ function handleSubmit() {
 
 ---
 
-### sync() Usage Scenarios
+### useSync() Usage Scenarios
 
 ```tsx
 // ✅ Form submission
@@ -232,7 +232,8 @@ function TemporaryComponent() {
   useEffect(() => {
     // Effect runs on mount
     return () => {
-    useState.delete('temp:data')  // Memory cleanup
+      useState.delete('temp:data')  // Memory cleanup
+    }
   })
 
   return <div>...</div>

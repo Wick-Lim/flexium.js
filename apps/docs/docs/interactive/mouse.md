@@ -68,7 +68,7 @@ function Game() {
 
 ```tsx
 function DrawingApp() {
-  const canvasRef = ref(null)
+  const canvasRef = useRef(null)
   const m = mouse()
   const isDrawing = useState(false)
 
@@ -214,7 +214,7 @@ function ContextMenuArea() {
 
 ## Notes
 
-- Use with `useLoop` for interactive input
+- Use with `useLoop()` for interactive input
 - Position is relative to viewport by default
 - Prevent default context menu for right-click handling
 

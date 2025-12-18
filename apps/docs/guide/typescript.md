@@ -31,11 +31,11 @@ function User(props: Props) {
 
 ## State Typing
 
-`state()` infers types automatically, or you can specify them.
+`useState()` infers types automatically, or you can specify them.
 
 ```tsx
-const count = state<number>(0);
-const user = state<User | null>(null);
+const count = useState<number>(0);
+const user = useState<User | null>(null);
 ```
 
 ## FNode Children Types

@@ -10,10 +10,10 @@ This guide walks you through migrating React apps to Flexium step by step.
 
 Flexium provides a React-like API but with some important differences:
 
-- ✅ **Single API**: One `state()` for all state management
+- ✅ **Single API**: One `useState()` for all state management
 - ✅ **Familiar pattern**: Same `[value, setter]` tuple as React
 - ✅ **No Virtual DOM**: Faster rendering
-- ✅ **Same dependency arrays**: `effect(fn, [deps])` like React
+- ✅ **Same dependency arrays**: `useEffect(fn, [deps])` like React
 
 ---
 
@@ -22,8 +22,8 @@ Flexium provides a React-like API but with some important differences:
 | React | Flexium | Notes |
 |-------|---------|-------|
 | `useState` | `useState` | Same `[value, setter]` tuple |
-| `useMemo` | `state(() => ..., { deps })` | computed state with deps |
-| `useEffect` | `effect(fn, deps)` | Same pattern with deps array |
+| `useMemo` | `useState(() => ..., { deps })` | computed state with deps |
+| `useEffect` | `useEffect(fn, deps)` | Same pattern with deps array |
 | `useCallback` | Unnecessary | Auto-optimized |
 | `useRef` | `useRef` | Same |
 | `useContext` | `useContext` | Same |
@@ -126,7 +126,7 @@ function Calculator() {
 ```
 
 **Changes**:
-- `useMemo(() => ..., [deps])` → `state(() => ..., { deps: [...] })`
+- `useMemo(() => ..., [deps])` → `useState(() => ..., { deps: [...] })`
 - Returns a tuple: `const [value] = useState(...)`
 
 ---
@@ -157,7 +157,7 @@ import { useState, useEffect } from 'flexium/core'
 function Timer() {
   const [count, setCount] = useState(0)
 
-  effect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setCount(c => c + 1)
     }, 1000)
@@ -200,7 +200,7 @@ import { useState, useEffect } from 'flexium/core'
 function UserProfile({ userId }) {
   const [user, setUser] = useState(null)
 
-  effect(() => {
+  useEffect(() => {
     fetch(`/api/users/${userId}`)
       .then(res => res.json())
       .then(data => setUser(data))
@@ -251,7 +251,7 @@ function Parent() {
 
 ---
 
-#### useRef → ref
+#### useRef → useRef
 
 ```tsx
 // ❌ Before (React)
@@ -259,11 +259,11 @@ import { useRef } from 'react'
 
 function Input() {
   const inputRef = useRef<HTMLInputElement>(null)
-  
+
   const focus = () => {
     inputRef.current?.focus()
   }
-  
+
   return <input ref={inputRef} />
 }
 
@@ -271,12 +271,12 @@ function Input() {
 import { useRef } from 'flexium/core'
 
 function Input() {
-  const inputRef = ref<HTMLInputElement>()
-  
+  const inputRef = useRef<HTMLInputElement>()
+
   const focus = () => {
     inputRef.current?.focus()
   }
-  
+
   return <input ref={inputRef} />
 }
 ```
@@ -308,7 +308,7 @@ function Child() {
   return <div>Theme: {theme}</div>
 }
 
-// ✅ After (Flexium) - Use state() with key
+// ✅ After (Flexium) - Use useState() with key
 import { useState } from 'flexium/core'
 
 function App() {
@@ -325,8 +325,8 @@ function Child() {
 ```
 
 **Changes**:
-- `createContext` → `state()` with `key` option
-- `useContext` → `state()` with same `key`
+- `createContext` → `useState()` with `key` option
+- `useContext` → `useState()` with same `key`
 - No Provider needed - state is global
 
 ---
@@ -443,10 +443,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 function UserDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
+
   const goBack = () => navigate(-1)
   const goHome = () => navigate('/')
-  
+
   return <div>User {id}</div>
 }
 
@@ -456,18 +456,18 @@ import { useRouter } from 'flexium/router'
 function UserDetail() {
   const r = useRouter()
   const id = r.params().id
-  
+
   const goBack = () => window.history.back()
   const goHome = () => r.navigate('/')
-  
+
   return <div>User {id}</div>
 }
 ```
 
 **Changes**:
-- `useNavigate` → `router()`
-- `useParams` → `router().params()`
-- `navigate(-1)` → `window.history.back()` or `router().navigate('/previous-path')`
+- `useNavigate` → `useRouter()`
+- `useParams` → `useRouter().params()`
+- `navigate(-1)` → `window.history.back()` or `useRouter().navigate('/previous-path')`
 - `navigate('/')` → `router.push('/')`
 
 ---
@@ -543,7 +543,7 @@ useEffect(() => {
 }, [count])
 
 // Flexium: Same pattern!
-effect(() => {
+useEffect(() => {
   console.log(count)
 }, [count])
 ```
@@ -747,7 +747,7 @@ import { equals } from 'flexium/core'
 if (equals(count, 5)) { ... }
 ```
 
-### Problem 2: effect runs too frequently
+### Problem 2: useEffect runs too frequently
 
 ```tsx
 // ❌ Problem: Multiple state updates cause duplicate execution

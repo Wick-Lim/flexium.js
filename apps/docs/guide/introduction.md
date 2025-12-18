@@ -60,18 +60,18 @@ function Counter() {
 import { useState, useEffect } from 'flexium/core';
 
 function Counter() {
-  const [count, setCount] = useState(0);
-  const [doubled] = useState(() => count * 2, { deps: [count] });
+  const count = useState(0);
+  const doubled = useState(() => count * 2);
 
   useEffect(() => {
     document.title = `Count: ${count}`;
-  }, [count]);
+  });
 
   return (
     <div>
       <p>Count: {count}</p>
       <p>Doubled: {doubled}</p>
-      <button onclick={() => setCount(c => c + 1)}>Increment</button>
+      <button onclick={() => count.set(c => c + 1)}>Increment</button>
     </div>
   );
 }
@@ -113,15 +113,15 @@ function UserProfile() {
 import { useState } from 'flexium/core';
 
 function UserProfile() {
-  const [userId, setUserId] = useState(1);
-  const [doubled] = useState(() => userId * 2, { deps: [userId] });
+  const userId = useState(1);
+  const doubled = useState(() => userId * 2);
 
-  const [user] = useState(async () => {
+  const user = useState(async () => {
     const res = await fetch(`/api/users/${userId}`);
     return res.json();
-  }, { key: ['user', userId] });
+  });
 
-  return <div>{user.status === 'loading' ? 'Loading...' : user.name}</div>;
+  return <div>{user.loading ? 'Loading...' : user.valueOf()?.name}</div>;
 }
 ```
 
@@ -405,37 +405,37 @@ Like React's useEffect, specify dependencies explicitly:
 import { useState, useEffect } from 'flexium/core';
 
 function SearchResults() {
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('all');
-  const [results, setResults] = useState([]);
+  const query = useState('');
+  const category = useState('all');
+  const results = useState([]);
 
   // Re-runs when query OR category changes
   useEffect(async () => {
-    if (!query) {
-      setResults([]);
+    if (!query.valueOf()) {
+      results.set([]);
       return;
     }
 
-    const res = await fetch(`/api/search?q=${query}&category=${category}`);
+    const res = await fetch(`/api/search?q=${query.valueOf()}&category=${category.valueOf()}`);
     const data = await res.json();
-    setResults(data);
+    results.set(data);
   }, [query, category]);
 
   return (
     <div>
       <input
-        value={query}
-        oninput={(e) => setQuery(e.target.value)}
+        value={query.valueOf()}
+        oninput={(e) => query.set(e.target.value)}
       />
 
-      <select onchange={(e) => setCategory(e.target.value)}>
+      <select onchange={(e) => category.set(e.target.value)}>
         <option value="all">All</option>
         <option value="books">Books</option>
         <option value="electronics">Electronics</option>
       </select>
 
       <ul>
-        {results.map(item => (
+        {results.valueOf().map(item => (
           <li key={item.id}>{item.title}</li>
         ))}
       </ul>
@@ -586,7 +586,7 @@ function LargeList() {
   const updateAll = () => {
     useSync(() => {
       // Even updating 1000 items at once is fast
-      items.set(items => items.map(item => ({
+      items.set(prev => prev.map(item => ({
         ...item,
         value: item.value + 1
       })));

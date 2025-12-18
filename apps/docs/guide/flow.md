@@ -26,10 +26,10 @@ Flexium supports the familiar React-style `.map()` syntax with **automatic optim
 ### Basic Usage
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function TodoList() {
-  const todos = state([
+  const todos = useState([
     { id: 1, text: 'Buy milk' },
     { id: 2, text: 'Walk the dog' }
   ])
@@ -59,7 +59,7 @@ In most frameworks, `items.map()` either:
 ### With Objects
 
 ```tsx
-const users = state([
+const users = useState([
   { id: 1, name: 'Alice' },
   { id: 2, name: 'Bob' }
 ])
@@ -94,10 +94,10 @@ Use native JavaScript for conditional rendering. This is more readable and lever
 For if/else conditions, use the ternary operator - just like React:
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 function LoginButton() {
-  const isLoggedIn = state(false);
+  const isLoggedIn = useState(false);
 
   return (
     <div>
@@ -115,10 +115,10 @@ function LoginButton() {
 For conditionally showing content when a value is truthy:
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 function UserGreeting() {
-  const user = state(null);
+  const user = useState(null);
 
   return (
     <div>
@@ -134,7 +134,7 @@ For multiple mutually exclusive conditions, use nested ternaries or a function:
 
 ```tsx
 function StatusDisplay() {
-  const status = state('loading');
+  const status = useState('loading');
 
   const renderStatus = () => {
     if (status.valueOf() === 'loading') return <p>Loading...</p>;
@@ -151,7 +151,7 @@ Or with nested ternaries:
 
 ```tsx
 function StatusDisplay() {
-  const status = state('loading');
+  const status = useState('loading');
 
   return (
     <div>

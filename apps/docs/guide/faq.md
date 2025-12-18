@@ -18,7 +18,7 @@ Flexium is a lightweight, signals-based UI framework with fine-grained reactivit
 |---------|---------|-------|
 | Reactivity | Fine-grained signals | Virtual DOM diffing |
 | Updates | Only affected nodes | Component re-renders |
-| State | `signal()` / `state()` | `useState()` / stores |
+| State | `useState()` | `useState()` / stores |
 | Size | ~10KB gzipped | ~45KB gzipped |
 | JSX | Yes | Yes |
 
@@ -28,10 +28,13 @@ Yes! Flexium is written in TypeScript and provides full type definitions. See th
 
 ## State Management
 
-### When should I use `signal()` vs `state()`?
+### When should I use `useState()`?
 
-// state() - direct value access
-const count = state(0)
+Use `useState()` for all state management needs in Flexium:
+
+```tsx
+// useState() - direct value access
+const count = useState(0)
 count // use directly
 ```
 
@@ -41,26 +44,26 @@ Use global state with a key:
 
 ```tsx
 // In any component
-const user = state(null, { key: 'currentUser' })
+const user = useState(null, { key: 'currentUser' })
 
 // In another component - same state!
-const user = state(null, { key: 'currentUser' })
+const user = useState(null, { key: 'currentUser' })
 ```
 
 Or use Context API:
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const theme = state('dark', { key: 'app:theme' })
+  const theme = useState('dark', { key: 'app:theme' })
   return <MyComponent />
 }
 
 function MyComponent() {
   // Access theme from anywhere
-  const theme = state('light', { key: 'app:theme' })
+  const theme = useState('light', { key: 'app:theme' })
   return <div>Theme: {theme}</div>
 }
 ```
@@ -75,7 +78,7 @@ Common causes:
    let count = 0
 
    // Will update
-   const count = state(0)
+   const count = useState(0)
    ```
 
 2. **Mutating objects directly** - Create new references
@@ -93,7 +96,7 @@ Common causes:
    console.log(count)
 
    // Inside effect - will track
-   effect(() => console.log(count))
+   useEffect(() => console.log(count))
    ```
 
 ## Rendering
@@ -184,9 +187,9 @@ Use the `virtual` prop on `<List>`:
 Use `untrack()` to read without creating dependencies:
 
 ```tsx
-import { untrack } from 'flexium/core'
+import { untrack, useEffect } from 'flexium/core'
 
-effect(() => {
+useEffect(() => {
   const value = trigger
   // config won't trigger re-run
   const cfg = untrack(() => config)
@@ -218,10 +221,10 @@ function App() {
 ### How do I access route params?
 
 ```tsx
-import { router } from 'flexium/router'
+import { useRouter } from 'flexium/router'
 
 function UserProfile() {
-  const route = router()
+  const route = useRouter()
   const userId = route.params.id
 
   return <div>User: {userId}</div>
@@ -234,14 +237,14 @@ function UserProfile() {
 
 ### How do I handle forms?
 
-Use `state()` for form handling:
+Use `useState()` for form handling:
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function LoginForm() {
-  const formData = state({ email: '', password: '' })
-  const errors = state({})
+  const formData = useState({ email: '', password: '' })
+  const errors = useState({})
 
   const validate = () => {
     const newErrors = {}
@@ -306,7 +309,7 @@ Usually caused by updating a signal inside an effect that reads it:
 
 ```tsx
 // Bad - infinite loop
-effect(() => {
+useEffect(() => {
   count.set(c => c + 1)
 })
 
@@ -319,8 +322,8 @@ count.set(prev => prev + 1)
 ### Can I migrate from React incrementally?
 
 Flexium's JSX is compatible with React patterns. Start by:
-1. Replacing `useState` with `state()`
-2. Replacing `useEffect` with `effect()`
+1. Replacing React's `useState` with Flexium's `useState()`
+2. Replacing React's `useEffect` with Flexium's `useEffect()`
 3. Using Flexium's control flow components
 
 See [Migration Guide](/guide/migration) for details.

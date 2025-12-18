@@ -1,11 +1,11 @@
 # Flexium.js
 
 **Simpler, Faster, Unified.**
-Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `state()`.
+Flexium is a next-generation UI framework that unifies state management, async data fetching, and global state into a single, powerful API: `useState()`.
 
 ## Key Features
 
-- **Unified State API**: No more `useState`, `useRecoil`, `useQuery` separation. Just `state()`.
+- **Unified State API**: No more `useRecoil`, `useQuery` separation. Just `useState()`.
 - **Fine-Grained Reactivity**: Updates only what changed. No Virtual DOM overhead.
 - **React-Style `.map()` with Optimization**: `items.map()` works reactively with automatic DOM caching.
 - **High Performance**: Optimized Monomorphic VNodes & Keyed Reconciliation.
@@ -18,21 +18,21 @@ Flexium is a next-generation UI framework that unifies state management, async d
 npm install flexium
 ```
 
-## The Only API You Need: `state()`
+## The Only API You Need: `useState()`
 
 Flexium unifies all state concepts into one function.
 
-### 1. Local State (Like `useState`)
+### 1. Local State
 
 ```javascript
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 function Counter() {
   // Create local state
-  const [count, setCount] = state(0);
+  const count = useState(0);
 
   return (
-    <button onclick={() => setCount(c => c + 1)}>
+    <button onclick={() => count.set(c => c + 1)}>
       Count: {count}
     </button>
   );
@@ -45,14 +45,14 @@ Just add a `key` to share state across components.
 
 ```javascript
 // Define global state (with initial value)
-const [theme, setTheme] = state('light', { key: 'theme' });
+const theme = useState('light', { key: 'theme' });
 
 function ThemeToggler() {
   // Access existing global state (initial value optional)
-  const [theme, setTheme] = state(undefined, { key: 'theme' });
+  const theme = useState(undefined, { key: 'theme' });
 
   return (
-    <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+    <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
       Current: {theme}
     </button>
   );
@@ -66,7 +66,7 @@ Pass an async function to handle data fetching automatically.
 ```javascript
 function UserProfile({ id }) {
   // Automatically fetches data. Re-runs if dependencies change.
-  const [user, actions] = state(async () => {
+  const user = useState(async () => {
     const res = await fetch(`/api/users/${id}`);
     return res.json();
   });
@@ -77,8 +77,8 @@ function UserProfile({ id }) {
 
     return (
       <div>
-        <h1>{user().name}</h1>
-        <button onclick={() => actions.refetch()}>Reload</button>
+        <h1>{user.valueOf().name}</h1>
+        <button onclick={() => user.refetch()}>Reload</button>
       </div>
     );
   };
@@ -90,11 +90,11 @@ function UserProfile({ id }) {
 Pass a synchronous function to create a value that updates automatically.
 
 ```javascript
-const [count, setCount] = state(1);
+const count = useState(1);
 // 'double' updates whenever 'count' changes
-const [double] = state(() => count * 2);
+const double = useState(() => count.valueOf() * 2);
 
-console.log(double); // 2 - use values directly, just like React!
+console.log(double.valueOf()); // 2 - use values directly!
 ```
 
 ### 5. List Rendering
@@ -103,7 +103,7 @@ Use familiar `.map()` syntax with automatic optimization:
 
 ```javascript
 function TodoList() {
-  const [todos, setTodos] = state([
+  const todos = useState([
     { id: 1, text: 'Learn Flexium' },
     { id: 2, text: 'Build something awesome' }
   ]);
@@ -125,14 +125,14 @@ Unlike other signal-based frameworks, Flexium's `.map()` is automatically reacti
 Flexium uses a signal-based reactivity system. Components run once, and only the parts that depend on changed state will update.
 
 ```javascript
-import { state, effect } from 'flexium/core';
+import { useState, useEffect } from 'flexium/core';
 
-const [count, setCount] = state(0);
+const count = useState(0);
 
-// Side effects with explicit dependencies (like React useEffect)
-effect(() => {
-  console.log('Count changed to:', count);
-}, [count]);
+// Side effects run automatically when dependencies change
+useEffect(() => {
+  console.log('Count changed to:', count.valueOf());
+});
 ```
 
 ## License

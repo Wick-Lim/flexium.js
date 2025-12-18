@@ -42,14 +42,14 @@ import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
 Canvas elements update automatically when state changes:
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function AnimatedCircle() {
-  const x = state(50)
+  const x = useState(50)
 
   // Animate
-  effect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       x.set(prev => (prev + 1) % 400)
     }, 16)
@@ -167,12 +167,12 @@ Draw arcs:
 Combine with event handlers for interactivity:
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function InteractiveCanvas() {
-  const mouseX = state(200)
-  const mouseY = state(200)
+  const mouseX = useState(200)
+  const mouseY = useState(200)
 
   return (
     <div
@@ -197,8 +197,8 @@ function InteractiveCanvas() {
 Canvas updates are automatically synchronized and debounced with `requestAnimationFrame`:
 
 ```tsx
-const x = state(0)
-const y = state(0)
+const x = useState(0)
+const y = useState(0)
 
 // Both changes trigger only ONE canvas redraw
 x.set(100)
@@ -227,14 +227,14 @@ For advanced use cases, access the underlying canvas:
 ## Example: Real-Time Chart
 
 ```tsx
-import { state, effect } from 'flexium/core'
+import { useState, useEffect } from 'flexium/core'
 import { Canvas, DrawLine, DrawCircle, DrawText } from 'flexium/canvas'
 
 function RealtimeChart() {
-  const dataPoints = state([50, 60, 55, 70, 65, 80])
+  const dataPoints = useState([50, 60, 55, 70, 65, 80])
 
   // Simulate real-time data
-  effect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       const newPoint = 50 + Math.random() * 50
       dataPoints.set(prev => [...prev.slice(1), newPoint])

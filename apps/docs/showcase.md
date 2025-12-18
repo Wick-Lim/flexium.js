@@ -77,7 +77,7 @@ import ContextDemo from './components/ContextDemo.vue'
 
 ## Counter Demo
 
-A simple counter demonstrating `state()` and `computed()` - the building blocks of Flexium reactivity.
+A simple counter demonstrating `useState()` and computed values - the building blocks of Flexium reactivity.
 
 <ClientOnly>
   <ShowcaseDemo />

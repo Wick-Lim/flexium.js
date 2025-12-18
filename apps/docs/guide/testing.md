@@ -149,16 +149,16 @@ Test signal creation, updates, and reactivity:
 
 ```ts
 import { describe, it, expect, vi } from 'vitest';
-import { effect, state } from 'flexium/core';
+import { useEffect, useState } from 'flexium/core';
 
 describe('Signal System', () => {
   it('should create a signal with initial value', () => {
-    const count = state(0);
+    const count = useState(0);
     expect(count.valueOf()).toBe(0);
   });
 
   it('should update signal value', () => {
-    const count = state(0);
+    const count = useState(0);
     count.set(5);
     expect(count.valueOf()).toBe(5);
 
@@ -167,10 +167,10 @@ describe('Signal System', () => {
   });
 
   it('should notify subscribers on change', () => {
-    const count = state(0);
+    const count = useState(0);
     const fn = vi.fn();
 
-    effect(() => {
+    useEffect(() => {
       fn(count.valueOf());
     });
 
@@ -183,10 +183,10 @@ describe('Signal System', () => {
   });
 
   it('should not notify on same value', () => {
-    const count = state(0);
+    const count = useState(0);
     const fn = vi.fn();
 
-    effect(() => {
+    useEffect(() => {
       fn(count.valueOf());
     });
 
@@ -204,12 +204,12 @@ Test derived state and memoization:
 
 ```ts
 import { describe, it, expect, vi } from 'vitest';
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 describe('Computed values', () => {
   it('should compute derived value', () => {
-    const count = state(2);
-    const doubled = state(() => count.valueOf() * 2);
+    const count = useState(2);
+    const doubled = useState(() => count.valueOf() * 2);
 
     expect(doubled.valueOf()).toBe(4);
 
@@ -218,9 +218,9 @@ describe('Computed values', () => {
   });
 
   it('should memoize computed values', () => {
-    const count = state(1);
+    const count = useState(1);
     const fn = vi.fn((val) => val * 2);
-    const doubled = state(() => fn(count.valueOf()));
+    const doubled = useState(() => fn(count.valueOf()));
 
     // First access
     expect(doubled.valueOf()).toBe(2);
@@ -238,10 +238,10 @@ describe('Computed values', () => {
   });
 
   it('should track nested dependencies', () => {
-    const a = state(1);
-    const b = state(2);
-    const sum = state(() => a.valueOf() + b.valueOf());
-    const doubled = state(() => sum.valueOf() * 2);
+    const a = useState(1);
+    const b = useState(2);
+    const sum = useState(() => a.valueOf() + b.valueOf());
+    const doubled = useState(() => sum.valueOf() * 2);
 
     expect(doubled.valueOf()).toBe(6);
 
@@ -260,20 +260,20 @@ Test side effects and cleanup:
 
 ```ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { effect, state } from 'flexium/core';
+import { useEffect, useState } from 'flexium/core';
 
 describe('Effects', () => {
   it('should run effect immediately', () => {
     const fn = vi.fn();
-    effect(fn);
+    useEffect(fn);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it('should run effect when dependencies change', () => {
-    const count = state(0);
+    const count = useState(0);
     const fn = vi.fn();
 
-    effect(() => {
+    useEffect(() => {
       fn(count());
     });
 
@@ -286,11 +286,11 @@ describe('Effects', () => {
   });
 
   it('should run cleanup function', () => {
-    const count = state(0);
+    const count = useState(0);
     const cleanup = vi.fn();
     const setup = vi.fn(() => cleanup);
 
-    effect(setup);
+    useEffect(setup);
 
     expect(setup).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
@@ -301,11 +301,11 @@ describe('Effects', () => {
   });
 
   it('should handle conditional dependencies', () => {
-    const a = state(1);
-    const b = state(2);
+    const a = useState(1);
+    const b = useState(2);
     const fn = vi.fn();
 
-    effect(() => {
+    useEffect(() => {
       if (a.valueOf() > 5) {
         fn(b.valueOf());
       }
@@ -329,15 +329,15 @@ describe('Effects', () => {
 
 ### Testing State API
 
-Test the high-level `state()` API:
+Test the high-level `useState()` API:
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
-describe('state() API', () => {
+describe('useState() API', () => {
   it('should create local state', () => {
-    const count = state(0);
+    const count = useState(0);
     expect(count.valueOf()).toBe(0);  // count is now a value-like proxy
 
     count.set(5);
@@ -348,8 +348,8 @@ describe('state() API', () => {
   });
 
   it('should create global state with key', () => {
-    const count1 = state(0, { key: 'global-count' });
-    const count2 = state(0, { key: 'global-count' });
+    const count1 = useState(0, { key: 'global-count' });
+    const count2 = useState(0, { key: 'global-count' });
 
     // Both reference same state
     expect(count1.valueOf()).toBe(0);
@@ -365,8 +365,8 @@ describe('state() API', () => {
   });
 
   it('should create computed state', () => {
-    const count = state(5);
-    const doubled = state(() => count.valueOf() * 2);
+    const count = useState(5);
+    const doubled = useState(() => count.valueOf() * 2);
 
     expect(doubled.valueOf()).toBe(10);
 
@@ -375,7 +375,7 @@ describe('state() API', () => {
   });
 
   it('should create async state', async () => {
-    const data = state(async () => {
+    const data = useState(async () => {
       return new Promise(resolve => {
         setTimeout(() => resolve({ value: 42 }), 10);
       });
@@ -402,7 +402,7 @@ Use jsdom and render utilities:
 ```ts
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render } from 'flexium/dom';
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 describe('Counter Component', () => {
   let container: HTMLElement;
@@ -417,7 +417,7 @@ describe('Counter Component', () => {
   });
 
   function Counter() {
-    const count = state(0);
+    const count = useState(0);
 
     return (
       <div>
@@ -475,7 +475,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render } from 'flexium/dom';
 import { screen, waitFor } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 describe('TodoList Component', () => {
   let container: HTMLElement;
@@ -490,8 +490,8 @@ describe('TodoList Component', () => {
   });
 
   function TodoList() {
-    const todos = state<string[]>([]);
-    const input = state('');
+    const todos = useState<string[]>([]);
+    const input = useState('');
 
     const addTodo = () => {
       if (input.valueOf().trim()) {
@@ -699,7 +699,7 @@ Mock async state:
 ```ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from 'flexium/dom';
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 import { screen, waitFor } from '@testing-library/dom';
 
 describe('UserProfile with mocked data', () => {
@@ -716,7 +716,7 @@ describe('UserProfile with mocked data', () => {
   });
 
   function UserProfile({ userId }) {
-    const user = state(async () => {
+    const user = useState(async () => {
       const res = await fetch(`/api/users/${userId}`);
       return res.json();
     });
@@ -951,12 +951,12 @@ export async function waitForSignal(getter: () => any, expected: any, timeout = 
 
 // Usage in tests
 it('should update signal', async () => {
-  const [count, setCount] = state(0);
+  const count = useState(0);
 
-  setTimeout(() => setCount(5), 100);
+  setTimeout(() => count.set(5), 100);
 
-  await waitForSignal(() => count, 5);
-  expect(count).toBe(5);
+  await waitForSignal(() => count.valueOf(), 5);
+  expect(count.valueOf()).toBe(5);
 });
 ```
 
@@ -1014,9 +1014,9 @@ it('should show error when email is invalid', async () => {
 
 // Bad - tests implementation details
 it('should set error state', () => {
-  const [error, setError] = state(null);
-  setError('Invalid email');
-  expect(error).toBe('Invalid email');
+  const error = useState(null);
+  error.set('Invalid email');
+  expect(error.valueOf()).toBe('Invalid email');
 });
 ```
 
@@ -1027,9 +1027,9 @@ Don't test that Flexium works - test that your app works:
 ```ts
 // Bad - testing Flexium
 it('should update signal', () => {
-  const [count, setCount] = state(0);
-  setCount(1);
-  expect(count).toBe(1);
+  const count = useState(0);
+  count.set(1);
+  expect(count.valueOf()).toBe(1);
 });
 
 // Good - testing your component

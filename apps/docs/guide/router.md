@@ -42,7 +42,7 @@ The router uses three main components to define your application's routes:
 
 ```tsx
 import { Routes, Route, Link } from 'flexium/router/dom'
-import { router } from 'flexium/router'
+import { useRouter } from 'flexium/router'
 
 function App() {
   return (
@@ -61,7 +61,7 @@ function App() {
 }
 
 function UserProfile() {
-  const r = router()
+  const r = useRouter()
   const params = r.params
 
   return <h1>User ID: {params.id}</h1>
@@ -81,7 +81,7 @@ Use the `:paramName` syntax to create dynamic route segments:
 
 // Access parameters in your component
 function PostDetail() {
-  const r = router()
+  const r = useRouter()
   const params = r.params
 
   return (
@@ -280,10 +280,10 @@ Access and manage URL query parameters using the location object.
 ### Reading Query Parameters
 
 ```tsx
-import { router } from 'flexium/router'
+import { useRouter } from 'flexium/router'
 
 function SearchResults() {
-  const r = router()
+  const r = useRouter()
   const location = r.location
 
   // URL: /search?q=flexium&sort=date&filter=js
@@ -306,7 +306,7 @@ Navigate with query strings to update parameters:
 
 ```tsx
 function ProductFilter() {
-  const r = router()
+  const r = useRouter()
 
   const applyFilter = (category: string, price: string) => {
     // Navigate with query parameters
@@ -329,7 +329,7 @@ Query parameters are reactive and will trigger component updates:
 
 ```tsx
 function FilteredList() {
-  const r = router()
+  const r = useRouter()
 
   // This will re-run when query params change
   const location = r.location
@@ -355,10 +355,10 @@ Navigate imperatively using the `navigate` function from `router()`.
 ### Basic Navigation
 
 ```tsx
-import { router } from 'flexium/router'
+import { useRouter } from 'flexium/router'
 
 function LoginForm() {
-  const r = router()
+  const r = useRouter()
 
   const handleSubmit = async (credentials) => {
     const success = await login(credentials)
@@ -379,7 +379,7 @@ While Flexium router uses browser history, you can pass data through route param
 
 ```tsx
 function ProductList() {
-  const r = router()
+  const r = useRouter()
 
   const viewProduct = (productId: string) => {
     r.navigate(`/products/${productId}`)
@@ -406,7 +406,7 @@ Navigate based on application logic:
 
 ```tsx
 function CheckoutButton() {
-  const r = router()
+  const r = useRouter()
 
   const handleCheckout = () => {
     const cart = getCart()
@@ -433,15 +433,15 @@ function CheckoutButton() {
 Navigate in response to data changes:
 
 ```tsx
-import { effect } from 'flexium/core'
-import { router } from 'flexium/router'
+import { useEffect } from 'flexium/core'
+import { useRouter } from 'flexium/router'
 
 function OrderStatus() {
-  const r = router()
+  const r = useRouter()
   const params = r.params()
   const orderId = params.id
 
-  effect(() => {
+  useEffect(() => {
     const checkStatus = async () => {
       const order = await fetchOrder(orderId)
 
@@ -467,15 +467,15 @@ Create smooth transitions between routes using CSS and Flexium's reactive system
 ### Basic Fade Transition
 
 ```tsx
-import { effect, state } from 'flexium/core'
-import { router } from 'flexium/router'
+import { useEffect, useState } from 'flexium/core'
+import { useRouter } from 'flexium/router'
 
 function TransitionWrapper({ children }) {
-  const r = router()
+  const r = useRouter()
   const location = r.location
-  const isTransitioning = state(false)
+  const isTransitioning = useState(false)
 
-  effect(() => {
+  useEffect(() => {
     // Trigger transition on location change
     isTransitioning.set(true)
 
@@ -502,12 +502,12 @@ function TransitionWrapper({ children }) {
 
 ```tsx
 function PageTransition({ children }) {
-  const r = router()
+  const r = useRouter()
   const location = r.location
-  const currentPath = state('')
-  const isAnimating = state(false)
+  const currentPath = useState('')
+  const isAnimating = useState(false)
 
-  effect(() => {
+  useEffect(() => {
     const newPath = location().pathname
 
     if (currentPath.valueOf() !== newPath) {
@@ -556,7 +556,7 @@ function App() {
 }
 
 function NotFound() {
-  const r = router()
+  const r = useRouter()
   const location = r.location
 
   return (
@@ -573,7 +573,7 @@ function NotFound() {
 
 ```tsx
 function NotFound() {
-  const r = router()
+  const r = useRouter()
   const location = r.location
 
   const suggestions = [
@@ -668,7 +668,7 @@ When accepting navigation paths from user input, the router's built-in protectio
 
 ```tsx
 function SearchBar() {
-  const r = router()
+  const r = useRouter()
 
   const handleSearch = (query: string) => {
     // Validate query before using in navigation
@@ -796,11 +796,11 @@ Renders child route content in nested routing scenarios.
 
 ## Hooks
 
-### `router()`
+### `useRouter()`
 Returns the router context, including `location`, `params`, `navigate`, and `matches`.
 
 ```tsx
-const r = router()
+const r = useRouter()
 
 // Access location
 const location = r.location
@@ -895,4 +895,4 @@ function App() {
 
 - [Router API Reference](/reference/router) - Complete API documentation
 - [State Management](/guide/state) - Managing application state
-- [Global State](/guide/context) - Sharing state globally with state() key
+- [Global State](/guide/context) - Sharing state globally with useState() key

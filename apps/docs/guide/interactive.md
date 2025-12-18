@@ -28,7 +28,7 @@ Flexium handles all of this for you with a clean, reactive API.
 ## Quick Example
 
 ```tsx
-import { loop, keyboard, Keys } from 'flexium/interactive'
+import { useLoop, useKeyboard, Keys } from 'flexium/interactive'
 import { Canvas, Circle } from 'flexium/canvas'
 
 function SimpleGame() {
@@ -36,15 +36,15 @@ function SimpleGame() {
   let y = 200
   const speed = 200 // pixels per second
 
-  const keyboard = keyboard()
+  const kb = useKeyboard()
 
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     onUpdate: (delta) => {
       // Handle input
-      if (keyboard.isPressed(Keys.ArrowRight)) x += speed * delta
-      if (keyboard.isPressed(Keys.ArrowLeft)) x -= speed * delta
-      if (keyboard.isPressed(Keys.ArrowUp)) y -= speed * delta
-      if (keyboard.isPressed(Keys.ArrowDown)) y += speed * delta
+      if (kb.isPressed(Keys.ArrowRight)) x += speed * delta
+      if (kb.isPressed(Keys.ArrowLeft)) x -= speed * delta
+      if (kb.isPressed(Keys.ArrowUp)) y -= speed * delta
+      if (kb.isPressed(Keys.ArrowDown)) y += speed * delta
     },
     onRender: () => {
       // Render will trigger canvas update
@@ -66,14 +66,14 @@ function SimpleGame() {
 
 The animation loop is the heart of any interactive application. It handles timing, updates, and rendering.
 
-### loop()
+### useLoop()
 
 Creates an animation loop with delta time and optional fixed timestep for physics.
 
 ```tsx
-import { loop } from 'flexium/interactive'
+import { useLoop } from 'flexium/interactive'
 
-const gameLoop = loop({
+const gameLoop = useLoop({
   fixedFps: 60,           // Target FPS for physics (default: 60)
   onUpdate: (delta) => {
     // Called every frame
@@ -91,8 +91,8 @@ const gameLoop = loop({
 
 gameLoop.start()     // Start the loop
 gameLoop.stop()      // Stop the loop
-loop.isRunning() // Check if running
-loop.getFps()    // Get current FPS
+gameLoop.isRunning() // Check if running
+gameLoop.getFps()    // Get current FPS
 ```
 
 ### Delta Time
@@ -102,7 +102,7 @@ Delta time represents the time elapsed since the last frame in seconds. Use it t
 ```tsx
 const speed = 100 // pixels per second
 
-loop({
+useLoop({
   onUpdate: (delta) => {
     // Without delta: moves 1 pixel per frame (varies with FPS)
     x += 1
@@ -118,7 +118,7 @@ loop({
 For physics simulations, use `onFixedUpdate` to ensure deterministic behavior:
 
 ```tsx
-const gameLoop = loop({
+const gameLoop = useLoop({
   fixedFps: 60, // Physics runs at 60 FPS
 
   onUpdate: (delta) => {
@@ -149,9 +149,9 @@ const gameLoop = loop({
 Monitor performance with the built-in FPS counter:
 
 ```tsx
-const gameLoop = loop({
+const gameLoop = useLoop({
   onRender: () => {
-    const fps = loop.getFps()
+    const fps = gameLoop.getFps()
     console.log(`Running at ${fps} FPS`)
   }
 })
@@ -159,32 +159,32 @@ const gameLoop = loop({
 
 ## Keyboard Input
 
-`keyboard()` provides reactive keyboard state tracking with support for key press, hold, and release detection.
+`useKeyboard()` provides reactive keyboard state tracking with support for key press, hold, and release detection.
 
 ### Basic Usage
 
 ```tsx
-import { keyboard, Keys } from 'flexium/interactive'
+import { useKeyboard, Keys } from 'flexium/interactive'
 
-const keyboard = keyboard()
+const kb = useKeyboard()
 
 // Check if key is currently pressed
-if (keyboard.isPressed(Keys.Space)) {
+if (kb.isPressed(Keys.Space)) {
   player.jump()
 }
 
 // Check if key was just pressed this frame
-if (keyboard.isJustPressed(Keys.KeyE)) {
+if (kb.isJustPressed(Keys.KeyE)) {
   player.interact()
 }
 
 // Check if key was just released this frame
-if (keyboard.isJustReleased(Keys.ShiftLeft)) {
+if (kb.isJustReleased(Keys.ShiftLeft)) {
   player.stopSprinting()
 }
 
 // Get all pressed keys
-const pressedKeys = keyboard.getPressedKeys()
+const pressedKeys = kb.getPressedKeys()
 console.log(pressedKeys) // ['keyw', 'space', ...]
 ```
 
@@ -219,25 +219,25 @@ By default, keyboard events are tracked on `window`. You can specify a different
 
 ```tsx
 const canvasElement = document.querySelector('canvas')
-const kb = keyboard(canvasElement)
+const kb = useKeyboard(canvasElement)
 ```
 
 ### Movement Example
 
 ```tsx
-const keyboard = keyboard()
+const kb = useKeyboard()
 const speed = 200
 
-loop({
+useLoop({
   onUpdate: (delta) => {
     let vx = 0
     let vy = 0
 
     // WASD movement
-    if (keyboard.isPressed(Keys.KeyW)) vy -= 1
-    if (keyboard.isPressed(Keys.KeyS)) vy += 1
-    if (keyboard.isPressed(Keys.KeyA)) vx -= 1
-    if (keyboard.isPressed(Keys.KeyD)) vx += 1
+    if (kb.isPressed(Keys.KeyW)) vy -= 1
+    if (kb.isPressed(Keys.KeyS)) vy += 1
+    if (kb.isPressed(Keys.KeyA)) vx -= 1
+    if (kb.isPressed(Keys.KeyD)) vx += 1
 
     // Normalize diagonal movement
     if (vx !== 0 && vy !== 0) {
@@ -251,7 +251,7 @@ loop({
     player.y += vy * speed * delta
 
     // Sprint modifier
-    if (keyboard.isPressed(Keys.ShiftLeft)) {
+    if (kb.isPressed(Keys.ShiftLeft)) {
       player.speed = speed * 2
     } else {
       player.speed = speed
@@ -265,11 +265,11 @@ loop({
 Access the reactive signal for advanced use cases:
 
 ```tsx
-const keyboard = keyboard()
+const kb = useKeyboard()
 
 // Watch for any key state changes
-effect(() => {
-  const pressedKeys = keyboard.keys.valueOf()
+useEffect(() => {
+  const pressedKeys = kb.keys.valueOf()
   console.log('Pressed keys:', Array.from(pressedKeys))
 })
 ```
@@ -288,19 +288,19 @@ effect(() => {
 ```tsx
 onUpdate: (delta) => {
   // Continuous movement
-  if (keyboard.isPressed(Keys.ArrowRight)) {
+  if (kb.isPressed(Keys.ArrowRight)) {
     player.x += speed * delta
   }
 
   // One-shot jump
-  if (keyboard.isJustPressed(Keys.Space)) {
+  if (kb.isJustPressed(Keys.Space)) {
     if (player.onGround) {
       player.velocityY = -jumpForce
     }
   }
 
   // Toggle sprint on release
-  if (keyboard.isJustReleased(Keys.ShiftLeft)) {
+  if (kb.isJustReleased(Keys.ShiftLeft)) {
     player.isSprinting = !player.isSprinting
   }
 }
@@ -311,18 +311,18 @@ onUpdate: (delta) => {
 Call `clearFrameState()` at the end of each frame to reset just-pressed/just-released states:
 
 ```tsx
-const keyboard = keyboard()
+const kb = useKeyboard()
 
-loop({
+useLoop({
   onUpdate: (delta) => {
     // Handle input
-    if (keyboard.isJustPressed(Keys.Space)) {
+    if (kb.isJustPressed(Keys.Space)) {
       console.log('Jump!')
     }
   },
   onRender: () => {
     // Clear frame state after processing
-    keyboard.clearFrameState()
+    kb.clearFrameState()
   }
 })
 ```
@@ -331,40 +331,40 @@ Don't forget to dispose when done:
 
 ```tsx
 onCleanup(() => {
-  keyboard.dispose()
+  kb.dispose()
 })
 ```
 
 ## Mouse Input
 
-`mouse()` provides reactive mouse state tracking with position, buttons, and wheel delta.
+`useMouse()` provides reactive mouse state tracking with position, buttons, and wheel delta.
 
 ### Basic Usage
 
 ```tsx
-import { mouse, MouseButton } from 'flexium/interactive'
+import { useMouse, MouseButton } from 'flexium/interactive'
 
-const mouse = mouse()
+const m = useMouse()
 
 // Get current mouse position
-const pos = mouse.position.valueOf()
+const pos = m.position.valueOf()
 console.log(pos.x, pos.y)
 
 // Check button states
-if (mouse.isLeftPressed()) {
+if (m.isLeftPressed()) {
   player.shoot()
 }
 
-if (mouse.isRightPressed()) {
+if (m.isRightPressed()) {
   player.aim()
 }
 
-if (mouse.isMiddlePressed()) {
+if (m.isMiddlePressed()) {
   camera.reset()
 }
 
 // Or use button numbers directly
-if (mouse.isPressed(MouseButton.Left)) {
+if (m.isPressed(MouseButton.Left)) {
   // same as isLeftPressed()
 }
 ```
@@ -374,11 +374,11 @@ if (mouse.isPressed(MouseButton.Left)) {
 The position is relative to the target element (or canvas if specified):
 
 ```tsx
-const m = mouse({ canvas: myCanvas })
+const m = useMouse({ canvas: myCanvas })
 
 // Position is in canvas coordinates
-effect(() => {
-  const pos = mouse.position.valueOf()
+useEffect(() => {
+  const pos = m.position.valueOf()
   console.log(`Mouse at: ${pos.x}, ${pos.y}`)
 })
 ```
@@ -388,10 +388,10 @@ effect(() => {
 Track mouse movement since last frame:
 
 ```tsx
-const mouse = mouse()
+const m = useMouse()
 
 onUpdate: (delta) => {
-  const delta = mouse.delta.valueOf()
+  const delta = m.delta.valueOf()
 
   // Camera rotation based on mouse movement
   camera.rotateX(delta.y * sensitivity)
@@ -404,10 +404,10 @@ onUpdate: (delta) => {
 Detect scroll wheel input:
 
 ```tsx
-const mouse = mouse()
+const m = useMouse()
 
 onUpdate: () => {
-  const wheel = mouse.wheelDelta.valueOf()
+  const wheel = m.wheelDelta.valueOf()
 
   if (wheel !== 0) {
     camera.zoom += wheel * zoomSpeed
@@ -423,7 +423,7 @@ When using with canvas, provide the canvas element for proper coordinate calcula
 function Game() {
   let canvasRef: HTMLCanvasElement | undefined
 
-  const m = mouse({
+  const m = useMouse({
     canvas: () => canvasRef // Pass as getter or direct reference
   })
 
@@ -434,8 +434,8 @@ function Game() {
       height={600}
     >
       <Circle
-        x={mouse.position.valueOf().x}
-        y={mouse.position.valueOf().y}
+        x={m.position.valueOf().x}
+        y={m.position.valueOf().y}
         radius={10}
         fill="red"
       />
@@ -459,17 +459,17 @@ MouseButton.Right  // 2
 Clear frame state and dispose when done:
 
 ```tsx
-const mouse = mouse()
+const m = useMouse()
 
-loop({
+useLoop({
   onRender: () => {
     // Clear delta after each frame
-    mouse.clearFrameState()
+    m.clearFrameState()
   }
 })
 
 onCleanup(() => {
-  mouse.dispose()
+  m.dispose()
 })
 ```
 
@@ -478,36 +478,36 @@ onCleanup(() => {
 Here's a complete game combining all the systems:
 
 ```tsx
-import { loop, keyboard, mouse, Keys } from 'flexium/interactive'
+import { useLoop, useKeyboard, useMouse, Keys } from 'flexium/interactive'
 import { Canvas, Circle, Rect, CanvasText } from 'flexium/canvas'
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function TopDownShooter() {
   // Game state
-  const score = state(0)
+  const score = useState(0)
   const player = { x: 400, y: 300, radius: 20, speed: 250 }
   const bullets: Array<{ x: number; y: number; vx: number; vy: number }> = []
   const enemies: Array<{ x: number; y: number; radius: 15 }> = []
 
   // Input
-  const keyboard = keyboard()
-  const mouse = mouse()
+  const kb = useKeyboard()
+  const m = useMouse()
 
   // Spawn enemies
   let spawnTimer = 0
   const spawnInterval = 2 // seconds
 
   // Game loop
-  const gameLoop = loop({
+  const gameLoop = useLoop({
     onUpdate: (delta) => {
       // Player movement
       let vx = 0
       let vy = 0
 
-      if (keyboard.isPressed(Keys.KeyW)) vy -= 1
-      if (keyboard.isPressed(Keys.KeyS)) vy += 1
-      if (keyboard.isPressed(Keys.KeyA)) vx -= 1
-      if (keyboard.isPressed(Keys.KeyD)) vx += 1
+      if (kb.isPressed(Keys.KeyW)) vy -= 1
+      if (kb.isPressed(Keys.KeyS)) vy += 1
+      if (kb.isPressed(Keys.KeyA)) vx -= 1
+      if (kb.isPressed(Keys.KeyD)) vx += 1
 
       // Normalize diagonal movement
       if (vx !== 0 && vy !== 0) {
@@ -524,8 +524,8 @@ function TopDownShooter() {
       player.y = Math.max(player.radius, Math.min(600 - player.radius, player.y))
 
       // Shooting
-      if (mouse.isLeftPressed()) {
-        const mousePos = mouse.position.valueOf()
+      if (m.isLeftPressed()) {
+        const mousePos = m.position.valueOf()
         const dx = mousePos.x - player.x
         const dy = mousePos.y - player.y
         const len = Math.sqrt(dx * dx + dy * dy)
@@ -597,8 +597,8 @@ function TopDownShooter() {
       }
 
       // Clear input states
-      keyboard.clearFrameState()
-      mouse.clearFrameState()
+      kb.clearFrameState()
+      m.clearFrameState()
     },
 
     onRender: () => {
@@ -626,8 +626,8 @@ function TopDownShooter() {
 
       {/* Crosshair at mouse */}
       <Circle
-        x={mouse.position.valueOf().x}
-        y={mouse.position.valueOf().y}
+        x={m.position.valueOf().x}
+        y={m.position.valueOf().y}
         radius={3}
         stroke="white"
         strokeWidth={1}
@@ -671,7 +671,7 @@ function TopDownShooter() {
       <CanvasText
         x={700}
         y={30}
-        text={`FPS: ${loop.getFps()}`}
+        text={`FPS: ${gameLoop.getFps()}`}
         fontSize={16}
         fill="white"
       />
@@ -699,7 +699,7 @@ x += speed * delta
 Keep game logic in `onUpdate` and rendering in `onRender`:
 
 ```tsx
-loop({
+useLoop({
   onUpdate: (delta) => {
     // Game logic, physics, input
     updatePlayer(delta)
@@ -719,7 +719,7 @@ loop({
 Physics simulations should use `onFixedUpdate`:
 
 ```tsx
-loop({
+useLoop({
   fixedFps: 60,
 
   onFixedUpdate: (fixedDelta) => {
@@ -735,10 +735,10 @@ loop({
 Always clear frame-specific input states:
 
 ```tsx
-loop({
+useLoop({
   onRender: () => {
-    keyboard.clearFrameState()
-    mouse.clearFrameState()
+    kb.clearFrameState()
+    m.clearFrameState()
   }
 })
 ```
@@ -750,8 +750,8 @@ Dispose of input handlers when done:
 ```tsx
 onCleanup(() => {
   gameLoop.stop()
-  keyboard.dispose()
-  mouse.dispose()
+  kb.dispose()
+  m.dispose()
 })
 ```
 
@@ -784,17 +784,17 @@ const cappedDelta = Math.min(delta, 0.1) // Cap at 100ms
 Flexium's game module integrates seamlessly with Canvas primitives:
 
 ```tsx
-import { loop } from 'flexium/interactive'
+import { useLoop } from 'flexium/interactive'
 import { Canvas, Circle, Rect } from 'flexium/canvas'
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function GameExample() {
-  const entities = state([
+  const entities = useState([
     { x: 100, y: 100, color: 'red' },
     { x: 200, y: 150, color: 'blue' }
   ])
 
-  loop({
+  useLoop({
     onUpdate: (delta) => {
       // Update entity positions
       entities.set(prev => prev.map(e => ({
@@ -829,14 +829,14 @@ All game APIs are fully typed:
 ```tsx
 import type { Loop, KeyboardState, MouseState } from 'flexium/interactive'
 
-const game: Loop = loop({
+const game: Loop = useLoop({
   onUpdate: (delta: number) => {
     // delta is typed as number
   }
 })
 
-const keyboard: KeyboardState = keyboard()
-const mouse: MouseState = mouse()
+const kb: KeyboardState = useKeyboard()
+const m: MouseState = useMouse()
 ```
 
 ## Next Steps

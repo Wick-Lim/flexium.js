@@ -27,8 +27,8 @@ function Component() {
   return <div>{count}</div>  // Automatically tracks updates
 }
 
-// Or read inside effect
-effect(() => {
+// Or read inside useEffect
+useEffect(() => {
   console.log(count)  // Tracks updates
 })
 ```
@@ -87,17 +87,17 @@ const [posts, setPosts] = useState([], { key: ['app', 'user', userId, 'posts'] }
 
 ### ❌ Updating State Inside Effect (Infinite Loop)
 
-**Problem**: Updating tracked state inside effect can cause infinite loops.
+**Problem**: Updating tracked state inside useEffect can cause infinite loops.
 
 ```tsx
 // ❌ Anti-pattern - infinite loop
 const [count, setCount] = useState(0)
-effect(() => {
+useEffect(() => {
   setCount(count + 1)  // count changes → effect re-runs → count changes → ...
 })
 
 // ✅ Correct approach 1: conditional update
-effect(() => {
+useEffect(() => {
   if (count < 10) {
     setCount(count + 1)
   }
@@ -105,7 +105,7 @@ effect(() => {
 
 // ✅ Correct approach 2: use untrack()
 import { untrack } from 'flexium/core'
-effect(() => {
+useEffect(() => {
   untrack(() => {
     setCount(count + 1)  // Not tracked
   })
@@ -121,7 +121,7 @@ effect(() => {
 ```tsx
 // ❌ Anti-pattern - memory leak
 const [isActive] = useState(false)
-effect(() => {
+useEffect(() => {
   if (isActive) {
     const interval = setInterval(() => {
       console.log('tick')
@@ -131,7 +131,7 @@ effect(() => {
 })
 
 // ✅ Correct approach
-effect(() => {
+useEffect(() => {
   if (isActive) {
     const interval = setInterval(() => {
       console.log('tick')
@@ -146,18 +146,18 @@ effect(() => {
 
 ### ❌ Not Reading State Inside Effect
 
-**Problem**: If state isn't read inside effect, dependencies aren't tracked.
+**Problem**: If state isn't read inside useEffect, dependencies aren't tracked.
 
 ```tsx
 // ❌ Anti-pattern - dependencies not tracked
 const [count, setCount] = useState(0)
-effect(() => {
+useEffect(() => {
   console.log('Hello')  // Doesn't read count
 })
 setCount(1)  // Effect doesn't re-run
 
 // ✅ Correct approach
-effect(() => {
+useEffect(() => {
   console.log('Count:', count)  // Must read count to track
 })
 setCount(1)  // Effect re-runs
@@ -192,7 +192,7 @@ const [data] = useState(() => ({
 
 ### ❌ Side Effects Inside Computed
 
-**Problem**: Computed should be pure functions. Handle side effects in effect.
+**Problem**: Computed should be pure functions. Handle side effects in useEffect.
 
 ```tsx
 // ❌ Anti-pattern - side effects
@@ -207,8 +207,8 @@ const [doubled] = useState(() => {
 const [count, setCount] = useState(0)
 const [doubled] = useState(() => count * 2, { deps: [count] })  // Pure function
 
-// Side effects in effect
-effect(() => {
+// Side effects in useEffect
+useEffect(() => {
   console.log('Count changed:', count)
   localStorage.setItem('count', String(count))
 })
@@ -230,7 +230,7 @@ setC(3)  // Re-render 3
 
 // ✅ Correct approach - sync updates
 import { useSync } from 'flexium/core'
-sync(() => {
+useSync(() => {
   setA(1)
   setB(2)
   setC(3)
@@ -350,7 +350,7 @@ interface User {
   email: string
 }
 
-const [user, setUser] = state<User | null>(null)
+const [user, setUser] = useState<User | null>(null)
 setUser({ name: 'John', email: 'john@example.com' })  // Type safe
 ```
 
@@ -387,7 +387,7 @@ function Component() {
   // Remains in memory after component unmounts
 }
 
-// ✅ Correct approach - cleanup in effect
+// ✅ Correct approach - cleanup in useEffect
 import { useState, useEffect } from 'flexium/core'
 
 function Component() {
@@ -395,7 +395,7 @@ function Component() {
     key: ['temp', 'data']
   })
 
-  effect(() => {
+  useEffect(() => {
     // Effect runs on mount
     return () => {
       // Manual cleanup if needed
@@ -421,9 +421,9 @@ function Component() {
 
 ### Recommendations
 
-1. ✅ Read state inside JSX or effect
+1. ✅ Read state inside JSX or useEffect
 2. ✅ Don't use global if local is sufficient
-3. ✅ Sync updates with `sync()`
+3. ✅ Sync updates with `useSync()`
 4. ✅ Use `deps` option for derived state
 5. ✅ Always return cleanup functions
 6. ✅ Specify types explicitly

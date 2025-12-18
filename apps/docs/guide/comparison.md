@@ -7,7 +7,7 @@ How does Flexium compare to React and Svelte? This guide helps you understand th
 | Feature | Flexium | React | Svelte |
 |---------|---------|-------|--------|
 | **Reactivity** | Signals (Proxy) | Virtual DOM | Signals (Runes) |
-| **API Philosophy** | Unified (`state()`) | Hooks (multiple) | Syntax (`let`, `$`) |
+| **API Philosophy** | Unified (`useState()`) | Hooks (multiple) | Syntax (`let`, `$`) |
 | **Re-rendering** | Fine-grained | Component tree | Fine-grained |
 | **List Rendering** | `items.map()` works | `items.map()` works | `{#each}` block |
 | **Bundle Size** | ~6KB (full bundle) | ~42KB (React only) | ~2KB (runtime) |
@@ -20,14 +20,14 @@ How does Flexium compare to React and Svelte? This guide helps you understand th
 ::: code-group
 
 ```jsx [Flexium ✨]
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function Component() {
   // All state needs - one function, tuple return
-  const [count, setCount] = state(0)                          // local
-  const [doubled] = state(() => count * 2, { deps: [count] }) // derived
-  const [user] = state(async () => fetchUser())               // async
-  const [theme, setTheme] = state('dark', { key: 'theme' })   // global
+  const [count, setCount] = useState(0)                          // local
+  const [doubled] = useState(() => count * 2, { deps: [count] }) // derived
+  const [user] = useState(async () => fetchUser())               // async
+  const [theme, setTheme] = useState('dark', { key: 'theme' })   // global
 
   return <div>{count} × 2 = {doubled}</div>
 }
@@ -85,7 +85,7 @@ This is where Flexium really shines:
 ```jsx [Flexium ✨]
 // React syntax + Svelte performance = Best of both worlds
 function TodoList() {
-  const [todos, setTodos] = state([...])
+  const [todos, setTodos] = useState([...])
 
   return (
     <ul>
@@ -141,7 +141,7 @@ function TodoList() {
 ::: code-group
 
 ```jsx [Flexium ✨]
-const [count, setCount] = state(5)
+const [count, setCount] = useState(5)
 
 // Tuple-based access like React
 count               // 5
@@ -186,7 +186,7 @@ count + 10          // 15
 ```jsx [Flexium ✨]
 // Native JavaScript - just like React!
 function Component() {
-  const [show, setShow] = state(true)
+  const [show, setShow] = useState(true)
 
   return (
     <div>
@@ -242,10 +242,10 @@ function Component() {
 ::: code-group
 
 ```jsx [Flexium ✨]
-import { effect } from 'flexium/core'
+import { useEffect } from 'flexium/core'
 
 // Dependency array like React
-effect(() => {
+useEffect(() => {
   console.log('Count:', count)
   console.log('Name:', name)
 }, [count, name])
@@ -306,7 +306,7 @@ useEffect(() => {
 
 | Framework | APIs to Learn | Time to Productive |
 |-----------|---------------|-------------------|
-| **Flexium** | `state()`, `effect()` | Hours |
+| **Flexium** | `useState()`, `useEffect()` | Hours |
 | React | useState, useMemo, useCallback, useEffect, useContext, useReducer, + external libs | Days to weeks |
 
 ## Migration Guide
@@ -315,20 +315,20 @@ useEffect(() => {
 
 | React | Flexium | Notes |
 |-------|---------|-------|
-| `useState(x)` | `state(x)` | Returns `[value, setter]` tuple |
-| `useMemo(() => x, [deps])` | `state(() => x, { deps })` | Computed with deps |
+| `useState(x)` | `useState(x)` | Returns `[value, setter]` tuple |
+| `useMemo(() => x, [deps])` | `useState(() => x, { deps })` | Computed with deps |
 | `useCallback(fn, [deps])` | Just use `fn` | No wrapper needed |
-| `useEffect(() => {}, [deps])` | `effect(() => {}, [deps])` | Same pattern |
-| React Query | `state(async () => ...)` | Built-in |
-| Recoil/Jotai | `state(x, { key })` | Built-in |
+| `useEffect(() => {}, [deps])` | `useEffect(() => {}, [deps])` | Same pattern |
+| React Query | `useState(async () => ...)` | Built-in |
+| Recoil/Jotai | `useState(x, { key })` | Built-in |
 | `items.map()` | `items.map()` | Same! But optimized |
 
 ### From Svelte 5 to Flexium
 
 | Svelte 5 | Flexium | Notes |
 |----------|---------|-------|
-| `let x = $state(0)` | `const x = state(0)` | |
-| `let y = $derived(x * 2)` | `const y = state(() => x * 2)` | Auto-detected |
+| `let x = $state(0)` | `const x = useState(0)` | |
+| `let y = $derived(x * 2)` | `const y = useState(() => x * 2)` | Auto-detected |
 | `{#each}` | `items.map()` | React syntax! |
 | `{#if}` | `{() => x.valueOf() && ...}` | Native JS |
 
@@ -347,7 +347,7 @@ useEffect(() => {
 
 | Aspect | Winner | Why |
 |--------|--------|-----|
-| **API Simplicity** | Flexium | One `state()` for everything |
+| **API Simplicity** | Flexium | One `useState()` for everything |
 | **Learning Curve** | Flexium | **Zero** for React devs vs Svelte's new syntax |
 | **List Rendering DX** | Flexium | Standard JS `.map()` vs Svelte's `{#each}` |
 | **Raw Performance** | Flexium/Svelte | Both are fine-grained & VDOM-less |

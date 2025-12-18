@@ -18,9 +18,9 @@ function LoginForm() {
     email: '',
     password: ''
   })
-  
-  const errors = state<Record<string, string>>({})
-  const touched = state<Record<string, boolean>>({})
+
+  const errors = useState<Record<string, string>>({})
+  const touched = useState<Record<string, boolean>>({})
   
   const handleSubmit = (e: Event) => {
     e.preventDefault()
@@ -119,7 +119,7 @@ function FormWithValidation() {
 function FormWithAsyncValidation() {
   const form = useState({ email: '' })
   const isChecking = useState(false)
-  const emailError = state<string | null>(null)
+  const emailError = useState<string | null>(null)
   
   const checkEmailAvailability = async (email: string) => {
     if (!email) return
@@ -208,7 +208,7 @@ function UserPosts({ userId }: { userId: number }) {
   }, { key: ['user', userId, 'posts'] })
   
   // Automatically refetch when userId changes
-  effect(() => {
+  useEffect(() => {
     const id = userId  // Dependency tracking
     posts.refetch()
   })
@@ -283,13 +283,13 @@ function InfiniteScrollList() {
     }
   }
   
-  effect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
         loadMore()
       }
     }
-    
+
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   })
@@ -314,9 +314,9 @@ function InfiniteScrollList() {
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
 function DataLoader() {
-  const loadingState = state<LoadingState>('idle')
+  const loadingState = useState<LoadingState>('idle')
   const data = useState(null)
-  const error = state<Error | null>(null)
+  const error = useState<Error | null>(null)
   
   const loadData = async () => {
     loadingState.set('loading')
@@ -363,7 +363,7 @@ type FormState =
   | { type: 'error'; message: string }
 
 function ComplexForm() {
-  const formState = state<FormState>({ type: 'idle' })
+  const formState = useState<FormState>({ type: 'idle' })
   const formData = useState({ email: '', password: '' })
   
   const handleSubmit = async () => {
@@ -421,20 +421,20 @@ function ComplexForm() {
 function SearchInput() {
   const query = useState('')
   const results = useState([])
-  
-  effect(() => {
+
+  useEffect(() => {
     if (!query.valueOf()) {
       results.set([])
       return
     }
-    
+
     // Debouncing: search after 300ms
     const timeoutId = setTimeout(async () => {
       const res = await fetch(`/api/search?q=${query.valueOf()}`)
       const data = await res.json()
       results.set(data.results)
     }, 300)
-    
+
     return () => clearTimeout(timeoutId)
   })
   
@@ -462,8 +462,8 @@ function SearchInput() {
 function ScrollTracker() {
   const scrollY = useState(0)
   const lastUpdate = useState(0)
-  
-  effect(() => {
+
+  useEffect(() => {
     const handleScroll = () => {
       const now = Date.now()
       // Update only once per 100ms
@@ -472,7 +472,7 @@ function ScrollTracker() {
         lastUpdate.set(now)
       }
     }
-    
+
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   })
@@ -496,7 +496,7 @@ function PersistentForm() {
   })
   
   // Save to local storage on state change
-  effect(() => {
+  useEffect(() => {
     localStorage.setItem('form-data', JSON.stringify(form.valueOf()))
   })
   
@@ -520,7 +520,7 @@ function PersistentForm() {
 
 ```tsx
 // app/state.ts
-export const theme = state<'light' | 'dark'>('light', {
+export const theme = useState<'light' | 'dark'>('light', {
   key: 'app:theme'
 })
 
@@ -548,7 +548,7 @@ function ThemeToggle() {
 
 ```tsx
 // app/error-handler.ts
-export const globalError = state<Error | null>(null, {
+export const globalError = useState<Error | null>(null, {
   key: 'app:error'
 })
 

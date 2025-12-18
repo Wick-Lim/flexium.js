@@ -25,7 +25,7 @@ Learn when to use local vs global state, how to name state keys, and how to mana
 Learn how to optimize the performance of Flexium apps.
 
 **Key Topics:**
-- Sync updates (`sync()`)
+- Sync updates (`useSync()`)
 - Computed optimization
 - List rendering optimization
 - Global State cleanup

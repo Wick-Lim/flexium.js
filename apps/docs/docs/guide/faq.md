@@ -17,8 +17,8 @@ Frequently asked questions and answers.
 const [count, setCount] = useState(0)
 console.log(count)  // Only outputs initial value, doesn't track updates
 
-// ✅ Correct approach 1: Inside effect()
-effect(() => {
+// ✅ Correct approach 1: Inside useEffect()
+useEffect(() => {
   console.log(count)  // Tracks updates
 })
 
@@ -56,7 +56,7 @@ Or use `useSync()` to sync multiple updates:
 ```tsx
 import { useSync } from 'flexium/core'
 
-sync(() => {
+useSync(() => {
   setA(1)
   setB(2)
   setC(3)
@@ -98,11 +98,11 @@ const [isOpen, setIsOpen] = useState(false)  // No key needed
 
 ```tsx
 // ✅ Return cleanup function
-effect(() => {
+useEffect(() => {
   const interval = setInterval(() => {
     console.log('tick')
   }, 1000)
-  
+
   return () => clearInterval(interval)  // cleanup
 })
 
@@ -117,19 +117,19 @@ useState.delete('old:key')  // Delete unused key
 
 ## Effects and Side Effects
 
-### Q: effect() gets stuck in infinite loop
+### Q: useEffect() gets stuck in infinite loop
 
-**A**: Don't update tracked state inside effect.
+**A**: Don't update tracked state inside useEffect.
 
 ```tsx
 // ❌ Infinite loop occurs
 const [count, setCount] = useState(0)
-effect(() => {
+useEffect(() => {
   setCount(count + 1)  // count changes → effect re-runs → count changes → ...
 })
 
 // ✅ Correct approach: conditional update
-effect(() => {
+useEffect(() => {
   if (count < 10) {
     setCount(count + 1)
   }
@@ -137,7 +137,7 @@ effect(() => {
 
 // ✅ Or: use untrack()
 import { untrack } from 'flexium/core'
-effect(() => {
+useEffect(() => {
   untrack(() => {
     setCount(count + 1)  // Not tracked
   })
@@ -146,20 +146,20 @@ effect(() => {
 
 ---
 
-### Q: effect() doesn't run
+### Q: useEffect() doesn't run
 
-**A**: State must be read inside effect for dependencies to be tracked.
+**A**: State must be read inside useEffect for dependencies to be tracked.
 
 ```tsx
 // ❌ Dependencies not tracked
 const [count, setCount] = useState(0)
-effect(() => {
+useEffect(() => {
   console.log('Hello')  // Doesn't read count
 })
 setCount(1)  // Effect doesn't re-run
 
 // ✅ Dependencies tracked
-effect(() => {
+useEffect(() => {
   console.log('Count:', count)  // Reads count
 })
 setCount(1)  // Effect re-runs
@@ -174,7 +174,7 @@ setCount(1)  // Effect re-runs
 **A**: The third value returned by `useState()` is the status.
 
 ```tsx
-const [data, refetch, status, error] = state(async () => {
+const [data, refetch, status, error] = useState(async () => {
   const res = await fetch('/api/data')
   return res.json()
 })
@@ -198,7 +198,7 @@ if (String(status) === 'error') {
 **A**: Use the `refetch` function.
 
 ```tsx
-const [users, refetch, status] = state(async () => {
+const [users, refetch, status] = useState(async () => {
   return fetch('/api/users').then(r => r.json())
 })
 
@@ -216,17 +216,17 @@ const [users, refetch, status] = state(async () => {
 
 ```tsx
 // ✅ Explicit type specification
-const [user, setUser] = state<User | null>(null)
+const [user, setUser] = useState<User | null>(null)
 
 // ✅ Use generics
-const [count, setCount] = state<number>(0)
+const [count, setCount] = useState<number>(0)
 
 // ✅ For complex types
 interface FormData {
   email: string
   password: string
 }
-const [form, setForm] = state<FormData>({
+const [form, setForm] = useState<FormData>({
   email: '',
   password: ''
 })
@@ -266,7 +266,7 @@ setB(2)  // Update 2
 setC(3)  // Update 3
 
 // ✅ Single update
-sync(() => {
+useSync(() => {
   setA(1)
   setB(2)
   setC(3)

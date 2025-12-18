@@ -1,6 +1,6 @@
 ---
 title: Forms - State-based Form Handling
-description: Build reactive forms using Flexium's state() API. Learn about form state management, validation, and submission handling.
+description: Build reactive forms using Flexium's useState() API. Learn about form state management, validation, and submission handling.
 head:
   - - meta
     - property: og:title
@@ -12,30 +12,30 @@ head:
 
 # Forms
 
-Flexium handles forms using the `state()` API for reactive form state management. This guide shows how to build forms with validation and error handling.
+Flexium handles forms using the `useState()` API for reactive form state management. This guide shows how to build forms with validation and error handling.
 
 ## Basic Usage
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function LoginForm() {
-  const formData = state({
+  const formData = useState({
     email: '',
     password: '',
   })
 
-  const errors = state({
+  const errors = useState({
     email: '',
     password: '',
   })
 
-  const touched = state({
+  const touched = useState({
     email: false,
     password: false,
   })
 
-  const isSubmitting = state(false)
+  const isSubmitting = useState(false)
 
   const validateEmail = (email: string) => {
     if (!email) return 'Email is required'
@@ -117,34 +117,34 @@ function LoginForm() {
 
 ## Form State Management
 
-Use Flexium's `state()` API to manage form state reactively.
+Use Flexium's `useState()` API to manage form state reactively.
 
 ### Form State Structure
 
 ```tsx
 // Form data
-const formData = state({
+const formData = useState({
   email: '',
   password: '',
   // ... more fields
 })
 
 // Validation errors
-const errors = state({
+const errors = useState({
   email: '',
   password: '',
   // ... matching field errors
 })
 
 // Field touched state
-const touched = state({
+const touched = useState({
   email: false,
   password: false,
   // ... matching fields
 })
 
 // Submission state
-const isSubmitting = state(false)
+const isSubmitting = useState(false)
 ```
 
 ## Validation
@@ -255,7 +255,7 @@ const validateUsername = (username: string) => {
 Perform async validation for server-side checks.
 
 ```tsx
-const isValidating = state(false)
+const isValidating = useState(false)
 
 const validateUsernameAsync = async (username: string) => {
   if (!username) return 'Username is required'
@@ -414,10 +414,10 @@ const resetForm = () => {
 ## Complete Example
 
 ```tsx
-import { state } from 'flexium/core'
+import { useState } from 'flexium/core'
 
 function RegistrationForm() {
-  const formData = state({
+  const formData = useState({
     username: '',
     email: '',
     password: '',
@@ -425,7 +425,7 @@ function RegistrationForm() {
     age: '',
   })
 
-  const errors = state({
+  const errors = useState({
     username: '',
     email: '',
     password: '',
@@ -433,7 +433,7 @@ function RegistrationForm() {
     age: '',
   })
 
-  const touched = state({
+  const touched = useState({
     username: false,
     email: false,
     password: false,
@@ -441,7 +441,7 @@ function RegistrationForm() {
     age: false,
   })
 
-  const isSubmitting = state(false)
+  const isSubmitting = useState(false)
 
   const validateUsername = (username: string) => {
     if (!username) return 'Username is required'
@@ -641,8 +641,8 @@ function RegistrationForm() {
 Handle file uploads with state management:
 
 ```tsx
-const file = state<File | null>(null)
-const fileError = state('')
+const file = useState<File | null>(null)
+const fileError = useState('')
 
 const validateFile = (file: File | null) => {
   if (!file) return 'Please select a file'
@@ -721,17 +721,17 @@ interface FormTouched {
   password: boolean
 }
 
-const formData = state<LoginData>({
+const formData = useState<LoginData>({
   email: '',
   password: '',
 })
 
-const errors = state<FormErrors>({
+const errors = useState<FormErrors>({
   email: '',
   password: '',
 })
 
-const touched = state<FormTouched>({
+const touched = useState<FormTouched>({
   email: false,
   password: false,
 })

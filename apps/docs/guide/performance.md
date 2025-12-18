@@ -21,10 +21,10 @@ Flexium is designed for high performance by default. With fine-grained reactivit
 Because Flexium uses signals, updates are pinpointed. If a state changes, only the specific text node or attribute bound to that state updates. There's no component re-rendering or VDOM diffing.
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 function Counter() {
-  const count = state(0);
+  const count = useState(0);
 
   // When count changes, ONLY the text node updates
   // The button, div, and everything else remain untouched
@@ -61,12 +61,12 @@ This means Flexium can be 2-10x faster than VDOM-based frameworks for many opera
 Effects and computed values automatically track only the signals they read. No manual dependency arrays, no risk of stale closures or missing dependencies.
 
 ```tsx
-import { state, effect } from 'flexium/core';
+import { useState, useEffect } from 'flexium/core';
 
-const a = state(1);
-const b = state(2);
+const a = useState(1);
+const b = useState(2);
 
-effect(() => {
+useEffect(() => {
   if (a.valueOf() > 5) {  // Both a() and a work in effects
     // Only when a > 5, this effect depends on 'b'
     console.log('b is', b);
@@ -85,14 +85,14 @@ b.set(20); // Effect runs again
 
 ### Use Computed for Derived State
 
-Instead of recalculating values in JSX, use `state()` with `deps` to memoize derived values:
+Instead of recalculating values in JSX, use `useState()` with `deps` to memoize derived values:
 
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 // Bad - recalculates on every access
 function TodoList() {
-  const [todos, setTodos] = state([...]);
+  const [todos, setTodos] = useState([...]);
 
   return (
     <div>
@@ -105,10 +105,10 @@ function TodoList() {
 
 // Good - computed values with deps
 function TodoList() {
-  const [todos, setTodos] = state([...]);
-  const [total] = state(() => todos.length, { deps: [todos] });
-  const [completed] = state(() => todos.filter(t => t.done).length, { deps: [todos] });
-  const [active] = state(() => todos.filter(t => !t.done).length, { deps: [todos] });
+  const [todos, setTodos] = useState([...]);
+  const [total] = useState(() => todos.length, { deps: [todos] });
+  const [completed] = useState(() => todos.filter(t => t.done).length, { deps: [todos] });
+  const [active] = useState(() => todos.filter(t => !t.done).length, { deps: [todos] });
 
   return (
     <div>
@@ -124,23 +124,23 @@ Computed values only recalculate when their dependencies change.
 
 ### Prefer Computed Over Effect
 
-When you need a derived value, use `computed()` instead of `effect()` with manual state updates:
+When you need a derived value, use `computed()` instead of `useEffect()` with manual state updates:
 
 ```tsx
 ```tsx
-import { effect, state } from 'flexium/core';
+import { useEffect, useState } from 'flexium/core';
 
-const firstName = state('John');
-const lastName = state('Doe');
+const firstName = useState('John');
+const lastName = useState('Doe');
 
 // Bad - uses effect to maintain derived state
-const fullName = state('');
-effect(() => {
+const fullName = useState('');
+useEffect(() => {
   fullName.set(`${firstName.valueOf()} ${lastName.valueOf()}`);
 });
 
 // Good - computed automatically updates
-const fullNameComputed = state(() => `${firstName.valueOf()} ${lastName.valueOf()}`);
+const fullNameComputed = useState(() => `${firstName.valueOf()} ${lastName.valueOf()}`);
 ```
 
 Computed is more efficient because it's lazy (only computes when read) and doesn't trigger unnecessary updates.
@@ -151,12 +151,12 @@ Reading signals inside loops or nested structures can create many dependencies:
 
 ```tsx
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
-const items = state([...]);
+const items = useState([...]);
 
 // Bad - creates dependency on every item property
-effect(() => {
+useEffect(() => {
   const list = items.valueOf();
   list.forEach(item => {
     console.log(item.name, item.value);
@@ -164,18 +164,18 @@ effect(() => {
 });
 
 // Good - depend only on the array itself
-effect(() => {
+useEffect(() => {
   const list = items.valueOf();
   console.log('Items changed:', list.length);
 });
 
 // Or use granular signals for each item
-const itemSignals = items.valueOf().map(item => state(item));
+const itemSignals = items.valueOf().map(item => useState(item));
 ```
 
 ## Computed vs Effect Usage
 
-Understanding when to use `computed()` vs `effect()` is crucial for performance.
+Understanding when to use `computed()` vs `useEffect()` is crucial for performance.
 
 ### Use Computed When:
 
@@ -186,13 +186,13 @@ Understanding when to use `computed()` vs `effect()` is crucial for performance.
 
 ```tsx
 ```tsx
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
-const price = state(100);
-const tax = state(0.08);
+const price = useState(100);
+const tax = useState(0.08);
 
 // Computed - perfect for derived values
-const total = state(() => price.valueOf() * (1 + tax.valueOf()));
+const total = useState(() => price.valueOf() * (1 + tax.valueOf()));
 
 // Used in UI - only recalculates when price or tax changes
 <div>Total: ${total}</div>
@@ -207,12 +207,12 @@ const total = state(() => price.valueOf() * (1 + tax.valueOf()));
 
 ```tsx
 ```tsx
-import { effect, state } from 'flexium/core';
+import { useEffect, useState } from 'flexium/core';
 
-const userId = state(null);
+const userId = useState(null);
 
 // Effect - perfect for side effects
-effect(() => {
+useEffect(() => {
   const id = userId.valueOf();  // userId() works in effects
   if (id) {
     // Side effect: log to analytics
@@ -221,7 +221,7 @@ effect(() => {
 });
 
 // Effect with cleanup
-effect(() => {
+useEffect(() => {
   const handler = () => console.log('Window resized');
   window.addEventListener('resize', handler);
 
@@ -233,18 +233,18 @@ effect(() => {
 
 ```tsx
 ```tsx
-import { effect, state } from 'flexium/core';
+import { useEffect, useState } from 'flexium/core';
 
-const count = state(0);
+const count = useState(0);
 
 // Computed - lazy, memoized
-const doubled = state(() => {
+const doubled = useState(() => {
   console.log('Computing doubled');
   return count.valueOf() * 2;
 });
 
 // Effect - eager, runs on every change
-effect(() => {
+useEffect(() => {
   console.log('Effect triggered');
   const value = count.valueOf() * 2;
 });
@@ -263,12 +263,12 @@ doubled.valueOf();   // Recomputes now
 When making multiple state changes, sync them to avoid intermediate updates:
 
 ```tsx
-import { sync } from 'flexium/core';
-import { state } from 'flexium/core';
+import { useSync } from 'flexium/core';
+import { useState } from 'flexium/core';
 
-const firstName = state('John');
-const lastName = state('Doe');
-const age = state(30);
+const firstName = useState('John');
+const lastName = useState('Doe');
+const age = useState(30);
 
 // Bad - triggers 3 separate updates
 function updateUser(user) {
@@ -280,7 +280,7 @@ function updateUser(user) {
 
 // Good - batches into 1 update
 function updateUser(user) {
-  sync(() => {
+  useSync(() => {
     firstName.set(user.first);
     lastName.set(user.last);
     age.set(user.age);
@@ -317,9 +317,9 @@ setTimeout(() => {
   active.set(true);
 }, 1000);
 
-// Wrap in sync() for async contexts
+// Wrap in useSync() for async contexts
 setTimeout(() => {
-  sync(() => {
+  useSync(() => {
     count.set(c => c + 1);
     name.set('Updated');
     active.set(true);
@@ -342,14 +342,14 @@ Flexium uses efficient event delegation for all standard events. Listeners are a
 Use `root()` to create disposal scopes for effects and computations:
 
 ```tsx
-import { effect, state } from 'flexium/core';
+import { useEffect, useState } from 'flexium/core';
 import { root } from 'flexium/core';
 
-const [count, setCount] = state(0);
+const [count, setCount] = useState(0);
 
 // Bad - effect never gets cleaned up
 function createWatcher() {
-  effect(() => {
+  useEffect(() => {
     console.log('Count:', count.valueOf());
   });
 }
@@ -360,7 +360,7 @@ createWatcher(); // Creates another effect - memory leak!
 // Good - effect is properly cleaned up
 function createWatcher() {
   return root(dispose => {
-    effect(() => {
+    useEffect(() => {
       console.log('Count:', count.valueOf());
     });
 
@@ -382,10 +382,10 @@ In components, effects are automatically cleaned up when the component unmounts:
 
 ```tsx
 function Timer() {
-  const time = state(0);
+  const time = useState(0);
 
   // This effect is automatically cleaned up on unmount
-  effect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       time.set(t => t + 1);
     }, 1000);
@@ -402,14 +402,14 @@ function Timer() {
 Use `untrack()` to read a signal without creating a dependency:
 
 ```tsx
-import { effect, state } from 'flexium/core';
+import { useEffect, useState } from 'flexium/core';
 import { untrack } from 'flexium/core';
 
-const count = state(0);
-const multiplier = state(2);
+const count = useState(0);
+const multiplier = useState(2);
 
 // This effect only tracks 'count', not 'multiplier'
-effect(() => {
+useEffect(() => {
   const c = count.valueOf();
   const m = untrack(() => multiplier.valueOf()); // Read without tracking
   console.log('Result:', c * m);
@@ -429,11 +429,11 @@ This is useful for:
 Signals also have a `.peek()` method that works like `untrack()`:
 
 ```tsx
-import { state, effect } from 'flexium/core';
+import { useState, useEffect } from 'flexium/core';
 
-const count = state(0);
+const count = useState(0);
 
-effect(() => {
+useEffect(() => {
   // Tracked access
   const current = count.valueOf();
 
@@ -450,10 +450,10 @@ When rendering thousands of items, use `List` with `virtual` mode to only render
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 function BigList() {
-  const items = state(
+  const items = useState(
     Array.from({ length: 10000 }, (_, i) => ({
       id: i,
       name: `Item ${i}`,
@@ -495,10 +495,10 @@ function BigList() {
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { state } from 'flexium/core';
+import { useState } from 'flexium/core';
 
 function OptimizedList() {
-  const items = state([...]); // 100,000 items
+  const items = useState([...]); // 100,000 items
 
   // List component automatically optimizes rendering
   return (
