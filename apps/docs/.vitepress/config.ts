@@ -238,7 +238,7 @@ export default defineConfig({
             { text: '&lt;Route /&gt;', link: '/docs/router/route' },
             { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
             { text: '&lt;Link /&gt;', link: '/docs/router/link' },
-            { text: 'router()', link: '/docs/router/router' }
+            { text: 'useRouter()', link: '/docs/router/router' }
           ]
         },
         {
@@ -321,7 +321,7 @@ export default defineConfig({
             { text: '&lt;Route /&gt;', link: '/docs/router/route' },
             { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
             { text: '&lt;Link /&gt;', link: '/docs/router/link' },
-            { text: 'router()', link: '/docs/router/router' }
+            { text: 'useRouter()', link: '/docs/router/router' }
           ]
         },
         {
@@ -397,7 +397,7 @@ export default defineConfig({
             { text: '&lt;Route /&gt;', link: '/docs/router/route' },
             { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
             { text: '&lt;Link /&gt;', link: '/docs/router/link' },
-            { text: 'router()', link: '/docs/router/router' }
+            { text: 'useRouter()', link: '/docs/router/router' }
           ]
         },
         {
