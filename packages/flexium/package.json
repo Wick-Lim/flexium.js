@@ -54,11 +54,6 @@
       "types": "./dist/interactive.d.ts",
       "import": "./dist/interactive.mjs",
       "require": "./dist/interactive.js"
-    },
-    "./advanced": {
-      "types": "./dist/advanced.d.ts",
-      "import": "./dist/advanced.mjs",
-      "require": "./dist/advanced.js"
     }
   },
   "files": [

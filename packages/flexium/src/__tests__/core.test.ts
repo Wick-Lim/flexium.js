@@ -5,8 +5,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, f } from '../dom'
-import { use, sync, useRef } from '../core'
-import { createContext } from '../advanced'
+import { use, sync, useRef, createContext } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 

@@ -328,13 +328,12 @@ Refs are passed via props - no special forwarding mechanism needed.
 
 ---
 
-## 2. Advanced Module (`advanced/`)
+## 2. Context API
 
 ### 2.1 Context API
 
 ```typescript
-import { createContext } from 'flexium/advanced'
-import { use } from 'flexium/core'
+import { createContext, use } from 'flexium/core'
 
 // Create context with default value
 const ThemeCtx = createContext('light')

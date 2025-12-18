@@ -103,8 +103,7 @@ If you're using deprecated Context API, migrate to `use()` with keys:
 
 ```tsx
 // ❌ Old way (deprecated)
-import { createContext } from 'flexium/advanced'
-import { use } from 'flexium/core'
+import { createContext, use } from 'flexium/core'
 
 const ThemeContext = createContext('light')
 

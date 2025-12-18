@@ -6,8 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { f, hydrate } from '../dom'
 import { renderToString, renderToStaticMarkup, getIsServer } from '../server'
-import { use } from '../core'
-import { createContext } from '../advanced'
+import { use, createContext } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
