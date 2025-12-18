@@ -142,7 +142,7 @@ export default defineConfig({
 
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
-      { text: 'Docs', link: '/docs/core/state' },
+      { text: 'Docs', link: '/docs/core/use' },
       { text: 'Showcase', link: '/showcase' },
       {
         text: 'v0.13.0',
