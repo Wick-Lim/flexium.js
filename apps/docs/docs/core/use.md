@@ -133,8 +133,55 @@ use(({ onCleanup }) => {
 }, [userId])
 ```
 
-::: info
-`onMount()` and `onCleanup()` have been removed. Use `use()` with empty deps `[]` instead. See [Lifecycle](/docs/core/lifecycle) for details.
+### Lifecycle Patterns
+
+`use()` handles all lifecycle needs—no separate mount or cleanup hooks:
+
+```tsx
+// Mount only (empty deps = run once)
+use(({ onCleanup }) => {
+  console.log('Component mounted!')
+  onCleanup(() => console.log('Component unmounted!'))
+}, [])
+
+// Initialize third-party libraries
+use(({ onCleanup }) => {
+  const chart = new Chart(element, config)
+  onCleanup(() => chart.destroy())
+}, [])
+
+// Cancel pending requests
+use(({ onCleanup }) => {
+  const controller = new AbortController()
+  fetch(`/api/search?q=${query}`, { signal: controller.signal })
+    .then(res => res.json())
+    .then(data => setResults(data))
+  onCleanup(() => controller.abort())
+}, [query])
+
+// Countdown timer
+use(({ onCleanup }) => {
+  if (time <= 0) return
+  const timeout = setTimeout(() => setTime(t => t - 1), 1000)
+  onCleanup(() => clearTimeout(timeout))
+}, [time])
+```
+
+::: info Migration
+`onMount()` and `onCleanup()` have been removed. Use `use()` with empty deps `[]` instead.
+```tsx
+// ❌ Old way (removed)
+onMount(() => {
+  const ws = new WebSocket('...')
+  return () => ws.close()
+})
+
+// ✅ New way
+use(({ onCleanup }) => {
+  const ws = new WebSocket('...')
+  onCleanup(() => ws.close())
+}, [])
+```
 :::
 
 ---
@@ -321,5 +368,4 @@ type ResourceControl = {
 ## See Also
 
 - [sync()](/docs/core/sync) - Batch multiple state updates
-- [Lifecycle](/docs/core/lifecycle) - Component lifecycle patterns
 - [Context](/docs/core/context) - Context API for dependency injection

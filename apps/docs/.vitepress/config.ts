@@ -206,8 +206,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'use()', link: '/docs/core/use' },
-            { text: 'sync()', link: '/docs/core/sync' },
-            { text: 'Lifecycle', link: '/docs/core/lifecycle' }
+            { text: 'sync()', link: '/docs/core/sync' }
           ]
         },
         {
@@ -291,8 +290,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'use()', link: '/docs/core/use' },
-            { text: 'sync()', link: '/docs/core/sync' },
-            { text: 'Lifecycle', link: '/docs/core/lifecycle' }
+            { text: 'sync()', link: '/docs/core/sync' }
           ]
         },
         {
@@ -369,8 +367,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'use()', link: '/docs/core/use' },
-            { text: 'sync()', link: '/docs/core/sync' },
-            { text: 'Lifecycle', link: '/docs/core/lifecycle' }
+            { text: 'sync()', link: '/docs/core/sync' }
           ]
         },
         {
