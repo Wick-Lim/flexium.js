@@ -3,7 +3,7 @@
  *
  * @example
  * ```tsx
- * import { Column, Row, Text, Button, createTheme, setTheme } from 'flexium-ui'
+ * import { Column, Row, Text, Button, Card, Spinner, Modal, createTheme, setTheme } from 'flexium-ui'
  *
  * // Optional: Create and set custom theme
  * const theme = createTheme({ colors: { primary: '#0066ff' } })
@@ -14,10 +14,17 @@
  *   return (
  *     <Column gap={16} padding={24}>
  *       <Text variant="h1">Welcome</Text>
+ *       <Card shadow="md" padding="lg">
+ *         <Text>Card content with elevation</Text>
+ *         <Spinner size="md" color="primary" />
+ *       </Card>
  *       <Row gap={8} mainAxisAlignment="end">
  *         <Button variant="outlined">Cancel</Button>
  *         <Button>Save</Button>
  *       </Row>
+ *       <Modal open={true} title="Dialog" onClose={() => {}}>
+ *         <Text>Modal content</Text>
+ *       </Modal>
  *     </Column>
  *   )
  * }
@@ -37,8 +44,32 @@ export type {
 } from './layout'
 
 // Components
-export { Text, Button } from './components'
-export type { TextProps, ButtonProps } from './components'
+export {
+  Text,
+  Button,
+  Card,
+  Spinner,
+  Modal,
+  Avatar,
+  Badge,
+  Chip,
+  TextField,
+  Checkbox,
+  Switch,
+} from './components'
+export type {
+  TextProps,
+  ButtonProps,
+  CardProps,
+  SpinnerProps,
+  ModalProps,
+  AvatarProps,
+  BadgeProps,
+  ChipProps,
+  TextFieldProps,
+  CheckboxProps,
+  SwitchProps,
+} from './components'
 
 // Theme
 export {
