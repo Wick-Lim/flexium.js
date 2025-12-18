@@ -20,7 +20,7 @@ It handles local state, shared global state, async data fetching, and derived va
 The `use()` function always returns a **tuple**:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Returns [value, setter]
 const [count, setCount] = use(0)
@@ -59,9 +59,9 @@ To share state across components, provide a unique `key` in the options.
 
 ```tsx
 // store/theme.ts
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
-export const useTheme = () => use('light', { key: 'theme' })
+export const useTheme = () => use('light', undefined, { key: ['theme'] })
 ```
 
 ```tsx
@@ -126,7 +126,7 @@ Pass a synchronous function with `deps` to derive state from other values.
 const [count, setCount] = use(1)
 
 // Updates when count changes
-const [double] = use(() => count * 2, { deps: [count] })
+const [double] = use(() => count * 2, [count])
 
 console.log(double) // 2
 setCount(5)
@@ -146,7 +146,7 @@ const [filteredItems] = use(() => {
   return items.filter(item =>
     filter === 'all' ? true : item.status === filter
   )
-}, { deps: [items, filter] })
+}, [items, filter])
 ```
 
 **When to use `deps`:**
@@ -157,7 +157,7 @@ const [filteredItems] = use(() => {
 **Computed state requires `deps`:**
 | Usage | Example |
 |-------|---------|
-| With deps | `use(() => count * 2, { deps: [count] })` |
+| With deps | `use(() => count * 2, [count])` |
 | Re-runs when deps change | Explicit dependency tracking |
 
 ```tsx
@@ -165,9 +165,9 @@ const [filteredItems] = use(() => {
 function KanbanBoard() {
   const [tasks] = useTasks()
 
-  const [todo] = use(() => tasks.filter(t => t.status === 'todo'), { deps: [tasks] })
-  const [inProgress] = use(() => tasks.filter(t => t.status === 'in-progress'), { deps: [tasks] })
-  const [done] = use(() => tasks.filter(t => t.status === 'done'), { deps: [tasks] })
+  const [todo] = use(() => tasks.filter(t => t.status === 'todo'), [tasks])
+  const [inProgress] = use(() => tasks.filter(t => t.status === 'in-progress'), [tasks])
+  const [done] = use(() => tasks.filter(t => t.status === 'done'), [tasks])
 
   return (
     <div class="kanban">
@@ -185,14 +185,14 @@ The `deps` option is not supported with async functions. Use automatic tracking 
 
 ## Effects & Side Effects
 
-While `use()` manages data, `use()` handles side effects like DOM manipulation, logging, or subscriptions.
+While `use()` manages data, `use()` also handles side effects like DOM manipulation, logging, or subscriptions.
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const [count, setCount] = use(0)
 
-use(() => {
+use(({ onCleanup }) => {
   // Runs when 'count' changes
   console.log('Count is:', count)
 }, [count])
@@ -221,12 +221,12 @@ return (
 Keys can be arrays for hierarchical namespacing - similar to TanStack Query:
 
 ```tsx
-// String key
-const [user, setUser] = use(null, { key: 'user' })
+// String key (deprecated - use array)
+const [user, setUser] = use(null, undefined, { key: ['user'] })
 
-// Array key - great for dynamic keys
-const [userProfile] = use(null, { key: ['user', 'profile', userId] })
-const [posts] = use([], { key: ['user', 'posts', userId] })
+// Array key - great for dynamic keys (recommended)
+const [userProfile] = use(null, undefined, { key: ['user', 'profile', userId] })
+const [posts] = use([], undefined, { key: ['user', 'posts', userId] })
 ```
 
 ### 7. Params Option
@@ -240,6 +240,7 @@ const [user] = use(async () => fetch(`/api/users/${userId}`))
 // Explicit dependencies (params) - recommended for complex cases
 const [userWithParams, control] = use(
   async ({ userId, postId }) => fetch(`/api/users/${userId}/posts/${postId}`),
+  undefined,
   {
     key: ['user', 'posts', userId, postId],
     params: { userId, postId }
@@ -256,5 +257,5 @@ const [userWithParams, control] = use(
 
 1. **Destructure the tuple**: `const [value, setter] = use(initial)`
 2. **Use setter for updates**: `setter(newValue)` or `setter(prev => prev + 1)`
-3. **Use deps for expensive computations**: `use(() => ..., { deps: [...] })`
+3. **Use deps for expensive computations**: `use(() => ..., [deps])`
 4. **Use array keys for dynamic data**: `['user', userId]` instead of `'user-' + userId`

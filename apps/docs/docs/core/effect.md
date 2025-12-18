@@ -17,14 +17,14 @@ A stopwatch demonstrating `use()` for timer-based updates:
 ## Import
 
 ```ts
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 ```
 
 ## Signature
 
 ```ts
 function use(
-  fn: () => void | (() => void),
+  fn: (context: { onCleanup: (fn: () => void) => void }) => void | Promise<void>,
   deps: any[]
 ): () => void
 ```
@@ -36,7 +36,7 @@ function use(
 ```tsx
 const [count, setCount] = use(0)
 
-use(() => {
+use(({ onCleanup }) => {
   console.log('Count changed:', count)
 }, [count])  // Explicit dependency array
 
@@ -49,14 +49,14 @@ setCount(2) // logs: "Count changed: 2"
 ```tsx
 const [isActive, setIsActive] = use(false)
 
-use(() => {
+use(({ onCleanup }) => {
   if (isActive) {
     const interval = setInterval(() => {
       console.log('tick')
     }, 1000)
 
-    // Return cleanup function
-    return () => clearInterval(interval)
+    // Register cleanup function
+    onCleanup(() => clearInterval(interval))
   }
 }, [isActive])
 ```
@@ -66,7 +66,7 @@ use(() => {
 ```tsx
 const [theme, setTheme] = use('light')
 
-use(() => {
+use(({ onCleanup }) => {
   document.body.classList.toggle('dark', theme === 'dark')
 }, [theme])
 ```
@@ -77,14 +77,14 @@ use(() => {
 const [userId, setUserId] = use(1)
 const [user, setUser] = use(null)
 
-use(() => {
+use(({ onCleanup }) => {
   fetch(`/api/users/${userId}`)
     .then(res => res.json())
     .then(data => setUser(data))
 
-  return () => {
+  onCleanup(() => {
     // Cancel pending request if userId changes
-  }
+  })
 }, [userId])
 ```
 
@@ -93,13 +93,13 @@ use(() => {
 ```tsx
 const [isListening] = use(true)
 
-use(() => {
+use(({ onCleanup }) => {
   if (!isListening) return
 
   const handler = (e) => console.log('Key:', e.key)
   window.addEventListener('keydown', handler)
 
-  return () => window.removeEventListener('keydown', handler)
+  onCleanup(() => window.removeEventListener('keydown', handler))
 }, [isListening])
 ```
 
@@ -109,7 +109,7 @@ use(() => {
 const [a, setA] = use(1)
 const [b, setB] = use(2)
 
-use(() => {
+use(({ onCleanup }) => {
   // Runs when either a or b changes
   console.log('Sum:', a + b)
 }, [a, b])
@@ -119,7 +119,7 @@ use(() => {
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `fn` | `() => void \| (() => void)` | Effect function, optionally returning a cleanup function |
+| `fn` | `(context: { onCleanup }) => void \| Promise<void>` | Effect function with access to onCleanup context |
 | `deps` | `any[]` | Dependency array - effect re-runs when these values change |
 
 ## Returns
@@ -139,16 +139,16 @@ use(() => {
 
 ```tsx
 // Mount + Cleanup (empty deps = run once)
-use(() => {
+use(({ onCleanup }) => {
   console.log('mounted')
-  return () => console.log('cleanup')
+  onCleanup(() => console.log('cleanup'))
 }, [])
 
 // React to changes + cleanup
-use(() => {
+use(({ onCleanup }) => {
   const ws = new WebSocket(`wss://api.com/${userId}`)
   ws.onmessage = (e) => setMessages(m => [...m, e.data])
-  return () => ws.close()  // cleanup before re-run or unmount
+  onCleanup(() => ws.close())  // cleanup before re-run or unmount
 }, [userId])
 ```
 

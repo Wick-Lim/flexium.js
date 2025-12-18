@@ -20,14 +20,14 @@ How does Flexium compare to React and Svelte? This guide helps you understand th
 ::: code-group
 
 ```jsx [Flexium ✨]
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Component() {
   // All state needs - one function, tuple return
   const [count, setCount] = use(0)                          // local
-  const [doubled] = use(() => count * 2, { deps: [count] }) // derived
+  const [doubled] = use(() => count * 2, [count])           // derived
   const [user] = use(async () => fetchUser())               // async
-  const [theme, setTheme] = use('dark', { key: 'theme' })   // global
+  const [theme, setTheme] = use('dark', undefined, { key: ['theme'] })   // global
 
   return <div>{count} × 2 = {doubled}</div>
 }
@@ -40,7 +40,7 @@ import { useRecoilState } from 'recoil'
 
 function Component() {
   // Different APIs for different needs
-  const [count, setCount] = use(0)                 // local
+  const [count, setCount] = useState(0)                 // local
   const doubled = useMemo(() => count * 2, [count])     // derived (manual deps!)
   const { data: user } = useQuery(['user'], fetchUser)  // async (separate lib!)
   const [theme, setTheme] = useRecoilState(themeAtom)   // global (separate lib!)
@@ -242,7 +242,7 @@ function Component() {
 ::: code-group
 
 ```jsx [Flexium ✨]
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Dependency array like React
 use(() => {
@@ -255,7 +255,7 @@ use(() => {
 ```
 
 ```jsx [React]
-import { useEffect } from 'react'
+import { use } from 'react'
 
 // Manual dependency array
 use(() => {

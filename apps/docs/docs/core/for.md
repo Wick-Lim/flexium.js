@@ -19,7 +19,7 @@ import TodoDemo from '../../components/TodoDemo.vue'
 ## Basic Usage
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const [items] = use(['Apple', 'Banana', 'Cherry'])
 

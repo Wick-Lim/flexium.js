@@ -1,18 +1,15 @@
 import { use } from 'flexium/core';
 import { Link } from 'flexium/router';
-import { loadItem, loadStories, useItem } from '../store';
+import { loadItem, loadStories } from '../store';
 
 function StoryItem(props: { id: number; index: number; key?: number }) {
-    // Load item data
-    use(() => {
-        loadItem(props.id);
+    // Use async use() to fetch story data
+    const [story, { loading }] = use(async () => {
+        return await loadItem(props.id);
     }, [props.id]);
 
-    // Subscribe to item state
-    const [story] = useItem(props.id);
-
     // Check if data is loaded
-    if (!story?.title) {
+    if (loading || !story?.title) {
         return <li class="news-item">Loading...</li>
     }
 

@@ -1,33 +1,28 @@
 import { use } from 'flexium/core'
 import { useRouter, Link } from 'flexium/router'
-import { loadItem, useItem } from '../store'
+import { loadItem } from '../store'
 
 function Comment(props: { id: number }) {
-    const [comment] = useItem(props.id);
+    // Use async use() to fetch comment data
+    const [comment, { loading }] = use(async () => {
+        return await loadItem(props.id);
+    }, [props.id]);
 
-    // Load comment data if missing
-    use(() => {
-        if (!comment) {
-            loadItem(props.id);
-        }
-    }, [props.id, comment]);
-
-    // Use proxy directly - no function wrapper needed
-    const c = comment;
-    if (!c || c.type !== 'comment' || !c.text) return null
+    if (loading || !comment) return null;
+    if (comment.type !== 'comment' || !comment.text) return null
 
     return (
         <li class="comment">
             <div class="comment-header">
                 <span class="by">
-                    <Link to={`/user/${c.by}`}>{c.by}</Link>
+                    <Link to={`/user/${comment.by}`}>{comment.by}</Link>
                 </span>
-                <span class="time"> {new Date(c.time * 1000).toLocaleString()}</span>
+                <span class="time"> {new Date(comment.time * 1000).toLocaleString()}</span>
             </div>
-            <div class="comment-text" innerHTML={c.text} />
-            {c.kids && c.kids.length > 0 && (
+            <div class="comment-text" innerHTML={comment.text} />
+            {comment.kids && comment.kids.length > 0 && (
                 <ul class="comment-children" style={{ paddingLeft: '20px' }}>
-                    {c.kids.map((kidId: number) => <Comment id={kidId} />)}
+                    {comment.kids.map((kidId: number) => <Comment id={kidId} />)}
                 </ul>
             )}
         </li>
@@ -39,23 +34,18 @@ export default function Item(props: { params?: { id?: string } } = {}) {
     const [itemId] = use(() => {
         const idStr = r.params.id || props.params?.id;
         return idStr ? parseInt(idStr) : undefined
-    })
+    }, [r.params.id, props.params?.id])
 
-    // Load item data when itemId changes
-    use(() => {
-        if (itemId) {
-            loadItem(itemId)
-        }
+    // Use async use() to fetch item data
+    const [item, { loading, error }] = use(async () => {
+        if (!itemId) return undefined;
+        return await loadItem(itemId);
     }, [itemId])
 
-    // Use item from global state - this will be reactive
-    const [item] = itemId ? useItem(itemId) : [undefined]
+    if (loading || !item) return <main class="view item-view" id="main"><div>Loading...</div></main>
+    if (error) return <main class="view item-view" id="main"><div>Error loading item</div></main>
 
-    // Use proxy directly
-    const i = item;
-    if (!i) return <main class="view item-view" id="main"><div>Loading...</div></main>
-
-    const itemValue = i
+    const itemValue = item
 
     return (
         <main class="view item-view" id="main">

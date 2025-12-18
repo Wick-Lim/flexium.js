@@ -105,7 +105,7 @@ With `autoImport: true`, you can use Flexium primitives without explicit imports
 
 ```tsx
 // Before (without autoImport)
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Counter() {
   const [count, setCount] = use(0);
@@ -148,7 +148,7 @@ The plugin enables HMR for Flexium components automatically. When you save a fil
 
 ```tsx
 // Counter.tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 export function Counter() {
   const [count, setCount] = use(0);
@@ -231,7 +231,7 @@ Alternatively, use pragma comments in individual files:
 
 ```tsx
 /** @jsxImportSource flexium */
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function App() {
   const [count, setCount] = use(0);

@@ -42,7 +42,7 @@ import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
 Canvas elements update automatically when state changes:
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function AnimatedCircle() {
@@ -167,7 +167,7 @@ Draw arcs:
 Combine with event handlers for interactivity:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function InteractiveCanvas() {
@@ -227,7 +227,7 @@ For advanced use cases, access the underlying canvas:
 ## Example: Real-Time Chart
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Canvas, DrawLine, DrawCircle, DrawText } from 'flexium/canvas'
 
 function RealtimeChart() {

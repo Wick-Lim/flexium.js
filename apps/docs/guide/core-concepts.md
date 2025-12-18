@@ -7,13 +7,13 @@ Understanding the fundamental concepts behind Flexium will help you build better
 Flexium's philosophy is simple: **one `use()` function for all reactive needs**.
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Mutable state
 const [count, setCount] = use(0)
 
 // Derived state
-const [doubled] = use(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, [count])
 
 // Async state
 const [users] = use(async () => fetch('/api/users'))
@@ -47,7 +47,7 @@ function Counter() {
 const [name, setName] = use('Alice')
 
 // Derived state - requires deps
-const [greeting] = use(() => `Hello, ${name}!`, { deps: [name] })
+const [greeting] = use(() => `Hello, ${name}!`, [name])
 
 // Async state - returns [value, control]
 const [data, control] = use(async () => fetchData())
@@ -217,7 +217,7 @@ function DataView() {
 | Concept | Purpose | Example |
 |---------|---------|---------|
 | `use(value)` | Mutable state | `const [x, setX] = use(0)` |
-| `use(() => T, { deps })` | Derived value | `use(() => a + b, { deps: [a, b] })` |
+| `use(() => T, { deps })` | Derived value | `use(() => a + b, [a, b])` |
 | `use(async () => T)` | Async data | `const [data, control] = use(async () => fetch(...))` |
 | `use(fn, deps)` | Side effects | `use(() => log(x), [x])` |
 | `items.map()` | List render | `items.map(item => <div>{item}</div>)` |

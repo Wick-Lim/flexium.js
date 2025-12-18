@@ -46,7 +46,7 @@ Style properties use camelCase (JavaScript convention) rather than kebab-case:
 For dynamic, reactive styling, pass a function that returns a style object. The function automatically tracks signal dependencies:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function ThemedButton() {
   const [isDark, setIsDark] = use(false)
@@ -94,7 +94,7 @@ const [color, setColor] = use('#333')
 Use computed values for derived styles:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function ProgressBar() {
   const [progress, setProgress] = use(0)
@@ -265,7 +265,7 @@ CSS custom properties provide a powerful way to create themeable, maintainable s
 Update CSS variables reactively for instant theme changes:
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -407,7 +407,7 @@ Traditional CSS media queries work seamlessly with Flexium:
 Use matchMedia API with signals for JavaScript-driven responsive behavior:
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = use(false)
@@ -470,7 +470,7 @@ Implement light/dark mode and custom themes.
 ### Simple Theme Toggle
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function useTheme() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app-theme' })
@@ -530,7 +530,7 @@ function App() {
 Use context to provide theme throughout your app:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Theme state - shared globally with key
 const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app:theme' })
@@ -553,7 +553,7 @@ const [colors, setColors] = use(() => String(theme) === 'light' ? lightColors : 
 const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
 function ThemedButton() {
-  const [theme, setTheme2] = use('light', { key: 'app:theme' })
+  const [theme, setTheme2] = use('light', undefined, { key: ['app:theme'] })
   const [colors, setColors2] = use(() => String(theme) === 'light' ? lightColors : darkColors, { key: 'app:theme:colors' })
 
   return (

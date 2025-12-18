@@ -11,17 +11,14 @@ Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchie
 Instead of Context API, use `use()` with a `key` option:
 
 ```tsx
-import { useState } from 'flexium/core'
-
-// Share theme across all components
-const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
+import { use } from 'flexium/core'
 
 // In any component
 function ThemeToggle() {
-  const [theme] = use('light', [], { key: 'app:theme' })
+  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
 
   return (
-    <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
+    <button onclick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
       Current: {theme}
     </button>
   )
@@ -31,18 +28,27 @@ function ThemeToggle() {
 ### Complete Example: Auth State
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Auth state - shared globally
-// Share theme across all components
-const theme = useState<'light' | 'dark'>('light', { key: 'app:theme' })
+function useAuth() {
+  const [user, setUser] = use<User | null>(null, undefined, { key: ['app', 'auth', 'user'] })
 
-// In any component
-function ThemeToggle() {
-  const [theme] = use('light', [], { key: 'app:theme' })
+  const login = async (email: string, password: string) => {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    })
+    const userData = await response.json()
+    setUser(userData)
+  }
 
-  return (
-    <button onclick={() => theme.set(t => t === 'light' ? 'dark' : 'light')}>
+  const logout = () => {
+    setUser(null)
+  }
+
+  return { user, login, logout }
+}
 
 // Use in any component
 function Header() {
@@ -66,24 +72,20 @@ function Header() {
 ### Multiple Global States
 
 ```tsx
-import { useState } from 'flexium/core'
-
-// Theme state
-const [theme] = use('light', [], { key: 'app:theme' })
-
-// Auth state
-const [user] = use(null, [], { key: 'app:auth:user' })
-
-// Cart state
-const [items] = use([], [], { key: 'app:cart:items' })
+import { use } from 'flexium/core'
 
 // Use in any component
 function Dashboard() {
-  const [theme] = use('light', [], { key: 'app:theme' })
-  const [user] = use(null, [], { key: 'app:auth:user' })
-  const [items] = use([], [], { key: 'app:cart:items' })
+  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
+  const [user, setUser] = use(null, undefined, { key: ['app', 'auth', 'user'] })
+  const [items, setItems] = use([], undefined, { key: ['app', 'cart', 'items'] })
 
-  // Use all states
+  return (
+    <div class={theme}>
+      <p>Welcome, {user?.name}</p>
+      <p>Cart items: {items.length}</p>
+    </div>
+  )
 }
 ```
 
@@ -92,7 +94,7 @@ function Dashboard() {
 - ✅ **No Provider boilerplate** - No wrapper components needed
 - ✅ **No hierarchy** - Access from anywhere, not just child components
 - ✅ **Simpler mental model** - Same API as local state
-- ✅ **Automatic cleanup** - Use `useState.delete(key)` when needed
+- ✅ **Automatic cleanup** - State is automatically cleaned up when no longer used
 - ✅ **Type-safe** - Full TypeScript support
 
 ## Migration from Context API
@@ -101,7 +103,8 @@ If you're using deprecated Context API, migrate to `use()` with keys:
 
 ```tsx
 // ❌ Old way (deprecated)
-import { createContext, useContext } from 'flexium/advanced'
+import { createContext } from 'flexium/advanced'
+import { use } from 'flexium/core'
 
 const ThemeContext = createContext('light')
 
@@ -115,16 +118,16 @@ function ThemeProvider(props) {
 }
 
 function Child() {
-  const theme = useContext(ThemeContext)
+  const [theme] = use(ThemeContext)
   return <div>{theme}</div>
 }
 
 // ✅ New way
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // No Provider needed!
 function Child() {
-  const [theme] = use('light', [], { key: 'app:theme' })
+  const [theme] = use('light', undefined, { key: ['app', 'theme'] })
   return <div>{theme}</div>
 }
 ```

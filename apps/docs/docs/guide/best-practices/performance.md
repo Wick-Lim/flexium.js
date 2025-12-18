@@ -222,7 +222,7 @@ function VirtualizedList() {
 
 ```tsx
 // ✅ Cleanup on component unmount
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function TemporaryComponent() {
   const [data] = use(async () => {

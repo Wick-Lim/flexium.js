@@ -433,7 +433,7 @@ function CheckoutButton() {
 Navigate in response to data changes:
 
 ```tsx
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { useRouter } from 'flexium/router'
 
 function OrderStatus() {
@@ -467,7 +467,7 @@ Create smooth transitions between routes using CSS and Flexium's reactive system
 ### Basic Fade Transition
 
 ```tsx
-import { useEffect, useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { useRouter } from 'flexium/router'
 
 function TransitionWrapper({ children }) {

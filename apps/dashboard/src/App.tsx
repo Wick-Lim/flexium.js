@@ -6,11 +6,11 @@ import RecentActivity from './components/RecentActivity'
 import DataTable from './components/DataTable'
 
 export default function App() {
-  use(() => {
+  use(({ onCleanup }) => {
     startRealTimeUpdates()
-    return () => {
+    onCleanup(() => {
       stopRealTimeUpdates()
-    }
+    })
   }, [])
 
   return (

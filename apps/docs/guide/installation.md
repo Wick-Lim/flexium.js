@@ -289,7 +289,7 @@ npm install -D @types/node
 Example of a fully typed Flexium component:
 
 ```ts
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 interface CounterProps {
   initialCount?: number

@@ -51,7 +51,7 @@ Update your `tsconfig.json`:
 Create `src/App.tsx`:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 export function App() {
   const [count, setCount] = use(0)
@@ -98,10 +98,10 @@ Share state between components easily using a unique `key`.
 
 ```tsx
 // In Header.tsx
-const [theme, setTheme] = use('light', { key: ['theme'] });
+const [theme, setTheme] = use('light', undefined, { key: ['theme'] });
 
 // Or with explicit undefined for async loading scenarios
-const [theme, setTheme] = use(undefined, { key: ['theme'] });
+const [theme, setTheme] = use(undefined, undefined, { key: ['theme'] });
 ```
 
 ### 3. Async State (Resources)
@@ -130,7 +130,7 @@ Pass a function to `use()` with `deps` to create a value that updates when depen
 
 ```tsx
 const [count, setCount] = use(0);
-const [double] = use(() => count * 2, { deps: [count] });
+const [double] = use(() => count * 2, [count]);
 ```
 
 ## Next Steps

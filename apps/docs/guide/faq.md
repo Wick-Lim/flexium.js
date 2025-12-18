@@ -44,26 +44,26 @@ Use global state with a key:
 
 ```tsx
 // In any component
-const [user, setUser] = use(null, { key: 'currentUser' })
+const [user, setUser] = use(null, undefined, { key: ['currentUser'] })
 
 // In another component - same state!
-const [user, setUser] = use(null, { key: 'currentUser' })
+const [user, setUser] = use(null, undefined, { key: ['currentUser'] })
 ```
 
 Or use Context API:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme] = use('dark', { key: 'app:theme' })
+  const [theme] = use('dark', undefined, { key: ['app', 'theme'] })
   return <MyComponent />
 }
 
 function MyComponent() {
   // Access theme from anywhere
-  const [theme] = use('light', { key: 'app:theme' })
+  const [theme] = use('light', undefined, { key: ['app', 'theme'] })
   return <div>Theme: {theme}</div>
 }
 ```
@@ -96,7 +96,7 @@ Common causes:
    console.log(count)
 
    // Inside effect - will track
-   use(() => console.log(count))
+   use(({ onCleanup }) => console.log(count), [count])
    ```
 
 ## Rendering
@@ -240,7 +240,7 @@ function UserProfile() {
 Use `use()` for form handling:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function LoginForm() {
   const [formData, setFormData] = use({ email: '', password: '' })

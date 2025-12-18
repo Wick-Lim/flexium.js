@@ -310,7 +310,7 @@ controller.animate({
 Use motion with Flexium's state for reactive animations.
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { MotionController } from 'flexium/primitives'
 
 const [isVisible, setIsVisible] = use(false)
@@ -428,7 +428,7 @@ controller.animate({
 
 ```tsx
 import { MotionController } from 'flexium/primitives'
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function AnimatedCard() {
   const [isExpanded, setIsExpanded] = use(false)

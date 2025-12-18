@@ -1,32 +1,23 @@
 import { use } from 'flexium/core'
 import { useRouter } from 'flexium/router'
-import { loadUser, useUser } from '../store'
+import { loadUser } from '../store'
 
 export default function User(props: { params?: { id?: string } } = {}) {
     const r = useRouter()
     const [userId] = use(() => {
         return r.params.id || props.params?.id
-    })
-    const [user] = use(() => {
-        if (!userId) {
-            return undefined
-        }
+    }, [r.params.id, props.params?.id])
 
-        const [globalUser] = useUser(userId);
-        return globalUser
-    })
-
-    use(() => {
-        if (userId) {
-            loadUser(userId);
-        }
+    // Use async use() to fetch user data
+    const [user, { loading, error }] = use(async () => {
+        if (!userId) return undefined;
+        return await loadUser(userId);
     }, [userId])
 
-    // Use proxy directly
-    const u = user;
-    if (!u) return <main class="view user-view" id="main"><div>Loading...</div></main>
+    if (loading || !user) return <main class="view user-view" id="main"><div>Loading...</div></main>
+    if (error) return <main class="view user-view" id="main"><div>Error loading user</div></main>
 
-    const userValue = u
+    const userValue = user
 
     return (
         <main class="view user-view" id="main">

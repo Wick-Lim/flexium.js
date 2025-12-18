@@ -298,7 +298,7 @@ my-app/
 ### App Component (src/App.tsx)
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 export default function App() {
   const [count, setCount] = use(0)

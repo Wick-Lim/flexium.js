@@ -9,32 +9,32 @@ Data fetching pattern examples including caching, infinite scroll, optimistic up
 ## Basic Data Fetching
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function PostList() {
-  const [posts, setPosts] = use(async () => {
+  const [posts, control] = use(async () => {
     const res = await fetch('/api/posts')
     if (!res.ok) throw new Error('Failed to fetch posts')
     return res.json()
-  }, { key: 'posts:all' })
-  
-  if (posts.status === 'loading') {
+  }, undefined, { key: ['posts', 'all'] })
+
+  if (control.loading) {
     return <div>Loading...</div>
   }
-  
-  if (posts.status === 'error') {
+
+  if (control.error) {
     return (
       <div>
-        <p>Error: {posts.error?.message}</p>
-        <button onclick={posts.refetch}>Retry</button>
+        <p>Error: {control.error?.message}</p>
+        <button onclick={control.refetch}>Retry</button>
       </div>
     )
   }
-  
+
   return (
     <div>
-      <button onclick={posts.refetch}>Refresh</button>
-      {posts.map(post => (
+      <button onclick={control.refetch}>Refresh</button>
+      {posts?.map(post => (
         <Post key={post.id} {...post} />
       ))}
     </div>
@@ -50,28 +50,27 @@ function PostList() {
 
 ```tsx
 // Share same data across multiple components
-// Share same data across multiple components
 function PostList() {
   // Cache with global key
-  const [posts, setPosts] = use(async () => {
+  const [posts, control] = use(async () => {
     return fetch('/api/posts').then(r => r.json())
-  }, { key: ['posts', 'all'] })
+  }, undefined, { key: ['posts', 'all'] })
 
-  return <div>{posts.map(p => <Post key={p.id} {...p} />)}</div>
+  return <div>{posts?.map(p => <Post key={p.id} {...p} />)}</div>
 }
 
 function PostDetail({ postId }: { postId: number }) {
   // Find from already cached posts
-  const [allPosts, setAllPosts] = use(null, { key: ['posts', 'all'] })
-  const [post, setPost] = use(() => {
+  const [allPosts] = use(null, undefined, { key: ['posts', 'all'] })
+  const [post] = use(() => {
     return allPosts?.find(p => p.id === postId)
-  })
+  }, [allPosts, postId])
 
   // Fetch individually if not found
-  const [fetchedPost, setFetchedPost] = use(async () => {
+  const [fetchedPost, control] = use(async () => {
     const res = await fetch(`/api/posts/${postId}`)
     return res.json()
-  }, { key: ['posts', postId] })
+  }, undefined, { key: ['posts', postId] })
 
   return <div>{post || fetchedPost}</div>
 }
@@ -82,7 +81,7 @@ function PostDetail({ postId }: { postId: number }) {
 ## Infinite Scroll
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function InfiniteScrollList() {
   const [items, setItems] = useState<any[]>([])
@@ -221,7 +220,7 @@ function LikeButton({ postId }: { postId: number }) {
 ## Error Retry
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function DataWithRetry() {
   const [retryCount, setRetryCount] = use(0)
@@ -270,7 +269,7 @@ function DataWithRetry() {
 ## Automatic Retry (Exponential Backoff)
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function DataWithAutoRetry() {
   const [data, setData] = use(async () => {
@@ -328,7 +327,7 @@ function DataWithAutoRetry() {
 ## Polling
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function PollingData({ interval = 5000 }: { interval?: number }) {
   const [data, setData] = use(async () => {

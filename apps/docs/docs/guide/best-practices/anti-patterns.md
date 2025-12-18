@@ -177,15 +177,15 @@ const [items] = use([1, 2, 3])
 const [data] = use(() => ({
   items: items,
   timestamp: Date.now()  // Different value each time → unnecessary recalculation
-}), { deps: [items] })
+}), [items])
 
 // ✅ Correct approach - stable dependencies
 const [items] = use([1, 2, 3])
-const [timestamp] = use(() => Date.now(), { deps: [] })  // Manage as separate state
+const [timestamp] = use(() => Date.now(), [])  // Manage as separate state
 const [data] = use(() => ({
   items: items,
   timestamp: timestamp  // Stable dependency
-}), { deps: [items, timestamp] })
+}), [items, timestamp])
 ```
 
 ---
@@ -201,11 +201,11 @@ const [doubled] = use(() => {
   console.log('Computing doubled')  // Side effect
   localStorage.setItem('count', String(count))  // Side effect
   return count * 2
-}, { deps: [count] })
+}, [count])
 
 // ✅ Correct approach
 const [count, setCount] = use(0)
-const [doubled] = use(() => count * 2, { deps: [count] })  // Pure function
+const [doubled] = use(() => count * 2, [count])  // Pure function
 
 // Side effects in useEffect
 use(() => {
@@ -246,7 +246,7 @@ sync(() => {
 ```tsx
 // ❌ Anti-pattern - unnecessary computed
 const [count, setCount] = use(0)
-const [displayCount] = use(() => count, { deps: [count] })  // Just returns value
+const [displayCount] = use(() => count, [count])  // Just returns value
 
 // ✅ Correct approach
 const [count, setCount] = use(0)
@@ -388,7 +388,7 @@ function Component() {
 }
 
 // ✅ Correct approach - cleanup in useEffect
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Component() {
   const [data, control] = use(async () => fetch('/api/data'), {

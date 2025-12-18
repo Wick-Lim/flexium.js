@@ -20,7 +20,7 @@ The simplest way to add animations is using built-in presets:
 
 ```tsx
 import { Transition } from 'flexium/primitives'
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function App() {
   const [visible, setVisible] = use(false)
@@ -284,7 +284,7 @@ Use `<TransitionGroup>` to create staggered animations for lists:
 
 ```tsx
 import { TransitionGroup, Transition } from 'flexium/primitives'
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function NotificationList() {
   const [notifications, setNotifications] = use([
@@ -491,7 +491,7 @@ function LoadingState() {
 
 ```tsx
 import { Transition, transitions } from 'flexium/primitives'
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Modal({ isOpen, onClose, children }) {
   return (

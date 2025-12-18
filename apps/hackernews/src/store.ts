@@ -47,34 +47,22 @@ export async function loadStories(type: string) {
     }
 }
 
-export async function loadItem(id: number) {
+export async function loadItem(id: number): Promise<any> {
     try {
-        const [item, setItem] = useItem(id);
-        if (item) return; // Already loaded
-
         const data = await fetchItem(id);
-        if (data) {
-            setItem(data);
-        } else {
-            console.warn(`No data returned for item ${id}`);
-        }
+        return data;
     } catch (error) {
         console.error(`Error loading item ${id}:`, error);
+        throw error;
     }
 }
 
-export async function loadUser(id: string) {
+export async function loadUser(id: string): Promise<any> {
     try {
-        const [user, setUser] = useUser(id);
-        if (user) return; // Already loaded
-
         const data = await fetchUser(id);
-        if (data) {
-            setUser(data);
-        } else {
-            console.warn(`No data returned for user ${id}`);
-        }
+        return data;
     } catch (error) {
         console.error(`Error loading user ${id}:`, error);
+        throw error;
     }
 }

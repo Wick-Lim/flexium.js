@@ -109,7 +109,7 @@ use(() => {
 });
 
 // ✅ Signal read inside computed
-const [shouldDoSomething] = use(() => count > 5, { deps: [count] });
+const [shouldDoSomething] = use(() => count > 5, [count]);
 
 // ✅ Signal read inside JSX
 const App = () => (
@@ -183,20 +183,20 @@ const [doubled] = use(() => {
 const [users] = use([]);
 const [sortedUsers] = use(() => {
   return users.sort(); // Mutates original array!
-}, { deps: [users] });
+}, [users]);
 
 // ❌ DOM manipulation in computed
 const [displayText] = use(() => {
   document.title = String(count); // DOM side effect!
   return `Count: ${count}`;
-}, { deps: [count] });
+}, [count]);
 ```
 
 #### Good
 
 ```javascript
 // ✅ Pure computed
-const [doubled] = use(() => count * 2, { deps: [count] });
+const [doubled] = use(() => count * 2, [count]);
 
 // ✅ Side effect in effect
 use(() => {
@@ -206,7 +206,7 @@ use(() => {
 // ✅ Non-mutating computed
 const [sortedUsers] = use(() => {
   return [...users].sort(); // Creates new array
-}, { deps: [users] });
+}, [users]);
 
 // ✅ DOM manipulation in effect
 use(() => {

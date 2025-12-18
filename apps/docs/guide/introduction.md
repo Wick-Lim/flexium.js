@@ -40,10 +40,10 @@ Understanding how Flexium compares to other popular frameworks helps you make an
 import { useState, useEffect, useContext, useMemo } from 'react';
 
 function Counter() {
-  const [count, setCount] = use(0);
+  const [count, setCount] = useState(0);
   const doubled = useMemo(() => count * 2, [count]);
 
-  use(() => {
+  useEffect(() => {
     document.title = `Count: ${count}`;
   }, [count]);
 
@@ -57,15 +57,15 @@ function Counter() {
 }
 
 // Flexium - One unified API
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Counter() {
   const [count, setCount] = use(0);
-  const [doubled] = use(() => count * 2);
+  const [doubled] = use(() => count * 2, [count]);
 
-  use(() => {
+  use(({ onCleanup }) => {
     document.title = `Count: ${count}`;
-  });
+  }, [count]);
 
   return (
     <div>
@@ -110,11 +110,11 @@ function UserProfile() {
 }
 
 // Flexium - One unified primitive
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function UserProfile() {
   const [userId] = use(1);
-  const [doubled] = use(() => userId * 2);
+  const [doubled] = use(() => userId * 2, [userId]);
 
   const [user, userControl] = use(async () => {
     const res = await fetch(`/api/users/${userId}`);
@@ -159,15 +159,15 @@ export default {
 };
 
 // Flexium
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Counter() {
   const [count] = use(0);
-  const [doubled] = use(() => count * 2);
+  const [doubled] = use(() => count * 2, [count]);
 
-  use(() => {
+  use(({ onCleanup }) => {
     console.log('Count:', count);
-  });
+  }, [count]);
 
   return { count, doubled };
 }
@@ -193,7 +193,7 @@ function Counter() {
 import { useState, useMemo } from 'preact/hooks';
 
 function Counter() {
-  const [count, setCount] = use(0);
+  const [count, setCount] = useState(0);
   const doubled = useMemo(() => count * 2, [count]);
 
   return (
@@ -205,11 +205,11 @@ function Counter() {
 }
 
 // Flexium
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Counter() {
   const [count, setCount] = use(0);
-  const [doubled] = use(() => count * 2);
+  const [doubled] = use(() => count * 2, [count]);
 
   return (
     <div>
@@ -263,7 +263,7 @@ You don't need to use `memo`, `useMemo`, or `useCallback` to achieve good perfor
 Flexium is written entirely in TypeScript with full type inference:
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 // Type is inferred as number
 const [count, setCount] = use(0);
@@ -293,13 +293,13 @@ Start simple and add complexity only when needed:
 const [count, setCount] = use(0);
 
 // Need it global? Just add a key
-const [globalCount, setGlobalCount] = use(0, { key: 'globalCount' });
+const [globalCount, setGlobalCount] = use(0, undefined, { key: ['globalCount'] });
 
 // Need async? Make the initializer async
 const [data] = use(async () => fetchData());
 
-// Need derived value? Pass a function
-const [doubled] = use(() => count * 2);
+// Need derived value? Pass a function with deps
+const [doubled] = use(() => count * 2, [count]);
 ```
 
 The same API grows with your needs.
@@ -311,18 +311,19 @@ The same API grows with your needs.
 All state management needs are handled by one function:
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Dashboard() {
   // 1. Local state
   const [filter, setFilter] = use('all');
 
   // 2. Global state (shared across components)
-  const [theme, setTheme] = use('light', { key: 'app-theme' });
+  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] });
 
   // 3. Computed state (auto-updates)
   const [greeting] = use(() =>
-    theme === 'dark' ? 'Good evening' : 'Good morning'
+    theme === 'dark' ? 'Good evening' : 'Good morning',
+    [theme]
   );
 
   // 4. Async state (data fetching)
@@ -365,7 +366,7 @@ function Dashboard() {
 Only what changes gets updated:
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Example() {
   const [firstName, setFirstName] = use('John');
@@ -402,7 +403,7 @@ function Example() {
 Like React's useEffect, specify dependencies explicitly:
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function SearchResults() {
   const [query, setQuery] = use('');

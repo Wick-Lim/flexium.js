@@ -149,7 +149,7 @@ Test signal creation, updates, and reactivity:
 
 ```ts
 import { describe, it, expect, vi } from 'vitest';
-import { useEffect, useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 describe('Signal System', () => {
   it('should create a signal with initial value', () => {
@@ -204,7 +204,7 @@ Test derived state and memoization:
 
 ```ts
 import { describe, it, expect, vi } from 'vitest';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 describe('Computed values', () => {
   it('should compute derived value', () => {
@@ -260,7 +260,7 @@ Test side effects and cleanup:
 
 ```ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useEffect, useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 describe('Effects', () => {
   it('should run effect immediately', () => {
@@ -333,7 +333,7 @@ Test the high-level `use()` API:
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 describe('use() API', () => {
   it('should create local state', () => {
@@ -348,8 +348,8 @@ describe('use() API', () => {
   });
 
   it('should create global state with key', () => {
-    const [count1, setCount1] = use(0, { key: 'global-count' });
-    const [count2, setCount2] = use(0, { key: 'global-count' });
+    const [count1, setCount1] = use(0, undefined, { key: ['global-count'] });
+    const [count2, setCount2] = use(0, undefined, { key: ['global-count'] });
 
     // Both reference same state
     expect(count1).toBe(0);
@@ -402,7 +402,7 @@ Use jsdom and render utilities:
 ```ts
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render } from 'flexium/dom';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 describe('Counter Component', () => {
   let container: HTMLElement;
@@ -475,7 +475,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render } from 'flexium/dom';
 import { screen, waitFor } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 describe('TodoList Component', () => {
   let container: HTMLElement;
@@ -699,7 +699,7 @@ Mock async state:
 ```ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from 'flexium/dom';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 import { screen, waitFor } from '@testing-library/dom';
 
 describe('UserProfile with mocked data', () => {

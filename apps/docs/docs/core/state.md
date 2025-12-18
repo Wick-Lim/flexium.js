@@ -18,7 +18,7 @@ import GlobalStateDemo from '../../components/GlobalStateDemo.vue'
 ## Import
 
 ```ts
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ import { useState } from 'flexium/core'
 const [count, setCount] = use(0)
 
 // Derived state - returns [value, control]
-const [doubled] = use(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, [count])
 
 // Async state - returns [value, control]
 const [users, control] = use(async () => fetch('/api'))
@@ -69,9 +69,9 @@ const [price, setPrice] = use(100)
 const [quantity, setQuantity] = use(2)
 
 // Use deps to specify dependencies
-const [subtotal] = use(() => price * quantity, { deps: [price, quantity] })
-const [tax] = use(() => subtotal * 0.1, { deps: [subtotal] })
-const [total] = use(() => subtotal + tax, { deps: [subtotal, tax] })
+const [subtotal] = use(() => price * quantity, [price, quantity])
+const [tax] = use(() => subtotal * 0.1, [subtotal])
+const [total] = use(() => subtotal + tax, [subtotal, tax])
 
 console.log(total)  // 220
 ```
@@ -89,7 +89,7 @@ const [filteredItems] = use(() => {
   return items.filter(item =>
     filter === 'all' ? true : item.status === filter
   )
-}, { deps: [items, filter] })
+}, [items, filter])
 ```
 
 ::: warning
@@ -173,7 +173,7 @@ const [data, control] = use(async () => fetchUser(id), {
 ```tsx
 function Counter() {
   const [count, setCount] = use(0)
-  const [doubled] = use(() => count * 2, { deps: [count] })
+  const [doubled] = use(() => count * 2, [count])
 
   return (
     <div>

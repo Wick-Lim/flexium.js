@@ -42,7 +42,7 @@ Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchie
 **Recommended**: Use `use()` with `key` option instead:
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 // Share theme globally - no Provider needed
 const theme = useState<'light' | 'dark'>('light', { key: ['app', 'theme'] });
@@ -61,7 +61,7 @@ function ThemedButton() {
 #### Complex Example: Auth State
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 interface User {
   id: string;
@@ -115,7 +115,7 @@ function UserProfile() {
 #### Multiple Global States
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 // Theme state
 const [theme, setTheme] = use('light', { key: 'app:theme' });
@@ -304,7 +304,7 @@ Returns a `KeyboardState` object:
 
 ```tsx
 import { keyboard, Keys } from 'flexium/interactive';
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function PlayerController() {
   const kb = keyboard();
@@ -345,7 +345,7 @@ function PlayerController() {
 
 ```tsx
 import { keyboard, Keys, useLoop } from 'flexium/interactive';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Game() {
   const kb = keyboard();
@@ -546,7 +546,7 @@ function DrawingCanvas() {
 
 ```tsx
 import { mouse, useLoop } from 'flexium/interactive';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function ShootingGame() {
   const m = mouse();
@@ -639,7 +639,7 @@ MouseButton.Right   // 2
 #### Cleanup
 
 ```tsx
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function GameComponent() {
   const m = mouse();
@@ -676,7 +676,7 @@ Flexium doesn't have special rules for hooks - you can create custom hooks by co
 #### Form Hook
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function useForm<T>(initialValues: T) {
   const [values, setValues] = use(initialValues);
@@ -768,7 +768,7 @@ function LoginForm() {
 #### Fetch Hook
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function useFetch<T>(url: string) {
   const [data, setData] = useState<T | null>(null);
@@ -824,7 +824,7 @@ function UserList() {
 #### Local Storage Hook
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function useLocalStorage<T>(key: string, initialValue: T) {
   const storedValue = localStorage.getItem(key);
@@ -865,7 +865,7 @@ function ThemeToggle() {
 #### Window Size Hook
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function useWindowSize() {
   const [width, setWidth] = use(window.innerWidth);
@@ -929,7 +929,7 @@ function ResponsiveComponent() {
 ### 1. Always Cleanup Resources
 
 ```tsx
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function GameComponent() {
   const kb = keyboard();
@@ -949,7 +949,7 @@ function GameComponent() {
 ### 2. Type Safety with TypeScript
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 interface AppState {
   user: User | null;
@@ -974,7 +974,7 @@ function Component() {
 ### 3. Combine Utilities Effectively
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 import { useRouter } from 'flexium/router';
 import { keyboard, Keys } from 'flexium/interactive';
 
@@ -1014,7 +1014,7 @@ function DataDisplay() {
 ### 5. Keep Hooks Simple and Focused
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 // Good: Single responsibility
 function useAuth() {

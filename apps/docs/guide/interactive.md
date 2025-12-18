@@ -480,7 +480,7 @@ Here's a complete game combining all the systems:
 ```tsx
 import { useLoop, useKeyboard, useMouse, Keys } from 'flexium/interactive'
 import { Canvas, Circle, Rect, CanvasText } from 'flexium/canvas'
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function TopDownShooter() {
   // Game state
@@ -786,7 +786,7 @@ Flexium's game module integrates seamlessly with Canvas primitives:
 ```tsx
 import { useLoop } from 'flexium/interactive'
 import { Canvas, Circle, Rect } from 'flexium/canvas'
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function GameExample() {
   const [entities, setEntities] = use([

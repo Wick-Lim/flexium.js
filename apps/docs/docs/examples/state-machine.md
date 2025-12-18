@@ -9,7 +9,7 @@ State machine pattern examples including complex state transitions, guard condit
 ## Basic State Machine
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
@@ -195,7 +195,7 @@ function ComplexForm() {
 ## State Machine with Guard Conditions
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 type GameState =
   | { type: 'menu' }
@@ -309,7 +309,7 @@ function Game() {
 ## Action-Based State Machine
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 type Action =
   | { type: 'LOAD' }

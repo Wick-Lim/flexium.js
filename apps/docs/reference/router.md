@@ -1075,7 +1075,7 @@ Create smooth animations when navigating between routes.
 
 ```tsx
 ```tsx
-import { useEffect, useState } from 'flexium/core';
+import { use } from 'flexium/core';
 import { useRouter } from 'flexium/router';
 
 function TransitionWrapper({ children }) {
@@ -1645,7 +1645,7 @@ function PrefetchLink({ to, children }) {
 Style active links based on current route:
 
 ```tsx
-import { useState } from 'flexium'; // Assuming useState is imported from flexium
+import { use } from 'flexium'; // Assuming useState is imported from flexium
 
 function NavLink({ to, children, activeClass = 'active', ...props }) {
   const r = useRouter();

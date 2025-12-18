@@ -9,7 +9,7 @@ Flexium uses `use()` for all lifecycle needs. There are no separate mount or cle
 ## Import
 
 ```ts
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 ```
 
 ## Using use() for Lifecycle
@@ -19,16 +19,16 @@ import { useEffect } from 'flexium/core'
 ### Mount + Cleanup
 
 ```tsx
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function MyComponent() {
   // Runs once on mount, cleanup on unmount
   use(({ onCleanup }) => {
     console.log('Component mounted!')
 
-    // Return cleanup function
+    // Register cleanup function
     onCleanup(() => console.log('Component unmounted!'))
-  })
+  }, [])  // Empty deps = run once on mount
 
   return <div>Hello</div>
 }
@@ -39,7 +39,7 @@ function MyComponent() {
 #### Initialize Third-Party Libraries
 
 ```tsx
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function ChartComponent() {
   let chartInstance
@@ -51,7 +51,7 @@ function ChartComponent() {
     })
 
     onCleanup(() => chartInstance.destroy())
-  })
+  }, [])  // Run once on mount
 
   return <canvas id="chart" />
 }
@@ -60,17 +60,17 @@ function ChartComponent() {
 #### Fetch Initial Data
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function UserProfile(props) {
   const [user, setUser] = use(null)
 
-  use(() => {
-    // Fetch runs once on mount
+  use(({ onCleanup }) => {
+    // Fetch runs when props.id changes
     fetch(`/api/users/${props.id}`)
       .then(res => res.json())
       .then(data => setUser(data))
-  })
+  }, [props.id])  // Re-run when id changes
 
   return user && <div>{user.name}</div>
 }
@@ -79,15 +79,15 @@ function UserProfile(props) {
 #### Set Up Event Listeners
 
 ```tsx
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function KeyboardHandler() {
-  use(() => {
+  use(({ onCleanup }) => {
     const handler = (e) => console.log('Key pressed:', e.key)
     window.addEventListener('keydown', handler)
 
     onCleanup(() => window.removeEventListener('keydown', handler))
-  })
+  }, [])  // Run once on mount
 
   return <div>Press any key</div>
 }
@@ -96,13 +96,13 @@ function KeyboardHandler() {
 ### Reactive Effects with Cleanup
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function WebSocketComponent() {
   const [messages, setMessages] = use([])
   const [userId, setUserId] = use(1)
 
-  use(() => {
+  use(({ onCleanup }) => {
     // Re-creates WebSocket when userId changes
     const ws = new WebSocket(`wss://example.com/${userId}`)
 
@@ -112,7 +112,7 @@ function WebSocketComponent() {
 
     // Cleanup before re-run or unmount
     onCleanup(() => ws.close())
-  })
+  }, [userId])  // Re-run when userId changes
 
   return <div>{messages.map(msg => <div>{msg}</div>)}</div>
 }
@@ -121,12 +121,12 @@ function WebSocketComponent() {
 ### Cancel Pending Requests
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function SearchResults(props) {
   const [results, setResults] = use([])
 
-  use(() => {
+  use(({ onCleanup }) => {
     const controller = new AbortController()
 
     fetch(`/api/search?q=${props.query}`, {
@@ -137,7 +137,7 @@ function SearchResults(props) {
 
     // Cancel request if query changes or component unmounts
     onCleanup(() => controller.abort())
-  })
+  }, [props.query])  // Re-run when query changes
 
   return <div>{results.map(item => <div>{item.title}</div>)}</div>
 }
@@ -146,12 +146,12 @@ function SearchResults(props) {
 ### Dispose Timers
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Countdown(props) {
   const [time, setTime] = use(props.seconds)
 
-  use(() => {
+  use(({ onCleanup }) => {
     if (time <= 0) return
 
     const timeout = setTimeout(() => {
@@ -159,7 +159,7 @@ function Countdown(props) {
     }, 1000)
 
     onCleanup(() => clearTimeout(timeout))
-  })
+  }, [time])  // Re-run when time changes
 
   return <div>{time} seconds remaining</div>
 }
@@ -191,12 +191,12 @@ onMount(() => {
 })
 
 // ✅ New way
-import { useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 use(({ onCleanup }) => {
   const ws = new WebSocket('...')
   onCleanup(() => ws.close())
-})
+}, [])  // Run once on mount
 ```
 
 ## See Also

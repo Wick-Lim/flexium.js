@@ -46,7 +46,7 @@ Global state is state that is shared across multiple components.
 // ✅ Global state examples
 
 // 1. User authentication (accessed app-wide)
-const [user, setUser] = use(null, { key: 'auth:user' })
+const [user, setUser] = use(null, undefined, { key: ['auth:user'] })
 
 // 2. App settings (dark mode, etc.)
 const [theme, setTheme] = use('light', { key: 'app:theme' })
@@ -58,7 +58,7 @@ const [posts, setPosts] = use(async () => {
 }, { key: ['posts', 'all'] })
 
 // 4. Global UI state
-const [notifications, setNotifications] = use([], { key: 'app:notifications' })
+const [notifications, setNotifications] = use([], undefined, { key: ['app:notifications'] })
 ```
 
 **Use global state when:**
@@ -76,17 +76,17 @@ const [notifications, setNotifications] = use([], { key: 'app:notifications' })
 ```tsx
 // ✅ Hierarchical keys
 const [user, setUser] = use(null, { key: ['auth', 'user'] })
-const [posts, setPosts] = use([], { key: ['user', userId, 'posts'] })
+const [posts, setPosts] = use([], undefined, { key: ['user', userId, 'posts'] })
 const [settings, setSettings] = use({}, { key: ['app', 'settings'] })
 
 // ✅ Namespace usage
-const [user, setUser] = use(null, { key: 'auth:user' })
+const [user, setUser] = use(null, undefined, { key: ['auth:user'] })
 const [posts, setPosts] = use([], { key: `user:${userId}:posts` })
 const [settings, setSettings] = use({}, { key: 'app:settings' })
 
 // ✅ Clear and specific keys
-const [cart, setCart] = use([], { key: 'ecommerce:cart' })
-const [checkout, setCheckout] = use(null, { key: 'ecommerce:checkout' })
+const [cart, setCart] = use([], undefined, { key: ['ecommerce:cart'] })
+const [checkout, setCheckout] = use(null, undefined, { key: ['ecommerce:checkout'] })
 ```
 
 **Characteristics of good keys:**
@@ -101,12 +101,12 @@ const [checkout, setCheckout] = use(null, { key: 'ecommerce:checkout' })
 
 ```tsx
 // ❌ Too generic
-const [data, setData] = use(null, { key: 'data' })
-const [user, setUser] = use(null, { key: 'user' })
+const [data, setData] = use(null, undefined, { key: ['data'] })
+const [user, setUser] = use(null, undefined, { key: ['user'] })
 
 // ❌ Unclear meaning
-const [state1, setState1] = use(null, { key: 'state1' })
-const [temp, setTemp] = use(null, { key: 'temp' })
+const [state1, setState1] = use(null, undefined, { key: ['state1'] })
+const [temp, setTemp] = use(null, undefined, { key: ['temp'] })
 
 // ❌ High collision risk
 const [count, setCount] = use(0, { key: 'count' })  // Can be used in multiple places
@@ -130,10 +130,10 @@ function UserProfile({ userId }: { userId: number }) {
   const [user, setUser] = use(null, { key: ['user', userId] })
   
   // User's posts
-  const [posts, setPosts] = use([], { key: ['user', userId, 'posts'] })
+  const [posts, setPosts] = use([], undefined, { key: ['user', userId, 'posts'] })
   
   // User's followers
-  const [followers, setFollowers] = use([], { key: ['user', userId, 'followers'] })
+  const [followers, setFollowers] = use([], undefined, { key: ['user', userId, 'followers'] })
   
   return <div>...</div>
 }
@@ -181,7 +181,7 @@ function ProductPage({ productId }: { productId: string }) {
 
 ```tsx
 // ✅ Cleanup on component unmount
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function TemporaryComponent() {
   const [data, setData] = use(async () => {
@@ -236,7 +236,7 @@ function cleanupEcommerce() {
 
 // ✅ Cleanup in useEffect cleanup
 use(() => {
-  const [tempData, setTempData] = use(null, { key: 'temp:data' })
+  const [tempData, setTempData] = use(null, undefined, { key: ['temp:data'] })
 
   return () => {
     useState.delete('temp:data')  // cleanup

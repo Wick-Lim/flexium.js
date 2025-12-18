@@ -11,14 +11,14 @@ Flexium's philosophy is "No Context API boilerplate" and "No Provider hierarchie
 Instead of Context API, use `use()` with a `key` option to share state globally:
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Share theme globally - no Provider needed
-const [theme, setTheme] = useState<'light' | 'dark'>('light', { key: 'app:theme' })
+const [theme, setTheme] = use<'light' | 'dark'>('light', undefined, { key: ['app', 'theme'] })
 
 // In any component - access the same state
 function ThemedButton() {
-  const [theme, setTheme] = use('light', { key: 'app:theme' })
+  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
 
   return (
     <button
@@ -37,11 +37,11 @@ function ThemedButton() {
 ## Complete Example: Auth State
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {
-  const [user, setUser] = useState<User | null>(null, { key: 'app:auth:user' })
+  const [user, setUser] = use<User | null>(null, undefined, { key: ['app', 'auth', 'user'] })
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/login', {
@@ -62,7 +62,7 @@ function useAuth() {
 // Use in any component
 function Header() {
   const { user, logout } = useAuth()
-  
+
   return (
     <header>
       {user ? (
@@ -81,23 +81,23 @@ function Header() {
 ## Multiple Global States
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Theme state
-const [theme, setTheme] = use('light', { key: 'app:theme' })
+const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
 
 // Language state
-const [lang, setLang] = use('en', { key: 'app:language' })
+const [lang, setLang] = use('en', undefined, { key: ['app', 'language'] })
 
 // User state
-const [user, setUser] = use(null, { key: 'app:user' })
+const [user, setUser] = use(null, undefined, { key: ['app', 'user'] })
 
 // Use in any component
 function ProfileCard() {
-  const [theme, setTheme] = use('light', { key: 'app:theme' })
-  const [lang, setLang] = use('en', { key: 'app:language' })
-  const [user, setUser] = use(null, { key: 'app:user' })
-  
+  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
+  const [lang, setLang] = use('en', undefined, { key: ['app', 'language'] })
+  const [user, setUser] = use(null, undefined, { key: ['app', 'user'] })
+
   return (
     <div class={`card-${theme}`}>
       <h2>{lang === 'en' ? 'Profile' : 'Profil'}</h2>
@@ -121,7 +121,8 @@ If you're using deprecated Context API, migrate to `use()` with keys:
 
 ```tsx
 // ❌ Old way (deprecated)
-import { createContext, context } from 'flexium/core'
+import { createContext } from 'flexium/advanced'
+import { use } from 'flexium/core'
 
 const ThemeContext = createContext('light')
 
@@ -135,31 +136,31 @@ function App() {
 }
 
 function Child() {
-  const theme = context(ThemeContext)
+  const [theme] = use(ThemeContext)
   return <div>{theme}</div>
 }
 
 // ✅ New way
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
-  const [theme, setTheme] = use('dark', { key: 'app:theme' })
+  const [theme, setTheme] = use('dark', undefined, { key: ['app', 'theme'] })
   return <Child />
 }
 
 function Child() {
   // Access theme from anywhere
-  const [theme, setTheme] = use('light', { key: 'app:theme' })
+  const [theme, setTheme] = use('light', undefined, { key: ['app', 'theme'] })
   return <div>{theme}</div>
 }
 ```
 
 ## Best Practices
 
-1. **Use descriptive keys**: Use hierarchical keys like `'app:theme'` or `['app', 'auth', 'user']`
+1. **Use descriptive keys**: Use hierarchical keys like `['app', 'theme']` or `['app', 'auth', 'user']`
 2. **Type safety**: Use TypeScript for type-safe state
-3. **Cleanup when needed**: Use `useState.delete(key)` to clean up unused global state
+3. **Cleanup when needed**: Global state is automatically cleaned up when no longer used
 4. **Avoid overuse**: Don't use global state for every piece of data - prefer local state when possible
 
 ## See Also

@@ -83,7 +83,7 @@ type StateValue<T> = T & {
 
 **Usage:**
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const [count, setCount] = use(0)
 
@@ -116,7 +116,7 @@ type Computed<T> = Readonly<StateValue<T>>
 
 **Usage:**
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const [count, setCount] = use(1)
 const [doubled] = use(() => count * 2)
@@ -152,7 +152,7 @@ type Resource<T> = StateValue<T | undefined> & {
 
 **Usage:**
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 // use() handles async functions as resources
 const [user, setUser] = use(async () => fetchUser(userId))
 
@@ -241,7 +241,7 @@ interface Context<T> {
 
 **Usage:**
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Share theme globally - no Provider needed
 const [theme, setTheme] = useState<'light' | 'dark'>('dark', { key: 'app:theme' })
@@ -501,7 +501,7 @@ interface DrawRectProps {
 
 **Usage:**
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 const [x, setX] = use(10)
 const [fill, setFill] = use('red')

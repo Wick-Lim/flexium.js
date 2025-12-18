@@ -41,7 +41,7 @@ import { root, untrack, sync } from 'flexium/core'
 Creates an isolated reactive scope. Useful for managing cleanup of effects.
 
 ```tsx
-import { useEffect, useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { root } from 'flexium/core'
 
 const [count, setCount] = use(0)
@@ -66,7 +66,7 @@ setCount(2)  // No log - effect was disposed
 Reads reactive values without creating dependencies. Useful when you need to access a value but don't want updates to that value to trigger re-computation.
 
 ```tsx
-import { useEffect, useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { untrack } from 'flexium/core'
 
 const [count, setCount] = use(0)
@@ -87,7 +87,7 @@ setMultiplier(10)  // No log - multiplier is untracked
 Here's an example of building a custom store using advanced primitives:
 
 ```tsx
-import { useEffect, useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function createStore<T extends object>(initialState: T) {
   const [storeState, setStoreState] = use(initialState)

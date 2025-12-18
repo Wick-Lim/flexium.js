@@ -26,7 +26,7 @@ Flexium supports the familiar React-style `.map()` syntax with **automatic optim
 ### Basic Usage
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function TodoList() {
   const [todos] = use([
@@ -94,7 +94,7 @@ Use native JavaScript for conditional rendering. This is more readable and lever
 For if/else conditions, use the ternary operator - just like React:
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function LoginButton() {
   const [isLoggedIn, setIsLoggedIn] = use(false);
@@ -115,7 +115,7 @@ function LoginButton() {
 For conditionally showing content when a value is truthy:
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function UserGreeting() {
   const [user] = use(null);

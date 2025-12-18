@@ -11,7 +11,7 @@ Learn practical patterns commonly used in Flexium.
 ### Basic Form Pattern
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function LoginForm() {
   const [form, setForm] = use({

@@ -21,7 +21,7 @@ Flexium is designed for high performance by default. With fine-grained reactivit
 Because Flexium uses signals, updates are pinpointed. If a state changes, only the specific text node or attribute bound to that state updates. There's no component re-rendering or VDOM diffing.
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function Counter() {
   const [count, setCount] = use(0);
@@ -61,7 +61,7 @@ This means Flexium can be 2-10x faster than VDOM-based frameworks for many opera
 Effects and computed values automatically track only the signals they read. No manual dependency arrays, no risk of stale closures or missing dependencies.
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [a, setA] = use(1);
 const [b, setB] = use(2);
@@ -88,7 +88,7 @@ setB(20); // Effect runs again
 Instead of recalculating values in JSX, use `use()` with `deps` to memoize derived values:
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 // Bad - recalculates on every access
 function TodoList() {
@@ -106,9 +106,9 @@ function TodoList() {
 // Good - computed values with deps
 function TodoList() {
   const [todos, setTodos] = use([...]);
-  const [total] = use(() => todos.length, { deps: [todos] });
-  const [completed] = use(() => todos.filter(t => t.done).length, { deps: [todos] });
-  const [active] = use(() => todos.filter(t => !t.done).length, { deps: [todos] });
+  const [total] = use(() => todos.length, [todos]);
+  const [completed] = use(() => todos.filter(t => t.done).length, [todos]);
+  const [active] = use(() => todos.filter(t => !t.done).length, [todos]);
 
   return (
     <div>
@@ -128,7 +128,7 @@ When you need a derived value, use `computed()` instead of `use()` with manual s
 
 ```tsx
 ```tsx
-import { useEffect, useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [firstName, setFirstName] = use('John');
 const [lastName, setLastName] = use('Doe');
@@ -151,7 +151,7 @@ Reading signals inside loops or nested structures can create many dependencies:
 
 ```tsx
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [items, setItems] = use([...]);
 
@@ -186,7 +186,7 @@ Understanding when to use `computed()` vs `use()` is crucial for performance.
 
 ```tsx
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [price, setPrice] = use(100);
 const [tax, setTax] = use(0.08);
@@ -207,7 +207,7 @@ const [total] = use(() => price * (1 + tax));
 
 ```tsx
 ```tsx
-import { useEffect, useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [userId, setUserId] = use(null);
 
@@ -233,7 +233,7 @@ use(() => {
 
 ```tsx
 ```tsx
-import { useEffect, useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [count, setCount] = use(0);
 
@@ -264,7 +264,7 @@ When making multiple state changes, sync them to avoid intermediate updates:
 
 ```tsx
 import { useSync } from 'flexium/core';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [firstName, setFirstName] = use('John');
 const [lastName, setLastName] = use('Doe');
@@ -342,7 +342,7 @@ Flexium uses efficient event delegation for all standard events. Listeners are a
 Use `root()` to create disposal scopes for effects and computations:
 
 ```tsx
-import { useEffect, useState } from 'flexium/core';
+import { use } from 'flexium/core';
 import { root } from 'flexium/core';
 
 const [count, setCount] = use(0);
@@ -402,7 +402,7 @@ function Timer() {
 Use `untrack()` to read a signal without creating a dependency:
 
 ```tsx
-import { useEffect, useState } from 'flexium/core';
+import { use } from 'flexium/core';
 import { untrack } from 'flexium/core';
 
 const [count, setCount] = use(0);
@@ -429,7 +429,7 @@ This is useful for:
 Use `untrack()` for reading values without creating dependencies:
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 const [count, setCount] = use(0);
 
@@ -450,7 +450,7 @@ When rendering thousands of items, use `List` with `virtual` mode to only render
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function BigList() {
   const [items, setItems] = use(
@@ -495,7 +495,7 @@ function BigList() {
 
 ```tsx
 import { List } from 'flexium/primitives';
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function OptimizedList() {
   const [items, setItems] = use([...]); // 100,000 items
@@ -604,7 +604,7 @@ function App() {
 Load data only when needed:
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function UserProfile({ userId }) {
   const [expanded, setExpanded] = use(false);
@@ -674,7 +674,7 @@ Flexium is designed for excellent tree shaking. Import only what you use:
 import * as Flexium from 'flexium';
 
 // Good - imports only what you need
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 import { Column, Row, Text } from 'flexium/primitives';
 ```
 
@@ -684,7 +684,7 @@ Flexium provides multiple entry points for optimal bundling:
 
 ```tsx
 // Core reactivity (smallest)
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 // DOM rendering
 import { render } from 'flexium/dom';
@@ -730,7 +730,7 @@ Look for:
 For large third-party libraries, use dynamic imports:
 
 ```tsx
-import { useState, useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function ChartComponent({ data }) {
   const [Chart, setChart] = use(null);
@@ -816,7 +816,7 @@ function Dashboard() {
 For expensive calculations, use `use()` with the `deps` option to control when recomputation occurs:
 
 ```tsx
-import { useState } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function DataTable({ rawData, filterStatus }) {
   // Expensive computation - only re-runs when deps change
@@ -828,7 +828,7 @@ function DataTable({ rawData, filterStatus }) {
         score: calculateComplexScore(item)
       }))
       .sort((a, b) => b.score - a.score);
-  }, { deps: [rawData, filterStatus] });
+  }, [rawData, filterStatus]);
 
   return (
     <table>
@@ -859,7 +859,7 @@ performance.measure('app-init', 'app-init-start', 'app-init-end');
 Track specific operations:
 
 ```tsx
-import { useEffect } from 'flexium/core';
+import { use } from 'flexium/core';
 
 function measureEffect(name, fn) {
   return use(() => {

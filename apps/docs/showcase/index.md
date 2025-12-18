@@ -85,7 +85,7 @@ A simple counter demonstrating `use()` and computed values - the building blocks
 
 ::: details View Source Code
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Counter() {
@@ -127,7 +127,7 @@ A fully functional todo list with add, toggle, and delete operations. Shows how 
 
 ::: details View Source Code
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function TodoApp() {
@@ -198,7 +198,7 @@ A precise stopwatch with lap recording. Demonstrates timer-based state updates a
 
 ::: details View Source Code
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Column, Row, Text, Pressable } from 'flexium/primitives'
 
 function Stopwatch() {
@@ -268,7 +268,7 @@ Interactive canvas with particle trail effects. Move your mouse to see smooth, r
 
 ::: details View Source Code
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Canvas, DrawCircle } from 'flexium/canvas'
 
 function ParticleCanvas() {
@@ -336,7 +336,7 @@ A complete game built with Flexium's game module. Use arrow keys or WASD to cont
 
 ::: details View Source Code
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { mount } from 'flexium/dom'
 import { Canvas, DrawRect } from 'flexium/canvas'
 import { keyboard, useLoop, Keys } from 'flexium/interactive'
@@ -390,7 +390,7 @@ Authentication, shopping cart, and notifications with multiple providers working
 
 ::: details View Source Code
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 // Auth state - shared globally
 function useAuth() {

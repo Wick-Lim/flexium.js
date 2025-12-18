@@ -52,7 +52,7 @@ npm install flexium
 import { useState, useEffect, useMemo } from 'react'
 
 // ✅ After (Flexium)
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 ```
 
 ### Step 3: Convert Components
@@ -61,7 +61,7 @@ import { useState, useEffect } from 'flexium/core'
 
 ```tsx
 // ❌ Before (React)
-import { useState } from 'react'
+import { use } from 'react'
 
 function Counter() {
   const [count, setCount] = use(0)
@@ -75,7 +75,7 @@ function Counter() {
 }
 
 // ✅ After (Flexium)
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Counter() {
   const [count, setCount] = use(0)
@@ -112,21 +112,21 @@ function Calculator() {
 }
 
 // ✅ After (Flexium)
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Calculator() {
   const [price, setPrice] = use(100)
   const [quantity, setQuantity] = use(2)
 
   // Use deps to specify dependencies (like useMemo)
-  const [total] = use(() => price * quantity, { deps: [price, quantity] })
+  const [total] = use(() => price * quantity, [price, quantity])
 
   return <div>Total: {total}</div>
 }
 ```
 
 **Changes**:
-- `useMemo(() => ..., [deps])` → `use(() => ..., { deps: [...] })`
+- `useMemo(() => ..., [deps])` → `use(() => ..., [...])`
 - Returns a tuple: `const [value] = use(...)`
 
 ---
@@ -135,7 +135,7 @@ function Calculator() {
 
 ```tsx
 // ❌ Before (React)
-import { useState, useEffect } from 'react'
+import { use } from 'react'
 
 function Timer() {
   const [count, setCount] = use(0)
@@ -152,7 +152,7 @@ function Timer() {
 }
 
 // ✅ After (Flexium)
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Timer() {
   const [count, setCount] = use(0)
@@ -180,7 +180,7 @@ function Timer() {
 
 ```tsx
 // ❌ Before (React)
-import { useState, useEffect } from 'react'
+import { use } from 'react'
 
 function UserProfile({ userId }) {
   const [user, setUser] = use(null)
@@ -195,7 +195,7 @@ function UserProfile({ userId }) {
 }
 
 // ✅ After (Flexium)
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function UserProfile({ userId }) {
   const [user, setUser] = use(null)
@@ -232,7 +232,7 @@ function Parent() {
 }
 
 // ✅ After (Flexium)
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Parent() {
   const [count, setCount] = use(0)
@@ -309,7 +309,7 @@ function Child() {
 }
 
 // ✅ After (Flexium) - Use use() with key
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function App() {
   // Set theme globally - no Provider needed
@@ -361,7 +361,7 @@ function Counter() {
 }
 
 // ✅ After (Flexium)
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function Counter() {
   const [counterState, setCounterState] = use({ count: 0 })
@@ -576,7 +576,7 @@ function Component() { ... }
 ### Before (React)
 
 ```tsx
-import { useState, useEffect } from 'react'
+import { use } from 'react'
 
 interface Todo {
   id: number
@@ -800,7 +800,7 @@ sync(() => {
 
 ```tsx
 // State shared across multiple components should be global
-const [user] = use(null, { key: 'auth:user' })
+const [user] = use(null, undefined, { key: ['auth:user'] })
 ```
 
 ---

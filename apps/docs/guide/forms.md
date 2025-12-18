@@ -17,7 +17,7 @@ Flexium handles forms using the `use()` API for reactive form state management. 
 ## Basic Usage
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function LoginForm() {
   const [formData, setFormData] = use({
@@ -414,7 +414,7 @@ const resetForm = () => {
 ## Complete Example
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function RegistrationForm() {
   const [formData, setFormData] = use({
