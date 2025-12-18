@@ -2,12 +2,10 @@ import { reactive } from './reactive'
 import { unsafeEffect } from './lifecycle'
 import { hook } from './hook'
 import { registerSignal, updateSignal } from './devtools'
-import type { Context } from './types'
+import { Context, useContext as _useContext } from './context'
 
 // Re-export context utilities
-export { createContext, pushContext, popContext, snapshotContext, runWithContext } from './context'
-import { useContext as _useContext } from './context'
-export type { Context }
+export { Context, createContext, pushContext, popContext, snapshotContext, runWithContext } from './context'
 
 function isContext(value: any): value is Context<any> {
   return value && typeof value === 'object' && 'id' in value && 'defaultValue' in value && 'Provider' in value

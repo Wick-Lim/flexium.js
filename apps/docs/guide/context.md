@@ -121,9 +121,9 @@ If you're using deprecated Context API, migrate to `use()` with keys:
 
 ```tsx
 // ❌ Old way (deprecated)
-import { createContext, use } from 'flexium/core'
+import { Context, use } from 'flexium/core'
 
-const ThemeContext = createContext('light')
+const ThemeContext = new Context('light')
 
 function App() {
   const [theme, setTheme] = use('dark')

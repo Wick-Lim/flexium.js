@@ -1,14 +1,42 @@
-import type { Context } from './types'
-
-export type { Context }
-
 const contextMap = new Map<symbol, any>()
 
+/**
+ * Context for passing data through the component tree
+ *
+ * @example
+ * ```tsx
+ * const ThemeContext = new Context('light')
+ *
+ * function App() {
+ *   return (
+ *     <ThemeContext.Provider value="dark">
+ *       <Child />
+ *     </ThemeContext.Provider>
+ *   )
+ * }
+ *
+ * function Child() {
+ *   const theme = useContext(ThemeContext)
+ *   return <div>{theme}</div>
+ * }
+ * ```
+ */
+export class Context<T> {
+    readonly id: symbol
+    readonly defaultValue: T
+    readonly Provider: (props: { value: T; children: any }) => any
+
+    constructor(defaultValue: T) {
+        this.id = Symbol('context')
+        this.defaultValue = defaultValue
+        this.Provider = (props: { value: T; children: any }) => props.children
+        ;(this.Provider as any)._contextId = this.id
+    }
+}
+
+/** @deprecated Use `new Context(defaultValue)` instead */
 export function createContext<T>(defaultValue: T): Context<T> {
-    const id = Symbol('context')
-    const Provider = (props: { value: T; children: any }) => props.children;
-    (Provider as any)._contextId = id
-    return { Provider, id, defaultValue }
+    return new Context(defaultValue)
 }
 
 export function useContext<T>(ctx: Context<T>): T {
