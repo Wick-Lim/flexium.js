@@ -19,13 +19,20 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
   },
   "peerDependencies": {
     "flexium": ">=0.14.2"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/blocks": "^8.6.14",
+    "@storybook/html": "^8.6.14",
+    "@storybook/html-vite": "^8.6.14",
     "flexium": "workspace:*",
+    "storybook": "^8.6.14",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
     "vitest": "^2.1.8"
