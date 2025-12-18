@@ -206,7 +206,9 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'use()', link: '/docs/core/use' },
-            { text: 'sync()', link: '/docs/core/sync' }
+            { text: 'sync()', link: '/docs/core/sync' },
+            { text: 'useRef()', link: '/docs/core/ref' },
+            { text: 'createContext()', link: '/docs/core/context' }
           ]
         },
         {
@@ -269,13 +271,6 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Advanced',
-          collapsed: true,
-          items: [
-            { text: 'Context API', link: '/docs/core/context' }
-          ]
-        },
-        {
           text: 'Type Reference',
           collapsed: true,
           items: [
@@ -289,7 +284,9 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'use()', link: '/docs/core/use' },
-            { text: 'sync()', link: '/docs/core/sync' }
+            { text: 'sync()', link: '/docs/core/sync' },
+            { text: 'useRef()', link: '/docs/core/ref' },
+            { text: 'createContext()', link: '/docs/core/context' }
           ]
         },
         {
@@ -365,7 +362,9 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'use()', link: '/docs/core/use' },
-            { text: 'sync()', link: '/docs/core/sync' }
+            { text: 'sync()', link: '/docs/core/sync' },
+            { text: 'useRef()', link: '/docs/core/ref' },
+            { text: 'createContext()', link: '/docs/core/context' }
           ]
         },
         {
