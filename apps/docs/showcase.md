@@ -546,7 +546,7 @@ Each documentation page now includes live demos. Here are some highlights:
   </div>
 </a>
 
-<a href="/docs/interactive/loop" class="example-card">
+<a href="/docs/interactive/use-loop" class="example-card">
   <div class="example-icon">🎮</div>
   <div class="example-content">
     <h3>Interactive Apps</h3>

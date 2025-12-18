@@ -248,4 +248,4 @@ function LoadingLayout() {
 - [&lt;Routes /&gt;](/docs/router/routes) - Root routing component
 - [&lt;Route /&gt;](/docs/router/route) - Route definitions
 - [&lt;Link /&gt;](/docs/router/link) - Navigation links
-- [useRouter()](/docs/router/router) - Access router context
+- [useRouter()](/docs/router/use-router) - Access router context

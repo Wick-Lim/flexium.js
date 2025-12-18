@@ -332,4 +332,4 @@ See [Migration Guide](/guide/migration) for details.
 
 - [GitHub Issues](https://github.com/Wick-Lim/flexium.js/issues)
 - [Documentation](/guide/introduction)
-- [API Reference](/docs/core/state)
+- [API Reference](/docs/core/use)

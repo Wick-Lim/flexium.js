@@ -147,4 +147,4 @@ import RouteDemo from '../../components/RouteDemo.vue'
 
 - [&lt;Routes /&gt;](/docs/router/routes) - Root routing component
 - [&lt;Link /&gt;](/docs/router/link) - Navigate between routes
-- [useRouter()](/docs/router/router) - Access router context
+- [useRouter()](/docs/router/use-router) - Access router context

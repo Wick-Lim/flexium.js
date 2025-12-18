@@ -228,5 +228,5 @@ import UseMouseDemo from '../../components/UseMouseDemo.vue'
 
 ## See Also
 
-- [useKeyboard()](/docs/interactive/keyboard)
-- [useLoop()](/docs/interactive/loop)
+- [useKeyboard()](/docs/interactive/use-keyboard)
+- [useLoop()](/docs/interactive/use-loop)

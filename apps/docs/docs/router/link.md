@@ -159,4 +159,4 @@ import LinkDemo from '../../components/LinkDemo.vue'
 
 - [&lt;Routes /&gt;](/docs/router/routes)
 - [&lt;Route /&gt;](/docs/router/route)
-- [useRouter()](/docs/router/router)
+- [useRouter()](/docs/router/use-router)

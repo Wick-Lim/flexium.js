@@ -229,6 +229,6 @@ const gameLoop = useLoop({
 
 ## See Also
 
-- [useKeyboard()](/docs/interactive/keyboard)
-- [useMouse()](/docs/interactive/mouse)
+- [useKeyboard()](/docs/interactive/use-keyboard)
+- [useMouse()](/docs/interactive/use-mouse)
 - [&lt;Canvas /&gt;](/docs/canvas/canvas)
