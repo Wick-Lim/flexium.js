@@ -3,15 +3,14 @@ import { defineConfig } from 'tsup'
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
-    core: 'src/core/index.ts',
-    dom: 'src/dom/index.ts',
-    server: 'src/server/index.ts',
-    router: 'src/router/index.ts',
-    'jsx-runtime': 'src/jsx-runtime.ts',
-    'jsx-dev-runtime': 'src/jsx-dev-runtime.ts',
   },
   format: ['esm', 'cjs'],
-  dts: true,
+  dts: {
+    compilerOptions: {
+      jsx: 'react-jsx',
+      jsxImportSource: 'flexium',
+    }
+  },
   splitting: true,
   treeshake: true,
   clean: true,
@@ -19,12 +18,15 @@ export default defineConfig({
   sourcemap: true,
   target: 'es2020',
   outDir: 'dist',
-  // Ensure .mjs extension for ESM builds
+  external: ['flexium', 'flexium/core', 'flexium/jsx-runtime'],
+  esbuildOptions(options) {
+    options.jsx = 'automatic'
+    options.jsxImportSource = 'flexium'
+  },
   outExtension({ format }) {
     return {
       js: format === 'esm' ? '.mjs' : '.js',
     }
   },
-  // Bundle size analysis
   metafile: true,
 })

@@ -8,4 +8,7 @@ export { sync } from './lifecycle'
 export { useRef } from './ref'
 
 // Context
-export { Context } from './context'
+export { Context, getContextValue, pushContext, popContext } from './context'
+
+// Reactive utilities (for canvas package)
+export { isReactive } from './reactive'

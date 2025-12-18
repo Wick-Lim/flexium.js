@@ -13,7 +13,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -26,6 +26,31 @@ function run(cmd, options = {}) {
   } catch (err) {
     return false;
   }
+}
+
+function runParallel(commands, options = {}) {
+  console.log(`\n$ Running in parallel: ${commands.join(' & ')}`);
+  return new Promise((resolve) => {
+    const results = [];
+    let completed = 0;
+
+    commands.forEach((cmd, index) => {
+      const [command, ...args] = cmd.split(' ');
+      const proc = spawn(command, args, {
+        stdio: 'inherit',
+        cwd: options.cwd || ROOT,
+        shell: true,
+      });
+
+      proc.on('close', (code) => {
+        results[index] = code === 0;
+        completed++;
+        if (completed === commands.length) {
+          resolve(results.every(Boolean));
+        }
+      });
+    });
+  });
 }
 
 function readJSON(path) {
@@ -69,44 +94,50 @@ async function deploy(type) {
     process.exit(1);
   }
 
-  // 4. Build only npm packages (flexium, create-flexium, eslint-plugin-flexium)
+  // 4. Build npm packages in parallel (flexium must build first, then flexium-canvas)
   console.log('\n🔨 Building npm packages...');
+
+  // First build flexium (required by flexium-canvas)
   if (!run('npm run build:flexium')) {
     console.error('❌ flexium build failed');
     process.exit(1);
   }
-  if (!run('npm run build:create-flexium')) {
-    console.error('❌ create-flexium build failed');
-    process.exit(1);
-  }
-  if (!run('npm run build:eslint-plugin')) {
-    console.error('❌ eslint-plugin-flexium build failed');
-    process.exit(1);
-  }
-  if (!run('npm run build:vite-plugin')) {
-    console.error('❌ vite-plugin-flexium build failed');
+
+  // Then build the rest in parallel
+  const buildSuccess = await runParallel([
+    'npm run build:flexium-canvas',
+    'npm run build:create-flexium',
+    'npm run build:eslint-plugin',
+    'npm run build:vite-plugin',
+  ]);
+  if (!buildSuccess) {
+    console.error('❌ Package builds failed');
     process.exit(1);
   }
 
-  // 5. Run tests (unit + e2e)
-  console.log('\n🧪 Running unit tests...');
-  if (!run('npm run test:unit')) {
-    console.error('❌ Unit tests failed');
+  // 5. Run tests in parallel (unit + e2e)
+  console.log('\n🧪 Running tests in parallel...');
+  const testSuccess = await runParallel([
+    'npm run test:unit',
+    'npm run test:e2e:quick',
+  ]);
+  if (!testSuccess) {
+    console.error('❌ Tests failed');
     process.exit(1);
   }
 
-  console.log('\n🌐 Running E2E tests...');
-  if (!run('npm run test:e2e:quick')) {
-    console.error('❌ E2E tests failed');
-    process.exit(1);
-  }
-
-  // 6. Publish to npm
+  // 6. Publish to npm (flexium first, then flexium-canvas, then others in parallel)
   console.log('\n📤 Publishing to npm...');
 
   console.log('\n  Publishing flexium...');
   if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/flexium') })) {
     console.error('❌ Failed to publish flexium');
+    process.exit(1);
+  }
+
+  console.log('\n  Publishing flexium-canvas...');
+  if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/flexium-canvas') })) {
+    console.error('❌ Failed to publish flexium-canvas');
     process.exit(1);
   }
 
@@ -142,6 +173,7 @@ async function deploy(type) {
   console.log(`\n✨ Successfully deployed v${newVersion}!\n`);
   console.log(`   npm packages:`);
   console.log(`   - https://www.npmjs.com/package/flexium`);
+  console.log(`   - https://www.npmjs.com/package/flexium-canvas`);
   console.log(`   - https://www.npmjs.com/package/create-flexium`);
   console.log(`   - https://www.npmjs.com/package/eslint-plugin-flexium`);
   console.log(`   - https://www.npmjs.com/package/vite-plugin-flexium`);

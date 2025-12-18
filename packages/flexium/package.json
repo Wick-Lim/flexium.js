@@ -44,16 +44,6 @@
       "types": "./dist/jsx-dev-runtime.d.ts",
       "import": "./dist/jsx-dev-runtime.mjs",
       "require": "./dist/jsx-dev-runtime.js"
-    },
-    "./canvas": {
-      "types": "./dist/canvas.d.ts",
-      "import": "./dist/canvas.mjs",
-      "require": "./dist/canvas.js"
-    },
-    "./interactive": {
-      "types": "./dist/interactive.d.ts",
-      "import": "./dist/interactive.mjs",
-      "require": "./dist/interactive.js"
     }
   },
   "files": [
@@ -91,11 +81,7 @@
     "ui",
     "framework",
     "dom",
-    "canvas",
-    "game",
-    "game-loop",
     "renderer",
-    "flexbox",
     "lightweight",
     "fine-grained",
     "typescript",
@@ -106,8 +92,7 @@
     "no-virtual-dom",
     "signal-based",
     "computed",
-    "effect",
-    "cross-platform"
+    "effect"
   ],
   "author": "Flexium Contributors",
   "license": "MIT",

@@ -24,10 +24,14 @@ const MAIN_PKG = join(ROOT, 'package.json');
 const FILES_TO_SYNC = [
   // Package files
   { path: 'packages/flexium/package.json', type: 'json', field: 'version' },
+  { path: 'packages/flexium-canvas/package.json', type: 'json', field: 'version' },
   { path: 'packages/create-flexium/package.json', type: 'json', field: 'version' },
   { path: 'packages/eslint-plugin-flexium/package.json', type: 'json', field: 'version' },
   { path: 'packages/vite-plugin-flexium/package.json', type: 'json', field: 'version' },
   { path: 'apps/docs/package.json', type: 'json', field: 'version' },
+
+  // flexium-canvas peerDependency sync
+  { path: 'packages/flexium-canvas/package.json', type: 'json', field: 'peerDependencies.flexium', prefix: '>=' },
 
   // Source files
   { path: 'packages/flexium/src/index.ts', type: 'regex', pattern: /VERSION = '[^']+'/g, replace: (v) => `VERSION = '${v}'` },

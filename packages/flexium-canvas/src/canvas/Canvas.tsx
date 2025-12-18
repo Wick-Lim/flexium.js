@@ -1,6 +1,4 @@
-import { use } from '../core/use'
-import { isReactive } from '../core/reactive'
-import { Context, getContextValue, pushContext, popContext } from '../core/context'
+import { use, Context, isReactive, getContextValue, pushContext, popContext } from 'flexium/core'
 import { drawNodeWebGL } from './webgl/renderer'
 import type { CanvasProps, CanvasDrawNode, CanvasContext as CanvasCtxType, CanvasRenderContext } from './types'
 
