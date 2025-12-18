@@ -1,10 +1,8 @@
 // Types
 export type { Setter, ResourceControl, UseContext, UseOptions } from './use'
-export type { RefObject, RefCallback, Ref } from '../ref/types'
+export type { RefObject, RefCallback, Ref, ForwardedRef } from './types'
 
 // Functions
 export { use } from './use'
 export { sync } from './lifecycle'
-
-// Ref API
-export { useRef } from '../ref'
+export { useRef } from './ref'

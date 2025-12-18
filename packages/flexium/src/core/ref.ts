@@ -1,4 +1,4 @@
-import { hook } from '../core/hook'
+import { hook } from './hook'
 import type { RefObject } from './types'
 
 /**
