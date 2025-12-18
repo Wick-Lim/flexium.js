@@ -14,6 +14,13 @@ head:
 
 Flexium provides a complete toolkit for building interactive canvas-based applications and games with a proper animation loop, keyboard input, mouse input, and declarative rendering.
 
+::: tip Installation
+Interactive features are available in the flexium-canvas package:
+```bash
+npm install flexium-canvas
+```
+:::
+
 ## Why Flexium for Interactive Apps?
 
 Traditional interactive development with canvas requires:
@@ -28,8 +35,8 @@ Flexium handles all of this for you with a clean, reactive API.
 ## Quick Example
 
 ```tsx
-import { useLoop, useKeyboard, Keys } from 'flexium/interactive'
-import { Canvas, Circle } from 'flexium/canvas'
+import { useLoop, useKeyboard, Keys } from 'flexium-canvas'
+import { Canvas, Circle } from 'flexium-canvas'
 
 function SimpleGame() {
   let x = 200
@@ -71,7 +78,7 @@ The animation loop is the heart of any interactive application. It handles timin
 Creates an animation loop with delta time and optional fixed timestep for physics.
 
 ```tsx
-import { useLoop } from 'flexium/interactive'
+import { useLoop } from 'flexium-canvas'
 
 const gameLoop = useLoop({
   fixedFps: 60,           // Target FPS for physics (default: 60)
@@ -164,7 +171,7 @@ const gameLoop = useLoop({
 ### Basic Usage
 
 ```tsx
-import { useKeyboard, Keys } from 'flexium/interactive'
+import { useKeyboard, Keys } from 'flexium-canvas'
 
 const kb = useKeyboard()
 
@@ -193,7 +200,7 @@ console.log(pressedKeys) // ['keyw', 'space', ...]
 The `Keys` enum provides convenient constants for common keys:
 
 ```tsx
-import { Keys } from 'flexium/interactive'
+import { Keys } from 'flexium-canvas'
 
 // Arrow keys
 Keys.ArrowUp, Keys.ArrowDown, Keys.ArrowLeft, Keys.ArrowRight
@@ -342,7 +349,7 @@ onCleanup(() => {
 ### Basic Usage
 
 ```tsx
-import { useMouse, MouseButton } from 'flexium/interactive'
+import { useMouse, MouseButton } from 'flexium-canvas'
 
 const m = useMouse()
 
@@ -447,7 +454,7 @@ function Game() {
 ### MouseButton Enum
 
 ```tsx
-import { MouseButton } from 'flexium/interactive'
+import { MouseButton } from 'flexium-canvas'
 
 MouseButton.Left   // 0
 MouseButton.Middle // 1
@@ -478,8 +485,8 @@ onCleanup(() => {
 Here's a complete game combining all the systems:
 
 ```tsx
-import { useLoop, useKeyboard, useMouse, Keys } from 'flexium/interactive'
-import { Canvas, Circle, Rect, CanvasText } from 'flexium/canvas'
+import { useLoop, useKeyboard, useMouse, Keys } from 'flexium-canvas'
+import { Canvas, Circle, Rect, CanvasText } from 'flexium-canvas'
 import { use } from 'flexium/core'
 
 function TopDownShooter() {
@@ -784,8 +791,8 @@ const cappedDelta = Math.min(delta, 0.1) // Cap at 100ms
 Flexium's game module integrates seamlessly with Canvas primitives:
 
 ```tsx
-import { useLoop } from 'flexium/interactive'
-import { Canvas, Circle, Rect } from 'flexium/canvas'
+import { useLoop } from 'flexium-canvas'
+import { Canvas, Circle, Rect } from 'flexium-canvas'
 import { use } from 'flexium/core'
 
 function GameExample() {
@@ -827,7 +834,7 @@ The canvas automatically re-renders when state changes, giving you the best of b
 All game APIs are fully typed:
 
 ```tsx
-import type { Loop, KeyboardState, MouseState } from 'flexium/interactive'
+import type { Loop, KeyboardState, MouseState } from 'flexium-canvas'
 
 const game: Loop = useLoop({
   onUpdate: (delta: number) => {

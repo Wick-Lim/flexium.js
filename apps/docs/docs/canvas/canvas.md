@@ -29,7 +29,7 @@ Move your mouse over the canvas to see particle effects:
 ## Usage
 
 ```tsx
-import { Canvas, Rect, Circle } from 'flexium/canvas';
+import { Canvas, Rect, Circle } from 'flexium-canvas';
 
 function DrawingApp() {
   return (

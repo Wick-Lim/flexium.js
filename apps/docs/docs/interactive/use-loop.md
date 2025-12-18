@@ -17,7 +17,7 @@ Use arrow keys or WASD to control the snake:
 ## Import
 
 ```tsx
-import { useLoop } from 'flexium/interactive'
+import { useLoop } from 'flexium-canvas'
 ```
 
 ## Signature

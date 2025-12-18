@@ -220,7 +220,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/canvas',
+          text: 'flexium-canvas',
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
@@ -244,7 +244,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/interactive',
+          text: 'flexium-canvas (interactive)',
           collapsed: false,
           items: [
             { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },
@@ -298,7 +298,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/canvas',
+          text: 'flexium-canvas',
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
@@ -322,7 +322,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/interactive',
+          text: 'flexium-canvas (interactive)',
           collapsed: false,
           items: [
             { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },
@@ -376,7 +376,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/canvas',
+          text: 'flexium-canvas',
           collapsed: false,
           items: [
             { text: '&lt;Canvas /&gt;', link: '/docs/canvas/canvas' },
@@ -400,7 +400,7 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexium/interactive',
+          text: 'flexium-canvas (interactive)',
           collapsed: false,
           items: [
             { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },

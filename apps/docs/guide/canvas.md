@@ -14,6 +14,13 @@ head:
 
 Flexium provides declarative JSX-based canvas rendering with built-in Signal reactivity.
 
+::: tip Installation
+Canvas features are available in a separate package:
+```bash
+npm install flexium-canvas
+```
+:::
+
 ## Why Canvas?
 
 Canvas is essential for:
@@ -29,7 +36,7 @@ Traditional canvas code is imperative and hard to maintain. Flexium makes it dec
 ## Basic Usage
 
 ```tsx
-import { Canvas, DrawRect, DrawCircle } from 'flexium/canvas'
+import { Canvas, DrawRect, DrawCircle } from 'flexium-canvas'
 
 <Canvas width={400} height={400}>
   <DrawRect x={50} y={50} width={100} height={100} fill="blue" />
@@ -43,7 +50,7 @@ Canvas elements update automatically when state changes:
 
 ```tsx
 import { use } from 'flexium/core'
-import { Canvas, DrawCircle } from 'flexium/canvas'
+import { Canvas, DrawCircle } from 'flexium-canvas'
 
 function AnimatedCircle() {
   const [x, setX] = use(50)
@@ -168,7 +175,7 @@ Combine with event handlers for interactivity:
 
 ```tsx
 import { use } from 'flexium/core'
-import { Canvas, DrawCircle } from 'flexium/canvas'
+import { Canvas, DrawCircle } from 'flexium-canvas'
 
 function InteractiveCanvas() {
   const [mouseX, setMouseX] = use(200)
@@ -228,7 +235,7 @@ For advanced use cases, access the underlying canvas:
 
 ```tsx
 import { use } from 'flexium/core'
-import { Canvas, DrawLine, DrawCircle, DrawText } from 'flexium/canvas'
+import { Canvas, DrawLine, DrawCircle, DrawText } from 'flexium-canvas'
 
 function RealtimeChart() {
   const [dataPoints, setDataPoints] = use([50, 60, 55, 70, 65, 80])
