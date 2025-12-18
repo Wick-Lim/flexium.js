@@ -12,7 +12,7 @@ export default function User(props: { params?: { id?: string } } = {}) {
     const [user, { loading, error }] = use(async () => {
         if (!userId) return undefined;
         return await loadUser(userId);
-    }, [userId])
+    })
 
     if (loading || !user) return <main class="view user-view" id="main"><div>Loading...</div></main>
     if (error) return <main class="view user-view" id="main"><div>Error loading user</div></main>

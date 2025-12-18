@@ -3,10 +3,10 @@ import { Link } from 'flexium/router';
 import { loadItem, loadStories } from '../store';
 
 function StoryItem(props: { id: number; index: number; key?: number }) {
-    // Use async use() to fetch story data
+    // Use async use() to fetch story data (component key handles re-fetching)
     const [story, { loading }] = use(async () => {
         return await loadItem(props.id);
-    }, [props.id]);
+    });
 
     // Check if data is loaded
     if (loading || !story?.title) {
