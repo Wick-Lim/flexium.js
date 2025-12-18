@@ -2,6 +2,14 @@
 export type CanvasMode = '2d' | 'webgl' | 'webgl2'
 export type CanvasContext = CanvasRenderingContext2D | WebGLRenderingContext | WebGL2RenderingContext
 
+// Canvas render context (passed to children)
+export interface CanvasRenderContext {
+    mode: CanvasMode
+    ctx: CanvasContext | null
+    width: number
+    height: number
+}
+
 // Canvas types
 export interface CanvasProps {
     width: number

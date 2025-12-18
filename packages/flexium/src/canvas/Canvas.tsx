@@ -1,18 +1,47 @@
 import { use } from '../core/use'
 import { isReactive } from '../core/reactive'
-import type { CanvasProps, CanvasDrawNode, CanvasContext } from './types'
+import type { CanvasProps, CanvasDrawNode, CanvasContext, CanvasRenderContext } from './types'
 
 export type { CanvasProps }
 
-// Canvas context for children to access (2D mode only)
-let currentCanvasContext: CanvasRenderingContext2D | null = null
+// Canvas render context for children to access
+let currentRenderContext: CanvasRenderContext | null = null
 const drawQueue: CanvasDrawNode[] = []
 
-export function getCanvasContext() {
-  return currentCanvasContext
+/** Get current canvas render context (mode, ctx, dimensions) */
+export function getCanvasRenderContext(): CanvasRenderContext | null {
+  return currentRenderContext
+}
+
+/** Get current 2D canvas context (returns null if not in 2D mode) */
+export function getCanvasContext(): CanvasRenderingContext2D | null {
+  if (currentRenderContext?.mode === '2d') {
+    return currentRenderContext.ctx as CanvasRenderingContext2D | null
+  }
+  return null
+}
+
+/** Get current WebGL context (returns null if not in WebGL mode) */
+export function getWebGLContext(): WebGLRenderingContext | null {
+  if (currentRenderContext?.mode === 'webgl') {
+    return currentRenderContext.ctx as WebGLRenderingContext | null
+  }
+  return null
+}
+
+/** Get current WebGL2 context (returns null if not in WebGL2 mode) */
+export function getWebGL2Context(): WebGL2RenderingContext | null {
+  if (currentRenderContext?.mode === 'webgl2') {
+    return currentRenderContext.ctx as WebGL2RenderingContext | null
+  }
+  return null
 }
 
 export function queueDraw(node: CanvasDrawNode) {
+  if (currentRenderContext?.mode !== '2d') {
+    console.warn(`Draw components only work in 2D mode. Current mode: ${currentRenderContext?.mode}`)
+    return
+  }
   drawQueue.push(node)
 }
 
@@ -25,6 +54,9 @@ export function Canvas(props: CanvasProps) {
   const render = () => {
     if (!canvas || !ctx) return
 
+    // Set render context for children
+    currentRenderContext = { mode, ctx, width, height }
+
     // For 2D mode, use the draw queue system
     if (mode === '2d' && ctx instanceof CanvasRenderingContext2D) {
       // Clear canvas
@@ -32,9 +64,6 @@ export function Canvas(props: CanvasProps) {
 
       // Clear draw queue
       drawQueue.length = 0
-
-      // Set current context for children
-      currentCanvasContext = ctx
 
       // Render children (they will queue draw commands)
       if (Array.isArray(children)) {
@@ -51,9 +80,6 @@ export function Canvas(props: CanvasProps) {
       drawQueue.forEach(node => {
         drawNode(ctx as CanvasRenderingContext2D, node)
       })
-
-      // Clear context
-      currentCanvasContext = null
     }
     // For WebGL modes, just call children if they exist (they handle their own rendering)
     else {
@@ -67,6 +93,9 @@ export function Canvas(props: CanvasProps) {
         children()
       }
     }
+
+    // Clear render context
+    currentRenderContext = null
   }
 
   use(() => {
