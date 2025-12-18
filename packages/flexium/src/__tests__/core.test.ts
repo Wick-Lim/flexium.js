@@ -1,16 +1,16 @@
 /**
  * Core API Tests
  *
- * Tests for: useState, useEffect, sync, useRef, createContext, useContext
+ * Tests for: use, sync, useRef, createContext, useContext
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, f } from '../dom'
-import { useState, useEffect, sync, useRef } from '../core'
+import { use, sync, useRef } from '../core'
 import { createContext, useContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
-describe('useState()', () => {
+describe('use()', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -26,7 +26,7 @@ describe('useState()', () => {
     let capturedValue: number | null = null
 
     function App() {
-      const [count] = useState(0)
+      const [count] = use(0)
       capturedValue = count
       return f('div', {}, String(count))
     }
@@ -38,7 +38,7 @@ describe('useState()', () => {
 
   it('should update state and re-render', async () => {
     function Counter() {
-      const [count, setCount] = useState(0)
+      const [count, setCount] = use(0)
 
       return f('div', {}, [
         f('span', { 'data-testid': 'count' }, String(count)),
@@ -57,7 +57,7 @@ describe('useState()', () => {
 
   it('should support functional updates', async () => {
     function Counter() {
-      const [count, setCount] = useState(0)
+      const [count, setCount] = use(0)
 
       return f('div', {}, [
         f('span', { 'data-testid': 'count' }, String(count)),
@@ -76,7 +76,7 @@ describe('useState()', () => {
 
   it('should handle object state', async () => {
     function UserForm() {
-      const [user, setUser] = useState({ name: '', email: '' })
+      const [user, setUser] = use({ name: '', email: '' })
 
       return f('div', {}, [
         f('span', { 'data-testid': 'name' }, user.name),
@@ -98,7 +98,7 @@ describe('useState()', () => {
 
   it('should handle array state', async () => {
     function TodoList() {
-      const [items, setItems] = useState<string[]>([])
+      const [items, setItems] = use<string[]>([])
 
       return f('div', {}, [
         f('ul', { 'data-testid': 'list' },
@@ -123,7 +123,7 @@ describe('useState()', () => {
   })
 })
 
-describe('useEffect()', () => {
+describe('use()', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -139,7 +139,7 @@ describe('useEffect()', () => {
     let effectRan = false
 
     function App() {
-      useEffect(() => {
+      use(() => {
         effectRan = true
       }, [])
 
@@ -156,9 +156,9 @@ describe('useEffect()', () => {
     const effectCalls: number[] = []
 
     function App() {
-      const [count, setCount] = useState(0)
+      const [count, setCount] = use(0)
 
-      useEffect(() => {
+      use(() => {
         effectCalls.push(count)
       }, [count])
 
@@ -176,12 +176,12 @@ describe('useEffect()', () => {
   })
 
   it('should support cleanup function', async () => {
-    // Test that cleanup function can be returned without error
+    // Test that cleanup function can be used with onCleanup
     function App() {
-      useEffect(() => {
+      use(({ onCleanup }) => {
         const handler = () => {}
         window.addEventListener('resize', handler)
-        return () => window.removeEventListener('resize', handler)
+        onCleanup(() => window.removeEventListener('resize', handler))
       }, [])
 
       return f('div', { 'data-testid': 'app' }, 'App')
@@ -225,7 +225,7 @@ describe('sync()', () => {
     const syncCalls: number[] = []
 
     function App() {
-      const [count, setCount] = useState(0)
+      const [count, setCount] = use(0)
 
       sync(() => {
         syncCalls.push(count)
@@ -299,7 +299,7 @@ describe('useRef()', () => {
   it('should persist value across renders', async () => {
     function App() {
       const renderCount = useRef<number>(0)
-      const [, setTrigger] = useState(0)
+      const [, setTrigger] = use(0)
 
       renderCount.current = (renderCount.current ?? 0) + 1
 
@@ -393,7 +393,7 @@ describe('createContext() & useContext()', () => {
     }
 
     function App() {
-      const [user, setUser] = useState({ name: 'Guest' })
+      const [user, setUser] = use({ name: 'Guest' })
 
       return f('div', {}, [
         f(UserCtx.Provider, { value: user }, [

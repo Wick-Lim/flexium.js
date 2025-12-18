@@ -1,4 +1,4 @@
-import { useState } from '../../core/state'
+import { use } from '../../core/use'
 import { hook } from '../../core/hook'
 import type { FNodeChild } from '../types'
 import type { ErrorInfo, ErrorBoundaryProps } from './types'
@@ -57,7 +57,7 @@ export function ErrorBoundary(props: ErrorBoundaryProps): FNodeChild {
   const { fallback, onError, children, resetKey } = props
 
   // Error state
-  const [errorState, setErrorState] = useState<{
+  const [errorState, setErrorState] = use<{
     error: Error | null
     info: ErrorInfo | null
   }>({ error: null, info: null })

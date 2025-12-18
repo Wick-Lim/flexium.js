@@ -1,4 +1,4 @@
-import { useEffect } from '../core/lifecycle'
+import { use } from '../core/use'
 import { isReactive } from '../core/reactive'
 import type { CanvasProps, CanvasDrawNode } from './types'
 
@@ -54,7 +54,7 @@ export function Canvas(props: CanvasProps) {
     currentCanvasContext = null
   }
 
-  useEffect(() => {
+  use(() => {
     if (canvas) {
       render()
     }

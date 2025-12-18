@@ -1,4 +1,4 @@
-import { useState } from '../../core/state'
+import { use } from '../../core/use'
 import { hook } from '../../core/hook'
 import { SuspenseCtx } from './suspenseContext'
 import type { SuspenseProps, SuspenseContextValue } from './types'
@@ -25,8 +25,8 @@ export function Suspense(props: SuspenseProps): FNodeChild {
 
   // Track pending promises using hook for mutable Set
   const pendingSet = hook(() => new Set<Promise<any>>())
-  const [, setPendingCount] = useState(0)
-  const [showFallback, setShowFallback] = useState(false)
+  const [, setPendingCount] = use(0)
+  const [showFallback, setShowFallback] = use(false)
 
   // Register function for lazy components
   const register = (promise: Promise<any>) => {

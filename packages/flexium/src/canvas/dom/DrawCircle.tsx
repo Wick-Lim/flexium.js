@@ -1,11 +1,11 @@
-import { useEffect } from '../../core/lifecycle'
+import { use } from '../../core/use'
 import { queueDraw } from '../Canvas'
 import type { DrawCircleProps } from '../types'
 
 export type { DrawCircleProps }
 
 export function DrawCircle(props: DrawCircleProps) {
-  useEffect(() => {
+  use(() => {
     queueDraw({
       type: 'circle',
       props

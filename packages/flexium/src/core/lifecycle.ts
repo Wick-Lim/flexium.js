@@ -1,5 +1,3 @@
-import { hook } from './hook'
-
 // Reactive effect system
 export let activeEffect: ReactiveEffect | undefined
 
@@ -102,38 +100,6 @@ export function triggerEffects(dep: Set<ReactiveEffect>) {
                 queueJob(effect)
             }
         }
-    }
-}
-
-// Lifecycle hooks
-export function useEffect(fn: () => (void | (() => void)), deps?: any[]) {
-    const state = hook(() => {
-        return {
-            cleanup: undefined as undefined | (() => void),
-            deps: undefined as undefined | any[],
-            effect: undefined as undefined | ReactiveEffect,
-            hasRun: false
-        }
-    })
-
-    let hasChanged = true
-    if (state.hasRun && deps && state.deps) {
-        hasChanged = deps.some((d, i) => d !== state.deps![i])
-    }
-
-    if (hasChanged) {
-        if (state.cleanup) {
-            state.cleanup()
-            state.cleanup = undefined
-        }
-
-        const cleanup = fn()
-        if (typeof cleanup === 'function') {
-            state.cleanup = cleanup
-        }
-
-        state.deps = deps
-        state.hasRun = true
     }
 }
 

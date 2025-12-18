@@ -1,4 +1,4 @@
-import { useEffect } from '../../core/lifecycle'
+import { use } from '../../core/use'
 import { hook } from '../../core/hook'
 import { render } from '../render'
 import type { PortalProps } from './types'
@@ -32,7 +32,7 @@ export function Portal(props: PortalProps): null {
     mounted: false
   }))
 
-  useEffect(() => {
+  use(({ onCleanup }) => {
     // Resolve target container
     let container: HTMLElement | null = null
 
@@ -59,13 +59,13 @@ export function Portal(props: PortalProps): null {
     render(children, portalWrapper)
 
     // Cleanup function
-    return () => {
+    onCleanup(() => {
       if (portalWrapper.parentNode) {
         portalWrapper.parentNode.removeChild(portalWrapper)
       }
       portalState.container = null
       portalState.mounted = false
-    }
+    })
   }, [target, children])
 
   // Portal renders nothing in its original location

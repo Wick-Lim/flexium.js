@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { f, hydrate } from '../dom'
 import { renderToString, renderToStaticMarkup, getIsServer } from '../server'
-import { useState } from '../core'
+import { use } from '../core'
 import { createContext, useContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
@@ -48,7 +48,7 @@ describe('renderToString()', () => {
 
   it('should render with state (initial value)', () => {
     function Counter() {
-      const [count] = useState(42)
+      const [count] = use(42)
       return f('span', {}, String(count))
     }
 

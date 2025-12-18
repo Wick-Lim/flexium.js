@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f, Portal, Suspense, ErrorBoundary } from '../dom'
-import { useState, useEffect, sync, useRef } from '../core'
+import { use, sync, useRef } from '../core'
 import { createContext, useContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
@@ -26,11 +26,11 @@ describe('State + Effect + Render', () => {
     const logs: string[] = []
 
     function Counter() {
-      const [count, setCount] = useState(0)
+      const [count, setCount] = use(0)
 
-      useEffect(() => {
+      use(({ onCleanup }) => {
         logs.push(`Count changed to ${count}`)
-        return () => logs.push(`Cleanup ${count}`)
+        onCleanup(() => logs.push(`Cleanup ${count}`))
       }, [count])
 
       return f('div', {}, [
@@ -54,8 +54,8 @@ describe('State + Effect + Render', () => {
 
   it('should build a todo app', async () => {
     function TodoApp() {
-      const [todos, setTodos] = useState<{ id: number; text: string; done: boolean }[]>([])
-      const [input, setInput] = useState('')
+      const [todos, setTodos] = use<{ id: number; text: string; done: boolean }[]>([])
+      const [input, setInput] = use('')
       const inputRef = useRef<HTMLInputElement | null>(null)
 
       const addTodo = () => {
@@ -145,7 +145,7 @@ describe('Context + State + Components', () => {
     }
 
     function App() {
-      const [theme, setTheme] = useState<'light' | 'dark'>('light')
+      const [theme, setTheme] = use<'light' | 'dark'>('light')
 
       return f(ThemeCtx.Provider, { value: theme }, [
         f('div', { class: `app ${theme}` }, [
@@ -203,7 +203,7 @@ describe('Context + State + Components', () => {
     }
 
     function App() {
-      const [user, setUser] = useState<User | null>(null)
+      const [user, setUser] = use<User | null>(null)
 
       const authValue: AuthContext = {
         user,
@@ -276,7 +276,7 @@ describe('Portal + Modal Pattern', () => {
     }
 
     function App() {
-      const [open, setOpen] = useState(false)
+      const [open, setOpen] = use(false)
 
       return f('div', {}, [
         f('button', { 'data-testid': 'open', onclick: () => setOpen(true) }, 'Open Modal'),
@@ -374,7 +374,7 @@ describe('Ref + Components', () => {
     function Form() {
       const nameRef = useRef<HTMLInputElement | null>(null)
       const emailRef = useRef<HTMLInputElement | null>(null)
-      const [submitted, setSubmitted] = useState(false)
+      const [submitted, setSubmitted] = use(false)
 
       const handleSubmit = () => {
         const name = nameRef.current?.value || ''
@@ -444,7 +444,7 @@ describe('Complex State Management', () => {
     }
 
     function App() {
-      const [appState, setAppState] = useState<AppState>({
+      const [appState, setAppState] = use<AppState>({
         user: {
           profile: {
             name: 'John',
@@ -491,10 +491,10 @@ describe('Complex State Management', () => {
 
   it('should handle multiple independent states', async () => {
     function MultiStateApp() {
-      const [count, setCount] = useState(0)
-      const [text, setText] = useState('')
-      const [items, setItems] = useState<string[]>([])
-      const [flag, setFlag] = useState(false)
+      const [count, setCount] = use(0)
+      const [text, setText] = use('')
+      const [items, setItems] = use<string[]>([])
+      const [flag, setFlag] = use(false)
 
       return f('div', {}, [
         f('div', {}, [
@@ -562,7 +562,7 @@ describe('Lifecycle Integration', () => {
     const lifecycle: string[] = []
 
     function Child({ id }: { id: string }) {
-      useEffect(() => {
+      use(() => {
         lifecycle.push(`${id} mounted`)
       }, [])
 

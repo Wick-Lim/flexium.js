@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f } from '../dom'
 import { Routes, Route, Link, Outlet } from '../router'
-import { useState } from '../core'
+import { use } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -191,7 +191,7 @@ describe('State-based navigation patterns', () => {
 
   it('should support tab navigation with state', async () => {
     function TabNav() {
-      const [tab, setTab] = useState<'home' | 'about' | 'contact'>('home')
+      const [tab, setTab] = use<'home' | 'about' | 'contact'>('home')
 
       const tabs = {
         home: f('div', { 'data-testid': 'home-tab' }, 'Home'),
@@ -228,7 +228,7 @@ describe('State-based navigation patterns', () => {
     }
 
     function App() {
-      const [loggedIn, setLoggedIn] = useState(false)
+      const [loggedIn, setLoggedIn] = use(false)
 
       return f('div', {}, [
         f(ProtectedContent, { loggedIn }),
@@ -253,7 +253,7 @@ describe('State-based navigation patterns', () => {
 
   it('should support role-based content', async () => {
     function App() {
-      const [role, setRole] = useState<'guest' | 'user' | 'admin'>('guest')
+      const [role, setRole] = use<'guest' | 'user' | 'admin'>('guest')
 
       const content = {
         guest: f('div', { 'data-testid': 'guest' }, 'Guest view'),

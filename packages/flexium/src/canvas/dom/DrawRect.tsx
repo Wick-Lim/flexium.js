@@ -1,11 +1,11 @@
-import { useEffect } from '../../core/lifecycle'
+import { use } from '../../core/use'
 import { queueDraw } from '../Canvas'
 import type { DrawRectProps } from '../types'
 
 export type { DrawRectProps }
 
 export function DrawRect(props: DrawRectProps) {
-  useEffect(() => {
+  use(() => {
     queueDraw({
       type: 'rect',
       props

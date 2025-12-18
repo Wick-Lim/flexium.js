@@ -2,10 +2,26 @@ import { reactive } from './reactive'
 import { unsafeEffect } from './lifecycle'
 import { hook } from './hook'
 import { registerSignal, updateSignal } from './devtools'
-import type { StateSetter, ResourceControl, StateOptions } from './types'
 
-export type { StateSetter, ResourceControl, StateOptions }
-export type StateAction<T> = StateSetter<T> | ResourceControl
+// Types
+export type Setter<T> = (newValue: T | ((prev: T) => T)) => void
+
+export type ResourceControl<P = void> = {
+  refetch: (params?: P) => Promise<void>
+  readonly loading: boolean
+  readonly error: unknown
+  readonly status: 'idle' | 'loading' | 'success' | 'error'
+}
+
+export interface UseContext<P = void> {
+  onCleanup: (fn: () => void) => void
+  params?: P
+}
+
+export interface UseOptions {
+  key?: unknown[]
+  name?: string
+}
 
 // Global State Registry
 const globalRegistry = new Map<string, any>()
@@ -15,11 +31,30 @@ function serializeKey(key: unknown[]): string {
 }
 
 // Overloads
-export function useState<T>(fn: () => Promise<T>, options?: StateOptions): [T | undefined, ResourceControl]
-export function useState<T>(fn: () => T, options?: StateOptions): [T, ResourceControl]
-export function useState<T>(initialValue: T extends Function ? never : T, options?: StateOptions): [T, StateSetter<T>]
-export function useState<T>(input: T | (() => T) | (() => Promise<T>), options?: StateOptions): any {
-  // 0. Validate key if provided
+export function use<T, P = void>(
+  fn: (ctx: UseContext<P>) => Promise<T>,
+  deps?: any[],
+  options?: UseOptions
+): [T | undefined, ResourceControl<P>]
+
+export function use<T>(
+  fn: (ctx: UseContext) => T,
+  deps?: any[],
+  options?: UseOptions
+): [T, ResourceControl]
+
+export function use<T>(
+  initialValue: T extends Function ? never : T,
+  deps?: any[],
+  options?: UseOptions
+): [T, Setter<T>]
+
+export function use<T, P = void>(
+  input: T | ((ctx: UseContext<P>) => T) | ((ctx: UseContext<P>) => Promise<T>),
+  deps?: any[],
+  options?: UseOptions
+): any {
+  // Validate key if provided
   if (options?.key && !Array.isArray(options.key)) {
     throw new Error('State key must be an array')
   }
@@ -36,40 +71,60 @@ export function useState<T>(input: T | (() => T) | (() => Promise<T>), options?:
   const currentKey = options?.key
   const serializedKey = currentKey ? serializeKey(currentKey) : undefined
 
-  // Check if key has changed by comparing serialized strings
+  // Check if key has changed
   const keyChanged = serializedKey !== stateRef.serializedKey
 
-  // DEPS MODE: Handle separately - always check deps on every render
-  if (typeof input === 'function' && options?.deps !== undefined) {
-    const fn = input as Function
+  // DEPS MODE: Function with explicit deps array
+  if (typeof input === 'function' && deps !== undefined) {
+    const fn = input as (ctx: UseContext<P>) => T | Promise<T>
+
     const memoState = hook(() => ({
       value: undefined as T | undefined,
       prevDeps: undefined as any[] | undefined,
-      hasRun: false
+      cleanup: undefined as (() => void) | undefined,
+      hasRun: false,
+      params: undefined as P | undefined
     }))
 
     let hasChanged = true
     if (memoState.hasRun && memoState.prevDeps) {
-      hasChanged = options.deps.length !== memoState.prevDeps.length ||
-        options.deps.some((d, i) => d !== memoState.prevDeps![i])
+      hasChanged = deps.length !== memoState.prevDeps.length ||
+        deps.some((d, i) => d !== memoState.prevDeps![i])
     }
 
     if (hasChanged) {
-      const result = fn()
-      if (result instanceof Promise) {
-        throw new Error('deps option is not supported with async functions')
+      // Run previous cleanup
+      if (memoState.cleanup) {
+        memoState.cleanup()
+        memoState.cleanup = undefined
       }
+
+      // Create context with onCleanup
+      const ctx: UseContext<P> = {
+        onCleanup: (fn) => {
+          memoState.cleanup = fn
+        },
+        params: memoState.params
+      }
+
+      const result = fn(ctx)
+
+      if (result instanceof Promise) {
+        throw new Error('deps with async functions is not supported. Use use(asyncFn) without deps for async resources.')
+      }
+
       memoState.value = result
-      memoState.prevDeps = [...options.deps]
+      memoState.prevDeps = [...deps]
       memoState.hasRun = true
     }
 
-    const control: ResourceControl = {
-      refetch: async () => { },
+    const control: ResourceControl<P> = {
+      refetch: async () => {},
       get loading() { return false },
       get error() { return null },
       get status() { return 'success' as const }
     }
+
     return [memoState.value, control]
   }
 
@@ -83,23 +138,42 @@ export function useState<T>(input: T | (() => T) | (() => Promise<T>), options?:
     } else {
       let newContainer: any
 
-      // 1. Function (Computed or Resource) - only async functions reach here now
+      // Function (Computed or Resource)
       if (typeof input === 'function') {
-        const fn = input as Function
+        const fn = input as (ctx: UseContext<P>) => T | Promise<T>
 
-        // REACTIVE MODE: Automatic tracking for async functions
+        // State for async/computed
         const state = reactive({
           type: 'resource',
           value: undefined as T | undefined,
           loading: true,
           error: null as any,
           status: 'idle' as 'idle' | 'loading' | 'success' | 'error',
-          run: () => { }
+          cleanup: undefined as (() => void) | undefined,
+          params: undefined as P | undefined,
+          run: () => {}
         })
 
-        const run = () => {
+        const run = (params?: P) => {
+          // Run previous cleanup
+          if (state.cleanup) {
+            state.cleanup()
+            state.cleanup = undefined
+          }
+
+          // Store params for context
+          state.params = params
+
           try {
-            const result = fn()
+            // Create context
+            const ctx: UseContext<P> = {
+              onCleanup: (fn) => {
+                state.cleanup = fn
+              },
+              params: state.params
+            }
+
+            const result = fn(ctx)
 
             if (result instanceof Promise) {
               state.loading = true
@@ -133,12 +207,11 @@ export function useState<T>(input: T | (() => T) | (() => Promise<T>), options?:
         state.run = run
 
         // Make it reactive!
-        unsafeEffect(run)
+        unsafeEffect(() => run())
 
         newContainer = state
       } else {
-        // 2. Value (Signal)
-        // We return the reactive proxy itself as the container
+        // Value (Signal)
         newContainer = reactive({
           type: 'signal',
           value: input
@@ -159,25 +232,23 @@ export function useState<T>(input: T | (() => T) | (() => Promise<T>), options?:
 
   const container = stateRef.container
 
-  // --- RETURN LOGIC ---
-  // Access container.value to track dependency in the component's effect
+  // Access container.value to track dependency
   const currentValue = container.value
 
   if (container.type === 'signal') {
-    const setter = (newValue: T | ((prev: T) => T)) => {
+    const setter: Setter<T> = (newValue) => {
       if (typeof newValue === 'function') {
         container.value = (newValue as Function)(container.value)
       } else {
         container.value = newValue
       }
-      // Notify DevTools of update
       updateSignal(container, container.value)
     }
     return [currentValue, setter]
   } else {
     // Resource / Computed
-    const control = {
-      refetch: async () => { container.run() },
+    const control: ResourceControl<P> = {
+      refetch: async (params?: P) => { container.run(params) },
       get loading() { return container.loading },
       get error() { return container.error },
       get status() { return container.status }

@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f, Portal, Suspense, lazy, ErrorBoundary } from '../dom'
-import { useState } from '../core'
+import { use } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -129,7 +129,7 @@ describe('render()', () => {
 
   it('should update existing elements', async () => {
     function App() {
-      const [text, setText] = useState('Initial')
+      const [text, setText] = use('Initial')
 
       return f('div', {}, [
         f('span', { 'data-testid': 'text' }, text),
@@ -148,7 +148,7 @@ describe('render()', () => {
 
   it('should handle conditional rendering', async () => {
     function App() {
-      const [show, setShow] = useState(true)
+      const [show, setShow] = use(true)
 
       return f('div', {}, [
         show ? f('span', { 'data-testid': 'content' }, 'Visible') : null,
@@ -167,7 +167,7 @@ describe('render()', () => {
 
   it('should handle list rendering with keys', async () => {
     function App() {
-      const [items, setItems] = useState(['A', 'B', 'C'])
+      const [items, setItems] = use(['A', 'B', 'C'])
 
       return f('div', {}, [
         f('ul', {},
@@ -244,7 +244,7 @@ describe('Portal', () => {
     }
 
     function App() {
-      const [open, setOpen] = useState(false)
+      const [open, setOpen] = use(false)
 
       return f('div', {}, [
         f('button', { 'data-testid': 'open', onclick: () => setOpen(true) }, 'Open'),
