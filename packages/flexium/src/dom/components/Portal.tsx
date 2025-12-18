@@ -6,6 +6,11 @@ import type { PortalProps } from './types'
 /**
  * Portal component that renders children into a different DOM node
  *
+ * @deprecated Use Portal from 'flexium-ui' instead:
+ * ```tsx
+ * import { Portal } from 'flexium-ui'
+ * ```
+ *
  * @example
  * ```tsx
  * function Modal({ isOpen, onClose, children }) {

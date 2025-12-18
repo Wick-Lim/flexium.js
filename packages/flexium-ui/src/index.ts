@@ -53,6 +53,7 @@ export {
   TextField,
   Checkbox,
   Switch,
+  Portal,
 } from './components'
 export type {
   TextProps,
@@ -66,6 +67,7 @@ export type {
   TextFieldProps,
   CheckboxProps,
   SwitchProps,
+  PortalProps,
 } from './components'
 
 // Theme
