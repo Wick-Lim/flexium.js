@@ -1,4 +1,4 @@
-import type { FNode, FNodeChild } from './dom'
+import type { FNode, FNodeChild } from './dom/types'
 
 export function jsx(type: any, props: any, key?: any): FNode {
     const { children, ...otherProps } = props || {}
