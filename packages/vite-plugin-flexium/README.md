@@ -75,7 +75,7 @@ import flexium from 'vite-plugin-flexium'
 export default defineConfig({
   plugins: [
     flexium({
-      autoImport: true // Auto-import signal, computed, useEffect
+      autoImport: true // Auto-import use, sync, createContext
     })
   ]
 })
@@ -98,7 +98,7 @@ Or use pragma comments:
 
 ```tsx
 /** @jsxImportSource flexium */
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function App() {
   const [count, setCount] = use(0)

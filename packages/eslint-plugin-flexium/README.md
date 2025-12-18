@@ -63,11 +63,11 @@ if (count > 5) {
 }
 
 // ✅ Good - state read inside effect
-use(() => {
+use(({ onCleanup }) => {
   if (count > 5) {
     doSomething()
   }
-})
+}, [count])
 
 // ✅ Good - state read inside JSX
 const App = () => <div>{count}</div>
@@ -81,15 +81,15 @@ Enforce cleanup functions in effects that add event listeners or timers.
 
 ```javascript
 // ❌ Bad - no cleanup for event listener
-use(() => {
+use(({ onCleanup }) => {
   window.addEventListener('resize', handleResize)
-})
+}, [])
 
-// ✅ Good - returns cleanup function
-use(() => {
+// ✅ Good - uses onCleanup
+use(({ onCleanup }) => {
   window.addEventListener('resize', handleResize)
-  return () => window.removeEventListener('resize', handleResize)
-})
+  onCleanup(() => window.removeEventListener('resize', handleResize))
+}, [])
 ```
 
 ### `flexium/no-side-effect-in-computed`
@@ -105,15 +105,15 @@ const [count, setCount] = use(0)
 const [doubled] = use(() => {
   console.log('Computing...')  // Side effect!
   return count * 2
-}, { deps: [count] })
+}, [count])
 
 // ✅ Good - pure computed
-const [doubled] = use(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, [count])
 
 // ✅ Good - side effect in effect
-use(() => {
+use(({ onCleanup }) => {
   console.log('Count changed:', count)
-})
+}, [count])
 ```
 
 ### `flexium/prefer-sync`
@@ -123,7 +123,7 @@ Suggest using `sync()` when multiple state updates occur consecutively.
 **Why?** Multiple state updates are auto-batched via microtask, but `sync()` provides explicit synchronous batching when needed.
 
 ```javascript
-import { useState, sync } from 'flexium/core'
+import { use, sync } from 'flexium/core'
 
 const [count, setCount] = use(0)
 const [name, setName] = use('')
@@ -178,7 +178,7 @@ Prevent calling use() in component render body without proper scoping.
 ```javascript
 // ❌ Bad - effect created on every render without deps
 const MyComponent = () => {
-  use(() => {
+  use(({ onCleanup }) => {
     console.log('This runs on every render!')
   })
 
@@ -187,7 +187,7 @@ const MyComponent = () => {
 
 // ✅ Good - effect with empty deps (runs once)
 const MyComponent = () => {
-  use(() => {
+  use(({ onCleanup }) => {
     console.log('This runs once on mount')
   }, [])
 
@@ -203,13 +203,13 @@ Detect circular dependencies between computed states.
 
 ```javascript
 // ❌ Bad - circular dependency
-const [a] = use(() => b + 1, { deps: [b] })
-const [b] = use(() => a + 1, { deps: [a] }) // Creates infinite loop!
+const [a] = use(() => b + 1, [b])
+const [b] = use(() => a + 1, [a]) // Creates infinite loop!
 
 // ✅ Good - no circular dependencies
 const [count, setCount] = use(0)
-const [doubled] = use(() => count * 2, { deps: [count] })
-const [quadrupled] = use(() => doubled * 2, { deps: [doubled] })
+const [doubled] = use(() => count * 2, [count])
+const [quadrupled] = use(() => doubled * 2, [doubled])
 ```
 
 ### `flexium/component-naming`
@@ -270,10 +270,10 @@ const [a, setA] = use(1)
 const [b, setB] = use(2)
 
 // ⚠️ Warning - b is used but not in deps
-const [sum] = use(() => a + b, { deps: [a] })
+const [sum] = use(() => a + b, [a])
 
 // ✅ Good - all dependencies listed
-const [sum] = use(() => a + b, { deps: [a, b] })
+const [sum] = use(() => a + b, [a, b])
 ```
 
 ### `flexium/effect-dependencies-complete`
@@ -285,12 +285,12 @@ const [count, setCount] = use(0)
 const [name, setName] = use('')
 
 // ⚠️ Warning - name is used but not in deps
-use(() => {
+use(({ onCleanup }) => {
   console.log(count, name)
 }, [count])
 
 // ✅ Good - all dependencies listed
-use(() => {
+use(({ onCleanup }) => {
   console.log(count, name)
 }, [count, name])
 ```
@@ -304,12 +304,12 @@ const [count, setCount] = use(0)
 const [doubled, setDoubled] = use(0)
 
 // ⚠️ Warning - prefer computed for derived values
-use(() => {
+use(({ onCleanup }) => {
   setDoubled(count * 2)
 }, [count])
 
 // ✅ Good - use computed state
-const [doubled] = use(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, [count])
 ```
 
 ## Rule Severity by Configuration

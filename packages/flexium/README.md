@@ -39,7 +39,7 @@ Flexium unifies all state concepts into one function.
 ### Local State
 
 ```tsx
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 import { render } from 'flexium/dom'
 
 function Counter() {
@@ -102,15 +102,14 @@ function UserProfile({ id }) {
 
 ```tsx
 const [count, setCount] = use(1)
-const [doubled] = use(() => count * 2, { deps: [count] })
+const [doubled] = use(() => count * 2, [count])
 ```
 
 ## Package Structure
 
 ```
 flexium
-├── /core         # Core reactivity: use(), use(), sync()
-├── /advanced     # Advanced APIs: createContext(), useContext()
+├── /core         # Core reactivity: use(), sync(), createContext()
 ├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
 ├── /ref          # Ref system: useRef(), forwardRef()
 ├── /router       # SPA routing: Routes, Route, Link, Outlet, useRouter(), useLocation()
@@ -168,7 +167,7 @@ function UserProfileHook() {
 
 ```tsx
 import { Canvas, DrawRect, DrawCircle, DrawText } from 'flexium/canvas'
-import { useState } from 'flexium/core'
+import { use } from 'flexium/core'
 
 function App() {
   const [x, setX] = use(100)
@@ -186,7 +185,7 @@ function App() {
 ## Game Development
 
 ```tsx
-import { useState, useEffect } from 'flexium/core'
+import { use } from 'flexium/core'
 import { Canvas, DrawRect } from 'flexium/canvas'
 import { useLoop, keyboard, Keys } from 'flexium/interactive'
 
@@ -202,9 +201,9 @@ function Game() {
     }
   })
 
-  use(() => {
+  use(({ onCleanup }) => {
     gameLoop.start()
-    return () => gameLoop.stop()
+    onCleanup(() => gameLoop.stop())
   }, [])
 
   return (
@@ -265,7 +264,7 @@ import { ErrorBoundary } from 'flexium/dom'
 ## Context API
 
 ```tsx
-import { createContext, useContext } from 'flexium/advanced'
+import { use, createContext } from 'flexium/core'
 
 const ThemeCtx = createContext('light')
 
@@ -278,7 +277,7 @@ function App() {
 }
 
 function Child() {
-  const theme = useContext(ThemeCtx)
+  const [theme] = use(ThemeCtx)
   return <div>Theme: {theme}</div>
 }
 ```
