@@ -1,4 +1,4 @@
-import { state } from '../core/state'
+import { useState } from '../core/state'
 import { MouseButton, type MouseOptions, type MouseState } from './types'
 
 export { MouseButton, type MouseOptions, type MouseState }
@@ -7,10 +7,10 @@ export function mouse(options: MouseOptions = {}): MouseState {
   const target = options.target || window
   const canvasGetter = typeof options.canvas === 'function' ? options.canvas : () => options.canvas as HTMLCanvasElement | undefined
 
-  const [position, setPosition] = state({ x: 0, y: 0 }, { key: ['mouse', 'position'] })
-  const [delta, setDelta] = state({ x: 0, y: 0 }, { key: ['mouse', 'delta'] })
-  const [wheelDelta, setWheelDelta] = state(0, { key: ['mouse', 'wheel'] })
-  const [buttons, setButtons] = state<Set<number>>(new Set<number>(), { key: ['mouse', 'buttons'] })
+  const [position, setPosition] = useState({ x: 0, y: 0 }, { key: ['mouse', 'position'] })
+  const [delta, setDelta] = useState({ x: 0, y: 0 }, { key: ['mouse', 'delta'] })
+  const [wheelDelta, setWheelDelta] = useState(0, { key: ['mouse', 'wheel'] })
+  const [buttons, setButtons] = useState<Set<number>>(new Set<number>(), { key: ['mouse', 'buttons'] })
 
   let lastX = 0
   let lastY = 0

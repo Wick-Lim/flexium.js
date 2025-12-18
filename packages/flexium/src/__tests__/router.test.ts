@@ -1,12 +1,12 @@
 /**
  * Router API Tests
  *
- * Tests for: Routes, Route, Link, Outlet, router()
+ * Tests for: Routes, Route, Link, Outlet, useRouter, useLocation, useNavigate, useParams, useQuery
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f } from '../dom'
 import { Routes, Route, Link, Outlet } from '../router'
-import { state } from '../core'
+import { useState } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -191,7 +191,7 @@ describe('State-based navigation patterns', () => {
 
   it('should support tab navigation with state', async () => {
     function TabNav() {
-      const [tab, setTab] = state<'home' | 'about' | 'contact'>('home')
+      const [tab, setTab] = useState<'home' | 'about' | 'contact'>('home')
 
       const tabs = {
         home: f('div', { 'data-testid': 'home-tab' }, 'Home'),
@@ -228,7 +228,7 @@ describe('State-based navigation patterns', () => {
     }
 
     function App() {
-      const [loggedIn, setLoggedIn] = state(false)
+      const [loggedIn, setLoggedIn] = useState(false)
 
       return f('div', {}, [
         f(ProtectedContent, { loggedIn }),
@@ -253,7 +253,7 @@ describe('State-based navigation patterns', () => {
 
   it('should support role-based content', async () => {
     function App() {
-      const [role, setRole] = state<'guest' | 'user' | 'admin'>('guest')
+      const [role, setRole] = useState<'guest' | 'user' | 'admin'>('guest')
 
       const content = {
         guest: f('div', { 'data-testid': 'guest' }, 'Guest view'),

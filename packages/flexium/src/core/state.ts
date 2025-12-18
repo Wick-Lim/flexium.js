@@ -15,10 +15,10 @@ function serializeKey(key: unknown[]): string {
 }
 
 // Overloads
-export function state<T>(fn: () => Promise<T>, options?: StateOptions): [T | undefined, ResourceControl]
-export function state<T>(fn: () => T, options?: StateOptions): [T, ResourceControl]
-export function state<T>(initialValue: T extends Function ? never : T, options?: StateOptions): [T, StateSetter<T>]
-export function state<T>(input: T | (() => T) | (() => Promise<T>), options?: StateOptions): any {
+export function useState<T>(fn: () => Promise<T>, options?: StateOptions): [T | undefined, ResourceControl]
+export function useState<T>(fn: () => T, options?: StateOptions): [T, ResourceControl]
+export function useState<T>(initialValue: T extends Function ? never : T, options?: StateOptions): [T, StateSetter<T>]
+export function useState<T>(input: T | (() => T) | (() => Promise<T>), options?: StateOptions): any {
   // 0. Validate key if provided
   if (options?.key && !Array.isArray(options.key)) {
     throw new Error('State key must be an array')

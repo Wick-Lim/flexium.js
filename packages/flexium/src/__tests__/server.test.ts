@@ -6,7 +6,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { f, hydrate } from '../dom'
 import { renderToString, renderToStaticMarkup, getIsServer } from '../server'
-import { state, createContext, context } from '../core'
+import { useState } from '../core'
+import { createContext, useContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -47,7 +48,7 @@ describe('renderToString()', () => {
 
   it('should render with state (initial value)', () => {
     function Counter() {
-      const [count] = state(42)
+      const [count] = useState(42)
       return f('span', {}, String(count))
     }
 
@@ -59,7 +60,7 @@ describe('renderToString()', () => {
     const ThemeCtx = createContext('light')
 
     function ThemedDiv() {
-      const theme = context(ThemeCtx)
+      const theme = useContext(ThemeCtx)
       return f('div', { class: theme }, 'Content')
     }
 

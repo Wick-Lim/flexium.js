@@ -106,7 +106,7 @@ export function triggerEffects(dep: Set<ReactiveEffect>) {
 }
 
 // Lifecycle hooks
-export function effect(fn: () => (void | (() => void)), deps?: any[]) {
+export function useEffect(fn: () => (void | (() => void)), deps?: any[]) {
     const state = hook(() => {
         return {
             cleanup: undefined as undefined | (() => void),
@@ -139,10 +139,10 @@ export function effect(fn: () => (void | (() => void)), deps?: any[]) {
 
 /**
  * Unified sync API
- * - sync(): Force refresh (flush pending effects)
- * - sync(fn): Batch updates (run fn then flush)
+ * - useSync(): Force refresh (flush pending effects)
+ * - useSync(fn): Batch updates (run fn then flush)
  */
-export function sync(fn?: () => void) {
+export function useSync(fn?: () => void) {
     if (fn) {
         setBatching(true)
         try {

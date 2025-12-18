@@ -1,12 +1,11 @@
 // Types
-export type { StateSetter, ResourceControl, StateOptions, Context } from './types'
+export type { StateSetter, ResourceControl, StateOptions } from './types'
 export type { StateAction } from './state'
-export type { RefObject, RefCallback, Ref, ForwardedRef } from '../ref/types'
+export type { RefObject, RefCallback, Ref } from '../ref/types'
 
 // Functions
-export { state } from './state'
-export { effect, sync } from './lifecycle'
-export { createContext, context } from './context'
+export { useState } from './state'
+export { useEffect, useSync } from './lifecycle'
 
 // Ref API
-export { ref, forwardRef } from '../ref'
+export { useRef } from '../ref'

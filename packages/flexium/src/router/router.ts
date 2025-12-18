@@ -1,5 +1,5 @@
 import { reactive } from '../core/reactive'
-import { createContext, context } from '../core/context'
+import { createContext, useContext } from '../core/context'
 import type { Location, RouterContext } from './types'
 import { parseQuery, isUnsafePath } from './utils'
 
@@ -33,7 +33,7 @@ let globalNavigate: ((path: string) => void) | null = null
 let popstateListenerAttached = false
 
 // Create location state and navigation (singleton pattern)
-export function location(): [Location, (path: string) => void] {
+export function useLocation(): [Location, (path: string) => void] {
     // Return existing singleton if already created
     if (globalLocation && globalNavigate) {
         return [globalLocation, globalNavigate]
@@ -72,11 +72,29 @@ export function location(): [Location, (path: string) => void] {
     return [globalLocation, globalNavigate]
 }
 
-// Router hook
-export function router(): RouterContext {
-    const routerContext = context(RouterCtx)
+// Router hook - returns full router context
+export function useRouter(): RouterContext {
+    const routerContext = useContext(RouterCtx)
     if (!routerContext) {
-        throw new Error('router() must be called within a <Routes> component')
+        throw new Error('useRouter() must be called within a <Routes> component')
     }
     return routerContext
+}
+
+// Navigate hook - returns navigate function
+export function useNavigate(): (path: string) => void {
+    const [, navigate] = useLocation()
+    return navigate
+}
+
+// Params hook - returns route params
+export function useParams<T extends Record<string, string> = Record<string, string>>(): T {
+    const router = useRouter()
+    return router.params as T
+}
+
+// Query hook - returns query params
+export function useQuery<T extends Record<string, string> = Record<string, string>>(): T {
+    const [location] = useLocation()
+    return location.query as T
 }

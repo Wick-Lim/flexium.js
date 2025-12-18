@@ -2,7 +2,7 @@ import type { LoopCallbacks, Loop } from './types'
 
 export type { LoopCallbacks, Loop }
 
-export function loop(callbacks: LoopCallbacks): Loop {
+export function useLoop(callbacks: LoopCallbacks): Loop {
   const { fixedFps = 60, onUpdate, onFixedUpdate, onRender } = callbacks
 
   const fixedDelta = 1 / fixedFps

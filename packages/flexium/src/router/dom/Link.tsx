@@ -1,9 +1,9 @@
 import { jsx as f } from '../../jsx-runtime'
 import type { LinkProps } from '../types'
-import { router } from '../router'
+import { useRouter } from '../router'
 
 export function Link(props: LinkProps) {
-    const routerContext = router()
+    const routerContext = useRouter()
     return f('a', {
         href: props.to,
         class: props.class,

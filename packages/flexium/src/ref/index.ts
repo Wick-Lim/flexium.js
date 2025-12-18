@@ -1,7 +1,5 @@
 // Types
-export type { RefObject, RefCallback, Ref, ForwardedRef } from './types'
-export type { ForwardRefComponent, ForwardRefRenderFunction } from './forwardRef'
+export type { RefObject, RefCallback, Ref } from './types'
 
 // Functions
-export { ref } from './ref'
-export { forwardRef, FORWARD_REF_SYMBOL } from './forwardRef'
+export { useRef } from './ref'

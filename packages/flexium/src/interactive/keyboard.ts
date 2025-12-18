@@ -1,12 +1,12 @@
-import { state } from '../core/state'
+import { useState } from '../core/state'
 import { Keys, type KeyboardState } from './types'
 
 export { Keys, type KeyboardState }
 
 export function keyboard(target: EventTarget = window): KeyboardState {
-  const [pressedKeys, setPressedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'pressed'] })
-  const [justPressedKeys, setJustPressedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justPressed'] })
-  const [justReleasedKeys, setJustReleasedKeys] = state<Set<string>>(new Set<string>(), { key: ['keyboard', 'justReleased'] })
+  const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set<string>(), { key: ['keyboard', 'pressed'] })
+  const [justPressedKeys, setJustPressedKeys] = useState<Set<string>>(new Set<string>(), { key: ['keyboard', 'justPressed'] })
+  const [justReleasedKeys, setJustReleasedKeys] = useState<Set<string>>(new Set<string>(), { key: ['keyboard', 'justReleased'] })
 
   const handleKeyDown = (e: Event) => {
     const key = (e as KeyboardEvent).code

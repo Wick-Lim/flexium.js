@@ -2,7 +2,7 @@
 export * from './types'
 
 // Export hooks
-export { router } from './router'
+export { useRouter, useLocation, useNavigate, useParams, useQuery } from './router'
 
 // Export components
 export { Routes } from './dom/Routes'

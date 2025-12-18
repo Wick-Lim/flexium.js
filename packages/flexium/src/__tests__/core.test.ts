@@ -1,15 +1,16 @@
 /**
  * Core API Tests
  *
- * Tests for: state, effect, sync, ref, forwardRef, createContext, context
+ * Tests for: useState, useEffect, useSync, useRef, createContext, useContext
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, f } from '../dom'
-import { state, effect, sync, ref, forwardRef, createContext, context } from '../core'
+import { useState, useEffect, useSync, useRef } from '../core'
+import { createContext, useContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
-describe('state()', () => {
+describe('useState()', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -25,7 +26,7 @@ describe('state()', () => {
     let capturedValue: number | null = null
 
     function App() {
-      const [count] = state(0)
+      const [count] = useState(0)
       capturedValue = count
       return f('div', {}, String(count))
     }
@@ -37,7 +38,7 @@ describe('state()', () => {
 
   it('should update state and re-render', async () => {
     function Counter() {
-      const [count, setCount] = state(0)
+      const [count, setCount] = useState(0)
 
       return f('div', {}, [
         f('span', { 'data-testid': 'count' }, String(count)),
@@ -56,7 +57,7 @@ describe('state()', () => {
 
   it('should support functional updates', async () => {
     function Counter() {
-      const [count, setCount] = state(0)
+      const [count, setCount] = useState(0)
 
       return f('div', {}, [
         f('span', { 'data-testid': 'count' }, String(count)),
@@ -75,7 +76,7 @@ describe('state()', () => {
 
   it('should handle object state', async () => {
     function UserForm() {
-      const [user, setUser] = state({ name: '', email: '' })
+      const [user, setUser] = useState({ name: '', email: '' })
 
       return f('div', {}, [
         f('span', { 'data-testid': 'name' }, user.name),
@@ -97,7 +98,7 @@ describe('state()', () => {
 
   it('should handle array state', async () => {
     function TodoList() {
-      const [items, setItems] = state<string[]>([])
+      const [items, setItems] = useState<string[]>([])
 
       return f('div', {}, [
         f('ul', { 'data-testid': 'list' },
@@ -122,7 +123,7 @@ describe('state()', () => {
   })
 })
 
-describe('effect()', () => {
+describe('useEffect()', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -138,7 +139,7 @@ describe('effect()', () => {
     let effectRan = false
 
     function App() {
-      effect(() => {
+      useEffect(() => {
         effectRan = true
       }, [])
 
@@ -155,9 +156,9 @@ describe('effect()', () => {
     const effectCalls: number[] = []
 
     function App() {
-      const [count, setCount] = state(0)
+      const [count, setCount] = useState(0)
 
-      effect(() => {
+      useEffect(() => {
         effectCalls.push(count)
       }, [count])
 
@@ -177,7 +178,7 @@ describe('effect()', () => {
   it('should support cleanup function', async () => {
     // Test that cleanup function can be returned without error
     function App() {
-      effect(() => {
+      useEffect(() => {
         const handler = () => {}
         window.addEventListener('resize', handler)
         return () => window.removeEventListener('resize', handler)
@@ -193,7 +194,7 @@ describe('effect()', () => {
   })
 })
 
-describe('sync()', () => {
+describe('useSync()', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -209,9 +210,9 @@ describe('sync()', () => {
     let syncRan = false
 
     function App() {
-      sync(() => {
+      useSync(() => {
         syncRan = true
-      }, [])
+      })
 
       return f('div', {}, 'Hello')
     }
@@ -220,15 +221,15 @@ describe('sync()', () => {
     expect(syncRan).toBe(true)
   })
 
-  it('should run when dependencies change', async () => {
+  it('should run on each render', async () => {
     const syncCalls: number[] = []
 
     function App() {
-      const [count, setCount] = state(0)
+      const [count, setCount] = useState(0)
 
-      sync(() => {
+      useSync(() => {
         syncCalls.push(count)
-      }, [count])
+      })
 
       return f('button', { 'data-testid': 'inc', onclick: () => setCount(count + 1) }, String(count))
     }
@@ -243,7 +244,7 @@ describe('sync()', () => {
   })
 })
 
-describe('ref()', () => {
+describe('useRef()', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -256,23 +257,23 @@ describe('ref()', () => {
   })
 
   it('should create ref with initial value', () => {
-    let capturedRef: { current: number } | null = null
+    let capturedValue: number | null = null
 
     function App() {
-      const myRef = ref(42)
-      capturedRef = myRef
-      return f('div', {}, String(myRef.current))
+      const myRef = useRef(42)
+      capturedValue = myRef.current
+      return f('div', {}, String(myRef.current ?? 0))
     }
 
     render(f(App), container)
-    expect(capturedRef?.current).toBe(42)
+    expect(capturedValue).toBe(42)
   })
 
   it('should attach ref to DOM element', async () => {
     let element: HTMLInputElement | null = null
 
     function App() {
-      const inputRef = ref<HTMLInputElement | null>(null)
+      const inputRef = useRef<HTMLInputElement | null>(null)
 
       return f('div', {}, [
         f('input', { ref: inputRef, 'data-testid': 'input' }),
@@ -297,10 +298,10 @@ describe('ref()', () => {
 
   it('should persist value across renders', async () => {
     function App() {
-      const renderCount = ref(0)
-      const [, setTrigger] = state(0)
+      const renderCount = useRef<number>(0)
+      const [, setTrigger] = useState(0)
 
-      renderCount.current++
+      renderCount.current = (renderCount.current ?? 0) + 1
 
       return f('div', {}, [
         f('span', { 'data-testid': 'count' }, String(renderCount.current)),
@@ -319,68 +320,7 @@ describe('ref()', () => {
   })
 })
 
-describe('forwardRef()', () => {
-  let container: HTMLDivElement
-
-  beforeEach(() => {
-    container = document.createElement('div')
-    document.body.appendChild(container)
-  })
-
-  afterEach(() => {
-    document.body.removeChild(container)
-  })
-
-  it('should forward ref to child element', async () => {
-    const FancyInput = forwardRef<HTMLInputElement, { placeholder: string }>(
-      (props, forwardedRef) => f('input', {
-        ref: forwardedRef,
-        placeholder: props.placeholder,
-        class: 'fancy'
-      })
-    )
-
-    let inputElement: HTMLInputElement | null = null
-
-    function App() {
-      const inputRef = ref<HTMLInputElement | null>(null)
-
-      return f('div', {}, [
-        f(FancyInput, { ref: inputRef, placeholder: 'Type...' }),
-        f('button', {
-          'data-testid': 'check',
-          onclick: () => { inputElement = inputRef.current }
-        }, 'Check')
-      ])
-    }
-
-    render(f(App), container)
-
-    container.querySelector<HTMLButtonElement>('[data-testid="check"]')?.click()
-    expect(inputElement?.placeholder).toBe('Type...')
-    expect(inputElement?.className).toBe('fancy')
-  })
-
-  it('should work with callback ref', () => {
-    let capturedEl: HTMLButtonElement | null = null
-
-    const FancyButton = forwardRef<HTMLButtonElement, { label: string }>(
-      (props, forwardedRef) => f('button', { ref: forwardedRef }, props.label)
-    )
-
-    function App() {
-      return f(FancyButton, {
-        label: 'Click',
-        ref: (el: HTMLButtonElement | null) => { capturedEl = el }
-      })
-    }
-
-    render(f(App), container)
-    expect(capturedEl?.textContent).toBe('Click')
-  })
-})
-
-describe('createContext() & context()', () => {
+describe('createContext() & useContext()', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -396,7 +336,7 @@ describe('createContext() & context()', () => {
     const ThemeCtx = createContext('light')
 
     function ThemedButton() {
-      const theme = context(ThemeCtx)
+      const theme = useContext(ThemeCtx)
       return f('button', { 'data-testid': 'btn' }, `Theme: ${theme}`)
     }
 
@@ -414,7 +354,7 @@ describe('createContext() & context()', () => {
     const CountCtx = createContext(100)
 
     function Display() {
-      const count = context(CountCtx)
+      const count = useContext(CountCtx)
       return f('span', { 'data-testid': 'count' }, String(count))
     }
 
@@ -426,7 +366,7 @@ describe('createContext() & context()', () => {
     const LevelCtx = createContext(0)
 
     function ShowLevel() {
-      const level = context(LevelCtx)
+      const level = useContext(LevelCtx)
       return f('span', { 'data-testid': 'level' }, String(level))
     }
 
@@ -448,12 +388,12 @@ describe('createContext() & context()', () => {
     const UserCtx = createContext({ name: 'Guest' })
 
     function Greeting() {
-      const user = context(UserCtx)
+      const user = useContext(UserCtx)
       return f('span', { 'data-testid': 'greeting' }, `Hello, ${user.name}`)
     }
 
     function App() {
-      const [user, setUser] = state({ name: 'Guest' })
+      const [user, setUser] = useState({ name: 'Guest' })
 
       return f('div', {}, [
         f(UserCtx.Provider, { value: user }, [

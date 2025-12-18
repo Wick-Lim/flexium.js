@@ -5,7 +5,8 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, f, Portal, Suspense, ErrorBoundary } from '../dom'
-import { state, effect, sync, ref, forwardRef, createContext, context } from '../core'
+import { useState, useEffect, useSync, useRef } from '../core'
+import { createContext, useContext } from '../advanced'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -25,9 +26,9 @@ describe('State + Effect + Render', () => {
     const logs: string[] = []
 
     function Counter() {
-      const [count, setCount] = state(0)
+      const [count, setCount] = useState(0)
 
-      effect(() => {
+      useEffect(() => {
         logs.push(`Count changed to ${count}`)
         return () => logs.push(`Cleanup ${count}`)
       }, [count])
@@ -53,9 +54,9 @@ describe('State + Effect + Render', () => {
 
   it('should build a todo app', async () => {
     function TodoApp() {
-      const [todos, setTodos] = state<{ id: number; text: string; done: boolean }[]>([])
-      const [input, setInput] = state('')
-      const inputRef = ref<HTMLInputElement | null>(null)
+      const [todos, setTodos] = useState<{ id: number; text: string; done: boolean }[]>([])
+      const [input, setInput] = useState('')
+      const inputRef = useRef<HTMLInputElement | null>(null)
 
       const addTodo = () => {
         if (!input.trim()) return
@@ -130,12 +131,12 @@ describe('Context + State + Components', () => {
     const ThemeCtx = createContext<'light' | 'dark'>('light')
 
     function ThemeToggle() {
-      const theme = context(ThemeCtx)
+      const theme = useContext(ThemeCtx)
       return f('span', { 'data-testid': 'theme' }, `Current: ${theme}`)
     }
 
     function ThemedButton({ onClick }: { onClick: () => void }) {
-      const theme = context(ThemeCtx)
+      const theme = useContext(ThemeCtx)
       return f('button', {
         'data-testid': 'toggle',
         class: theme === 'dark' ? 'dark-btn' : 'light-btn',
@@ -144,7 +145,7 @@ describe('Context + State + Components', () => {
     }
 
     function App() {
-      const [theme, setTheme] = state<'light' | 'dark'>('light')
+      const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
       return f(ThemeCtx.Provider, { value: theme }, [
         f('div', { class: `app ${theme}` }, [
@@ -185,7 +186,7 @@ describe('Context + State + Components', () => {
     })
 
     function UserDisplay() {
-      const { user } = context(AuthCtx)
+      const { user } = useContext(AuthCtx)
       if (!user) {
         return f('span', { 'data-testid': 'guest' }, 'Guest')
       }
@@ -193,7 +194,7 @@ describe('Context + State + Components', () => {
     }
 
     function LoginButton() {
-      const { user, login, logout } = context(AuthCtx)
+      const { user, login, logout } = useContext(AuthCtx)
 
       if (user) {
         return f('button', { 'data-testid': 'logout', onclick: logout }, 'Logout')
@@ -202,7 +203,7 @@ describe('Context + State + Components', () => {
     }
 
     function App() {
-      const [user, setUser] = state<User | null>(null)
+      const [user, setUser] = useState<User | null>(null)
 
       const authValue: AuthContext = {
         user,
@@ -275,7 +276,7 @@ describe('Portal + Modal Pattern', () => {
     }
 
     function App() {
-      const [open, setOpen] = state(false)
+      const [open, setOpen] = useState(false)
 
       return f('div', {}, [
         f('button', { 'data-testid': 'open', onclick: () => setOpen(true) }, 'Open Modal'),
@@ -346,7 +347,7 @@ describe('ErrorBoundary patterns', () => {
   })
 })
 
-describe('Ref + forwardRef + Components', () => {
+describe('Ref + Components', () => {
   let container: HTMLDivElement
 
   beforeEach(() => {
@@ -358,22 +359,22 @@ describe('Ref + forwardRef + Components', () => {
     document.body.removeChild(container)
   })
 
-  it('should build form with forwarded refs', async () => {
-    const Input = forwardRef<{
+  it('should build form with refs', async () => {
+    function Input({ label, inputRef }: {
       label: string
+      inputRef: { current: HTMLInputElement | null }
       error?: string
-    }, HTMLInputElement>((props, inputRef) => {
+    }) {
       return f('div', { class: 'form-field' }, [
-        f('label', {}, props.label),
-        f('input', { ref: inputRef, class: props.error ? 'error' : '' }),
-        props.error ? f('span', { class: 'error-msg' }, props.error) : null
+        f('label', {}, label),
+        f('input', { ref: inputRef })
       ])
-    })
+    }
 
     function Form() {
-      const nameRef = ref<HTMLInputElement | null>(null)
-      const emailRef = ref<HTMLInputElement | null>(null)
-      const [submitted, setSubmitted] = state(false)
+      const nameRef = useRef<HTMLInputElement | null>(null)
+      const emailRef = useRef<HTMLInputElement | null>(null)
+      const [submitted, setSubmitted] = useState(false)
 
       const handleSubmit = () => {
         const name = nameRef.current?.value || ''
@@ -393,8 +394,8 @@ describe('Ref + forwardRef + Components', () => {
       }
 
       return f('form', { onsubmit: (e: Event) => e.preventDefault() }, [
-        f(Input, { ref: nameRef, label: 'Name' }),
-        f(Input, { ref: emailRef, label: 'Email' }),
+        f(Input, { inputRef: nameRef, label: 'Name' }),
+        f(Input, { inputRef: emailRef, label: 'Email' }),
         f('button', { 'data-testid': 'submit', type: 'button', onclick: handleSubmit }, 'Submit')
       ])
     }
@@ -443,7 +444,7 @@ describe('Complex State Management', () => {
     }
 
     function App() {
-      const [appState, setAppState] = state<AppState>({
+      const [appState, setAppState] = useState<AppState>({
         user: {
           profile: {
             name: 'John',
@@ -490,10 +491,10 @@ describe('Complex State Management', () => {
 
   it('should handle multiple independent states', async () => {
     function MultiStateApp() {
-      const [count, setCount] = state(0)
-      const [text, setText] = state('')
-      const [items, setItems] = state<string[]>([])
-      const [flag, setFlag] = state(false)
+      const [count, setCount] = useState(0)
+      const [text, setText] = useState('')
+      const [items, setItems] = useState<string[]>([])
+      const [flag, setFlag] = useState(false)
 
       return f('div', {}, [
         f('div', {}, [
@@ -561,7 +562,7 @@ describe('Lifecycle Integration', () => {
     const lifecycle: string[] = []
 
     function Child({ id }: { id: string }) {
-      effect(() => {
+      useEffect(() => {
         lifecycle.push(`${id} mounted`)
       }, [])
 
@@ -587,9 +588,9 @@ describe('Lifecycle Integration', () => {
     let refAttached = false
 
     function Component() {
-      const divRef = ref<HTMLDivElement | null>(null)
+      const divRef = useRef<HTMLDivElement | null>(null)
 
-      sync(() => {
+      useSync(() => {
         syncExecuted = true
         if (divRef.current) {
           refAttached = true

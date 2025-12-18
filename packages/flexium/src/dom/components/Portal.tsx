@@ -1,4 +1,4 @@
-import { effect } from '../../core/lifecycle'
+import { useEffect } from '../../core/lifecycle'
 import { hook } from '../../core/hook'
 import { render } from '../render'
 import type { PortalProps } from './types'
@@ -32,7 +32,7 @@ export function Portal(props: PortalProps): null {
     mounted: false
   }))
 
-  effect(() => {
+  useEffect(() => {
     // Resolve target container
     let container: HTMLElement | null = null
 

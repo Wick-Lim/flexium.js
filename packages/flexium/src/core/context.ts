@@ -11,7 +11,7 @@ export function createContext<T>(defaultValue: T): Context<T> {
     return { Provider, id, defaultValue }
 }
 
-export function context<T>(ctx: Context<T>): T {
+export function useContext<T>(ctx: Context<T>): T {
     return contextMap.has(ctx.id) ? contextMap.get(ctx.id) : ctx.defaultValue
 }
 
