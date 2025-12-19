@@ -1,7 +1,7 @@
 {
   "name": "flexism",
   "version": "0.1.0",
-  "description": "Isomorphic SSR framework for Flexium with state hydration",
+  "description": "Realtime-first fullstack framework for Flexium",
   "publishConfig": {
     "access": "public"
   },
@@ -9,6 +9,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "flexism": "./dist/cli.mjs"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -42,11 +45,13 @@
   },
   "keywords": [
     "flexium",
+    "realtime",
+    "sse",
+    "server-sent-events",
+    "streaming",
     "ssr",
-    "server-side-rendering",
-    "hydration",
-    "isomorphic",
-    "universal",
+    "fullstack",
+    "framework",
     "signals"
   ],
   "author": "Flexium Contributors",

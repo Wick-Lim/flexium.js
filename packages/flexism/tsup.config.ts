@@ -5,9 +5,16 @@ export default defineConfig({
     index: 'src/index.ts',
     server: 'src/server/index.ts',
     client: 'src/client/index.ts',
+    cli: 'src/cli/index.ts',
   },
   format: ['esm', 'cjs'],
-  dts: true,
+  dts: {
+    entry: {
+      index: 'src/index.ts',
+      server: 'src/server/index.ts',
+      client: 'src/client/index.ts',
+    },
+  },
   splitting: true,
   treeshake: true,
   clean: true,
