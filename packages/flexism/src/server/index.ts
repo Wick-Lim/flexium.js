@@ -36,3 +36,7 @@ export {
   renderToHtmlStream,
 } from './stream'
 export type { StreamOptions, StreamResult, PipeableStream } from './stream'
+
+// SSE (Server-Sent Events)
+export { sse, sseMiddleware } from './sse'
+export type { SSEContext, SSEHandler, SSEResponse } from './sse'
