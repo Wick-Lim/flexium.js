@@ -67,8 +67,8 @@ importers:
   apps/hackernews:
     dependencies:
       flexium:
-        specifier: ^0.15.1
-        version: 0.15.1
+        specifier: ^0.15.2
+        version: 0.15.2
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -200,8 +200,8 @@ importers:
   packages/flexium-canvas:
     dependencies:
       flexium:
-        specifier: '>=0.15.1'
-        version: 0.15.1
+        specifier: '>=0.15.2'
+        version: 0.15.2
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -1868,8 +1868,8 @@ packages:
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
 
-  flexium@0.15.1:
-    resolution: {integrity: sha512-9cDNj5XPP/YScr5AyitcjukpXdBxnx9kxNpwMgZOWmyoE7c41GLC6Y7HRjPOPPNTsNKfExD35lnKQgyWAsv6tA==}
+  flexium@0.15.2:
+    resolution: {integrity: sha512-1GpBxjA5cwlWaHUxFOBkuiGTqJfmT9aZ5ai6Q/ADwwpjXkEY9GxPsgYgMRuoLF5Hl/soc687RnYNyYCmxhFbBw==}
     engines: {node: '>=18.0.0'}
 
   focus-trap@7.6.6:
@@ -4679,7 +4679,7 @@ snapshots:
 
   flatted@3.3.3: {}
 
-  flexium@0.15.1: {}
+  flexium@0.15.2: {}
 
   focus-trap@7.6.6:
     dependencies:

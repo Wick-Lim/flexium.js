@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "flexium": "^0.15.1",
-    "flexism": "^0.15.1"
+    "flexium": "^0.15.2",
+    "flexism": "^0.15.2"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
