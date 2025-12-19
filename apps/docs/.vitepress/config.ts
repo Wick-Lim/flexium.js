@@ -253,6 +253,23 @@ export default defineConfig({
           ]
         },
         {
+          text: 'flexism',
+          collapsed: false,
+          items: [
+            { text: 'Stream', link: '/docs/flexism/stream' },
+            { text: 'SSE Server', link: '/docs/flexism/sse' },
+            { text: 'CLI', link: '/docs/flexism/cli' }
+          ]
+        },
+        {
+          text: 'flexium-ui',
+          collapsed: false,
+          items: [
+            { text: 'Layout (Column, Row)', link: '/docs/ui/layout' },
+            { text: 'Portal', link: '/docs/ui/portal' }
+          ]
+        },
+        {
           text: 'Guide',
           collapsed: false,
           items: [
