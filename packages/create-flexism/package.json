@@ -1,0 +1,45 @@
+{
+  "name": "create-flexism",
+  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Create a new Flexism app with one command",
+  "type": "module",
+  "bin": {
+    "create-flexism": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "templates"
+  ],
+  "scripts": {
+    "test": "node --test __tests__/cli.test.js"
+  },
+  "keywords": [
+    "flexism",
+    "flexium",
+    "create",
+    "scaffold",
+    "cli",
+    "starter",
+    "realtime",
+    "sse",
+    "fullstack"
+  ],
+  "author": "Flexium Contributors",
+  "license": "MIT",
+  "homepage": "https://flexium.junhyuk.im",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wick-Lim/flexium.js.git",
+    "directory": "packages/create-flexism"
+  },
+  "bugs": {
+    "url": "https://github.com/Wick-Lim/flexium.js/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
