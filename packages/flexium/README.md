@@ -25,8 +25,19 @@ npm install flexium
 
 ## Quick Start
 
+### Client-side App
+
 ```bash
 npm create flexium@latest my-app
+cd my-app
+npm install
+npm run dev
+```
+
+### Fullstack App (with Realtime/SSE)
+
+```bash
+npm create flexism@latest my-app
 cd my-app
 npm install
 npm run dev
@@ -234,6 +245,16 @@ function Child() {
   return <div class={theme}>Current theme: {theme}</div>
 }
 ```
+
+## Ecosystem
+
+| Package | Description |
+|---------|-------------|
+| [flexism](https://www.npmjs.com/package/flexism) | Realtime-first fullstack framework with SSE streaming |
+| [flexium-ui](https://www.npmjs.com/package/flexium-ui) | Column/Row based UI component library |
+| [flexium-canvas](https://www.npmjs.com/package/flexium-canvas) | Canvas, WebGL, and interactive modules |
+| [create-flexium](https://www.npmjs.com/package/create-flexium) | Scaffold a client-side Flexium app |
+| [create-flexism](https://www.npmjs.com/package/create-flexism) | Scaffold a fullstack Flexism app |
 
 ## Documentation
 
