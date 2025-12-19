@@ -16,9 +16,7 @@ Get up and running with Flexium in under 5 minutes.
 
 ## Create a New Project
 
-### Client-side App
-
-The fastest way to start a client-side app:
+The fastest way to start is using the official CLI:
 
 ```bash
 npm create flexium@latest my-app
@@ -26,19 +24,6 @@ cd my-app
 npm install
 npm run dev
 ```
-
-### Fullstack App (with Realtime/SSE)
-
-For fullstack apps with real-time streaming capabilities:
-
-```bash
-npm create flexism@latest my-app
-cd my-app
-npm install
-npm run dev
-```
-
-[Flexism](/docs/flexism/stream) is a realtime-first fullstack framework built on Flexium, featuring SSE streaming and the `Stream` API.
 
 ## Manual Installation
 
@@ -151,5 +136,5 @@ const [double] = use(() => count * 2, [count]);
 
 - Learn about [State Management](/guide/state) in depth
 - Explore [JSX & Rendering](/guide/jsx)
-- Build realtime apps with [Flexism Stream API](/docs/flexism/stream)
+- Create [custom reactive sources](/docs/core/useable) with Useable
 - Use [Flexium UI](/docs/ui/layout) layout components

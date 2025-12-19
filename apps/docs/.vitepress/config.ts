@@ -208,7 +208,8 @@ export default defineConfig({
             { text: 'use()', link: '/docs/core/use' },
             { text: 'sync()', link: '/docs/core/sync' },
             { text: 'useRef()', link: '/docs/core/ref' },
-            { text: 'Context', link: '/docs/core/context' }
+            { text: 'Context', link: '/docs/core/context' },
+            { text: 'Useable', link: '/docs/core/useable' }
           ]
         },
         {
@@ -253,15 +254,6 @@ export default defineConfig({
           ]
         },
         {
-          text: 'flexism',
-          collapsed: false,
-          items: [
-            { text: 'Stream', link: '/docs/flexism/stream' },
-            { text: 'SSE Server', link: '/docs/flexism/sse' },
-            { text: 'CLI', link: '/docs/flexism/cli' }
-          ]
-        },
-        {
           text: 'flexium-ui',
           collapsed: false,
           items: [
@@ -303,7 +295,8 @@ export default defineConfig({
             { text: 'use()', link: '/docs/core/use' },
             { text: 'sync()', link: '/docs/core/sync' },
             { text: 'useRef()', link: '/docs/core/ref' },
-            { text: 'Context', link: '/docs/core/context' }
+            { text: 'Context', link: '/docs/core/context' },
+            { text: 'Useable', link: '/docs/core/useable' }
           ]
         },
         {
@@ -381,7 +374,8 @@ export default defineConfig({
             { text: 'use()', link: '/docs/core/use' },
             { text: 'sync()', link: '/docs/core/sync' },
             { text: 'useRef()', link: '/docs/core/ref' },
-            { text: 'Context', link: '/docs/core/context' }
+            { text: 'Context', link: '/docs/core/context' },
+            { text: 'Useable', link: '/docs/core/useable' }
           ]
         },
         {

@@ -25,19 +25,8 @@ npm install flexium
 
 ## Quick Start
 
-### Client-side App
-
 ```bash
 npm create flexium@latest my-app
-cd my-app
-npm install
-npm run dev
-```
-
-### Fullstack App (with Realtime/SSE)
-
-```bash
-npm create flexism@latest my-app
 cd my-app
 npm install
 npm run dev
@@ -120,9 +109,9 @@ const [doubled] = use(() => count * 2, [count])
 
 ```
 flexium
-├── /core         # Core reactivity: use(), sync(), Context
+├── /core         # Core reactivity: use(), sync(), Context, Useable
 ├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
-├── /ref          # Ref system: useRef(), forwardRef()
+├── /ref          # Ref system: ref(), forwardRef()
 ├── /router       # SPA routing: Routes, Route, Link, Outlet, useRouter(), useLocation()
 └── /server       # SSR: renderToString(), renderToStaticMarkup()
 ```
@@ -250,11 +239,9 @@ function Child() {
 
 | Package | Description |
 |---------|-------------|
-| [flexism](https://www.npmjs.com/package/flexism) | Realtime-first fullstack framework with SSE streaming |
 | [flexium-ui](https://www.npmjs.com/package/flexium-ui) | Column/Row based UI component library |
 | [flexium-canvas](https://www.npmjs.com/package/flexium-canvas) | Canvas, WebGL, and interactive modules |
-| [create-flexium](https://www.npmjs.com/package/create-flexium) | Scaffold a client-side Flexium app |
-| [create-flexism](https://www.npmjs.com/package/create-flexism) | Scaffold a fullstack Flexism app |
+| [create-flexium](https://www.npmjs.com/package/create-flexium) | Scaffold a Flexium app |
 
 ## Documentation
 
