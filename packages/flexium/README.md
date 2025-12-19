@@ -109,9 +109,8 @@ const [doubled] = use(() => count * 2, [count])
 
 ```
 flexium
-├── /core         # Core reactivity: use(), sync(), Context, Useable
+├── /core         # Core reactivity: use(), sync(), useRef(), Context, Useable
 ├── /dom          # DOM renderer: render(), hydrate(), Portal, Suspense
-├── /ref          # Ref system: ref(), forwardRef()
 ├── /router       # SPA routing: Routes, Route, Link, Outlet, useRouter(), useLocation()
 └── /server       # SSR: renderToString(), renderToStaticMarkup()
 ```
