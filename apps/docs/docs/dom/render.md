@@ -74,10 +74,10 @@ disposeWidget?.()
 
 ## Behavior
 
-- **Appends** content to the container (doesn't replace)
+- **Replaces** container content (clears existing content)
 - Creates **reactive subscriptions** for signals
 - **Cleans up** subscriptions and effects on dispose
-- Supports **multiple render calls** to same container
+- Returns **dispose function** for unmounting
 
 ## Notes
 

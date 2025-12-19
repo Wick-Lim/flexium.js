@@ -439,7 +439,7 @@ export function reconcile(oldNodes: Node[], newNodes: Node[], parent: Node, befo
     return resultNodes
 }
 
-export function render(app: any, container: HTMLElement) {
+export function render(app: any, container: HTMLElement): () => void {
     container.innerHTML = ''
 
     if (typeof app === 'function') {
@@ -447,4 +447,19 @@ export function render(app: any, container: HTMLElement) {
     }
 
     renderNode(app, container)
+
+    // Return dispose function
+    return () => {
+        // Remove all component instances registered under this container
+        if (instanceRegistry.has(container)) {
+            const registry = instanceRegistry.get(container)!
+            registry.forEach(instance => {
+                removeComponentInstance(instance)
+            })
+            registry.clear()
+            instanceRegistry.delete(container)
+        }
+        // Clear container
+        container.innerHTML = ''
+    }
 }
