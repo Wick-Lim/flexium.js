@@ -24,14 +24,17 @@ const MAIN_PKG = join(ROOT, 'package.json');
 const FILES_TO_SYNC = [
   // Package files
   { path: 'packages/flexium/package.json', type: 'json', field: 'version' },
+  { path: 'packages/flexism/package.json', type: 'json', field: 'version' },
   { path: 'packages/flexium-canvas/package.json', type: 'json', field: 'version' },
   { path: 'packages/flexium-ui/package.json', type: 'json', field: 'version' },
   { path: 'packages/create-flexium/package.json', type: 'json', field: 'version' },
+  { path: 'packages/create-flexism/package.json', type: 'json', field: 'version' },
   { path: 'packages/eslint-plugin-flexium/package.json', type: 'json', field: 'version' },
   { path: 'packages/vite-plugin-flexium/package.json', type: 'json', field: 'version' },
   { path: 'apps/docs/package.json', type: 'json', field: 'version' },
 
   // peerDependency sync
+  { path: 'packages/flexism/package.json', type: 'json', field: 'peerDependencies.flexium', prefix: '>=' },
   { path: 'packages/flexium-canvas/package.json', type: 'json', field: 'peerDependencies.flexium', prefix: '>=' },
   { path: 'packages/flexium-ui/package.json', type: 'json', field: 'peerDependencies.flexium', prefix: '>=' },
 
@@ -42,8 +45,9 @@ const FILES_TO_SYNC = [
   // Config files
   { path: 'apps/docs/.vitepress/config.ts', type: 'regex', pattern: /text: 'v[^']+'/g, replace: (v) => `text: 'v${v}'` },
 
-  // Template files
-  { path: 'packages/create-flexium/templates/vite-starter/package.json', type: 'json', field: 'dependencies.flexium', prefix: '^' },
+  // Template files (create-flexism default template)
+  { path: 'packages/create-flexism/templates/default/package.json', type: 'json', field: 'dependencies.flexium', prefix: '^' },
+  { path: 'packages/create-flexism/templates/default/package.json', type: 'json', field: 'dependencies.flexism', prefix: '^' },
 
   // App dependency updates
   { path: 'apps/hackernews/package.json', type: 'json', field: 'dependencies.flexium', prefix: '^' },

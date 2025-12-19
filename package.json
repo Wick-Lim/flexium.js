@@ -7,9 +7,11 @@
   "scripts": {
     "build": "turbo run build",
     "build:flexium": "turbo run build --filter=flexium",
+    "build:flexism": "turbo run build --filter=flexism",
     "build:flexium-canvas": "turbo run build --filter=flexium-canvas",
     "build:flexium-ui": "turbo run build --filter=flexium-ui",
     "build:create-flexium": "turbo run build --filter=create-flexium",
+    "build:create-flexism": "turbo run build --filter=create-flexism",
     "build:eslint-plugin": "turbo run build --filter=eslint-plugin-flexium",
     "build:vite-plugin": "turbo run build --filter=vite-plugin-flexium",
     "build:docs": "turbo run build --filter=@flexium/docs",

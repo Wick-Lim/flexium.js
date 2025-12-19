@@ -97,9 +97,15 @@ async function deploy(type) {
   // 4. Build npm packages in parallel (flexium must build first, then flexium-canvas)
   console.log('\n🔨 Building npm packages...');
 
-  // First build flexium (required by flexium-canvas)
+  // First build flexium (required by flexism, flexium-canvas, flexium-ui)
   if (!run('npm run build:flexium')) {
     console.error('❌ flexium build failed');
+    process.exit(1);
+  }
+
+  // Then build flexism (required by create-flexism template)
+  if (!run('npm run build:flexism')) {
+    console.error('❌ flexism build failed');
     process.exit(1);
   }
 
@@ -108,6 +114,7 @@ async function deploy(type) {
     'npm run build:flexium-canvas',
     'npm run build:flexium-ui',
     'npm run build:create-flexium',
+    'npm run build:create-flexism',
     'npm run build:eslint-plugin',
     'npm run build:vite-plugin',
   ]);
@@ -136,6 +143,12 @@ async function deploy(type) {
     process.exit(1);
   }
 
+  console.log('\n  Publishing flexism...');
+  if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/flexism') })) {
+    console.error('❌ Failed to publish flexism');
+    process.exit(1);
+  }
+
   console.log('\n  Publishing flexium-canvas...');
   if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/flexium-canvas') })) {
     console.error('❌ Failed to publish flexium-canvas');
@@ -151,6 +164,12 @@ async function deploy(type) {
   console.log('\n  Publishing create-flexium...');
   if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/create-flexium') })) {
     console.error('❌ Failed to publish create-flexium');
+    process.exit(1);
+  }
+
+  console.log('\n  Publishing create-flexism...');
+  if (!run('npm publish --access public', { cwd: join(ROOT, 'packages/create-flexism') })) {
+    console.error('❌ Failed to publish create-flexism');
     process.exit(1);
   }
 
@@ -180,9 +199,11 @@ async function deploy(type) {
   console.log(`\n✨ Successfully deployed v${newVersion}!\n`);
   console.log(`   npm packages:`);
   console.log(`   - https://www.npmjs.com/package/flexium`);
+  console.log(`   - https://www.npmjs.com/package/flexism`);
   console.log(`   - https://www.npmjs.com/package/flexium-canvas`);
   console.log(`   - https://www.npmjs.com/package/flexium-ui`);
   console.log(`   - https://www.npmjs.com/package/create-flexium`);
+  console.log(`   - https://www.npmjs.com/package/create-flexism`);
   console.log(`   - https://www.npmjs.com/package/eslint-plugin-flexium`);
   console.log(`   - https://www.npmjs.com/package/vite-plugin-flexium`);
   console.log(`   GitHub: https://github.com/Wick-Lim/flexium.js/releases/tag/v${newVersion}\n`);
