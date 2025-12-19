@@ -1,11 +1,11 @@
 /**
  * Core API Tests
  *
- * Tests for: use, sync, useRef, Context
+ * Tests for: use, sync, useRef, Context, Useable
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, f } from '../dom'
-import { use, sync, useRef, Context } from '../core'
+import { use, sync, useRef, Context, Useable, isUseable } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 
@@ -412,5 +412,124 @@ describe('Context & use(Context)', () => {
     await tick()
 
     expect(container.querySelector('[data-testid="greeting"]')?.textContent).toBe('Hello, John')
+  })
+})
+
+describe('Useable', () => {
+  let container: HTMLDivElement
+
+  beforeEach(() => {
+    container = document.createElement('div')
+    document.body.appendChild(container)
+  })
+
+  afterEach(() => {
+    document.body.removeChild(container)
+  })
+
+  it('should identify Useable instances with isUseable()', () => {
+    const ctx = new Context('test')
+    expect(isUseable(ctx)).toBe(true)
+    expect(isUseable({})).toBe(false)
+    expect(isUseable(null)).toBe(false)
+    expect(isUseable('string')).toBe(false)
+  })
+
+  it('should allow creating custom Useable classes', () => {
+    class Counter extends Useable<number> {
+      private value: number
+
+      constructor(initial: number) {
+        super()
+        this.value = initial
+      }
+
+      getInitial(): number {
+        return this.value
+      }
+
+      subscribe(_params: undefined, callback: (value: number) => void): () => void {
+        // Simulate async update
+        const timer = setTimeout(() => {
+          this.value++
+          callback(this.value)
+        }, 10)
+        return () => clearTimeout(timer)
+      }
+    }
+
+    const counter = new Counter(0)
+    expect(isUseable(counter)).toBe(true)
+    expect(counter.getInitial()).toBe(0)
+  })
+
+  it('should work with use() for custom Useable', async () => {
+    class SimpleValue<T> extends Useable<T> {
+      constructor(private value: T) {
+        super()
+      }
+
+      getInitial(): T {
+        return this.value
+      }
+
+      subscribe(): () => void {
+        return () => {}
+      }
+    }
+
+    const MyValue = new SimpleValue(42)
+
+    function App() {
+      const [value] = use(MyValue)
+      return f('div', { 'data-testid': 'value' }, String(value))
+    }
+
+    render(f(App), container)
+    expect(container.querySelector('[data-testid="value"]')?.textContent).toBe('42')
+  })
+
+  it('should update when Useable calls callback', async () => {
+    const callbacks: Array<(value: number) => void> = []
+
+    class LiveValue extends Useable<number> {
+      constructor(private initial: number) {
+        super()
+      }
+
+      getInitial(): number {
+        return this.initial
+      }
+
+      subscribe(_params: undefined, callback: (value: number) => void): () => void {
+        callbacks.push(callback)
+        return () => {
+          const idx = callbacks.indexOf(callback)
+          if (idx >= 0) callbacks.splice(idx, 1)
+        }
+      }
+    }
+
+    const liveValue = new LiveValue(0)
+
+    function App() {
+      const [value] = use(liveValue)
+      return f('div', { 'data-testid': 'value' }, String(value))
+    }
+
+    render(f(App), container)
+    expect(container.querySelector('[data-testid="value"]')?.textContent).toBe('0')
+
+    // Simulate external update
+    callbacks.forEach(cb => cb(100))
+    await tick()
+
+    expect(container.querySelector('[data-testid="value"]')?.textContent).toBe('100')
+  })
+
+  it('Context should extend Useable', () => {
+    const ctx = new Context('default')
+    expect(ctx instanceof Useable).toBe(true)
+    expect(ctx.getInitial()).toBe('default')
   })
 })

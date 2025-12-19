@@ -1,3 +1,5 @@
+import { Useable } from './useable'
+
 const contextMap = new Map<symbol, any>()
 
 /**
@@ -21,22 +23,40 @@ const contextMap = new Map<symbol, any>()
  * }
  * ```
  */
-export class Context<T> {
-    readonly id: symbol
-    readonly defaultValue: T
-    readonly Provider: (props: { value: T; children: any }) => any
+export class Context<T> extends Useable<T> {
+  readonly id: symbol
+  readonly defaultValue: T
+  readonly Provider: (props: { value: T; children: any }) => any
 
-    constructor(defaultValue: T) {
-        this.id = Symbol('context')
-        this.defaultValue = defaultValue
-        this.Provider = (props: { value: T; children: any }) => props.children
-        ;(this.Provider as any)._contextId = this.id
-    }
+  constructor(defaultValue: T) {
+    super()
+    this.id = Symbol('context')
+    this.defaultValue = defaultValue
+    this.Provider = (props: { value: T; children: any }) => props.children
+    ;(this.Provider as any)._contextId = this.id
+  }
+
+  /**
+   * Get current context value or default
+   */
+  getInitial(): T {
+    return contextMap.has(this.id) ? contextMap.get(this.id) : this.defaultValue
+  }
+
+  /**
+   * Context doesn't have traditional subscriptions
+   * Reactivity is handled by component re-rendering
+   */
+  subscribe(_params: undefined, _callback: (value: T) => void): () => void {
+    // Context changes trigger re-render through Provider mechanism
+    // No additional subscription needed
+    return () => {}
+  }
 }
 
 // Internal: get context value (used by use.ts)
 export function getContextValue<T>(ctx: Context<T>): T {
-    return contextMap.has(ctx.id) ? contextMap.get(ctx.id) : ctx.defaultValue
+  return ctx.getInitial()
 }
 
 // Internal helpers for renderer

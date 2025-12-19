@@ -7,6 +7,9 @@ export { use } from './use'
 export { sync } from './lifecycle'
 export { useRef } from './ref'
 
+// Useable base class
+export { Useable, isUseable } from './useable'
+
 // Context
 export { Context, getContextValue, pushContext, popContext } from './context'
 
