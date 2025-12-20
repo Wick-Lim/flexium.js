@@ -8,8 +8,8 @@
     "start": "flexism start"
   },
   "dependencies": {
-    "flexium": "^0.15.6",
-    "flexism": "^0.15.6"
+    "flexium": "^0.15.7",
+    "flexism": "^0.15.7"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
