@@ -115,17 +115,21 @@ export class Transformer {
 
   private wrapApiHandler(name: string, body: string, isAsync: boolean): string {
     const asyncKeyword = isAsync ? 'async ' : ''
+    const exportPrefix = name === 'default' ? 'export default' : 'export'
+    const funcName = name === 'default' ? '' : ` ${name}`
     return `
 // API Handler: ${name}
-export ${asyncKeyword}function ${name}(request, context) ${body}
+${exportPrefix} ${asyncKeyword}function${funcName}(request, context)${body}
 `.trim()
   }
 
   private wrapServerComponent(name: string, body: string, isAsync: boolean): string {
     const asyncKeyword = isAsync ? 'async ' : ''
+    const exportPrefix = name === 'default' ? 'export default' : 'export'
+    const funcName = name === 'default' ? '' : ` ${name}`
     return `
 // Server Component: ${name} (no hydration)
-export ${asyncKeyword}function ${name}(props) ${body}
+${exportPrefix} ${asyncKeyword}function${funcName}(props)${body}
 `.trim()
   }
 
@@ -157,29 +161,48 @@ export ${isAsync ? 'async ' : ''}function loader(props) {
       ? `{ ${sharedProps.join(', ')} }`
       : 'props'
 
+    // Generate unique export names based on route path to avoid ESM export conflicts
+    const uniqueId = this.routePathToId(this.context.routePath)
+    const componentName = `Component_${uniqueId}`
+    const hydrateName = `hydrateComponent_${uniqueId}`
+
     return `
 // Client Component: ${name}
 import { use } from 'flexium/core'
 import { hydrate } from 'flexium/dom'
 
-export function Component(${propsParam}) ${clientBody}
+export function ${componentName}(${propsParam})${clientBody}
 
 // Hydration entry
-export function hydrateComponent(container, serverData) {
-  hydrate(Component, container, serverData)
+export function ${hydrateName}(container, serverData) {
+  hydrate(${componentName}, container, serverData)
 }
 `.trim()
   }
 
+  private routePathToId(routePath: string): string {
+    // Convert route path to a valid identifier
+    // /users/:id -> users_$id
+    // / -> index
+    if (routePath === '/') return 'index'
+    return routePath
+      .slice(1)  // Remove leading /
+      .replace(/\//g, '_')
+      .replace(/:/g, '$')
+  }
+
   private cleanServerBody(body: string): string {
-    // Remove leading/trailing braces if present
+    // For 2-function patterns, body is the content before `return`
+    // We only need to remove the leading function body brace if present
     let cleaned = body.trim()
-    if (cleaned.startsWith('{')) {
+
+    // Only remove leading brace if it's the function body opener
+    // (starts with `{` followed by whitespace/newline, not part of an expression)
+    if (cleaned.startsWith('{') && (cleaned.length === 1 || /\s/.test(cleaned[1]))) {
       cleaned = cleaned.slice(1)
     }
-    if (cleaned.endsWith('}')) {
-      cleaned = cleaned.slice(0, -1)
-    }
+
+    // Don't remove trailing braces - they belong to statements in the body
     return cleaned.trim()
   }
 }

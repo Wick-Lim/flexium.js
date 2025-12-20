@@ -53,17 +53,17 @@ export class Emitter {
       const layoutKey = result.filePath
       const moduleName = this.filePathToModuleName(result.filePath, 'layout')
 
-      // Write server code
+      // Write server code (use .tsx for JSX support)
       if (result.serverCode) {
-        const serverFileName = `${moduleName}.server.ts`
+        const serverFileName = `${moduleName}.server.tsx`
         const serverPath = path.join(serverOutDir, serverFileName)
         await fs.promises.writeFile(serverPath, result.serverCode)
         serverEntries.push(serverPath)
       }
 
-      // Write client code
+      // Write client code (use .tsx for JSX support)
       if (result.clientCode) {
-        const clientFileName = `${moduleName}.client.ts`
+        const clientFileName = `${moduleName}.client.tsx`
         const clientPath = path.join(clientOutDir, clientFileName)
         await fs.promises.writeFile(clientPath, result.clientCode)
         clientEntries.push(clientPath)
@@ -76,41 +76,73 @@ export class Emitter {
       }
     }
 
-    // Process pages and routes
+    // Process pages and routes - group by route path for API routes with multiple methods
     const routes: RouteInfo[] = []
+    const groupedByPath = new Map<string, TransformResult[]>()
 
     for (const result of pageRouteResults) {
-      const moduleName = this.routePathToModuleName(result.route.path)
+      const existing = groupedByPath.get(result.route.path)
+      if (existing) {
+        existing.push(result)
+      } else {
+        groupedByPath.set(result.route.path, [result])
+      }
+    }
 
-      // Write server code
-      if (result.serverCode) {
-        const serverFileName = `${moduleName}.server.ts`
+    for (const [routePath, results] of groupedByPath) {
+      const moduleName = this.routePathToModuleName(routePath)
+      const firstResult = results[0]
+
+      // Combine server code from all exports
+      const combinedServerCode = results
+        .filter(r => r.serverCode)
+        .map(r => r.serverCode)
+        .join('\n\n')
+
+      // Write combined server code (use .tsx for JSX support)
+      if (combinedServerCode) {
+        const serverFileName = `${moduleName}.server.tsx`
         const serverPath = path.join(serverOutDir, serverFileName)
-        await fs.promises.writeFile(serverPath, result.serverCode)
+        await fs.promises.writeFile(serverPath, combinedServerCode)
         serverEntries.push(serverPath)
-        result.route.serverModule = `${moduleName}.server.js`
       }
 
-      // Write client code
-      if (result.clientCode) {
-        const clientFileName = `${moduleName}.client.ts`
+      // Combine client code from all exports
+      const combinedClientCode = results
+        .filter(r => r.clientCode)
+        .map(r => r.clientCode)
+        .join('\n\n')
+
+      // Write combined client code (use .tsx for JSX support)
+      if (combinedClientCode) {
+        const clientFileName = `${moduleName}.client.tsx`
         const clientPath = path.join(clientOutDir, clientFileName)
-        await fs.promises.writeFile(clientPath, result.clientCode)
+        await fs.promises.writeFile(clientPath, combinedClientCode)
         clientEntries.push(clientPath)
-        result.route.clientModule = `${moduleName}.client.js`
       }
 
-      // Convert layout file paths to module names
-      const layoutModuleNames: string[] = []
-      for (const layoutPath of result.route.layouts) {
-        const entry = layoutModules[layoutPath]
-        if (entry) {
-          layoutModuleNames.push(entry.module)
+      // Add route info for each export
+      for (const result of results) {
+        // Set module paths
+        if (combinedServerCode) {
+          result.route.serverModule = `${moduleName}.server.js`
         }
-      }
-      result.route.layouts = layoutModuleNames
+        if (combinedClientCode) {
+          result.route.clientModule = `${moduleName}.client.js`
+        }
 
-      routes.push(result.route)
+        // Convert layout file paths to module names
+        const layoutModuleNames: string[] = []
+        for (const layoutPath of result.route.layouts) {
+          const entry = layoutModules[layoutPath]
+          if (entry) {
+            layoutModuleNames.push(entry.module)
+          }
+        }
+        result.route.layouts = layoutModuleNames
+
+        routes.push(result.route)
+      }
     }
 
     // Transpile server files individually
@@ -211,8 +243,16 @@ export class Emitter {
   private async bundleClient(entries: string[], outDir: string): Promise<string> {
     const outfile = path.join(outDir, 'index.js')
 
+    // Create a virtual entry point that imports all client modules
+    const entryContent = entries
+      .map((entry, i) => `export * from './${path.basename(entry)}'`)
+      .join('\n')
+
+    const entryPath = path.join(outDir, '_entry.tsx')
+    await fs.promises.writeFile(entryPath, entryContent)
+
     await esbuild.build({
-      entryPoints: entries,
+      entryPoints: [entryPath],
       bundle: true,
       outfile,
       format: 'esm',
@@ -220,17 +260,25 @@ export class Emitter {
       target: this.options.target || 'es2022',
       minify: this.options.minify,
       sourcemap: this.options.sourcemap,
+      // Configure JSX
+      jsx: 'automatic',
+      jsxImportSource: 'flexium',
       external: [
-        // Flexium is loaded separately
+        // Flexium runtime modules are loaded separately
         'flexium',
-        'flexium/*',
+        'flexium/core',
+        'flexium/dom',
+        'flexium/jsx-runtime',
+        'flexium/jsx-dev-runtime',
       ],
       define: {
         'process.env.NODE_ENV': '"production"',
-        'typeof window': '"object"',
       },
-      treeShaking: true,
+      treeShaking: false,  // Keep all exports to ensure components are bundled
     })
+
+    // Clean up entry file
+    await fs.promises.unlink(entryPath)
 
     return outfile
   }

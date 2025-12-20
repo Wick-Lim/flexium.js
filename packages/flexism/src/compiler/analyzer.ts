@@ -14,6 +14,7 @@ export class Analyzer {
   private source: string
   private filePath: string
   private ast: Module | null = null
+  private baseOffset: number = 0
 
   constructor(source: string, filePath: string) {
     this.source = source
@@ -27,6 +28,10 @@ export class Analyzer {
       tsx: true,
       comments: false,
     })
+
+    // SWC uses global span positions, so we need to adjust relative to our source
+    // The AST's span.start gives us the base offset for this source
+    this.baseOffset = this.ast.span.start
 
     const exports: ExportInfo[] = []
 
@@ -76,6 +81,21 @@ export class Analyzer {
     }
   }
 
+  /**
+   * Adjust a span start position to be relative to source string
+   */
+  private adjustSpanStart(position: number): number {
+    return position - this.baseOffset
+  }
+
+  /**
+   * Adjust a span end position to be relative to source string
+   * SWC span.end is at the closing brace position, but we need to include it
+   */
+  private adjustSpanEnd(position: number): number {
+    return position - this.baseOffset + 1
+  }
+
   private analyzeFunction(node: any): FunctionAnalysis {
     const isAsync = node.async === true
     let returnsFunction = false
@@ -88,7 +108,7 @@ export class Analyzer {
     }
 
     const body = node.body
-    serverBody = { start: body.span.start, end: body.span.end }
+    serverBody = { start: this.adjustSpanStart(body.span.start), end: this.adjustSpanEnd(body.span.end) }
 
     // Find return statement
     const returnStmt = this.findReturnStatement(body)
@@ -123,16 +143,18 @@ export class Analyzer {
 
         // Client body is the inner function
         if (returnArg.body) {
+          const clientStart = returnArg.body.span?.start || returnArg.span.start
+          const clientEnd = returnArg.body.span?.end || returnArg.span.end
           clientBody = {
-            start: returnArg.body.span?.start || returnArg.span.start,
-            end: returnArg.body.span?.end || returnArg.span.end,
+            start: this.adjustSpanStart(clientStart),
+            end: this.adjustSpanEnd(clientEnd),
           }
         }
 
         // Server body ends before return statement
         serverBody = {
-          start: body.span.start,
-          end: returnStmt.span.start,
+          start: this.adjustSpanStart(body.span.start),
+          end: this.adjustSpanStart(returnStmt.span.start),
         }
       }
     }

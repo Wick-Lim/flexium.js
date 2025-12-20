@@ -72,7 +72,8 @@ export class Compiler {
         fileType: fileType!,
         routePath: this.extractRoutePath(filePath),
         middlewares: this.findMiddlewareChain(filePath),
-        layouts: fileType === 'layout' ? [] : this.findLayoutChain(filePath),
+        // Layouts don't apply to other layouts or API routes
+        layouts: (fileType === 'layout' || fileType === 'route') ? [] : this.findLayoutChain(filePath),
       }
 
       // Transform the file (returns array of results for each export)
