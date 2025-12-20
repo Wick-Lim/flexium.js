@@ -38,6 +38,16 @@ import {
   streamingPlaceholder,
 } from '../server/streaming'
 
+// Compression
+import {
+  createCompressionMiddleware,
+  compressBuffer,
+  compressedResponse,
+  parseAcceptEncoding,
+  selectEncoding,
+} from '../server/compression'
+import * as zlib from 'zlib'
+
 const TEST_DIR = path.join(__dirname, '__static_test__')
 
 describe('Static File Serving', () => {
@@ -428,6 +438,213 @@ describe('Streaming SSR', () => {
           'data-streaming': 'true',
         },
       })
+    })
+  })
+})
+
+describe('Compression', () => {
+  describe('parseAcceptEncoding', () => {
+    it('should parse simple Accept-Encoding header', () => {
+      const result = parseAcceptEncoding('gzip, deflate, br')
+      expect(result).toHaveLength(3)
+      expect(result.map(r => r.encoding)).toContain('gzip')
+      expect(result.map(r => r.encoding)).toContain('deflate')
+      expect(result.map(r => r.encoding)).toContain('br')
+    })
+
+    it('should parse quality values', () => {
+      const result = parseAcceptEncoding('br;q=1.0, gzip;q=0.8, deflate;q=0.5')
+      expect(result[0]).toEqual({ encoding: 'br', quality: 1 })
+      expect(result[1]).toEqual({ encoding: 'gzip', quality: 0.8 })
+      expect(result[2]).toEqual({ encoding: 'deflate', quality: 0.5 })
+    })
+
+    it('should ignore unsupported encodings', () => {
+      const result = parseAcceptEncoding('gzip, identity, compress, br')
+      expect(result).toHaveLength(2)
+      expect(result.map(r => r.encoding)).not.toContain('identity')
+      expect(result.map(r => r.encoding)).not.toContain('compress')
+    })
+
+    it('should handle empty header', () => {
+      expect(parseAcceptEncoding('')).toEqual([])
+    })
+  })
+
+  describe('selectEncoding', () => {
+    it('should select best encoding based on server preference', () => {
+      expect(selectEncoding('gzip, br', ['br', 'gzip'])).toBe('br')
+      expect(selectEncoding('gzip, br', ['gzip', 'br'])).toBe('gzip')
+    })
+
+    it('should return null for no matching encoding', () => {
+      expect(selectEncoding('identity', ['br', 'gzip'])).toBeNull()
+      expect(selectEncoding('', ['br', 'gzip'])).toBeNull()
+    })
+
+    it('should respect client quality preferences', () => {
+      // Both server and client prefer br, client has higher quality for br
+      expect(selectEncoding('br;q=1.0, gzip;q=0.5', ['br', 'gzip'])).toBe('br')
+    })
+  })
+
+  describe('compressBuffer', () => {
+    const testData = 'Hello World! '.repeat(100)
+
+    it('should compress with gzip', async () => {
+      const buffer = Buffer.from(testData)
+      const compressed = await compressBuffer(buffer, 'gzip')
+
+      expect(compressed.length).toBeLessThan(buffer.length)
+
+      // Verify by decompressing
+      const decompressed = zlib.gunzipSync(compressed)
+      expect(decompressed.toString()).toBe(testData)
+    })
+
+    it('should compress with brotli', async () => {
+      const buffer = Buffer.from(testData)
+      const compressed = await compressBuffer(buffer, 'br')
+
+      expect(compressed.length).toBeLessThan(buffer.length)
+
+      // Verify by decompressing
+      const decompressed = zlib.brotliDecompressSync(compressed)
+      expect(decompressed.toString()).toBe(testData)
+    })
+
+    it('should compress with deflate', async () => {
+      const buffer = Buffer.from(testData)
+      const compressed = await compressBuffer(buffer, 'deflate')
+
+      expect(compressed.length).toBeLessThan(buffer.length)
+
+      // Verify by decompressing
+      const decompressed = zlib.inflateSync(compressed)
+      expect(decompressed.toString()).toBe(testData)
+    })
+  })
+
+  describe('compressedResponse', () => {
+    it('should compress response with gzip when client supports it', async () => {
+      const content = 'Hello World! '.repeat(200)
+      const request = new Request('http://localhost/', {
+        headers: { 'Accept-Encoding': 'gzip' },
+      })
+
+      const response = await compressedResponse(content, request, {
+        contentType: 'text/plain',
+      })
+
+      expect(response.headers.get('Content-Encoding')).toBe('gzip')
+      expect(response.headers.get('Vary')).toBe('Accept-Encoding')
+
+      // Compressed size should be smaller
+      const compressedBody = await response.arrayBuffer()
+      expect(compressedBody.byteLength).toBeLessThan(content.length)
+    })
+
+    it('should not compress small content below threshold', async () => {
+      const content = 'Hello' // Very small content
+      const request = new Request('http://localhost/', {
+        headers: { 'Accept-Encoding': 'gzip' },
+      })
+
+      const response = await compressedResponse(content, request, {
+        contentType: 'text/plain',
+        threshold: 1024,
+      })
+
+      expect(response.headers.get('Content-Encoding')).toBeNull()
+    })
+
+    it('should not compress when client does not support it', async () => {
+      const content = 'Hello World! '.repeat(200)
+      const request = new Request('http://localhost/', {
+        headers: { 'Accept-Encoding': '' },
+      })
+
+      const response = await compressedResponse(content, request, {
+        contentType: 'text/plain',
+      })
+
+      expect(response.headers.get('Content-Encoding')).toBeNull()
+    })
+  })
+
+  describe('createCompressionMiddleware', () => {
+    it('should compress responses with supported encoding', async () => {
+      const middleware = createCompressionMiddleware()
+      const largeContent = 'Hello World! '.repeat(200)
+
+      const request = new Request('http://localhost/', {
+        headers: { 'Accept-Encoding': 'gzip, deflate, br' },
+      })
+
+      const response = await middleware(request, async () => {
+        return new Response(largeContent, {
+          headers: { 'Content-Type': 'text/plain' },
+        })
+      })
+
+      expect(response.headers.get('Content-Encoding')).toBe('br') // br is preferred
+      expect(response.headers.get('Vary')).toContain('Accept-Encoding')
+    })
+
+    it('should skip already encoded responses', async () => {
+      const middleware = createCompressionMiddleware()
+
+      const request = new Request('http://localhost/', {
+        headers: { 'Accept-Encoding': 'gzip' },
+      })
+
+      const response = await middleware(request, async () => {
+        return new Response('already compressed', {
+          headers: {
+            'Content-Type': 'text/plain',
+            'Content-Encoding': 'gzip',
+          },
+        })
+      })
+
+      // Should not double-encode
+      expect(response.headers.get('Content-Encoding')).toBe('gzip')
+    })
+
+    it('should skip non-compressible content types', async () => {
+      const middleware = createCompressionMiddleware()
+      const content = 'binary data '.repeat(200)
+
+      const request = new Request('http://localhost/', {
+        headers: { 'Accept-Encoding': 'gzip' },
+      })
+
+      const response = await middleware(request, async () => {
+        return new Response(content, {
+          headers: { 'Content-Type': 'image/png' },
+        })
+      })
+
+      expect(response.headers.get('Content-Encoding')).toBeNull()
+    })
+
+    it('should skip excluded paths', async () => {
+      const middleware = createCompressionMiddleware({
+        excludePaths: ['/api/stream'],
+      })
+      const content = 'Hello World! '.repeat(200)
+
+      const request = new Request('http://localhost/api/stream', {
+        headers: { 'Accept-Encoding': 'gzip' },
+      })
+
+      const response = await middleware(request, async () => {
+        return new Response(content, {
+          headers: { 'Content-Type': 'text/plain' },
+        })
+      })
+
+      expect(response.headers.get('Content-Encoding')).toBeNull()
     })
   })
 })

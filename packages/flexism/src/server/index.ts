@@ -151,3 +151,14 @@ export type {
   StreamingChunk,
   StreamingContext,
 } from './streaming'
+
+// Compression
+export {
+  createCompressionMiddleware,
+  compressBuffer,
+  compressedResponse,
+  parseAcceptEncoding,
+  selectEncoding,
+  getPrecompressedPath,
+} from './compression'
+export type { CompressionOptions, CompressionEncoding } from './compression'
