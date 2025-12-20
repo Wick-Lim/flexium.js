@@ -16,5 +16,5 @@
  * ```
  */
 
-export { hydrate, hydrateFromState } from './hydrate'
+export { hydrate, hydrateFromState, loadStreamsFromWindow } from './hydrate'
 export { isHydrating, isHydrated } from './state'

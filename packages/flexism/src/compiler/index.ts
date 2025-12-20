@@ -7,14 +7,21 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { analyzeFile } from './analyzer'
+import { analyzeStreams } from './stream-analyzer'
 import { transformFile, type TransformContext } from './transformer'
 import { Emitter } from './emitter'
+import {
+  emitStreamHandlers,
+  analysesToEndpoints,
+} from './stream-emitter'
 import type {
   CompilerOptions,
   AnalysisResult,
   TransformResult,
   BuildResult,
   FileType,
+  StreamAnalysis,
+  StreamEndpoint,
 } from './types'
 import { SPECIAL_FILES } from './types'
 
@@ -35,6 +42,15 @@ export {
   injectStreamRefs,
 } from './stream-transformer'
 export type { StreamTransformResult } from './stream-transformer'
+
+// Stream Emitter
+export {
+  emitStreamHandlers,
+  hashFilePath,
+  analysisToEndpoint,
+  analysesToEndpoints,
+} from './stream-emitter'
+export type { StreamEmitResult, StreamEmitOptions } from './stream-emitter'
 
 // Incremental Build
 export {
@@ -84,6 +100,7 @@ export class Compiler {
 
     // Analyze and transform each file
     const allTransformResults: TransformResult[] = []
+    const allStreamAnalyses: StreamAnalysis[] = []
 
     for (const filePath of routeFiles) {
       const relativePath = path.relative(this.options.srcDir, filePath)
@@ -103,6 +120,13 @@ export class Compiler {
       const analysis = await analyzeFile(source, filePath)
       this.logAnalysis(filePath, analysis)
 
+      // Analyze Stream declarations
+      const streams = await analyzeStreams(source, filePath)
+      if (streams.length > 0) {
+        console.log(`[flexism]   - Streams: ${streams.length}`)
+        allStreamAnalyses.push(...streams)
+      }
+
       // Create transform context
       const context: TransformContext = {
         srcDir: this.options.srcDir,
@@ -114,6 +138,8 @@ export class Compiler {
         // Find closest error/loading files
         errorFile: this.findErrorFile(filePath),
         loadingFile: this.findLoadingFile(filePath),
+        // Pass stream info for code transformation
+        streams,
       }
 
       // Transform the file (returns array of results for each export)
@@ -121,9 +147,21 @@ export class Compiler {
       allTransformResults.push(...results)
     }
 
+    // Emit stream handlers
+    const streamEndpoints: StreamEndpoint[] = analysesToEndpoints(allStreamAnalyses)
+    const streamEmitResult = await emitStreamHandlers(streamEndpoints, {
+      outDir: this.options.outDir,
+      srcDir: this.options.srcDir,
+    })
+
+    if (Object.keys(streamEmitResult.manifestEntries).length > 0) {
+      console.log(`[flexism] Generated ${Object.keys(streamEmitResult.manifestEntries).length} stream handlers`)
+    }
+
     // Emit bundles
     const emitter = new Emitter(this.options)
     emitter.addTransformResults(allTransformResults)
+    emitter.setStreamManifest(streamEmitResult.manifestEntries)
 
     const buildResult = await emitter.emit()
 

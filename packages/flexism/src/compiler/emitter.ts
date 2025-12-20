@@ -7,11 +7,12 @@
 import * as esbuild from 'esbuild'
 import * as fs from 'fs'
 import * as path from 'path'
-import type { CompilerOptions, TransformResult, BuildResult, BuildManifest, RouteInfo, LayoutManifestEntry } from './types'
+import type { CompilerOptions, TransformResult, BuildResult, BuildManifest, RouteInfo, LayoutManifestEntry, StreamManifestEntry } from './types'
 
 export class Emitter {
   private options: CompilerOptions
   private transformResults: TransformResult[] = []
+  private streamManifest: Record<string, StreamManifestEntry> = {}
 
   constructor(options: CompilerOptions) {
     this.options = options
@@ -19,6 +20,10 @@ export class Emitter {
 
   addTransformResults(results: TransformResult[]): void {
     this.transformResults.push(...results)
+  }
+
+  setStreamManifest(streams: Record<string, StreamManifestEntry>): void {
+    this.streamManifest = streams
   }
 
   async emit(): Promise<BuildResult> {
@@ -214,7 +219,7 @@ export class Emitter {
       middlewares: {}, // TODO: add middleware support
       errors: errorModules,
       loadings: loadingModules,
-      streams: {}, // TODO: add stream handlers from analysis
+      streams: this.streamManifest,
     }
     const manifestPath = path.join(this.options.outDir, 'manifest.json')
     await fs.promises.writeFile(

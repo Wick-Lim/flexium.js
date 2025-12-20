@@ -8,6 +8,20 @@ import {
 } from '../runtime'
 import { setHydrated } from './state'
 
+declare global {
+  interface Window {
+    __FLEXISM_STREAMS__?: Record<string, unknown>
+  }
+}
+
+/**
+ * Load stream refs from window (set by SSR)
+ */
+export function loadStreamsFromWindow(): Record<string, unknown> | null {
+  if (typeof window === 'undefined') return null
+  return window.__FLEXISM_STREAMS__ ?? null
+}
+
 /**
  * Hydrate server-rendered HTML with client-side interactivity
  *

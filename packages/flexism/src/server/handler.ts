@@ -361,6 +361,9 @@ async function handlePageRoute(
     fullContent = pageContent
   }
 
+  // Extract stream refs from page data
+  const streamRefs = pageData.__streams as Record<string, unknown> | undefined
+
   // Render to HTML
   try {
     const { html, state } = renderToString(fullContent, { hydrate: true })
@@ -372,13 +375,14 @@ async function handlePageRoute(
     let finalHtml: string
     if (isFullDocument) {
       // Layout provides full document, just inject scripts
-      finalHtml = injectScripts(html, clientBundle, state)
+      finalHtml = injectScripts(html, clientBundle, state, streamRefs)
     } else {
       // Wrap in document shell
+      const streamScript = streamRefs ? createStreamScript(streamRefs) : ''
       finalHtml = createDocumentShell({
         content: html,
         scripts: [clientBundle],
-        stateScript: state ? createStateScript(state) : '',
+        stateScript: (state ? createStateScript(state) : '') + streamScript,
       })
     }
 
@@ -397,17 +401,23 @@ async function handlePageRoute(
 /**
  * Inject scripts into HTML document
  */
-function injectScripts(html: string, clientBundle: string, state: any): string {
+function injectScripts(
+  html: string,
+  clientBundle: string,
+  state: any,
+  streams?: Record<string, unknown>
+): string {
   const stateScript = state ? createStateScript(state) : ''
+  const streamScript = streams ? createStreamScript(streams) : ''
   const clientScript = `<script type="module" src="${clientBundle}"></script>`
 
   // Inject before </body>
   if (html.includes('</body>')) {
-    return html.replace('</body>', `${stateScript}${clientScript}</body>`)
+    return html.replace('</body>', `${stateScript}${streamScript}${clientScript}</body>`)
   }
 
   // Append to end if no </body>
-  return html + stateScript + clientScript
+  return html + stateScript + streamScript + clientScript
 }
 
 /**
@@ -416,4 +426,12 @@ function injectScripts(html: string, clientBundle: string, state: any): string {
 function createStateScript(state: any): string {
   const json = JSON.stringify(state)
   return `<script>window.__FLEXISM_STATE__=${json}</script>`
+}
+
+/**
+ * Create stream refs serialization script
+ */
+function createStreamScript(streams: Record<string, unknown>): string {
+  const json = JSON.stringify(streams)
+  return `<script>window.__FLEXISM_STREAMS__=${json}</script>`
 }

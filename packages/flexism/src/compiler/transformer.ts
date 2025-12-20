@@ -5,7 +5,7 @@
  * based on the 2-function pattern analysis
  */
 
-import type { AnalysisResult, TransformResult, ExportInfo, RouteInfo, FileType } from './types'
+import type { AnalysisResult, TransformResult, ExportInfo, RouteInfo, FileType, StreamAnalysis } from './types'
 
 export interface TransformContext {
   /** Source directory */
@@ -22,6 +22,8 @@ export interface TransformContext {
   errorFile?: string | null
   /** Closest loading.tsx file path */
   loadingFile?: string | null
+  /** Stream declarations in this file */
+  streams?: StreamAnalysis[]
 }
 
 export class Transformer {
@@ -145,14 +147,38 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(props)${body}
     sharedProps: string[],
     isAsync: boolean
   ): string {
-    const propsObject = sharedProps.length > 0
-      ? `{ ${sharedProps.join(', ')} }`
+    const streams = this.context.streams || []
+    const hasStreams = streams.length > 0
+
+    // Build props object with stream refs
+    const propsEntries = [...sharedProps]
+    const streamConversions: string[] = []
+
+    for (const stream of streams) {
+      const varName = stream.variableName || `__stream_${streams.indexOf(stream)}`
+      // Add capture and toRef conversion
+      const captureParams = stream.capturedVars
+        .map(v => {
+          const paramName = v.properties.length > 0 ? v.properties[v.properties.length - 1] : v.base
+          return `"${paramName}": ${v.path}`
+        })
+        .join(', ')
+
+      streamConversions.push(`  const __streamRef_${varName} = ${varName}.capture({ ${captureParams} }).toRef()`)
+      propsEntries.push(`__streams: { ${streams.map((s, i) => `${s.variableName || `__stream_${i}`}: __streamRef_${s.variableName || `__stream_${i}`}.toJSON()`).join(', ')} }`)
+    }
+
+    const propsObject = propsEntries.length > 0
+      ? `{ ${propsEntries.filter((v, i, arr) => arr.indexOf(v) === i).join(', ')} }`
       : '{}'
 
+    const streamImport = hasStreams ? `import { Stream } from 'flexism/stream'\n` : ''
+    const streamConversionCode = streamConversions.length > 0 ? '\n' + streamConversions.join('\n') + '\n' : ''
+
     return `
-// Server Loader for: ${name}
+${streamImport}// Server Loader for: ${name}
 export ${isAsync ? 'async ' : ''}function loader(props) {
-  ${this.cleanServerBody(serverBody)}
+  ${this.cleanServerBody(serverBody)}${streamConversionCode}
   return ${propsObject}
 }
 `.trim()
@@ -163,8 +189,17 @@ export ${isAsync ? 'async ' : ''}function loader(props) {
     clientBody: string,
     sharedProps: string[]
   ): string {
-    const propsParam = sharedProps.length > 0
-      ? `{ ${sharedProps.join(', ')} }`
+    const streams = this.context.streams || []
+    const hasStreams = streams.length > 0
+
+    // Build props with __streams
+    const allProps = [...sharedProps]
+    if (hasStreams) {
+      allProps.push('__streams')
+    }
+
+    const propsParam = allProps.length > 0
+      ? `{ ${allProps.join(', ')} }`
       : 'props'
 
     // Generate unique export names based on route path to avoid ESM export conflicts
@@ -172,18 +207,43 @@ export ${isAsync ? 'async ' : ''}function loader(props) {
     const componentName = `Component_${uniqueId}`
     const hydrateName = `hydrateComponent_${uniqueId}`
 
+    // Generate stream restoration code
+    const streamImport = hasStreams ? `import { StreamRef } from 'flexism/stream'\n` : ''
+    const streamRestoration = streams.map(stream => {
+      const varName = stream.variableName || `__stream_${streams.indexOf(stream)}`
+      return `  const ${varName} = __streams?.${varName} ? StreamRef.fromJSON(__streams.${varName}) : null`
+    }).join('\n')
+
+    const streamRestorationBlock = hasStreams ? `\n${streamRestoration}\n` : ''
+
     return `
 // Client Component: ${name}
-import { use } from 'flexium/core'
+${streamImport}import { use } from 'flexium/core'
 import { hydrate } from 'flexium/dom'
 
-export function ${componentName}(${propsParam})${clientBody}
+export function ${componentName}(${propsParam}) {${streamRestorationBlock}${this.cleanClientBody(clientBody)}
+}
 
 // Hydration entry
 export function ${hydrateName}(container, serverData) {
   hydrate(${componentName}, container, serverData)
 }
 `.trim()
+  }
+
+  private cleanClientBody(body: string): string {
+    // For client body, we need to extract just the inner content
+    let cleaned = body.trim()
+
+    // Remove surrounding braces if present
+    if (cleaned.startsWith('{')) {
+      cleaned = cleaned.slice(1)
+    }
+    if (cleaned.endsWith('}')) {
+      cleaned = cleaned.slice(0, -1)
+    }
+
+    return cleaned.trim()
   }
 
   private routePathToId(routePath: string): string {
