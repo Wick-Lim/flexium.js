@@ -7,7 +7,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as crypto from 'crypto'
-import { LRUCache } from '../utils/lru-cache'
+import { LRUCache, type CacheStats } from '../utils/lru-cache'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -374,7 +374,7 @@ export class BuildCache {
   /**
    * Get cache stats
    */
-  stats(): { hashCache: ReturnType<typeof this.hashCache.stats>; outputCache: ReturnType<typeof this.outputCache.stats> } {
+  stats(): { hashCache: CacheStats; outputCache: CacheStats } {
     return {
       hashCache: this.hashCache.stats(),
       outputCache: this.outputCache.stats(),

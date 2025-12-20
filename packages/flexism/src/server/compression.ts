@@ -428,13 +428,13 @@ export async function compressedResponse(
   // Check if we should compress
   if (!encoding || buffer.length < threshold) {
     headers['Content-Length'] = String(buffer.length)
-    return new Response(buffer, { status, headers })
+    return new Response(new Uint8Array(buffer), { status, headers })
   }
 
   // Check if content type should be compressed
   if (!shouldCompressContentType(contentType, compressionOptions.mimeTypes || DEFAULT_MIME_TYPES)) {
     headers['Content-Length'] = String(buffer.length)
-    return new Response(buffer, { status, headers })
+    return new Response(new Uint8Array(buffer), { status, headers })
   }
 
   // Compress
@@ -444,7 +444,7 @@ export async function compressedResponse(
   headers['Content-Length'] = String(compressed.length)
   headers['Vary'] = 'Accept-Encoding'
 
-  return new Response(compressed, { status, headers })
+  return new Response(new Uint8Array(compressed), { status, headers })
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -474,6 +474,7 @@ export function getPrecompressedPath(
     br: '.br',
     gzip: '.gz',
     deflate: '.zz',
+    zstd: '.zst',
   }
 
   const compressedPath = filePath + extensions[encoding]
