@@ -10,11 +10,11 @@ Flexism is a fullstack framework built on top of Flexium, designed for building 
 
 ## Features
 
-- **SSE-based Streaming** - Real-time data streaming with automatic reconnection
-- **Stream API** - Reactive data sources that integrate with Flexium's `use()`
+- **File-based Routing** - page.tsx, route.ts, layout.tsx conventions
+- **Two-function Pattern** - Server loader + Client component in one file
+- **SSE Streaming** - Real-time data with automatic reconnection
 - **Hot Module Replacement** - CSS hot reload without page refresh
 - **Incremental Builds** - Only changed files recompile
-- **Memory Optimization** - LRU cache with automatic cleanup
 - **CLI Tools** - Development server, build, and production commands
 
 
@@ -41,73 +41,108 @@ flexism build   # Build for production
 flexism start   # Start production server
 ```
 
-## Stream API
+## File-based Routing
 
-Stream provides reactive SSE data sources that work with Flexium's `use()`.
+```
+src/
+├── page.tsx              # / (home)
+├── layout.tsx            # Root layout
+├── about/
+│   └── page.tsx          # /about
+├── users/
+│   ├── page.tsx          # /users
+│   └── [id]/
+│       └── page.tsx      # /users/:id
+└── api/
+    └── messages/
+        └── route.ts      # /api/messages
+```
 
-### Client-side
+## Page (Two-function Pattern)
+
+Server loader and client component in one file:
 
 ```tsx
+// src/users/[id]/page.tsx
+import { use } from 'flexium/core'
+
+// Server: runs on server, fetches data
+export async function loader({ params }) {
+  const user = await db.users.find(params.id)
+  return { user }
+}
+
+// Client: hydrates on client with loader data
+export function Component({ user }) {
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  )
+}
+```
+
+## API Route (SSE Streaming)
+
+```ts
+// src/api/messages/route.ts
+import { sse } from 'flexism/server'
+
+// SSE endpoint with async generator
+export function GET() {
+  return sse(async function* () {
+    yield { text: 'Connected!' }
+
+    for await (const msg of db.messages.subscribe()) {
+      yield msg
+    }
+  })
+}
+
+// Regular JSON API
+export async function POST(request) {
+  const body = await request.json()
+  const message = await db.messages.create(body)
+  return Response.json(message)
+}
+```
+
+## Stream (Reactive SSE Client)
+
+Subscribe to SSE endpoints reactively:
+
+```tsx
+// src/chat/page.tsx
 import { use } from 'flexium/core'
 import { Stream } from 'flexism'
 
-// Define a stream
 const messages = new Stream<Message>('/api/messages')
 
-function Chat() {
-  // Automatically subscribes to SSE
+export function Component() {
   const [message] = use(messages)
 
   return <div>{message?.text}</div>
 }
 ```
 
-### Server-side
+## Layout
 
-```ts
-import { sse } from 'flexism/server'
+Wrap pages with shared UI:
 
-// With async generator (recommended)
-export function GET() {
-  return sse(async function* () {
-    yield { text: 'Hello!' }
-
-    // Stream updates over time
-    for (let i = 0; i < 10; i++) {
-      await new Promise(r => setTimeout(r, 1000))
-      yield { text: `Time: ${Date.now()}` }
-    }
-  })
+```tsx
+// src/layout.tsx
+export function Component({ children }) {
+  return (
+    <html>
+      <head><title>My App</title></head>
+      <body>
+        <nav>...</nav>
+        {children}
+      </body>
+    </html>
+  )
 }
-
-// With context callback
-export function GET() {
-  return sse((ctx) => {
-    ctx.send({ text: 'Hello!' })
-
-    const interval = setInterval(() => {
-      if (!ctx.isOpen) {
-        clearInterval(interval)
-        return
-      }
-      ctx.send({ text: `Time: ${Date.now()}` })
-    }, 1000)
-  })
-}
-
-// From async iterable
-export function GET() {
-  return sse.from(db.posts.subscribe())
-}
-```
-
-## Package Structure
-
-```
-flexism
-├── /           # Stream class for reactive SSE
-├── /server     # SSE helpers for server-side
-└── /client     # SSEClient for client-side connections
 ```
 
 ## Requirements
