@@ -228,6 +228,7 @@ async function serveFile(
   const mimeType = getMimeType(filePath)
   const etag = `"${stat.size}-${stat.mtime.getTime()}"`
   const lastModified = stat.mtime.toUTCString()
+  const fileSize = stat.size
 
   // Check conditional headers
   const ifNoneMatch = request.headers.get('If-None-Match')
@@ -247,13 +248,43 @@ async function serveFile(
     }
   }
 
+  // Parse Range header
+  const rangeHeader = request.headers.get('Range')
+  let start = 0
+  let end = fileSize - 1
+  let isRangeRequest = false
+
+  if (rangeHeader) {
+    const range = parseRangeHeader(rangeHeader, fileSize)
+    if (range === null) {
+      // Invalid range - return 416 Range Not Satisfiable
+      return {
+        response: new Response(null, {
+          status: 416,
+          headers: { 'Content-Range': `bytes */${fileSize}` },
+        }),
+        served: true,
+      }
+    }
+    start = range.start
+    end = range.end
+    isRangeRequest = true
+  }
+
+  const contentLength = end - start + 1
+
   // Build headers
   const headers: Record<string, string> = {
     'Content-Type': mimeType,
-    'Content-Length': String(stat.size),
+    'Content-Length': String(contentLength),
     'ETag': etag,
     'Last-Modified': lastModified,
+    'Accept-Ranges': 'bytes',
     ...customHeaders,
+  }
+
+  if (isRangeRequest) {
+    headers['Content-Range'] = `bytes ${start}-${end}/${fileSize}`
   }
 
   // Cache headers
@@ -269,17 +300,69 @@ async function serveFile(
   // HEAD request - no body
   if (request.method === 'HEAD') {
     return {
-      response: new Response(null, { status: 200, headers }),
+      response: new Response(null, { status: isRangeRequest ? 206 : 200, headers }),
       served: true,
     }
   }
 
-  // Read and serve file
-  const content = await fs.promises.readFile(filePath)
-  return {
-    response: new Response(content, { status: 200, headers }),
-    served: true,
+  // Read and serve file (full or partial)
+  const fd = await fs.promises.open(filePath, 'r')
+  try {
+    const buffer = Buffer.alloc(contentLength)
+    await fd.read(buffer, 0, contentLength, start)
+    return {
+      response: new Response(buffer, { status: isRangeRequest ? 206 : 200, headers }),
+      served: true,
+    }
+  } finally {
+    await fd.close()
   }
+}
+
+/**
+ * Parse Range header and return start/end bytes
+ * Returns null if range is invalid or unsatisfiable
+ */
+function parseRangeHeader(
+  rangeHeader: string,
+  fileSize: number
+): { start: number; end: number } | null {
+  // Only support single byte ranges
+  const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader)
+  if (!match) return null
+
+  const [, startStr, endStr] = match
+
+  let start: number
+  let end: number
+
+  if (startStr === '' && endStr !== '') {
+    // Suffix range: bytes=-500 (last 500 bytes)
+    const suffix = parseInt(endStr, 10)
+    if (suffix === 0) return null
+    start = Math.max(0, fileSize - suffix)
+    end = fileSize - 1
+  } else if (startStr !== '' && endStr === '') {
+    // Open-ended range: bytes=500-
+    start = parseInt(startStr, 10)
+    end = fileSize - 1
+  } else if (startStr !== '' && endStr !== '') {
+    // Explicit range: bytes=0-499
+    start = parseInt(startStr, 10)
+    end = parseInt(endStr, 10)
+  } else {
+    return null
+  }
+
+  // Validate range
+  if (start > end || start >= fileSize) {
+    return null
+  }
+
+  // Clamp end to file size
+  end = Math.min(end, fileSize - 1)
+
+  return { start, end }
 }
 
 async function serveDirectoryListing(

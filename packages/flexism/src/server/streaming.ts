@@ -343,13 +343,20 @@ export function renderChunksParallel(
       })
 
       // Stream results as they complete (out-of-order)
-      const pending = new Set(promises)
+      const pending = new Map<Promise<{ id: string; html: string; error: unknown }>, boolean>()
+      for (const p of promises) {
+        pending.set(p, true)
+      }
 
       while (pending.size > 0) {
-        const completed = await Promise.race(pending)
-        pending.delete(promises.find(p => p === Promise.resolve(completed))!)
+        // Race all pending promises, but track which one completed
+        const winner = await Promise.race(
+          [...pending.keys()].map(p => p.then(result => ({ result, originalPromise: p })))
+        )
 
-        const script = getChunkScript(completed.id, completed.html)
+        pending.delete(winner.originalPromise)
+
+        const script = getChunkScript(winner.result.id, winner.result.html)
         controller.enqueue(encoder.encode(script))
       }
 
