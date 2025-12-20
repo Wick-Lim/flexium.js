@@ -27,6 +27,11 @@
       "types": "./dist/client.d.ts",
       "import": "./dist/client.mjs",
       "require": "./dist/client.js"
+    },
+    "./compiler": {
+      "types": "./dist/compiler.d.ts",
+      "import": "./dist/compiler.mjs",
+      "require": "./dist/compiler.js"
     }
   },
   "files": [
@@ -77,5 +82,9 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@swc/core": "^1.15.7",
+    "esbuild": "^0.27.2"
   }
 }

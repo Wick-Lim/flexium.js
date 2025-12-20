@@ -6,6 +6,7 @@ export default defineConfig({
     server: 'src/server/index.ts',
     client: 'src/client/index.ts',
     cli: 'src/cli/index.ts',
+    compiler: 'src/compiler/index.ts',
   },
   format: ['esm', 'cjs'],
   dts: {
@@ -13,6 +14,7 @@ export default defineConfig({
       index: 'src/index.ts',
       server: 'src/server/index.ts',
       client: 'src/client/index.ts',
+      compiler: 'src/compiler/index.ts',
     },
   },
   splitting: true,
@@ -22,7 +24,7 @@ export default defineConfig({
   sourcemap: true,
   target: 'es2020',
   outDir: 'dist',
-  external: ['flexium'],
+  external: ['flexium', 'esbuild', '@swc/core'],
   outExtension({ format }) {
     return {
       js: format === 'esm' ? '.mjs' : '.js',

@@ -1,23 +1,15 @@
-import { spawn } from 'child_process'
-import { existsSync } from 'fs'
 import { resolve } from 'path'
+import { createCompiler } from '../../compiler'
 
 const cyan = '\x1b[36m'
 const green = '\x1b[32m'
 const yellow = '\x1b[33m'
 const reset = '\x1b[0m'
 const bold = '\x1b[1m'
+const dim = '\x1b[2m'
 
 export async function build() {
   const cwd = process.cwd()
-
-  // Check if vite is available
-  const viteBin = findViteBin(cwd)
-  if (!viteBin) {
-    console.error(`${yellow}Vite not found. Please install vite:${reset}`)
-    console.log(`  npm install -D vite`)
-    process.exit(1)
-  }
 
   console.log(`
 ${cyan}${bold}  ╔═══════════════════════════════════╗
@@ -27,40 +19,36 @@ ${cyan}${bold}  ╔════════════════════�
 
   console.log(`${green}Building for production...${reset}\n`)
 
-  // Run vite build
-  const child = spawn(viteBin, ['build'], {
-    cwd,
-    stdio: 'inherit',
-    shell: true,
-    env: {
-      ...process.env,
-      FLEXISM_MODE: 'production',
-      NODE_ENV: 'production',
-    },
-  })
+  const startTime = Date.now()
 
-  return new Promise<void>((resolve, reject) => {
-    child.on('error', (error) => {
-      console.error('Build failed:', error)
-      reject(error)
+  try {
+    // Create compiler with production settings
+    const compiler = createCompiler({
+      srcDir: resolve(cwd, 'src'),
+      outDir: resolve(cwd, '.flexism'),
+      minify: true,
+      sourcemap: true,
+      target: 'es2022',
     })
 
-    child.on('close', (code) => {
-      if (code === 0) {
-        console.log(`\n${green}${bold}Build completed successfully!${reset}`)
-        console.log(`Output: ${cyan}./dist${reset}\n`)
-        resolve()
-      } else {
-        reject(new Error(`Build failed with code ${code}`))
-      }
-    })
-  })
-}
+    // Run compilation
+    const result = await compiler.compile()
 
-function findViteBin(cwd: string): string | null {
-  const localVite = resolve(cwd, 'node_modules', '.bin', 'vite')
-  if (existsSync(localVite)) {
-    return localVite
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2)
+
+    console.log(`
+${green}${bold}✓ Build completed in ${result.buildTime}ms${reset}
+
+${dim}Output:${reset}
+  ${cyan}Server:${reset}   ${result.serverBundle}
+  ${cyan}Client:${reset}   ${result.clientBundle}
+  ${cyan}Manifest:${reset} ${result.manifestPath}
+
+${dim}Total time: ${duration}s${reset}
+`)
+
+  } catch (error) {
+    console.error(`\n${yellow}Build failed:${reset}`, error)
+    process.exit(1)
   }
-  return 'npx vite'
 }
