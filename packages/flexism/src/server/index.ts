@@ -99,3 +99,55 @@ export type {
   ErrorModule,
   ErrorHandlerOptions,
 } from './error'
+
+// Static Files
+export { createStaticHandler, serveStatic } from './static'
+export type { StaticFileOptions } from './static'
+
+// Security
+export {
+  createCorsMiddleware,
+  createCsrfMiddleware,
+  createSecurityHeadersMiddleware,
+  createSecurityMiddleware,
+  generateCsrfToken,
+} from './security'
+export type {
+  CorsOptions,
+  CsrfOptions,
+  SecurityHeaders,
+  SecurityOptions,
+} from './security'
+
+// Cache Control
+export {
+  buildCacheControl,
+  withCache,
+  withETag,
+  withLastModified,
+  cachedJson,
+  cachedHtml,
+  createCacheMiddleware,
+  CACHE_NO_STORE,
+  CACHE_PRIVATE,
+  CACHE_SHORT,
+  CACHE_MEDIUM,
+  CACHE_LONG,
+  CACHE_STATIC,
+  CACHE_ISR,
+} from './cache'
+export type { CacheControlOptions, RouteCacheConfig } from './cache'
+
+// Streaming SSR
+export {
+  renderToStream as renderToStreamSSR,
+  streamingResponse,
+  createStreamingContext,
+  streamingPlaceholder,
+  renderChunksParallel,
+} from './streaming'
+export type {
+  StreamingOptions,
+  StreamingChunk,
+  StreamingContext,
+} from './streaming'
