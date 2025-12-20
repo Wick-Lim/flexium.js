@@ -7,14 +7,16 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { analyzeFile } from './analyzer'
-import { transformFile } from './transformer'
+import { transformFile, type TransformContext } from './transformer'
 import { Emitter } from './emitter'
 import type {
   CompilerOptions,
   AnalysisResult,
   TransformResult,
   BuildResult,
+  FileType,
 } from './types'
+import { SPECIAL_FILES } from './types'
 
 export * from './types'
 export { analyzeFile } from './analyzer'
@@ -44,10 +46,19 @@ export class Compiler {
     console.log(`[flexism] Found ${routeFiles.length} route files`)
 
     // Analyze and transform each file
-    const transformResults = new Map<string, TransformResult>()
+    const allTransformResults: TransformResult[] = []
 
     for (const filePath of routeFiles) {
-      console.log(`[flexism] Processing ${path.relative(this.options.srcDir, filePath)}`)
+      const relativePath = path.relative(this.options.srcDir, filePath)
+      const fileType = this.getFileType(path.basename(filePath))
+
+      // Skip middleware files (they're collected but not transformed directly)
+      if (fileType === 'middleware') {
+        console.log(`[flexism] Found middleware: ${relativePath}`)
+        continue
+      }
+
+      console.log(`[flexism] Processing ${relativePath}`)
 
       const source = await fs.promises.readFile(filePath, 'utf-8')
 
@@ -55,16 +66,23 @@ export class Compiler {
       const analysis = await analyzeFile(source, filePath)
       this.logAnalysis(filePath, analysis)
 
-      // Transform the file
-      const result = await transformFile(source, analysis)
-      transformResults.set(filePath, result)
+      // Create transform context
+      const context: TransformContext = {
+        srcDir: this.options.srcDir,
+        fileType: fileType!,
+        routePath: this.extractRoutePath(filePath),
+        middlewares: this.findMiddlewareChain(filePath),
+        layouts: fileType === 'layout' ? [] : this.findLayoutChain(filePath),
+      }
+
+      // Transform the file (returns array of results for each export)
+      const results = transformFile(source, analysis, context)
+      allTransformResults.push(...results)
     }
 
     // Emit bundles
     const emitter = new Emitter(this.options)
-    for (const [filePath, result] of transformResults) {
-      emitter.addTransformResult(filePath, result)
-    }
+    emitter.addTransformResults(allTransformResults)
 
     const buildResult = await emitter.emit()
 
@@ -91,7 +109,7 @@ export class Compiler {
       { recursive: true },
       async (event, filename) => {
         if (!filename) return
-        if (!this.isRouteFile(filename)) return
+        if (!this.getFileType(path.basename(filename))) return
 
         console.log(`[flexism] File changed: ${filename}`)
 
@@ -111,15 +129,16 @@ export class Compiler {
     })
   }
 
+  /**
+   * Find all special files (page, layout, route, middleware)
+   */
   private async findRouteFiles(): Promise<string[]> {
-    const routesDir = path.join(this.options.srcDir, 'routes')
-
-    if (!fs.existsSync(routesDir)) {
-      console.warn(`[flexism] No routes directory found at ${routesDir}`)
+    if (!fs.existsSync(this.options.srcDir)) {
+      console.warn(`[flexism] Source directory not found: ${this.options.srcDir}`)
       return []
     }
 
-    return this.walkDir(routesDir)
+    return this.walkDir(this.options.srcDir)
   }
 
   private async walkDir(dir: string): Promise<string[]> {
@@ -130,8 +149,12 @@ export class Compiler {
       const fullPath = path.join(dir, entry.name)
 
       if (entry.isDirectory()) {
+        // Skip node_modules and hidden directories
+        if (entry.name.startsWith('.') || entry.name === 'node_modules') {
+          continue
+        }
         files.push(...await this.walkDir(fullPath))
-      } else if (this.isRouteFile(entry.name)) {
+      } else if (this.getFileType(entry.name)) {
         files.push(fullPath)
       }
     }
@@ -139,22 +162,125 @@ export class Compiler {
     return files
   }
 
-  private isRouteFile(filename: string): boolean {
-    return /\.(tsx?|jsx?)$/.test(filename) && !filename.includes('.test.')
+  /**
+   * Get the file type based on filename
+   */
+  private getFileType(filename: string): FileType | null {
+    if (SPECIAL_FILES.page.test(filename)) return 'page'
+    if (SPECIAL_FILES.layout.test(filename)) return 'layout'
+    if (SPECIAL_FILES.route.test(filename)) return 'route'
+    if (SPECIAL_FILES.middleware.test(filename)) return 'middleware'
+    return null
+  }
+
+  /**
+   * Extract route path from file path
+   * e.g., src/blog/[slug]/page.tsx -> /blog/:slug
+   */
+  private extractRoutePath(filePath: string): string {
+    // Get relative path from srcDir
+    let relativePath = path.relative(this.options.srcDir, filePath)
+
+    // Remove the filename (page.tsx, route.ts, etc.)
+    relativePath = path.dirname(relativePath)
+
+    // Handle root case
+    if (relativePath === '.') {
+      return '/'
+    }
+
+    // Process path segments
+    const segments = relativePath.split(path.sep)
+    const routeSegments: string[] = []
+
+    for (const segment of segments) {
+      // Skip route groups (parentheses)
+      if (segment.startsWith('(') && segment.endsWith(')')) {
+        continue
+      }
+
+      // Convert [param] to :param
+      if (segment.startsWith('[') && segment.endsWith(']')) {
+        const param = segment.slice(1, -1)
+        // Handle catch-all [...slug]
+        if (param.startsWith('...')) {
+          routeSegments.push(`:${param}`)
+        } else {
+          routeSegments.push(`:${param}`)
+        }
+      } else {
+        routeSegments.push(segment)
+      }
+    }
+
+    return '/' + routeSegments.join('/')
+  }
+
+  /**
+   * Find middleware files that apply to a route
+   */
+  private findMiddlewareChain(filePath: string): string[] {
+    const middlewares: string[] = []
+    let currentDir = path.dirname(filePath)
+    const srcDir = this.options.srcDir
+
+    // Walk up from the file to srcDir
+    while (currentDir.startsWith(srcDir)) {
+      const middlewarePath = path.join(currentDir, 'middleware.ts')
+      const middlewarePathTsx = path.join(currentDir, 'middleware.tsx')
+
+      if (fs.existsSync(middlewarePath)) {
+        middlewares.unshift(middlewarePath) // Add to front (outermost first)
+      } else if (fs.existsSync(middlewarePathTsx)) {
+        middlewares.unshift(middlewarePathTsx)
+      }
+
+      if (currentDir === srcDir) break
+      currentDir = path.dirname(currentDir)
+    }
+
+    return middlewares
+  }
+
+  /**
+   * Find layout files that apply to a route
+   */
+  private findLayoutChain(filePath: string): string[] {
+    const layouts: string[] = []
+    let currentDir = path.dirname(filePath)
+    const srcDir = this.options.srcDir
+
+    // Walk up from the file to srcDir
+    while (currentDir.startsWith(srcDir)) {
+      const layoutPath = path.join(currentDir, 'layout.tsx')
+      const layoutPathTs = path.join(currentDir, 'layout.ts')
+
+      if (fs.existsSync(layoutPath)) {
+        layouts.unshift(layoutPath) // Add to front (outermost first)
+      } else if (fs.existsSync(layoutPathTs)) {
+        layouts.unshift(layoutPathTs)
+      }
+
+      if (currentDir === srcDir) break
+      currentDir = path.dirname(currentDir)
+    }
+
+    return layouts
   }
 
   private logAnalysis(filePath: string, analysis: AnalysisResult): void {
-    const serverCount = analysis.serverCode.length
-    const clientCount = analysis.clientCode.length
+    const apiCount = analysis.exports.filter(e => e.type === 'api').length
+    const componentCount = analysis.exports.filter(e => e.type === 'component').length
 
-    if (serverCount > 0 || clientCount > 0) {
+    if (analysis.exports.length > 0) {
       console.log(
-        `[flexism]   - Server patterns: ${serverCount}, Client patterns: ${clientCount}`
+        `[flexism]   - APIs: ${apiCount}, Components: ${componentCount}`
       )
     }
 
-    if (analysis.isAsync) {
-      console.log(`[flexism]   - Async component detected`)
+    const asyncExports = analysis.exports.filter(e => e.isAsync)
+    if (asyncExports.length > 0) {
+      console.log(`[flexism]   - Async exports: ${asyncExports.map(e => e.name).join(', ')}`)
     }
   }
 }

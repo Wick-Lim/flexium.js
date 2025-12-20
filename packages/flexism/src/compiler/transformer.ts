@@ -2,227 +2,196 @@
  * Flexism Code Transformer
  *
  * Transforms source code by splitting server and client code
+ * based on the 2-function pattern analysis
  */
 
-import { transform, print, parse, type Module } from '@swc/core'
-import type { AnalysisResult, TransformResult, ClientBoundary } from './types'
+import type { AnalysisResult, TransformResult, ExportInfo, RouteInfo, FileType } from './types'
+
+export interface TransformContext {
+  /** Source directory */
+  srcDir: string
+  /** Detected file type */
+  fileType: FileType
+  /** Route path (pre-computed) */
+  routePath: string
+  /** Middleware chain */
+  middlewares: string[]
+  /** Layout chain */
+  layouts: string[]
+}
 
 export class Transformer {
   private source: string
   private analysis: AnalysisResult
+  private context: TransformContext
 
-  constructor(source: string, analysis: AnalysisResult) {
+  constructor(source: string, analysis: AnalysisResult, context: TransformContext) {
     this.source = source
     this.analysis = analysis
+    this.context = context
   }
 
-  async transform(): Promise<TransformResult> {
-    const componentName = this.extractComponentName()
-    const route = this.extractRoute()
+  transform(): TransformResult[] {
+    const results: TransformResult[] = []
 
-    // Generate server code
-    const serverCode = await this.generateServerCode(componentName)
+    for (const exp of this.analysis.exports) {
+      if (exp.type === 'api') {
+        // API handlers stay on server only
+        results.push(this.transformApi(exp))
+      } else if (exp.type === 'component') {
+        // Components get split
+        results.push(this.transformComponent(exp))
+      }
+    }
 
-    // Generate client code
-    const { clientCode, boundaries } = await this.generateClientCode(componentName)
+    return results
+  }
+
+  private transformApi(exp: ExportInfo): TransformResult {
+    // API handlers: entire function goes to server
+    const serverCode = exp.serverBody
+      ? this.extractCode(exp.serverBody.start, exp.serverBody.end)
+      : ''
 
     return {
-      serverCode,
-      clientCode,
-      manifest: {
-        route,
-        componentName,
-        boundaries,
-      },
+      filePath: this.analysis.filePath,
+      serverCode: this.wrapApiHandler(exp.name, serverCode, exp.isAsync),
+      clientCode: '', // No client code for APIs
+      route: this.createRouteInfo(exp.name, 'api', []),
     }
   }
 
-  private extractComponentName(): string {
-    // Extract from file path or function name
-    const match = this.analysis.filePath.match(/([^/]+)\.(tsx?|jsx?)$/)
-    if (match) {
-      const name = match[1]
-      // Convert to PascalCase
-      return name.charAt(0).toUpperCase() + name.slice(1)
-    }
-    return 'Component'
-  }
+  private transformComponent(exp: ExportInfo): TransformResult {
+    if (!exp.returnsFunction) {
+      // Component doesn't return a function - server-only (no hydration)
+      const serverCode = exp.serverBody
+        ? this.extractCode(exp.serverBody.start, exp.serverBody.end)
+        : ''
 
-  private extractRoute(): string {
-    // Extract route from file path
-    // e.g., routes/user/[id].tsx -> /user/:id
-    const match = this.analysis.filePath.match(/routes\/(.+)\.(tsx?|jsx?)$/)
-    if (match) {
-      return '/' + match[1]
-        .replace(/\[([^\]]+)\]/g, ':$1')  // [id] -> :id
-        .replace(/\/index$/, '')           // /index -> /
-    }
-    return '/'
-  }
-
-  private async generateServerCode(componentName: string): Promise<string> {
-    const { serverCode, clientCode, imports, sharedVariables } = this.analysis
-
-    // If no server code, return minimal loader
-    if (serverCode.length === 0) {
-      return `
-// Generated server code for ${componentName}
-export async function loader({ params, request }) {
-  return {}
-}
-`.trim()
-    }
-
-    // Build server imports (only server-safe imports)
-    const serverImports = imports
-      .filter(imp => imp.isServerOnly || !this.isClientOnlyImport(imp.source))
-      .map(imp => `import { ${imp.specifiers.join(', ')} } from '${imp.source}'`)
-      .join('\n')
-
-    // Extract server-only logic (await expressions, db calls, etc.)
-    const serverLogic = this.extractServerLogic()
-
-    // Build the loader function
-    const loaderCode = `
-// Generated server code for ${componentName}
-${serverImports}
-
-export async function loader({ params, request }) {
-${serverLogic}
-}
-
-export { default as Component } from './${componentName}.server'
-`.trim()
-
-    return loaderCode
-  }
-
-  private async generateClientCode(componentName: string): Promise<{
-    clientCode: string
-    boundaries: ClientBoundary[]
-  }> {
-    const { clientCode: clientRanges, imports } = this.analysis
-    const boundaries: ClientBoundary[] = []
-
-    // If no client code, return empty
-    if (clientRanges.length === 0) {
       return {
-        clientCode: `// No client code needed for ${componentName}`,
-        boundaries: [],
+        filePath: this.analysis.filePath,
+        serverCode: this.wrapServerComponent(exp.name, serverCode, exp.isAsync),
+        clientCode: '',
+        route: this.createRouteInfo(exp.name, 'component', []),
       }
     }
 
-    // Build client imports (flexium/core for use(), etc.)
-    const clientImports = [
-      `import { use } from 'flexium/core'`,
-      `import { hydrate } from 'flexium/dom'`,
-    ]
+    // Component returns a function - split server/client
+    const serverCode = exp.serverBody
+      ? this.extractCode(exp.serverBody.start, exp.serverBody.end)
+      : ''
 
-    // Extract all use() calls and event handlers
-    const useCallRanges = clientRanges.filter(r => r.type === 'use_call')
-    const eventHandlerRanges = clientRanges.filter(r => r.type === 'event_handler')
+    const clientCode = exp.clientBody
+      ? this.extractCode(exp.clientBody.start, exp.clientBody.end)
+      : ''
 
-    // Generate hydration components for each client boundary
-    let boundaryId = 0
-    for (const range of useCallRanges) {
-      const id = `${componentName}_boundary_${boundaryId++}`
-      boundaries.push({
-        id,
-        props: this.extractPropsFromRange(range),
-        clientComponent: `${componentName}.client`,
-      })
+    return {
+      filePath: this.analysis.filePath,
+      serverCode: this.generateServerLoader(exp.name, serverCode, exp.sharedProps, exp.isAsync),
+      clientCode: this.generateClientComponent(exp.name, clientCode, exp.sharedProps),
+      route: this.createRouteInfo(exp.name, 'component', exp.sharedProps),
     }
+  }
 
-    // Build the client hydration code
-    const clientCode = `
-// Generated client code for ${componentName}
-${clientImports.join('\n')}
+  private createRouteInfo(
+    exportName: string,
+    type: 'api' | 'component',
+    hydrateProps: string[]
+  ): RouteInfo {
+    return {
+      path: this.context.routePath,
+      exportName,
+      type,
+      fileType: this.context.fileType,
+      hydrateProps,
+      middlewares: this.context.middlewares,
+      layouts: this.context.layouts,
+    }
+  }
 
-${boundaries.map(b => this.generateBoundaryComponent(b)).join('\n\n')}
+  private extractCode(start: number, end: number): string {
+    return this.source.slice(start, end)
+  }
+
+  private wrapApiHandler(name: string, body: string, isAsync: boolean): string {
+    const asyncKeyword = isAsync ? 'async ' : ''
+    return `
+// API Handler: ${name}
+export ${asyncKeyword}function ${name}(request, context) ${body}
+`.trim()
+  }
+
+  private wrapServerComponent(name: string, body: string, isAsync: boolean): string {
+    const asyncKeyword = isAsync ? 'async ' : ''
+    return `
+// Server Component: ${name} (no hydration)
+export ${asyncKeyword}function ${name}(props) ${body}
+`.trim()
+  }
+
+  private generateServerLoader(
+    name: string,
+    serverBody: string,
+    sharedProps: string[],
+    isAsync: boolean
+  ): string {
+    const propsObject = sharedProps.length > 0
+      ? `{ ${sharedProps.join(', ')} }`
+      : '{}'
+
+    return `
+// Server Loader for: ${name}
+export ${isAsync ? 'async ' : ''}function loader(props) {
+  ${this.cleanServerBody(serverBody)}
+  return ${propsObject}
+}
+`.trim()
+  }
+
+  private generateClientComponent(
+    name: string,
+    clientBody: string,
+    sharedProps: string[]
+  ): string {
+    const propsParam = sharedProps.length > 0
+      ? `{ ${sharedProps.join(', ')} }`
+      : 'props'
+
+    return `
+// Client Component: ${name}
+import { use } from 'flexium/core'
+import { hydrate } from 'flexium/dom'
+
+export function Component(${propsParam}) ${clientBody}
 
 // Hydration entry
-export function hydrateAll(container, serverData) {
-  ${boundaries.map(b => `
-  const ${b.id}_el = container.querySelector('[data-boundary="${b.id}"]')
-  if (${b.id}_el) {
-    hydrate(${b.id}, ${b.id}_el, serverData.${b.id})
-  }`).join('\n')}
-}
-`.trim()
-
-    return { clientCode, boundaries }
-  }
-
-  private extractServerLogic(): string {
-    const { serverCode } = this.analysis
-    const lines: string[] = []
-
-    // Group by type and generate appropriate code
-    const awaitExprs = serverCode.filter(r => r.type === 'await')
-    const dbCalls = serverCode.filter(r => r.type === 'db_call')
-    const envAccess = serverCode.filter(r => r.type === 'env_access')
-
-    // Add variable declarations for data fetching
-    lines.push('  const data = {}')
-
-    // Process await expressions
-    for (let i = 0; i < awaitExprs.length; i++) {
-      const expr = awaitExprs[i]
-      if (expr.content) {
-        lines.push(`  const result${i} = ${expr.content}`)
-        lines.push(`  data.result${i} = result${i}`)
-      }
-    }
-
-    // Process db calls
-    for (let i = 0; i < dbCalls.length; i++) {
-      const call = dbCalls[i]
-      if (call.content) {
-        lines.push(`  const dbResult${i} = await ${call.content}`)
-        lines.push(`  data.dbResult${i} = dbResult${i}`)
-      }
-    }
-
-    lines.push('  return data')
-
-    return lines.join('\n')
-  }
-
-  private extractPropsFromRange(range: any): string[] {
-    // Extract variable references from the code range
-    // This is a simplified implementation
-    const content = range.content || ''
-    const matches: string[] = content.match(/\b[a-zA-Z_]\w*\b/g) || []
-    const filtered = matches.filter((m: string) =>
-      !['use', 'const', 'let', 'var', 'function', 'return', 'if', 'else'].includes(m)
-    )
-    return [...new Set(filtered)]
-  }
-
-  private generateBoundaryComponent(boundary: ClientBoundary): string {
-    return `
-function ${boundary.id}({ ${boundary.props.join(', ')} }) {
-  // Client-side reactive state
-  const [state, setState] = use(${boundary.props[0] || 'null'})
-
-  return state
+export function hydrateComponent(container, serverData) {
+  hydrate(Component, container, serverData)
 }
 `.trim()
   }
 
-  private isClientOnlyImport(source: string): boolean {
-    // Imports that are client-only
-    return ['flexium/dom', 'flexium/router'].includes(source)
+  private cleanServerBody(body: string): string {
+    // Remove leading/trailing braces if present
+    let cleaned = body.trim()
+    if (cleaned.startsWith('{')) {
+      cleaned = cleaned.slice(1)
+    }
+    if (cleaned.endsWith('}')) {
+      cleaned = cleaned.slice(0, -1)
+    }
+    return cleaned.trim()
   }
 }
 
 /**
- * Transform a source file
+ * Transform a source file based on analysis
  */
-export async function transformFile(
+export function transformFile(
   source: string,
-  analysis: AnalysisResult
-): Promise<TransformResult> {
-  const transformer = new Transformer(source, analysis)
+  analysis: AnalysisResult,
+  context: TransformContext
+): TransformResult[] {
+  const transformer = new Transformer(source, analysis, context)
   return transformer.transform()
 }

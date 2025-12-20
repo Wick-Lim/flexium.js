@@ -15,82 +15,93 @@ export interface CompilerOptions {
   target?: 'es2020' | 'es2021' | 'es2022' | 'esnext'
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Analysis Types
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface AnalysisResult {
   /** File path */
   filePath: string
-  /** Whether the component is async */
-  isAsync: boolean
-  /** Server-only code ranges */
-  serverCode: CodeRange[]
-  /** Client-only code ranges */
-  clientCode: CodeRange[]
-  /** Variables that need to be passed from server to client */
-  sharedVariables: SharedVariable[]
-  /** Imports used */
-  imports: ImportInfo[]
+  /** All exports in the file */
+  exports: ExportInfo[]
 }
 
-export interface CodeRange {
+export interface ExportInfo {
+  /** Export name ('default' or named) */
+  name: string
+  /** Type of export */
+  type: 'api' | 'component'
+  /** Whether the function is async */
+  isAsync: boolean
+  /** Whether it returns a function (component pattern) */
+  returnsFunction: boolean
+  /** Server code body range */
+  serverBody: CodeSpan | null
+  /** Client code body range */
+  clientBody: CodeSpan | null
+  /** Props passed from server to client */
+  sharedProps: string[]
+}
+
+export interface FunctionAnalysis {
+  isAsync: boolean
+  returnsFunction: boolean
+  serverBody: CodeSpan | null
+  clientBody: CodeSpan | null
+  sharedProps: string[]
+}
+
+export interface CodeSpan {
   start: number
   end: number
-  type: CodeType
-  /** The actual code content */
-  content?: string
 }
 
-export type CodeType =
-  | 'await'           // await expression
-  | 'db_call'         // db.*, prisma.*
-  | 'fs_call'         // fs.*
-  | 'env_access'      // process.env.*
-  | 'use_call'        // use()
-  | 'event_handler'   // onclick, onChange, etc.
-  | 'browser_api'     // document.*, window.*
-
-export interface SharedVariable {
-  /** Variable name */
-  name: string
-  /** Where it's defined (server code) */
-  definedAt: number
-  /** Where it's used (client code) */
-  usedAt: number[]
-}
-
-export interface ImportInfo {
-  /** Module specifier */
-  source: string
-  /** Import specifiers */
-  specifiers: string[]
-  /** Is server-only import */
-  isServerOnly: boolean
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// Transform Types
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface TransformResult {
-  /** Server bundle code */
+  /** Original file path */
+  filePath: string
+  /** Server module code */
   serverCode: string
-  /** Client bundle code */
+  /** Client module code */
   clientCode: string
-  /** Hydration manifest */
-  manifest: HydrationManifest
+  /** Route manifest info */
+  route: RouteInfo
 }
 
-export interface HydrationManifest {
-  /** Route path */
-  route: string
-  /** Component name */
-  componentName: string
-  /** Client boundaries */
-  boundaries: ClientBoundary[]
+export interface RouteInfo {
+  /** Route path pattern (e.g., /user/:id) */
+  path: string
+  /** Export name */
+  exportName: string
+  /** Type */
+  type: 'api' | 'component'
+  /** File type */
+  fileType: FileType
+  /** Props to hydrate */
+  hydrateProps: string[]
+  /** Middleware chain (file paths) */
+  middlewares: string[]
+  /** Layout chain (file paths, innermost first) */
+  layouts: string[]
 }
 
-export interface ClientBoundary {
-  /** Unique ID for this boundary */
-  id: string
-  /** Props passed from server */
-  props: string[]
-  /** Client component path */
-  clientComponent: string
-}
+/** Special file types */
+export type FileType = 'page' | 'layout' | 'route' | 'middleware'
+
+/** Special file names */
+export const SPECIAL_FILES = {
+  page: /^page\.(tsx?|jsx?)$/,
+  layout: /^layout\.(tsx?|jsx?)$/,
+  route: /^route\.(tsx?|jsx?)$/,
+  middleware: /^middleware\.(tsx?|jsx?)$/,
+} as const
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Build Types
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface BuildResult {
   /** Server bundle path */
@@ -103,39 +114,23 @@ export interface BuildResult {
   buildTime: number
 }
 
-/** Server-only module patterns */
-export const SERVER_MODULES = [
-  'fs',
-  'path',
-  'crypto',
-  'http',
-  'https',
-  'net',
-  'os',
-  'child_process',
-  // Database
-  'prisma',
-  '@prisma/client',
-  'mongoose',
-  'pg',
-  'mysql',
-  'mysql2',
-  'sqlite3',
-  'better-sqlite3',
-  // ORM
-  'drizzle-orm',
-  'typeorm',
-  'sequelize',
-  'knex',
-]
+export interface BuildManifest {
+  routes: RouteInfo[]
+}
 
-/** Browser-only APIs */
-export const BROWSER_APIS = [
-  'document',
-  'window',
-  'navigator',
-  'localStorage',
-  'sessionStorage',
-  'location',
-  'history',
-]
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** HTTP methods that indicate an API handler */
+export const HTTP_METHODS = [
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'HEAD',
+  'OPTIONS',
+] as const
+
+export type HttpMethod = typeof HTTP_METHODS[number]

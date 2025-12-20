@@ -7,18 +7,18 @@
 import * as esbuild from 'esbuild'
 import * as fs from 'fs'
 import * as path from 'path'
-import type { CompilerOptions, TransformResult, BuildResult, HydrationManifest } from './types'
+import type { CompilerOptions, TransformResult, BuildResult, BuildManifest, RouteInfo } from './types'
 
 export class Emitter {
   private options: CompilerOptions
-  private transformResults: Map<string, TransformResult> = new Map()
+  private transformResults: TransformResult[] = []
 
   constructor(options: CompilerOptions) {
     this.options = options
   }
 
-  addTransformResult(filePath: string, result: TransformResult): void {
-    this.transformResults.set(filePath, result)
+  addTransformResults(results: TransformResult[]): void {
+    this.transformResults.push(...results)
   }
 
   async emit(): Promise<BuildResult> {
@@ -34,36 +34,54 @@ export class Emitter {
     // Write transformed files
     const serverEntries: string[] = []
     const clientEntries: string[] = []
-    const manifests: HydrationManifest[] = []
+    const routes: RouteInfo[] = []
 
-    for (const [filePath, result] of this.transformResults) {
-      const baseName = path.basename(filePath, path.extname(filePath))
+    for (const result of this.transformResults) {
+      const baseName = path.basename(result.filePath, path.extname(result.filePath))
+      const routeDir = path.dirname(result.filePath).replace(/.*routes\/?/, '')
 
       // Write server code
-      const serverPath = path.join(serverOutDir, `${baseName}.server.ts`)
-      await fs.promises.writeFile(serverPath, result.serverCode)
-      serverEntries.push(serverPath)
+      if (result.serverCode) {
+        const serverFileName = routeDir
+          ? `${routeDir.replace(/\//g, '_')}_${baseName}.server.ts`
+          : `${baseName}.server.ts`
+        const serverPath = path.join(serverOutDir, serverFileName)
+        await fs.promises.writeFile(serverPath, result.serverCode)
+        serverEntries.push(serverPath)
+      }
 
       // Write client code
-      const clientPath = path.join(clientOutDir, `${baseName}.client.ts`)
-      await fs.promises.writeFile(clientPath, result.clientCode)
-      clientEntries.push(clientPath)
+      if (result.clientCode) {
+        const clientFileName = routeDir
+          ? `${routeDir.replace(/\//g, '_')}_${baseName}.client.ts`
+          : `${baseName}.client.ts`
+        const clientPath = path.join(clientOutDir, clientFileName)
+        await fs.promises.writeFile(clientPath, result.clientCode)
+        clientEntries.push(clientPath)
+      }
 
-      // Collect manifest
-      manifests.push(result.manifest)
+      // Collect route info
+      routes.push(result.route)
     }
 
     // Bundle server code
-    const serverBundle = await this.bundleServer(serverEntries, serverOutDir)
+    let serverBundle = ''
+    if (serverEntries.length > 0) {
+      serverBundle = await this.bundleServer(serverEntries, serverOutDir)
+    }
 
     // Bundle client code
-    const clientBundle = await this.bundleClient(clientEntries, clientOutDir)
+    let clientBundle = ''
+    if (clientEntries.length > 0) {
+      clientBundle = await this.bundleClient(clientEntries, clientOutDir)
+    }
 
     // Write manifest
+    const manifest: BuildManifest = { routes }
     const manifestPath = path.join(this.options.outDir, 'manifest.json')
     await fs.promises.writeFile(
       manifestPath,
-      JSON.stringify({ routes: manifests }, null, 2)
+      JSON.stringify(manifest, null, 2)
     )
 
     const buildTime = Date.now() - startTime
@@ -134,10 +152,7 @@ export class Emitter {
         'process.env.NODE_ENV': '"production"',
         'typeof window': '"object"',
       },
-      // Tree-shake server code
       treeShaking: true,
-      // Inject browser polyfills if needed
-      inject: [],
     })
 
     return outfile
@@ -149,13 +164,9 @@ export class Emitter {
  */
 export async function emitBundles(
   options: CompilerOptions,
-  transformResults: Map<string, TransformResult>
+  transformResults: TransformResult[]
 ): Promise<BuildResult> {
   const emitter = new Emitter(options)
-
-  for (const [filePath, result] of transformResults) {
-    emitter.addTransformResult(filePath, result)
-  }
-
+  emitter.addTransformResults(transformResults)
   return emitter.emit()
 }

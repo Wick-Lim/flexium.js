@@ -1,5 +1,5 @@
 import { resolve } from 'path'
-import { createServer } from 'http'
+import { createServer, type IncomingMessage, type ServerResponse } from 'http'
 import { createCompiler } from '../../compiler'
 
 const cyan = '\x1b[36m'
@@ -8,6 +8,9 @@ const yellow = '\x1b[33m'
 const reset = '\x1b[0m'
 const bold = '\x1b[1m'
 const dim = '\x1b[2m'
+
+// SSE clients for HMR
+const hmrClients = new Set<ServerResponse>()
 
 export async function dev() {
   const cwd = process.cwd()
@@ -33,11 +36,20 @@ ${cyan}${bold}  ╔════════════════════�
   // Start watching and compiling
   await compiler.watch((result) => {
     console.log(`${dim}[${new Date().toLocaleTimeString()}]${reset} ${green}Rebuilt in ${result.buildTime}ms${reset}`)
+
+    // Notify all HMR clients
+    broadcastHMR({ type: 'reload', buildTime: result.buildTime })
   })
 
   // Create dev server
   const server = createServer(async (req, res) => {
     const url = new URL(req.url || '/', `http://localhost:${port}`)
+
+    // Handle HMR SSE endpoint
+    if (url.pathname === '/__flexism_hmr') {
+      handleHMR(req, res)
+      return
+    }
 
     // Serve static files from .flexism/client
     if (url.pathname.startsWith('/_flexism/')) {
@@ -57,7 +69,7 @@ ${cyan}${bold}  ╔════════════════════�
 
     // Handle SSR for routes
     try {
-      const html = await renderRoute(url.pathname, resolve(cwd, '.flexism'))
+      const html = await renderRoute(url.pathname, resolve(cwd, '.flexism'), port)
       res.writeHead(200, { 'Content-Type': 'text/html' })
       res.end(html)
     } catch (error) {
@@ -81,12 +93,49 @@ ${green}${bold}✓ Dev server ready${reset}
   // Handle shutdown
   process.on('SIGINT', () => {
     console.log(`\n${dim}Shutting down...${reset}`)
+    // Close all HMR connections
+    for (const client of hmrClients) {
+      client.end()
+    }
     server.close()
     process.exit(0)
   })
 }
 
-async function renderRoute(pathname: string, outDir: string): Promise<string> {
+/**
+ * Handle SSE connection for HMR
+ */
+function handleHMR(req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+  })
+
+  // Send initial connection message
+  res.write('data: {"type":"connected"}\n\n')
+
+  // Add to clients set
+  hmrClients.add(res)
+
+  // Remove on close
+  req.on('close', () => {
+    hmrClients.delete(res)
+  })
+}
+
+/**
+ * Broadcast HMR message to all clients
+ */
+function broadcastHMR(message: { type: string; [key: string]: any }) {
+  const data = `data: ${JSON.stringify(message)}\n\n`
+  for (const client of hmrClients) {
+    client.write(data)
+  }
+}
+
+async function renderRoute(pathname: string, outDir: string, port: number): Promise<string> {
   // Load manifest
   const { readFile } = await import('fs/promises')
   const manifestPath = resolve(outDir, 'manifest.json')
@@ -101,8 +150,26 @@ async function renderRoute(pathname: string, outDir: string): Promise<string> {
 
   // Find matching route
   const route = manifest.routes?.find((r: any) =>
-    matchRoute(pathname, r.route)
+    matchRoute(pathname, r.path)
   )
+
+  // HMR client script
+  const hmrScript = `
+<script>
+(function() {
+  const hmr = new EventSource('/__flexism_hmr');
+  hmr.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    if (data.type === 'reload') {
+      console.log('[flexism] Reloading...');
+      location.reload();
+    }
+  };
+  hmr.onerror = function() {
+    console.log('[flexism] HMR disconnected, retrying...');
+  };
+})();
+</script>`
 
   // Generate HTML shell
   return `<!DOCTYPE html>
@@ -114,9 +181,14 @@ async function renderRoute(pathname: string, outDir: string): Promise<string> {
 </head>
 <body>
   <div id="app">
-    ${route ? `<!-- Route: ${route.route} -->` : '<!-- No matching route -->'}
+    ${route ? `<!-- Route: ${route.path} -->` : `<!-- No matching route for: ${pathname} -->`}
+    <p>Route: ${route?.path || 'Not found'}</p>
+    <p>Type: ${route?.type || 'N/A'}</p>
+    <p>Middlewares: ${route?.middlewares?.length || 0}</p>
+    <p>Layouts: ${route?.layouts?.length || 0}</p>
   </div>
   <script type="module" src="/_flexism/index.js"></script>
+  ${hmrScript}
 </body>
 </html>`
 }
