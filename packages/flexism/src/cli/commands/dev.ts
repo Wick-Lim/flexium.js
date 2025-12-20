@@ -2,6 +2,7 @@ import { resolve } from 'path'
 import { createServer, type IncomingMessage, type ServerResponse } from 'http'
 import { createCompiler } from '../../compiler'
 import { createRequestHandler, clearAllCaches } from '../../server/handler'
+import { createInjectorStream, pipeToResponse } from '../../utils/stream'
 
 const cyan = '\x1b[36m'
 const green = '\x1b[32m'
@@ -93,25 +94,33 @@ ${cyan}${bold}  ╔════════════════════�
       const webRequest = toWebRequest(req, port)
       const response = await handler(webRequest)
 
-      // Inject HMR script into HTML responses
+      // Build headers (exclude content-length for streaming)
+      const headers: Record<string, string> = {}
+      response.headers.forEach((value, key) => {
+        if (key.toLowerCase() !== 'content-length') {
+          headers[key] = value
+        }
+      })
+
+      // Inject HMR script into HTML responses using streaming
       const contentType = response.headers.get('Content-Type') || ''
-      if (contentType.includes('text/html')) {
-        let html = await response.text()
-        html = injectHMRScript(html)
+      if (contentType.includes('text/html') && response.body) {
+        const injector = createInjectorStream('</body>', HMR_SCRIPT)
+        const injectedStream = response.body.pipeThrough(injector)
 
         res.writeHead(response.status, {
+          ...headers,
           'Content-Type': 'text/html; charset=utf-8',
         })
-        res.end(html)
-      } else {
-        // Non-HTML response
-        const headers: Record<string, string> = {}
-        response.headers.forEach((value, key) => {
-          headers[key] = value
-        })
+        await pipeToResponse(injectedStream, res)
+      } else if (response.body) {
+        // Non-HTML response - stream directly (zero-copy)
         res.writeHead(response.status, headers)
-        const body = await response.arrayBuffer()
-        res.end(Buffer.from(body))
+        await pipeToResponse(response.body, res)
+      } else {
+        // No body
+        res.writeHead(response.status, headers)
+        res.end()
       }
     } catch (error) {
       console.error(`${yellow}Request error:${reset}`, error)

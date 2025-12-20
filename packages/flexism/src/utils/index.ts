@@ -26,3 +26,21 @@ export type {
   MemoryEventType,
   MemoryMonitorOptions,
 } from './memory'
+
+// Zero-Copy Streaming
+export {
+  concatStreams,
+  prependToStream,
+  appendToStream,
+  createInjectorStream,
+  stringToStream,
+  bytesToStream,
+  pipeToResponse,
+  nodeToWebStream,
+  webToNodeStream,
+  createByteCounter,
+  teeWithConsumer,
+  limitStream,
+  peekStream,
+} from './stream'
+export type { ConcatStreamOptions } from './stream'

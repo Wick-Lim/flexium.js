@@ -10,9 +10,10 @@ import * as http from 'http'
 import { createCompiler } from '../compiler'
 import { createRequestHandler, clearAllCaches } from '../server/handler'
 import { createStaticHandler } from '../server/static'
-import { HMRManager, getHMRClientScript, injectHMRScript } from './hmr'
+import { HMRManager, getHMRClientScript } from './hmr'
 import { getBuildCache } from '../compiler/incremental'
 import { MemoryMonitor, formatBytes } from '../utils/memory'
+import { prependToStream, createInjectorStream, pipeToResponse } from '../utils/stream'
 import type { CompilerOptions, BuildResult } from '../compiler/types'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -234,12 +235,18 @@ export async function createDevServer(options: DevServerOptions) {
       if (url.pathname.startsWith('/_flexism/client')) {
         const result = await clientHandler(request)
         if (result.served) {
-          // Inject HMR client
-          if (url.pathname.endsWith('/index.js') && hmrManager) {
-            const body = await result.response.text()
-            const hmrClient = getHMRClientScript()
-            await sendResponse(res, new Response(hmrClient + '\n' + body, {
-              headers: result.response.headers,
+          // Inject HMR client using streaming (no buffering)
+          if (url.pathname.endsWith('/index.js') && hmrManager && result.response.body) {
+            const hmrClient = getHMRClientScript() + '\n'
+            const combinedStream = prependToStream(hmrClient, result.response.body)
+
+            // Copy headers but remove content-length (changed by prepend)
+            const headers = new Headers(result.response.headers)
+            headers.delete('content-length')
+
+            await sendResponse(res, new Response(combinedStream, {
+              status: result.response.status,
+              headers,
             }))
             return
           }
@@ -260,13 +267,19 @@ export async function createDevServer(options: DevServerOptions) {
       // SSR handler
       const response = await requestHandler(request)
 
-      // Inject HMR script into HTML
-      if (hmrManager && response.headers.get('Content-Type')?.includes('text/html')) {
-        const html = await response.text()
-        const injected = injectHMRScript(html)
-        await sendResponse(res, new Response(injected, {
+      // Inject HMR script into HTML using streaming (minimal buffering)
+      if (hmrManager && response.headers.get('Content-Type')?.includes('text/html') && response.body) {
+        const hmrScript = `<script>${getHMRClientScript()}</script>`
+        const injector = createInjectorStream('</body>', hmrScript)
+        const injectedStream = response.body.pipeThrough(injector)
+
+        // Copy headers but remove content-length (changed by injection)
+        const headers = new Headers(response.headers)
+        headers.delete('content-length')
+
+        await sendResponse(res, new Response(injectedStream, {
           status: response.status,
-          headers: response.headers,
+          headers,
         }))
         return
       }
