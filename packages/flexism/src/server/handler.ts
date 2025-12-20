@@ -168,8 +168,13 @@ async function handleApiRoute(
 ): Promise<Response> {
   const { route, params } = match
 
-  // Load API module
-  const modulePath = getModulePath(serverDir, route.path, 'route')
+  // Get module path from manifest
+  if (!route.serverModule) {
+    console.error(`[flexism] No server module for route: ${route.path}`)
+    return new Response('Internal Server Error', { status: 500 })
+  }
+
+  const modulePath = `${serverDir}/${route.serverModule}`
   let apiModule: ApiModule
 
   try {
@@ -217,8 +222,13 @@ async function handlePageRoute(
   const { serverDir, clientBundle } = options
   const context: LoaderContext = { request, params }
 
-  // Load page module
-  const modulePath = getModulePath(serverDir, route.path, 'page')
+  // Get module path from manifest
+  if (!route.serverModule) {
+    console.error(`[flexism] No server module for route: ${route.path}`)
+    return new Response('Internal Server Error', { status: 500 })
+  }
+
+  const modulePath = `${serverDir}/${route.serverModule}`
   let pageModule: PageModule
 
   try {
@@ -265,7 +275,8 @@ async function handlePageRoute(
   let fullContent: FNodeChild
   try {
     fullContent = await composeLayouts({
-      layoutPaths: route.layouts,
+      layoutModules: route.layouts,
+      serverDir,
       pageContent,
       context: { request, params },
     })
@@ -307,25 +318,6 @@ async function handlePageRoute(
 // ─────────────────────────────────────────────────────────────────────────────
 // Utilities
 // ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Get module path from route path
- */
-function getModulePath(
-  serverDir: string,
-  routePath: string,
-  fileType: 'page' | 'route'
-): string {
-  // Convert route path to module path
-  // /users/:id → users_[id].server.js
-  const sanitizedPath = routePath
-    .replace(/^\//, '')
-    .replace(/\//g, '_')
-    .replace(/:(\.\.\.)?([\w]+)/g, '[$1$2]')
-
-  const fileName = sanitizedPath || 'index'
-  return `${serverDir}/${fileName}.${fileType}.server.js`
-}
 
 /**
  * Inject scripts into HTML document

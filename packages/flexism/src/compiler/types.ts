@@ -86,6 +86,10 @@ export interface RouteInfo {
   middlewares: string[]
   /** Layout chain (file paths, innermost first) */
   layouts: string[]
+  /** Server module path (set by Emitter) */
+  serverModule?: string
+  /** Client module path (set by Emitter) */
+  clientModule?: string
 }
 
 /** Special file types */
@@ -116,6 +120,17 @@ export interface BuildResult {
 
 export interface BuildManifest {
   routes: RouteInfo[]
+  /** Layout modules (path → module name) */
+  layouts: Record<string, LayoutManifestEntry>
+  /** Middleware modules (path → module name) */
+  middlewares: Record<string, string>
+}
+
+export interface LayoutManifestEntry {
+  /** Compiled module name */
+  module: string
+  /** Whether layout uses 2-function pattern */
+  hasLoader: boolean
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

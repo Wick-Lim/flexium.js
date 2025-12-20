@@ -94,8 +94,10 @@ export function clearLayoutCache(): void {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface ComposeLayoutsOptions {
-  /** Layout file paths (outermost first) */
-  layoutPaths: string[]
+  /** Layout module names (outermost first) */
+  layoutModules: string[]
+  /** Server directory for loading modules */
+  serverDir: string
   /** Page content to wrap */
   pageContent: FNodeChild
   /** Layout context */
@@ -137,16 +139,17 @@ export interface ComposeLayoutsOptions {
 export async function composeLayouts(
   options: ComposeLayoutsOptions
 ): Promise<FNodeChild> {
-  const { layoutPaths, pageContent, context } = options
+  const { layoutModules, serverDir, pageContent, context } = options
 
   // Load all layout modules
   const layouts: LayoutModule[] = []
-  for (const path of layoutPaths) {
+  for (const moduleName of layoutModules) {
+    const modulePath = `${serverDir}/${moduleName}`
     try {
-      const mod = await loadLayout(path)
+      const mod = await loadLayout(modulePath)
       layouts.push(mod)
     } catch (error) {
-      console.error(`[flexism] Failed to load layout: ${path}`, error)
+      console.error(`[flexism] Failed to load layout: ${modulePath}`, error)
       // Skip failed layouts
     }
   }
