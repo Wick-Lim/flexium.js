@@ -1,7 +1,17 @@
 /**
- * Flexium node child type (any renderable content)
+ * Virtual DOM element node structure
  */
-export type FNodeChild = any
+export interface FNode {
+  type: string | ((...args: unknown[]) => FNodeChild)
+  props: Record<string, unknown>
+  children: FNodeChild[]
+}
+
+/**
+ * Flexium node child type (any renderable content)
+ * Note: Using union type for better type inference while maintaining flexibility
+ */
+export type FNodeChild = FNode | string | number | boolean | null | undefined | FNodeChild[]
 
 /**
  * Serialized state for SSR -> client transfer

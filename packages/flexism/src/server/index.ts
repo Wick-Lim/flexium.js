@@ -160,5 +160,6 @@ export {
   parseAcceptEncoding,
   selectEncoding,
   getPrecompressedPath,
+  createCompressionStream,
 } from './compression'
-export type { CompressionOptions, CompressionEncoding } from './compression'
+export type { CompressionOptions, CompressionEncoding, ZstdCompressor } from './compression'

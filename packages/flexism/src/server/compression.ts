@@ -1,11 +1,11 @@
 /**
  * Flexism Compression Middleware
  *
- * Gzip and Brotli compression for HTTP responses
+ * Gzip, Brotli, and Zstd compression for HTTP responses
  */
 
 import * as zlib from 'zlib'
-import { Readable } from 'stream'
+import { Readable, Transform } from 'stream'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -18,15 +18,28 @@ export interface CompressionOptions {
   gzipLevel?: number
   /** Compression level for brotli (0-11, default: 4) */
   brotliLevel?: number
+  /** Compression level for zstd (1-22, default: 3) */
+  zstdLevel?: number
   /** Preferred encoding order (default: ['br', 'gzip', 'deflate']) */
   encodings?: CompressionEncoding[]
   /** Content types to compress (default: text/*, application/json, application/javascript, etc.) */
   mimeTypes?: string[]
   /** Skip compression for these paths */
   excludePaths?: string[]
+  /** Custom zstd compressor (for zstd support, provide external implementation) */
+  zstdCompress?: ZstdCompressor
 }
 
-export type CompressionEncoding = 'br' | 'gzip' | 'deflate'
+/**
+ * Custom Zstd compressor interface
+ * Implement this with a package like 'zstd-codec' or '@aspect-build/zstd'
+ */
+export interface ZstdCompressor {
+  compress(buffer: Buffer, level?: number): Promise<Buffer>
+  createCompressStream(level?: number): Transform
+}
+
+export type CompressionEncoding = 'br' | 'gzip' | 'deflate' | 'zstd'
 
 interface EncodingPreference {
   encoding: CompressionEncoding
@@ -59,13 +72,15 @@ const DEFAULT_MIME_TYPES = [
   'application/wasm',
 ]
 
-const DEFAULT_OPTIONS: Required<CompressionOptions> = {
+const DEFAULT_OPTIONS: Required<Omit<CompressionOptions, 'zstdCompress'>> & { zstdCompress?: ZstdCompressor } = {
   threshold: DEFAULT_THRESHOLD,
   gzipLevel: 6,
   brotliLevel: 4,
+  zstdLevel: 3,
   encodings: ['br', 'gzip', 'deflate'],
   mimeTypes: DEFAULT_MIME_TYPES,
   excludePaths: [],
+  zstdCompress: undefined,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,7 +112,7 @@ export function parseAcceptEncoding(header: string): EncodingPreference[] {
     }
 
     // Only accept supported encodings
-    if (!['br', 'gzip', 'deflate'].includes(normalizedEncoding)) {
+    if (!['br', 'gzip', 'deflate', 'zstd'].includes(normalizedEncoding)) {
       continue
     }
 
@@ -187,12 +202,20 @@ function shouldCompressContentType(
 /**
  * Compress a buffer with the specified encoding
  */
-export function compressBuffer(
+export async function compressBuffer(
   buffer: Buffer,
   encoding: CompressionEncoding,
   options: CompressionOptions = {}
 ): Promise<Buffer> {
-  const { gzipLevel = 6, brotliLevel = 4 } = options
+  const { gzipLevel = 6, brotliLevel = 4, zstdLevel = 3, zstdCompress } = options
+
+  // Handle zstd with external compressor
+  if (encoding === 'zstd') {
+    if (!zstdCompress) {
+      throw new Error('Zstd compression requires a custom zstdCompress implementation')
+    }
+    return zstdCompress.compress(buffer, zstdLevel)
+  }
 
   return new Promise((resolve, reject) => {
     const callback = (err: Error | null, result: Buffer) => {
@@ -230,8 +253,8 @@ export function compressBuffer(
 export function createCompressionStream(
   encoding: CompressionEncoding,
   options: CompressionOptions = {}
-): zlib.BrotliCompress | zlib.Gzip | zlib.Deflate {
-  const { gzipLevel = 6, brotliLevel = 4 } = options
+): zlib.BrotliCompress | zlib.Gzip | zlib.Deflate | Transform {
+  const { gzipLevel = 6, brotliLevel = 4, zstdLevel = 3, zstdCompress } = options
 
   switch (encoding) {
     case 'br':
@@ -244,6 +267,11 @@ export function createCompressionStream(
       return zlib.createGzip({ level: gzipLevel })
     case 'deflate':
       return zlib.createDeflate({ level: gzipLevel })
+    case 'zstd':
+      if (!zstdCompress) {
+        throw new Error('Zstd compression requires a custom zstdCompress implementation')
+      }
+      return zstdCompress.createCompressStream(zstdLevel)
   }
 }
 

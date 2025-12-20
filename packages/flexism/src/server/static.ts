@@ -32,6 +32,8 @@ export interface StaticFileOptions {
   listing?: boolean
   /** Custom headers */
   headers?: Record<string, string>
+  /** Serve pre-compressed files (.br, .gz) if available (default: true in prod) */
+  precompressed?: boolean
 }
 
 interface ServeResult {
@@ -50,10 +52,13 @@ const MIME_TYPES: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8',
+  '.cjs': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.xml': 'application/xml; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
   '.md': 'text/markdown; charset=utf-8',
+  '.csv': 'text/csv; charset=utf-8',
+  '.ics': 'text/calendar; charset=utf-8',
 
   // Images
   '.png': 'image/png',
@@ -64,6 +69,9 @@ const MIME_TYPES: Record<string, string> = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
   '.avif': 'image/avif',
+  '.heic': 'image/heic',
+  '.heif': 'image/heif',
+  '.jxl': 'image/jxl',
 
   // Fonts
   '.woff': 'font/woff',
@@ -78,16 +86,36 @@ const MIME_TYPES: Record<string, string> = {
   '.webm': 'video/webm',
   '.ogg': 'audio/ogg',
   '.wav': 'audio/wav',
+  '.m4a': 'audio/mp4',
+  '.m4v': 'video/mp4',
+  '.mov': 'video/quicktime',
+  '.avi': 'video/x-msvideo',
+  '.flac': 'audio/flac',
 
   // Documents
   '.pdf': 'application/pdf',
   '.zip': 'application/zip',
   '.tar': 'application/x-tar',
   '.gz': 'application/gzip',
+  '.br': 'application/br',
+  '.zst': 'application/zstd',
 
   // Data
   '.wasm': 'application/wasm',
   '.map': 'application/json',
+
+  // Web App Manifest & Config
+  '.webmanifest': 'application/manifest+json',
+  '.manifest': 'application/manifest+json',
+  '.webapp': 'application/x-web-app-manifest+json',
+
+  // Other
+  '.ts': 'text/typescript; charset=utf-8',
+  '.tsx': 'text/typescript; charset=utf-8',
+  '.jsx': 'text/javascript; charset=utf-8',
+  '.yaml': 'text/yaml; charset=utf-8',
+  '.yml': 'text/yaml; charset=utf-8',
+  '.toml': 'text/toml; charset=utf-8',
 }
 
 function getMimeType(filePath: string): string {
@@ -127,6 +155,7 @@ export function createStaticHandler(options: StaticFileOptions) {
     index = 'index.html',
     listing = false,
     headers: customHeaders = {},
+    precompressed = process.env.NODE_ENV === 'production',
   } = options
 
   // Normalize prefix
@@ -165,6 +194,14 @@ export function createStaticHandler(options: StaticFileOptions) {
       }
     }
 
+    // Check for pre-compressed version if enabled
+    const acceptEncoding = request.headers.get('Accept-Encoding') || ''
+    let compressedResult: { filePath: string; encoding: string; stat: fs.Stats } | null = null
+
+    if (precompressed) {
+      compressedResult = await findPrecompressedFile(filePath, acceptEncoding)
+    }
+
     // Check if file exists
     try {
       const stat = await fs.promises.stat(filePath)
@@ -175,6 +212,23 @@ export function createStaticHandler(options: StaticFileOptions) {
         try {
           const indexStat = await fs.promises.stat(indexPath)
           if (indexStat.isFile()) {
+            // Check for pre-compressed index
+            let indexCompressed: { filePath: string; encoding: string; stat: fs.Stats } | null = null
+            if (precompressed) {
+              indexCompressed = await findPrecompressedFile(indexPath, acceptEncoding)
+            }
+
+            if (indexCompressed) {
+              return serveFile(indexCompressed.filePath, indexCompressed.stat, request, {
+                cache,
+                maxAge,
+                immutable,
+                customHeaders,
+                contentEncoding: indexCompressed.encoding,
+                originalPath: indexPath,
+              })
+            }
+
             return serveFile(indexPath, indexStat, request, {
               cache,
               maxAge,
@@ -195,6 +249,18 @@ export function createStaticHandler(options: StaticFileOptions) {
       }
 
       if (stat.isFile()) {
+        // Serve pre-compressed version if available
+        if (compressedResult) {
+          return serveFile(compressedResult.filePath, compressedResult.stat, request, {
+            cache,
+            maxAge,
+            immutable,
+            customHeaders,
+            contentEncoding: compressedResult.encoding,
+            originalPath: filePath,
+          })
+        }
+
         return serveFile(filePath, stat, request, {
           cache,
           maxAge,
@@ -211,6 +277,71 @@ export function createStaticHandler(options: StaticFileOptions) {
   }
 }
 
+/**
+ * Find pre-compressed version of a file
+ */
+async function findPrecompressedFile(
+  filePath: string,
+  acceptEncoding: string
+): Promise<{ filePath: string; encoding: string; stat: fs.Stats } | null> {
+  // Parse Accept-Encoding and check in priority order
+  const encodings = parseAcceptEncodingSimple(acceptEncoding)
+
+  for (const encoding of encodings) {
+    const ext = encoding === 'br' ? '.br' : encoding === 'gzip' ? '.gz' : encoding === 'zstd' ? '.zst' : null
+    if (!ext) continue
+
+    const compressedPath = filePath + ext
+    try {
+      const stat = await fs.promises.stat(compressedPath)
+      if (stat.isFile()) {
+        return { filePath: compressedPath, encoding, stat }
+      }
+    } catch {
+      // Compressed version doesn't exist
+    }
+  }
+
+  return null
+}
+
+/**
+ * Simple Accept-Encoding parser that returns encodings in priority order
+ */
+function parseAcceptEncodingSimple(header: string): string[] {
+  if (!header) return []
+
+  const encodings: { name: string; q: number }[] = []
+
+  for (const part of header.split(',')) {
+    const [name, ...params] = part.trim().split(';')
+    const normalizedName = name.trim().toLowerCase()
+
+    if (!['br', 'gzip', 'zstd'].includes(normalizedName)) continue
+
+    let q = 1
+    for (const param of params) {
+      const [key, value] = param.trim().split('=')
+      if (key.trim().toLowerCase() === 'q' && value) {
+        q = parseFloat(value) || 0
+      }
+    }
+
+    if (q > 0) {
+      encodings.push({ name: normalizedName, q })
+    }
+  }
+
+  // Sort by quality (highest first), prefer br > zstd > gzip
+  return encodings
+    .sort((a, b) => {
+      if (b.q !== a.q) return b.q - a.q
+      const priority = { br: 3, zstd: 2, gzip: 1 }
+      return (priority[b.name as keyof typeof priority] || 0) - (priority[a.name as keyof typeof priority] || 0)
+    })
+    .map(e => e.name)
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // File Serving
 // ─────────────────────────────────────────────────────────────────────────────
@@ -220,6 +351,10 @@ interface ServeOptions {
   maxAge: number
   immutable: boolean
   customHeaders: Record<string, string>
+  /** Content-Encoding header for pre-compressed files */
+  contentEncoding?: string
+  /** Original file path (for MIME type detection when serving compressed) */
+  originalPath?: string
 }
 
 async function serveFile(
@@ -228,8 +363,9 @@ async function serveFile(
   request: Request,
   options: ServeOptions
 ): Promise<ServeResult> {
-  const { cache, maxAge, immutable, customHeaders } = options
-  const mimeType = getMimeType(filePath)
+  const { cache, maxAge, immutable, customHeaders, contentEncoding, originalPath } = options
+  // Use original path for MIME type when serving pre-compressed files
+  const mimeType = getMimeType(originalPath || filePath)
   const etag = `"${stat.size}-${stat.mtime.getTime()}"`
   const lastModified = stat.mtime.toUTCString()
   const fileSize = stat.size
@@ -285,6 +421,12 @@ async function serveFile(
     'Last-Modified': lastModified,
     'Accept-Ranges': 'bytes',
     ...customHeaders,
+  }
+
+  // Add Content-Encoding for pre-compressed files
+  if (contentEncoding) {
+    headers['Content-Encoding'] = contentEncoding
+    headers['Vary'] = 'Accept-Encoding'
   }
 
   if (isRangeRequest) {

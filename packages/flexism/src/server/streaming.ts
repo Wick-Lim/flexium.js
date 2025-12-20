@@ -5,7 +5,7 @@
  */
 
 import { renderToString } from 'flexium/server'
-import type { FNodeChild } from '../types'
+import type { FNodeChild, FNode } from '../types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -275,7 +275,7 @@ function getChunkScript(id: string, html: string): string {
  * })
  * ```
  */
-export function streamingPlaceholder(chunk: StreamingChunk): FNodeChild {
+export function streamingPlaceholder(chunk: StreamingChunk): FNode {
   // Return a placeholder div with the chunk ID
   // The streaming runtime will replace this with the actual content
   const fallbackHtml = chunk.fallback
@@ -289,7 +289,7 @@ export function streamingPlaceholder(chunk: StreamingChunk): FNodeChild {
       'data-streaming': 'true',
     },
     children: [fallbackHtml],
-  } as unknown as FNodeChild
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

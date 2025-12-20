@@ -267,9 +267,20 @@ function parseCookies(cookieHeader: string): Record<string, string> {
   if (!cookieHeader) return cookies
 
   for (const pair of cookieHeader.split(';')) {
-    const [key, value] = pair.split('=').map(s => s.trim())
+    const trimmed = pair.trim()
+    const eqIndex = trimmed.indexOf('=')
+    if (eqIndex === -1) continue
+
+    const key = trimmed.slice(0, eqIndex).trim()
+    const value = trimmed.slice(eqIndex + 1).trim()
+
     if (key && value) {
-      cookies[key] = decodeURIComponent(value)
+      try {
+        cookies[key] = decodeURIComponent(value)
+      } catch {
+        // Invalid encoding, use raw value
+        cookies[key] = value
+      }
     }
   }
 
