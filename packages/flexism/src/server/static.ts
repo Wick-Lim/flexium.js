@@ -6,6 +6,10 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
+import { Readable } from 'stream'
+
+// Threshold for switching to streaming (10MB)
+const STREAM_THRESHOLD = 10 * 1024 * 1024
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -306,12 +310,26 @@ async function serveFile(
   }
 
   // Read and serve file (full or partial)
+  const status = isRangeRequest ? 206 : 200
+
+  // Use streaming for large files to avoid memory issues
+  if (contentLength > STREAM_THRESHOLD) {
+    const nodeStream = fs.createReadStream(filePath, { start, end })
+    // Convert Node.js stream to Web ReadableStream
+    const webStream = Readable.toWeb(nodeStream) as ReadableStream<Uint8Array>
+    return {
+      response: new Response(webStream, { status, headers }),
+      served: true,
+    }
+  }
+
+  // For smaller files, read into memory (faster for small files)
   const fd = await fs.promises.open(filePath, 'r')
   try {
     const buffer = Buffer.alloc(contentLength)
     await fd.read(buffer, 0, contentLength, start)
     return {
-      response: new Response(buffer, { status: isRangeRequest ? 206 : 200, headers }),
+      response: new Response(buffer, { status, headers }),
       served: true,
     }
   } finally {

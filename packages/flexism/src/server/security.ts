@@ -277,14 +277,17 @@ function parseCookies(cookieHeader: string): Record<string, string> {
 }
 
 function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false
-  }
+  // Pad to same length to avoid leaking length information via timing
+  const maxLen = Math.max(a.length, b.length, 1)
+  const bufA = Buffer.alloc(maxLen)
+  const bufB = Buffer.alloc(maxLen)
+  Buffer.from(a).copy(bufA)
+  Buffer.from(b).copy(bufB)
 
-  const bufA = Buffer.from(a)
-  const bufB = Buffer.from(b)
-
-  return crypto.timingSafeEqual(bufA, bufB)
+  // Compare in constant time, then check length match
+  // Length check is done after to ensure constant-time comparison always runs
+  const contentsEqual = crypto.timingSafeEqual(bufA, bufB)
+  return contentsEqual && a.length === b.length
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

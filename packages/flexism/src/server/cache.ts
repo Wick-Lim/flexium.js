@@ -314,13 +314,18 @@ export function createCacheMiddleware(configs: RouteCacheConfig[]) {
 // Utilities
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * FNV-1a hash - better distribution than djb2
+ * @see https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ */
 function simpleHash(content: string | Buffer): string {
   const str = typeof content === 'string' ? content : content.toString()
-  let hash = 0
+  // FNV-1a 32-bit parameters
+  let hash = 2166136261
   for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash // Convert to 32-bit integer
+    hash ^= str.charCodeAt(i)
+    // FNV prime: 16777619, using multiply with bit ops for speed
+    hash = (hash * 16777619) >>> 0
   }
-  return Math.abs(hash).toString(36)
+  return hash.toString(36)
 }
