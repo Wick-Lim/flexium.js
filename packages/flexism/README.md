@@ -13,7 +13,7 @@ Flexism is a fullstack framework built on top of Flexium, designed for building 
 - **SSE-based Streaming** - Real-time data streaming with automatic reconnection
 - **Stream API** - Reactive data sources that integrate with Flexium's `use()`
 - **CLI Tools** - Development server, build, and production commands
-- **Vite Integration** - Lightning-fast development with HMR
+
 
 ## Installation
 
@@ -33,7 +33,7 @@ npm run dev
 ## CLI Commands
 
 ```bash
-flexism dev     # Start development server (Vite)
+flexism dev     # Start development server
 flexism build   # Build for production
 flexism start   # Start production server
 ```

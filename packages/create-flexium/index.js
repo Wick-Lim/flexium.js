@@ -42,7 +42,7 @@ ${cyan}${bright}
   ║                                       ║
   ║   ${magenta}✨ Create Flexium App ✨${cyan}           ║
   ║                                       ║
-  ║   ${reset}Vite + TypeScript + Tailwind CSS    ${cyan}║
+  ║   ${reset}Fine-grained Reactive UI Framework      ${cyan}║
   ║                                       ║
   ╚═══════════════════════════════════════╝
 ${reset}
