@@ -40,3 +40,48 @@ export type { StreamOptions, StreamResult, PipeableStream } from './stream'
 // SSE (Server-Sent Events)
 export { sse, sseMiddleware } from './sse'
 export type { SSEContext, SSEHandler, SSEResponse } from './sse'
+
+// Router
+export { createRouter, Router } from './router'
+export type { RouterOptions, RouteMatch } from './router'
+
+// Middleware
+export {
+  executeMiddlewareChain,
+  loadMiddleware,
+  clearMiddlewareCache,
+  redirect,
+  json,
+} from './middleware'
+export type {
+  MiddlewareContext,
+  MiddlewareHandler,
+  MiddlewareModule,
+  ExecuteMiddlewareOptions,
+} from './middleware'
+
+// Layout
+export {
+  composeLayouts,
+  loadLayout,
+  clearLayoutCache,
+  createDocumentShell,
+} from './layout'
+export type {
+  LayoutContext,
+  LayoutLoader,
+  LayoutComponent,
+  LayoutModule,
+  ComposeLayoutsOptions,
+} from './layout'
+
+// Request Handler
+export { createRequestHandler, clearAllCaches } from './handler'
+export type {
+  RequestHandlerOptions,
+  RequestHandler,
+  PageModule,
+  ApiModule,
+  LoaderContext,
+  ApiHandler,
+} from './handler'

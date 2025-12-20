@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import { createServer, type IncomingMessage, type ServerResponse } from 'http'
 import { createCompiler } from '../../compiler'
+import { createRequestHandler, clearAllCaches } from '../../server/handler'
 
 const cyan = '\x1b[36m'
 const green = '\x1b[32m'
@@ -12,9 +13,28 @@ const dim = '\x1b[2m'
 // SSE clients for HMR
 const hmrClients = new Set<ServerResponse>()
 
+// HMR client script
+const HMR_SCRIPT = `
+<script>
+(function() {
+  const hmr = new EventSource('/__flexism_hmr');
+  hmr.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    if (data.type === 'reload') {
+      console.log('[flexism] Reloading...');
+      location.reload();
+    }
+  };
+  hmr.onerror = function() {
+    console.log('[flexism] HMR disconnected, retrying...');
+  };
+})();
+</script>`
+
 export async function dev() {
   const cwd = process.cwd()
   const port = parseInt(process.env.PORT || '3000', 10)
+  const outDir = resolve(cwd, '.flexism')
 
   console.log(`
 ${cyan}${bold}  ╔═══════════════════════════════════╗
@@ -27,7 +47,7 @@ ${cyan}${bold}  ╔════════════════════�
   // Create compiler with dev settings
   const compiler = createCompiler({
     srcDir: resolve(cwd, 'src'),
-    outDir: resolve(cwd, '.flexism'),
+    outDir,
     minify: false,
     sourcemap: true,
     target: 'esnext',
@@ -37,8 +57,19 @@ ${cyan}${bold}  ╔════════════════════�
   await compiler.watch((result) => {
     console.log(`${dim}[${new Date().toLocaleTimeString()}]${reset} ${green}Rebuilt in ${result.buildTime}ms${reset}`)
 
+    // Clear caches on rebuild
+    clearAllCaches()
+
     // Notify all HMR clients
     broadcastHMR({ type: 'reload', buildTime: result.buildTime })
+  })
+
+  // Create request handler
+  let handler = await createRequestHandler({
+    manifestPath: resolve(outDir, 'manifest.json'),
+    serverDir: resolve(outDir, 'server'),
+    clientBundle: '/_flexism/index.js',
+    dev: true,
   })
 
   // Create dev server
@@ -53,27 +84,37 @@ ${cyan}${bold}  ╔════════════════════�
 
     // Serve static files from .flexism/client
     if (url.pathname.startsWith('/_flexism/')) {
-      const filePath = resolve(cwd, '.flexism/client', url.pathname.replace('/_flexism/', ''))
-      try {
-        const { readFile } = await import('fs/promises')
-        const content = await readFile(filePath)
-        res.writeHead(200, { 'Content-Type': getContentType(filePath) })
-        res.end(content)
-        return
-      } catch {
-        res.writeHead(404)
-        res.end('Not found')
-        return
-      }
+      await serveStaticFile(req, res, cwd, url.pathname)
+      return
     }
 
-    // Handle SSR for routes
+    // Handle routes via request handler
     try {
-      const html = await renderRoute(url.pathname, resolve(cwd, '.flexism'), port)
-      res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(html)
+      const webRequest = toWebRequest(req, port)
+      const response = await handler(webRequest)
+
+      // Inject HMR script into HTML responses
+      const contentType = response.headers.get('Content-Type') || ''
+      if (contentType.includes('text/html')) {
+        let html = await response.text()
+        html = injectHMRScript(html)
+
+        res.writeHead(response.status, {
+          'Content-Type': 'text/html; charset=utf-8',
+        })
+        res.end(html)
+      } else {
+        // Non-HTML response
+        const headers: Record<string, string> = {}
+        response.headers.forEach((value, key) => {
+          headers[key] = value
+        })
+        res.writeHead(response.status, headers)
+        const body = await response.arrayBuffer()
+        res.end(Buffer.from(body))
+      }
     } catch (error) {
-      console.error(`${yellow}Render error:${reset}`, error)
+      console.error(`${yellow}Request error:${reset}`, error)
       res.writeHead(500)
       res.end(`<pre>Error: ${error}</pre>`)
     }
@@ -135,75 +176,61 @@ function broadcastHMR(message: { type: string; [key: string]: any }) {
   }
 }
 
-async function renderRoute(pathname: string, outDir: string, port: number): Promise<string> {
-  // Load manifest
-  const { readFile } = await import('fs/promises')
-  const manifestPath = resolve(outDir, 'manifest.json')
-
-  let manifest
+/**
+ * Serve static files from .flexism/client
+ */
+async function serveStaticFile(
+  req: IncomingMessage,
+  res: ServerResponse,
+  cwd: string,
+  pathname: string
+) {
+  const filePath = resolve(cwd, '.flexism/client', pathname.replace('/_flexism/', ''))
   try {
-    const content = await readFile(manifestPath, 'utf-8')
-    manifest = JSON.parse(content)
+    const { readFile } = await import('fs/promises')
+    const content = await readFile(filePath)
+    res.writeHead(200, { 'Content-Type': getContentType(filePath) })
+    res.end(content)
   } catch {
-    manifest = { routes: [] }
+    res.writeHead(404)
+    res.end('Not found')
   }
-
-  // Find matching route
-  const route = manifest.routes?.find((r: any) =>
-    matchRoute(pathname, r.path)
-  )
-
-  // HMR client script
-  const hmrScript = `
-<script>
-(function() {
-  const hmr = new EventSource('/__flexism_hmr');
-  hmr.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    if (data.type === 'reload') {
-      console.log('[flexism] Reloading...');
-      location.reload();
-    }
-  };
-  hmr.onerror = function() {
-    console.log('[flexism] HMR disconnected, retrying...');
-  };
-})();
-</script>`
-
-  // Generate HTML shell
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flexism App</title>
-</head>
-<body>
-  <div id="app">
-    ${route ? `<!-- Route: ${route.path} -->` : `<!-- No matching route for: ${pathname} -->`}
-    <p>Route: ${route?.path || 'Not found'}</p>
-    <p>Type: ${route?.type || 'N/A'}</p>
-    <p>Middlewares: ${route?.middlewares?.length || 0}</p>
-    <p>Layouts: ${route?.layouts?.length || 0}</p>
-  </div>
-  <script type="module" src="/_flexism/index.js"></script>
-  ${hmrScript}
-</body>
-</html>`
 }
 
-function matchRoute(pathname: string, pattern: string): boolean {
-  // Simple route matching (TODO: implement full pattern matching)
-  const patternParts = pattern.split('/')
-  const pathParts = pathname.split('/')
+/**
+ * Convert Node.js IncomingMessage to Web Request
+ */
+function toWebRequest(req: IncomingMessage, port: number): Request {
+  const url = new URL(req.url || '/', `http://localhost:${port}`)
 
-  if (patternParts.length !== pathParts.length) return false
+  const headers = new Headers()
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (value) {
+      headers.set(key, Array.isArray(value) ? value.join(', ') : value)
+    }
+  }
 
-  return patternParts.every((part, i) => {
-    if (part.startsWith(':')) return true
-    return part === pathParts[i]
+  return new Request(url.toString(), {
+    method: req.method || 'GET',
+    headers,
+    // Note: Body handling would be needed for POST requests
   })
+}
+
+/**
+ * Inject HMR script into HTML
+ */
+function injectHMRScript(html: string): string {
+  // Inject before </body>
+  if (html.includes('</body>')) {
+    return html.replace('</body>', `${HMR_SCRIPT}</body>`)
+  }
+  // Inject before </html>
+  if (html.includes('</html>')) {
+    return html.replace('</html>', `${HMR_SCRIPT}</html>`)
+  }
+  // Append to end
+  return html + HMR_SCRIPT
 }
 
 function getContentType(filePath: string): string {
