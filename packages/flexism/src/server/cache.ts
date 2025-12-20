@@ -319,13 +319,21 @@ export function createCacheMiddleware(configs: RouteCacheConfig[]) {
  * @see https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
  */
 function simpleHash(content: string | Buffer): string {
-  const str = typeof content === 'string' ? content : content.toString()
   // FNV-1a 32-bit parameters
   let hash = 2166136261
-  for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i)
-    // FNV prime: 16777619, using multiply with bit ops for speed
-    hash = (hash * 16777619) >>> 0
+
+  if (typeof content === 'string') {
+    for (let i = 0; i < content.length; i++) {
+      hash ^= content.charCodeAt(i)
+      hash = (hash * 16777619) >>> 0
+    }
+  } else {
+    // Buffer: iterate bytes directly without toString() copy
+    for (let i = 0; i < content.length; i++) {
+      hash ^= content[i]
+      hash = (hash * 16777619) >>> 0
+    }
   }
+
   return hash.toString(36)
 }
