@@ -31,9 +31,17 @@ bun create flexism my-app
 
 - **Flexism** - Realtime-first fullstack framework
 - **Flexium** - Fine-grained reactive UI framework
-- **Vite** - Lightning-fast development server with HMR
+- **Vite** - Lightning-fast development server
 - **TypeScript** - Full type safety
 - **Tailwind CSS** - Utility-first styling
+
+### Development Features
+
+- **HMR** - Hot Module Replacement with CSS hot reload (no page refresh)
+- **Incremental Builds** - Only changed files recompile
+- **Memory Optimization** - LRU cache with automatic cleanup
+- **Zero-Copy Streaming** - Efficient handling of large files
+- **Error Overlay** - Build errors displayed in browser
 
 ## Project Structure
 
@@ -53,7 +61,7 @@ my-app/
 ## Scripts
 
 ```bash
-npm run dev      # Start dev server (flexism dev)
+npm run dev      # Start dev server with HMR (flexism dev)
 npm run build    # Build for production (flexism build)
 npm run start    # Start production server (flexism start)
 npm run preview  # Preview production build (vite preview)
