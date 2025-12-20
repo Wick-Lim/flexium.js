@@ -9,6 +9,13 @@ import type { FNodeChild } from '../types'
 import { createRouter, type Router, type RouteMatch } from './router'
 import { executeMiddlewareChain, clearMiddlewareCache } from './middleware'
 import { composeLayouts, createDocumentShell, clearLayoutCache } from './layout'
+import {
+  createFlexismError,
+  renderErrorResponse,
+  renderCustomError,
+  clearErrorCache,
+  type FlexismError,
+} from './error'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -73,6 +80,7 @@ export function clearAllCaches(): void {
   apiModuleCache.clear()
   clearMiddlewareCache()
   clearLayoutCache()
+  clearErrorCache()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -127,9 +135,41 @@ export async function createRequestHandler(
       request,
       params: match.params,
       middlewarePaths: match.route.middlewares,
-      handler: () => handleRoute(request, match, { serverDir, clientBundle }),
+      handler: () => handleRoute(request, match, { serverDir, clientBundle, dev }),
     })
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Error Rendering Helper
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface RenderErrorOptions {
+  error: FlexismError
+  errorModulePath?: string
+  serverDir: string
+  dev: boolean
+}
+
+/**
+ * Render error response, trying custom error.tsx first
+ */
+async function renderRouteError(options: RenderErrorOptions): Promise<Response> {
+  const { error, errorModulePath, serverDir, dev } = options
+
+  // Try custom error component first
+  if (errorModulePath) {
+    const customResponse = await renderCustomError(error, errorModulePath, {
+      dev,
+      serverDir,
+    })
+    if (customResponse) {
+      return customResponse
+    }
+  }
+
+  // Fall back to default error response
+  return renderErrorResponse(error, { dev })
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -139,6 +179,7 @@ export async function createRequestHandler(
 interface HandleRouteOptions {
   serverDir: string
   clientBundle: string
+  dev?: boolean
 }
 
 async function handleRoute(
@@ -147,15 +188,20 @@ async function handleRoute(
   options: HandleRouteOptions
 ): Promise<Response> {
   const { route, params } = match
-  const { serverDir, clientBundle } = options
+  const { serverDir, clientBundle, dev = false } = options
 
   // Handle API routes
   if (route.type === 'api') {
-    return handleApiRoute(request, match, serverDir)
+    return handleApiRoute(request, match, { serverDir, dev })
   }
 
   // Handle page/component routes
-  return handlePageRoute(request, match, { serverDir, clientBundle })
+  return handlePageRoute(request, match, { serverDir, clientBundle, dev })
+}
+
+interface ApiRouteOptions {
+  serverDir: string
+  dev?: boolean
 }
 
 /**
@@ -164,14 +210,18 @@ async function handleRoute(
 async function handleApiRoute(
   request: Request,
   match: RouteMatch,
-  serverDir: string
+  options: ApiRouteOptions
 ): Promise<Response> {
   const { route, params } = match
+  const { serverDir, dev = false } = options
 
   // Get module path from manifest
   if (!route.serverModule) {
-    console.error(`[flexism] No server module for route: ${route.path}`)
-    return new Response('Internal Server Error', { status: 500 })
+    const error = createFlexismError(
+      new Error(`No server module for route: ${route.path}`),
+      500
+    )
+    return renderErrorResponse(error, { dev })
   }
 
   const modulePath = `${serverDir}/${route.serverModule}`
@@ -185,9 +235,9 @@ async function handleApiRoute(
       apiModule = await import(modulePath)
       apiModuleCache.set(modulePath, apiModule)
     }
-  } catch (error) {
-    console.error(`[flexism] Failed to load API module: ${modulePath}`, error)
-    return new Response('Internal Server Error', { status: 500 })
+  } catch (err) {
+    const error = createFlexismError(err, 500)
+    return renderErrorResponse(error, { dev })
   }
 
   // Get handler for HTTP method
@@ -204,9 +254,9 @@ async function handleApiRoute(
   // Execute handler
   try {
     return await handler(request, { request, params })
-  } catch (error) {
-    console.error(`[flexism] API handler error:`, error)
-    return new Response('Internal Server Error', { status: 500 })
+  } catch (err) {
+    const error = createFlexismError(err, 500)
+    return renderErrorResponse(error, { dev })
   }
 }
 
@@ -219,13 +269,23 @@ async function handlePageRoute(
   options: HandleRouteOptions
 ): Promise<Response> {
   const { route, params } = match
-  const { serverDir, clientBundle } = options
+  const { serverDir, clientBundle, dev = false } = options
   const context: LoaderContext = { request, params }
+
+  // Helper to render errors with custom error.tsx support
+  const handleError = (err: unknown, statusCode = 500) => {
+    const error = createFlexismError(err, statusCode)
+    return renderRouteError({
+      error,
+      errorModulePath: route.errorModule,
+      serverDir,
+      dev,
+    })
+  }
 
   // Get module path from manifest
   if (!route.serverModule) {
-    console.error(`[flexism] No server module for route: ${route.path}`)
-    return new Response('Internal Server Error', { status: 500 })
+    return handleError(new Error(`No server module for route: ${route.path}`))
   }
 
   const modulePath = `${serverDir}/${route.serverModule}`
@@ -239,9 +299,8 @@ async function handlePageRoute(
       pageModule = await import(modulePath)
       pageModuleCache.set(modulePath, pageModule)
     }
-  } catch (error) {
-    console.error(`[flexism] Failed to load page module: ${modulePath}`, error)
-    return new Response('Internal Server Error', { status: 500 })
+  } catch (err) {
+    return handleError(err)
   }
 
   // Execute loader to get page data
@@ -249,26 +308,23 @@ async function handlePageRoute(
   if (pageModule.loader) {
     try {
       pageData = await pageModule.loader(context)
-    } catch (error) {
-      console.error(`[flexism] Loader error:`, error)
-      return new Response('Internal Server Error', { status: 500 })
+    } catch (err) {
+      return handleError(err)
     }
   }
 
   // Get component (either hydrating or server-only)
   const PageComponent = pageModule.Component || pageModule.default
   if (!PageComponent) {
-    console.error(`[flexism] No component found in: ${modulePath}`)
-    return new Response('Internal Server Error', { status: 500 })
+    return handleError(new Error(`No component found in: ${modulePath}`))
   }
 
   // Render page content
   let pageContent: FNodeChild
   try {
     pageContent = PageComponent(pageData)
-  } catch (error) {
-    console.error(`[flexism] Component render error:`, error)
-    return new Response('Internal Server Error', { status: 500 })
+  } catch (err) {
+    return handleError(err)
   }
 
   // Compose with layouts
@@ -280,8 +336,9 @@ async function handlePageRoute(
       pageContent,
       context: { request, params },
     })
-  } catch (error) {
-    console.error(`[flexism] Layout composition error:`, error)
+  } catch (err) {
+    // Layout errors are non-fatal, fall back to page content
+    console.error(`[flexism] Layout composition error:`, err)
     fullContent = pageContent
   }
 
@@ -309,9 +366,8 @@ async function handlePageRoute(
     return new Response(finalHtml, {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     })
-  } catch (error) {
-    console.error(`[flexism] Render error:`, error)
-    return new Response('Internal Server Error', { status: 500 })
+  } catch (err) {
+    return handleError(err)
   }
 }
 

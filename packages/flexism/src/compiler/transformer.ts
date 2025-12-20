@@ -18,6 +18,10 @@ export interface TransformContext {
   middlewares: string[]
   /** Layout chain */
   layouts: string[]
+  /** Closest error.tsx file path */
+  errorFile?: string | null
+  /** Closest loading.tsx file path */
+  loadingFile?: string | null
 }
 
 export class Transformer {
@@ -106,6 +110,8 @@ export class Transformer {
       hydrateProps,
       middlewares: this.context.middlewares,
       layouts: this.context.layouts,
+      errorModule: this.context.errorFile ?? undefined,
+      loadingModule: this.context.loadingFile ?? undefined,
     }
   }
 

@@ -85,3 +85,17 @@ export type {
   LoaderContext,
   ApiHandler,
 } from './handler'
+
+// Error Handling
+export {
+  createFlexismError,
+  renderErrorResponse,
+  renderCustomError,
+  clearErrorCache,
+} from './error'
+export type {
+  FlexismError,
+  ErrorComponentProps,
+  ErrorModule,
+  ErrorHandlerOptions,
+} from './error'

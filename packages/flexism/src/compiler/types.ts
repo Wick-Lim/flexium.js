@@ -7,12 +7,18 @@ export interface CompilerOptions {
   srcDir: string
   /** Output directory */
   outDir: string
-  /** Enable minification */
+  /** Build mode - sets sensible defaults for minify/sourcemap */
+  mode?: 'development' | 'production'
+  /** Enable minification (default: false in dev, true in prod) */
   minify?: boolean
-  /** Enable source maps */
+  /** Enable source maps (default: true in dev, false in prod) */
   sourcemap?: boolean
   /** Target environment */
   target?: 'es2020' | 'es2021' | 'es2022' | 'esnext'
+  /** Environment variables to inject */
+  env?: Record<string, string>
+  /** Public env prefix (default: FLEXISM_PUBLIC_) */
+  publicEnvPrefix?: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -90,10 +96,14 @@ export interface RouteInfo {
   serverModule?: string
   /** Client module path (set by Emitter) */
   clientModule?: string
+  /** Error module path (closest error.tsx) */
+  errorModule?: string
+  /** Loading module path (closest loading.tsx) */
+  loadingModule?: string
 }
 
 /** Special file types */
-export type FileType = 'page' | 'layout' | 'route' | 'middleware'
+export type FileType = 'page' | 'layout' | 'route' | 'middleware' | 'error' | 'loading'
 
 /** Special file names */
 export const SPECIAL_FILES = {
@@ -101,6 +111,8 @@ export const SPECIAL_FILES = {
   layout: /^layout\.(tsx?|jsx?)$/,
   route: /^route\.(tsx?|jsx?)$/,
   middleware: /^middleware\.(tsx?|jsx?)$/,
+  error: /^error\.(tsx?|jsx?)$/,
+  loading: /^loading\.(tsx?|jsx?)$/,
 } as const
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -124,6 +136,10 @@ export interface BuildManifest {
   layouts: Record<string, LayoutManifestEntry>
   /** Middleware modules (path → module name) */
   middlewares: Record<string, string>
+  /** Error modules (path → module name) */
+  errors: Record<string, string>
+  /** Loading modules (path → module name) */
+  loadings: Record<string, string>
 }
 
 export interface LayoutManifestEntry {

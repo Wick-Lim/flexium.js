@@ -35,11 +35,23 @@ export class Emitter {
     const layoutResults: TransformResult[] = []
     const pageRouteResults: TransformResult[] = []
 
+    // Collect unique error/loading files
+    const errorFiles = new Set<string>()
+    const loadingFiles = new Set<string>()
+
     for (const result of this.transformResults) {
       if (result.route.fileType === 'layout') {
         layoutResults.push(result)
       } else {
         pageRouteResults.push(result)
+      }
+
+      // Collect error/loading file paths
+      if (result.route.errorModule) {
+        errorFiles.add(result.route.errorModule)
+      }
+      if (result.route.loadingModule) {
+        loadingFiles.add(result.route.loadingModule)
       }
     }
 
@@ -74,6 +86,36 @@ export class Emitter {
         module: `${moduleName}.server.js`,
         hasLoader: result.route.hydrateProps.length > 0,
       }
+    }
+
+    // Process error files
+    const errorModules: Record<string, string> = {}
+    for (const errorFilePath of errorFiles) {
+      const moduleName = this.filePathToModuleName(errorFilePath, 'error')
+      const source = await fs.promises.readFile(errorFilePath, 'utf-8')
+
+      // Write error component as server module
+      const serverFileName = `${moduleName}.server.tsx`
+      const serverPath = path.join(serverOutDir, serverFileName)
+      await fs.promises.writeFile(serverPath, source)
+      serverEntries.push(serverPath)
+
+      errorModules[errorFilePath] = `${moduleName}.server.js`
+    }
+
+    // Process loading files
+    const loadingModules: Record<string, string> = {}
+    for (const loadingFilePath of loadingFiles) {
+      const moduleName = this.filePathToModuleName(loadingFilePath, 'loading')
+      const source = await fs.promises.readFile(loadingFilePath, 'utf-8')
+
+      // Write loading component as server module
+      const serverFileName = `${moduleName}.server.tsx`
+      const serverPath = path.join(serverOutDir, serverFileName)
+      await fs.promises.writeFile(serverPath, source)
+      serverEntries.push(serverPath)
+
+      loadingModules[loadingFilePath] = `${moduleName}.server.js`
     }
 
     // Process pages and routes - group by route path for API routes with multiple methods
@@ -141,6 +183,14 @@ export class Emitter {
         }
         result.route.layouts = layoutModuleNames
 
+        // Convert error/loading file paths to module names
+        if (result.route.errorModule && errorModules[result.route.errorModule]) {
+          result.route.errorModule = errorModules[result.route.errorModule]
+        }
+        if (result.route.loadingModule && loadingModules[result.route.loadingModule]) {
+          result.route.loadingModule = loadingModules[result.route.loadingModule]
+        }
+
         routes.push(result.route)
       }
     }
@@ -162,6 +212,8 @@ export class Emitter {
       routes,
       layouts: layoutModules,
       middlewares: {}, // TODO: add middleware support
+      errors: errorModules,
+      loadings: loadingModules,
     }
     const manifestPath = path.join(this.options.outDir, 'manifest.json')
     await fs.promises.writeFile(
@@ -218,6 +270,32 @@ export class Emitter {
   }
 
   /**
+   * Build esbuild define config with env vars
+   */
+  private getDefineConfig(publicOnly: boolean = false): Record<string, string> {
+    const define: Record<string, string> = {
+      'process.env.NODE_ENV': this.options.mode === 'production'
+        ? '"production"'
+        : '"development"',
+    }
+
+    // Add env vars if provided
+    if (this.options.env) {
+      const prefix = this.options.publicEnvPrefix || 'FLEXISM_PUBLIC_'
+
+      for (const [key, value] of Object.entries(this.options.env)) {
+        // For client, only include public vars
+        if (publicOnly && !key.startsWith(prefix)) {
+          continue
+        }
+        define[`process.env.${key}`] = JSON.stringify(value)
+      }
+    }
+
+    return define
+  }
+
+  /**
    * Transpile server files individually (not bundled)
    * This allows dynamic imports at runtime
    */
@@ -234,9 +312,8 @@ export class Emitter {
       bundle: false,
       // Keep imports external for runtime resolution
       packages: 'external',
-      define: {
-        'process.env.NODE_ENV': '"production"',
-      },
+      // Server gets all env vars
+      define: this.getDefineConfig(false),
     })
   }
 
@@ -271,9 +348,8 @@ export class Emitter {
         'flexium/jsx-runtime',
         'flexium/jsx-dev-runtime',
       ],
-      define: {
-        'process.env.NODE_ENV': '"production"',
-      },
+      // Client only gets public env vars
+      define: this.getDefineConfig(true),
       treeShaking: false,  // Keep all exports to ensure components are bundled
     })
 

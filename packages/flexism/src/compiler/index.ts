@@ -27,10 +27,14 @@ export class Compiler {
   private options: CompilerOptions
 
   constructor(options: CompilerOptions) {
+    const isProd = options.mode === 'production'
+
     this.options = {
       target: 'es2022',
-      minify: false,
-      sourcemap: true,
+      // Production defaults: minify=true, sourcemap=false
+      // Development defaults: minify=false, sourcemap=true
+      minify: isProd,
+      sourcemap: !isProd,
       ...options,
     }
   }
@@ -52,9 +56,9 @@ export class Compiler {
       const relativePath = path.relative(this.options.srcDir, filePath)
       const fileType = this.getFileType(path.basename(filePath))
 
-      // Skip middleware files (they're collected but not transformed directly)
-      if (fileType === 'middleware') {
-        console.log(`[flexism] Found middleware: ${relativePath}`)
+      // Skip middleware, error, loading files (they're collected but not transformed directly)
+      if (fileType === 'middleware' || fileType === 'error' || fileType === 'loading') {
+        console.log(`[flexism] Found ${fileType}: ${relativePath}`)
         continue
       }
 
@@ -74,6 +78,9 @@ export class Compiler {
         middlewares: this.findMiddlewareChain(filePath),
         // Layouts don't apply to other layouts or API routes
         layouts: (fileType === 'layout' || fileType === 'route') ? [] : this.findLayoutChain(filePath),
+        // Find closest error/loading files
+        errorFile: this.findErrorFile(filePath),
+        loadingFile: this.findLoadingFile(filePath),
       }
 
       // Transform the file (returns array of results for each export)
@@ -171,6 +178,8 @@ export class Compiler {
     if (SPECIAL_FILES.layout.test(filename)) return 'layout'
     if (SPECIAL_FILES.route.test(filename)) return 'route'
     if (SPECIAL_FILES.middleware.test(filename)) return 'middleware'
+    if (SPECIAL_FILES.error.test(filename)) return 'error'
+    if (SPECIAL_FILES.loading.test(filename)) return 'loading'
     return null
   }
 
@@ -267,6 +276,48 @@ export class Compiler {
     }
 
     return layouts
+  }
+
+  /**
+   * Find the closest error.tsx file for a route
+   */
+  private findErrorFile(filePath: string): string | null {
+    let currentDir = path.dirname(filePath)
+    const srcDir = this.options.srcDir
+
+    while (currentDir.startsWith(srcDir)) {
+      const errorPath = path.join(currentDir, 'error.tsx')
+      const errorPathTs = path.join(currentDir, 'error.ts')
+
+      if (fs.existsSync(errorPath)) return errorPath
+      if (fs.existsSync(errorPathTs)) return errorPathTs
+
+      if (currentDir === srcDir) break
+      currentDir = path.dirname(currentDir)
+    }
+
+    return null
+  }
+
+  /**
+   * Find the closest loading.tsx file for a route
+   */
+  private findLoadingFile(filePath: string): string | null {
+    let currentDir = path.dirname(filePath)
+    const srcDir = this.options.srcDir
+
+    while (currentDir.startsWith(srcDir)) {
+      const loadingPath = path.join(currentDir, 'loading.tsx')
+      const loadingPathTs = path.join(currentDir, 'loading.ts')
+
+      if (fs.existsSync(loadingPath)) return loadingPath
+      if (fs.existsSync(loadingPathTs)) return loadingPathTs
+
+      if (currentDir === srcDir) break
+      currentDir = path.dirname(currentDir)
+    }
+
+    return null
   }
 
   private logAnalysis(filePath: string, analysis: AnalysisResult): void {

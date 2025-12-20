@@ -45,7 +45,7 @@ export class Router {
       this.manifest = JSON.parse(content)
       this.compilePatterns()
     } catch {
-      this.manifest = { routes: [], layouts: {}, middlewares: {} }
+      this.manifest = { routes: [], layouts: {}, middlewares: {}, errors: {}, loadings: {} }
     }
   }
 

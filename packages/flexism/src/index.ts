@@ -48,6 +48,18 @@ export {
   getIsHydrating,
 } from './runtime'
 
+// Environment variables
+export {
+  loadEnv,
+  parseEnvFile,
+  getEnvDefine,
+  generateEnvScript,
+  getEnv,
+  requireEnv,
+  validateEnv,
+} from './env'
+export type { EnvConfig, LoadedEnv, EnvSchema } from './env'
+
 // Types
 export type {
   FlexismState,
