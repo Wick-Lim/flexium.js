@@ -23,6 +23,26 @@ export { analyzeFile } from './analyzer'
 export { transformFile } from './transformer'
 export { emitBundles } from './emitter'
 
+// Incremental Build
+export {
+  BuildCache,
+  getBuildCache,
+  resetBuildCache,
+  hashFile,
+  hashContent,
+  getFileHash,
+  hasFileChanged,
+  extractDependencies,
+  buildDependencyGraph,
+  getAffectedFiles,
+} from './incremental'
+export type {
+  FileHash,
+  DependencyGraph,
+  BuildCacheEntry,
+  IncrementalBuildOptions,
+} from './incremental'
+
 export class Compiler {
   private options: CompilerOptions
 

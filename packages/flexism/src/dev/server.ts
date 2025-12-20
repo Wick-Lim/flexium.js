@@ -10,6 +10,9 @@ import * as http from 'http'
 import { createCompiler } from '../compiler'
 import { createRequestHandler, clearAllCaches } from '../server/handler'
 import { createStaticHandler } from '../server/static'
+import { HMRManager, getHMRClientScript, injectHMRScript } from './hmr'
+import { getBuildCache } from '../compiler/incremental'
+import { MemoryMonitor, formatBytes } from '../utils/memory'
 import type { CompilerOptions, BuildResult } from '../compiler/types'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -29,17 +32,18 @@ export interface DevServerOptions {
   publicDir?: string
   /** Enable HMR */
   hmr?: boolean
+  /** Enable CSS hot reload (no page refresh) */
+  cssHotReload?: boolean
   /** Open browser on start */
   open?: boolean
+  /** Enable memory monitoring */
+  memoryMonitor?: boolean
+  /** Memory warning threshold in MB */
+  memoryWarningMB?: number
   /** Custom request handler */
   onRequest?: (request: Request) => Promise<Response | null>
 }
 
-interface HMRClient {
-  id: string
-  send: (data: string) => void
-  close: () => void
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Dev Server
@@ -70,7 +74,10 @@ export async function createDevServer(options: DevServerOptions) {
     host = 'localhost',
     publicDir = 'public',
     hmr = true,
+    cssHotReload = true,
     open = false,
+    memoryMonitor = true,
+    memoryWarningMB = 500,
     onRequest,
   } = options
 
@@ -80,6 +87,9 @@ export async function createDevServer(options: DevServerOptions) {
     outDir,
     mode: 'development',
   })
+
+  // Initialize build cache
+  const buildCache = getBuildCache()
 
   // Initial build
   console.log('[flexism] Starting dev server...')
@@ -105,26 +115,60 @@ export async function createDevServer(options: DevServerOptions) {
     cache: false,
   })
 
-  // HMR clients
-  const hmrClients: Map<string, HMRClient> = new Map()
-  let clientIdCounter = 0
+  // Initialize memory monitor
+  let monitor: MemoryMonitor | null = null
+  if (memoryMonitor) {
+    monitor = new MemoryMonitor({
+      interval: 30000,
+      thresholds: {
+        warning: memoryWarningMB * 1024 * 1024,
+        critical: memoryWarningMB * 2 * 1024 * 1024,
+      },
+      onEvent: (type, stats) => {
+        if (type === 'warning') {
+          console.warn(`[flexism] Memory warning: ${formatBytes(stats.current.heapUsed)} used`)
+        } else if (type === 'critical') {
+          console.error(`[flexism] Memory critical: ${formatBytes(stats.current.heapUsed)} used`)
+          // Clear caches to free memory
+          clearAllCaches()
+          buildCache.clear()
+          console.log('[flexism] Caches cleared to reduce memory usage')
+        } else if (type === 'recovered') {
+          console.log(`[flexism] Memory recovered: ${formatBytes(stats.current.heapUsed)}`)
+        }
+      },
+    })
+    monitor.start()
+  }
 
-  // File watcher
-  let watcher: fs.FSWatcher | null = null
+  // Initialize HMR manager
+  let hmrManager: HMRManager | null = null
 
   if (hmr) {
-    watcher = fs.watch(srcDir, { recursive: true }, async (event, filename) => {
-      if (!filename) return
+    hmrManager = new HMRManager({
+      srcDir,
+      outDir,
+      cssHotReload,
+      granularUpdates: true,
+      debounceMs: 100,
+    })
 
-      // Ignore non-source files
-      const ext = path.extname(filename)
-      if (!['.ts', '.tsx', '.js', '.jsx'].includes(ext)) return
+    // Handle file changes
+    hmrManager.on('update', async (update) => {
+      // CSS updates don't need rebuild
+      if (update.type === 'css-update') {
+        console.log(`[flexism] CSS updated: ${path.basename(update.file)}`)
+        return
+      }
 
-      console.log(`[flexism] File changed: ${filename}`)
+      console.log(`[flexism] File changed: ${path.basename(update.file)}`)
 
       try {
         // Clear caches
         clearAllCaches()
+
+        // Invalidate build cache for changed file
+        buildCache.invalidate(update.file)
 
         // Rebuild
         const startTime = Date.now()
@@ -138,25 +182,16 @@ export async function createDevServer(options: DevServerOptions) {
           clientBundle: '/_flexism/client/index.js',
           dev: true,
         })
-
-        // Notify HMR clients
-        broadcastHMR({ type: 'reload', file: filename })
       } catch (error) {
         console.error('[flexism] Build error:', error)
-        broadcastHMR({ type: 'error', error: String(error) })
+        hmrManager!.sendError(String(error))
       }
     })
-  }
 
-  function broadcastHMR(message: object) {
-    const data = JSON.stringify(message)
-    for (const client of hmrClients.values()) {
-      try {
-        client.send(`data: ${data}\n\n`)
-      } catch {
-        hmrClients.delete(client.id)
-      }
-    }
+    hmrManager.start()
+
+    // Keep-alive interval
+    setInterval(() => hmrManager!.keepAlive(), 30000)
   }
 
   // Create HTTP server
@@ -166,7 +201,7 @@ export async function createDevServer(options: DevServerOptions) {
       const request = toWebRequest(req, url)
 
       // HMR endpoint
-      if (url.pathname === '/__hmr' && hmr) {
+      if (url.pathname === '/__hmr' && hmrManager) {
         res.writeHead(200, {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
@@ -174,26 +209,13 @@ export async function createDevServer(options: DevServerOptions) {
           'Access-Control-Allow-Origin': '*',
         })
 
-        const clientId = String(++clientIdCounter)
-        const client: HMRClient = {
-          id: clientId,
-          send: (data) => res.write(data),
-          close: () => res.end(),
-        }
-
-        hmrClients.set(clientId, client)
-
-        // Send connected message
-        client.send(`data: ${JSON.stringify({ type: 'connected' })}\n\n`)
-
-        // Keep connection alive
-        const keepAlive = setInterval(() => {
-          client.send(': keepalive\n\n')
-        }, 30000)
+        const clientId = hmrManager.addClient(
+          (data) => res.write(data),
+          () => res.end()
+        )
 
         req.on('close', () => {
-          clearInterval(keepAlive)
-          hmrClients.delete(clientId)
+          hmrManager!.removeClient(clientId)
         })
 
         return
@@ -213,7 +235,7 @@ export async function createDevServer(options: DevServerOptions) {
         const result = await clientHandler(request)
         if (result.served) {
           // Inject HMR client
-          if (url.pathname.endsWith('/index.js') && hmr) {
+          if (url.pathname.endsWith('/index.js') && hmrManager) {
             const body = await result.response.text()
             const hmrClient = getHMRClientScript()
             await sendResponse(res, new Response(hmrClient + '\n' + body, {
@@ -239,7 +261,7 @@ export async function createDevServer(options: DevServerOptions) {
       const response = await requestHandler(request)
 
       // Inject HMR script into HTML
-      if (hmr && response.headers.get('Content-Type')?.includes('text/html')) {
+      if (hmrManager && response.headers.get('Content-Type')?.includes('text/html')) {
         const html = await response.text()
         const injected = injectHMRScript(html)
         await sendResponse(res, new Response(injected, {
@@ -282,13 +304,21 @@ export async function createDevServer(options: DevServerOptions) {
     url: serverUrl,
     port,
     host,
+    hmr: hmrManager,
+    memory: monitor,
+    buildCache,
 
     async close() {
-      watcher?.close()
-      for (const client of hmrClients.values()) {
-        client.close()
-      }
-      hmrClients.clear()
+      // Stop HMR manager
+      hmrManager?.stop()
+
+      // Stop memory monitor
+      monitor?.stop()
+
+      // Clear build cache
+      buildCache.clear()
+
+      // Close HTTP server
       await new Promise<void>((resolve, reject) => {
         server.close((err) => {
           if (err) reject(err)
@@ -299,7 +329,24 @@ export async function createDevServer(options: DevServerOptions) {
     },
 
     broadcast(message: object) {
-      broadcastHMR(message)
+      if (hmrManager) {
+        hmrManager.broadcast({
+          type: 'full-reload',
+          file: '',
+          timestamp: Date.now(),
+          ...message,
+        })
+      }
+    },
+
+    /** Get memory stats */
+    getMemoryStats() {
+      return monitor?.getStats() ?? null
+    },
+
+    /** Get build cache stats */
+    getCacheStats() {
+      return buildCache.stats()
     },
   }
 }
@@ -348,65 +395,6 @@ async function sendResponse(res: http.ServerResponse, response: Response) {
   res.end()
 }
 
-function getHMRClientScript(): string {
-  return `
-// Flexism HMR Client
-(function() {
-  if (typeof window === 'undefined') return;
-
-  var es = new EventSource('/__hmr');
-  var reconnectTimer = null;
-
-  es.onmessage = function(e) {
-    try {
-      var data = JSON.parse(e.data);
-      console.log('[HMR]', data.type, data.file || '');
-
-      if (data.type === 'reload') {
-        window.location.reload();
-      } else if (data.type === 'error') {
-        console.error('[HMR] Build error:', data.error);
-        showError(data.error);
-      }
-    } catch (err) {
-      console.error('[HMR] Parse error:', err);
-    }
-  };
-
-  es.onerror = function() {
-    es.close();
-    if (!reconnectTimer) {
-      reconnectTimer = setTimeout(function() {
-        reconnectTimer = null;
-        window.location.reload();
-      }, 2000);
-    }
-  };
-
-  function showError(error) {
-    var overlay = document.getElementById('flexism-error-overlay');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'flexism-error-overlay';
-      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);color:#ff5555;padding:20px;font-family:monospace;white-space:pre-wrap;z-index:99999;overflow:auto';
-      document.body.appendChild(overlay);
-    }
-    overlay.textContent = 'Build Error:\\n\\n' + error;
-    overlay.onclick = function() { overlay.remove(); };
-  }
-})();
-`
-}
-
-function injectHMRScript(html: string): string {
-  const script = `<script>${getHMRClientScript()}</script>`
-
-  // Inject before </body> or at the end
-  if (html.includes('</body>')) {
-    return html.replace('</body>', script + '</body>')
-  }
-  return html + script
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CLI Helper
