@@ -12,6 +12,9 @@ Flexism is a fullstack framework built on top of Flexium, designed for building 
 
 - **SSE-based Streaming** - Real-time data streaming with automatic reconnection
 - **Stream API** - Reactive data sources that integrate with Flexium's `use()`
+- **Hot Module Replacement** - CSS hot reload without page refresh
+- **Incremental Builds** - Only changed files recompile
+- **Memory Optimization** - LRU cache with automatic cleanup
 - **CLI Tools** - Development server, build, and production commands
 
 
@@ -33,7 +36,7 @@ npm run dev
 ## CLI Commands
 
 ```bash
-flexism dev     # Start development server
+flexism dev     # Start development server with HMR
 flexism build   # Build for production
 flexism start   # Start production server
 ```
@@ -64,21 +67,37 @@ function Chat() {
 ```ts
 import { sse } from 'flexism/server'
 
-// Create SSE endpoint
+// With async generator (recommended)
 export function GET() {
-  return sse(async (send) => {
-    send({ text: 'Hello!' })
+  return sse(async function* () {
+    yield { text: 'Hello!' }
 
-    // Send updates over time
-    setInterval(() => {
-      send({ text: `Time: ${Date.now()}` })
+    // Stream updates over time
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, 1000))
+      yield { text: `Time: ${Date.now()}` }
+    }
+  })
+}
+
+// With context callback
+export function GET() {
+  return sse((ctx) => {
+    ctx.send({ text: 'Hello!' })
+
+    const interval = setInterval(() => {
+      if (!ctx.isOpen) {
+        clearInterval(interval)
+        return
+      }
+      ctx.send({ text: `Time: ${Date.now()}` })
     }, 1000)
   })
 }
 
-// Or stream from async iterable
+// From async iterable
 export function GET() {
-  return sse.from(asyncGenerator())
+  return sse.from(db.posts.subscribe())
 }
 ```
 
