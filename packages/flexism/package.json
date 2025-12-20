@@ -1,6 +1,6 @@
 {
   "name": "flexism",
-  "version": "0.15.4",
+  "version": "0.15.5",
   "description": "Realtime-first fullstack framework for Flexium",
   "publishConfig": {
     "access": "public"
@@ -70,7 +70,7 @@
     "url": "https://github.com/Wick-Lim/flexium.js/issues"
   },
   "peerDependencies": {
-    "flexium": ">=0.15.4"
+    "flexium": ">=0.15.5"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
