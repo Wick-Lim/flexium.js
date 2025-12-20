@@ -214,6 +214,7 @@ export class Emitter {
       middlewares: {}, // TODO: add middleware support
       errors: errorModules,
       loadings: loadingModules,
+      streams: {}, // TODO: add stream handlers from analysis
     }
     const manifestPath = path.join(this.options.outDir, 'manifest.json')
     await fs.promises.writeFile(

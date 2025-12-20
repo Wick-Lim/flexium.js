@@ -163,3 +163,7 @@ export {
   createCompressionStream,
 } from './compression'
 export type { CompressionOptions, CompressionEncoding, ZstdCompressor } from './compression'
+
+// Stream Registry
+export { streamRegistry, loadStreamHandlers } from './stream-registry'
+export type { StreamHandler } from './stream-registry'

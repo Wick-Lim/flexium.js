@@ -140,6 +140,8 @@ export interface BuildManifest {
   errors: Record<string, string>
   /** Loading modules (path → module name) */
   loadings: Record<string, string>
+  /** Stream endpoints (id → manifest entry) */
+  streams: Record<string, StreamManifestEntry>
 }
 
 export interface LayoutManifestEntry {
@@ -165,3 +167,58 @@ export const HTTP_METHODS = [
 ] as const
 
 export type HttpMethod = typeof HTTP_METHODS[number]
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Stream Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface StreamAnalysis {
+  /** Unique stream ID (deterministic based on file + position) */
+  id: string
+  /** Variable name the stream is assigned to */
+  variableName: string
+  /** AST position */
+  position: CodeSpan
+  /** Extracted callback source code */
+  callbackCode: string
+  /** Variables captured from closure (e.g., params.roomId) */
+  capturedVars: CapturedVariable[]
+  /** Stream options */
+  options: StreamOptionsAnalysis
+}
+
+export interface CapturedVariable {
+  /** Full path (e.g., "params.roomId") */
+  path: string
+  /** Base variable name (e.g., "params") */
+  base: string
+  /** Property path (e.g., ["roomId"]) */
+  properties: string[]
+}
+
+export interface StreamOptionsAnalysis {
+  /** Initial value expression */
+  initial?: string
+  /** Once mode */
+  once?: boolean
+}
+
+export interface StreamEndpoint {
+  /** Stream ID */
+  id: string
+  /** Generated endpoint path */
+  path: string
+  /** Handler function code */
+  handlerCode: string
+  /** Required params from URL */
+  params: string[]
+}
+
+export interface StreamManifestEntry {
+  /** Stream ID */
+  id: string
+  /** SSE endpoint path */
+  endpoint: string
+  /** Server module containing the handler */
+  handlerModule: string
+}

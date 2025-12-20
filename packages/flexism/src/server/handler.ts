@@ -16,6 +16,7 @@ import {
   clearErrorCache,
   type FlexismError,
 } from './error'
+import { streamRegistry, loadStreamHandlers } from './stream-registry'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -81,6 +82,7 @@ export function clearAllCaches(): void {
   clearMiddlewareCache()
   clearLayoutCache()
   clearErrorCache()
+  streamRegistry.clear()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -114,6 +116,12 @@ export async function createRequestHandler(
   const router = createRouter({ manifestPath })
   await router.loadManifest()
 
+  // Load stream handlers from manifest
+  const manifest = router.getManifest()
+  if (manifest) {
+    await loadStreamHandlers(manifest, serverDir)
+  }
+
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url)
 
@@ -121,6 +129,17 @@ export async function createRequestHandler(
     if (dev) {
       await router.loadManifest()
       clearAllCaches()
+      // Reload stream handlers
+      const freshManifest = router.getManifest()
+      if (freshManifest) {
+        await loadStreamHandlers(freshManifest, serverDir)
+      }
+    }
+
+    // Handle SSE stream endpoints
+    if (url.pathname.startsWith('/_flexism/sse/')) {
+      const streamId = url.pathname.replace('/_flexism/sse/', '')
+      return streamRegistry.handleRequest(streamId, request)
     }
 
     // Match route

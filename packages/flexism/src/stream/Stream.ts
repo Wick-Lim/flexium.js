@@ -1,5 +1,29 @@
-import { Useable } from 'flexium/core'
-import { SSEClient, SSEClientOptions } from './SSEClient'
+/**
+ * Stream - Server-side reactive data source declaration
+ *
+ * Declares a streaming data source in server code.
+ * The compiler transforms this into SSE endpoints and StreamRef for client.
+ *
+ * @example
+ * ```tsx
+ * export default async function Page({ params }) {
+ *   // Server: declare stream with callback
+ *   const Messages = new Stream(() => db.messages.subscribe(params.roomId))
+ *
+ *   // Client: use stream reactively
+ *   return () => {
+ *     const [messages] = use(Messages)
+ *     return <ul>{messages.map(m => <li>{m.text}</li>)}</ul>
+ *   }
+ * }
+ * ```
+ */
+
+import { StreamRef, type StreamRefOptions } from './StreamRef'
+
+export type StreamCallback<T> =
+  | (() => AsyncIterable<T>)
+  | (() => Promise<AsyncIterable<T>>)
 
 export interface StreamOptions<T> {
   /**
@@ -12,75 +36,117 @@ export interface StreamOptions<T> {
    * If false (default), stream stays open for continuous updates
    */
   once?: boolean
-
-  /**
-   * SSE connection options
-   */
-  sse?: SSEClientOptions
 }
-
-export type StreamSource<T, P> =
-  | string // URL endpoint
-  | ((params: P) => string) // Dynamic URL
 
 /**
- * Stream - Reactive data source for server-sent events
+ * Stream - Server-side stream declaration
  *
- * @example
- * ```tsx
- * // Server subscription (stays open)
- * const Posts = new Stream<Post[]>('/api/posts')
- * const [posts] = use(Posts)
+ * At build time, the compiler:
+ * 1. Extracts the callback code
+ * 2. Generates an SSE endpoint
+ * 3. Replaces Stream with StreamRef in client code
  *
- * // One-time streaming (like LLM response)
- * const Chat = new Stream<string>('/api/chat', { once: true })
- * const [response] = use(Chat, { body: { prompt: '...' } })
+ * At runtime (server):
+ * 1. Stream.toRef() creates a StreamRef with the generated endpoint URL
+ * 2. StreamRef is serialized and sent to client
  *
- * // Dynamic URL with params
- * const UserPosts = new Stream<Post[]>((p) => `/api/users/${p.userId}/posts`)
- * const [posts] = use(UserPosts, { userId: '123' })
- * ```
+ * At runtime (client):
+ * 1. StreamRef is deserialized
+ * 2. use(streamRef) subscribes to SSE endpoint
  */
-export class Stream<T, P = void> extends Useable<T | null, P> {
-  private source: StreamSource<T, P>
-  private options: StreamOptions<T>
+export class Stream<T> {
+  readonly __type = 'flexism:stream' as const
 
-  constructor(source: StreamSource<T, P>, options: StreamOptions<T> = {}) {
-    super()
-    this.source = source
+  /**
+   * Unique identifier for this stream
+   * Set by compiler based on file path and position
+   */
+  readonly id: string
+
+  /**
+   * The callback that produces the async iterable
+   * Executed on the server when SSE endpoint is called
+   */
+  readonly callback: StreamCallback<T>
+
+  /**
+   * Stream options
+   */
+  readonly options: StreamOptions<T>
+
+  /**
+   * Captured parameters from closure
+   * Populated at runtime by server code
+   */
+  private capturedParams: Record<string, unknown> = {}
+
+  constructor(
+    callback: StreamCallback<T>,
+    options: StreamOptions<T> = {},
+    id?: string
+  ) {
+    this.callback = callback
     this.options = options
+    // ID is set by compiler, fallback to random for dynamic usage
+    this.id = id ?? `stream_${Math.random().toString(36).slice(2)}`
   }
 
   /**
-   * Get initial value (null or provided initial)
+   * Capture parameters for URL generation
+   * Called internally when stream is created in server context
    */
-  getInitial(_params?: P): T | null {
-    return this.options.initial ?? null
+  capture(params: Record<string, unknown>): this {
+    this.capturedParams = { ...this.capturedParams, ...params }
+    return this
   }
 
   /**
-   * Subscribe to SSE updates
+   * Convert to client-side StreamRef
+   * Called by the server when preparing data for client
    */
-  subscribe(
-    params: P | undefined,
-    callback: (value: T) => void
-  ): () => void {
-    const url = typeof this.source === 'function'
-      ? this.source(params as P)
-      : this.source
-
-    const client = new SSEClient<T>(url, {
-      ...this.options.sse,
-      once: this.options.once,
-      onMessage: (data) => {
-        callback(data)
-      },
-    })
-
-    client.connect(params)
-
-    return () => {
-      client.close()
+  toRef(baseUrl = '/_flexism/sse'): StreamRef<T> {
+    // Build URL with captured params as query string
+    const queryParams = new URLSearchParams()
+    for (const [key, value] of Object.entries(this.capturedParams)) {
+      if (value !== undefined && value !== null) {
+        queryParams.set(key, String(value))
+      }
     }
+
+    const query = queryParams.toString()
+    const url = query ? `${baseUrl}/${this.id}?${query}` : `${baseUrl}/${this.id}`
+
+    return new StreamRef<T>(this.id, url, {
+      initial: this.options.initial,
+      once: this.options.once,
+    })
+  }
+
+  /**
+   * Execute the callback to get async iterable
+   * Called by SSE endpoint handler
+   */
+  async execute(): Promise<AsyncIterable<T>> {
+    const result = this.callback()
+    if (result instanceof Promise) {
+      return await result
+    }
+    return result
+  }
+
+  /**
+   * Check if value is a Stream instance
+   */
+  static isStream(value: unknown): value is Stream<unknown> {
+    return (
+      value !== null &&
+      typeof value === 'object' &&
+      '__type' in value &&
+      (value as any).__type === 'flexism:stream'
+    )
   }
 }
+
+// Re-export types and classes
+export { StreamRef, type StreamRefOptions, type SerializedStreamRef } from './StreamRef'
+export { SSEClient, type SSEClientOptions } from './SSEClient'

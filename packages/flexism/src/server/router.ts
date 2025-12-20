@@ -45,7 +45,7 @@ export class Router {
       this.manifest = JSON.parse(content)
       this.compilePatterns()
     } catch {
-      this.manifest = { routes: [], layouts: {}, middlewares: {}, errors: {}, loadings: {} }
+      this.manifest = { routes: [], layouts: {}, middlewares: {}, errors: {}, loadings: {}, streams: {} }
     }
   }
 
@@ -88,6 +88,13 @@ export class Router {
    */
   getRoutes(): RouteInfo[] {
     return this.manifest?.routes ?? []
+  }
+
+  /**
+   * Get the full manifest
+   */
+  getManifest(): BuildManifest | null {
+    return this.manifest
   }
 }
 

@@ -39,8 +39,14 @@ export { use, Context } from './use'
 export type { Setter, ResourceControl, UseContext, UseOptions } from './use'
 
 // Stream - Reactive SSE data source
-export { Stream, SSEClient } from './stream'
-export type { StreamOptions, StreamSource, SSEClientOptions } from './stream'
+export { Stream, StreamRef, SSEClient } from './stream'
+export type {
+  StreamOptions,
+  StreamCallback,
+  StreamRefOptions,
+  SerializedStreamRef,
+  SSEClientOptions,
+} from './stream'
 
 // Runtime utilities
 export {

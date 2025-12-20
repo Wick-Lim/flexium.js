@@ -23,6 +23,19 @@ export { analyzeFile } from './analyzer'
 export { transformFile } from './transformer'
 export { emitBundles } from './emitter'
 
+// Stream Analysis
+export { analyzeStreams, StreamAnalyzer } from './stream-analyzer'
+
+// Stream Transform
+export {
+  generateStreamHandlers,
+  generateStreamRefCreation,
+  transformClientCode,
+  generateStreamHydrationScript,
+  injectStreamRefs,
+} from './stream-transformer'
+export type { StreamTransformResult } from './stream-transformer'
+
 // Incremental Build
 export {
   BuildCache,
