@@ -30,11 +30,39 @@ export class Transformer {
   private source: string
   private analysis: AnalysisResult
   private context: TransformContext
+  private imports: string[]
 
   constructor(source: string, analysis: AnalysisResult, context: TransformContext) {
     this.source = source
     this.analysis = analysis
     this.context = context
+    this.imports = this.extractImports()
+  }
+
+  /**
+   * Extract all import statements from source code
+   */
+  private extractImports(): string[] {
+    const imports: string[] = []
+    // Match import statements (both single and multi-line)
+    const importRegex = /^import\s+(?:(?:\{[^}]*\}|\*\s+as\s+\w+|\w+)(?:\s*,\s*(?:\{[^}]*\}|\*\s+as\s+\w+|\w+))*\s+from\s+)?['"][^'"]+['"]\s*;?\s*$/gm
+    let match
+    while ((match = importRegex.exec(this.source)) !== null) {
+      imports.push(match[0].trim())
+    }
+    return imports
+  }
+
+  /**
+   * Get imports that should be included in server code
+   * Filters out client-only imports like 'flexium/dom'
+   */
+  private getServerImports(): string {
+    const clientOnlyModules = ['flexium/dom']
+    const filtered = this.imports.filter(imp => {
+      return !clientOnlyModules.some(mod => imp.includes(`'${mod}'`) || imp.includes(`"${mod}"`))
+    })
+    return filtered.length > 0 ? filtered.join('\n') + '\n\n' : ''
   }
 
   transform(): TransformResult[] {
@@ -128,8 +156,8 @@ export class Transformer {
     const asyncKeyword = isAsync ? 'async ' : ''
     const exportPrefix = name === 'default' ? 'export default' : 'export'
     const funcName = name === 'default' ? '' : ` ${name}`
-    return `
-// API Handler: ${name}
+    const imports = this.getServerImports()
+    return `${imports}// API Handler: ${name}
 ${exportPrefix} ${asyncKeyword}function${funcName}(request, context)${body}
 `.trim()
   }
@@ -138,8 +166,8 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(request, context)${body}
     const asyncKeyword = isAsync ? 'async ' : ''
     const exportPrefix = name === 'default' ? 'export default' : 'export'
     const funcName = name === 'default' ? '' : ` ${name}`
-    return `
-// Server Component: ${name} (no hydration)
+    const imports = this.getServerImports()
+    return `${imports}// Server Component: ${name} (no hydration)
 ${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern})${body}
 `.trim()
   }
@@ -213,9 +241,16 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern})${body}
     const streamRestorationBlock = hasStreams ? `\n${streamRestoration}\n` : ''
     const streamRefImport = hasStreams ? `import { StreamRef } from 'flexism/stream'\n` : ''
 
+    // Get additional imports (CSS, etc.) excluding flexium/core and flexium/dom
+    const excludedModules = ['flexium/core', 'flexium/dom', 'flexism/stream']
+    const additionalImports = this.imports.filter(imp => {
+      return !excludedModules.some(mod => imp.includes(`'${mod}'`) || imp.includes(`"${mod}"`))
+    }).join('\n')
+    const additionalImportsBlock = additionalImports ? additionalImports + '\n' : ''
+
     return `
 ${streamImport}${streamRefImport}import { use } from 'flexium/core'
-
+${additionalImportsBlock}
 // Server Loader for: ${name}
 export ${isAsync ? 'async ' : ''}function loader(props) {
   ${this.cleanServerBody(serverBody)}${streamConversionCode}
@@ -266,11 +301,18 @@ export function Component(${componentPropsParam}) {${streamRestorationBlock}${th
 
     const streamRestorationBlock = hasStreams ? `\n${streamRestoration}\n` : ''
 
+    // Get additional imports (CSS, etc.) excluding flexium/core, flexium/dom, flexism/stream
+    const excludedModules = ['flexium/core', 'flexium/dom', 'flexism/stream']
+    const additionalImports = this.imports.filter(imp => {
+      return !excludedModules.some(mod => imp.includes(`'${mod}'`) || imp.includes(`"${mod}"`))
+    }).join('\n')
+    const additionalImportsBlock = additionalImports ? additionalImports + '\n' : ''
+
     return `
 // Client Component: ${name}
 ${streamImport}import { use } from 'flexium/core'
 import { hydrate } from 'flexium/dom'
-
+${additionalImportsBlock}
 export function ${componentName}(${propsParam}) {${streamRestorationBlock}${this.cleanClientBody(clientBody)}
 }
 

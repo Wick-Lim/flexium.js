@@ -5,6 +5,7 @@
  */
 
 import { renderToString } from 'flexium/server'
+import { getStyleTag, resetStyles } from 'flexium/css'
 import type { FNodeChild } from '../types'
 import { createRouter, type Router, type RouteMatch } from './router'
 import { executeMiddlewareChain, clearMiddlewareCache } from './middleware'
@@ -17,6 +18,7 @@ import {
   type FlexismError,
 } from './error'
 import { streamRegistry, loadStreamHandlers } from './stream-registry'
+import { shouldInvalidateCache, getAndClearChangedFiles, forceInvalidation } from './dev-watcher'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -122,17 +124,33 @@ export async function createRequestHandler(
     await loadStreamHandlers(manifest, serverDir)
   }
 
+  // Track if this is the first request (need to set up watcher)
+  let isFirstRequest = true
+
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url)
 
-    // Reload manifest in dev mode for each request
+    // Dev mode: only invalidate caches when files actually change
     if (dev) {
-      await router.loadManifest()
-      clearAllCaches()
-      // Reload stream handlers
-      const freshManifest = router.getManifest()
-      if (freshManifest) {
-        await loadStreamHandlers(freshManifest, serverDir)
+      // First request: set up the file watcher
+      if (isFirstRequest) {
+        isFirstRequest = false
+        forceInvalidation() // Force first load
+      }
+
+      // Only reload if files have changed
+      if (shouldInvalidateCache(serverDir)) {
+        const changedFiles = getAndClearChangedFiles(serverDir)
+        if (changedFiles.size > 0) {
+          console.log(`[flexism] Reloading due to file changes...`)
+        }
+        await router.loadManifest()
+        clearAllCaches()
+        // Reload stream handlers
+        const freshManifest = router.getManifest()
+        if (freshManifest) {
+          await loadStreamHandlers(freshManifest, serverDir)
+        }
       }
     }
 
@@ -291,6 +309,9 @@ async function handlePageRoute(
   const { serverDir, clientBundle, dev = false } = options
   const context: LoaderContext = { request, params }
 
+  // Reset CSS-in-JS styles for this request
+  resetStyles()
+
   // Helper to render errors with custom error.tsx support
   const handleError = (err: unknown, statusCode = 500) => {
     const error = createFlexismError(err, statusCode)
@@ -341,7 +362,8 @@ async function handlePageRoute(
   // Render page content
   let pageContent: FNodeChild
   try {
-    pageContent = PageComponent(pageData)
+    // Pass params along with page data for components that need URL parameters
+    pageContent = PageComponent({ ...pageData, params })
   } catch (err) {
     return handleError(err)
   }
@@ -405,7 +427,7 @@ async function handlePageRoute(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Inject scripts into HTML document
+ * Inject scripts and styles into HTML document
  */
 function injectScripts(
   html: string,
@@ -417,13 +439,22 @@ function injectScripts(
   const streamScript = streams ? createStreamScript(streams) : ''
   const clientScript = `<script type="module" src="${clientBundle}"></script>`
 
-  // Inject before </body>
-  if (html.includes('</body>')) {
-    return html.replace('</body>', `${stateScript}${streamScript}${clientScript}</body>`)
+  // Get collected CSS-in-JS styles
+  const cssStyles = getStyleTag()
+
+  // Inject CSS styles into <head>
+  let result = html
+  if (cssStyles && html.includes('</head>')) {
+    result = result.replace('</head>', `${cssStyles}</head>`)
+  }
+
+  // Inject scripts before </body>
+  if (result.includes('</body>')) {
+    return result.replace('</body>', `${stateScript}${streamScript}${clientScript}</body>`)
   }
 
   // Append to end if no </body>
-  return html + stateScript + streamScript + clientScript
+  return result + stateScript + streamScript + clientScript
 }
 
 /**

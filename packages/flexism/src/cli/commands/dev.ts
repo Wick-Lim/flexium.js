@@ -1,5 +1,6 @@
 import { resolve } from 'path'
 import { createServer, type IncomingMessage, type ServerResponse } from 'http'
+import { Readable } from 'stream'
 import { createCompiler } from '../../compiler'
 import { createRequestHandler, clearAllCaches } from '../../server/handler'
 import { createInjectorStream, pipeToResponse } from '../../utils/stream'
@@ -18,17 +19,24 @@ const hmrClients = new Set<ServerResponse>()
 const HMR_SCRIPT = `
 <script>
 (function() {
-  const hmr = new EventSource('/__flexism_hmr');
+  var hmr = new EventSource('/__flexism_hmr');
   hmr.onmessage = function(e) {
-    const data = JSON.parse(e.data);
+    var data = JSON.parse(e.data);
     if (data.type === 'reload') {
       console.log('[flexism] Reloading...');
+      hmr.close();
       location.reload();
     }
   };
   hmr.onerror = function() {
-    console.log('[flexism] HMR disconnected, retrying...');
+    console.log('[flexism] HMR disconnected');
   };
+  window.addEventListener('beforeunload', function() {
+    hmr.close();
+  });
+  window.addEventListener('pagehide', function() {
+    hmr.close();
+  });
 })();
 </script>`
 
@@ -219,10 +227,18 @@ function toWebRequest(req: IncomingMessage, port: number): Request {
     }
   }
 
+  const method = req.method || 'GET'
+
+  // For methods with body, pass the Node.js stream as a web ReadableStream
+  const hasBody = method !== 'GET' && method !== 'HEAD'
+  const body = hasBody ? (Readable.toWeb(req) as ReadableStream<Uint8Array>) : undefined
+
   return new Request(url.toString(), {
-    method: req.method || 'GET',
+    method,
     headers,
-    // Note: Body handling would be needed for POST requests
+    body,
+    // @ts-expect-error - duplex is needed for streaming body
+    duplex: hasBody ? 'half' : undefined,
   })
 }
 

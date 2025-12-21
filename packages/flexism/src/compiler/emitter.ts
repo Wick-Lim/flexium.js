@@ -326,33 +326,43 @@ export class Emitter {
   private async bundleClient(entries: string[], outDir: string): Promise<string> {
     const outfile = path.join(outDir, 'index.js')
 
-    // Create a virtual entry point that imports and hydrates all client modules
+    // Create a virtual entry point that imports and hydrates client modules
     const imports: string[] = []
-    const hydrateCalls: string[] = []
+
+    // Build route matching info for each client module
+    const routeConfigs: Array<{ route: string; idx: number; baseName: string }> = []
 
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[i]
       const baseName = path.basename(entry, '.tsx').replace('.client', '')
-      // Convert module name to unique id (e.g., _index -> index)
-      const uniqueId = baseName.replace(/^_/, '').replace(/_/g, '-')
+      // Convert _counter -> /counter, _todos -> /todos, _index -> /
+      let routePath = baseName.replace(/^_/, '/').replace(/_/g, '/')
+      if (routePath === '/index') routePath = '/'
 
       imports.push(`import * as client_${i} from './${path.basename(entry)}'`)
-
-      // Find the hydrate function for this module
-      hydrateCalls.push(`
-  // Hydrate ${baseName}
-  const hydrateFn_${i} = Object.values(client_${i}).find(fn => typeof fn === 'function' && fn.name.startsWith('hydrateComponent'))
-  if (hydrateFn_${i}) {
-    hydrateFn_${i}(document.body, window.__FLEXISM_STATE__ || {})
-  }`)
+      routeConfigs.push({ route: routePath, idx: i, baseName })
     }
+
+    // Generate route-based hydration code
+    const routeCases = routeConfigs.map(({ route, idx, baseName }) => {
+      return `  if (path === '${route}') {
+    // Hydrate ${baseName}
+    const hydrateFn = Object.values(client_${idx}).find(fn => typeof fn === 'function' && fn.name.startsWith('hydrateComponent'))
+    if (hydrateFn) {
+      const container = document.querySelector('main') || document.body
+      hydrateFn(container, state)
+    }
+  }`
+    }).join(' else ')
 
     const entryContent = `${imports.join('\n')}
 
-// Auto-hydration on load
+// Route-based hydration - only hydrate component for current route
 if (typeof window !== 'undefined') {
   const state = window.__FLEXISM_STATE__ || {}
-${hydrateCalls.join('\n')}
+  const path = window.location.pathname
+
+${routeCases}
 }
 `
 
