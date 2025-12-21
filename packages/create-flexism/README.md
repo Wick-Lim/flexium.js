@@ -33,14 +33,14 @@ bun create flexism my-app
 - **Flexium** - Fine-grained reactive UI framework
 - **Stream API** - Real-time SSE with reactive subscriptions
 - **TypeScript** - Full type safety
-- **Tailwind CSS** - Utility-first styling
+- **Tailwind CSS** - Utility-first styling (via CDN)
 
 ### Key Features
 
 - **Two-function Pattern** - Server loader + Client component in one file
 - **File-based Routing** - page.tsx, route.ts, layout.tsx conventions
 - **SSE Streaming** - Real-time data with automatic reconnection
-- **HMR** - Hot Module Replacement with CSS hot reload
+- **HMR** - Hot Module Replacement
 - **Incremental Builds** - Only changed files recompile
 
 ## Project Structure
@@ -49,13 +49,9 @@ bun create flexism my-app
 my-app/
 ├── src/
 │   ├── page.tsx          # Home page (/)
-│   ├── layout.tsx        # Root layout
-│   └── style.css         # Tailwind imports
-├── index.html
+│   └── layout.tsx        # Root layout
 ├── package.json
-├── tsconfig.json
-├── tailwind.config.js
-└── postcss.config.js
+└── tsconfig.json
 ```
 
 ## Scripts

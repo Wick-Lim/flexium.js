@@ -35,8 +35,8 @@ describe('create-flexism CLI', () => {
 
       assert.ok(existsSync(projectPath), 'Project directory should exist')
       assert.ok(existsSync(join(projectPath, 'package.json')), 'package.json should exist')
-      assert.ok(existsSync(join(projectPath, 'src', 'main.tsx')), 'src/main.tsx should exist')
-      assert.ok(existsSync(join(projectPath, 'index.html')), 'index.html should exist')
+      assert.ok(existsSync(join(projectPath, 'src', 'page.tsx')), 'src/page.tsx should exist')
+      assert.ok(existsSync(join(projectPath, 'src', 'layout.tsx')), 'src/layout.tsx should exist')
     })
 
     it('should set project name in package.json', () => {
