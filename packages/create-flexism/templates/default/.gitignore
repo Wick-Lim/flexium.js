@@ -1,4 +1,5 @@
 node_modules
 dist
+.flexism
 .DS_Store
 *.local

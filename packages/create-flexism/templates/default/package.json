@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "flexism dev",
     "build": "flexism build",
-    "start": "flexism start"
+    "start": "flexism start",
+    "dev:local": "rm -rf node_modules/flexium node_modules/flexism .flexism && ln -sf ../../../../flexium node_modules/flexium && ln -sf ../../../../flexism node_modules/flexism && flexism dev"
   },
   "dependencies": {
     "flexium": "^0.15.14",
