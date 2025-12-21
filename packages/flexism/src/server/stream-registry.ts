@@ -5,6 +5,7 @@
  * Populated at build time, used at runtime to handle SSE requests.
  */
 
+import * as path from 'path'
 import { sse } from './sse'
 
 export type StreamHandler = (
@@ -112,7 +113,7 @@ class StreamRegistry {
 export const streamRegistry = new StreamRegistry()
 
 /**
- * Load stream handlers from manifest
+ * Load stream handlers from manifest with security validation
  */
 export async function loadStreamHandlers(
   manifest: { streams?: Record<string, { handlerModule: string }> },
@@ -120,9 +121,23 @@ export async function loadStreamHandlers(
 ): Promise<void> {
   if (!manifest.streams) return
 
+  const resolvedServerDir = path.resolve(serverDir)
+
   for (const [id, entry] of Object.entries(manifest.streams)) {
     try {
-      const modulePath = `${serverDir}/${entry.handlerModule}`
+      // Validate handler module name format
+      if (!isValidHandlerModule(entry.handlerModule)) {
+        console.error(`[flexism] Invalid handler module name: ${entry.handlerModule}`)
+        continue
+      }
+
+      // Resolve and validate path is within serverDir (prevent path traversal)
+      const modulePath = path.resolve(resolvedServerDir, entry.handlerModule)
+      if (!modulePath.startsWith(resolvedServerDir + path.sep)) {
+        console.error(`[flexism] Path traversal blocked: ${entry.handlerModule}`)
+        continue
+      }
+
       const module = await import(modulePath)
 
       if (module.__streamHandlers?.[id]) {
@@ -132,4 +147,13 @@ export async function loadStreamHandlers(
       console.error(`[flexism] Failed to load stream handler ${id}:`, error)
     }
   }
+}
+
+/**
+ * Validate handler module name follows expected pattern
+ */
+function isValidHandlerModule(name: string): boolean {
+  // Must start with __stream_ and end with .js
+  // Only allow alphanumeric, underscore, and dot
+  return /^__stream_[a-zA-Z0-9_]+\.js$/.test(name)
 }

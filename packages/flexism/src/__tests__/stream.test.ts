@@ -55,50 +55,75 @@ describe('Stream (server-side)', () => {
 
 describe('StreamRef (client-side)', () => {
   it('should extend Useable', () => {
-    const ref = new StreamRef<string>('test-id', '/sse/test')
+    const ref = new StreamRef<string>('test_id', '/_flexism/sse/test_id')
     expect(isUseable(ref)).toBe(true)
   })
 
   it('should return initial value from getInitial', () => {
-    const ref = new StreamRef<string>('test-id', '/sse/test', { initial: 'hello' })
+    const ref = new StreamRef<string>('test_id', '/_flexism/sse/test_id', { initial: 'hello' })
     expect(ref.getInitial()).toBe('hello')
   })
 
   it('should return null if no initial value', () => {
-    const ref = new StreamRef<string>('test-id', '/sse/test')
+    const ref = new StreamRef<string>('test_id', '/_flexism/sse/test_id')
     expect(ref.getInitial()).toBe(null)
   })
 
   it('should serialize to JSON', () => {
-    const ref = new StreamRef<string>('test-id', '/sse/test', { initial: 'hi' })
+    const ref = new StreamRef<string>('test_id', '/_flexism/sse/test_id', { initial: 'hi' })
     const json = ref.toJSON()
 
     expect(json.__type).toBe('flexism:streamref')
-    expect(json.id).toBe('test-id')
-    expect(json.url).toBe('/sse/test')
+    expect(json.id).toBe('test_id')
+    expect(json.url).toBe('/_flexism/sse/test_id')
     expect(json.options.initial).toBe('hi')
   })
 
   it('should deserialize from JSON', () => {
     const json = {
       __type: 'flexism:streamref' as const,
-      id: 'test-id',
-      url: '/sse/test',
+      id: 'test_id',
+      url: '/_flexism/sse/test_id',
       options: { initial: 'hi' as string }
     }
     const ref = StreamRef.fromJSON(json)
 
     expect(ref).toBeInstanceOf(StreamRef)
-    expect(ref.id).toBe('test-id')
-    expect(ref.url).toBe('/sse/test')
+    expect(ref.id).toBe('test_id')
+    expect(ref.url).toBe('/_flexism/sse/test_id')
     expect(ref.getInitial()).toBe('hi')
+  })
+
+  it('should reject invalid StreamRef data', () => {
+    // Invalid id (contains hyphen)
+    expect(() => StreamRef.fromJSON({
+      __type: 'flexism:streamref',
+      id: 'test-id',
+      url: '/_flexism/sse/test',
+      options: {}
+    })).toThrow('[flexism] Invalid StreamRef id')
+
+    // Invalid url (wrong prefix)
+    expect(() => StreamRef.fromJSON({
+      __type: 'flexism:streamref',
+      id: 'test_id',
+      url: '/api/sse/test',
+      options: {}
+    })).toThrow('[flexism] Invalid StreamRef url')
+
+    // Missing __type
+    expect(() => StreamRef.fromJSON({
+      id: 'test_id',
+      url: '/_flexism/sse/test',
+      options: {}
+    })).toThrow('[flexism] Invalid StreamRef data')
   })
 
   it('should identify serialized StreamRef', () => {
     expect(StreamRef.isSerializedStreamRef({
       __type: 'flexism:streamref',
-      id: 'test',
-      url: '/test',
+      id: 'test_id',
+      url: '/_flexism/sse/test_id',
       options: {}
     })).toBe(true)
     expect(StreamRef.isSerializedStreamRef({})).toBe(false)

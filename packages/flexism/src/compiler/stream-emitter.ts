@@ -91,6 +91,13 @@ function groupEndpointsBySource(
 }
 
 /**
+ * Validate that a string is a valid JavaScript identifier
+ */
+function isValidIdentifier(name: string): boolean {
+  return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(name)
+}
+
+/**
  * Generate SSE handler module code
  */
 function generateHandlerModule(endpoints: StreamEndpoint[]): string {
@@ -100,6 +107,12 @@ function generateHandlerModule(endpoints: StreamEndpoint[]): string {
     for (const paramPath of endpoint.params) {
       const parts = paramPath.split('.')
       const base = parts[0]
+
+      // Security: validate base is a valid JS identifier
+      if (!isValidIdentifier(base)) {
+        throw new Error(`[flexism] Invalid variable name in stream params: "${base}"`)
+      }
+
       const rest = parts.slice(1).join('.')
       const existing = varsByBase.get(base) || []
       if (rest) {

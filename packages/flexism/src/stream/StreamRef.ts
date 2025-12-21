@@ -100,10 +100,31 @@ export class StreamRef<T> extends Useable<T | null> {
   }
 
   /**
-   * Create StreamRef from serialized data
+   * Create StreamRef from serialized data with validation
    */
-  static fromJSON<T>(data: SerializedStreamRef<T>): StreamRef<T> {
-    return new StreamRef<T>(data.id, data.url, data.options)
+  static fromJSON<T>(data: unknown): StreamRef<T> {
+    // Type guard validation
+    if (!StreamRef.isSerializedStreamRef(data)) {
+      throw new Error('[flexism] Invalid StreamRef data: missing or invalid __type')
+    }
+
+    // Validate id (alphanumeric and underscore only)
+    if (typeof data.id !== 'string' || !/^[a-zA-Z0-9_]+$/.test(data.id)) {
+      throw new Error('[flexism] Invalid StreamRef id')
+    }
+
+    // Validate url (must be /_flexism/sse/ path)
+    if (typeof data.url !== 'string' || !data.url.startsWith('/_flexism/sse/')) {
+      throw new Error('[flexism] Invalid StreamRef url')
+    }
+
+    // Validate options
+    const options = data.options
+    if (options !== null && typeof options !== 'object') {
+      throw new Error('[flexism] Invalid StreamRef options')
+    }
+
+    return new StreamRef<T>(data.id, data.url, (options ?? {}) as StreamRefOptions<T>)
   }
 
   /**
