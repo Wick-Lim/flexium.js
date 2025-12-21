@@ -1,15 +1,11 @@
 import { use } from 'flexium/core'
 
-interface PageProps {
-  initialCount: number
-}
-
 export default function HomePage() {
-  // Server-side: This runs on the server
+  // Server: runs on server, can access DB, env vars, etc.
   const initialCount = 0
 
-  // Return a client component that receives server data as props
-  return ({ initialCount }: PageProps) => {
+  // Client: hydrates in browser with server data
+  return () => {
     const [count, setCount] = use(initialCount)
 
     return (

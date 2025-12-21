@@ -135,21 +135,17 @@ export class Analyzer {
       ) {
         returnsFunction = true
 
-        // Extract props from function parameters
-        if (returnArg.params && returnArg.params.length > 0) {
-          const firstParam = returnArg.params[0]
-          if (firstParam.type === 'ObjectPattern') {
-            for (const prop of firstParam.properties) {
-              if (prop.type === 'KeyValuePatternProperty' || prop.type === 'AssignmentPatternProperty') {
-                const key = prop.key || prop.value
-                if (key && key.type === 'Identifier') {
-                  sharedProps.push(key.value)
-                }
-              }
-              if (prop.type === 'Identifier') {
-                sharedProps.push(prop.value)
-              }
-            }
+        // Auto-detect shared props: find server variables used in client body
+        // 1. Collect all variable declarations from server body (before return)
+        const serverVars = this.collectVariableDeclarations(body, returnStmt)
+
+        // 2. Collect all identifier references from client body
+        const clientRefs = this.collectIdentifierReferences(returnArg.body)
+
+        // 3. Intersection: server vars that are referenced in client
+        for (const varName of serverVars) {
+          if (clientRefs.has(varName)) {
+            sharedProps.push(varName)
           }
         }
 
@@ -230,6 +226,98 @@ export class Analyzer {
     }
 
     return null
+  }
+
+  /**
+   * Collect variable declarations from server body (statements before return)
+   */
+  private collectVariableDeclarations(body: any, returnStmt: any): Set<string> {
+    const vars = new Set<string>()
+    if (!body.stmts) return vars
+
+    for (const stmt of body.stmts) {
+      // Stop at return statement
+      if (stmt === returnStmt) break
+
+      // Handle variable declarations: const x = ..., let y = ...
+      if (stmt.type === 'VariableDeclaration') {
+        for (const decl of stmt.declarations || []) {
+          if (decl.id?.type === 'Identifier') {
+            vars.add(decl.id.value)
+          }
+          // Handle destructuring: const { a, b } = ...
+          if (decl.id?.type === 'ObjectPattern') {
+            this.collectPatternIdentifiers(decl.id, vars)
+          }
+          // Handle array destructuring: const [a, b] = ...
+          if (decl.id?.type === 'ArrayPattern') {
+            this.collectPatternIdentifiers(decl.id, vars)
+          }
+        }
+      }
+    }
+
+    return vars
+  }
+
+  /**
+   * Collect identifiers from destructuring patterns
+   */
+  private collectPatternIdentifiers(pattern: any, vars: Set<string>): void {
+    if (pattern.type === 'Identifier') {
+      vars.add(pattern.value)
+    } else if (pattern.type === 'ObjectPattern') {
+      for (const prop of pattern.properties || []) {
+        if (prop.type === 'KeyValuePatternProperty') {
+          this.collectPatternIdentifiers(prop.value, vars)
+        } else if (prop.type === 'AssignmentPatternProperty') {
+          if (prop.key?.type === 'Identifier') {
+            vars.add(prop.key.value)
+          }
+        } else if (prop.type === 'RestElement') {
+          this.collectPatternIdentifiers(prop.argument, vars)
+        }
+      }
+    } else if (pattern.type === 'ArrayPattern') {
+      for (const element of pattern.elements || []) {
+        if (element) {
+          this.collectPatternIdentifiers(element, vars)
+        }
+      }
+    }
+  }
+
+  /**
+   * Collect all identifier references from an AST node (client body)
+   */
+  private collectIdentifierReferences(node: any): Set<string> {
+    const refs = new Set<string>()
+    this.walkNode(node, (n: any) => {
+      if (n.type === 'Identifier') {
+        refs.add(n.value)
+      }
+    })
+    return refs
+  }
+
+  /**
+   * Walk AST node and call visitor for each node
+   */
+  private walkNode(node: any, visitor: (n: any) => void): void {
+    if (!node || typeof node !== 'object') return
+
+    visitor(node)
+
+    for (const key of Object.keys(node)) {
+      const value = node[key]
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          this.walkNode(item, visitor)
+        }
+      } else if (value && typeof value === 'object') {
+        this.walkNode(value, visitor)
+      }
+    }
   }
 }
 
