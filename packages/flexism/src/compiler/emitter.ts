@@ -371,15 +371,7 @@ ${hydrateCalls.join('\n')}
       // Configure JSX
       jsx: 'automatic',
       jsxImportSource: 'flexium',
-      external: [
-        // Flexium runtime modules are loaded separately
-        'flexium',
-        'flexium/core',
-        'flexium/dom',
-        'flexium/stream',
-        'flexium/jsx-runtime',
-        'flexium/jsx-dev-runtime',
-      ],
+      // Bundle everything for browser (no external modules)
       // Client only gets public env vars
       define: this.getDefineConfig(true),
       treeShaking: false,  // Keep all exports to ensure components are bundled
