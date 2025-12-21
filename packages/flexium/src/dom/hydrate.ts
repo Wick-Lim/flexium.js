@@ -3,6 +3,7 @@ import type { SerializedState } from '../server/types'
 import { runWithComponent, type ComponentInstance } from '../core/hook'
 import { pushContext, popContext } from '../core/context'
 import { unsafeEffect } from '../core/lifecycle'
+import { renderNode, reconcile } from './render'
 
 // Hydration state
 let isHydrating = false
@@ -314,17 +315,49 @@ function hydrateComponent(fnode: FNode, parent: HTMLElement): Node | Node[] | nu
     // Set up reactive re-rendering for future updates
     let isFirstRender = true
     const renderFn = () => {
+      // Re-render with reconciliation (same logic as render.ts)
+      const currentProps = instance.props
+
+      // Always run the component to establish reactive tracking
+      const result = runWithComponent(instance, () => Component(currentProps))
+
       if (isFirstRender) {
         isFirstRender = false
-        return // Skip first render, already done during hydration
+        return // Skip DOM manipulation on first render, already done during hydration
       }
 
-      // Re-render logic (same as render.ts but simplified)
-      const currentProps = instance.props
-      runWithComponent(instance, () => Component(currentProps))
+      if (instance.nodes.length === 0) {
+        const newNodes = renderNode(result, parent)
+        instance.nodes = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
+        return
+      }
 
-      // For subsequent renders, use full render path
-      // This will be handled by the normal reconciliation
+      const firstNode = instance.nodes[0]
+      const nodeParent = firstNode.parentNode as HTMLElement
+
+      if (!nodeParent) {
+        return
+      }
+
+      const marker = document.createComment('flexium-marker')
+      const lastNode = instance.nodes[instance.nodes.length - 1]
+      if (lastNode.nextSibling) {
+        nodeParent.insertBefore(marker, lastNode.nextSibling)
+      } else {
+        nodeParent.appendChild(marker)
+      }
+
+      instance.children.clear()
+
+      const tempContainer = document.createElement('div')
+      const newNodes = renderNode(result, tempContainer, nodeParent)
+      const newNodesArray = newNodes ? (Array.isArray(newNodes) ? newNodes : [newNodes]) : []
+
+      const reconciledNodes = reconcile(instance.nodes, newNodesArray, nodeParent, marker)
+
+      nodeParent.removeChild(marker)
+
+      instance.nodes = reconciledNodes
     }
 
     instance.renderFn = renderFn

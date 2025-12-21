@@ -178,7 +178,7 @@ function renderComponent(fnode: any, parent: HTMLElement, registryParent?: HTMLE
     return instance.nodes
 }
 
-function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElement): Node | Node[] | null {
+export function renderNode(fnode: any, parent: HTMLElement, registryParent?: HTMLElement): Node | Node[] | null {
     const effectiveRegistryParent = registryParent || parent
 
     if (fnode === null || fnode === undefined || typeof fnode === 'boolean') {
