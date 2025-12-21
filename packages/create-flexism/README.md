@@ -17,11 +17,11 @@ npm run dev
 Or with other package managers:
 
 ```bash
-# Yarn
-yarn create flexism my-app
-
 # pnpm
 pnpm create flexism my-app
+
+# Yarn
+yarn create flexism my-app
 
 # Bun
 bun create flexism my-app
@@ -29,31 +29,31 @@ bun create flexism my-app
 
 ## What You Get
 
-- **Flexism** - Realtime-first fullstack framework
+- **Flexism** - Realtime-first fullstack framework with SSR
 - **Flexium** - Fine-grained reactive UI framework
-- **Vite** - Lightning-fast development server
+- **Stream API** - Real-time SSE with reactive subscriptions
 - **TypeScript** - Full type safety
 - **Tailwind CSS** - Utility-first styling
 
-### Development Features
+### Key Features
 
-- **HMR** - Hot Module Replacement with CSS hot reload (no page refresh)
+- **Two-function Pattern** - Server loader + Client component in one file
+- **File-based Routing** - page.tsx, route.ts, layout.tsx conventions
+- **SSE Streaming** - Real-time data with automatic reconnection
+- **HMR** - Hot Module Replacement with CSS hot reload
 - **Incremental Builds** - Only changed files recompile
-- **Memory Optimization** - LRU cache with automatic cleanup
-- **Zero-Copy Streaming** - Efficient handling of large files
-- **Error Overlay** - Build errors displayed in browser
 
 ## Project Structure
 
 ```
 my-app/
 ├── src/
-│   ├── main.tsx      # App entry point
-│   └── style.css     # Tailwind imports
+│   ├── page.tsx          # Home page (/)
+│   ├── layout.tsx        # Root layout
+│   └── style.css         # Tailwind imports
 ├── index.html
 ├── package.json
 ├── tsconfig.json
-├── vite.config.ts
 ├── tailwind.config.js
 └── postcss.config.js
 ```
@@ -61,10 +61,38 @@ my-app/
 ## Scripts
 
 ```bash
-npm run dev      # Start dev server with HMR (flexism dev)
-npm run build    # Build for production (flexism build)
-npm run start    # Start production server (flexism start)
-npm run preview  # Preview production build (vite preview)
+npm run dev      # Start dev server with HMR
+npm run build    # Build for production
+npm run start    # Start production server
+```
+
+## Example: Two-function Pattern
+
+```tsx
+// src/page.tsx
+export default async function HomePage() {
+  const data = await fetchData()  // Server-side
+
+  return ({ data }) => (           // Client-side
+    <div>{data.message}</div>
+  )
+}
+```
+
+## Example: Real-time Stream
+
+```tsx
+// src/chat/page.tsx
+import { Stream } from 'flexism/stream'
+
+export default async function ChatPage({ params }) {
+  const Messages = new Stream(() => db.messages.subscribe(params.roomId))
+
+  return ({ Messages }) => {
+    const [messages] = use(Messages)
+    return <ul>{messages?.map(m => <li>{m.text}</li>)}</ul>
+  }
+}
 ```
 
 ## Requirements

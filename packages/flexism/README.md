@@ -60,21 +60,16 @@ src/
 
 ## Page (Two-function Pattern)
 
-Server loader and client component in one file:
+Server logic and client component in one function:
 
 ```tsx
 // src/users/[id]/page.tsx
-import { use } from 'flexium/core'
-
-// Server: runs on server, fetches data
-export async function loader({ params }) {
+export default async function UserPage({ params }) {
+  // Server: runs on server, fetches data
   const user = await db.users.find(params.id)
-  return { user }
-}
 
-// Client: hydrates on client with loader data
-export function Component({ user }) {
-  return (
+  // Client: hydrates on client with server data
+  return ({ user }) => (
     <div>
       <h1>{user.name}</h1>
       <p>{user.email}</p>
@@ -82,6 +77,9 @@ export function Component({ user }) {
   )
 }
 ```
+
+The outer function is the **server loader** (async, has DB access).
+The returned inner function is the **client component** (hydrated in browser).
 
 ## API Route (SSE Streaming)
 
@@ -108,22 +106,51 @@ export async function POST(request) {
 }
 ```
 
-## Stream (Reactive SSE Client)
+## Stream (Reactive SSE)
 
-Subscribe to SSE endpoints reactively:
+Declare real-time streams with the two-function pattern:
 
 ```tsx
-// src/chat/page.tsx
+// src/chat/[roomId]/page.tsx
 import { use } from 'flexium/core'
-import { Stream } from 'flexism'
+import { Stream } from 'flexism/stream'
 
-const messages = new Stream<Message>('/api/messages')
+export default async function ChatPage({ params }) {
+  // Server: Create stream with callback (runs on server)
+  const Messages = new Stream<Message[]>(() =>
+    db.messages.subscribe(params.roomId)
+  )
 
-export function Component() {
-  const [message] = use(messages)
+  // Client: Receive StreamRef and subscribe reactively
+  return ({ Messages }) => {
+    const [messages] = use(Messages)
 
-  return <div>{message?.text}</div>
+    return (
+      <ul>
+        {messages?.map(m => <li key={m.id}>{m.text}</li>)}
+      </ul>
+    )
+  }
 }
+```
+
+### How It Works
+
+1. **Server**: `Stream` captures the callback and runtime params
+2. **Compiler**: Generates SSE handler at `/_flexism/sse/{id}`
+3. **Client**: Receives `StreamRef` that auto-connects to SSE endpoint
+4. **Reactive**: `use()` hook updates UI when new data arrives
+
+### Stream with Options
+
+```tsx
+const Notifications = new Stream<Notification>(
+  () => notificationService.subscribe(userId),
+  {
+    initial: [],     // Initial value before connection
+    once: true       // Close after first complete response
+  }
+)
 ```
 
 ## Layout
@@ -148,7 +175,7 @@ export function Component({ children }) {
 ## Requirements
 
 - Node.js 18.0.0 or higher
-- Flexium >= 0.15.0
+- Flexium >= 0.15.8
 
 ## Documentation
 
