@@ -202,8 +202,14 @@ export ${isAsync ? 'async ' : ''}function loader(props) {
     const streams = this.context.streams || []
     const hasStreams = streams.length > 0
 
-    // Build props with __streams
-    const allProps = [...sharedProps]
+    // Get stream variable names to exclude from props
+    // (they're restored from __streams, not passed directly)
+    const streamVarNames = new Set(
+      streams.map(s => s.variableName || `__stream_${streams.indexOf(s)}`)
+    )
+
+    // Build props with __streams, excluding stream variables
+    const allProps = sharedProps.filter(prop => !streamVarNames.has(prop))
     if (hasStreams) {
       allProps.push('__streams')
     }

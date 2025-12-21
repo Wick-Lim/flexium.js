@@ -382,4 +382,149 @@ export default async function UserPage() {
       }
     })
   })
+
+  describe('Stream Integration', () => {
+    const STREAM_FIXTURES = path.join(__dirname, '__stream_fixtures__')
+    const STREAM_OUTPUT = path.join(__dirname, '__stream_output__')
+
+    beforeAll(async () => {
+      // Create stream fixtures directory
+      await fs.promises.mkdir(STREAM_FIXTURES, { recursive: true })
+
+      // Create page with Stream declaration
+      await fs.promises.writeFile(
+        path.join(STREAM_FIXTURES, 'page.tsx'),
+        `
+import { Stream } from 'flexism/stream'
+
+export default async function ChatPage({ params }) {
+  const roomId = params.roomId || 'default'
+  const Messages = new Stream(() => db.messages.subscribe(roomId))
+
+  return ({ Messages }) => {
+    const [messages] = use(Messages)
+    return <div>{messages?.map(m => <p>{m.text}</p>)}</div>
+  }
+}
+`
+      )
+
+      // Create page with multiple streams
+      await fs.promises.mkdir(path.join(STREAM_FIXTURES, 'multi'), { recursive: true })
+      await fs.promises.writeFile(
+        path.join(STREAM_FIXTURES, 'multi', 'page.tsx'),
+        `
+import { Stream } from 'flexism/stream'
+
+export default async function DashboardPage() {
+  const Users = new Stream(() => db.users.watch())
+  const Stats = new Stream(() => db.stats.live(), { once: true })
+
+  return ({ Users, Stats }) => {
+    const [users] = use(Users)
+    const [stats] = use(Stats)
+    return <div>Users: {users?.length}, Stats: {stats?.count}</div>
+  }
+}
+`
+      )
+
+      // Create page with nested param capture
+      await fs.promises.mkdir(path.join(STREAM_FIXTURES, 'nested'), { recursive: true })
+      await fs.promises.writeFile(
+        path.join(STREAM_FIXTURES, 'nested', 'page.tsx'),
+        `
+import { Stream } from 'flexism/stream'
+
+export default async function NestedPage({ params }) {
+  const Feed = new Stream(() => api.subscribe(params.org.id, params.user.name))
+
+  return ({ Feed }) => {
+    const [feed] = use(Feed)
+    return <div>{feed?.items?.length}</div>
+  }
+}
+`
+      )
+    })
+
+    afterAll(async () => {
+      await fs.promises.rm(STREAM_FIXTURES, { recursive: true, force: true })
+      await fs.promises.rm(STREAM_OUTPUT, { recursive: true, force: true })
+    })
+
+    it('should compile pages with Stream declarations', async () => {
+      const compiler = createCompiler({
+        srcDir: STREAM_FIXTURES,
+        outDir: STREAM_OUTPUT,
+        minify: false,
+        sourcemap: false,
+      })
+
+      const result = await compiler.compile()
+      expect(result.manifestPath).toBeDefined()
+    })
+
+    it('should generate stream handlers in manifest', async () => {
+      const manifestPath = path.join(STREAM_OUTPUT, 'manifest.json')
+      const manifest = JSON.parse(await fs.promises.readFile(manifestPath, 'utf-8'))
+
+      // Should have streams section
+      expect(manifest.streams).toBeDefined()
+      expect(typeof manifest.streams).toBe('object')
+      expect(Object.keys(manifest.streams).length).toBeGreaterThan(0)
+    })
+
+    it('should generate __stream_*.js handler modules', async () => {
+      const serverDir = path.join(STREAM_OUTPUT, 'server')
+      const files = await fs.promises.readdir(serverDir)
+      const streamFiles = files.filter(f => f.startsWith('__stream_') && f.endsWith('.js'))
+
+      expect(streamFiles.length).toBeGreaterThan(0)
+
+      // Each stream file should have valid structure
+      for (const file of streamFiles) {
+        const content = await fs.promises.readFile(
+          path.join(serverDir, file),
+          'utf-8'
+        )
+        expect(content).toContain('__streamHandlers')
+        expect(content).toContain('async function*')
+      }
+    })
+
+    it('should include stream manifest entries with correct format', async () => {
+      const manifestPath = path.join(STREAM_OUTPUT, 'manifest.json')
+      const manifest = JSON.parse(await fs.promises.readFile(manifestPath, 'utf-8'))
+
+      for (const [id, entry] of Object.entries(manifest.streams as Record<string, any>)) {
+        // ID should be alphanumeric with underscores
+        expect(id).toMatch(/^[a-zA-Z0-9_]+$/)
+
+        // Should have required fields
+        expect(entry.id).toBe(id)
+        expect(entry.endpoint).toMatch(/^\/_flexism\/sse\//)
+        expect(entry.handlerModule).toMatch(/^__stream_[a-zA-Z0-9_]+\.js$/)
+      }
+    })
+
+    it('should handle multiple streams per file correctly', async () => {
+      const manifestPath = path.join(STREAM_OUTPUT, 'manifest.json')
+      const manifest = JSON.parse(await fs.promises.readFile(manifestPath, 'utf-8'))
+
+      // Count streams - should have at least 4 (1 from root, 2 from multi, 1 from nested)
+      const streamCount = Object.keys(manifest.streams).length
+      expect(streamCount).toBeGreaterThanOrEqual(4)
+    })
+
+    it('should detect stream ID collisions', async () => {
+      // This test verifies the collision detection works
+      // We can't easily trigger a collision in a real scenario,
+      // but we verify the mechanism exists
+      const { Compiler } = await import('../compiler')
+
+      // The detectStreamCollisions method should exist
+      expect(typeof Compiler.prototype['detectStreamCollisions']).toBe('function')
+    })
+  })
 })

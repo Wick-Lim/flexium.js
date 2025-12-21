@@ -351,6 +351,7 @@ export class Emitter {
         'flexium',
         'flexium/core',
         'flexium/dom',
+        'flexium/stream',
         'flexium/jsx-runtime',
         'flexium/jsx-dev-runtime',
       ],

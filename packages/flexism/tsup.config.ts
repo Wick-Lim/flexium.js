@@ -7,6 +7,7 @@ export default defineConfig({
     client: 'src/client/index.ts',
     cli: 'src/cli/index.ts',
     compiler: 'src/compiler/index.ts',
+    stream: 'src/stream/index.ts',
   },
   format: ['esm', 'cjs'],
   dts: {
@@ -15,6 +16,7 @@ export default defineConfig({
       server: 'src/server/index.ts',
       client: 'src/client/index.ts',
       compiler: 'src/compiler/index.ts',
+      stream: 'src/stream/index.ts',
     },
   },
   splitting: true,
