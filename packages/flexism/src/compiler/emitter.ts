@@ -326,10 +326,35 @@ export class Emitter {
   private async bundleClient(entries: string[], outDir: string): Promise<string> {
     const outfile = path.join(outDir, 'index.js')
 
-    // Create a virtual entry point that imports all client modules
-    const entryContent = entries
-      .map((entry, i) => `export * from './${path.basename(entry)}'`)
-      .join('\n')
+    // Create a virtual entry point that imports and hydrates all client modules
+    const imports: string[] = []
+    const hydrateCalls: string[] = []
+
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i]
+      const baseName = path.basename(entry, '.tsx').replace('.client', '')
+      // Convert module name to unique id (e.g., _index -> index)
+      const uniqueId = baseName.replace(/^_/, '').replace(/_/g, '-')
+
+      imports.push(`import * as client_${i} from './${path.basename(entry)}'`)
+
+      // Find the hydrate function for this module
+      hydrateCalls.push(`
+  // Hydrate ${baseName}
+  const hydrateFn_${i} = Object.values(client_${i}).find(fn => typeof fn === 'function' && fn.name.startsWith('hydrateComponent'))
+  if (hydrateFn_${i}) {
+    hydrateFn_${i}(document.body, window.__FLEXISM_STATE__ || {})
+  }`)
+    }
+
+    const entryContent = `${imports.join('\n')}
+
+// Auto-hydration on load
+if (typeof window !== 'undefined') {
+  const state = window.__FLEXISM_STATE__ || {}
+${hydrateCalls.join('\n')}
+}
+`
 
     const entryPath = path.join(outDir, '_entry.tsx')
     await fs.promises.writeFile(entryPath, entryContent)
