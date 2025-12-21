@@ -9,8 +9,8 @@
     "dev:local": "rm -rf node_modules/flexium node_modules/flexism .flexism && ln -sf ../../../../flexium node_modules/flexium && ln -sf ../../../../flexism node_modules/flexism && flexism dev"
   },
   "dependencies": {
-    "flexium": "^0.15.14",
-    "flexism": "^0.15.14"
+    "flexium": "^0.16.0",
+    "flexism": "^0.16.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

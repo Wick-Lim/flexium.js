@@ -1,4 +1,4 @@
-export const VERSION = '0.15.14'
+export const VERSION = '0.16.0'
 
 // Use subpaths for actual functionality:
 // - flexium-canvas/dom: Canvas, DrawRect, DrawCircle, DrawArc, DrawLine, DrawPath, DrawText
