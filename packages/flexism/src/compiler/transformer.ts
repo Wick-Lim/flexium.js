@@ -159,17 +159,27 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(props)${body}
       // Add capture and toRef conversion
       const captureParams = stream.capturedVars
         .map(v => {
-          const paramName = v.properties.length > 0 ? v.properties[v.properties.length - 1] : v.base
+          // Use full property path with underscores to avoid collisions
+          // e.g., params.user.id → "user_id", params.roomId → "roomId"
+          const paramName = v.properties.length > 0 ? v.properties.join('_') : v.base
           return `"${paramName}": ${v.path}`
         })
         .join(', ')
 
       streamConversions.push(`  const __streamRef_${varName} = ${varName}.capture({ ${captureParams} }).toRef()`)
-      propsEntries.push(`__streams: { ${streams.map((s, i) => `${s.variableName || `__stream_${i}`}: __streamRef_${s.variableName || `__stream_${i}`}.toJSON()`).join(', ')} }`)
+    }
+
+    // Add __streams object with all stream refs (outside loop to avoid duplicates)
+    if (hasStreams) {
+      const streamsObject = streams.map((s, i) => {
+        const varName = s.variableName || `__stream_${i}`
+        return `${varName}: __streamRef_${varName}.toJSON()`
+      }).join(', ')
+      propsEntries.push(`__streams: { ${streamsObject} }`)
     }
 
     const propsObject = propsEntries.length > 0
-      ? `{ ${propsEntries.filter((v, i, arr) => arr.indexOf(v) === i).join(', ')} }`
+      ? `{ ${propsEntries.join(', ')} }`
       : '{}'
 
     const streamImport = hasStreams ? `import { Stream } from 'flexism/stream'\n` : ''
@@ -235,15 +245,22 @@ export function ${hydrateName}(container, serverData) {
     // For client body, we need to extract just the inner content
     let cleaned = body.trim()
 
-    // Remove surrounding braces if present
-    if (cleaned.startsWith('{')) {
-      cleaned = cleaned.slice(1)
-    }
-    if (cleaned.endsWith('}')) {
-      cleaned = cleaned.slice(0, -1)
+    // Check if this is a block body with braces
+    const isBlockBody = cleaned.startsWith('{') && cleaned.endsWith('}')
+
+    if (isBlockBody) {
+      // Remove surrounding braces
+      cleaned = cleaned.slice(1, -1).trim()
+    } else {
+      // Arrow function with expression body (implicit return)
+      // e.g., () => <div>Hello</div>
+      // Need to add return statement
+      if (!cleaned.startsWith('return ') && !cleaned.startsWith('return\n')) {
+        cleaned = `return ${cleaned}`
+      }
     }
 
-    return cleaned.trim()
+    return cleaned
   }
 
   private routePathToId(routePath: string): string {

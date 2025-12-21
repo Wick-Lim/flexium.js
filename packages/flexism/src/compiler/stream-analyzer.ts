@@ -36,10 +36,10 @@ export class StreamAnalyzer {
     const streams: StreamAnalysis[] = []
     let streamIndex = 0
 
-    // Walk AST to find `new Stream(...)` expressions
-    this.walkNode(this.ast, (node) => {
+    // Walk AST to find `new Stream(...)` expressions, tracking parents
+    this.walkNode(this.ast, null, (node, parent) => {
       if (this.isStreamConstruction(node)) {
-        const analysis = this.analyzeStreamConstruction(node, streamIndex)
+        const analysis = this.analyzeStreamConstruction(node, parent, streamIndex)
         if (analysis) {
           streams.push(analysis)
           streamIndex++
@@ -64,15 +64,17 @@ export class StreamAnalyzer {
   /**
    * Analyze a Stream construction and extract info
    */
-  private analyzeStreamConstruction(node: any, index: number): StreamAnalysis | null {
+  private analyzeStreamConstruction(node: any, parent: any, index: number): StreamAnalysis | null {
     const args = node.arguments || []
     if (args.length === 0) return null
 
-    const callbackArg = args[0]?.expression
-    if (!callbackArg) return null
+    // SWC uses 'expression' in some versions, 'expr' in others
+    const firstArg = args[0]
+    const callbackArg = firstArg?.expression ?? firstArg?.expr ?? firstArg
+    if (!callbackArg || !callbackArg.span) return null
 
     // Find the variable name this stream is assigned to
-    const variableName = this.findAssignmentTarget(node) || `stream_${index}`
+    const variableName = this.findAssignmentTarget(node, parent) || `stream_${index}`
 
     // Extract callback code
     const callbackSpan: CodeSpan = {
@@ -85,8 +87,9 @@ export class StreamAnalyzer {
     const capturedVars = this.findCapturedVariables(callbackArg)
 
     // Extract options if present
-    const optionsArg = args[1]?.expression
-    const options = optionsArg ? this.parseOptions(optionsArg) : {}
+    const secondArg = args[1]
+    const optionsArg = secondArg?.expression ?? secondArg?.expr ?? secondArg
+    const options = optionsArg?.span ? this.parseOptions(optionsArg) : {}
 
     // Generate deterministic ID
     const id = this.generateStreamId(index)
@@ -112,7 +115,7 @@ export class StreamAnalyzer {
     const pathHash = createHash('md5')
       .update(this.filePath)
       .digest('hex')
-      .slice(0, 8)
+      .slice(0, 12)
 
     // Convert file path to valid identifier
     const pathPart = this.filePath
@@ -127,9 +130,30 @@ export class StreamAnalyzer {
   /**
    * Find the variable name the Stream is assigned to
    */
-  private findAssignmentTarget(node: any): string | null {
-    // This is tricky - we need to look at parent context
-    // For now, return null and let transformer handle it
+  private findAssignmentTarget(node: any, parent: any): string | null {
+    if (!parent) return null
+
+    // Case 1: VariableDeclarator - const Messages = new Stream(...)
+    if (parent.type === 'VariableDeclarator') {
+      if (parent.id?.type === 'Identifier') {
+        return parent.id.value
+      }
+    }
+
+    // Case 2: AssignmentExpression - Messages = new Stream(...)
+    if (parent.type === 'AssignmentExpression') {
+      if (parent.left?.type === 'Identifier') {
+        return parent.left.value
+      }
+    }
+
+    // Case 3: Property in object - { messages: new Stream(...) }
+    if (parent.type === 'KeyValueProperty') {
+      if (parent.key?.type === 'Identifier') {
+        return parent.key.value
+      }
+    }
+
     return null
   }
 
@@ -151,7 +175,7 @@ export class StreamAnalyzer {
     }
 
     // Walk callback body to find member expressions like params.roomId
-    this.walkNode(callbackNode.body, (node) => {
+    this.walkNode(callbackNode.body, null, (node) => {
       if (node.type === 'MemberExpression') {
         const path = this.extractMemberPath(node)
         if (path && !localVars.has(path.base)) {
@@ -254,22 +278,22 @@ export class StreamAnalyzer {
   }
 
   /**
-   * Walk AST node and call visitor for each node
+   * Walk AST node and call visitor for each node with parent tracking
    */
-  private walkNode(node: any, visitor: (node: any) => void): void {
+  private walkNode(node: any, parent: any, visitor: (node: any, parent: any) => void): void {
     if (!node || typeof node !== 'object') return
 
-    visitor(node)
+    visitor(node, parent)
 
     // Walk children based on node type
     for (const key of Object.keys(node)) {
       const value = node[key]
       if (Array.isArray(value)) {
         for (const item of value) {
-          this.walkNode(item, visitor)
+          this.walkNode(item, node, visitor)
         }
       } else if (value && typeof value === 'object' && value.type) {
-        this.walkNode(value, visitor)
+        this.walkNode(value, node, visitor)
       }
     }
   }
@@ -279,7 +303,8 @@ export class StreamAnalyzer {
   }
 
   private adjustSpanEnd(position: number): number {
-    return position - this.baseOffset + 1
+    // SWC spans are [start, end) so end is already exclusive
+    return position - this.baseOffset
   }
 }
 

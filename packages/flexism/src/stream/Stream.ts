@@ -123,18 +123,6 @@ export class Stream<T> {
   }
 
   /**
-   * Execute the callback to get async iterable
-   * Called by SSE endpoint handler
-   */
-  async execute(): Promise<AsyncIterable<T>> {
-    const result = this.callback()
-    if (result instanceof Promise) {
-      return await result
-    }
-    return result
-  }
-
-  /**
    * Check if value is a Stream instance
    */
   static isStream(value: unknown): value is Stream<unknown> {

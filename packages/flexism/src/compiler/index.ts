@@ -46,7 +46,6 @@ export type { StreamTransformResult } from './stream-transformer'
 // Stream Emitter
 export {
   emitStreamHandlers,
-  hashFilePath,
   analysisToEndpoint,
   analysesToEndpoints,
 } from './stream-emitter'
@@ -146,6 +145,9 @@ export class Compiler {
       const results = transformFile(source, analysis, context)
       allTransformResults.push(...results)
     }
+
+    // Check for stream ID collisions
+    this.detectStreamCollisions(allStreamAnalyses)
 
     // Emit stream handlers
     const streamEndpoints: StreamEndpoint[] = analysesToEndpoints(allStreamAnalyses)
@@ -404,6 +406,26 @@ export class Compiler {
     const asyncExports = analysis.exports.filter(e => e.isAsync)
     if (asyncExports.length > 0) {
       console.log(`[flexism]   - Async exports: ${asyncExports.map(e => e.name).join(', ')}`)
+    }
+  }
+
+  /**
+   * Detect stream ID collisions across all analyzed streams
+   */
+  private detectStreamCollisions(streams: StreamAnalysis[]): void {
+    const seen = new Map<string, StreamAnalysis>()
+
+    for (const stream of streams) {
+      const existing = seen.get(stream.id)
+      if (existing) {
+        throw new Error(
+          `[flexism] Stream ID collision detected: "${stream.id}"\n` +
+          `  - First: ${existing.variableName} at position ${existing.position.start}\n` +
+          `  - Second: ${stream.variableName} at position ${stream.position.start}\n` +
+          `This is likely a bug. Please report this issue.`
+        )
+      }
+      seen.set(stream.id, stream)
     }
   }
 }

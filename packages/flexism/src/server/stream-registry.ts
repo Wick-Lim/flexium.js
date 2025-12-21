@@ -7,7 +7,9 @@
 
 import { sse } from './sse'
 
-export type StreamHandler = (params: Record<string, string>) => AsyncIterable<unknown>
+export type StreamHandler = (
+  params: Record<string, string>
+) => AsyncIterable<unknown> | AsyncGenerator<unknown, void, unknown>
 
 interface RegisteredStream {
   id: string

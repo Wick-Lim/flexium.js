@@ -6,7 +6,6 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { createHash } from 'crypto'
 import type { StreamEndpoint, StreamManifestEntry, StreamAnalysis } from './types'
 
 export interface StreamEmitResult {
@@ -96,19 +95,38 @@ function groupEndpointsBySource(
  */
 function generateHandlerModule(endpoints: StreamEndpoint[]): string {
   const handlers = endpoints.map((endpoint) => {
-    const paramNames = endpoint.params.map((p) => {
-      // Extract last part of path (e.g., "params.roomId" → "roomId")
-      const parts = p.split('.')
-      return parts[parts.length - 1]
-    })
+    // Group captured vars by their base (e.g., params.roomId → params: {roomId})
+    const varsByBase = new Map<string, string[]>()
+    for (const paramPath of endpoint.params) {
+      const parts = paramPath.split('.')
+      const base = parts[0]
+      const rest = parts.slice(1).join('.')
+      const existing = varsByBase.get(base) || []
+      if (rest) {
+        existing.push(rest)
+      }
+      varsByBase.set(base, existing)
+    }
 
-    const paramsDestructure =
-      paramNames.length > 0
-        ? `const { ${paramNames.join(', ')} } = __params`
-        : ''
+    // Build variable reconstruction code
+    const reconstructions: string[] = []
+    for (const [base, props] of varsByBase) {
+      if (props.length === 0) {
+        // Simple variable like `userId` - just extract it
+        reconstructions.push(`    const ${base} = __params["${base}"]`)
+      } else {
+        // Nested like params.roomId or params.user.id - reconstruct the object
+        const nestedObj = buildNestedObject(props)
+        reconstructions.push(`    const ${base} = ${nestedObj}`)
+      }
+    }
+
+    const reconstructionCode = reconstructions.length > 0
+      ? reconstructions.join('\n') + '\n'
+      : ''
 
     return `  "${endpoint.id}": async function* (__params) {
-${paramsDestructure ? `    ${paramsDestructure}\n` : ''}    const __callback = ${endpoint.handlerCode}
+${reconstructionCode}    const __callback = ${endpoint.handlerCode}
     const __iterable = await Promise.resolve(__callback())
     yield* __iterable
   }`
@@ -124,10 +142,53 @@ ${handlers.join(',\n')}
 }
 
 /**
- * Generate deterministic hash for a file path
+ * Build nested object literal from property paths
+ * e.g., ["roomId", "user.id", "user.name"] → { roomId: __params["roomId"], user: { id: __params["user_id"], name: __params["user_name"] } }
  */
-export function hashFilePath(filePath: string): string {
-  return createHash('md5').update(filePath).digest('hex').slice(0, 8)
+function buildNestedObject(props: string[]): string {
+  // Build a tree structure first
+  const tree: Record<string, any> = {}
+
+  for (const prop of props) {
+    const parts = prop.split('.')
+    let current = tree
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i]
+      const isLeaf = i === parts.length - 1
+
+      if (isLeaf) {
+        // Leaf node - use full prop path with underscores as param key
+        // This matches the key format used in transformer.ts
+        current[part] = { __leaf: true, key: prop.replace(/\./g, '_') }
+      } else {
+        // Branch node
+        if (!current[part]) {
+          current[part] = {}
+        }
+        current = current[part]
+      }
+    }
+  }
+
+  // Convert tree to object literal string
+  return treeToObjectLiteral(tree)
+}
+
+function treeToObjectLiteral(tree: Record<string, any>): string {
+  const entries: string[] = []
+
+  for (const [key, value] of Object.entries(tree)) {
+    if (value.__leaf) {
+      // Leaf node - reference __params
+      entries.push(`${key}: __params["${value.key}"]`)
+    } else {
+      // Branch node - recurse
+      entries.push(`${key}: ${treeToObjectLiteral(value)}`)
+    }
+  }
+
+  return `{ ${entries.join(', ')} }`
 }
 
 /**
