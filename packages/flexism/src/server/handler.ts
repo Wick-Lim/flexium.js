@@ -368,6 +368,12 @@ async function handlePageRoute(
   try {
     const { html, state } = renderToString(fullContent, { hydrate: true })
 
+    // Merge loader data (pageData) with render state for client hydration
+    const fullState = {
+      ...state,
+      ...pageData,
+    }
+
     // Check if root layout provides full HTML document
     const isFullDocument = html.trimStart().startsWith('<!DOCTYPE') ||
                            html.trimStart().startsWith('<html')
@@ -375,14 +381,14 @@ async function handlePageRoute(
     let finalHtml: string
     if (isFullDocument) {
       // Layout provides full document, just inject scripts
-      finalHtml = injectScripts(html, clientBundle, state, streamRefs)
+      finalHtml = injectScripts(html, clientBundle, fullState, streamRefs)
     } else {
       // Wrap in document shell
       const streamScript = streamRefs ? createStreamScript(streamRefs) : ''
       finalHtml = createDocumentShell({
         content: html,
         scripts: [clientBundle],
-        stateScript: (state ? createStateScript(state) : '') + streamScript,
+        stateScript: (fullState ? createStateScript(fullState) : '') + streamScript,
       })
     }
 

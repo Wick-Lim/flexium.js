@@ -276,7 +276,7 @@ export function ${componentName}(${propsParam}) {${streamRestorationBlock}${this
 
 // Hydration entry
 export function ${hydrateName}(container, serverData) {
-  hydrate(${componentName}, container, serverData)
+  hydrate({ type: ${componentName}, props: serverData, children: [], key: undefined }, container, {})
 }
 `.trim()
   }
