@@ -1,4 +1,8 @@
-export default function RootLayout({ children }) {
+interface LayoutProps {
+  children: any
+}
+
+export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en">
       <head>
@@ -7,9 +11,7 @@ export default function RootLayout({ children }) {
         <title>Flexism App</title>
         <script src="https://cdn.tailwindcss.com"></script>
       </head>
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
