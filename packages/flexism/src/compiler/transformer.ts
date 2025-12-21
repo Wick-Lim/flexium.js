@@ -74,9 +74,12 @@ export class Transformer {
         ? this.extractCode(exp.serverBody.start, exp.serverBody.end)
         : ''
 
+      // Use the parameter pattern from analysis (e.g., '{ children }')
+      const paramPattern = exp.paramPattern || 'props'
+
       return {
         filePath: this.analysis.filePath,
-        serverCode: this.wrapServerComponent(exp.name, serverCode, exp.isAsync),
+        serverCode: this.wrapServerComponent(exp.name, serverCode, exp.isAsync, paramPattern),
         clientCode: '',
         route: this.createRouteInfo(exp.name, 'component', []),
       }
@@ -93,7 +96,7 @@ export class Transformer {
 
     return {
       filePath: this.analysis.filePath,
-      serverCode: this.generateServerLoader(exp.name, serverCode, exp.sharedProps, exp.isAsync),
+      serverCode: this.generateServerCode(exp.name, serverCode, clientCode, exp.sharedProps, exp.isAsync),
       clientCode: this.generateClientComponent(exp.name, clientCode, exp.sharedProps),
       route: this.createRouteInfo(exp.name, 'component', exp.sharedProps),
     }
@@ -131,19 +134,20 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(request, context)${body}
 `.trim()
   }
 
-  private wrapServerComponent(name: string, body: string, isAsync: boolean): string {
+  private wrapServerComponent(name: string, body: string, isAsync: boolean, paramPattern: string): string {
     const asyncKeyword = isAsync ? 'async ' : ''
     const exportPrefix = name === 'default' ? 'export default' : 'export'
     const funcName = name === 'default' ? '' : ` ${name}`
     return `
 // Server Component: ${name} (no hydration)
-${exportPrefix} ${asyncKeyword}function${funcName}(props)${body}
+${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern})${body}
 `.trim()
   }
 
-  private generateServerLoader(
+  private generateServerCode(
     name: string,
     serverBody: string,
+    clientBody: string,
     sharedProps: string[],
     isAsync: boolean
   ): string {
@@ -185,11 +189,41 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(props)${body}
     const streamImport = hasStreams ? `import { Stream } from 'flexism/stream'\n` : ''
     const streamConversionCode = streamConversions.length > 0 ? '\n' + streamConversions.join('\n') + '\n' : ''
 
+    // Get stream variable names to exclude from props (same as client)
+    const streamVarNames = new Set(
+      streams.map(s => s.variableName || `__stream_${streams.indexOf(s)}`)
+    )
+
+    // Build props for Component (excluding stream variables)
+    const componentProps = sharedProps.filter(prop => !streamVarNames.has(prop))
+    if (hasStreams) {
+      componentProps.push('__streams')
+    }
+
+    const componentPropsParam = componentProps.length > 0
+      ? `{ ${componentProps.join(', ')} }`
+      : 'props'
+
+    // Generate stream restoration code for Component (same as client)
+    const streamRestoration = streams.map(stream => {
+      const varName = stream.variableName || `__stream_${streams.indexOf(stream)}`
+      return `  const ${varName} = __streams?.${varName} ? StreamRef.fromJSON(__streams.${varName}) : null`
+    }).join('\n')
+
+    const streamRestorationBlock = hasStreams ? `\n${streamRestoration}\n` : ''
+    const streamRefImport = hasStreams ? `import { StreamRef } from 'flexism/stream'\n` : ''
+
     return `
-${streamImport}// Server Loader for: ${name}
+${streamImport}${streamRefImport}import { use } from 'flexium/core'
+
+// Server Loader for: ${name}
 export ${isAsync ? 'async ' : ''}function loader(props) {
   ${this.cleanServerBody(serverBody)}${streamConversionCode}
   return ${propsObject}
+}
+
+// Server Component for SSR
+export function Component(${componentPropsParam}) {${streamRestorationBlock}${this.cleanClientBody(clientBody)}
 }
 `.trim()
   }

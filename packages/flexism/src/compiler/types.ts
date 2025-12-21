@@ -47,6 +47,8 @@ export interface ExportInfo {
   clientBody: CodeSpan | null
   /** Props passed from server to client */
   sharedProps: string[]
+  /** Parameter pattern string for server-only components (e.g., '{ children }') */
+  paramPattern: string | null
 }
 
 export interface FunctionAnalysis {
@@ -55,6 +57,8 @@ export interface FunctionAnalysis {
   serverBody: CodeSpan | null
   clientBody: CodeSpan | null
   sharedProps: string[]
+  /** Parameter pattern string for server-only components (e.g., '{ children }') */
+  paramPattern: string | null
 }
 
 export interface CodeSpan {

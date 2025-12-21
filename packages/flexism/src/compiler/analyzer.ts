@@ -50,6 +50,7 @@ export class Analyzer {
             serverBody: analysis.serverBody,
             clientBody: analysis.clientBody,
             sharedProps: analysis.sharedProps,
+            paramPattern: analysis.paramPattern,
           })
         }
       }
@@ -70,6 +71,7 @@ export class Analyzer {
             serverBody: analysis.serverBody,
             clientBody: analysis.clientBody,
             sharedProps: analysis.sharedProps,
+            paramPattern: analysis.paramPattern,
           })
         }
       }
@@ -103,8 +105,18 @@ export class Analyzer {
     let clientBody: CodeSpan | null = null
     const sharedProps: string[] = []
 
+    // Build parameter pattern string from AST structure
+    // (extracting from source is unreliable due to SWC span offsets)
+    let paramPattern: string | null = null
+    if (node.params && node.params.length > 0) {
+      const firstParam = node.params[0]
+      // Handle Parameter wrapper (SWC wraps params in a Parameter node)
+      const pat = firstParam.pat || firstParam
+      paramPattern = this.buildPatternString(pat)
+    }
+
     if (!node.body) {
-      return { isAsync, returnsFunction, serverBody, clientBody, sharedProps }
+      return { isAsync, returnsFunction, serverBody, clientBody, sharedProps, paramPattern }
     }
 
     const body = node.body
@@ -159,7 +171,53 @@ export class Analyzer {
       }
     }
 
-    return { isAsync, returnsFunction, serverBody, clientBody, sharedProps }
+    return { isAsync, returnsFunction, serverBody, clientBody, sharedProps, paramPattern }
+  }
+
+  /**
+   * Build a parameter pattern string from AST node
+   */
+  private buildPatternString(node: any): string {
+    if (!node) return 'props'
+
+    switch (node.type) {
+      case 'Identifier':
+        return node.value
+
+      case 'ObjectPattern': {
+        const props = node.properties
+          .map((prop: any) => {
+            if (prop.type === 'AssignmentPatternProperty') {
+              return prop.key?.value || prop.value?.value
+            }
+            if (prop.type === 'KeyValuePatternProperty') {
+              return prop.key?.value
+            }
+            if (prop.type === 'RestElement') {
+              return `...${this.buildPatternString(prop.argument)}`
+            }
+            return null
+          })
+          .filter(Boolean)
+        return `{ ${props.join(', ')} }`
+      }
+
+      case 'ArrayPattern': {
+        const elements = node.elements
+          .map((el: any) => el ? this.buildPatternString(el) : '')
+          .join(', ')
+        return `[${elements}]`
+      }
+
+      case 'RestElement':
+        return `...${this.buildPatternString(node.argument)}`
+
+      case 'AssignmentPattern':
+        return this.buildPatternString(node.left)
+
+      default:
+        return 'props'
+    }
   }
 
   private findReturnStatement(body: any): any | null {
