@@ -1,0 +1,4 @@
+# Debug files
+src/__tests__/__debug_fixtures__/
+src/__tests__/__debug_output__/
+src/__tests__/debug-compile.ts
