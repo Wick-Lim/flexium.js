@@ -39,12 +39,11 @@ export { use, Context } from './use'
 export type { Setter, ResourceControl, UseContext, UseOptions } from './use'
 
 // Stream - Reactive SSE data source
-export { Stream, StreamRef, SSEClient } from './stream'
+export { Stream, SendableStream, SSEClient } from './stream'
 export type {
   StreamOptions,
   StreamCallback,
-  StreamRefOptions,
-  SerializedStreamRef,
+  SerializedStream,
   SSEClientOptions,
 } from './stream'
 
@@ -54,17 +53,8 @@ export {
   getIsHydrating,
 } from './runtime'
 
-// Environment variables
-export {
-  loadEnv,
-  parseEnvFile,
-  getEnvDefine,
-  generateEnvScript,
-  getEnv,
-  requireEnv,
-  validateEnv,
-} from './env'
-export type { EnvConfig, LoadedEnv, EnvSchema } from './env'
+// Note: Environment variables (loadEnv, parseEnvFile, etc.) are server-only
+// Import from 'flexism/server' instead
 
 // Types
 export type {

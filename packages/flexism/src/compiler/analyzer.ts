@@ -7,7 +7,7 @@
  */
 
 import { parse, type Module } from '@swc/core'
-import type { AnalysisResult, ExportInfo, FunctionAnalysis, CodeSpan } from './types'
+import type { AnalysisResult, ExportInfo, FunctionAnalysis, CodeSpan, ModuleDeclaration } from './types'
 import { HTTP_METHODS } from './types'
 
 export class Analyzer {
@@ -34,9 +34,25 @@ export class Analyzer {
     this.baseOffset = this.ast.span.start
 
     const exports: ExportInfo[] = []
+    const moduleDeclarations: ModuleDeclaration[] = []
 
-    // Analyze all exports
+    // Analyze all module-level items
     for (const item of this.ast.body) {
+      // Collect module-level variable declarations (const x = css({...}))
+      if (item.type === 'VariableDeclaration') {
+        const code = this.source.slice(
+          this.adjustSpanStart(item.span.start),
+          this.adjustSpanEnd(item.span.end)
+        )
+        moduleDeclarations.push({
+          code,
+          span: {
+            start: this.adjustSpanStart(item.span.start),
+            end: this.adjustSpanEnd(item.span.end),
+          },
+        })
+      }
+
       // export default async function Page() {}
       if (item.type === 'ExportDefaultDeclaration') {
         const decl = item.decl as any
@@ -80,6 +96,7 @@ export class Analyzer {
     return {
       filePath: this.filePath,
       exports,
+      moduleDeclarations,
     }
   }
 
@@ -92,10 +109,10 @@ export class Analyzer {
 
   /**
    * Adjust a span end position to be relative to source string
-   * SWC span.end is at the closing brace position, but we need to include it
+   * SWC spans are [start, end) - end is already exclusive (position after last char)
    */
   private adjustSpanEnd(position: number): number {
-    return position - this.baseOffset + 1
+    return position - this.baseOffset
   }
 
   private analyzeFunction(node: any): FunctionAnalysis {

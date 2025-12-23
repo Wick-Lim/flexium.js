@@ -5,7 +5,7 @@
  * based on the 2-function pattern analysis
  */
 
-import type { AnalysisResult, TransformResult, ExportInfo, RouteInfo, FileType, StreamAnalysis } from './types'
+import type { AnalysisResult, TransformResult, ExportInfo, RouteInfo, FileType, StreamAnalysis, ModuleDeclaration } from './types'
 
 export interface TransformContext {
   /** Source directory */
@@ -24,6 +24,8 @@ export interface TransformContext {
   loadingFile?: string | null
   /** Stream declarations in this file */
   streams?: StreamAnalysis[]
+  /** Module-level variable declarations */
+  moduleDeclarations?: ModuleDeclaration[]
 }
 
 export class Transformer {
@@ -152,6 +154,15 @@ export class Transformer {
     return this.source.slice(start, end)
   }
 
+  /**
+   * Get module-level declarations code block (e.g., const container = css({...}))
+   */
+  private getModuleDeclarationsBlock(): string {
+    const moduleDecls = this.analysis.moduleDeclarations || []
+    if (moduleDecls.length === 0) return ''
+    return '\n// Module-level declarations\n' + moduleDecls.map(d => d.code).join('\n') + '\n'
+  }
+
   private wrapApiHandler(name: string, body: string, isAsync: boolean): string {
     const asyncKeyword = isAsync ? 'async ' : ''
     const exportPrefix = name === 'default' ? 'export default' : 'export'
@@ -188,17 +199,25 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern})${body}
 
     for (const stream of streams) {
       const varName = stream.variableName || `__stream_${streams.indexOf(stream)}`
-      // Add capture and toRef conversion
-      const captureParams = stream.capturedVars
-        .map(v => {
-          // Use full property path with underscores to avoid collisions
-          // e.g., params.user.id → "user_id", params.roomId → "roomId"
-          const paramName = v.properties.length > 0 ? v.properties.join('_') : v.base
-          return `"${paramName}": ${v.path}`
-        })
-        .join(', ')
 
-      streamConversions.push(`  const __streamRef_${varName} = ${varName}.capture({ ${captureParams} }).toRef()`)
+      // For sendable streams, skip .capture() - params come from client request
+      // For non-sendable streams, capture closure variables to pass as URL params
+      if (stream.options.sendable) {
+        // Sendable streams get params at request time, just call toRef()
+        streamConversions.push(`  const __streamRef_${varName} = ${varName}.toRef()`)
+      } else {
+        // Non-sendable streams need captured variables from closure
+        const captureParams = stream.capturedVars
+          .map(v => {
+            // Use full property path with underscores to avoid collisions
+            // e.g., params.user.id → "user_id", params.roomId → "roomId"
+            const paramName = v.properties.length > 0 ? v.properties.join('_') : v.base
+            return `"${paramName}": ${v.path}`
+          })
+          .join(', ')
+
+        streamConversions.push(`  const __streamRef_${varName} = ${varName}.capture({ ${captureParams} }).toRef()`)
+      }
     }
 
     // Add __streams object with all stream refs (outside loop to avoid duplicates)
@@ -215,6 +234,7 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern})${body}
       : '{}'
 
     const streamImport = hasStreams ? `import { Stream } from 'flexism/stream'\n` : ''
+    // Note: Stream is only used on server for .toRef() call
     const streamConversionCode = streamConversions.length > 0 ? '\n' + streamConversions.join('\n') + '\n' : ''
 
     // Get stream variable names to exclude from props (same as client)
@@ -233,13 +253,18 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern})${body}
       : 'props'
 
     // Generate stream restoration code for Component (same as client)
+    // Stream.fromJSON() handles both regular and sendable streams
+    // Memoize with use() to prevent creating new Stream instances on each render
+    // use() with deps returns [value, meta], so we destructure to get just the value
     const streamRestoration = streams.map(stream => {
       const varName = stream.variableName || `__stream_${streams.indexOf(stream)}`
-      return `  const ${varName} = __streams?.${varName} ? StreamRef.fromJSON(__streams.${varName}) : null`
+      return `  const [${varName}] = use(() => __streams?.${varName} ? Stream.fromJSON(__streams.${varName}) : null, [])`
     }).join('\n')
 
     const streamRestorationBlock = hasStreams ? `\n${streamRestoration}\n` : ''
-    const streamRefImport = hasStreams ? `import { StreamRef } from 'flexism/stream'\n` : ''
+    const streamRefImport = hasStreams
+      ? `import { Stream } from 'flexism/stream'\n`
+      : ''
 
     // Get additional imports (CSS, etc.) excluding flexium/core and flexium/dom
     const excludedModules = ['flexium/core', 'flexium/dom', 'flexism/stream']
@@ -248,9 +273,12 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern})${body}
     }).join('\n')
     const additionalImportsBlock = additionalImports ? additionalImports + '\n' : ''
 
+    // Get module-level declarations
+    const moduleDeclarationsBlock = this.getModuleDeclarationsBlock()
+
     return `
 ${streamImport}${streamRefImport}import { use } from 'flexium/core'
-${additionalImportsBlock}
+${additionalImportsBlock}${moduleDeclarationsBlock}
 // Server Loader for: ${name}
 export ${isAsync ? 'async ' : ''}function loader(props) {
   ${this.cleanServerBody(serverBody)}${streamConversionCode}
@@ -293,10 +321,15 @@ export function Component(${componentPropsParam}) {${streamRestorationBlock}${th
     const hydrateName = `hydrateComponent_${uniqueId}`
 
     // Generate stream restoration code
-    const streamImport = hasStreams ? `import { StreamRef } from 'flexism/stream'\n` : ''
+    // Stream.fromJSON() handles both regular and sendable streams
+    // Memoize with use() to prevent creating new Stream instances on each render
+    // use() with deps returns [value, meta], so we destructure to get just the value
+    const streamImport = hasStreams
+      ? `import { Stream } from 'flexism/stream'\n`
+      : ''
     const streamRestoration = streams.map(stream => {
       const varName = stream.variableName || `__stream_${streams.indexOf(stream)}`
-      return `  const ${varName} = __streams?.${varName} ? StreamRef.fromJSON(__streams.${varName}) : null`
+      return `  const [${varName}] = use(() => __streams?.${varName} ? Stream.fromJSON(__streams.${varName}) : null, [])`
     }).join('\n')
 
     const streamRestorationBlock = hasStreams ? `\n${streamRestoration}\n` : ''
@@ -308,11 +341,14 @@ export function Component(${componentPropsParam}) {${streamRestorationBlock}${th
     }).join('\n')
     const additionalImportsBlock = additionalImports ? additionalImports + '\n' : ''
 
+    // Get module-level declarations (CSS variables, etc.)
+    const moduleDeclarationsBlock = this.getModuleDeclarationsBlock()
+
     return `
 // Client Component: ${name}
 ${streamImport}import { use } from 'flexium/core'
 import { hydrate } from 'flexium/dom'
-${additionalImportsBlock}
+${additionalImportsBlock}${moduleDeclarationsBlock}
 export function ${componentName}(${propsParam}) {${streamRestorationBlock}${this.cleanClientBody(clientBody)}
 }
 
@@ -328,11 +364,29 @@ export function ${hydrateName}(container, serverData) {
     let cleaned = body.trim()
 
     // Check if this is a block body with braces
-    const isBlockBody = cleaned.startsWith('{') && cleaned.endsWith('}')
+    if (cleaned.startsWith('{')) {
+      // Find the matching closing brace for the first opening brace
+      // This handles cases where SWC spans include extra content
+      let braceCount = 0
+      let matchingEnd = -1
 
-    if (isBlockBody) {
-      // Remove surrounding braces
-      cleaned = cleaned.slice(1, -1).trim()
+      for (let i = 0; i < cleaned.length; i++) {
+        const char = cleaned[i]
+        if (char === '{') {
+          braceCount++
+        } else if (char === '}') {
+          braceCount--
+          if (braceCount === 0) {
+            matchingEnd = i
+            break
+          }
+        }
+      }
+
+      if (matchingEnd !== -1) {
+        // Extract content between first { and its matching }
+        cleaned = cleaned.slice(1, matchingEnd).trim()
+      }
     } else {
       // Arrow function with expression body (implicit return)
       // e.g., () => <div>Hello</div>
@@ -367,8 +421,79 @@ export function ${hydrateName}(container, serverData) {
       cleaned = cleaned.slice(1)
     }
 
+    // Inject deterministic IDs into Stream constructor calls
+    cleaned = this.injectStreamIds(cleaned)
+
     // Don't remove trailing braces - they belong to statements in the body
     return cleaned.trim()
+  }
+
+  /**
+   * Inject deterministic IDs into Stream constructor calls
+   * Transforms: new Stream(callback, options)
+   * Into: new Stream(callback, options, "deterministic_id")
+   * Handles multi-line Stream constructions
+   */
+  private injectStreamIds(code: string): string {
+    const streams = this.context.streams || []
+    if (streams.length === 0) return code
+
+    let result = code
+
+    // Process streams in reverse order of their appearance
+    // to avoid position shifts when modifying code
+    const sortedStreams = [...streams].sort(
+      (a, b) => (b.position?.start || 0) - (a.position?.start || 0)
+    )
+
+    for (const stream of sortedStreams) {
+      // Find all occurrences of "new Stream" for this variable
+      result = this.injectIdIntoStreamConstruction(result, stream.variableName, stream.id)
+    }
+
+    return result
+  }
+
+  /**
+   * Inject ID into a multi-line Stream constructor call
+   * Finds the Stream construction and injects ID before the final closing paren
+   */
+  private injectIdIntoStreamConstruction(code: string, varName: string, id: string): string {
+    // Find pattern: varName = new Stream<...>(
+    // The type parameters are optional
+    const varPattern = new RegExp(
+      `(${varName}\\s*=\\s*new\\s+Stream)(?:<[^>]*>)?\\s*\\(`,
+      'g'
+    )
+
+    const match = varPattern.exec(code)
+    if (!match || match.index === undefined) return code
+
+    // Find the opening paren position
+    const openParenIdx = code.indexOf('(', match.index + match[0].length - 1)
+    if (openParenIdx === -1) return code
+
+    // Track parentheses to find the matching close paren
+    let parenCount = 1
+    let closeParenIdx = openParenIdx + 1
+
+    for (let i = openParenIdx + 1; i < code.length && parenCount > 0; i++) {
+      const char = code[i]
+      if (char === '(') parenCount++
+      else if (char === ')') {
+        parenCount--
+        if (parenCount === 0) {
+          closeParenIdx = i
+          break
+        }
+      }
+    }
+
+    // Insert the ID before the closing paren
+    const before = code.slice(0, closeParenIdx)
+    const after = code.slice(closeParenIdx)
+
+    return `${before}, "${id}"${after}`
   }
 }
 

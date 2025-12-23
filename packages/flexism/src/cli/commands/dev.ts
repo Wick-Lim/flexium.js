@@ -91,8 +91,8 @@ ${cyan}${bold}  ╔════════════════════�
       return
     }
 
-    // Serve static files from .flexism/client
-    if (url.pathname.startsWith('/_flexism/')) {
+    // Serve static files from .flexism/client (except SSE endpoints)
+    if (url.pathname.startsWith('/_flexism/') && !url.pathname.startsWith('/_flexism/sse/')) {
       await serveStaticFile(req, res, cwd, url.pathname)
       return
     }

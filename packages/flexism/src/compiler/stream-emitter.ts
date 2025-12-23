@@ -6,7 +6,26 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
+import { transformSync } from 'esbuild'
 import type { StreamEndpoint, StreamManifestEntry, StreamAnalysis } from './types'
+
+/**
+ * Strip TypeScript annotations from code, converting it to plain JavaScript
+ */
+function stripTypeScript(code: string): string {
+  try {
+    const result = transformSync(code, {
+      loader: 'ts',
+      target: 'es2020',
+      minify: false,
+      keepNames: false,
+    })
+    return result.code.trim()
+  } catch {
+    // If transformation fails, return original code
+    return code
+  }
+}
 
 export interface StreamEmitResult {
   /** Generated handler module paths */
@@ -33,6 +52,7 @@ export async function emitStreamHandlers(
   const handlerModules = new Map<string, string>()
   const manifestEntries: Record<string, StreamManifestEntry> = {}
 
+  // Process all streams - both sendable and non-sendable
   if (endpoints.length === 0) {
     return { handlerModules, manifestEntries }
   }
@@ -102,6 +122,19 @@ function isValidIdentifier(name: string): boolean {
  */
 function generateHandlerModule(endpoints: StreamEndpoint[]): string {
   const handlers = endpoints.map((endpoint) => {
+    // Sendable streams receive params directly from client
+    if (endpoint.sendable) {
+      // Strip TypeScript annotations from callback code
+      const jsCallback = stripTypeScript(`const __cb = ${endpoint.handlerCode}`)
+        .replace(/^const __cb = /, '')
+        .replace(/;$/, '')
+      return `  "${endpoint.id}": async function* (__params) {
+    const __callback = ${jsCallback}
+    yield* __callback(__params)
+  }`
+    }
+
+    // Non-sendable streams reconstruct captured variables
     // Group captured vars by their base (e.g., params.roomId → params: {roomId})
     const varsByBase = new Map<string, string[]>()
     for (const paramPath of endpoint.params) {
@@ -213,6 +246,7 @@ export function analysisToEndpoint(analysis: StreamAnalysis): StreamEndpoint {
     path: `/_flexism/sse/${analysis.id}`,
     handlerCode: analysis.callbackCode,
     params: analysis.capturedVars.map((v) => v.path),
+    sendable: analysis.options.sendable,
   }
 }
 

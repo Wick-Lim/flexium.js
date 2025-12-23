@@ -1,4 +1,4 @@
-import { use } from 'flexium/core'
+import { use, SendableStream } from 'flexism'
 import { css } from 'flexium/css'
 
 interface Message {
@@ -6,138 +6,266 @@ interface Message {
   content: string
 }
 
-export default function ChatPage() {
-  return () => {
-    const container = css({ maxWidth: '48rem', margin: '0 auto', padding: '4rem 1rem' })
-    const title = css({ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem' })
-    const subtitle = css({ color: '#94a3b8', marginBottom: '2rem' })
-    const card = css({ background: 'rgba(30, 41, 59, 0.5)', borderRadius: '1rem', border: '1px solid #334155', overflow: 'hidden' })
-    const messagesArea = css({ height: '400px', overflowY: 'auto', padding: '1.5rem' })
-    const messageRow = css({ marginBottom: '1rem', display: 'flex' })
-    const userRow = css({ justifyContent: 'flex-end' })
-    const assistantRow = css({ justifyContent: 'flex-start' })
-    const messageBubble = css({ maxWidth: '80%', padding: '0.75rem 1rem', borderRadius: '1rem', lineHeight: 1.5 })
-    const userBubble = css({ background: '#2563eb', borderBottomRightRadius: '0.25rem' })
-    const assistantBubble = css({ background: '#334155', borderBottomLeftRadius: '0.25rem' })
-    const inputArea = css({ display: 'flex', gap: '0.75rem', padding: '1rem', borderTop: '1px solid #334155', background: 'rgba(15, 23, 42, 0.5)' })
-    const input = css({ flex: 1, padding: '0.75rem 1rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '0.5rem', color: '#fff', outline: 'none' })
-    const sendBtn = css({ padding: '0.75rem 1.5rem', background: '#2563eb', borderRadius: '0.5rem', fontWeight: 500, transition: 'background 0.2s' })
-    const sendBtnDisabled = css({ opacity: 0.5, cursor: 'not-allowed' })
-    const cursor = css({ display: 'inline-block', width: '8px', height: '1em', background: '#60a5fa', marginLeft: '2px' })
-    const emptyState = css({ textAlign: 'center', color: '#64748b', padding: '4rem 1rem' })
-    const hint = css({ fontSize: '0.875rem', color: '#64748b', marginTop: '0.5rem' })
+// Styles (module-level - works on both server and client)
+const container = css({
+  maxWidth: '800px',
+  margin: '0 auto',
+  height: '100vh',
+  display: 'flex',
+  flexDirection: 'column',
+  background: '#0f172a',
+})
 
+const header = css({
+  padding: '1rem 1.5rem',
+  borderBottom: '1px solid #1e293b',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+})
+
+const avatar = css({
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '1.25rem',
+})
+
+const headerText = css({ flex: 1 })
+
+const headerTitle = css({
+  fontSize: '1.125rem',
+  fontWeight: 600,
+  color: '#f1f5f9',
+})
+
+const headerSub = css({
+  fontSize: '0.75rem',
+  color: '#64748b',
+})
+
+const chatArea = css({
+  flex: 1,
+  overflowY: 'auto',
+  padding: '1.5rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+})
+
+const messageRow = css({
+  display: 'flex',
+  gap: '0.75rem',
+  maxWidth: '85%',
+})
+
+const userRow = css({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  maxWidth: '100%',
+})
+
+const msgAvatar = css({
+  width: '32px',
+  height: '32px',
+  borderRadius: '50%',
+  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '0.875rem',
+  flexShrink: 0,
+})
+
+const bubble = css({
+  padding: '0.75rem 1rem',
+  borderRadius: '1rem',
+  lineHeight: 1.5,
+  whiteSpace: 'pre-wrap',
+})
+
+const assistantBubble = css({
+  background: '#1e293b',
+  color: '#e2e8f0',
+  borderTopLeftRadius: '0.25rem',
+})
+
+const userBubble = css({
+  background: '#3b82f6',
+  color: '#fff',
+  borderTopRightRadius: '0.25rem',
+  maxWidth: '85%',
+})
+
+const inputArea = css({
+  padding: '1rem 1.5rem',
+  borderTop: '1px solid #1e293b',
+  background: '#0f172a',
+})
+
+const inputWrapper = css({
+  display: 'flex',
+  gap: '0.75rem',
+  background: '#1e293b',
+  borderRadius: '1.5rem',
+  padding: '0.5rem 0.5rem 0.5rem 1.25rem',
+  alignItems: 'center',
+})
+
+const inputStyle = css({
+  flex: 1,
+  background: 'transparent',
+  border: 'none',
+  outline: 'none',
+  color: '#f1f5f9',
+  fontSize: '1rem',
+})
+
+const sendBtn = css({
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  background: '#3b82f6',
+  border: 'none',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'background 0.2s',
+})
+
+const sendBtnDisabled = css({
+  background: '#475569',
+  cursor: 'not-allowed',
+})
+
+const emptyState = css({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: '#64748b',
+  gap: '1rem',
+})
+
+const emptyIcon = css({
+  width: '64px',
+  height: '64px',
+  borderRadius: '50%',
+  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '2rem',
+})
+
+export default function StreamDemo() {
+  const responses = [
+    "Hello!", "I'm", "powered", "by", "Flexism's", "Stream", "API.",
+    "Flexism", "uses", "SSE", "to", "stream", "data", "in", "real-time.",
+    "Perfect", "for", "AI", "chat", "-", "responses", "shown", "as", "they're", "generated.",
+  ]
+
+  const Chat = new SendableStream<string, { message: string }>(
+    async function* (_p) {
+      let full = ''
+      for (const word of responses) {
+        full += word + ' '
+        yield full
+        await new Promise(r => setTimeout(r, 80))
+      }
+    },
+    { initial: '' }
+  )
+
+  return () => {
+    const [input, setInput] = use('')
+    const [streaming, send] = use(Chat)
     const [messages, setMessages] = use<Message[]>([])
-    const [inputValue, setInputValue] = use('')
     const [isStreaming, setIsStreaming] = use(false)
 
-    const sendMessage = async () => {
-      const text = inputValue.trim()
-      if (!text || isStreaming) return
+    const handleSubmit = (e: Event) => {
+      e.preventDefault()
+      if (!input.trim() || isStreaming) return
 
-      // Add user message
-      setMessages((prev: Message[]) => [...prev, { role: 'user', content: text }])
-      setInputValue('')
+      const userMessage = input.trim()
+      setMessages(prev => [...prev, { role: 'user', content: userMessage }])
+      setInput('')
       setIsStreaming(true)
+      send({ message: userMessage })
 
-      // Add empty assistant message
-      setMessages((prev: Message[]) => [...prev, { role: 'assistant', content: '' }])
-
-      try {
-        const response = await fetch('/api/stream', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text }),
-        })
-
-        const reader = response.body?.getReader()
-        const decoder = new TextDecoder()
-
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-
-            const chunk = decoder.decode(value)
-            const lines = chunk.split('\n')
-
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const data = JSON.parse(line.slice(6))
-                  if (data.token) {
-                    setMessages((prev: Message[]) => {
-                      const updated = [...prev]
-                      const last = updated[updated.length - 1]
-                      if (last.role === 'assistant') {
-                        last.content += data.token
-                      }
-                      return updated
-                    })
-                  }
-                } catch {}
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Stream error:', err)
-      }
-
-      setIsStreaming(false)
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
-        sendMessage()
-      }
+      // Simulate end of streaming after responses complete
+      setTimeout(() => {
+        setMessages(prev => [...prev, { role: 'assistant', content: streaming || responses.join(' ') }])
+        setIsStreaming(false)
+      }, (responses.join('').length * 30) + (responses.length * 300) + 500)
     }
 
     return (
       <div class={container}>
-        <h1 class={title}>AI Chat Demo</h1>
-        <p class={subtitle}>Real-time streaming responses with Server-Sent Events</p>
-
-        <div class={card}>
-          <div class={messagesArea}>
-            {messages.length === 0 ? (
-              <div class={emptyState}>
-                <div>Start a conversation!</div>
-                <div class={hint}>Try: "What is Flexism?" or "How does SSE work?"</div>
-              </div>
-            ) : (
-              messages.map((msg) => (
-                <div class={`${messageRow} ${msg.role === 'user' ? userRow : assistantRow}`}>
-                  <div class={`${messageBubble} ${msg.role === 'user' ? userBubble : assistantBubble}`}>
-                    {msg.content}
-                    {msg.role === 'assistant' && isStreaming && msg === messages[messages.length - 1] && (
-                      <span class={cursor} />
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
+        <div class={header}>
+          <div class={avatar}>AI</div>
+          <div class={headerText}>
+            <div class={headerTitle}>Flexism AI</div>
+            <div class={headerSub}>Powered by SendableStream</div>
           </div>
+        </div>
 
-          <div class={inputArea}>
+        <div class={chatArea}>
+          {messages.length === 0 && !isStreaming ? (
+            <div class={emptyState}>
+              <div class={emptyIcon}>AI</div>
+              <div style={{ fontSize: '1.25rem', color: '#e2e8f0' }}>How can I help you today?</div>
+              <div>Send a message to start streaming</div>
+            </div>
+          ) : (
+            <>
+              {messages.map((msg) => (
+                msg.role === 'user' ? (
+                  <div class={userRow}>
+                    <div class={`${bubble} ${userBubble}`}>{msg.content}</div>
+                  </div>
+                ) : (
+                  <div class={messageRow}>
+                    <div class={msgAvatar}>AI</div>
+                    <div class={`${bubble} ${assistantBubble}`}>{msg.content}</div>
+                  </div>
+                )
+              ))}
+              {isStreaming && streaming && (
+                <div class={messageRow}>
+                  <div class={msgAvatar}>AI</div>
+                  <div class={`${bubble} ${assistantBubble}`}>{streaming}</div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div class={inputArea}>
+          <form class={inputWrapper} onsubmit={handleSubmit}>
             <input
-              type="text"
-              class={input}
-              placeholder="Type a message..."
-              value={inputValue}
-              oninput={(e: Event) => setInputValue((e.target as HTMLInputElement).value)}
-              onkeydown={handleKeyDown}
+              class={inputStyle}
+              value={input}
+              oninput={(e: Event) => setInput((e.target as HTMLInputElement).value)}
+              placeholder="Message Flexism AI..."
               disabled={isStreaming}
             />
             <button
-              class={`${sendBtn} ${isStreaming ? sendBtnDisabled : ''}`}
-              onclick={sendMessage}
-              disabled={isStreaming}
+              class={`${sendBtn} ${(!input.trim() || isStreaming) ? sendBtnDisabled : ''}`}
+              type="submit"
+              disabled={!input.trim() || isStreaming}
             >
-              {isStreaming ? 'Sending...' : 'Send'}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" />
+              </svg>
             </button>
-          </div>
+          </form>
         </div>
       </div>
     )

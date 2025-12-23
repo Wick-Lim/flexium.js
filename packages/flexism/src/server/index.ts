@@ -167,3 +167,15 @@ export type { CompressionOptions, CompressionEncoding, ZstdCompressor } from './
 // Stream Registry
 export { streamRegistry, loadStreamHandlers } from './stream-registry'
 export type { StreamHandler } from './stream-registry'
+
+// Environment variables (server-only - uses fs/path)
+export {
+  loadEnv,
+  parseEnvFile,
+  getEnvDefine,
+  generateEnvScript,
+  getEnv,
+  requireEnv,
+  validateEnv,
+} from '../env'
+export type { EnvConfig, LoadedEnv, EnvSchema } from '../env'

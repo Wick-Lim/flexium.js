@@ -250,8 +250,8 @@ export class StreamAnalyzer {
   /**
    * Parse options object literal
    */
-  private parseOptions(node: any): { initial?: string; once?: boolean } {
-    const options: { initial?: string; once?: boolean } = {}
+  private parseOptions(node: any): { initial?: string; once?: boolean; sendable?: boolean } {
+    const options: { initial?: string; once?: boolean; sendable?: boolean } = {}
 
     if (node.type !== 'ObjectExpression') return options
 
@@ -262,6 +262,9 @@ export class StreamAnalyzer {
 
         if (key === 'once' && value?.type === 'BooleanLiteral') {
           options.once = value.value
+        }
+        if (key === 'sendable' && value?.type === 'BooleanLiteral') {
+          options.sendable = value.value
         }
         if (key === 'initial') {
           // Store the source code of initial value

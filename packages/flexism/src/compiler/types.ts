@@ -30,6 +30,15 @@ export interface AnalysisResult {
   filePath: string
   /** All exports in the file */
   exports: ExportInfo[]
+  /** Module-level variable declarations (outside functions) */
+  moduleDeclarations: ModuleDeclaration[]
+}
+
+export interface ModuleDeclaration {
+  /** The source code of the declaration */
+  code: string
+  /** Code span for extraction */
+  span: CodeSpan
 }
 
 export interface ExportInfo {
@@ -205,6 +214,8 @@ export interface StreamOptionsAnalysis {
   initial?: string
   /** Once mode */
   once?: boolean
+  /** Sendable mode - params come from client request, not closure */
+  sendable?: boolean
 }
 
 export interface StreamEndpoint {
@@ -216,6 +227,8 @@ export interface StreamEndpoint {
   handlerCode: string
   /** Required params from URL */
   params: string[]
+  /** Whether this is a sendable stream (handled by runtime registry) */
+  sendable?: boolean
 }
 
 export interface StreamManifestEntry {

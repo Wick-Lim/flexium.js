@@ -1,4 +1,4 @@
-import { use as flexiumUse, Context } from 'flexium/core'
+import { use as flexiumUse, Context, isUseable, type Useable } from 'flexium/core'
 import type { Setter, ResourceControl, UseContext, UseOptions } from 'flexium/core'
 import {
   getIsServer,
@@ -10,6 +10,10 @@ import {
   serializeValue,
   deserializeValue,
 } from './runtime'
+import { Stream, SendableStream, registerRuntimeStream } from './stream'
+
+// Cache restored streams by ID to maintain same instance across renders
+const streamCache = new Map<string, Stream<any, any> | SendableStream<any, any>>()
 
 /**
  * SSR-aware state hook
@@ -37,6 +41,8 @@ import {
 // Overloads (same as flexium's use)
 export function use<T>(ctx: Context<T>): [T, undefined]
 
+export function use<T, P, A extends unknown[]>(source: Useable<T, P, A>, params?: P): [T, ...A]
+
 export function use<T, P = void>(
   fn: (ctx: UseContext<P>) => Promise<T>,
   depsOrOptions?: any[] | UseOptions,
@@ -55,10 +61,78 @@ export function use<T>(
 ): [T, Setter<T>]
 
 export function use<T, P = void>(
-  input: T | Context<T> | ((ctx: UseContext<P>) => T) | ((ctx: UseContext<P>) => Promise<T>),
+  input: T | Context<T> | Useable<T, P, any> | ((ctx: UseContext<P>) => T) | ((ctx: UseContext<P>) => Promise<T>),
   depsOrOptions?: any[] | UseOptions,
   thirdArg?: UseOptions
 ): any {
+  // Client-side: Restore serialized streams from server state
+  // This handles the case where the hydration passes the serialized stream object
+  if (!getIsServer() && input && typeof input === 'object' && '__type' in input) {
+    const typed = input as { __type: string; id?: string; options?: { sendable?: boolean } }
+    if (typed.__type === 'flexism:stream' || typed.__type === 'flexism:streamref' || typed.__type === 'flexism:sendablestreamref') {
+      // Cache restored stream by ID to maintain same instance across renders
+      const streamId = typed.id ?? 'unknown'
+      if (!streamCache.has(streamId)) {
+        const restoredStream = typed.options?.sendable || typed.__type === 'flexism:sendablestreamref'
+          ? SendableStream.fromJSON(input)
+          : Stream.fromJSON(input)
+        streamCache.set(streamId, restoredStream)
+      }
+      const cachedStream = streamCache.get(streamId)!
+      return (flexiumUse as any)(cachedStream, depsOrOptions)
+    }
+  }
+
+  // Useable mode (Stream, SendableStream, etc.)
+  if (isUseable(input)) {
+    const source = input as Useable<T, P, any>
+    const params = depsOrOptions as P | undefined
+
+    // Handle Stream/SendableStream with hydration support
+    if (source instanceof Stream || source instanceof SendableStream) {
+      const streamId = generateSignalId()
+
+      // Server: register stream and serialize for client
+      if (getIsServer()) {
+        const streamRef = source.toRef()
+        // Collect serialized stream for client hydration
+        collectSignal(streamId, streamRef.toJSON())
+
+        const initialValue = source.getInitial()
+        const actions = source.getActions?.() ?? []
+        if (actions.length > 0) {
+          return [initialValue, ...actions]
+        }
+        return [initialValue, undefined]
+      }
+
+      // Client hydrating: restore stream from server state
+      if (getIsHydrating() && hasHydratedSignal(streamId)) {
+        const serializedStream = getHydratedSignal(streamId)
+        const restoredStream = source instanceof SendableStream
+          ? SendableStream.fromJSON(serializedStream)
+          : Stream.fromJSON(serializedStream)
+        return (flexiumUse as any)(restoredStream, params)
+      }
+
+      // Client normal (not hydrating): use the source directly
+      return (flexiumUse as any)(source, params)
+    }
+
+    // Other Useable types: pass through
+    if (getIsServer()) {
+      const initialValue = source.getInitial(params)
+      const actions = source.getActions?.() ?? []
+      if (actions.length > 0) {
+        return [initialValue, ...actions]
+      }
+      return [initialValue, undefined]
+    }
+
+    // Client: use flexium's use (will subscribe to updates)
+    return flexiumUse(source, params)
+  }
+
   // Context mode: pass through to flexium
   if (isContext(input)) {
     return flexiumUse(input)

@@ -3,10 +3,12 @@
  *
  * Runtime registry for Stream SSE handlers.
  * Populated at build time, used at runtime to handle SSE requests.
+ * Also supports runtime-registered streams via getRuntimeStream.
  */
 
 import * as path from 'path'
 import { sse } from './sse'
+import { getRuntimeStream, clearRuntimeStreams } from '../stream/Stream'
 
 export type StreamHandler = (
   params: Record<string, string>
@@ -75,17 +77,44 @@ class StreamRegistry {
     id: string,
     request: Request
   ): Promise<Response> {
-    const registered = this.handlers.get(id)
+    // First check compiled handlers
+    let registered = this.handlers.get(id)
+
+    // If not found, check runtime registry (for dynamically created streams)
+    if (!registered) {
+      const runtimeStream = getRuntimeStream(id)
+      if (runtimeStream) {
+        // Adapt runtime stream to match handler interface
+        registered = {
+          id: runtimeStream.id,
+          handler: runtimeStream.callback as StreamHandler,
+          modulePath: 'runtime',
+        }
+      }
+    }
 
     if (!registered) {
       return new Response(`Stream not found: ${id}`, { status: 404 })
     }
 
-    // Extract params from URL query string
+    // Extract params from URL query string and request body (for POST)
     const url = new URL(request.url)
     const params: Record<string, string> = {}
     for (const [key, value] of url.searchParams) {
       params[key] = value
+    }
+
+    // For POST requests (sendable streams), parse body params
+    if (request.method === 'POST') {
+      try {
+        const bodyText = await request.text()
+        if (bodyText) {
+          const bodyParams = JSON.parse(bodyText)
+          Object.assign(params, bodyParams)
+        }
+      } catch {
+        // Ignore body parse errors
+      }
     }
 
     try {
@@ -106,6 +135,14 @@ class StreamRegistry {
         }
       )
     }
+  }
+
+  /**
+   * Clear all handlers including runtime streams (for HMR)
+   */
+  clearAll(): void {
+    this.handlers.clear()
+    clearRuntimeStreams()
   }
 }
 

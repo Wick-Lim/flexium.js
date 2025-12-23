@@ -1,10 +1,20 @@
-// Stream - Server-side stream declaration
-export { Stream } from './Stream'
-export type { StreamCallback, StreamOptions } from './Stream'
+// Stream - Unified streaming data source
+export { Stream, SendableStream } from './Stream'
 
-// StreamRef - Client-side stream reference (Useable)
-export { StreamRef } from './StreamRef'
-export type { StreamRefOptions, SerializedStreamRef } from './StreamRef'
+export type {
+  StreamCallback,
+  StreamOptions,
+  SerializedStream,
+} from './Stream'
+
+// Runtime stream registry (for dynamic streams without compiler)
+export {
+  registerRuntimeStream,
+  getRuntimeStream,
+  hasRuntimeStream,
+  clearRuntimeStreams,
+} from './Stream'
+export type { RuntimeStreamHandler } from './Stream'
 
 // SSE Client
 export { SSEClient } from './SSEClient'

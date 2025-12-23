@@ -16,8 +16,12 @@
  * const source = new MySource(...)
  * const [value] = use(source)
  * ```
+ *
+ * @typeParam T - The value type
+ * @typeParam P - The params type for subscribe/send
+ * @typeParam Actions - Tuple of additional actions returned by use() after the value
  */
-export abstract class Useable<T, P = void> {
+export abstract class Useable<T, P = void, Actions extends unknown[] = []> {
   /**
    * Unique identifier for this Useable type
    * Used internally by use() for type checking
@@ -42,6 +46,25 @@ export abstract class Useable<T, P = void> {
     params: P | undefined,
     callback: (value: T) => void
   ): () => void
+
+  /**
+   * Get additional actions to include in the use() tuple
+   * Override this to return [action1, action2, ...] that will be appended to [value, ...]
+   *
+   * @example
+   * ```tsx
+   * class SendableStream extends Useable<T, P> {
+   *   getActions() {
+   *     return [this.send.bind(this)]
+   *   }
+   * }
+   *
+   * const [value, send] = use(stream)
+   * ```
+   */
+  getActions(): Actions | undefined {
+    return undefined
+  }
 }
 
 /**

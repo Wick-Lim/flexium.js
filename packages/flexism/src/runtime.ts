@@ -1,5 +1,6 @@
 import type { FlexismState } from './types'
 import { FLEXISM_STATE_KEY } from './types'
+import { Stream, SendableStream } from './stream'
 
 /**
  * Runtime state for SSR/hydration
@@ -146,12 +147,22 @@ export function deserializeValue(
 
   // Handle special types
   if (value && typeof value === 'object' && '__type' in value) {
-    const typed = value as { __type: string; value?: unknown }
+    const typed = value as { __type: string; value?: unknown; options?: { sendable?: boolean } }
     switch (typed.__type) {
       case 'undefined': return undefined
       case 'Date': return new Date(typed.value as string)
       case 'Map': return new Map(typed.value as [unknown, unknown][])
       case 'Set': return new Set(typed.value as unknown[])
+      // Restore streams from serialized data
+      case 'flexism:stream':
+        if (typed.options?.sendable) {
+          return SendableStream.fromJSON(value)
+        }
+        return Stream.fromJSON(value)
+      case 'flexism:streamref':
+        return Stream.fromJSON(value)
+      case 'flexism:sendablestreamref':
+        return SendableStream.fromJSON(value)
     }
   }
 

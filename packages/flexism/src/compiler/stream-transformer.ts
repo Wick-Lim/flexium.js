@@ -3,7 +3,7 @@
  *
  * Transforms Stream declarations:
  * - Server: Generates SSE endpoint handlers
- * - Client: Replaces Stream with StreamRef
+ * - Client: Serializes Stream for hydration
  */
 
 import type { StreamAnalysis, StreamEndpoint, CapturedVariable } from './types'
@@ -13,7 +13,7 @@ export interface StreamTransformResult {
   endpoints: StreamEndpoint[]
   /** Server-side code additions */
   serverAdditions: string
-  /** Client code with Stream → StreamRef replacement */
+  /** Client code with Stream serialization */
   clientCode: string
 }
 
@@ -76,7 +76,7 @@ export function generateStreamHandlers(
 }
 
 /**
- * Generate code to create StreamRef from Stream at runtime
+ * Generate code to serialize Stream for client
  * This code runs on the server to prepare data for client
  */
 export function generateStreamRefCreation(
@@ -86,7 +86,7 @@ export function generateStreamRefCreation(
   if (streams.length === 0) return ''
 
   const lines: string[] = [
-    '// Convert Streams to StreamRefs for client',
+    '// Serialize Streams for client hydration',
     'const __streamRefs = {}',
   ]
 
@@ -106,7 +106,7 @@ export function generateStreamRefCreation(
 }
 
 /**
- * Transform client code to use StreamRef instead of Stream
+ * Transform client code for Stream hydration
  */
 export function transformClientCode(
   source: string,
@@ -117,27 +117,18 @@ export function transformClientCode(
   let result = source
 
   // Replace `new Stream(...)` with placeholder that will be filled from props
-  // The actual StreamRef comes from server-rendered data
+  // The actual Stream comes from server-rendered data via Stream.fromJSON()
 
-  // For now, we'll generate code that expects __streamRefs in props
-  // and hydrates StreamRef from it
+  // For now, we'll generate code that expects __streams in props
+  // and hydrates Stream from it
 
-  // Add import for StreamRef
+  // Add import for Stream if not present
   const hasStreamImport = /import\s+.*Stream.*from\s+['"]flexism/.test(result)
   if (!hasStreamImport) {
-    result = `import { StreamRef } from 'flexism/stream'\n${result}`
-  } else {
-    // Add StreamRef to existing import
-    result = result.replace(
-      /import\s+{([^}]*Stream[^}]*)}\s+from\s+['"]flexism['"]/,
-      (match, imports) => {
-        if (imports.includes('StreamRef')) return match
-        return `import {${imports}, StreamRef } from 'flexism'`
-      }
-    )
+    result = `import { Stream } from 'flexism/stream'\n${result}`
   }
 
-  // Replace each Stream construction with StreamRef.fromJSON
+  // Replace each Stream construction with Stream.fromJSON
   for (const stream of streams) {
     const originalCode = source.slice(stream.position.start, stream.position.end)
 
@@ -145,9 +136,9 @@ export function transformClientCode(
     // We need to wrap the component to receive stream refs
     const replacement = `(function() {
       if (typeof window !== 'undefined' && window.__FLEXISM_STREAMS__?.["${stream.id}"]) {
-        return StreamRef.fromJSON(window.__FLEXISM_STREAMS__["${stream.id}"])
+        return Stream.fromJSON(window.__FLEXISM_STREAMS__["${stream.id}"])
       }
-      // Server-side: return original Stream (will be converted to ref)
+      // Server-side: return original Stream (will be serialized)
       return ${originalCode}
     })()`
 
@@ -172,7 +163,7 @@ export function generateStreamHydrationScript(
 }
 
 /**
- * Inject stream refs into hydration data
+ * Inject serialized streams into hydration data
  */
 export function injectStreamRefs(
   existingState: any,

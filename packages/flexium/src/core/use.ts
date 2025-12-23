@@ -39,7 +39,7 @@ function serializeKey(key: unknown[]): string {
 // Overloads
 export function use<T>(ctx: Context<T>): [T, undefined]
 
-export function use<T, P = void>(source: Useable<T, P>, params?: P): [T, undefined]
+export function use<T, P, A extends unknown[]>(source: Useable<T, P, A>, params?: P): [T, ...A]
 
 export function use<T, P = void>(
   fn: (ctx: UseContext<P>) => Promise<T>,
@@ -63,7 +63,7 @@ export function use<T, P = void>(
   depsOrOptions?: any[] | UseOptions | P,
   thirdArg?: UseOptions
 ): any {
-  // Useable mode: use(SomeUseable, params?) returns [value, undefined]
+  // Useable mode: use(SomeUseable, params?) returns [value, undefined] or [value, send] for sendable
   // This handles Context, Stream, Shared, and any custom Useable
   if (isUseable(input)) {
     const source = input as Useable<T, P>
@@ -86,6 +86,12 @@ export function use<T, P = void>(
 
     // Access value to track dependency
     const currentValue = state.value
+
+    // Get additional actions from the source (if any)
+    const actions = source.getActions()
+    if (actions && actions.length > 0) {
+      return [currentValue, ...actions]
+    }
 
     return [currentValue, undefined]
   }
