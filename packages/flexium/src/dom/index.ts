@@ -6,14 +6,12 @@ export type { HydrateOptions } from './hydrate'
 
 // Components
 export {
-  Portal,
   Suspense,
   ErrorBoundary,
   lazy,
 } from './components'
 
 export type {
-  PortalProps,
   SuspenseProps,
   LazyComponent,
   ErrorInfo,

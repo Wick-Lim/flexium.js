@@ -1,10 +1,10 @@
 /**
  * DOM API Tests
  *
- * Tests for: f, render, Portal, Suspense, lazy, ErrorBoundary
+ * Tests for: f, render, Suspense, lazy, ErrorBoundary
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, f, Portal, Suspense, lazy, ErrorBoundary } from '../dom'
+import { render, f, Suspense, lazy, ErrorBoundary } from '../dom'
 import { use } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
@@ -187,105 +187,6 @@ describe('render()', () => {
     await tick()
 
     expect(container.querySelectorAll('li')[0].textContent).toBe('C')
-  })
-})
-
-describe('Portal', () => {
-  let container: HTMLDivElement
-  let portalRoot: HTMLDivElement
-
-  beforeEach(() => {
-    container = document.createElement('div')
-    document.body.appendChild(container)
-
-    portalRoot = document.createElement('div')
-    portalRoot.id = 'portal-root'
-    document.body.appendChild(portalRoot)
-  })
-
-  afterEach(() => {
-    document.body.removeChild(container)
-    document.body.removeChild(portalRoot)
-  })
-
-  it('should render content to target element', () => {
-    function App() {
-      return f('div', {}, [
-        f('p', {}, 'Main content'),
-        f(Portal, { target: portalRoot }, [
-          f('div', { 'data-testid': 'portal-content' }, 'Portal content')
-        ])
-      ])
-    }
-
-    render(f(App), container)
-
-    expect(container.querySelector('[data-testid="portal-content"]')).toBeNull()
-    expect(portalRoot.querySelector('[data-testid="portal-content"]')).not.toBeNull()
-  })
-
-  it('should render to target by selector', () => {
-    function App() {
-      return f(Portal, { target: '#portal-root' }, [
-        f('span', { 'data-testid': 'by-selector' }, 'By selector')
-      ])
-    }
-
-    render(f(App), container)
-    expect(portalRoot.querySelector('[data-testid="by-selector"]')).not.toBeNull()
-  })
-
-  it('should handle dynamic portal content', async () => {
-    function Modal({ open }: { open: boolean }) {
-      if (!open) return null
-      return f(Portal, { target: portalRoot }, [
-        f('div', { 'data-testid': 'modal' }, 'Modal content')
-      ])
-    }
-
-    function App() {
-      const [open, setOpen] = use(false)
-
-      return f('div', {}, [
-        f('button', { 'data-testid': 'open', onclick: () => setOpen(true) }, 'Open'),
-        f(Modal, { open })
-      ])
-    }
-
-    render(f(App), container)
-    expect(portalRoot.querySelector('[data-testid="modal"]')).toBeNull()
-
-    container.querySelector<HTMLButtonElement>('[data-testid="open"]')?.click()
-    await tick()
-
-    expect(portalRoot.querySelector('[data-testid="modal"]')).not.toBeNull()
-  })
-
-  it('should support multiple portals', () => {
-    function App() {
-      return f('div', {}, [
-        f(Portal, { target: portalRoot }, [f('div', { 'data-testid': 'p1' }, '1')]),
-        f(Portal, { target: portalRoot }, [f('div', { 'data-testid': 'p2' }, '2')])
-      ])
-    }
-
-    render(f(App), container)
-
-    expect(portalRoot.querySelector('[data-testid="p1"]')).not.toBeNull()
-    expect(portalRoot.querySelector('[data-testid="p2"]')).not.toBeNull()
-  })
-
-  it('should warn when target not found', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-
-    function App() {
-      return f(Portal, { target: '#non-existent' }, [f('div', {}, 'Content')])
-    }
-
-    render(f(App), container)
-
-    expect(warnSpy).toHaveBeenCalled()
-    warnSpy.mockRestore()
   })
 })
 

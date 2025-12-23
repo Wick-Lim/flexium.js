@@ -4,7 +4,7 @@
  * Complex scenarios combining multiple APIs
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, f, Portal, Suspense, ErrorBoundary } from '../dom'
+import { render, f, Suspense, ErrorBoundary } from '../dom'
 import { use, sync, useRef, Context } from '../core'
 
 const tick = () => new Promise(r => setTimeout(r, 50))
@@ -233,71 +233,6 @@ describe('Context + State + Components', () => {
     await tick()
 
     expect(container.querySelector('[data-testid="guest"]')).not.toBeNull()
-  })
-})
-
-describe('Portal + Modal Pattern', () => {
-  let container: HTMLDivElement
-  let modalRoot: HTMLDivElement
-
-  beforeEach(() => {
-    container = document.createElement('div')
-    document.body.appendChild(container)
-
-    modalRoot = document.createElement('div')
-    modalRoot.id = 'modal-root'
-    document.body.appendChild(modalRoot)
-  })
-
-  afterEach(() => {
-    document.body.removeChild(container)
-    document.body.removeChild(modalRoot)
-  })
-
-  it('should build a complete modal system', async () => {
-    function Modal({ open, children }: {
-      open: boolean
-      children: any
-    }) {
-      if (!open) return null
-
-      return f(Portal, { target: modalRoot }, [
-        f('div', { class: 'modal-backdrop', 'data-testid': 'backdrop' }, [
-          f('div', {
-            class: 'modal-content',
-            'data-testid': 'modal'
-          }, [
-            f('button', { class: 'close-btn', 'data-testid': 'close' }, 'X'),
-            children
-          ])
-        ])
-      ])
-    }
-
-    function App() {
-      const [open, setOpen] = use(false)
-
-      return f('div', {}, [
-        f('button', { 'data-testid': 'open', onclick: () => setOpen(true) }, 'Open Modal'),
-        f(Modal, { open }, [
-          f('h2', {}, 'Modal Title'),
-          f('p', {}, 'Modal content here')
-        ])
-      ])
-    }
-
-    render(f(App), container)
-
-    // Initially modal should not be visible
-    expect(modalRoot.querySelector('[data-testid="modal"]')).toBeNull()
-
-    // Open modal
-    container.querySelector<HTMLButtonElement>('[data-testid="open"]')?.click()
-    await tick()
-
-    // Modal should be rendered in portal target
-    expect(modalRoot.querySelector('[data-testid="modal"]')).not.toBeNull()
-    expect(modalRoot.querySelector('h2')?.textContent).toBe('Modal Title')
   })
 })
 

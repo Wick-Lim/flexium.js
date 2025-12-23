@@ -217,7 +217,32 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'render()', link: '/docs/dom/render' },
-            { text: 'f()', link: '/docs/dom/f' }
+            { text: 'f()', link: '/docs/dom/f' },
+            { text: 'Suspense', link: '/docs/dom/suspense' },
+            { text: 'ErrorBoundary', link: '/docs/dom/error-boundary' },
+            { text: 'lazy()', link: '/docs/dom/lazy' }
+          ]
+        },
+        {
+          text: 'flexium/router',
+          collapsed: false,
+          items: [
+            { text: '&lt;Routes /&gt;', link: '/docs/router/routes' },
+            { text: '&lt;Route /&gt;', link: '/docs/router/route' },
+            { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
+            { text: '&lt;Link /&gt;', link: '/docs/router/link' },
+            { text: 'useRouter()', link: '/docs/router/use-router' }
+          ]
+        },
+        {
+          text: 'flexium-ui',
+          collapsed: false,
+          items: [
+            { text: 'Column', link: '/docs/ui/layout#column' },
+            { text: 'Row', link: '/docs/ui/layout#row' },
+            { text: 'Center', link: '/docs/ui/layout#center' },
+            { text: 'Spacer', link: '/docs/ui/layout#spacer' },
+            { text: 'Portal', link: '/docs/ui/portal' }
           ]
         },
         {
@@ -240,25 +265,6 @@ export default defineConfig({
             { text: 'useKeyboard()', link: '/docs/interactive/use-keyboard' },
             { text: 'useMouse()', link: '/docs/interactive/use-mouse' },
             { text: 'useLoop()', link: '/docs/interactive/use-loop' }
-          ]
-        },
-        {
-          text: 'flexium/router',
-          collapsed: false,
-          items: [
-            { text: '&lt;Routes /&gt;', link: '/docs/router/routes' },
-            { text: '&lt;Route /&gt;', link: '/docs/router/route' },
-            { text: '&lt;Outlet /&gt;', link: '/docs/router/outlet' },
-            { text: '&lt;Link /&gt;', link: '/docs/router/link' },
-            { text: 'useRouter()', link: '/docs/router/use-router' }
-          ]
-        },
-        {
-          text: 'flexium-ui',
-          collapsed: false,
-          items: [
-            { text: 'Layout (Column, Row)', link: '/docs/ui/layout' },
-            { text: 'Portal', link: '/docs/ui/portal' }
           ]
         },
         {
@@ -304,7 +310,10 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'render()', link: '/docs/dom/render' },
-            { text: 'f()', link: '/docs/dom/f' }
+            { text: 'f()', link: '/docs/dom/f' },
+            { text: 'Suspense', link: '/docs/dom/suspense' },
+            { text: 'ErrorBoundary', link: '/docs/dom/error-boundary' },
+            { text: 'lazy()', link: '/docs/dom/lazy' }
           ]
         },
         {
@@ -383,7 +392,10 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'render()', link: '/docs/dom/render' },
-            { text: 'f()', link: '/docs/dom/f' }
+            { text: 'f()', link: '/docs/dom/f' },
+            { text: 'Suspense', link: '/docs/dom/suspense' },
+            { text: 'ErrorBoundary', link: '/docs/dom/error-boundary' },
+            { text: 'lazy()', link: '/docs/dom/lazy' }
           ]
         },
         {
