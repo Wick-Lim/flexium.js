@@ -155,6 +155,35 @@ export class Transformer {
   }
 
   /**
+   * Ensure a function body has balanced braces
+   * Adds missing closing brace if needed
+   */
+  private ensureBalancedBody(body: string): string {
+    let trimmed = body.trim()
+    if (!trimmed) return '{}'
+
+    // Count braces
+    let braceCount = 0
+    for (const char of trimmed) {
+      if (char === '{') braceCount++
+      else if (char === '}') braceCount--
+    }
+
+    // Add missing closing braces
+    while (braceCount > 0) {
+      trimmed += '\n}'
+      braceCount--
+    }
+
+    // Ensure it starts with {
+    if (!trimmed.startsWith('{')) {
+      trimmed = '{\n' + trimmed + '\n}'
+    }
+
+    return trimmed
+  }
+
+  /**
    * Get module-level declarations code block (e.g., const container = css({...}))
    */
   private getModuleDeclarationsBlock(): string {
@@ -168,8 +197,9 @@ export class Transformer {
     const exportPrefix = name === 'default' ? 'export default' : 'export'
     const funcName = name === 'default' ? '' : ` ${name}`
     const imports = this.getServerImports()
+    const balancedBody = this.ensureBalancedBody(body)
     return `${imports}// API Handler: ${name}
-${exportPrefix} ${asyncKeyword}function${funcName}(request, context)${body}
+${exportPrefix} ${asyncKeyword}function${funcName}(request, context) ${balancedBody}
 `.trim()
   }
 
@@ -178,8 +208,9 @@ ${exportPrefix} ${asyncKeyword}function${funcName}(request, context)${body}
     const exportPrefix = name === 'default' ? 'export default' : 'export'
     const funcName = name === 'default' ? '' : ` ${name}`
     const imports = this.getServerImports()
+    const balancedBody = this.ensureBalancedBody(body)
     return `${imports}// Server Component: ${name} (no hydration)
-${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern})${body}
+${exportPrefix} ${asyncKeyword}function${funcName}(${paramPattern}) ${balancedBody}
 `.trim()
   }
 
@@ -361,12 +392,21 @@ export function ${hydrateName}(container, serverData) {
 
   private cleanClientBody(body: string): string {
     // For client body, we need to extract just the inner content
+    // The analyzer provides the body span which may be:
+    // 1. Just the block body: { return <JSX/> }
+    // 2. Full arrow function: (props) => { return <JSX/> }
     let cleaned = body.trim()
+
+    // Handle full arrow function expression: (props) => { ... } or (props) => expr
+    // Extract just the body part after the arrow
+    const arrowMatch = cleaned.match(/^\([^)]*\)\s*=>\s*/)
+    if (arrowMatch) {
+      cleaned = cleaned.slice(arrowMatch[0].length).trim()
+    }
 
     // Check if this is a block body with braces
     if (cleaned.startsWith('{')) {
-      // Find the matching closing brace for the first opening brace
-      // This handles cases where SWC spans include extra content
+      // Use proper brace counting to find the matching closing brace
       let braceCount = 0
       let matchingEnd = -1
 
@@ -386,6 +426,14 @@ export function ${hydrateName}(container, serverData) {
       if (matchingEnd !== -1) {
         // Extract content between first { and its matching }
         cleaned = cleaned.slice(1, matchingEnd).trim()
+      } else {
+        // Brace matching failed - fall back to removing just the first {
+        // and assume content goes to the end
+        cleaned = cleaned.slice(1).trim()
+        // Remove trailing } if it exists and seems to be a closing brace
+        if (cleaned.endsWith('}')) {
+          cleaned = cleaned.slice(0, -1).trim()
+        }
       }
     } else {
       // Arrow function with expression body (implicit return)
@@ -394,6 +442,11 @@ export function ${hydrateName}(container, serverData) {
       if (!cleaned.startsWith('return ') && !cleaned.startsWith('return\n')) {
         cleaned = `return ${cleaned}`
       }
+    }
+
+    // Add newline at start for proper formatting if content exists
+    if (cleaned && !cleaned.startsWith('\n')) {
+      cleaned = '\n    ' + cleaned
     }
 
     return cleaned
