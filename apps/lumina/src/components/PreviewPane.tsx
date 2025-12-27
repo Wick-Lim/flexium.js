@@ -40,7 +40,7 @@ export function PreviewPane({ componentBody }: PreviewPaneProps) {
 <body>
     <div id="root"></div>
     <script type="module">
-        import { use, sync, render, f, Routes, Route, Link, resetRouter } from 'https://esm.sh/flexium@0.16.12?bundle&t=1735320630';
+        import { use, sync, render, f, Routes, Route, Link, resetRouter } from 'https://esm.sh/flexium@0.16.12?bundle&t=1735320631';
         
         // Reset router state to avoid stale state from previous renders
         resetRouter();
