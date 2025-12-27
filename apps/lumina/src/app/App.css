@@ -1,0 +1,84 @@
+.app-container {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    max-width: none !important;
+    background-color: var(--bg-app);
+}
+
+.app-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(to right, #fff, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-accent {
+    color: var(--accent-primary);
+}
+
+.main-layout {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: calc(100% - 60px) !important;
+}
+
+.panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.left-panel {
+    flex: 0 0 400px;
+    /* Fixed width for chat */
+    border-right: 1px solid var(--border-subtle);
+    background-color: var(--bg-panel);
+    max-width: 50vw;
+}
+
+.right-panel {
+    flex: 1 1 auto !important;
+    min-width: 300px !important;
+    background-color: #000;
+    display: flex !important;
+}
+
+@media (max-width: 768px) {
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .left-panel {
+        flex: 1;
+        max-width: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+}
