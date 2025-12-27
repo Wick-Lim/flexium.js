@@ -1,15 +1,14 @@
 // Generation Unit Types
-// Each component is self-contained with its own CSS
+// Styles are now inside code using css() function
 
 /** 
- * Component Unit - CSS is included with the component
- * Each component carries its own styles
+ * Component Unit - styles are in code using css() function
+ * Each component uses css() for styling
  */
 export interface ComponentUnit {
     type: 'component';
     name: string;              // "Header", "HeroSection", "ProductCard"
-    code: string;              // Component function body
-    css: string;               // CSS styles for this component
+    code: string;              // Component code with css() calls
     children?: string[];       // Child component references
     isRoot?: boolean;          // True if this is the App component
 }

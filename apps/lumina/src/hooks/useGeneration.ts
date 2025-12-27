@@ -9,14 +9,8 @@ export function useGeneration() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // CSS is extracted and merged from all components
-    const css = useMemo(() => {
-        return [...components.values()]
-            .map(c => `/* ${c.name} */\n${c.css}`)
-            .join('\n\n');
-    }, [components]);
-
     // Build the final component code from all received components
+    // CSS is now inside code using css() function - no separate extraction needed
     const componentCode = useMemo(() => {
         const rootComponent = [...components.values()].find(c => c.isRoot);
         if (!rootComponent) return '';
@@ -123,7 +117,6 @@ export function useGeneration() {
         // State
         chatMessages,
         components,
-        css,
         componentCode,
         isLoading,
         error,

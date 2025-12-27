@@ -8,11 +8,9 @@ import './App.css'
 
 export default function Home() {
   const [componentBody, setComponentBody] = useState<string>('');
-  const [css, setCss] = useState<string>('');
 
-  const handleCodeGenerated = (newBody: string, newCss: string) => {
+  const handleCodeGenerated = (newBody: string) => {
     setComponentBody(newBody);
-    setCss(newCss);
   }
 
   return (
@@ -34,7 +32,7 @@ export default function Home() {
           <ChatInterface onCodeGenerated={handleCodeGenerated} />
         </div>
         <div className="panel right-panel">
-          <PreviewPane componentBody={componentBody} css={css} />
+          <PreviewPane componentBody={componentBody} />
         </div>
       </main>
     </div>

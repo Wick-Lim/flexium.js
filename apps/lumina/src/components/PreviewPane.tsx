@@ -6,22 +6,21 @@ import './PreviewPane.css'
 
 interface PreviewPaneProps {
     componentBody: string;
-    css: string;
 }
 
-export function PreviewPane({ componentBody, css }: PreviewPaneProps) {
+export function PreviewPane({ componentBody }: PreviewPaneProps) {
     // Generate the iframe srcdoc HTML
     const srcdoc = useMemo(() => {
         if (!componentBody) return '';
 
         // Build srcdoc using string concatenation to avoid escaping issues
-        // This preserves template literals (backticks and ${}) in the AI-generated code
+        // Custom css() implementation for iframe (adoptedStyleSheets doesn't work in srcdoc)
         const htmlStart = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
+    <style id="fx-styles">
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { 
             width: 100%; 
@@ -36,13 +35,61 @@ export function PreviewPane({ componentBody, css }: PreviewPaneProps) {
             width: 100%;
             min-height: 100%;
         }
-        ${css}
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="module">
         import { use, sync, render, f } from 'https://esm.sh/flexium@0.16.3?bundle';
+        
+        // Custom css() for iframe - uses style tag instead of adoptedStyleSheets
+        const cssCache = new Map();
+        const styleEl = document.getElementById('fx-styles');
+        
+        function hash(str) {
+            let h = 5381;
+            for (let i = 0; i < str.length; i++) {
+                h = ((h << 5) + h) ^ str.charCodeAt(i);
+            }
+            return 'fx-' + (h >>> 0).toString(36);
+        }
+        
+        function serialize(obj, selector) {
+            let css = '';
+            let nested = '';
+            for (const [key, value] of Object.entries(obj)) {
+                if (typeof value === 'object') {
+                    const nestedSelector = key.startsWith('&') 
+                        ? selector + key.slice(1) 
+                        : key.startsWith('@') 
+                            ? key 
+                            : selector + ' ' + key;
+                    if (key.startsWith('@')) {
+                        nested += key + '{' + serialize(obj[key], selector).replace(selector, selector) + '}';
+                    } else {
+                        nested += serialize(value, nestedSelector);
+                    }
+                } else {
+                    const prop = key.replace(/[A-Z]/g, m => '-' + m.toLowerCase());
+                    css += prop + ':' + value + ';';
+                }
+            }
+            return (css ? selector + '{' + css + '}' : '') + nested;
+        }
+        
+        function css(styles) {
+            const key = JSON.stringify(styles);
+            if (cssCache.has(key)) return cssCache.get(key);
+            const className = hash(key);
+            const cssText = serialize(styles, '.' + className);
+            styleEl.textContent += cssText;
+            cssCache.set(key, className);
+            return className;
+        }
+        
+        function cx(...classes) {
+            return classes.filter(Boolean).join(' ');
+        }
         
         try {
             // Define the component
@@ -64,7 +111,7 @@ export function PreviewPane({ componentBody, css }: PreviewPaneProps) {
 </html>`;
 
         return htmlStart + componentBody + htmlEnd;
-    }, [componentBody, css]);
+    }, [componentBody]);
 
     return (
         <div className="preview-container">

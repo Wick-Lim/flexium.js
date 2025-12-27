@@ -13,7 +13,7 @@ export interface Message {
 }
 
 interface ChatInterfaceProps {
-    onCodeGenerated: (componentBody: string, css: string) => void;
+    onCodeGenerated: (componentBody: string) => void;
     onComponentReceived?: (component: ComponentUnit) => void;
 }
 
@@ -37,27 +37,23 @@ export function ChatInterface({ onCodeGenerated, onComponentReceived }: ChatInte
     useEffect(scrollToBottom, [messages]);
 
     // When components change, rebuild and send the code
+    // CSS is now inside each component's code using css() function
     useEffect(() => {
         if (components.size === 0) return;
 
         const rootComponent = [...components.values()].find(c => c.isRoot);
         if (!rootComponent) return;
 
-        // Build component definitions
+        // Build component definitions (css() calls are inside code)
         const componentDefs = [...components.values()]
             .filter(c => !c.isRoot)
             .map(c => `function ${c.name}() { ${c.code} }`)
             .join('\n');
 
-        // Merge CSS from all components
-        const css = [...components.values()]
-            .map(c => c.css)
-            .join('\n');
-
-        // Final code
+        // Final code - css() is called within each component
         const code = `${componentDefs}\n${rootComponent.code}`;
 
-        onCodeGenerated(code, css);
+        onCodeGenerated(code);
     }, [components, onCodeGenerated]);
 
     const handleUnit = useCallback((unit: GenerationUnit) => {
