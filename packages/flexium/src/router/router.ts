@@ -59,6 +59,7 @@ export function useLocation(): [Location, (path: string) => void] {
     }
 
     globalNavigate = (path: string) => {
+        console.log('[Flexium Router] Navigate called with:', path)
         if (typeof window === 'undefined') return
         if (isUnsafePath(path)) {
             console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
@@ -73,12 +74,14 @@ export function useLocation(): [Location, (path: string) => void] {
         }
 
         // Always update internal location state for SPA navigation
-        updateLocation({
+        const newLocation = {
             pathname: path.split('?')[0].split('#')[0],
             search: path.includes('?') ? '?' + path.split('?')[1].split('#')[0] : '',
             hash: path.includes('#') ? '#' + path.split('#')[1] : '',
             query: parseQuery(path.includes('?') ? '?' + path.split('?')[1].split('#')[0] : '')
-        })
+        }
+        console.log('[Flexium Router] Updating location to:', newLocation)
+        updateLocation(newLocation)
     }
 
     // Listen to popstate (only once)
