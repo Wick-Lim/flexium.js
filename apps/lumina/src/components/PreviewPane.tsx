@@ -14,13 +14,9 @@ export function PreviewPane({ componentBody, css }: PreviewPaneProps) {
     const srcdoc = useMemo(() => {
         if (!componentBody) return '';
 
-        // Escape backticks and backslashes in the component body for template literal
-        const escapedBody = componentBody
-            .replace(/\\/g, '\\\\')
-            .replace(/`/g, '\\`')
-            .replace(/\$/g, '\\$');
-
-        return `<!DOCTYPE html>
+        // Build srcdoc using string concatenation to avoid escaping issues
+        // This preserves template literals (backticks and ${}) in the AI-generated code
+        const htmlStart = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -51,7 +47,9 @@ export function PreviewPane({ componentBody, css }: PreviewPaneProps) {
         try {
             // Define the component
             function App() {
-                ${escapedBody}
+`;
+
+        const htmlEnd = `
             }
             
             // Use render() with f() to enable Flexium's reactive system
@@ -64,6 +62,8 @@ export function PreviewPane({ componentBody, css }: PreviewPaneProps) {
     </script>
 </body>
 </html>`;
+
+        return htmlStart + componentBody + htmlEnd;
     }, [componentBody, css]);
 
     return (
