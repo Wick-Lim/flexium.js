@@ -1,6 +1,6 @@
 {
   "name": "flexium-ui",
-  "version": "0.16.7",
+  "version": "0.16.8",
   "description": "Column/Row based UI component library for Flexium",
   "type": "module",
   "main": "./dist/index.mjs",
@@ -24,7 +24,7 @@
     "storybook:build": "storybook build"
   },
   "peerDependencies": {
-    "flexium": ">=0.16.7"
+    "flexium": ">=0.16.8"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^8.6.14",

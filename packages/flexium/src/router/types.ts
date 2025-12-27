@@ -36,5 +36,7 @@ export interface RouteProps {
 export interface LinkProps {
   to: string
   class?: string
+  className?: string
+  style?: string
   children?: any
 }

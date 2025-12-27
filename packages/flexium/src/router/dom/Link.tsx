@@ -6,8 +6,8 @@ export function Link(props: LinkProps) {
     const navigate = useNavigate()
     return f('a', {
         href: props.to,
-        class: props.class,
-        style: 'cursor: pointer;',
+        class: props.class || props.className,
+        style: props.style ? props.style + '; cursor: pointer;' : 'cursor: pointer;',
         onclick: (event: Event) => {
             event.preventDefault()
             navigate(props.to)
