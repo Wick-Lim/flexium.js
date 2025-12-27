@@ -152,23 +152,33 @@ export function ChatInterface({ onCodeGenerated, onComponentReceived }: ChatInte
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setLoading(true);
-        setComponents(new Map()); // Reset components for new generation
+        // Keep existing components - AI will modify only what's needed
 
         try {
-            // Prepare history for API
-            const history = messages
+            // Prepare history for API - include current code context
+            const chatHistory = messages
                 .filter(m => m.role !== 'assistant' || m.id !== 'welcome')
                 .map(m => ({
                     role: m.role === 'assistant' ? 'model' : 'user',
                     parts: [{ text: m.content }]
                 }));
 
+            // Include current components as context for modifications
+            const currentComponents = components.size > 0
+                ? [...components.values()].map(c => ({
+                    name: c.name,
+                    code: c.code,
+                    isRoot: c.isRoot
+                }))
+                : null;
+
             const response = await fetch('/api/generate-stream', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: input,
-                    history
+                    history: chatHistory,
+                    currentComponents // Send current code for modification context
                 }),
             });
 

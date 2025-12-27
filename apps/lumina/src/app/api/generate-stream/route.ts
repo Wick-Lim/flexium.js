@@ -72,10 +72,26 @@ Example:
   {"type":"component","name":"App","content":"const app = css({ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0f, #1a1a2e)', color: '#fff' }); return f('div', {className: app}, [f(Hero, {})])"}
 ]
 
-Make it BEAUTIFUL. Apple/Stripe quality.`;
+Make it BEAUTIFUL. Apple/Stripe quality.
+
+MODIFICATION MODE:
+If currentComponents is provided, you are MODIFYING an existing site.
+- Only return components that need to be changed
+- Keep the same component names
+- Don't regenerate unchanged components`;
 
 export async function POST(req: Request) {
-    const { message, history } = await req.json();
+    const { message, history, currentComponents } = await req.json();
+
+    // Build the actual message with current code context
+    let fullMessage = message;
+    if (currentComponents && currentComponents.length > 0) {
+        const componentSummary = currentComponents
+            .map((c: { name: string; code: string; isRoot: boolean }) =>
+                `${c.name}${c.isRoot ? ' (App)' : ''}: ${c.code.slice(0, 100)}...`)
+            .join('\n');
+        fullMessage = `[MODIFICATION MODE - Current components:]\n${componentSummary}\n\n[User request:] ${message}`;
+    }
 
     const model = genAI.getGenerativeModel({
         model: 'gemini-3-flash-preview',
@@ -92,7 +108,7 @@ export async function POST(req: Request) {
             let closed = false;
 
             const send = (unit: GenerationUnit) => {
-                if (!closed) controller.enqueue(encoder.encode(`data: ${JSON.stringify(unit)}\n\n`));
+                if (!closed) controller.enqueue(encoder.encode(`data: ${JSON.stringify(unit)} \n\n`));
             };
 
             const close = () => {
@@ -103,7 +119,7 @@ export async function POST(req: Request) {
                 send({ type: 'chat', content: '디자인 중... 🎨' });
 
                 const chat = model.startChat({ history: history || [] });
-                const result = await chat.sendMessageStream(message);
+                const result = await chat.sendMessageStream(fullMessage);
 
                 // Create a Node.js readable stream from Gemini chunks
                 const textStream = new Readable({
@@ -119,7 +135,7 @@ export async function POST(req: Request) {
 
                 // Handle each complete array item as it's parsed
                 arrayStream.on('data', ({ value }) => {
-                    console.log(`[STREAM-JSON] Object parsed:`, value?.type, value?.content);
+                    console.log(`[STREAM - JSON] Object parsed: `, value?.type, value?.content);
 
                     if (value.type === 'chat') {
                         send({ type: 'chat', content: value.content });
