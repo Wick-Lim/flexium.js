@@ -46,7 +46,7 @@ export function PreviewPane({ componentBody, css }: PreviewPaneProps) {
         
         try {
             // Define the component
-            function App() {
+            function App(props = {}) {
 `;
 
         const htmlEnd = `

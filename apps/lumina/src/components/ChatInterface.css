@@ -127,3 +127,55 @@
         transform: rotate(360deg);
     }
 }
+
+/* Streaming message styles */
+.message.streaming .bubble {
+    border-color: rgba(139, 92, 246, 0.4);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.streaming-indicator {
+    display: inline-block;
+    margin-left: 8px;
+    color: var(--accent-primary);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Component progress indicator */
+.component-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    margin: 0 auto;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--accent-primary);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

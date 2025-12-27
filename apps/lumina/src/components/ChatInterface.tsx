@@ -1,32 +1,33 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { Send, Bot, User, Loader2 } from 'lucide-react'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import { SYSTEM_INSTRUCTION } from '@/lib/gemini'
-import { use } from '../../../../packages/flexium/src/core'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react'
+import type { GenerationUnit, ComponentUnit } from '@/types/generation'
 import './ChatInterface.css'
 
 export interface Message {
     id: string;
     role: 'user' | 'assistant';
     content: string;
+    isStreaming?: boolean;
 }
 
 interface ChatInterfaceProps {
     onCodeGenerated: (componentBody: string, css: string) => void;
+    onComponentReceived?: (component: ComponentUnit) => void;
 }
 
-export function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
+export function ChatInterface({ onCodeGenerated, onComponentReceived }: ChatInterfaceProps) {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: 'welcome',
             role: 'assistant',
-            content: "Hi! I'm Lumina. Describe the website you want to build, and I'll create it for you using Flexium."
+            content: "안녕하세요! 저는 Lumina예요. 원하는 웹사이트를 설명해주시면 Flexium으로 만들어드릴게요 ✨"
         }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [components, setComponents] = useState<Map<string, ComponentUnit>>(new Map());
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -34,6 +35,93 @@ export function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
     };
 
     useEffect(scrollToBottom, [messages]);
+
+    // When components change, rebuild and send the code
+    useEffect(() => {
+        if (components.size === 0) return;
+
+        const rootComponent = [...components.values()].find(c => c.isRoot);
+        if (!rootComponent) return;
+
+        // Build component definitions
+        const componentDefs = [...components.values()]
+            .filter(c => !c.isRoot)
+            .map(c => `function ${c.name}() { ${c.code} }`)
+            .join('\n');
+
+        // Merge CSS from all components
+        const css = [...components.values()]
+            .map(c => c.css)
+            .join('\n');
+
+        // Final code
+        const code = `${componentDefs}\n${rootComponent.code}`;
+
+        onCodeGenerated(code, css);
+    }, [components, onCodeGenerated]);
+
+    const handleUnit = useCallback((unit: GenerationUnit) => {
+        switch (unit.type) {
+            case 'chat':
+                // Add streaming chat message
+                setMessages(prev => {
+                    // If last message is streaming, append to it
+                    const last = prev[prev.length - 1];
+                    if (last?.isStreaming && last.role === 'assistant') {
+                        return [
+                            ...prev.slice(0, -1),
+                            { ...last, content: last.content + '\n' + unit.content }
+                        ];
+                    }
+                    // Otherwise add new streaming message
+                    return [...prev, {
+                        id: Date.now().toString(),
+                        role: 'assistant',
+                        content: unit.content,
+                        isStreaming: true
+                    }];
+                });
+                break;
+
+            case 'component':
+                // Component arrives! 자기 자리 찾아서 탁!
+                setComponents(prev => {
+                    const newMap = new Map(prev);
+                    newMap.set(unit.name, unit);
+                    return newMap;
+                });
+
+                // Notify parent if callback provided
+                onComponentReceived?.(unit);
+                break;
+
+            case 'error':
+                setMessages(prev => [...prev, {
+                    id: Date.now().toString(),
+                    role: 'assistant',
+                    content: `오류가 발생했어요: ${unit.message}`
+                }]);
+                break;
+
+            case 'done':
+                // Mark streaming as complete
+                setMessages(prev => {
+                    const last = prev[prev.length - 1];
+                    if (last?.isStreaming) {
+                        return [
+                            ...prev.slice(0, -1),
+                            { ...last, isStreaming: false, content: last.content + '\n\n' + unit.summary }
+                        ];
+                    }
+                    return [...prev, {
+                        id: Date.now().toString(),
+                        role: 'assistant',
+                        content: unit.summary
+                    }];
+                });
+                break;
+        }
+    }, [onComponentReceived]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -48,6 +136,7 @@ export function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setLoading(true);
+        setComponents(new Map()); // Reset components for new generation
 
         try {
             // Prepare history for API
@@ -58,11 +147,9 @@ export function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
                     parts: [{ text: m.content }]
                 }));
 
-            const response = await fetch('/api/generate', {
+            const response = await fetch('/api/generate-stream', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: input,
                     history
@@ -71,43 +158,49 @@ export function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
             if (!response.ok) throw new Error('API request failed');
 
-            const data = await response.json();
-            const responseText = data.text;
+            // Read SSE stream
+            const reader = response.body!.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
 
-            let validJson = null;
-            try {
-                // Clean up markdown if present (e.g. json code block)
-                const cleanJson = responseText.replace(/```json\n ?|\n ? ```/g, '');
-                validJson = JSON.parse(cleanJson);
-            } catch (e) {
-                console.error("JSON Parse Error", e);
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+
+                // Parse SSE events
+                const lines = buffer.split('\n\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+
+                    try {
+                        const unit: GenerationUnit = JSON.parse(line.slice(6));
+                        handleUnit(unit);
+                    } catch (e) {
+                        console.error('Failed to parse SSE unit:', e);
+                    }
+                }
             }
 
-            let message = responseText; // Fallback if regular text
-
-            if (validJson && validJson.componentBody) {
-                const { css, componentBody } = validJson;
-
-                // Pass raw body and css to parent for rendering
-                onCodeGenerated(componentBody, css);
-
-                message = "I've generated the interface for you.";
+            // Process remaining buffer
+            if (buffer.startsWith('data: ')) {
+                try {
+                    const unit: GenerationUnit = JSON.parse(buffer.slice(6));
+                    handleUnit(unit);
+                } catch (e) {
+                    console.error('Failed to parse final SSE unit:', e);
+                }
             }
-
-            const aiMessage: Message = {
-                id: Date.now().toString(),
-                role: 'assistant',
-                content: message
-            };
-
-            setMessages(prev => [...prev, aiMessage]);
 
         } catch (error) {
             console.error("Chat Error:", error);
             setMessages(prev => [...prev, {
                 id: Date.now().toString(),
                 role: 'assistant',
-                content: "Sorry, I had trouble connecting to my creative engine. Please try again."
+                content: "죄송해요, 연결에 문제가 생겼어요. 다시 시도해주세요."
             }]);
         } finally {
             setLoading(false);
@@ -118,24 +211,33 @@ export function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         <div className="chat-container">
             <div className="messages-list">
                 {messages.map(msg => (
-                    <div key={msg.id} className={`message ${msg.role} `}>
+                    <div key={msg.id} className={`message ${msg.role} ${msg.isStreaming ? 'streaming' : ''}`}>
                         <div className="avatar">
                             {msg.role === 'assistant' ? <Bot size={18} /> : <User size={18} />}
                         </div>
                         <div className="bubble">
                             {msg.content}
+                            {msg.isStreaming && <Sparkles size={14} className="streaming-indicator" />}
                         </div>
                     </div>
                 ))}
-                {loading && (
+                {loading && !messages.some(m => m.isStreaming) && (
                     <div className="message assistant">
                         <div className="avatar"><Bot size={18} /></div>
                         <div className="bubble loading">
-                            <Loader2 size={16} className="spin" /> Thinking...
+                            <Loader2 size={16} className="spin" /> 생각 중...
                         </div>
                     </div>
                 )}
                 <div ref={messagesEndRef} />
+
+                {/* Component progress indicator */}
+                {components.size > 0 && loading && (
+                    <div className="component-progress">
+                        <Sparkles size={14} />
+                        <span>{components.size}개 컴포넌트 생성됨</span>
+                    </div>
+                )}
             </div>
 
             <form className="input-area glass-panel" onSubmit={handleSubmit}>
@@ -143,7 +245,7 @@ export function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
                     type="text"
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    placeholder="Describe your site..."
+                    placeholder="원하는 사이트를 설명해주세요..."
                     disabled={loading}
                 />
                 <button type="submit" disabled={loading || !input.trim()}>
