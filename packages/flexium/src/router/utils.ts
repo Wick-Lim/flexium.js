@@ -20,6 +20,8 @@ function parseQuery(search: string): Record<string, string> {
 }
 
 function isUnsafePath(path: string): boolean {
+  // Handle undefined or null path
+  if (!path || typeof path !== 'string') return true
   // Prevent prototype pollution or massive strings
   if (path.length > 2048) return true
   if (path.includes('__proto__') || path.includes('constructor')) return true

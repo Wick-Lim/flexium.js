@@ -7,6 +7,7 @@ export function Link(props: LinkProps) {
     return f('a', {
         href: props.to,
         class: props.class,
+        style: 'cursor: pointer;',
         onclick: (event: Event) => {
             event.preventDefault()
             navigate(props.to)

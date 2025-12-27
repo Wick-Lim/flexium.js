@@ -60,7 +60,7 @@ ROUTING (CRITICAL - for multi-page sites):
 - NEVER put Navbar or Link outside Routes! This causes runtime error!
 - Pattern: App -> Routes -> [Navbar, Route, Route, ...]
 - Route: f(Route, {path: '/', component: Home})
-- Link: f(Link, {href: '/about'}, 'About')
+- Link: f(Link, {to: '/about'}, 'About') -- MUST use 'to' prop, not 'href'!
 
 css() SYNTAX:
 - const btn = css({ background: '#1a1a1a', padding: '1rem' })
@@ -82,7 +82,7 @@ Example (single-page):
 
 Example (multi-page with Routes - IMPORTANT: Navbar and Links MUST be INSIDE Routes):
 [
-  {"type":"component","name":"Navbar","content":"const nav = css({ padding: '1rem 2rem', display: 'flex', gap: '1rem' }); const link = css({ color: '#fff', textDecoration: 'none' }); return f('nav', {className: nav}, [f(Link, {href: '/', className: link}, 'Home'), f(Link, {href: '/about', className: link}, 'About')])"},
+  {"type":"component","name":"Navbar","content":"const nav = css({ padding: '1rem 2rem', display: 'flex', gap: '1rem' }); const link = css({ color: '#fff', textDecoration: 'none' }); return f('nav', {className: nav}, [f(Link, {to: '/', className: link}, 'Home'), f(Link, {to: '/about', className: link}, 'About')])"},
   {"type":"component","name":"Home","content":"const hero = css({ padding: '4rem', textAlign: 'center' }); return f('div', {className: hero}, [f('h1', {}, 'Welcome Home')])"},
   {"type":"component","name":"About","content":"const about = css({ padding: '4rem', textAlign: 'center' }); return f('div', {className: about}, [f('h1', {}, 'About Us')])"},
   {"type":"component","name":"App","content":"const app = css({ minHeight: '100vh', background: '#0a0a0f', color: '#fff' }); return f('div', {className: app}, [f(Routes, {}, [f(Navbar, {}), f(Route, {path: '/', component: Home}), f(Route, {path: '/about', component: About})])])"}

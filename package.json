@@ -1,6 +1,6 @@
 {
   "name": "flexium-monorepo",
-  "version": "0.16.6",
+  "version": "0.16.7",
   "private": true,
   "description": "Flexium - Fine-grained reactive UI framework (monorepo)",
   "type": "module",
