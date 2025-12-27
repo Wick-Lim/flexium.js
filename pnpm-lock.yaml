@@ -67,8 +67,8 @@ importers:
   apps/hackernews:
     dependencies:
       flexium:
-        specifier: ^0.16.4
-        version: 0.16.4
+        specifier: ^0.16.5
+        version: 0.16.5
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -116,6 +116,9 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.7)
+      '@types/stream-json':
+        specifier: ^1.7.8
+        version: 1.7.8
       eslint:
         specifier: ^9
         version: 9.39.2(jiti@2.6.1)
@@ -256,8 +259,8 @@ importers:
   packages/flexium-canvas:
     dependencies:
       flexium:
-        specifier: '>=0.16.4'
-        version: 0.16.4
+        specifier: '>=0.16.5'
+        version: 0.16.5
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -1693,6 +1696,12 @@ packages:
   '@types/semver@7.7.1':
     resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
+  '@types/stream-chain@2.1.0':
+    resolution: {integrity: sha512-guDyAl6s/CAzXUOWpGK2bHvdiopLIwpGu8v10+lb9hnQOyo4oj/ZUQFOvqFjKGsE3wJP1fpIesCcMvbXuWsqOg==}
+
+  '@types/stream-json@1.7.8':
+    resolution: {integrity: sha512-MU1OB1eFLcYWd1LjwKXrxdoPtXSRzRmAnnxs4Js/ayB5O/NvHraWwuOaqMWIebpYwM6khFlsJOHEhI9xK/ab4Q==}
+
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
@@ -2729,8 +2738,8 @@ packages:
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
 
-  flexium@0.16.4:
-    resolution: {integrity: sha512-3OCezKkmNQa/v6uHpy8IOnbKMi44zVtrUbt1YA2U+9Ogn8VRqO0czI1KDz3HmCCZCHBtJm3yxP87+CecybSfkA==}
+  flexium@0.16.5:
+    resolution: {integrity: sha512-H/OywcrGAE38qJJW7vwSlnbaOMeMM2yYwKRCcIR5LpFJMgSoKROvs6kBshNSmTr1ng8DYhyo6Agj1aOMi5AmiQ==}
     engines: {node: '>=18.0.0'}
 
   focus-trap@7.6.6:
@@ -5586,6 +5595,15 @@ snapshots:
 
   '@types/semver@7.7.1': {}
 
+  '@types/stream-chain@2.1.0':
+    dependencies:
+      '@types/node': 20.19.26
+
+  '@types/stream-json@1.7.8':
+    dependencies:
+      '@types/node': 20.19.26
+      '@types/stream-chain': 2.1.0
+
   '@types/unist@3.0.3': {}
 
   '@types/uuid@9.0.8': {}
@@ -6942,7 +6960,7 @@ snapshots:
 
   flatted@3.3.3: {}
 
-  flexium@0.16.4: {}
+  flexium@0.16.5: {}
 
   focus-trap@7.6.6:
     dependencies:

@@ -20,8 +20,15 @@ const getCurrentLocation = (): Location => {
     if (typeof window === 'undefined') {
         return getDefaultLocation()
     }
+
+    // Handle srcdoc iframe - pathname may be empty or 'srcdoc'
+    let pathname = window.location.pathname
+    if (!pathname || pathname === 'srcdoc' || pathname === '/srcdoc') {
+        pathname = '/'
+    }
+
     return {
-        pathname: window.location.pathname,
+        pathname,
         search: window.location.search,
         hash: window.location.hash,
         query: parseQuery(window.location.search),

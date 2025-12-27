@@ -40,7 +40,7 @@ export function PreviewPane({ componentBody }: PreviewPaneProps) {
 <body>
     <div id="root"></div>
     <script type="module">
-        import { use, sync, render, f, Routes, Route, Link } from 'https://esm.sh/flexium@0.16.3?bundle';
+        import { use, sync, render, f, Routes, Route, Link } from 'https://esm.sh/flexium@0.16.4?bundle';
         
         // Custom css() for iframe - uses style tag instead of adoptedStyleSheets
         const cssCache = new Map();
