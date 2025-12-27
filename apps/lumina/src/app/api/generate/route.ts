@@ -19,14 +19,14 @@ const responseSchema: Schema = {
         },
         componentBody: {
             type: SchemaType.STRING,
-            description: `JavaScript code that creates and returns a DOM element. Requirements:
+            description: `JavaScript code that returns a VNode using f() function. Requirements:
 - Use 'use(initialValue)' for reactive state, returns [value, setter]
 - Access state directly as value (NOT value())
-- Use 'sync(() => { ... })' for effects that run on state change
-- MUST return a DOM HTMLElement
-- Use template literals for innerHTML
-- Reattach event listeners inside sync() after innerHTML updates
-- NO imports, NO export default`
+- Use 'f(tag, props, children)' to create elements
+- MUST return a VNode created with f(), NOT a DOM element
+- f('div', { className: 'card', onclick: handler }, children)
+- Children can be string, single f() call, or array of f() calls
+- NO imports, NO export default, NO document.createElement`
         }
     },
     required: ["css", "componentBody"]

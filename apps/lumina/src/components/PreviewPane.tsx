@@ -40,17 +40,17 @@ export function PreviewPane({ componentBody, css }: PreviewPaneProps) {
 <body>
     <div id="root"></div>
     <script type="module">
-        import { use, sync } from 'https://esm.sh/flexium@0.16.2/core?bundle';
-        import { render } from 'https://esm.sh/flexium@0.16.2/dom?bundle';
+        import { use, sync, render, f } from 'https://esm.sh/flexium@0.16.3?bundle';
         
         try {
-            // Define the component as a function
+            // Define the component
             function App() {
                 ${escapedBody}
             }
             
-            // Use render to mount the component properly
-            render(App, document.getElementById('root'));
+            // Use render() with f() to enable Flexium's reactive system
+            const root = document.getElementById('root');
+            render(f(App), root);
         } catch (err) {
             console.error('Runtime Error:', err);
             document.getElementById('root').innerHTML = '<pre style="color:#ef4444;padding:20px;white-space:pre-wrap;">Runtime Error: ' + err.message + '</pre>';

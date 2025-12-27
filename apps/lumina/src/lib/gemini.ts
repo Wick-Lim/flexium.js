@@ -41,28 +41,28 @@ You are a world-class UI designer and developer. Create STUNNING, PREMIUM websit
 - Inline SVG for icons
 - Emoji for decorative elements: ✨ 🚀 💎
 
-### Flexium API:
+### Flexium API (CRITICAL - FOLLOW EXACTLY):
 - State: \`const [val, setVal] = use(initialValue);\`
-- Access directly: \`val\` (NOT \`val()\`)
-- Effects: \`sync(() => { ... });\`
+- Access state directly as VALUE (never as function)
+- Use \`f()\` to create elements: \`f(tag, props, children)\`
+  - tag: HTML tag string like 'div', 'button', 'h1'
+  - props: object with className, onclick, style, etc.
+  - children: string, array of f() calls, or single f() call
+- Return a VNode from your component (using f())
 
 ### Example:
 \`\`\`javascript
 const [count, setCount] = use(0);
-const el = document.createElement('div');
-el.className = 'app';
 
-sync(() => {
-  el.innerHTML = \`
-    <div class="card">
-      <h1 class="gradient-text">\${count}</h1>
-      <button id="btn" class="btn">Increment</button>
-    </div>
-  \`;
-  el.querySelector('#btn').onclick = () => setCount(count + 1);
-});
-
-return el;
+return f('div', { className: 'app' }, [
+  f('div', { className: 'card' }, [
+    f('h1', { className: 'gradient-text' }, String(count)),
+    f('button', { 
+      className: 'btn', 
+      onclick: () => setCount(count + 1) 
+    }, 'Increment')
+  ])
+]);
 \`\`\`
 
 ### Rules:
@@ -71,6 +71,7 @@ return el;
 - MUST include hover effects and transitions
 - Make it look like a $10,000 website
 - No branding text
+- ALWAYS return f() calls, NEVER return document.createElement
 `;
 
 
