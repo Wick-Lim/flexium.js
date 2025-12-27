@@ -38,22 +38,42 @@ export function ChatInterface({ onCodeGenerated, onComponentReceived }: ChatInte
 
     // When components change, rebuild and send the code
     // CSS is now inside each component's code using css() function
+    // PROGRESSIVE RENDERING: Generate temp App if real App hasn't arrived yet
     useEffect(() => {
         if (components.size === 0) return;
 
-        const rootComponent = [...components.values()].find(c => c.isRoot);
-        if (!rootComponent) return;
+        const realApp = [...components.values()].find(c => c.isRoot);
+        const nonRootComponents = [...components.values()].filter(c => !c.isRoot);
+
+        if (nonRootComponents.length === 0 && !realApp) return;
 
         // Build component definitions (css() calls are inside code)
-        const componentDefs = [...components.values()]
-            .filter(c => !c.isRoot)
+        const componentDefs = nonRootComponents
             .map(c => `function ${c.name}() { ${c.code} }`)
             .join('\n');
 
-        // Final code - css() is called within each component
-        const code = `${componentDefs}\n${rootComponent.code}`;
+        let finalCode: string;
 
-        onCodeGenerated(code);
+        if (realApp) {
+            // Use the real App from AI
+            finalCode = `${componentDefs}\n${realApp.code}`;
+        } else {
+            // Generate temporary App that renders all received components
+            const tempAppCode = `
+                const app = css({ 
+                    minHeight: '100vh', 
+                    background: 'linear-gradient(135deg, #0a0a0f, #1a1a2e)', 
+                    color: '#fff',
+                    fontFamily: 'system-ui, sans-serif'
+                }); 
+                return f('div', {className: app}, [
+                    ${nonRootComponents.map(c => `f(${c.name}, {})`).join(', ')}
+                ])
+            `;
+            finalCode = `${componentDefs}\n${tempAppCode}`;
+        }
+
+        onCodeGenerated(finalCode);
     }, [components, onCodeGenerated]);
 
     const handleUnit = useCallback((unit: GenerationUnit) => {

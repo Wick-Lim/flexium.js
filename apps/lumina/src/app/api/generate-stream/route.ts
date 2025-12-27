@@ -114,14 +114,18 @@ export async function POST(req: Request) {
                     if (value.type === 'chat') {
                         send({ type: 'chat', content: value.content });
                     } else if (value.type === 'component' && value.code) {
+                        const isRoot = value.content === 'App';
                         send({
                             type: 'component',
                             name: value.content,
                             code: value.code,
                             children: [],
-                            isRoot: value.content === 'App'
+                            isRoot
                         });
-                        send({ type: 'chat', content: `✨ ${value.content} 생성됨` });
+                        // Skip progress message for App since 'done' follows immediately
+                        if (!isRoot) {
+                            send({ type: 'chat', content: `✨ ${value.content} 생성됨` });
+                        }
                     }
                 });
 
