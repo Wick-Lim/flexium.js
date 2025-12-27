@@ -40,6 +40,13 @@ let globalLocation: Location | null = null
 let globalNavigate: ((path: string) => void) | null = null
 let popstateListenerAttached = false
 
+// Reset router state - used when app is re-rendered (e.g., srcdoc iframe update)
+export function resetRouter(): void {
+    globalLocation = null
+    globalNavigate = null
+    // Note: we don't reset popstateListenerAttached since the listener persists
+}
+
 // Create location state and navigation (singleton pattern)
 export function useLocation(): [Location, (path: string) => void] {
     // Return existing singleton if already created
@@ -59,7 +66,6 @@ export function useLocation(): [Location, (path: string) => void] {
     }
 
     globalNavigate = (path: string) => {
-        console.log('[Flexium Router] Navigate called with:', path)
         if (typeof window === 'undefined') return
         if (isUnsafePath(path)) {
             console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
@@ -80,7 +86,6 @@ export function useLocation(): [Location, (path: string) => void] {
             hash: path.includes('#') ? '#' + path.split('#')[1] : '',
             query: parseQuery(path.includes('?') ? '?' + path.split('?')[1].split('#')[0] : '')
         }
-        console.log('[Flexium Router] Updating location to:', newLocation)
         updateLocation(newLocation)
     }
 

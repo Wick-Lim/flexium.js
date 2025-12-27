@@ -40,7 +40,10 @@ export function PreviewPane({ componentBody }: PreviewPaneProps) {
 <body>
     <div id="root"></div>
     <script type="module">
-        import { use, sync, render, f, Routes, Route, Link } from 'https://esm.sh/flexium@0.16.11?bundle&t=1735320069';
+        import { use, sync, render, f, Routes, Route, Link, resetRouter } from 'https://esm.sh/flexium@0.16.12?bundle&t=1735320630';
+        
+        // Reset router state to avoid stale state from previous renders
+        resetRouter();
         
         // Custom css() for iframe - uses style tag instead of adoptedStyleSheets
         const cssCache = new Map();

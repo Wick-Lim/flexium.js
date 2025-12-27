@@ -24,7 +24,6 @@ export function Routes(props: { children: FNodeChild }) {
     // DIRECT access to currentLocation.pathname
     // This should trigger reactive tracking in the component's effect context
     const currentPath = currentLocation.pathname
-    console.log('[Flexium Routes] Rendering with path:', currentPath)
     const matches = matchRoutes(routeDefinitions, currentPath) || []
     const params = matches.length > 0 ? matches[matches.length - 1].params : {}
 

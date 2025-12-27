@@ -10,7 +10,6 @@ export function Link(props: LinkProps) {
         style: props.style ? props.style + '; cursor: pointer;' : 'cursor: pointer;',
         onclick: (event: Event) => {
             event.preventDefault()
-            console.log('[Flexium Link] Clicked, navigating to:', props.to)
             navigate(props.to)
         },
         children: props.children
