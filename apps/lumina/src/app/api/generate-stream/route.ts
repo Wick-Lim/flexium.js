@@ -1,4 +1,7 @@
 import { GoogleGenerativeAI, SchemaType, type Schema } from '@google/generative-ai';
+import { Readable } from 'stream';
+import { parser } from 'stream-json';
+import { streamArray } from 'stream-json/streamers/StreamArray';
 import type { GenerationUnit } from '@/types/generation';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -14,8 +17,8 @@ const responseSchema: Schema = {
                 format: "enum",
                 enum: ["chat", "component"]
             },
-            content: { type: SchemaType.STRING },  // chat: message, component: name
-            code: { type: SchemaType.STRING }      // component only - includes css() calls
+            content: { type: SchemaType.STRING },
+            code: { type: SchemaType.STRING }
         },
         required: ["type", "content"]
     }
@@ -90,27 +93,56 @@ export async function POST(req: Request) {
                 send({ type: 'chat', content: '디자인 중... 🎨' });
 
                 const chat = model.startChat({ history: history || [] });
-                const result = await chat.sendMessage(message);
-                const text = result.response.text();
+                const result = await chat.sendMessageStream(message);
 
-                console.log('Response:', text.substring(0, 500));
+                // Create a Node.js readable stream from Gemini chunks
+                const textStream = new Readable({
+                    read() { }
+                });
 
-                const units = JSON.parse(text) as Array<{ type: string; content: string; code?: string }>;
+                // Setup stream-json pipeline for event-driven parsing
+                const jsonParser = parser();
+                const arrayStream = streamArray();
 
-                for (const u of units) {
-                    if (u.type === 'chat') {
-                        send({ type: 'chat', content: u.content });
-                    } else if (u.type === 'component' && u.code) {
+                // Pipe: textStream -> jsonParser -> arrayStream
+                textStream.pipe(jsonParser).pipe(arrayStream);
+
+                // Handle each complete array item as it's parsed
+                arrayStream.on('data', ({ value }) => {
+                    console.log(`[STREAM-JSON] Object parsed:`, value?.type, value?.content);
+
+                    if (value.type === 'chat') {
+                        send({ type: 'chat', content: value.content });
+                    } else if (value.type === 'component' && value.code) {
                         send({
                             type: 'component',
-                            name: u.content,
-                            code: u.code,
+                            name: value.content,
+                            code: value.code,
                             children: [],
-                            isRoot: u.content === 'App'
+                            isRoot: value.content === 'App'
                         });
+                        send({ type: 'chat', content: `✨ ${value.content} 생성됨` });
                     }
-                    await new Promise(r => setTimeout(r, 50));
+                });
+
+                // Feed chunks from Gemini into the text stream
+                for await (const chunk of result.stream) {
+                    const text = chunk.text();
+                    console.log(`[GEMINI] Chunk: +${text.length} chars`);
+                    textStream.push(text);
                 }
+
+                // Signal end of input
+                textStream.push(null);
+
+                // Wait for parsing to complete
+                await new Promise<void>((resolve, reject) => {
+                    arrayStream.on('end', () => {
+                        console.log('[STREAM-JSON] Parsing complete');
+                        resolve();
+                    });
+                    arrayStream.on('error', reject);
+                });
 
                 send({ type: 'done', summary: '완료! ✨' });
 
