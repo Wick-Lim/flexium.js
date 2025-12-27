@@ -1,4 +1,4 @@
-export const VERSION = '0.16.3' // Bump version to signify rebuild
+export const VERSION = '0.16.4' // Bump version to signify rebuild
 
 // Re-export all from submodules
 export * from './core'
