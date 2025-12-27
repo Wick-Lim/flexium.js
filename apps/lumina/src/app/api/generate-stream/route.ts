@@ -45,6 +45,7 @@ AVAILABLE FUNCTIONS:
 - css(styleObj) - create CSS class, returns className string
 - use(initial) - create reactive state
 - cx(...classes) - combine class names
+- Routes, Route, Link - for multi-page navigation
 
 RULES:
 1. Use css() for ALL styling - returns className string
@@ -53,6 +54,13 @@ RULES:
 4. HTML: f('div', {className: myClass}, []) with quotes
 5. Components: f(Header, {}) NO quotes
 6. State: const [val, setVal] = use(0)
+
+ROUTING (CRITICAL - for multi-page sites):
+- App must return: f(Routes, {}, [...ALL content including Navbar...])
+- NEVER put Navbar or Link outside Routes! This causes runtime error!
+- Pattern: App -> Routes -> [Navbar, Route, Route, ...]
+- Route: f(Route, {path: '/', component: Home})
+- Link: f(Link, {href: '/about'}, 'About')
 
 css() SYNTAX:
 - const btn = css({ background: '#1a1a1a', padding: '1rem' })
@@ -66,10 +74,18 @@ css() SYNTAX:
 - Typography: Large (4rem+), gradient text
 - Animations: transition: 'all 0.3s ease'
 
-Example:
+Example (single-page):
 [
-  {"type":"component","name":"Hero","content":"const hero = css({ minHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at top, #1a1a3e, #0a0a0f)', padding: '4rem' }); const title = css({ fontSize: '5rem', fontWeight: 800, background: 'linear-gradient(135deg, #fff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }); const btn = css({ background: 'linear-gradient(135deg, #667eea, #764ba2)', color: 'white', padding: '1.2rem 3rem', border: 'none', borderRadius: '50px', cursor: 'pointer', transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-3px)' } }); return f('section', {className: hero}, [f('h1', {className: title}, 'Premium Shop'), f('button', {className: btn}, 'Explore')])"},
+  {"type":"component","name":"Hero","content":"const hero = css({ minHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(ellipse at top, #1a1a3e, #0a0a0f)', padding: '4rem' }); const title = css({ fontSize: '5rem', fontWeight: 800, background: 'linear-gradient(135deg, #fff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }); return f('section', {className: hero}, [f('h1', {className: title}, 'Premium Shop')])"},
   {"type":"component","name":"App","content":"const app = css({ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0f, #1a1a2e)', color: '#fff' }); return f('div', {className: app}, [f(Hero, {})])"}
+]
+
+Example (multi-page with Routes - IMPORTANT: Navbar and Links MUST be INSIDE Routes):
+[
+  {"type":"component","name":"Navbar","content":"const nav = css({ padding: '1rem 2rem', display: 'flex', gap: '1rem' }); const link = css({ color: '#fff', textDecoration: 'none' }); return f('nav', {className: nav}, [f(Link, {href: '/', className: link}, 'Home'), f(Link, {href: '/about', className: link}, 'About')])"},
+  {"type":"component","name":"Home","content":"const hero = css({ padding: '4rem', textAlign: 'center' }); return f('div', {className: hero}, [f('h1', {}, 'Welcome Home')])"},
+  {"type":"component","name":"About","content":"const about = css({ padding: '4rem', textAlign: 'center' }); return f('div', {className: about}, [f('h1', {}, 'About Us')])"},
+  {"type":"component","name":"App","content":"const app = css({ minHeight: '100vh', background: '#0a0a0f', color: '#fff' }); return f('div', {className: app}, [f(Routes, {}, [f(Navbar, {}), f(Route, {path: '/', component: Home}), f(Route, {path: '/about', component: About})])])"}
 ]
 
 Make it BEAUTIFUL. Apple/Stripe quality.
