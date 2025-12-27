@@ -64,9 +64,21 @@ export function useLocation(): [Location, (path: string) => void] {
             console.error('[Flexium Router] Blocked navigation to unsafe path:', path)
             return
         }
-        window.history.pushState({}, '', path)
-        const newLocation = getCurrentLocation()
-        updateLocation(newLocation)
+
+        // Try to update browser history, but continue even if it fails (e.g., in srcdoc iframe)
+        try {
+            window.history.pushState({}, '', path)
+        } catch {
+            // SecurityError in srcdoc iframe - ignore but continue with internal state update
+        }
+
+        // Always update internal location state for SPA navigation
+        updateLocation({
+            pathname: path.split('?')[0].split('#')[0],
+            search: path.includes('?') ? '?' + path.split('?')[1].split('#')[0] : '',
+            hash: path.includes('#') ? '#' + path.split('#')[1] : '',
+            query: parseQuery(path.includes('?') ? '?' + path.split('?')[1].split('#')[0] : '')
+        })
     }
 
     // Listen to popstate (only once)
