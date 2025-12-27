@@ -398,7 +398,7 @@ function patchNode(oldNode: Node, newNode: Node, parent: Element): void {
             if (idx !== -1) {
                 ownerInstance.nodes[idx] = oldNode
             }
-            ;(oldNode as any).__ownerInstance = ownerInstance
+            ; (oldNode as any).__ownerInstance = ownerInstance
             delete (newNode as any).__ownerInstance
         }
 
@@ -411,7 +411,17 @@ function patchNode(oldNode: Node, newNode: Node, parent: Element): void {
             reconcileChildren(oldNode as Element, newNode as Element)
         }
     } else {
-        parent.replaceChild(newNode, oldNode)
+        // Ensure oldNode is actually a child of parent before replacing
+        if (oldNode.parentNode === parent) {
+            parent.replaceChild(newNode, oldNode)
+        } else if (oldNode.parentNode) {
+            // oldNode is attached to a different parent, remove it and insert newNode
+            oldNode.parentNode.removeChild(oldNode)
+            parent.insertBefore(newNode, null)
+        } else {
+            // oldNode is detached, just insert newNode
+            parent.insertBefore(newNode, null)
+        }
     }
 }
 
